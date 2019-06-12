@@ -3,6 +3,7 @@
 #include "Draw.h"
 #include "World.h"
 #include "Vehicle.h"
+#include "Frontend.h"
 #include "Ped.h"
 #include "Pad.h"
 #include "General.h"
@@ -14,6 +15,7 @@
 const float DefaultFOV = 80.0f;	// actually 70.0f
 
 CCamera &TheCamera = *(CCamera*)0x6FACF8;
+bool &CCamera::m_bUseMouse3rdPerson = *(bool *)0x5F03D8;
 
 WRAPPER void CCamera::DrawBordersForWideScreen(void) { EAXJMP(0x46B430); }
 
@@ -1194,6 +1196,14 @@ CCam::Process_Cam_On_A_String(const CVector &CameraTarget, float TargetOrientati
 	Front.Normalise();
 	GetVectorsReadyForRW();
 	ResetStatics = false;
+}
+
+bool CCam::Using3rdPersonMouseCam() {
+	return CCamera::m_bUseMouse3rdPerson &&
+		(Mode == MODE_FOLLOWPED ||
+			TheCamera.m_bPlayerIsInGarage &&
+			FindPlayerPed() && FindPlayerPed()->m_nPedState != PED_DRIVING &&
+			Mode != MODE_TOPDOWN1 && this->CamTargetEntity == FindPlayerPed());
 }
 
 // Basic Cam on a string algorithm

@@ -2,6 +2,7 @@
 
 #include "Physical.h"
 #include "Weapon.h"
+#include "PathFind.h"
 
 enum {
 	PED_MAX_WEAPONS = 13
@@ -163,7 +164,24 @@ public:
 	int32 m_nPedState;
 	int32 m_nLastPedState;
 	int32 m_nMoveState;
-	uint8 stuff2[188];
+	int m_nStoredActionState;
+	int m_nPrevActionState;
+	int m_nWaitState;
+	int m_nWaitTimer;
+private:
+	uint32 stuff0[28];
+public:
+	unsigned short m_nPathNodes;
+	short m_nCurPathNode;
+	char m_nPathState;
+private:
+	char _pad2B5[3];
+public:
+	CPathNode *m_pNextPathNode;
+	CPathNode *m_pLastPathNode;
+	float m_fHealth;
+	float m_fArmour;
+	uint8 stuff2[34];
 	CEntity *m_pCurrentPhysSurface;
 	CVector m_vecOffsetFromPhysSurface;
 	CEntity *m_pCurSurface;

@@ -2,6 +2,7 @@
 
 #include "Game.h"
 #include "Lists.h"
+#include "PlayerInfo.h"
 
 /* Sectors span from -2000 to 2000 in x and y.
  * With 100x100 sectors, each is 40x40 units. */
@@ -45,6 +46,8 @@ class CWorld
 	static uint16 &ms_nCurrentScanCode;
 
 public:
+	static unsigned char &PlayerInFocus;
+	static CPlayerInfo *Players;
 	static CEntity *&pIgnoreEntity;
 	static bool &bIncludeDeadPeds;
 	static bool &bNoMoreCollisionTorque;

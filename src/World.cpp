@@ -12,6 +12,8 @@ CPtrList &CWorld::ms_listMovingEntityPtrs = *(CPtrList*)0x8F433C;
 CSector (*CWorld::ms_aSectors)[NUMSECTORS_X] = (CSector (*)[NUMSECTORS_Y])0x665608;
 uint16 &CWorld::ms_nCurrentScanCode = *(uint16*)0x95CC64;
 
+unsigned char &CWorld::PlayerInFocus = *(unsigned char *)0x95CD61;
+CPlayerInfo *CWorld::Players = (CPlayerInfo *)0x9412F0;
 bool &CWorld::bNoMoreCollisionTorque = *(bool*)0x95CDCC;
 CEntity *&CWorld::pIgnoreEntity	= *(CEntity**)0x8F6494;
 bool &CWorld::bIncludeDeadPeds = *(bool*)0x95CD8F;

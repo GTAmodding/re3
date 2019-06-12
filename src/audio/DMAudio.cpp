@@ -15,3 +15,4 @@ WRAPPER Bool cDMAudio::IsAudioInitialised() { EAXJMP(0x57CAB0); }
 WRAPPER Char cDMAudio::GetCDAudioDriveLetter() { EAXJMP(0x57CA90); }
 WRAPPER Bool cDMAudio::CheckForAnAudioFileOnCD() { EAXJMP(0x57CA70); }
 WRAPPER void cDMAudio::ChangeMusicMode(UInt8 mode) { EAXJMP(0x57CCF0); }
+WRAPPER void cDMAudio::PlayFrontEndSound(int16 m_dwID, float fVolume) { EAXJMP(0x57CC20); }

@@ -49,6 +49,7 @@ struct CCam
 		MODE_SPECIALFIXEDFORSYPHON,
 		MODE_FIGHT,
 		MODE_TOPDOWNPED,
+		MODE_LIGHTHOUSE,
 		MODE_SNIPER_RUN_AROUND,
 		MODE_ROCKET_RUN_AROUND,
 		MODE_FIRSTPERSONPEDONPC_40,
@@ -176,6 +177,7 @@ struct CCam
 	void Process_FollowPed(const CVector &CameraTarget, float TargetOrientation, float, float);
 	void Process_BehindCar(const CVector &CameraTarget, float TargetOrientation, float, float);
 	void Process_Cam_On_A_String(const CVector &CameraTarget, float TargetOrientation, float, float);
+	bool Using3rdPersonMouseCam();
 };
 static_assert(sizeof(CCam) == 0x1A4, "CCam: wrong size");
 static_assert(offsetof(CCam, Alpha) == 0xA8, "CCam: error");
@@ -438,6 +440,7 @@ int     m_iModeObbeCamIsInForCar;
 	uint32 m_uiFadeTimeStarted;
 	uint32 m_uiFadeTimeStartedMusic;
 
+	static bool &m_bUseMouse3rdPerson;
 
 	CMatrix &GetCameraMatrix(void) { return m_cameraMatrix; }
 	CVector &GetGameCamPosition(void) { return m_vecGameCamPos; }

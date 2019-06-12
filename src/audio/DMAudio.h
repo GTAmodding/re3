@@ -15,5 +15,6 @@ public:
 	Char GetCDAudioDriveLetter(void);
 	Bool CheckForAnAudioFileOnCD(void);
 	void ChangeMusicMode(UInt8 mode);
+	void PlayFrontEndSound(int16 m_dwID, float fVolume);
 };
 extern cDMAudio &DMAudio;

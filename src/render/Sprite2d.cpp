@@ -145,7 +145,7 @@ CSprite2d::Draw(const CRect &rect, const CRGBA &c0, const CRGBA &c1, const CRGBA
 void
 CSprite2d::Draw(float x1, float y1, float x2, float y2, float x3, float y3, float x4, float y4, const CRGBA &col)
 {
-	SetVertices(x1, y2, x2, y2, x3, y3, x4, y4, col, col, col, col);
+	SetVertices(x1, y1, x2, y2, x3, y3, x4, y4, col, col, col, col);
 	SetRenderState();
 	RwIm2DRenderPrimitive(rwPRIMTYPETRIFAN, CSprite2d::maVertices, 4);
 }

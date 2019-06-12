@@ -342,7 +342,7 @@ Render2dStuff(void)
 		CSceneEdit::Draw();
 	else
 */
-		CHud::Draw();
+	CHud::Draw();
 	CUserDisplay::OnscnTimer.ProcessForDisplay();
 	CMessages::Display();
 	CDarkel::DrawMessages();

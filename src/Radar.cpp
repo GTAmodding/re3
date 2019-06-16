@@ -38,8 +38,8 @@ void CRadar::DrawMap() {
 }
 
 void CRadar::TransformRadarPointToScreenSpace(CVector2D *out, CVector2D *in) {
-	out->x = in->x * SCREEN_STRETCH_X(47.0f) + SCREEN_STRETCH_X(47.0f + 20.0f);
-	out->y =  (SCREEN_STRETCH_Y(76.0f)) * 0.5f + RsGlobal.height - (SCREEN_STRETCH_Y(123.0f)) - in->y * (SCREEN_STRETCH_Y(76.0f)) * 0.5f;
+	out->x = in->x * HUD_STRETCH_X(47.0f) + HUD_STRETCH_X(47.0f + 20.0f);
+	out->y =  (HUD_STRETCH_Y(76.0f)) * 0.5f + SCREEN_HEIGHT - (HUD_STRETCH_Y(123.0f)) - in->y * (HUD_STRETCH_Y(76.0f)) * 0.5f;
 }
 
 STARTPATCHES

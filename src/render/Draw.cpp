@@ -15,16 +15,15 @@ uint8 &CDraw::FadeRed = *(uint8*)0x95CD90;
 uint8 &CDraw::FadeGreen = *(uint8*)0x95CD71;
 uint8 &CDraw::FadeBlue = *(uint8*)0x95CD53;
 
-void CDraw::CalculateAspectRatio() {
-	if (FrontEndMenuManager.m_PrefsUseWideScreen) {		
-		ms_fAspectRatio = 1.7777778f;
-	}
-	else if (TheCamera.m_WideScreenOn) {
+void
+CDraw::CalculateAspectRatio()
+{
+	if(FrontEndMenuManager.m_PrefsUseWideScreen)	
+		ms_fAspectRatio = 16.0f/9.0f;
+	else if(TheCamera.m_WideScreenOn)
 		ms_fAspectRatio = 1.25f;
-	}
-	else {
-		ms_fAspectRatio = 1.3333334f;
-	}
+	else
+		ms_fAspectRatio = 4.0f/3.0f;
 }
 
 static float hFov2vFov(float hfov)

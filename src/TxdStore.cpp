@@ -29,7 +29,7 @@ CTxdStore::GameShutdown(void)
 
 	for(i = 0; i < TXDSTORESIZE; i++){
 		TxdDef *def = GetSlot(i);
-		if(def && GetNumRefs(i))
+		if(def && GetNumRefs(i) == 0)
 			RemoveTxdSlot(i);
 	}
 }

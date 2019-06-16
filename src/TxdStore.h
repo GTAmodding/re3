@@ -34,6 +34,11 @@ public:
 	static bool FinishLoadTxd(int slot, RwStream *stream);
 	static void RemoveTxd(int slot);
 
-	static TxdDef *GetSlot(int slot) { return ms_pTxdPool->GetSlot(slot); }
+	static TxdDef *GetSlot(int slot) {
+		assert(slot >= 0);
+		assert(ms_pTxdPool);
+		assert(slot < ms_pTxdPool->GetSize());
+		return ms_pTxdPool->GetSlot(slot);
+	}
 	static bool isTxdLoaded(int slot);
 };

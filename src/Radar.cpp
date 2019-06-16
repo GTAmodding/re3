@@ -15,33 +15,29 @@ WRAPPER void CRadar::DrawRadarMap() { EAXJMP(0x4A6C20); }
 Float &CRadar::m_RadarRange = *(Float*)0x8E281C;
 CVector2D &CRadar::vec2DRadarOrigin = *(CVector2D*)0x6299B8;
 
-void CRadar::DrawMap()
-{
-	if (!TheCamera.m_WideScreenOn && CHud::m_Wants_To_Draw_Hud)
-	{
-		if (FindPlayerVehicle())
-		{
-			if (FindPlayerVehicle()->GetSpeed().Magnitude() > 0.3f)
-			{
+void CRadar::DrawMap() {
+	if (!TheCamera.m_WideScreenOn && CHud::m_Wants_To_Draw_Hud) {
+		if (FindPlayerVehicle()) {
+			if (FindPlayerVehicle()->GetSpeed().Magnitude() > 0.3f) {
 				if (FindPlayerVehicle()->GetSpeed().Magnitude() > 0.9f)
 					CRadar::m_RadarRange = 350.0f;
 				else
 					CRadar::m_RadarRange = (FindPlayerVehicle()->GetSpeed().Magnitude() + 0.3f) * 200.0f;
 			}
-			else
+			else {
 				CRadar::m_RadarRange = 120.0f;
+			}
 		}
-		else
+		else {
 			CRadar::m_RadarRange = 120.0f;
-
+		}
 		vec2DRadarOrigin.x = FindPlayerCentreOfWorld_NoSniperShift().x;
 		vec2DRadarOrigin.y = FindPlayerCentreOfWorld_NoSniperShift().y;
 		CRadar::DrawRadarMap();
 	}
 }
 
-void CRadar::TransformRadarPointToScreenSpace(CVector2D *out, CVector2D *in)
-{
+void CRadar::TransformRadarPointToScreenSpace(CVector2D *out, CVector2D *in) {
 	out->x = in->x * HUD_STRETCH_X(47.0f) + HUD_STRETCH_X(47.0f + 20.0f);
 	out->y =  (HUD_STRETCH_Y(76.0f)) * 0.5f + SCREEN_HEIGHT - (HUD_STRETCH_Y(123.0f)) - in->y * (HUD_STRETCH_Y(76.0f)) * 0.5f;
 }

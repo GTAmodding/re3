@@ -57,7 +57,6 @@
 
 uint8 work_buff[55000];
 char gString[256];
-wchar *gUString = (wchar*)0x74B018;
 
 bool &b_FoundRecentSavedGameWantToLoad = *(bool*)0x95CDA8;
 
@@ -324,14 +323,14 @@ Render2dStuff(void)
 
 		// top and bottom strips
 		if(weaponType == WEAPONTYPE_ROCKETLAUNCHER){
-			CSprite2d::DrawRect(CRect(0.0f, 0.0f, SCREENW, SCREENH/2 - HUD_STRETCH_Y(180)), black);
-			CSprite2d::DrawRect(CRect(0.0f, SCREENH/2 + HUD_STRETCH_Y(170), SCREENW, SCREENH), black);
+			CSprite2d::DrawRect(CRect(0.0f, 0.0f, SCREENW, SCREENH/2 - SCREEN_STRETCH_Y(180)), black);
+			CSprite2d::DrawRect(CRect(0.0f, SCREENH/2 + SCREEN_STRETCH_Y(170), SCREENW, SCREENH), black);
 		}else{
-			CSprite2d::DrawRect(CRect(0.0f, 0.0f, SCREENW, SCREENH/2 - HUD_STRETCH_Y(210)), black);
-			CSprite2d::DrawRect(CRect(0.0f, SCREENH/2 + HUD_STRETCH_Y(210), SCREENW, SCREENH), black);
+			CSprite2d::DrawRect(CRect(0.0f, 0.0f, SCREENW, SCREENH/2 - SCREEN_STRETCH_Y(210)), black);
+			CSprite2d::DrawRect(CRect(0.0f, SCREENH/2 + SCREEN_STRETCH_Y(210), SCREENW, SCREENH), black);
 		}
-		CSprite2d::DrawRect(CRect(0.0f, 0.0f, SCREENW/2 - HUD_STRETCH_X(210), SCREENH), black);
-		CSprite2d::DrawRect(CRect(SCREENW/2 + HUD_STRETCH_X(210), 0.0f, SCREENW, SCREENH), black);
+		CSprite2d::DrawRect(CRect(0.0f, 0.0f, SCREENW/2 - SCREEN_STRETCH_X(210), SCREENH), black);
+		CSprite2d::DrawRect(CRect(SCREENW/2 + SCREEN_STRETCH_X(210), 0.0f, SCREENW, SCREENH), black);
 	}
 
 	MusicManager.DisplayRadioStationName();

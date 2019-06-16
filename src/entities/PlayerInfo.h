@@ -2,21 +2,18 @@
 #include "Automobile.h"
 #include "PlayerPed.h"
 
-enum eWastedBustedState
-{
-	WBSTATE_PLAYING,
-	WBSTATE_WASTED,
-	WBSTATE_BUSTED,
-	WBSTATE_FAILED_CRITICAL_MISSION,
+enum eWastedBustedState {
+	WBSTATE_PLAYING = 0x0,
+	WBSTATE_WASTED = 0x1,
+	WBSTATE_BUSTED = 0x2,
+	WBSTATE_FAILED_CRITICAL_MISSION = 0x3,
 };
 
-struct CCivilianPed
-{
+struct CCivilianPed  {
 
 };
 
-class CPlayerInfo 
-{
+class CPlayerInfo {
 public:
 	CPlayerPed *m_pPed;
 	CVehicle *m_pRemoteVehicle;
@@ -32,7 +29,7 @@ public:
 	int32 m_nTotalPackages;
 	int32 field_188;
 	int32 m_nSwitchTaxiTime;
-	bool m_bSwitchTaxi;
+	Bool m_bSwitchTaxi;
 	int8 field_197;
 	int8 field_198;
 	int8 field_199;
@@ -45,7 +42,7 @@ public:
 	int8 field_218;
 	int8 field_219;
 	int32 m_nWBTime;
-	bool m_bInRemoteMode;
+	Bool m_bInRemoteMode;
 	int8 field_225;
 	int8 field_226;
 	int8 field_227;
@@ -58,15 +55,15 @@ public:
 	int16 m_nTrafficMultiplier;
 	int8 field_254;
 	int8 field_255;
-	float m_fRoadDensity;
+	Float m_fRoadDensity;
 	int32 m_nPreviousTimeRewardedForExplosion;
 	int32 m_nExplosionsSinceLastReward;
 	int32 field_268;
 	int32 field_272;
-	bool m_bInfiniteSprint;
-	bool m_bFastReload;
-	bool m_bGetOutOfJailFree;
-	bool m_bGetOutOfHospitalFree;
+	Bool m_bInfiniteSprint;
+	Bool m_bFastReload;
+	Bool m_bGetOutOfJailFree;
+	Bool m_bGetOutOfHospitalFree;
 	uint8 m_aSkinName[32];
 	RwTexture *m_pSkinTexture;
 };

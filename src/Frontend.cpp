@@ -15,14 +15,14 @@ int8 &CMenuManager::m_ControlMethod = *(int8*)0x8F5F7C;
 int8 &CMenuManager::m_PrefsDMA = *(int8*)0x5F2F74;
 int8 &CMenuManager::m_PrefsLanguage = *(int8*)0x941238;
 
-Bool &CMenuManager::m_PrefsAllowNastyGame = *(Bool*)0x5F2E64;
-Bool &CMenuManager::m_bStartUpFrontEndRequested = *(Bool*)0x95CCF4;
+bool &CMenuManager::m_PrefsAllowNastyGame = *(bool*)0x5F2E64;
+bool &CMenuManager::m_bStartUpFrontEndRequested = *(bool*)0x95CCF4;
 
 int8 &CMenuManager::m_PrefsUseWideScreen = *(int8*)0x95CD23;
 int8 &CMenuManager::m_PrefsRadioStation = *(int8*)0x95CDA4;
 int8 &CMenuManager::m_bDisableMouseSteering = *(int8*)0x60252C;
 int32 &CMenuManager::m_PrefsBrightness = *(int32*)0x5F2E50;
-Float &CMenuManager::m_PrefsLOD = *(Float*)0x8F42C4;
+float &CMenuManager::m_PrefsLOD = *(float*)0x8F42C4;
 int8 &CMenuManager::m_bFrontEnd_ReloadObrTxtGxt = *(int8*)0x628CFC;
 int32 &CMenuManager::m_PrefsMusicVolume = *(int32*)0x5F2E4C;
 int32 &CMenuManager::m_PrefsSfxVolume = *(int32*)0x5F2E48;
@@ -37,15 +37,15 @@ WRAPPER void CMenuManager::LoadSettings(void) { EAXJMP(0x488EE0); }
 WRAPPER void CMenuManager::WaitForUserCD(void) { EAXJMP(0x48ADD0); }
 
 int CMenuManager::FadeIn(int alpha) {
-	if (FrontEndMenuManager.m_nCurrScreen == MENU_LOADING_IN_PROGRESS ||
-		FrontEndMenuManager.m_nCurrScreen == MENU_SAVING_IN_PROGRESS ||
-		FrontEndMenuManager.m_nCurrScreen == MENU_DELETING)
+	if (m_nCurrScreen == MENU_LOADING_IN_PROGRESS ||
+		m_nCurrScreen == MENU_SAVING_IN_PROGRESS ||
+		m_nCurrScreen == MENU_DELETING)
 		return alpha;
 
-	if (FrontEndMenuManager.m_nMenuFadeAlpha >= alpha)
+	if (m_nMenuFadeAlpha >= alpha)
 		return alpha;
 
-	return FrontEndMenuManager.m_nMenuFadeAlpha;
+	return m_nMenuFadeAlpha;
 }
 
 STARTPATCHES

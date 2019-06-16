@@ -16,7 +16,8 @@ int &gRetuneCounter = *(int*)0x650B84;
 
 //WRAPPER void cMusicManager::DisplayRadioStationName(void) { EAXJMP(0x57E6D0); }
 
-bool cMusicManager::PlayerInCar() {
+bool cMusicManager::PlayerInCar() 
+{
 	if (!FindPlayerVehicle())
 		return false;
 	else {
@@ -25,7 +26,6 @@ bool cMusicManager::PlayerInCar() {
 		if (State == PED_DRAG_FROM_CAR || State == PED_EXIT_CAR || State == PED_ARRESTED)
 			return false;
 
-		int16 Model = FindPlayerVehicle()->m_modelIndex;
 		switch (FindPlayerVehicle()->m_modelIndex) {
 		case MI_FIRETRUCK:
 		case MI_AMBULAN:
@@ -42,8 +42,9 @@ bool cMusicManager::PlayerInCar() {
 	}
 }
 
-void cMusicManager::DisplayRadioStationName() {
-	wchar* RadioName = nullptr;
+void cMusicManager::DisplayRadioStationName() 
+{
+	wchar *RadioName = nullptr;
 	uint32 RadioStation = gNumRetunePresses + MusicManager.m_nCurrentStreamedSound;
 
 	switch (RadioStation) {
@@ -84,11 +85,11 @@ void cMusicManager::DisplayRadioStationName() {
 
 	CFont::SetJustifyOff();
 	CFont::SetBackgroundOff();
-	CFont::SetScale(SCREEN_STRETCH_X(0.8f), SCREEN_STRETCH_Y(1.35f));
+	CFont::SetScale(HUD_STRETCH_X(0.8f), HUD_STRETCH_Y(1.35f));
 	CFont::SetPropOn();
 	CFont::SetFontStyle(FONT_HEADING);
 	CFont::SetCentreOn();
-	CFont::SetCentreSize(SCREEN_STRETCH_X(640.0f));;
+	CFont::SetCentreSize(HUD_STRETCH_X(640.0f));;
 
 	static int32 nTime = 0;
 	if (!CTimer::GetIsPaused() && !TheCamera.m_WideScreenOn && MusicManager.PlayerInCar()) {
@@ -105,31 +106,34 @@ void cMusicManager::DisplayRadioStationName() {
 				else {
 					if (RadioStation > HEAD_RADIO) {
 						if (cSampleManager.IsMP3RadioChannelAvailable()) {
-							if (RadioStation > USERTRACK)
+							if (RadioStation > USERTRACK) {
 								RadioStation = RADIO_OFF;
+								return;
+							}
 						}
 						else {
-							if (RadioStation > CHATTERBOX)
+							if (RadioStation > CHATTERBOX) {
 								RadioStation = RADIO_OFF;
+								return;
+							}
 						}
 					}
-					else {
+					else
 						RadioStation = RADIO_OFF;
-					}
 				}
 			}
 
 			if (RadioName) {
 				CFont::SetColor(CRGBA(0, 0, 0, 255));
 
-				CFont::PrintString(SCREEN_WIDTH / 2, SCREEN_STRETCH_Y(23.0f), RadioName);
+				CFont::PrintString(SCREEN_WIDTH / 2, HUD_STRETCH_Y(23.0f), RadioName);
 
 				if (gNumRetunePresses)
 					CFont::SetColor(CRGBA(102, 133, 143, 255));
 				else
 					CFont::SetColor(CRGBA(147, 196, 211, 255));
 
-				CFont::PrintString(SCREEN_WIDTH / 2, SCREEN_STRETCH_Y(22.0f), RadioName);
+				CFont::PrintString(SCREEN_WIDTH / 2, HUD_STRETCH_Y(22.0f), RadioName);
 				CFont::DrawFonts();
 			}
 		}

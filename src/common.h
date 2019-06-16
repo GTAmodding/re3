@@ -78,6 +78,8 @@ extern void **rwengine;
 
 #define HUD_STRETCH_X SCREEN_STRETCH_X_AR
 #define HUD_STRETCH_Y SCREEN_STRETCH_Y
+#define HUD_FROM_RIGHT(a)  Float(SCREEN_WIDTH - HUD_STRETCH_X(a))
+#define HUD_FROM_BOTTOM(a) Float(SCREEN_HEIGHT - HUD_STRETCH_Y(a))
 
 struct GlobalScene
 {
@@ -141,6 +143,7 @@ void mysrand(unsigned int seed);
 
 extern uint8 work_buff[55000];
 extern char gString[256];
+extern wchar *gUString;
 
 void re3_debug(char *format, ...);
 void re3_trace(const char *filename, unsigned int lineno, const char *func, char *format, ...);

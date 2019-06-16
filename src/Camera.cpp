@@ -1249,7 +1249,8 @@ CCam::FixCamWhenObscuredByVehicle(const CVector &TargetCoors)
 	Source.z += HeightFixerCarsObscuring;
 }
 
-bool CCam::Using3rdPersonMouseCam() {
+bool CCam::Using3rdPersonMouseCam() 
+{
 	return CCamera::m_bUseMouse3rdPerson &&
 		(Mode == MODE_FOLLOWPED ||
 			TheCamera.m_bPlayerIsInGarage &&

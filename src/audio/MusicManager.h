@@ -226,7 +226,7 @@ public:
 class cMusicManager
 {
 public:
-	Bool m_bIsInitialised;
+	bool m_bIsInitialised;
 	uint8 field_1;
 	uint8 m_nMusicMode;
 	uint8 m_nCurrentStreamedSound;
@@ -234,10 +234,10 @@ public:
 	uint8 field_5;
 	uint8 field_6;
 	uint8 field_7;
-	Bool m_bAnnouncement;
-	Bool m_bPreviousPlayerInCar;
-	Bool m_bPlayerInCar;
-	Bool m_bAnnouncementInProgress;
+	bool m_bAnnouncement;
+	bool m_bPreviousPlayerInCar;
+	bool m_bPlayerInCar;
+	bool m_bAnnouncementInProgress;
 	tMP3Sample m_asMP3Samples[196];
 	uint8 field_2364;
 	uint8 field_2365;
@@ -249,13 +249,13 @@ public:
 	uint8 field_2380;
 	uint8 field_2381;
 	uint8 field_2382;
-	Bool m_bRadioSetByScript;
+	bool m_bRadioSetByScript;
 	uint8 m_nRadioStation;
 	uint8 field_2385;
 	uint8 field_2386;
 	uint8 field_2387;
 	uint32 m_nRadioPosition;
-	Bool m_bRadioInCar;
+	bool m_bRadioInCar;
 	uint8 field_2393;
 	uint8 field_2394;
 	uint8 field_2395;

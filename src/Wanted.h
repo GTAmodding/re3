@@ -2,7 +2,8 @@
 #include "Entity.h"
 #include "math/Vector.h"
 
-enum eCrimeType {
+enum eCrimeType 
+{
 	CRIME_NONE,
 	CRIME_SHOT_FIRED,
 	CRIME_PED_FIGHT,
@@ -22,14 +23,16 @@ enum eCrimeType {
 	CRIME_DESTROYED_CESSNA,
 };
 
-enum eCopType {
-	COP_STREET = 0,
-	COP_FBI = 1,
-	COP_SWAT = 2,
-	COP_ARMY = 3,
+enum eCopType 
+{
+	COP_STREET,
+	COP_FBI,
+	COP_SWAT,
+	COP_ARMY,
 };
 
-class CCrime {
+class CCrime
+{
 public:
 	eCrimeType m_eCrimeType;
 	CEntity *m_pVictim;
@@ -40,7 +43,8 @@ public:
 	int8 pad_20[2];
 };
 
-class CCopPed {
+class CCopPed
+{
 public:
 	int16 m_wRoadblockNode;
 	int8 field_1342;
@@ -62,7 +66,8 @@ public:
 	int8 field_1367;
 };
 
-class CWanted {
+class CWanted 
+{
 public:
 	int32 m_nChaos;
 	int32 m_nLastUpdateTime;

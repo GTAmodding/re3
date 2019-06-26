@@ -608,7 +608,7 @@ CPed::IsPedHeadAbovePos(float zOffset)
 	RwMatrix mat;
 	
 	CPedIK::GetWorldMatrix(GetNodeFrame(PED_HEAD), &mat);
-	return zOffset + GetPosition().z >= mat.pos.z;
+	return zOffset + GetPosition().z <= mat.pos.z;
 }
 
 void

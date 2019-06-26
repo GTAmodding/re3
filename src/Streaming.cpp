@@ -881,7 +881,7 @@ CStreaming::RemoveLeastUsedModel(void)
 
 	for(si = ms_endLoadedList.m_prev; si != &ms_startLoadedList; si = si->m_prev){
 		streamId = si - ms_aInfoForModel;
-		if(streamId < STREAM_OFFSET_TXD){
+		if(streamId >= STREAM_OFFSET_TXD){
 			if(CTxdStore::GetNumRefs(streamId - STREAM_OFFSET_TXD) == 0 &&
 			   !IsTxdUsedByRequestedModels(streamId - STREAM_OFFSET_TXD)){
 				RemoveModel(streamId);
@@ -948,7 +948,7 @@ CStreaming::IsTxdUsedByRequestedModels(int32 txdId)
 	int streamId;
 	int i;
 
-	for(si = ms_endRequestedList.m_prev; si != &ms_startRequestedList; si = si->m_prev){
+	for(si = ms_startRequestedList.m_next; si != &ms_endRequestedList; si = si->m_next){
 		streamId = si - ms_aInfoForModel;
 		if(streamId < STREAM_OFFSET_TXD &&
 		   CModelInfo::GetModelInfo(streamId)->GetTxdSlot() == txdId)
@@ -1074,8 +1074,9 @@ void
 CStreaming::SetModelIsDeletable(int32 id)
 {
 	ms_aInfoForModel[id].m_flags &= ~STREAMFLAGS_DONT_REMOVE;
-	if(id >= STREAM_OFFSET_TXD ||
-	   CModelInfo::GetModelInfo(id)->m_type == MITYPE_VEHICLE && ms_aInfoForModel[id].m_flags & STREAMFLAGS_SCRIPTOWNED){
+	if((id >= STREAM_OFFSET_TXD || CModelInfo::GetModelInfo(id)->m_type != MITYPE_VEHICLE)
+		&& (ms_aInfoForModel[id].m_flags & STREAMFLAGS_SCRIPTOWNED) == 0){
+
 		if(ms_aInfoForModel[id].m_loadState != STREAMSTATE_LOADED)
 			RemoveModel(id);
 		else if(ms_aInfoForModel[id].m_next == nil)
@@ -1093,8 +1094,9 @@ void
 CStreaming::SetMissionDoesntRequireModel(int32 id)
 {
 	ms_aInfoForModel[id].m_flags &= ~STREAMFLAGS_SCRIPTOWNED;
-	if(id >= STREAM_OFFSET_TXD ||
-	   CModelInfo::GetModelInfo(id)->m_type == MITYPE_VEHICLE && ms_aInfoForModel[id].m_flags & STREAMFLAGS_DONT_REMOVE){
+	if((id >= STREAM_OFFSET_TXD || CModelInfo::GetModelInfo(id)->m_type != MITYPE_VEHICLE)
+		&& (ms_aInfoForModel[id].m_flags & STREAMFLAGS_DONT_REMOVE) == 0){
+
 		if(ms_aInfoForModel[id].m_loadState != STREAMSTATE_LOADED)
 			RemoveModel(id);
 		else if(ms_aInfoForModel[id].m_next == nil)
@@ -1375,7 +1377,7 @@ CStreaming::ProcessLoadingChannel(int32 ch)
 			if(id < STREAM_OFFSET_TXD &&
 			   CModelInfo::GetModelInfo(id)->m_type == MITYPE_VEHICLE &&
 			   ms_numVehiclesLoaded >= desiredNumVehiclesLoaded &&
-			   RemoveLoadedVehicle() &&
+			   !RemoveLoadedVehicle() &&
 			   ((ms_aInfoForModel[id].m_flags & STREAMFLAGS_NOT_IN_LIST) == 0 || GetAvailableVehicleSlot() == -1)){
 				// can't load vehicle
 				RemoveModel(id);

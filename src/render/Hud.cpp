@@ -1302,7 +1302,7 @@ void CHud::ReInitialise() {
 			BigMessageInUse[i] = 0.0f;
 
 		if (i <= 128)
-			m_BigMessage[i][0] = 0;
+			m_BigMessage[i][i] = 0;
 	}
 
 	m_HelpMessageTimer = 0;
@@ -1339,7 +1339,8 @@ WRAPPER void CHud::SetBigMessage(wchar *message, int16 style) { EAXJMP(0x50A250)
 #else
 void CHud::SetBigMessage(wchar *message, int16 style)
 {
-	for (int i = 0; i < 128; i++) {
+	int i = 0;
+	for (i; i < 128; i++) {
 		if (!message[i])
 			break;
 
@@ -1349,7 +1350,15 @@ void CHud::SetBigMessage(wchar *message, int16 style)
 		}
 
 		m_BigMessage[style][i] = message[i];
+
+		if (i < 8)
+			m_LastBigMessage[i] = message[i];
 	};
+
+	m_BigMessage[style][i] = 0;
+
+	if (i < 8)
+		m_LastBigMessage[i] = 0;
 }
 #endif
 

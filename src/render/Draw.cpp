@@ -23,8 +23,6 @@ CDraw::CalculateAspectRatio()
 
 	if(FrontEndMenuManager.m_PrefsUseWideScreen)	
 		ms_fAspectRatio = 16.0f/9.0f;
-	else if(TheCamera.m_WideScreenOn)
-		ms_fAspectRatio = 1.25f;
 	else
 		ms_fAspectRatio = 4.0f/3.0f;
 }

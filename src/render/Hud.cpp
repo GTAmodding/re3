@@ -125,6 +125,15 @@ WRAPPER void CHud::Draw(void) { EAXJMP(0x5052A0); }
 #else
 void CHud::Draw()
 {
+	RwRenderStateSet(rwRENDERSTATEFOGENABLE, (void*)FALSE);
+	RwRenderStateSet(rwRENDERSTATESRCBLEND, (void*)rwBLENDSRCALPHA);
+	RwRenderStateSet(rwRENDERSTATEDESTBLEND, (void*)rwBLENDINVSRCALPHA);
+	RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)TRUE);
+	RwRenderStateSet(rwRENDERSTATETEXTUREADDRESS, (void*)rwTEXTUREADDRESSMIRROR);
+	RwRenderStateSet(rwRENDERSTATETEXTURERASTER, (void*)FALSE);
+	RwRenderStateSet(rwRENDERSTATESHADEMODE, (void*)rwSHADEMODEFLAT);
+	RwRenderStateSet(rwRENDERSTATETEXTUREFILTER, (void*)rwFILTERLINEAR);
+
 	if (CReplay::IsPlayingBack())
 		return;
 
@@ -168,6 +177,7 @@ void CHud::Draw()
 			float fMultBright = SpriteBrightness * 0.03f * (0.25f * fStep + 0.75f);
 			CRect rect;
 
+#ifndef HOR_PLUS
 			float fWidescreenOffset[2] = { 0.0f, 0.0f };
 
 			if (FrontEndMenuManager.m_PrefsUseWideScreen) {
@@ -178,7 +188,11 @@ void CHud::Draw()
 			if (Mode_RunAround && TheCamera.Cams->Using3rdPersonMouseCam()) {
 				float f3rdX = SCREENW * TheCamera.m_f3rdPersonCHairMultX + fWidescreenOffset[0];
 				float f3rdY = SCREENH * TheCamera.m_f3rdPersonCHairMultY - fWidescreenOffset[1];
-
+#else
+			if (Mode_RunAround && TheCamera.Cams->Using3rdPersonMouseCam()) {
+				float f3rdX = (((TheCamera.m_f3rdPersonCHairMultX - 0.5f) / ((CDraw::GetAspectRatio()) / (4.0f / 3.0f))) + 0.5f) * SCREENW;
+				float f3rdY = SCREENH * TheCamera.m_f3rdPersonCHairMultY;
+#endif
 				if (CWorld::Players[CWorld::PlayerInFocus].m_pPed && WeaponType == WEAPONTYPE_M16) {
 					rect.left = f3rdX - SCREEN_SCALE_X(32.0f * 0.6f);
 					rect.top = f3rdY - SCREEN_SCALE_Y(32.0f  * 0.6f);
@@ -1443,7 +1457,7 @@ STARTPATCHES
 	InjectHook(0x5048F0, &CHud::Initialise, PATCH_JUMP);
 	InjectHook(0x504CC0, &CHud::ReInitialise, PATCH_JUMP);
 	InjectHook(0x50A250, &CHud::SetBigMessage, PATCH_JUMP);
-	InjectHook(0x5051E0, &CHud::SetHelpMessage, PATCH_JUMP);
+	//InjectHook(0x5051E0, &CHud::SetHelpMessage, PATCH_JUMP);
 	InjectHook(0x50A210, &CHud::SetMessage, PATCH_JUMP);
 	InjectHook(0x50A320, &CHud::SetPagerMessage, PATCH_JUMP);
 	InjectHook(0x505290, &CHud::SetVehicleName, PATCH_JUMP);

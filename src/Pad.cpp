@@ -25,6 +25,7 @@
 #include "Weather.h"
 #include "win.h"
 
+
 CPad *Pads = (CPad*)0x6F0360; // [2]
 CMousePointerStateHelper &MousePointerStateHelper = *(CMousePointerStateHelper*)0x95CC8C;
 
@@ -531,7 +532,7 @@ void CPad::AddToPCCheatString(char c)
 	// "NASTYLIMBSCHEAT"
 	if ( !_CHEATCMP("TAEHCSBMILYTSAN") )
 		NastyLimbsCheat();
-
+	
 #ifdef KANGAROO_CHEAT
 	// "KANGAROO"
 	if (!_CHEATCMP("OORAGNAK"))

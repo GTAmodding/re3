@@ -3,6 +3,18 @@
 #define HUD_SCALE 0.8f
 #define DEFAULT_SCALE 1.0f
 
+enum eAspectRatio {
+	AR_AUTO,
+	AR_3_2,
+	AR_4_3,
+	AR_5_3,
+	AR_5_4,
+	AR_15_9,
+	AR_16_9,
+	AR_16_10,
+	AR_64_27,
+};
+
 class CDraw
 {
 private:

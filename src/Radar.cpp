@@ -535,7 +535,11 @@ WRAPPER void CRadar::DrawRadarSprite(int32 sprite, float x, float y, int32 alpha
 #else
 void CRadar::DrawRadarSprite(int32 sprite, float x, float y, int32 alpha)
 {
+#ifndef SA_STYLE_RADAR
 	RadarSprites[sprite]->Draw(CRect(x - SCREEN_SCALE_X(8.0f), y - SCREEN_SCALE_Y(8.0f), x + SCREEN_SCALE_X(8.0f), y + SCREEN_SCALE_Y(8.0f)), CRGBA(255, 255, 255, alpha));
+#else
+	RadarSprites[sprite]->Draw(CRect(x - SCREEN_SCALE_X(6.0f), y - SCREEN_SCALE_Y(6.0f), x + SCREEN_SCALE_X(6.0f), y + SCREEN_SCALE_Y(6.0f)), CRGBA(255, 255, 255, alpha));
+#endif
 }
 #endif
 
@@ -547,17 +551,25 @@ void CRadar::DrawRotatingRadarSprite(CSprite2d* sprite, float x, float y, float 
 	CVector curPosn[4];
 	CVector oldPosn[4];
 
-	curPosn[0].x = x - SCREEN_SCALE_X(5.6f);
-	curPosn[0].y = y + SCREEN_SCALE_Y(5.6f);
+	float fSize = 0.0f;
 
-	curPosn[1].x = x + SCREEN_SCALE_X(5.6f);
-	curPosn[1].y = y + SCREEN_SCALE_Y(5.6f);
+#ifndef SA_STYLE_RADAR
+	fSize = 5.6f;
+#else
+	fSize = 4.6f;
+#endif
 
-	curPosn[2].x = x - SCREEN_SCALE_X(5.6f);
-	curPosn[2].y = y - SCREEN_SCALE_Y(5.6f);
+	curPosn[0].x = x - SCREEN_SCALE_X(fSize);
+	curPosn[0].y = y + SCREEN_SCALE_Y(fSize);
 
-	curPosn[3].x = x + SCREEN_SCALE_X(5.6f);
-	curPosn[3].y = y - SCREEN_SCALE_Y(5.6f);
+	curPosn[1].x = x + SCREEN_SCALE_X(fSize);
+	curPosn[1].y = y + SCREEN_SCALE_Y(fSize);
+
+	curPosn[2].x = x - SCREEN_SCALE_X(fSize);
+	curPosn[2].y = y - SCREEN_SCALE_Y(fSize);
+
+	curPosn[3].x = x + SCREEN_SCALE_X(fSize);
+	curPosn[3].y = y - SCREEN_SCALE_Y(fSize);
 
 	for (uint32 i = 0; i < 4; i++) {
 		oldPosn[i] = curPosn[i];

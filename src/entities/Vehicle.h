@@ -135,6 +135,7 @@ public:
 	static bool &bCheat3;
 	static bool &bCheat4;
 	static bool &bCheat5;
+	static bool &m_bDisableMouseSteering;
 };
 
 static_assert(sizeof(CVehicle) == 0x288, "CVehicle: error");

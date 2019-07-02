@@ -19,3 +19,4 @@ void LoadingIslandScreen(const char *levelName);
 CSprite2d *LoadSplash(const char *name);
 char *GetLevelSplashScreen(int level);
 char *GetRandomSplashScreen(void);
+extern bool &b_FoundRecentSavedGameWantToLoad;

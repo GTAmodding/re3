@@ -50,3 +50,8 @@ void CControllerConfigManager::LoadSettings(int32 file)
 		}
 	}
 }
+
+WRAPPER void CControllerConfigManager::SaveSettings(int32 file)
+{
+	EAXJMP(0x58B800);
+}

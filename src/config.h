@@ -79,3 +79,7 @@ enum Config {
 #define NASTY_GAME
 #define PS2_MATFX
 #define KANGAROO_CHEAT
+#define HOR_PLUS
+#define MID_RADIOICONS
+#define NO_ROCKET_BORDERS
+#define SA_STYLE_RADAR

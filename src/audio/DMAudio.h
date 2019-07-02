@@ -188,7 +188,13 @@ public:
 	bool CheckForAnAudioFileOnCD(void);
 	void ChangeMusicMode(uint8 mode);
 	void PlayFrontEndSound(uint32, uint32);
-	void PlayOneShot(int, uint16, float);
+	void PlayFrontEndTrack(uint32, uint32);
+	void StopFrontEndTrack();
+	void PlayOneShot(int32, uint16, float);
+	void SetMusicMasterVolume(int8);
+	void SetEffectsMasterVolume(int8);
+	int8 SetCurrent3DProvider(int8);
+	int32 SetSpeakerConfig(int32);
 	int32 GetRadioInCar(void);
 	void SetEffectsFadeVol(uint8);
 	void SetMusicFadeVol(uint8);

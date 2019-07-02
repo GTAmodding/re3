@@ -63,10 +63,17 @@ struct CBlip
 static_assert(sizeof(CBlip) == 0x30, "CBlip: error");
 
 // Values for screen space
+#ifndef SA_STYLE_RADAR
 #define RADAR_LEFT (40.0f)
 #define RADAR_BOTTOM (47.0f)
 #define RADAR_WIDTH (94.0f)
 #define RADAR_HEIGHT (76.0f)
+#else
+#define RADAR_LEFT (32.0f)
+#define RADAR_BOTTOM (25.0f)
+#define RADAR_WIDTH (88.0f)
+#define RADAR_HEIGHT (82.0f)
+#endif
 
 class CRadar
 {

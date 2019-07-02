@@ -29,7 +29,11 @@
 #define MENUSELECT_BOX_MAX 20.5f
 #define MENUSELECT_BOX_MIN 17.0f
 
+#ifndef MID_RADIOICONS
 #define MENURADIO_ICON_X 31.5f
+#else
+#define MENURADIO_ICON_X -262.0f
+#endif
 #define MENURADIO_ICON_Y 29.5f
 #define MENURADIO_ICON_W 60.0f
 #define MENURADIO_ICON_H 60.0f
@@ -38,6 +42,8 @@
 #define MENUDROP_COLOR_SIZE -1
 
 #define MENUSLIDER_X 306.0f
+
+#define buf(a) (char*)(a)
 
 enum eLanguages
 {
@@ -314,6 +320,7 @@ enum eMenuColumns
 
 enum eMenuRow
 {
+	MENUROW_NONE = -1,
 	MENUROW_0,
 	MENUROW_1,
 	MENUROW_2,
@@ -347,7 +354,8 @@ struct tSkinInfo
 struct CMenuScreen
 {
 	char m_ScreenName[8];
-	int32 m_PreviousPage[3]; // eMenuScreen
+	int32 unk;
+	int32 m_PreviousPage[2]; // eMenuScreen
 	int32 m_ParentEntry[2]; // eMenuRow
 
 	struct CMenuEntry
@@ -417,7 +425,7 @@ public:
 	int m_nHoverOption;
 	int m_nCurrScreen;
 	int m_nCurrOption;
-	int m_nCurrentInput;
+	int m_nPrevOption;
 	int m_nPrevScreen;
  int field_558;
 	int m_nCurrSaveSlot;
@@ -431,7 +439,6 @@ public:
 	static int8 &m_PrefsVsync;
 	static int8 &m_PrefsVsyncDisp;
 	static int8 &m_PrefsFrameLimiter;
-	static int8 &BlurOn;
 	static int8 &m_PrefsShowSubtitles;
 	static int8 &m_PrefsSpeakers;
 	static int8 &m_ControlMethod;
@@ -443,6 +450,8 @@ public:
 	static int8 &m_bFrontEnd_ReloadObrTxtGxt;
 	static int32 &m_PrefsMusicVolume;
 	static int32 &m_PrefsSfxVolume;
+	static uint8 *m_PrefsSkinFile;
+
 	static bool &m_bStartUpFrontEndRequested;
 	static bool &m_bShutDownFrontEndRequested;
 	static bool &m_PrefsAllowNastyGame;
@@ -452,6 +461,7 @@ public:
 	static void CentreMousePointer();
 	void CheckCodesForControls(int, int);
 	bool CheckHover(int x1, int x2, int y1, int y2);
+	void CheckSliderMovement(int);
 	int CostructStatLine(int);
 	void DisplayHelperText();
 	float DisplaySlider(float, float, float, float, float, float);
@@ -489,6 +499,12 @@ public:
 	void SwitchMenuOnAndOff();
 	void UnloadTextures();
 	void WaitForUserCD();
+
+	// New content:
+	uint8 GetNumberOfMenuOptions();
+	void SwitchToNewScreen(int8 screen);
+	void SetDefaultPreferences(int8 screen);
+
 };
 
 static_assert(sizeof(CMenuManager) == 0x564, "CMenuManager: error");

@@ -42,6 +42,7 @@ public:
 	
 	int32 GetJoyButtonJustDown();
 	void LoadSettings(int32 file);
+	void SaveSettings(int32 file);
 	void MakeControllerActionsBlank();
 	void InitDefaultControlConfiguration();
 	void InitDefaultControlConfigMouse(CMouseControllerState const &mousestate);

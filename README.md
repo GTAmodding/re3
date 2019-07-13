@@ -13,6 +13,9 @@ Re3 requires assets to work, so you need to own copy of GTA III.
 
 Also re3 heavily depends on MSVC (memory layout), futher more, only windows is supported for now. 
 ### Installing
+#### Simple:
+1. [Put files from this archive into your game folder.](https://cdn.discordapp.com/attachments/582894364737404963/595745485327826947/re3.7z)
+#### Step by step:
 1. Put script file "main_freeroam.scm" into data catalog. (available in gamefiles)
 2. Put binary of re3 into main catalog of game.
  
@@ -28,8 +31,8 @@ Also re3 heavily depends on MSVC (memory layout), futher more, only windows is s
     -  Create empty file `dlls.cfg`(in main catalog of game) and add inside it `re3`. (To indicate what it should load.)
 ### Standart mission script
 
-Press `g` when game is loading.
+Hold `g` when game is loading.
 
 ### Development and Contributing
 
-Please visit wiki for details.
+[Contribution guidelines for this project](CONTRIBUTING.md)

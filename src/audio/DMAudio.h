@@ -180,7 +180,6 @@ enum eSound : int16
 class cAudioScriptObject;
 class CEntity;
 enum eCrimeType;
-enum eAudioType;
 
 class cDMAudio
 {
@@ -192,7 +191,7 @@ public:
 	void Terminate(void);
 	void Service(void);
 	
-	int32 CreateEntity(eAudioType type, void *UID);
+	int32 CreateEntity(int32 type, void *UID);
 	void DestroyEntity(int32 audioEntity);
 	void SetEntityStatus(int32 audioEntity, uint8 status);
 	void PlayOneShot(int32 audioEntity, uint16 oneShot, float volume);

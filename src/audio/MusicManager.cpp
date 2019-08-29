@@ -239,7 +239,15 @@ WRAPPER void cMusicManager::SetRadioInCar(unsigned int)
 	EAXJMP(0x57D2C0);
 }
 
-WRAPPER void cMusicManager::SetRadioChannelByScript(unsigned char, int)
+WRAPPER void
+cMusicManager::SetRadioChannelByScript(unsigned char, int)
 {
 	EAXJMP(0x57D180);
+}
+
+WRAPPER
+void
+cMusicManager::ResetMusicAfterReload()
+{
+	EAXJMP(0x57CF30);
 }

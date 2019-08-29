@@ -26,7 +26,7 @@ cDMAudio::Service(void)
 }
 
 int32
-cDMAudio::CreateEntity(eAudioType type, void *UID)
+cDMAudio::CreateEntity(int32 type, void *UID)
 {
 	return AudioManager.CreateEntity(type, (CPhysical *)UID);
 }

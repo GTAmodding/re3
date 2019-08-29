@@ -1278,38 +1278,50 @@ CPathFind::DoPathSearch(uint8 type, CVector start, int32 startNodeId, CVector ta
 		targetNode = FindNodeClosestToCoors(target, type, distLimit);
 	else
 		targetNode = forcedTargetNode;
-	if(targetNode < 0)
-		goto fail;
+	if(targetNode < 0) {
+		*pNumNodes = 0;
+		if(pDist) *pDist = 100000.0f;
+		return;
+	}
 
 	// Find start
 	int numPathsToTry;
 	CTreadable *startObj;
-	if(startNodeId < 0){
+	if(startNodeId < 0) {
 		if(vehicle == nil || (startObj = vehicle->m_treadable[type]) == nil)
 			startObj = FindRoadObjectClosestToCoors(start, type);
 		numPathsToTry = 0;
-		for(i = 0; i < 12; i++){
-			if(startObj->m_nodeIndices[type][i] < 0)
-				break;
-			if(m_pathNodes[startObj->m_nodeIndices[type][i]].group == m_pathNodes[targetNode].group)
+		for(i = 0; i < 12; i++) {
+			if(startObj->m_nodeIndices[type][i] < 0) break;
+			if(m_pathNodes[startObj->m_nodeIndices[type][i]].group ==
+			   m_pathNodes[targetNode].group)
 				numPathsToTry++;
 		}
-	}else{
+	} else {
 		numPathsToTry = 1;
 		startObj = m_mapObjects[m_pathNodes[startNodeId].objectIndex];
 	}
-	if(numPathsToTry == 0)
-		goto fail;
-
-	if(startNodeId < 0){
-		// why only check node 0?
-		if(m_pathNodes[startObj->m_nodeIndices[type][0]].group != m_pathNodes[targetNode].group)
-			goto fail;
-	}else{
-		if(m_pathNodes[startNodeId].group != m_pathNodes[targetNode].group)
-			goto fail;
+	if(numPathsToTry == 0) {
+		*pNumNodes = 0;
+		if(pDist) *pDist = 100000.0f;
+		return;
 	}
 
+	if(startNodeId < 0) {
+		// why only check node 0?
+		if(m_pathNodes[startObj->m_nodeIndices[type][0]].group !=
+		   m_pathNodes[targetNode].group) {
+			*pNumNodes = 0;
+			if(pDist) *pDist = 100000.0f;
+			return;
+		}
+	} else {
+		if(m_pathNodes[startNodeId].group != m_pathNodes[targetNode].group) {
+			*pNumNodes = 0;
+			if(pDist) *pDist = 100000.0f;
+			return;
+		}
+	}
 
 	for(i = 0; i < 512; i++)
 		m_searchNodes[i].next = nil;
@@ -1388,11 +1400,6 @@ CPathFind::DoPathSearch(uint8 type, CVector start, int32 startNodeId, CVector ta
 	for(i = 0; i < numNodesToBeCleared; i++)
 		apNodesToBeCleared[i]->distance = MAX_DIST;
 	return;
-
-fail:
-	*pNumNodes = 0;
-	if(pDist)
-		*pDist = 100000.0f;
 }
 
 static CPathNode *pNodeList[32];

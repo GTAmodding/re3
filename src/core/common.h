@@ -121,7 +121,7 @@ public:
 	CRGBA(void) { }
 	CRGBA(uint8 r, uint8 g, uint8 b, uint8 a) : r(r), g(g), b(b), a(a) { }
 	
-	CRGBA &CRGBA::operator =(const CRGBA &right)
+	CRGBA &operator =(const CRGBA &right)
 	{
 		this->r = right.r;
 		this->g = right.g;
@@ -142,7 +142,7 @@ public:
 		return rwRGBA;
 	}
 
-	CRGBA &CRGBA::operator =(const RwRGBA &right)
+	CRGBA &operator =(const RwRGBA &right)
 	{
 		this->r = right.red;
 		this->g = right.green;
@@ -197,8 +197,8 @@ void re3_assert(const char *expr, const char *filename, unsigned int lineno, con
 #define ARRAY_SIZE(array)                (sizeof(array) / sizeof(array[0]))
 #define BIT(num)                         (1<<(num))
 
-#define max(a, b)  (((a) > (b)) ? (a) : (b)) 
-#define min(a, b)  (((a) < (b)) ? (a) : (b))
+auto max = [](auto a, auto b) { return ((a) > (b)) ? (a) : (b); };
+auto min = [](auto a, auto b) { return ((a) < (b)) ? (a) : (b); };
 #define ABS(a)  (((a) < 0) ? (-(a)) : (a))
 #define norm(value, min, max) (((value) < (min)) ? 0 : (((value) > (max)) ? 1 : (((value) - (min)) / ((max) - (min)))))
 

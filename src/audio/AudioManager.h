@@ -200,7 +200,7 @@ public:
 	CVector Posn;
 	int32 AudioEntity;
 
-	void Reset(); // todo hook
+	void Reset(); /// ok
 
 	static void *operator new(size_t);
 	static void *operator new(size_t, int);
@@ -284,9 +284,9 @@ public:
 	int32 m_nPoliceChannelEntity;
 	uint8 stuff[239];
 	uint8 unk1;
-	uint8 unk2;
+	uint8 policeChannelTimer;
 	uint8 unk3;
-	uint8 unk4;
+	uint8 policeChannelCounterSeconds;
 	uint8 unk5;
 	Crime crimes[10];
 	int32 m_nFrontEndEntity;
@@ -417,7 +417,7 @@ public:
 	uint8 GetCDAudioDriveLetter() const;
 	int8 GetCurrent3DProviderIndex() const;                            /// ok
 	float GetCollisionLoopingRatio(uint32 a, uint32 b, float c) const; // not used
-	float GetCollisionOneShotRatio(int32 a, float b) const;           /// ok
+	float GetCollisionOneShotRatio(int32 a, float b) const;            /// ok
 	float GetCollisionRatio(float a, float b, float c, float d) const; /// ok
 	float GetDistanceSquared(CVector *v) const;                        /// ok
 	int32 GetJumboTaxiFreq() const;                                    /// ok
@@ -528,12 +528,12 @@ public:
 	void ReleaseDigitalHandle() const;
 	void ReportCollision(CEntity *entity1, CEntity *entity2, uint8 surface1, uint8 surface2,
 	                     float collisionPower, float intensity2); /// ok
-	void ReportCrime(int32 crime, const CVector *pos);   /// ok
-	void ResetAudioLogicTimers(int32 timer);                  /// ok
-	void ResetPoliceRadio();                                  /// ok
-	void ResetTimers(uint32 time);                            /// ok
+	void ReportCrime(int32 crime, const CVector *pos);            /// ok
+	void ResetAudioLogicTimers(int32 timer);                      /// ok
+	void ResetPoliceRadio();                                      /// ok
+	void ResetTimers(uint32 time);                                /// ok
 
-	void Service();                                    // todo
+	void Service();                                    /// ok
 	void ServiceCollisions();                          // todo
 	void ServicePoliceRadio();                         /// ok
 	void ServicePoliceRadioChannel(int32 wantedLevel); /// ok
@@ -543,28 +543,30 @@ public:
 	void SetEffectsFadeVolume(uint8 volume) const;
 	void SetEffectsMasterVolume(uint8 volume) const;
 	void SetEntityStatus(int32 id, bool status);
-	uint32 SetLoopingCollisionRequestedSfxFreqAndGetVol(cAudioCollision *audioCollision); // todo hook
+	uint32
+	SetLoopingCollisionRequestedSfxFreqAndGetVol(cAudioCollision *audioCollision); /// ok
 	void SetMissionAudioLocation(float x, float y, float z);
 	void SetMissionScriptPoliceAudio(int32 sfx) const;
 	void SetMonoMode(uint8); // todo (mobile)
 	void SetMusicFadeVolume(uint8 volume) const;
 	void SetMusicMasterVolume(uint8 volume) const;
 	void SetSpeakerConfig(int32 conf) const;
-	void SetUpLoopingCollisionSound(cAudioCollision *col, uint8 counter);          // todo hook
-	void SetUpOneShotCollisionSound(int a2);                  // todo
-	bool SetupCrimeReport();                                  // todo
-	bool SetupJumboEngineSound(uint8 a2, int32 a3);           // todo
-	bool SetupJumboFlySound(uint8 emittingVol);               /// ok
-	bool SetupJumboRumbleSound(uint8 emittingVol);            /// ok
-	bool SetupJumboTaxiSound(uint8 vol);                      /// ok
-	bool SetupJumboWhineSound(uint8 emittingVol, int32 freq); /// ok
-	void SetupPedComments(cPedParams *params, uint32 sound);  /// ok
-	void SetupSuspectLastSeenReport();                        // todo
+	void SetUpLoopingCollisionSound(cAudioCollision *col, uint8 counter); /// ok
+	void SetUpOneShotCollisionSound(cAudioCollision *col);                /// ok
+	bool SetupCrimeReport();                                              // todo
+	bool SetupJumboEngineSound(uint8 a2, int32 a3);                       // todo
+	bool SetupJumboFlySound(uint8 emittingVol);                           /// ok
+	bool SetupJumboRumbleSound(uint8 emittingVol);                        /// ok
+	bool SetupJumboTaxiSound(uint8 vol);                                  /// ok
+	bool SetupJumboWhineSound(uint8 emittingVol, int32 freq);             /// ok
+	void SetupPedComments(cPedParams *params, uint32 sound);              /// ok
+	void SetupSuspectLastSeenReport();                                    // todo
 
 	void Terminate();
 	void TranslateEntity(CVector *v1, CVector *v2) const;
 
 	void UpdateGasPedalAudio(CAutomobile *automobile);
+	void UpdateReflections(); // todo
 	bool UsesReverseWarning(int32 model) const;
 	bool UsesSiren(int32 model) const;
 	bool UsesSirenSwitching(int32 model) const;

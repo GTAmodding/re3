@@ -197,8 +197,8 @@ void re3_assert(const char *expr, const char *filename, unsigned int lineno, con
 #define ARRAY_SIZE(array)                (sizeof(array) / sizeof(array[0]))
 #define BIT(num)                         (1<<(num))
 
-auto max = [](auto a, auto b) { return ((a) > (b)) ? (a) : (b); };
-auto min = [](auto a, auto b) { return ((a) < (b)) ? (a) : (b); };
+//auto max = [](auto a, auto b) { return ((a) > (b)) ? (a) : (b); };
+//auto min = [](auto a, auto b) { return ((a) < (b)) ? (a) : (b); };
 #define ABS(a)  (((a) < 0) ? (-(a)) : (a))
 #define norm(value, min, max) (((value) < (min)) ? 0 : (((value) > (max)) ? 1 : (((value) - (min)) / ((max) - (min)))))
 

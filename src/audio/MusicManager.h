@@ -1,5 +1,7 @@
 #pragma once
 
+#include "common.h"
+
 enum eRadioStation
 {
 	HEAD_RADIO,
@@ -297,6 +299,9 @@ public:
 	void SetRadioChannelByScript(unsigned char, int);
 
 	void ResetMusicAfterReload();
+
+	void ResetTimers(int32);
+	void Service();
 };
 
 static_assert(sizeof(cMusicManager) == 0x95C, "cMusicManager: error");

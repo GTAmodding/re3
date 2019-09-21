@@ -1,5 +1,5 @@
 version: 1.0.{build}
-image: Visual Studio 2019
+image: Visual Studio 2017
 configuration:
 - Debug
 - Release
@@ -10,7 +10,7 @@ install:
 - cmd: >-
     git submodule update --init --recursive
 
-    premake-vs2019.cmd
+    premake-vs2017.cmd
 build:
   project: build/re3.sln
   verbosity: minimal
@@ -29,11 +29,9 @@ after_build:
 
     $url = "$releases/download/$latestVersion/$name"
 
-
     Start-FileDownload $url -FileName 'C:\Ultimate-ASI-Loader.zip'
 
     7z e c:\Ultimate-ASI-Loader.zip -oc:\Projects\re3\bin\${env:CONFIGURATION}
-
 
     cd "bin\${env:CONFIGURATION}"
 

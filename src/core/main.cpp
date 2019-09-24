@@ -339,7 +339,7 @@ void
 RenderEffects(void)
 {
 	CGlass::Render();
-	CWaterCannons::Render();
+	CWaterCannon::Render();
 	CSpecialFX::Render();
 	CShadows::RenderStaticShadows();
 	CShadows::RenderStoredShadows();

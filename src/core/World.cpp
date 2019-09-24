@@ -793,7 +793,7 @@ CWorld::TestSphereAgainstSectorList(CPtrList &list, CVector spherePos, float rad
 						*eCol, &ms_testSpherePoint, nil, nil);
 
 					if (collidedSpheres != 0 ||
-						(e->IsVehicle() && ((CVehicle*)e)->m_vehType == VEHICLE_TYPE_CAR &&
+						(e->IsVehicle() && ((CVehicle*)e)->m_vehType == VEHICLE_TYPE_AUTOMOBILE &&
 						e->m_modelIndex != MI_DODO && radius + eCol->boundingBox.max.x > distance)) {
 						return e;
 					}

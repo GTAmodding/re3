@@ -1897,7 +1897,7 @@ CPhysical::ProcessCollision(void)
 		CTimer::SetTimeStep(savedTimeStep);
 		if(IsVehicle()){
 			CVehicle *veh = (CVehicle*)this;
-			if(veh->m_vehType == VEHICLE_TYPE_CAR){
+			if(veh->m_vehType == VEHICLE_TYPE_AUTOMOBILE){
 				CAutomobile *car = (CAutomobile*)this;
 				car->m_aSuspensionSpringRatio[0] = 1.0f;
 				car->m_aSuspensionSpringRatio[1] = 1.0f;

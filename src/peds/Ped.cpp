@@ -4389,7 +4389,7 @@ CPed::SetEvasiveStep(CEntity *reason, uint8 animType)
 		neededTurn = 2 * PI - neededTurn;
 
 	CVehicle *veh = (CVehicle*)reason;
-	if (reason->IsVehicle() && veh->m_vehType == VEHICLE_TYPE_CAR) {
+	if (reason->IsVehicle() && veh->m_vehType == VEHICLE_TYPE_AUTOMOBILE) {
 		if (veh->m_nCarHornTimer) {
 			vehPressedHorn = true;
 			if (!IsPlayer())
@@ -4457,7 +4457,7 @@ CPed::SetEvasiveDive(CPhysical *reason, uint8 onlyRandomJump)
 
 	angleToFace = m_fRotationCur;
 	CVehicle *veh = (CVehicle*) reason;
-	if (reason->IsVehicle() && veh->m_vehType == VEHICLE_TYPE_CAR && veh->m_nCarHornTimer && !IsPlayer()) {
+	if (reason->IsVehicle() && veh->m_vehType == VEHICLE_TYPE_AUTOMOBILE && veh->m_nCarHornTimer && !IsPlayer()) {
 		onlyRandomJump = true;
 	}
 
@@ -7246,7 +7246,7 @@ CPed::Seek(void)
 									false, true, false, false, false, false);
 
 				if (obstacle) {
-					if (!obstacle->IsVehicle() || ((CVehicle*)obstacle)->m_vehType == VEHICLE_TYPE_CAR) {
+					if (!obstacle->IsVehicle() || ((CVehicle*)obstacle)->m_vehType == VEHICLE_TYPE_AUTOMOBILE) {
 						distanceToCountItDone = 2.5f;
 					} else {
 						CVehicleModelInfo *vehModel = (CVehicleModelInfo*) CModelInfo::GetModelInfo(obstacle->m_modelIndex);
@@ -8482,7 +8482,7 @@ CPed::KillPedWithCar(CVehicle *car, float impulse)
 					if (damageDir > 3)
 						damageDir = damageDir - 4;
 
-					if (car->m_vehType == VEHICLE_TYPE_CAR) {
+					if (car->m_vehType == VEHICLE_TYPE_AUTOMOBILE) {
 						CObject *bonnet = ((CAutomobile*)car)->RemoveBonnetInPedCollision();
 
 						if (bonnet) {

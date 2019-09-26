@@ -31,6 +31,7 @@
 #include "Vehicle.h"
 #include "WaterCannon.h"
 #include "Weather.h"
+#include "Zones.h"
 #include "World.h"
 #include "ZoneCull.h"
 #include "sampman.h"
@@ -221,8 +222,7 @@ cPedComments::Process()
 			        AudioManager.m_sQueueSample.m_nSampleIndex) +
 			    AudioManager.RandomDisplacement(750u);
 			if(CTimer::GetIsSlowMotionActive())
-				AudioManager.m_sQueueSample.m_nFrequency =
-				    AudioManager.m_sQueueSample.m_nFrequency >> 1;
+				AudioManager.m_sQueueSample.m_nFrequency /= 2;
 			m_asPedComments[activeBank][indexMap[activeBank][0]].field_25 = -1;
 			AudioManager.AddSampleToRequestedQueue();
 		}
@@ -3153,7 +3153,7 @@ void
 cAudioManager::InitialisePoliceRadio()
 {
 	policeChannelTimer = 0;
-	unk3 = 0;
+	policeChannelTimerSeconds = 0;
 	policeChannelCounterSeconds = 0;
 	for(int32 i = 0; i < 10; i++) { crimes[i].type = 0; }
 
@@ -3314,12 +3314,10 @@ cAudioManager::PlayLoadedMissionAudio()
 	}
 }
 
-WRAPPER
 void
 cAudioManager::PlayOneShot(int32 index, int16 sound, float vol)
 {
-	EAXJMP(0x57A500);
-	/*if(m_bIsInitialised) {
+	if(m_bIsInitialised) {
 		if (index >= 0 && index < totalAudioEntitiesSlots) {
 			if (m_asAudioEntities[index].m_bIsUsed) {
 				if (sound < SOUND_TOTAL_SOUNDS) {
@@ -3339,17 +3337,17 @@ cAudioManager::PlayOneShot(int32 index, int16 sound, float vol)
 							if (i >= m_asAudioEntities[index].m_Loops) {
 								if (m_asAudioEntities[index]
 									.m_Loops < 4) {
-									m_asAudioEntities[index / 2]
+									m_asAudioEntities[index]
 										.m_awAudioEvent[i] =
 										sound;
-									m_asAudioEntities[index / 4]
+									m_asAudioEntities[index]
 										.m_afVolume[i] = vol;
 									++m_asAudioEntities[index]
 										.m_Loops;
 								}
 								return;
 							}
-							if (panTable[m_asAudioEntities[index / 2]
+							if (panTable[m_asAudioEntities[index]
 								.m_awAudioEvent[i]] >
 								panTable[sound])
 								break;
@@ -3357,34 +3355,234 @@ cAudioManager::PlayOneShot(int32 index, int16 sound, float vol)
 						}
 						if (i < 3) {
 							memmove(
-								&m_asAudioEntities[0]
-								.m_awAudioEvent[i + 1 + index / 2],
-								&m_asAudioEntities[0]
-								.m_awAudioEvent[i + index / 2],
-								2 * (3 - i));
-							memmove(&m_asAudioEntities[0]
-								.m_afVolume[i + 1 + index / 4],
-								&m_asAudioEntities[0]
-								.m_afVolume[i + index / 4],
-								4 * (3 - i));
+								&m_asAudioEntities[index]
+								.m_awAudioEvent[i + 1],
+								&m_asAudioEntities[index]
+								.m_awAudioEvent[i],
+								3 - i);
+							memmove(&m_asAudioEntities[index]
+								.m_afVolume[i + 1],
+								&m_asAudioEntities[index]
+								.m_afVolume[i],
+								3 - i);
 						}
-						m_asAudioEntities[index / 2].m_awAudioEvent[i] =
+						m_asAudioEntities[index].m_awAudioEvent[i] =
 							sound;
-						m_asAudioEntities[index / 4].m_afVolume[i] = vol;
+						m_asAudioEntities[index].m_afVolume[i] = vol;
 						if (m_asAudioEntities[index].m_Loops < 4)
 							++m_asAudioEntities[index].m_Loops;
 					}
 				}
 			}
 		}
-	}*/
+	}
 }
 
-WRAPPER
-uint32
+void
 cAudioManager::PlaySuspectLastSeen(float x, float y, float z)
 {
-	EAXJMP(0x580500);
+		cAudioManager* v4; // ebx
+		int16 audioZone; // ax
+		unsigned __int8 i; // dl
+		CZone* zone; // edi
+		int v8; // ecx
+		double v10; // st5
+		double v11; // st7
+		double v12; // st4
+		double v13; // st6
+		double v14; // st5
+		double v15; // st4
+		double v16; // st7
+		double v17; // st6
+		int v18; // eax
+		int32 sample; // [esp+8h] [ebp-30h]
+		char v20; // [esp+Ch] [ebp-2Ch]
+		CVector vec = {x, y, z};
+
+		v4 = this;
+		v20 = 0;
+		if (this->m_bIsInitialised)
+		{
+			if (MusicManager.m_nMusicMode != 2 && 60 - policeChannelTimer > 9u)
+			{
+
+				audioZone = CTheZones::FindAudioZone(&vec);
+				if (audioZone >= 0 && audioZone < 36)
+				{
+					i = 0;
+					zone = &CTheZones::ZoneArray[CTheZones::AudioZoneArray[audioZone]];
+					v8 = 0;
+					while (strcmp(zone->name, ZoneSfx[v8].m_aName) != 0)
+					{
+						++i;
+						++v8;
+						if (i >= 36u)
+							goto LABEL_11;
+					}
+					sample = ZoneSfx[i].m_nSampleIndex;
+				LABEL_11:
+					if (i < 36u)
+					{
+						if (v4->policeChannelTimer != 60)
+						{
+							v4->crimesSamples[v4->policeChannelTimerSeconds] = v4->m_anRandomTable[4] % 3u
+								+ AUDIO_SAMPLE_POLICE_SCANNER_SMALL_CRACKLE_1;
+							++v4->policeChannelTimer;
+							v4->policeChannelTimerSeconds = (v4->policeChannelTimerSeconds + 1) % 60;
+						}
+						if (v4->policeChannelTimer != 60)
+						{
+							v4->crimesSamples[v4->policeChannelTimerSeconds] = AUDIO_SAMPLE_POLICE_SCANNER_SUSPECT;
+							++v4->policeChannelTimer;
+							v4->policeChannelTimerSeconds = (v4->policeChannelTimerSeconds + 1) % 60;
+						}
+						if (v4->policeChannelTimer != 60)
+						{
+							v4->crimesSamples[v4->policeChannelTimerSeconds] = AUDIO_SAMPLE_POLICE_SCANNER_LAST_SEEN;
+							++v4->policeChannelTimer;
+							v4->policeChannelTimerSeconds = (v4->policeChannelTimerSeconds + 1) % 60;
+						}
+						if (v4->policeChannelTimer != 60)
+						{
+							v4->crimesSamples[v4->policeChannelTimerSeconds] = AUDIO_SAMPLE_POLICE_SCANNER_IN;
+							++v4->policeChannelTimer;
+							v4->policeChannelTimerSeconds = (v4->policeChannelTimerSeconds + 1) % 60;
+						}
+						if (sample == AUDIO_SAMPLE_POLICE_SCANNER_ZONE_SHORESIDE
+							&& (strcmp(zone->name, SubZo2Label) == 0
+								|| strcmp(zone->name, SubZo3Label) == 0))
+						{
+							if (v4->policeChannelTimer != 60)
+							{
+								v4->crimesSamples[v4->policeChannelTimerSeconds] = AUDIO_SAMPLE_POLICE_SCANNER_NORTH;
+								++v4->policeChannelTimer;
+								v4->policeChannelTimerSeconds = (v4->policeChannelTimerSeconds + 1) % 60;
+							}
+							if (v4->policeChannelTimer == 60) {
+								if (v4->policeChannelTimer != 60)
+								{
+									v4->crimesSamples[v4->policeChannelTimerSeconds] = sample;
+									++v4->policeChannelTimer;
+									v4->policeChannelTimerSeconds = (v4->policeChannelTimerSeconds + 1) % 60;
+								}
+								v18 = -1431655765 * v4->m_anRandomTable[2];
+								if (v4->policeChannelTimer != 60)
+								{
+									v4->crimesSamples[v4->policeChannelTimerSeconds] = v4->m_anRandomTable[2] % 3u
+										+ AUDIO_SAMPLE_POLICE_SCANNER_SMALL_CRACKLE_1;
+									++v4->policeChannelTimer;
+									v4->policeChannelTimerSeconds = (v4->policeChannelTimerSeconds + 1) % 60;
+								}
+								if (v4->policeChannelTimer != 60)
+								{
+									v4->crimesSamples[v4->policeChannelTimerSeconds] = TOTAL_AUDIO_SAMPLES;
+									++v4->policeChannelTimer;
+									v4->policeChannelTimerSeconds = (v4->policeChannelTimerSeconds + 1) % 60;
+								}
+								gSpecialSuspectLastSeenReport = 1;
+								return;
+							}
+							v4->crimesSamples[v4->policeChannelTimerSeconds] = AUDIO_SAMPLE_POLICE_SCANNER_EAST;
+							goto LABEL_45;
+						}
+						v10 = zone->minx;
+						v11 = zone->maxx - v10;
+						v12 = zone->miny;
+						v13 = zone->maxy - v12;
+						v14 = 0.5f * v11 + v10;
+						v15 = 0.5f * v13 + v12;
+						v16 = 0.25f * v11;
+						v17 = 0.25f * v13;
+						if (v15 + v17 < vec.y)
+						{
+							if (v15 - v17 <= vec.y)
+								goto LABEL_36;
+							if (v4->policeChannelTimer != 60)
+							{
+								v4->crimesSamples[v4->policeChannelTimerSeconds] = AUDIO_SAMPLE_POLICE_SCANNER_SOUTH;
+								++v4->policeChannelTimer;
+								v4->policeChannelTimerSeconds = (v4->policeChannelTimerSeconds + 1) % 60;
+							}
+						}
+						else if (v4->policeChannelTimer != 60)
+						{
+							v4->crimesSamples[v4->policeChannelTimerSeconds] = AUDIO_SAMPLE_POLICE_SCANNER_NORTH;
+							++v4->policeChannelTimer;
+							v4->policeChannelTimerSeconds = (v4->policeChannelTimerSeconds + 1) % 60;
+						}
+						v20 = 1;
+					LABEL_36:
+						if (v14 + v16 < vec.x)
+						{
+							if (v14 - v16 <= vec.x)
+							{
+								if (v20 || v4->policeChannelTimer == 60) {
+									if (v4->policeChannelTimer != 60)
+									{
+										v4->crimesSamples[v4->policeChannelTimerSeconds] = sample;
+										++v4->policeChannelTimer;
+										v4->policeChannelTimerSeconds = (v4->policeChannelTimerSeconds + 1) % 60;
+									}
+									v18 = -1431655765 * v4->m_anRandomTable[2];
+									if (v4->policeChannelTimer != 60)
+									{
+										v4->crimesSamples[v4->policeChannelTimerSeconds] = v4->m_anRandomTable[2] % 3u
+											+ AUDIO_SAMPLE_POLICE_SCANNER_SMALL_CRACKLE_1;
+										++v4->policeChannelTimer;
+										v4->policeChannelTimerSeconds = (v4->policeChannelTimerSeconds + 1) % 60;
+									}
+									if (v4->policeChannelTimer != 60)
+									{
+										v4->crimesSamples[v4->policeChannelTimerSeconds] = TOTAL_AUDIO_SAMPLES;
+										++v4->policeChannelTimer;
+										v4->policeChannelTimerSeconds = (v4->policeChannelTimerSeconds + 1) % 60;
+									}
+									gSpecialSuspectLastSeenReport = 1;
+									return;
+								}
+								v4->crimesSamples[v4->policeChannelTimerSeconds] = AUDIO_SAMPLE_POLICE_SCANNER_CENTRAL;
+								goto LABEL_45;
+							}
+							if (v4->policeChannelTimer != 60)
+							{
+								v4->crimesSamples[v4->policeChannelTimerSeconds] = AUDIO_SAMPLE_POLICE_SCANNER_WEST;
+								goto LABEL_45;
+							}
+						}
+						else if (v4->policeChannelTimer != 60)
+						{
+							v4->crimesSamples[v4->policeChannelTimerSeconds] = AUDIO_SAMPLE_POLICE_SCANNER_EAST;
+						LABEL_45:
+							++v4->policeChannelTimer;
+							v4->policeChannelTimerSeconds = (v4->policeChannelTimerSeconds + 1) % 60;
+						}
+						if (v4->policeChannelTimer != 60)
+						{
+							v4->crimesSamples[v4->policeChannelTimerSeconds] = sample;
+							++v4->policeChannelTimer;
+							v4->policeChannelTimerSeconds = (v4->policeChannelTimerSeconds + 1) % 60;
+						}
+						v18 = -1431655765 * v4->m_anRandomTable[2];
+						if (v4->policeChannelTimer != 60)
+						{
+							v4->crimesSamples[v4->policeChannelTimerSeconds] = v4->m_anRandomTable[2] % 3u
+								+ AUDIO_SAMPLE_POLICE_SCANNER_SMALL_CRACKLE_1;
+							++v4->policeChannelTimer;
+							v4->policeChannelTimerSeconds = (v4->policeChannelTimerSeconds + 1) % 60;
+						}
+						if (v4->policeChannelTimer != 60)
+						{
+							v4->crimesSamples[v4->policeChannelTimerSeconds] = TOTAL_AUDIO_SAMPLES;
+							++v4->policeChannelTimer;
+							v4->policeChannelTimerSeconds = (v4->policeChannelTimerSeconds + 1) % 60;
+						}
+						gSpecialSuspectLastSeenReport = 1;
+						return;
+					}
+				}
+			}
+		}
+	
 }
 
 void
@@ -3488,18 +3686,12 @@ cAudioManager::PreTerminateGameSpecificShutdown()
 	}
 }
 
-#if 1
-
 WRAPPER
 void
 cAudioManager::ProcessActiveQueues()
 {
 	EAXJMP(0x57BA60);
 }
-
-#else
-
-#endif
 
 bool
 cAudioManager::ProcessAirBrakes(cVehicleParams *params)
@@ -4355,7 +4547,7 @@ cAudioManager::ProcessFrontEnd()
 	for(uint32 i = 0; i < m_asAudioEntities[m_sQueueSample.m_nEntityIndex].m_Loops; i++) {
 		processed = 0;
 		switch(
-		    m_asAudioEntities[0].m_awAudioEvent[i + 20 * m_sQueueSample.m_nEntityIndex]) {
+		    m_asAudioEntities[m_sQueueSample.m_nEntityIndex].m_awAudioEvent[i]) {
 		case SOUND_WEAPON_SNIPER_SHOT_NO_ZOOM:
 			m_sQueueSample.m_nSampleIndex = AUDIO_SAMPLE_SNIPER_NO_ZOOM;
 			break;
@@ -4461,12 +4653,12 @@ cAudioManager::ProcessFrontEnd()
 		}
 
 		sample =
-		    m_asAudioEntities[0].m_awAudioEvent[i + 20 * m_sQueueSample.m_nEntityIndex];
+		    m_asAudioEntities[m_sQueueSample.m_nEntityIndex].m_awAudioEvent[i];
 		if(sample == AUDIO_SAMPLE_COLLISION_LOOPING_GRASS) {
 			m_sQueueSample.m_nFrequency = 28509;
 		} else if(sample == AUDIO_SAMPLE_PICKUP_NEUTRAL_1) {
 			if(1.f ==
-			   m_asAudioEntities[0].m_afVolume[i + 10 * m_sQueueSample.m_nEntityIndex])
+			   m_asAudioEntities[m_sQueueSample.m_nEntityIndex].m_afVolume[i])
 				m_sQueueSample.m_nFrequency = 32000;
 			else
 				m_sQueueSample.m_nFrequency = 48000;
@@ -8799,7 +8991,7 @@ cAudioManager::ServicePoliceRadioChannel(int32 wantedLevel)
 			    g_nMissionAudioPlayingStatus != 1) &&
 			   !SampleManager.GetChannelUsedFlag(policeChannel) && policeChannelTimer) {
 				if(policeChannelTimer) {
-					sample = *(uint32 *)&stuff[4 * policeChannelCounterSeconds];
+					sample = crimesSamples[policeChannelCounterSeconds];
 					--policeChannelTimer;
 					policeChannelCounterSeconds =
 					    (policeChannelCounterSeconds + 1) % 60;
@@ -9186,15 +9378,224 @@ cAudioManager::SetUpOneShotCollisionSound(cAudioCollision *col)
 	}
 }
 
-WRAPPER
 bool
 cAudioManager::SetupCrimeReport()
 {
-	EAXJMP(0x57F5B0);
+
+		cAudioManager* v1; // ebx
+		unsigned __int8 v3; // dl
+		int v4; // eax
+		__int16 v5; // ax
+		unsigned __int8 v6; // dl
+		CZone* v7; // edi
+		int v8; // ecx
+		int v9; // eax
+		int v10; // eax
+		int32 v11; // edx
+		double v12; // st5
+		double v13; // st7
+		double v14; // st4
+		double v15; // st6
+		double v16; // st5
+		double v17; // st4
+		double v18; // st7
+		double v19; // st6
+		double v20; // st3
+		double v21; // st6
+		int v22; // eax
+		int v23; // [esp+4h] [ebp-24h]
+		int32 v24; // [esp+8h] [ebp-20h]
+		char v25; // [esp+Ch] [ebp-1Ch]
+
+		v1 = this;
+		v25 = 0;
+		if (MusicManager.m_nMusicMode == 2)
+			return 0;
+		if ((unsigned __int8)(60 - this->policeChannelTimer) <= 9u)
+			goto LABEL_65;
+		v3 = 0;
+		v4 = 0;
+		do
+		{
+			if (this->crimes[v4].type)
+				break;
+			++v3;
+			++v4;
+		} while (v3 < 10u);
+		if (v3 == 10)
+			return 0;
+		v23 = v3;
+		v5 = CTheZones::FindAudioZone(&this->crimes[v23].position);
+		if (v5 >= 0 && v5 < 36)
+		{
+			v6 = 0;
+			v7 = &CTheZones::ZoneArray[CTheZones::AudioZoneArray[v5]];
+			v8 = 0;
+			while (strcmp(v7->name, ZoneSfx[v8].m_aName) != 0)
+			{
+				++v6;
+				++v8;
+				if (v6 >= 36u)
+					goto LABEL_16;
+			}
+			v24 = ZoneSfx[v6].m_nSampleIndex;
+		LABEL_16:
+			if (v6 < 36u)
+			{
+				v9 = -1431655765 * v1->m_anRandomTable[4];
+				if (v1->policeChannelTimer != 60)
+				{
+					v1->crimesSamples[v1->policeChannelTimerSeconds] = v1->m_anRandomTable[4] % 3u
+						+ AUDIO_SAMPLE_POLICE_SCANNER_SMALL_CRACKLE_1;
+					++v1->policeChannelTimer;
+					v1->policeChannelTimerSeconds = (v1->policeChannelTimerSeconds + 1) % 60;
+				}
+				v10 = -1431655765 * v1->m_anRandomTable[0];
+				if (v1->policeChannelTimer != 60)
+				{
+					v1->crimesSamples[v1->policeChannelTimerSeconds] = v1->m_anRandomTable[0] % 3u
+						+ AUDIO_SAMPLE_POLICE_SCANNER_WE_GOT_1;
+					++v1->policeChannelTimer;
+					v1->policeChannelTimerSeconds = (v1->policeChannelTimerSeconds + 1) % 60;
+				}
+				if (v1->policeChannelTimer != 60)
+				{
+					v1->crimesSamples[v1->policeChannelTimerSeconds] = (v1->m_anRandomTable[1] & 1)
+						+ AUDIO_SAMPLE_POLICE_SCANNER_TEN_1;
+					++v1->policeChannelTimer;
+					v1->policeChannelTimerSeconds = (v1->policeChannelTimerSeconds + 1) % 60;
+				}
+				v11 = v1->crimes[v23].type;
+				switch (v1->crimes[v23].type)
+				{
+				case CRIME_PED_BURNED:
+					v1->crimes[v23].type = 2;
+					break;
+				case CRIME_COP_BURNED:
+					v1->crimes[v23].type = 3;
+					break;
+				case CRIME_VEHICLE_BURNED:
+					v1->crimes[v23].type = 6;
+					break;
+				case CRIME_DESTROYED_CESSNA:
+					v1->crimes[v23].type = 12;
+					break;
+				default:
+					break;
+				}
+				if (v1->policeChannelTimer != 60)
+				{
+					v1->crimesSamples[v1->policeChannelTimerSeconds] = v1->crimes[v23].type + AUDIO_SAMPLE_POLICE_SCANNER_TEN_2;
+					++v1->policeChannelTimer;
+					v1->policeChannelTimerSeconds = (v1->policeChannelTimerSeconds + 1) % 60;
+				}
+				if (v1->policeChannelTimer != 60)
+				{
+					v1->crimesSamples[v1->policeChannelTimerSeconds] = AUDIO_SAMPLE_POLICE_SCANNER_IN;
+					++v1->policeChannelTimer;
+					v1->policeChannelTimerSeconds = (v1->policeChannelTimerSeconds + 1) % 60;
+				}
+				if (v24 == AUDIO_SAMPLE_POLICE_SCANNER_ZONE_SHORESIDE
+					&& (strcmp(v7->name, SubZo2Label) == 0
+						|| strcmp(v7->name, SubZo3Label) ==0))
+				{
+					if (v1->policeChannelTimer != 60)
+					{
+						v1->crimesSamples[v1->policeChannelTimerSeconds] = AUDIO_SAMPLE_POLICE_SCANNER_NORTH;
+						++v1->policeChannelTimer;
+						v1->policeChannelTimerSeconds = (v1->policeChannelTimerSeconds + 1) % 60;
+					}
+					if (v1->policeChannelTimer == 60)
+						goto LABEL_58;
+					v1->crimesSamples[v1->policeChannelTimerSeconds] = AUDIO_SAMPLE_POLICE_SCANNER_EAST;
+					goto LABEL_57;
+				}
+				v12 = v7->minx;
+				v13 = v7->maxx - v12;
+				v14 = v7->miny;
+				v15 = v7->maxy - v14;
+				v16 = 0.5f * v13 + v12;
+				v17 = 0.5f * v15 + v14;
+				v18 = 0.25f * v13;
+				v19 = 0.25f * v15;
+				v20 = v1->crimes[v23].position.y;
+				if (v17 + v19 < v20)
+				{
+					if (v17 - v19 <= v20)
+						goto LABEL_48;
+					if (v1->policeChannelTimer != 60)
+					{
+						v1->crimesSamples[v1->policeChannelTimerSeconds] = AUDIO_SAMPLE_POLICE_SCANNER_SOUTH;
+						++v1->policeChannelTimer;
+						v1->policeChannelTimerSeconds = (v1->policeChannelTimerSeconds + 1) % 60;
+					}
+				}
+				else if (v1->policeChannelTimer != 60)
+				{
+					v1->crimesSamples[v1->policeChannelTimerSeconds] = AUDIO_SAMPLE_POLICE_SCANNER_NORTH;
+					++v1->policeChannelTimer;
+					v1->policeChannelTimerSeconds = (v1->policeChannelTimerSeconds + 1) % 60;
+				}
+				v25 = 1;
+			LABEL_48:
+				v21 = v1->crimes[v23].position.x;
+				if (v16 + v18 < v21)
+				{
+					if (v16 - v18 <= v21)
+					{
+						if (v25 || v1->policeChannelTimer == 60)
+							goto LABEL_58;
+						v1->crimesSamples[v1->policeChannelTimerSeconds] = AUDIO_SAMPLE_POLICE_SCANNER_CENTRAL;
+						goto LABEL_57;
+					}
+					if (v1->policeChannelTimer != 60)
+					{
+						v1->crimesSamples[v1->policeChannelTimerSeconds] = AUDIO_SAMPLE_POLICE_SCANNER_WEST;
+						goto LABEL_57;
+					}
+				}
+				else if (v1->policeChannelTimer != 60)
+				{
+					v1->crimesSamples[v1->policeChannelTimerSeconds] = AUDIO_SAMPLE_POLICE_SCANNER_EAST;
+				LABEL_57:
+					++v1->policeChannelTimer;
+					v1->policeChannelTimerSeconds = (v1->policeChannelTimerSeconds + 1) % 60;
+					goto LABEL_58;
+				}
+			LABEL_58:
+				if (v1->policeChannelTimer != 60)
+				{
+					v1->crimesSamples[v1->policeChannelTimerSeconds] = v24;
+					++v1->policeChannelTimer;
+					v1->policeChannelTimerSeconds = (v1->policeChannelTimerSeconds + 1) % 60;
+				}
+				v22 = -1431655765 * v1->m_anRandomTable[2];
+				if (v1->policeChannelTimer != 60)
+				{
+					v1->crimesSamples[v1->policeChannelTimerSeconds] = v1->m_anRandomTable[2] % 3u
+						+ AUDIO_SAMPLE_POLICE_SCANNER_SMALL_CRACKLE_1;
+					++v1->policeChannelTimer;
+					v1->policeChannelTimerSeconds = (v1->policeChannelTimerSeconds + 1) % 60;
+				}
+				if (v1->policeChannelTimer != 60)
+				{
+					v1->crimesSamples[v1->policeChannelTimerSeconds] = TOTAL_AUDIO_SAMPLES;
+					++v1->policeChannelTimer;
+					v1->policeChannelTimerSeconds = (v1->policeChannelTimerSeconds + 1) % 60;
+				}
+				goto LABEL_64;
+			}
+		}
+	LABEL_64:
+		v1->crimes[v23].type = 0;
+	LABEL_65:
+		AgeCrimes();
+		return 1;
+	
 }
 
 WRAPPER
-bool cAudioManager::SetupJumboEngineSound(uint8, int32) { EAXJMP(0x56F140); }
+bool cAudioManager::SetupJumboEngineSound(uint8, int32) { EAXJMP(0x56F140) }
 
 bool
 cAudioManager::SetupJumboFlySound(uint8 emittingVol)
@@ -9457,11 +9858,547 @@ cAudioManager::SetupPedComments(cPedParams *params, uint32 sound)
 	}
 }
 
-WRAPPER
+struct ColorSoundForScanner
+{
+	eAudioSamples m_eColor1;
+	eAudioSamples m_eColor2;
+	eAudioSamples m_eColor3;
+};
+
 void
 cAudioManager::SetupSuspectLastSeenReport()
 {
-	EAXJMP(0x57FCC0);
+		cAudioManager* v1; // ebp
+		CAutomobile* v2; // eax
+		uint8 v3; // bl
+		unsigned __int8 v4; // dl
+		int v5; // edx
+		int main_color; // edi
+		int v7; // edx
+		eAudioSamples v8; // esi
+		int v9; // eax
+		int v10; // eax
+		uint8 v11; // cl
+		int v12; // eax
+		int v13; // eax
+		int color_pre_modifier; // [esp+8h] [ebp-18h]
+		int color_post_modifier; // [esp+Ch] [ebp-14h]
+
+		constexpr int32 colors[] =
+{
+  3032,
+  248,
+  3032,
+  3032,
+  249,
+  3032,
+  3032,
+  250,
+  3032,
+  3032,
+  251,
+  3032,
+  258,
+  250,
+  3032,
+  3032,
+  252,
+  3032,
+  3032,
+  253,
+  3032,
+  260,
+  250,
+  3032,
+  259,
+  250,
+  254,
+  259,
+  3032,
+  3032,
+  258,
+  3032,
+  3032,
+  258,
+  3032,
+  3032,
+  258,
+  251,
+  3032,
+  3032,
+  251,
+  3032,
+  3032,
+  251,
+  3032,
+  3032,
+  251,
+  3032,
+  3032,
+  251,
+  3032,
+  3032,
+  251,
+  3032,
+  3032,
+  251,
+  3032,
+  259,
+  3032,
+  3032,
+  258,
+  3032,
+  3032,
+  258,
+  3032,
+  3032,
+  258,
+  3032,
+  3032,
+  3032,
+  255,
+  3032,
+  3032,
+  255,
+  3032,
+  3032,
+  255,
+  3032,
+  3032,
+  255,
+  3032,
+  3032,
+  255,
+  3032,
+  3032,
+  255,
+  3032,
+  259,
+  3032,
+  3032,
+  258,
+  3032,
+  3032,
+  258,
+  3032,
+  3032,
+  258,
+  3032,
+  3032,
+  3032,
+  253,
+  3032,
+  3032,
+  253,
+  3032,
+  3032,
+  253,
+  3032,
+  3032,
+  253,
+  3032,
+  3032,
+  253,
+  3032,
+  3032,
+  253,
+  3032,
+  259,
+  3032,
+  3032,
+  258,
+  3032,
+  3032,
+  258,
+  3032,
+  3032,
+  258,
+  3032,
+  3032,
+  3032,
+  256,
+  3032,
+  3032,
+  256,
+  3032,
+  3032,
+  256,
+  3032,
+  3032,
+  256,
+  3032,
+  3032,
+  256,
+  3032,
+  3032,
+  256,
+  3032,
+  259,
+  3032,
+  3032,
+  258,
+  3032,
+  3032,
+  258,
+  3032,
+  3032,
+  258,
+  3032,
+  3032,
+  3032,
+  250,
+  3032,
+  3032,
+  250,
+  3032,
+  3032,
+  250,
+  3032,
+  3032,
+  250,
+  3032,
+  3032,
+  250,
+  3032,
+  3032,
+  250,
+  3032,
+  259,
+  3032,
+  3032,
+  258,
+  3032,
+  3032,
+  258,
+  3032,
+  3032,
+  258,
+  3032,
+  3032,
+  3032,
+  252,
+  3032,
+  3032,
+  252,
+  3032,
+  3032,
+  252,
+  3032,
+  3032,
+  252,
+  3032,
+  3032,
+  252,
+  3032,
+  3032,
+  252,
+  3032,
+  259,
+  3032,
+  3032,
+  258,
+  3032,
+  3032,
+  258,
+  3032,
+  3032,
+  258,
+  3032,
+  3032,
+  3032,
+  257,
+  3032,
+  3032,
+  257,
+  3032,
+  3032,
+  257,
+  3032,
+  3032,
+  257,
+  3032,
+  3032,
+  257,
+  3032,
+  3032,
+  257,
+  3032,
+  259,
+  3032,
+  3032,
+  259,
+  3032,
+  3032,
+  259,
+  3032,
+  3032,
+  259,
+  3032,
+  3032,
+  259,
+  3032,
+  3032,
+  259,
+  3032,
+  3032,
+  259,
+  3032,
+  3032,
+  259,
+  3032,
+  3032,
+  259,
+  3032,
+  3032,
+  259,
+  3032,
+  3032,
+  259,
+  3032,
+  3032,
+  258,
+  3032,
+  3032,
+  258,
+  3032,
+  3032,
+  258,
+  3032,
+  3032,
+  258,
+  3032,
+  3032,
+  258,
+  3032,
+  3032
+};
+
+		v1 = this;
+		if (MusicManager.m_nMusicMode != 2)
+		{
+			v2 = (CAutomobile*)FindPlayerVehicle();
+			if (v2)
+			{
+				v3 = v1->policeChannelTimer;
+				if (60 - v3 > 9u)
+				{
+					v4 = v2->m_currentColour1;
+					if (v4 >= 95u)
+					{
+						debug("\n *** UNKNOWN CAR COLOUR %d *** ", v4);
+					}
+					else
+					{
+						v5 = 3 * v4;
+						main_color = colors[v5 + 1]; //todo refactor struct
+						color_pre_modifier = colors[v5];
+						color_post_modifier = colors[v5 + 2];
+						v7 = v2->m_modelIndex;
+						switch (v7)
+						{
+						case MI_LANDSTAL:
+						case MI_BLISTA:
+							v8 = AUDIO_SAMPLE_POLICE_SCANNER_CAR_CRUISER;
+							goto LABEL_28;
+						case MI_IDAHO:
+						case MI_STALLION:
+							v8 = AUDIO_SAMPLE_POLICE_SCANNER_CAR_CONVERTIBLE;
+							goto LABEL_28;
+						case MI_STINGER:
+						case MI_INFERNUS:
+						case MI_CHEETAH:
+						case MI_BANSHEE:
+							v8 = AUDIO_SAMPLE_POLICE_SCANNER_CAR_SPORTS_CAR;
+							goto LABEL_28;
+						case MI_PEREN:
+						case MI_SENTINEL:
+						case MI_FBICAR:
+							v8 = AUDIO_SAMPLE_POLICE_SCANNER_CAR_ECONOMY;
+							goto LABEL_28;
+						case MI_PATRIOT:
+						case MI_BOBCAT:
+							v8 = AUDIO_SAMPLE_POLICE_SCANNER_CAR_PICKUP;
+							goto LABEL_28;
+						case MI_FIRETRUCK:
+							v8 = AUDIO_SAMPLE_POLICE_SCANNER_CAR_FIRETRUCK;
+							goto LABEL_28;
+						case MI_TRASH:
+						case MI_BARRACKS:
+							v8 = AUDIO_SAMPLE_POLICE_SCANNER_CAR_TRUCK;
+							goto LABEL_28;
+						case MI_STRETCH:
+							v8 = AUDIO_SAMPLE_POLICE_SCANNER_CAR_LIMO;
+							goto LABEL_28;
+						case MI_MANANA:
+						case MI_ESPERANT:
+							v8 = AUDIO_SAMPLE_POLICE_SCANNER_CAR_COUPE;
+							goto LABEL_28;
+						case MI_PONY:
+						case MI_MULE:
+						case MI_MOONBEAM:
+						case MI_ENFORCER:
+						case MI_SECURICA:
+						case MI_RUMPO:
+							v8 = AUDIO_SAMPLE_POLICE_SCANNER_CAR_VAN;
+							goto LABEL_28;
+						case MI_AMBULAN:
+							v8 = AUDIO_SAMPLE_POLICE_SCANNER_CAR_AMBULANCE;
+							goto LABEL_28;
+						case MI_TAXI:
+						case MI_CABBIE:
+						case MI_BORGNINE:
+							v8 = AUDIO_SAMPLE_POLICE_SCANNER_CAR_TAXI;
+							goto LABEL_28;
+						case MI_MRWHOOP:
+							v8 = AUDIO_SAMPLE_POLICE_SCANNER_CAR_ICE_CREAM_TRUCK;
+							goto LABEL_28;
+						case MI_BFINJECT:
+							v8 = AUDIO_SAMPLE_POLICE_SCANNER_CAR_BUGGY;
+							goto LABEL_28;
+						case MI_POLICE:
+							v8 = AUDIO_SAMPLE_POLICE_SCANNER_CAR_POLICE_CAR;
+							goto LABEL_28;
+						case MI_PREDATOR:
+							v8 = AUDIO_SAMPLE_POLICE_SCANNER_CAR_BOAT;
+							goto LABEL_28;
+						case MI_BUS:
+						case MI_COACH:
+							v8 = AUDIO_SAMPLE_POLICE_SCANNER_CAR_BUS;
+							goto LABEL_28;
+						case MI_RHINO:
+							v8 = AUDIO_SAMPLE_POLICE_SCANNER_CAR_TANK;
+							main_color = TOTAL_AUDIO_SAMPLES;
+							color_post_modifier = TOTAL_AUDIO_SAMPLES;
+							goto LABEL_28;
+						case MI_TRAIN:
+							v8 = AUDIO_SAMPLE_POLICE_SCANNER_CAR_SUBWAY_CAR;
+							main_color = TOTAL_AUDIO_SAMPLES;
+							color_post_modifier = TOTAL_AUDIO_SAMPLES;
+						LABEL_28:
+							v9 = -1431655765 * v1->m_anRandomTable[4];
+							if (v3 != 60)
+							{
+								v1->crimesSamples[v1->policeChannelTimerSeconds] = v1->m_anRandomTable[4] % 3u
+									+ AUDIO_SAMPLE_POLICE_SCANNER_SMALL_CRACKLE_1;
+								++v1->policeChannelTimer;
+								v1->policeChannelTimerSeconds = (v1->policeChannelTimerSeconds + 1) % 60;
+							}
+							if (v1->policeChannelTimer != 60)
+							{
+								v1->crimesSamples[v1->policeChannelTimerSeconds] = AUDIO_SAMPLE_POLICE_SCANNER_SUSPECT;
+								++v1->policeChannelTimer;
+								v1->policeChannelTimerSeconds = (v1->policeChannelTimerSeconds + 1) % 60;
+							}
+							if (v1->m_anRandomTable[3] & 1 && v1->policeChannelTimer != 60)
+							{
+								v1->crimesSamples[v1->policeChannelTimerSeconds] = AUDIO_SAMPLE_POLICE_SCANNER_LAST_SEEN;
+								++v1->policeChannelTimer;
+								v1->policeChannelTimerSeconds = (v1->policeChannelTimerSeconds + 1) % 60;
+							}
+							if (main_color == AUDIO_SAMPLE_POLICE_SCANNER_COLOR_ORANGE)
+							{
+								if (v1->policeChannelTimer != 60)
+								{
+									v1->crimesSamples[v1->policeChannelTimerSeconds] = AUDIO_SAMPLE_POLICE_SCANNER_IN_AN;
+									++v1->policeChannelTimer;
+									v1->policeChannelTimerSeconds = (v1->policeChannelTimerSeconds + 1) % 60;
+								}
+							}
+							else if (v1->policeChannelTimer != 60)
+							{
+								v1->crimesSamples[v1->policeChannelTimerSeconds] = AUDIO_SAMPLE_POLICE_SCANNER_IN_A;
+								++v1->policeChannelTimer;
+								v1->policeChannelTimerSeconds = (v1->policeChannelTimerSeconds + 1) % 60;
+							}
+							if (color_pre_modifier != 3032 && v1->policeChannelTimer != 60)
+							{
+								v1->crimesSamples[v1->policeChannelTimerSeconds] = color_pre_modifier;
+								++v1->policeChannelTimer;
+								v1->policeChannelTimerSeconds = (v1->policeChannelTimerSeconds + 1) % 60;
+							}
+							if (main_color != 3032 && v1->policeChannelTimer != 60)
+							{
+								v1->crimesSamples[v1->policeChannelTimerSeconds] = main_color;
+								++v1->policeChannelTimer;
+								v1->policeChannelTimerSeconds = (v1->policeChannelTimerSeconds + 1) % 60;
+							}
+							if (color_post_modifier != 3032 && v1->policeChannelTimer != 60)
+							{
+								v1->crimesSamples[v1->policeChannelTimerSeconds] = color_post_modifier;
+								++v1->policeChannelTimer;
+								v1->policeChannelTimerSeconds = (v1->policeChannelTimerSeconds + 1) % 60;
+							}
+							if (v1->policeChannelTimer != 60)
+							{
+								v1->crimesSamples[v1->policeChannelTimerSeconds] = v8;
+								++v1->policeChannelTimer;
+								v1->policeChannelTimerSeconds = (v1->policeChannelTimerSeconds + 1) % 60;
+							}
+							v10 = -1431655765 * v1->m_anRandomTable[0];
+							if (v1->policeChannelTimer != 60)
+							{
+								v1->crimesSamples[v1->policeChannelTimerSeconds] = v1->m_anRandomTable[0] % 3u
+									+ AUDIO_SAMPLE_POLICE_SCANNER_SMALL_CRACKLE_1;
+								++v1->policeChannelTimer;
+								v1->policeChannelTimerSeconds = (v1->policeChannelTimerSeconds + 1) % 60;
+							}
+							if (v1->policeChannelTimer != 60)
+							{
+								v1->crimesSamples[v1->policeChannelTimerSeconds] = TOTAL_AUDIO_SAMPLES;
+								++v1->policeChannelTimer;
+								v1->policeChannelTimerSeconds = (v1->policeChannelTimerSeconds + 1) % 60;
+							}
+							break;
+						default:
+							debug("\n *** UNKNOWN CAR MODEL INDEX %d *** ", v7);
+							break;
+						}
+					}
+				}
+			}
+			else
+			{
+				v11 = v1->policeChannelTimer;
+				if (60 - v11 > 4u)
+				{
+					v12 = -1431655765 * v1->m_anRandomTable[4];
+					if (v11 != 60)
+					{
+						v1->crimesSamples[v1->policeChannelTimerSeconds] = v1->m_anRandomTable[4] % 3u
+							+ AUDIO_SAMPLE_POLICE_SCANNER_SMALL_CRACKLE_1;
+						++v1->policeChannelTimer;
+						v1->policeChannelTimerSeconds = (v1->policeChannelTimerSeconds + 1) % 60;
+					}
+					if (v1->policeChannelTimer != 60)
+					{
+						v1->crimesSamples[v1->policeChannelTimerSeconds] = AUDIO_SAMPLE_POLICE_SCANNER_SUSPECT;
+						++v1->policeChannelTimer;
+						v1->policeChannelTimerSeconds = (v1->policeChannelTimerSeconds + 1) % 60;
+					}
+					if (v1->policeChannelTimer != 60)
+					{
+						v1->crimesSamples[v1->policeChannelTimerSeconds] = AUDIO_SAMPLE_POLICE_SCANNER_ON_FOOT;
+						++v1->policeChannelTimer;
+						v1->policeChannelTimerSeconds = (v1->policeChannelTimerSeconds + 1) % 60;
+					}
+					v13 = -1431655765 * v1->m_anRandomTable[0];
+					if (v1->policeChannelTimer != 60)
+					{
+						v1->crimesSamples[v1->policeChannelTimerSeconds] = v1->m_anRandomTable[0] % 3u
+							+ AUDIO_SAMPLE_POLICE_SCANNER_SMALL_CRACKLE_1;
+						++v1->policeChannelTimer;
+						v1->policeChannelTimerSeconds = (v1->policeChannelTimerSeconds + 1) % 60;
+					}
+					if (v1->policeChannelTimer != 60)
+					{
+						v1->crimesSamples[v1->policeChannelTimerSeconds] = TOTAL_AUDIO_SAMPLES;
+						++v1->policeChannelTimer;
+						v1->policeChannelTimerSeconds = (v1->policeChannelTimerSeconds + 1) % 60;
+					}
+				}
+			}
+		}
+	
 }
 
 void
@@ -9527,7 +10464,7 @@ WRAPPER
 void
 cAudioManager::UpdateReflections()
 {
-	EAXJMP(0x57B470);
+	EAXJMP(0x57B470)
 }
 
 bool
@@ -9706,7 +10643,7 @@ InjectHook(0x579520, &cAudioManager::MissionScriptAudioUsesPoliceChannel, PATCH_
 InjectHook(0x56AD10, &cAudioManager::PlayerJustGotInCar, PATCH_JUMP);
 InjectHook(0x56AD20, &cAudioManager::PlayerJustLeftCar, PATCH_JUMP);
 InjectHook(0x579620, &cAudioManager::PlayLoadedMissionAudio, PATCH_JUMP);
-//InjectHook(0x57A500, &cAudioManager::PlayOneShot, PATCH_JUMP);
+InjectHook(0x57A500, &cAudioManager::PlayOneShot, PATCH_JUMP);
 InjectHook(0x569420, &cAudioManager::PostInitialiseGameSpecificSetup, PATCH_JUMP);
 InjectHook(0x569640, &cAudioManager::PostTerminateGameSpecificShutdown, PATCH_JUMP);
 InjectHook(0x569400, &cAudioManager::PreInitialiseGameSpecificSetup, PATCH_JUMP);

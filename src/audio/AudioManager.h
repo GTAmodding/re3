@@ -239,7 +239,7 @@ struct Crime {
 	int32 type;
 	CVector position;
 	uint16 timer;
-	uint16 b;
+	uint16 gap;
 };
 
 static_assert(sizeof(Crime) == 20, "Crime: error ");
@@ -282,12 +282,11 @@ public:
 	int32 m_nFireAudioEntity;
 	int32 m_nWaterCannonEntity;
 	int32 m_nPoliceChannelEntity;
-	uint8 stuff[239];
-	uint8 unk1;
+	int32 crimesSamples[60];
 	uint8 policeChannelTimer;
-	uint8 unk3;
+	uint8 policeChannelTimerSeconds;
 	uint8 policeChannelCounterSeconds;
-	uint8 unk5;
+	uint8 gap30;
 	Crime crimes[10];
 	int32 m_nFrontEndEntity;
 	int32 m_nCollisionEntity;
@@ -447,7 +446,7 @@ public:
 
 	void PlayLoadedMissionAudio();                         /// ok
 	void PlayOneShot(int32 index, int16 sound, float vol); // to do (need testing)
-	uint32 PlaySuspectLastSeen(float x, float y, float z); // todo
+	void PlaySuspectLastSeen(float x, float y, float z); // todo cleanup and hook
 	void PlayerJustGotInCar() const;                       /// ok
 	void PlayerJustLeftCar() const;                        /// ok
 	void PostInitialiseGameSpecificSetup();                /// ok
@@ -552,14 +551,14 @@ public:
 	void SetSpeakerConfig(int32 conf) const;
 	void SetUpLoopingCollisionSound(cAudioCollision *col, uint8 counter); /// ok
 	void SetUpOneShotCollisionSound(cAudioCollision *col);                /// ok
-	bool SetupCrimeReport();                                              // todo
+	bool SetupCrimeReport();                                              // todo cleanup and hook
 	bool SetupJumboEngineSound(uint8 a2, int32 a3);                       // todo
 	bool SetupJumboFlySound(uint8 emittingVol);                           /// ok
 	bool SetupJumboRumbleSound(uint8 emittingVol);                        /// ok
 	bool SetupJumboTaxiSound(uint8 vol);                                  /// ok
 	bool SetupJumboWhineSound(uint8 emittingVol, int32 freq);             /// ok
 	void SetupPedComments(cPedParams *params, uint32 sound);              /// ok
-	void SetupSuspectLastSeenReport();                                    // todo
+	void SetupSuspectLastSeenReport();                                    // todo cleanup and hook
 
 	void Terminate();
 	void TranslateEntity(CVector *v1, CVector *v2) const;

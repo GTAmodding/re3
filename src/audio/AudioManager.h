@@ -4,9 +4,8 @@
 #include "DMAudio.h"
 #include "common.h"
 
-class tActiveSample
+struct tActiveSample
 {
-public:
 	int32 m_nEntityIndex;
 	int32 m_counter;
 	int32 m_nSampleIndex;
@@ -76,9 +75,8 @@ enum eAudioType : int32 {
 class CPhysical;
 class CAutomobile;
 
-class tAudioEntity
+struct tAudioEntity
 {
-public:
 	eAudioType m_nType;
 	void *m_pEntity;
 	bool m_bIsUsed;
@@ -94,9 +92,8 @@ public:
 
 static_assert(sizeof(tAudioEntity) == 40, "tAudioEntity: error");
 
-class tPedComment
+struct tPedComment
 {
-public:
 	int32 m_nSampleIndex;
 	int32 m_entityIndex;
 	CVector m_vecPos;
@@ -445,8 +442,8 @@ public:
 	bool MissionScriptAudioUsesPoliceChannel(int32 soundMission) const; /// ok
 
 	void PlayLoadedMissionAudio();                         /// ok
-	void PlayOneShot(int32 index, int16 sound, float vol); // to do (need testing)
-	void PlaySuspectLastSeen(float x, float y, float z); // todo cleanup and hook
+	void PlayOneShot(int32 index, int16 sound, float vol); /// ok
+	void PlaySuspectLastSeen(float x, float y, float z);   /// ok
 	void PlayerJustGotInCar() const;                       /// ok
 	void PlayerJustLeftCar() const;                        /// ok
 	void PostInitialiseGameSpecificSetup();                /// ok
@@ -551,14 +548,14 @@ public:
 	void SetSpeakerConfig(int32 conf) const;
 	void SetUpLoopingCollisionSound(cAudioCollision *col, uint8 counter); /// ok
 	void SetUpOneShotCollisionSound(cAudioCollision *col);                /// ok
-	bool SetupCrimeReport();                                              // todo cleanup and hook
+	bool SetupCrimeReport();                                              /// ok
 	bool SetupJumboEngineSound(uint8 a2, int32 a3);                       // todo
 	bool SetupJumboFlySound(uint8 emittingVol);                           /// ok
 	bool SetupJumboRumbleSound(uint8 emittingVol);                        /// ok
 	bool SetupJumboTaxiSound(uint8 vol);                                  /// ok
 	bool SetupJumboWhineSound(uint8 emittingVol, int32 freq);             /// ok
 	void SetupPedComments(cPedParams *params, uint32 sound);              /// ok
-	void SetupSuspectLastSeenReport();                                    // todo cleanup and hook
+	void SetupSuspectLastSeenReport();                                    /// ok
 
 	void Terminate();
 	void TranslateEntity(CVector *v1, CVector *v2) const;

@@ -1349,6 +1349,14 @@ CCamera::TakeControlWithSpline(short nSwitch)
 	//FindPlayerPed(); // unused
 };
 
+void CCamera::SetCameraDirectlyInFrontForFollowPed_CamOnAString()
+{
+	m_bCamDirectlyInFront = true;
+	CPlayerPed *player = FindPlayerPed();
+	if (player)
+		m_PedOrientForBehindOrInFront = CGeneral::GetATanOfXY(player->GetForward().x, player->GetForward().y);
+}
+
 STARTPATCHES
 	InjectHook(0x42C760, (bool (CCamera::*)(const CVector &center, float radius, const CMatrix *mat))&CCamera::IsSphereVisible, PATCH_JUMP);
 	InjectHook(0x46FD00, &CCamera::SetFadeColour, PATCH_JUMP);
@@ -1356,6 +1364,8 @@ STARTPATCHES
 	InjectHook(0x46FD40, &CCamera::SetMotionBlur, PATCH_JUMP);
 	InjectHook(0x46FD80, &CCamera::SetMotionBlurAlpha, PATCH_JUMP);
 	InjectHook(0x46F940, &CCamera::RenderMotionBlur, PATCH_JUMP);
+
+	InjectHook(0x46FC90, &CCamera::SetCameraDirectlyInFrontForFollowPed_CamOnAString, PATCH_JUMP);
 
 	InjectHook(0x456F40, WellBufferMe, PATCH_JUMP);
 	InjectHook(0x4582F0, &CCam::GetVectorsReadyForRW, PATCH_JUMP);

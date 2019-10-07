@@ -76,6 +76,7 @@ public:
 	bool AddCrimeToQ(eCrimeType type, int32 id, const CVector &pos, bool reported, bool policeDoesntCare);
 	void ReportCrimeNow(eCrimeType type, const CVector &coors, bool policeDoesntCare);
 	void UpdateWantedLevel();
+	void Reset();
 
 	bool IsIgnored(void) { return m_bIgnoredByCops || m_bIgnoredByEveryone; }
 

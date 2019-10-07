@@ -41,6 +41,7 @@ bool &CWorld::bIncludeCarTyres = *(bool*)0x95CDAA;
 WRAPPER void CWorld::ShutDown(void) { EAXJMP(0x4AE450); }
 WRAPPER void CWorld::RemoveReferencesToDeletedObject(CEntity*) { EAXJMP(0x4B3BF0); }
 WRAPPER void CWorld::FindObjectsKindaColliding(const CVector &, float, bool, int16*, int16, CEntity **, bool, bool, bool, bool, bool){ EAXJMP(0x4B2A30); }
+WRAPPER void CWorld::ClearExcitingStuffFromArea(const CVector &pos, float radius, uint8) { EAXJMP(0x4B4E70) };
 
 void
 CWorld::Initialise()

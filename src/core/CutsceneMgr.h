@@ -10,7 +10,6 @@ class CCutsceneHead;
 class CCutsceneMgr
 {
 	static bool &ms_running;
-	static bool &ms_cutsceneProcessing;
 	static CCutsceneObject *(&ms_pCutsceneObjects)[NUMCUTSCENEOBJECTS];
 	
 	static int32 &ms_numCutsceneObjs;
@@ -25,6 +24,7 @@ class CCutsceneMgr
 public:
 	static CDirectory *&ms_pCutsceneDir;
 	static uint32 &ms_cutsceneLoadStatus;
+	static bool &ms_cutsceneProcessing;
 
 	static bool IsRunning(void) { return ms_running; }
 	static bool IsCutsceneProcessing(void) { return ms_cutsceneProcessing; }

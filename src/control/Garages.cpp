@@ -71,6 +71,7 @@ bool CGarages::HasCarBeenCrushed(int32 handle)
 WRAPPER void CGarages::TriggerMessage(const char *text, int16, uint16 time, int16) { EAXJMP(0x426B20); }
 WRAPPER bool CGarages::IsPointWithinHideOutGarage(CVector&) { EAXJMP(0x428260); }
 WRAPPER bool CGarages::IsPointWithinAnyGarage(CVector&) { EAXJMP(0x428320); }
+WRAPPER void CGarages::PlayerArrestedOrDied() { EAXJMP(0x427F60); }
 
 #if 0
 WRAPPER void CGarages::PrintMessages(void) { EAXJMP(0x426310); }

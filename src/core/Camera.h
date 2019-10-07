@@ -489,6 +489,7 @@ int     m_iModeObbeCamIsInForCar;
 	void SetCamCutSceneOffSet(const CVector&);
 	void TakeControlWithSpline(short);
 	void RestoreWithJumpCut(void);
+	void SetCameraDirectlyInFrontForFollowPed_CamOnAString(void);
 
 	void dtor(void) { this->CCamera::~CCamera(); }
 };

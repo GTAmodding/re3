@@ -27,4 +27,5 @@ public:
 	static bool HasCarBeenCrushed(int32);
 	static bool IsPointWithinHideOutGarage(CVector&);
 	static bool IsPointWithinAnyGarage(CVector&);
+	static void PlayerArrestedOrDied();
 };

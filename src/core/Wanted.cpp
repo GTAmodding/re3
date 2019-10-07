@@ -12,6 +12,8 @@
 int32 &CWanted::MaximumWantedLevel = *(int32*)0x5F7714;	// 6
 int32 &CWanted::nMaximumWantedLevel = *(int32*)0x5F7718;	// 6400
 
+WRAPPER void CWanted::Reset() { EAXJMP(0x4AD790) };
+
 void
 CWanted::Initialise()
 {

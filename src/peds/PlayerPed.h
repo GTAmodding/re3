@@ -53,6 +53,7 @@ public:
 	void SetMoveAnim(void);
 	void ProcessControl(void);
 	void ClearAdrenaline(void);
+	class CPlayerInfo *GetPlayerInfoForThisPlayerPed();
 
 	static void SetupPlayerPed(int32);
 	static void DeactivatePlayerPed(int32);

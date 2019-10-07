@@ -4,6 +4,7 @@
 #include "Camera.h"
 #include "WeaponEffects.h"
 #include "ModelIndices.h"
+#include "World.h"
 
 CPlayerPed::~CPlayerPed()
 {
@@ -103,6 +104,15 @@ CPlayerPed::ClearAdrenaline(void)
 	}
 }
 
+CPlayerInfo *
+CPlayerPed::GetPlayerInfoForThisPlayerPed()
+{
+	if (CWorld::Players[0].m_pPed == this)
+		return &CWorld::Players[0];
+
+	return nil;
+}
+
 class CPlayerPed_ : public CPlayerPed
 {
 public:
@@ -115,4 +125,5 @@ STARTPATCHES
 	InjectHook(0x4EFB30, &CPlayerPed_::dtor, PATCH_JUMP);
 	InjectHook(0x4F28A0, &CPlayerPed::ClearWeaponTarget, PATCH_JUMP);
 	InjectHook(0x4F3700, &CPlayerPed::AnnoyPlayerPed, PATCH_JUMP);
+	InjectHook(0x4F36C0, &CPlayerPed::GetPlayerInfoForThisPlayerPed, PATCH_JUMP);
 ENDPATCHES

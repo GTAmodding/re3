@@ -85,6 +85,7 @@ public:
 		}
 	}
 	static void ClearScanCodes(void);
+	static void ClearExcitingStuffFromArea(const CVector &pos, float radius, uint8);
 
 	static bool CameraToIgnoreThisObject(CEntity *ent);
 

@@ -73,6 +73,8 @@ public:
 	void SetPlayerSkin(char* skin);
 	CVector& GetPos();
 	void Process(void);
+	void KillPlayer(void);
+	void ArrestPlayer(void);
 };
 
 static_assert(sizeof(CPlayerInfo) == 0x13C, "CPlayerInfo: error");

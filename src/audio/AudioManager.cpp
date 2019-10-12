@@ -31,9 +31,9 @@
 #include "Vehicle.h"
 #include "WaterCannon.h"
 #include "Weather.h"
-#include "Zones.h"
 #include "World.h"
 #include "ZoneCull.h"
+#include "Zones.h"
 #include "sampman.h"
 
 cAudioManager &AudioManager = *(cAudioManager *)0x880FC0;
@@ -47,16 +47,15 @@ bool &bPlayerJustEnteredCar = *(bool *)0x6508C4;
 bool &g_bMissionAudioLoadFailed = *(bool *)0x95CD8E;
 uint32 *gMinTimeToNextReport = (uint32 *)0x8E2828;
 uint8 &gSpecialSuspectLastSeenReport = *(uint8 *)0x95CD4D;
-//uint32 *gOneShotCol = (uint32 *)0x604BD0;
 bool *somethingWithHorns = (bool *)0x606AB8;
 
 constexpr int totalAudioEntitiesSlots = 200;
 constexpr int maxVolume = 127;
 constexpr int policeChannel = 28;
-constexpr uint8 panTable[64]{
-    0,  3,  8,  12, 16, 19, 22, 24, 26, 28, 30, 31, 33, 34, 36, 37, 39, 40, 41, 42, 44, 45,
-    46, 47, 48, 49, 49, 50, 51, 52, 53, 53, 54, 55, 55, 56, 56, 57, 57, 58, 58, 58, 59, 59,
-    59, 60, 60, 61, 61, 61, 61, 62, 62, 62, 62, 62, 63, 63, 63, 63, 63, 63, 63, 63};
+constexpr uint8 panTable[64]{0,  3,  8,  12, 16, 19, 22, 24, 26, 28, 30, 31, 33, 34, 36, 37,
+                             39, 40, 41, 42, 44, 45, 46, 47, 48, 49, 49, 50, 51, 52, 53, 53,
+                             54, 55, 55, 56, 56, 57, 57, 58, 58, 58, 59, 59, 59, 60, 60, 61,
+                             61, 61, 61, 62, 62, 62, 62, 62, 63, 63, 63, 63, 63, 63, 63, 63};
 
 // TODO: where is this used? Is this the right file?
 enum eVehicleModel {
@@ -666,8 +665,8 @@ cAudioManager::DestroyAllGameCreatedEntities()
 				case AUDIOTYPE_SCRIPTOBJECT:
 					entity =
 					    (cAudioScriptObject *)m_asAudioEntities[i].m_pEntity;
-					if(entity) { 
-						delete entity; 
+					if(entity) {
+						delete entity;
 						m_asAudioEntities[i].m_pEntity = nil;
 					}
 					DestroyEntity(i);
@@ -3162,16 +3161,15 @@ cAudioManager::InitialisePoliceRadio()
 	for(int32 i = 0; i < 18; i++) { gMinTimeToNextReport[i] = m_nTimeOfRecentCrime; }
 }
 
-struct tPoliceRadioZone
-{
-  char m_aName[8];
-  uint32 m_nSampleIndex;
-  int32 field_12;
+struct tPoliceRadioZone {
+	char m_aName[8];
+	uint32 m_nSampleIndex;
+	int32 field_12;
 };
 
-tPoliceRadioZone* ZoneSfx = (tPoliceRadioZone*)0x880240;
-char* SubZo2Label = (char*)0x6E9918;
-char* SubZo3Label = (char*)0x6E9870;
+tPoliceRadioZone *ZoneSfx = (tPoliceRadioZone *)0x880240;
+char *SubZo2Label = (char *)0x6E9918;
+char *SubZo3Label = (char *)0x6E9870;
 
 void
 cAudioManager::InitialisePoliceRadioZones()
@@ -3318,24 +3316,12 @@ void
 cAudioManager::PlayOneShot(int32 index, int16 sound, float vol)
 {
 	static constexpr uint8 byte_60ABD0[168] = {
-	3,   3,   3,   3,   3,   3,   3,   3,   3,   3,
-	3,   3,   3,   5,   5,   5,   3,   5,   2,   2,
-	1,   1,   3,   1,   3,   3,   1,   1,   1,   4,
-	4,   3,   1,   1,   1,   1,   1,   1,   1,   1,
-	1,   1,   1,   1,   1,   6,   1,   1,   3,   2,
-	2,   2,   2,   0,   0,   6,   6,   0,   0,   0,
-	0,   0,   0,   0,   0,   0,   0,   0,   1,   2,
-	1,   0,   0,   0,   0,   0,   0,   0,   0,   0,
-	0,   0,   0,   0,   0,   0,   0,   0,   0,   0,
-	0,   0,   1,   1,   0,   0,   0,   3,   1,   1,
-	1,   9,   2,   2,   0,   0,   0,   0,   3,   3,
-	5,   1,   1,   1,   1,   3,   4,   7,   6,   6,
-	6,   6,   1,   3,   4,   3,   4,   2,   1,   3,
-	5,   4,   6,   6,   1,   3,   1,   1,   1,   0,
-	0,   0,   0,   0,   0,   3,   1,   0,   0,   0,
-	0,   0,   0,   0,   0,   0,   0,   0,   0,   0,
-	0,   0,   0,   0,   0,   0,   0,   0
-	};
+	    3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 5, 5, 5, 3, 5, 2, 2, 1, 1, 3, 1, 3, 3, 1, 1,
+	    1, 4, 4, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 6, 1, 1, 3, 2, 2, 2, 2, 0, 0, 6,
+	    6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+	    0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 3, 1, 1, 1, 9, 2, 2, 0, 0, 0, 0, 3, 3, 5, 1,
+	    1, 1, 1, 3, 4, 7, 6, 6, 6, 6, 1, 3, 4, 3, 4, 2, 1, 3, 5, 4, 6, 6, 1, 3, 1, 1, 1, 0,
+	    0, 0, 0, 0, 0, 3, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 
 	if(m_bIsInitialised) {
 		if(index >= 0 && index < totalAudioEntitiesSlots) {
@@ -3367,8 +3353,8 @@ cAudioManager::PlayOneShot(int32 index, int16 sound, float vol)
 								return;
 							}
 							if(byte_60ABD0[m_asAudioEntities[index]
-							                .m_awAudioEvent[i]] >
-								byte_60ABD0[sound])
+							                   .m_awAudioEvent[i]] >
+							   byte_60ABD0[sound])
 								break;
 							++i;
 						}
@@ -4580,8 +4566,7 @@ cAudioManager::ProcessFrontEnd()
 
 	for(uint32 i = 0; i < m_asAudioEntities[m_sQueueSample.m_nEntityIndex].m_Loops; i++) {
 		processed = 0;
-		switch(
-		    m_asAudioEntities[m_sQueueSample.m_nEntityIndex].m_awAudioEvent[i]) {
+		switch(m_asAudioEntities[m_sQueueSample.m_nEntityIndex].m_awAudioEvent[i]) {
 		case SOUND_WEAPON_SNIPER_SHOT_NO_ZOOM:
 			m_sQueueSample.m_nSampleIndex = AUDIO_SAMPLE_SNIPER_NO_ZOOM;
 			break;
@@ -4686,13 +4671,11 @@ cAudioManager::ProcessFrontEnd()
 		default: continue;
 		}
 
-		sample =
-		    m_asAudioEntities[m_sQueueSample.m_nEntityIndex].m_awAudioEvent[i];
+		sample = m_asAudioEntities[m_sQueueSample.m_nEntityIndex].m_awAudioEvent[i];
 		if(sample == AUDIO_SAMPLE_COLLISION_LOOPING_GRASS) {
 			m_sQueueSample.m_nFrequency = 28509;
 		} else if(sample == AUDIO_SAMPLE_PICKUP_NEUTRAL_1) {
-			if(1.f ==
-			   m_asAudioEntities[m_sQueueSample.m_nEntityIndex].m_afVolume[i])
+			if(1.f == m_asAudioEntities[m_sQueueSample.m_nEntityIndex].m_afVolume[i])
 				m_sQueueSample.m_nFrequency = 32000;
 			else
 				m_sQueueSample.m_nFrequency = 48000;
@@ -4747,7 +4730,8 @@ cAudioManager::ProcessHelicopter(cVehicleParams *params)
 	float dist;
 	float baseDist;
 	int32 emittingVol;
-	static constexpr tHelicopterSampleData gHeliSfxRanges[3] = { {400.f, 380.f, 100}, {100.f, 70.f, maxVolume}, {60.f, 30.f, maxVolume} };
+	static constexpr tHelicopterSampleData gHeliSfxRanges[3] = {
+	    {400.f, 380.f, 100}, {100.f, 70.f, maxVolume}, {60.f, 30.f, maxVolume}};
 
 	if(gHeliSfxRanges[0].m_fMaxDistance * gHeliSfxRanges[0].m_fMaxDistance <=
 	   params->m_fDistance)
@@ -7732,8 +7716,7 @@ cAudioManager::ProcessProjectiles()
 			}
 			m_sQueueSample.field_48 = 4.0;
 			m_sQueueSample.field_76 = 3;
-			m_sQueueSample.m_vecPos =
-			    CProjectileInfo::ms_apProjectile[i].GetPosition();
+			m_sQueueSample.m_vecPos = CProjectileInfo::ms_apProjectile[i].GetPosition();
 			float distSquared = GetDistanceSquared(&m_sQueueSample.m_vecPos);
 			if(distSquared < maxDist) {
 				m_sQueueSample.m_fDistance = Sqrt(distSquared);
@@ -8111,7 +8094,6 @@ cAudioManager::ProcessTrainNoise(cVehicleParams *params)
 	return 1;
 }
 
-
 void
 cAudioManager::ProcessVehicle(CVehicle *veh)
 {
@@ -8142,8 +8124,7 @@ cAudioManager::ProcessVehicle(CVehicle *veh)
 		if(params.m_nIndex == RCBANDIT) {
 			ProcessModelCarEngine(&params);
 			ProcessVehicleOneShots(&params);
-				((CAutomobile *)veh)->m_fVelocityChangeForAudio =
-				    params.m_fVelocityChange;
+			((CAutomobile *)veh)->m_fVelocityChangeForAudio = params.m_fVelocityChange;
 			ProcessRainOnVehicle(&params);
 			break;
 		}
@@ -8255,11 +8236,12 @@ cAudioManager::ProcessVehicleDoors(cVehicleParams *params)
 			}
 		}
 	}
-    return 1;
+	return 1;
 }
 
 WRAPPER
-bool cAudioManager::ProcessVehicleEngine(cVehicleParams *params)
+bool
+cAudioManager::ProcessVehicleEngine(cVehicleParams *params)
 {
 	EAXJMP(0x56A610);
 }
@@ -8349,7 +8331,8 @@ cAudioManager::ProcessVehicleHorn(cVehicleParams *params)
 }
 
 WRAPPER
-void cAudioManager::ProcessVehicleOneShots(void*)
+void
+cAudioManager::ProcessVehicleOneShots(void *)
 {
 	EAXJMP(0x56CD40);
 }
@@ -8457,7 +8440,8 @@ cAudioManager::ProcessVehicleRoadNoise(cVehicleParams *params)
 }
 
 WRAPPER
-void cAudioManager::ProcessVehicleSirenOrAlarm(void*)
+void
+cAudioManager::ProcessVehicleSirenOrAlarm(void *)
 {
 	EAXJMP(0x56C420);
 }

@@ -4,8 +4,7 @@
 #include "DMAudio.h"
 #include "common.h"
 
-struct tActiveSample
-{
+struct tActiveSample {
 	int32 m_nEntityIndex;
 	int32 m_counter;
 	int32 m_nSampleIndex;
@@ -75,8 +74,7 @@ enum eAudioType : int32 {
 class CPhysical;
 class CAutomobile;
 
-struct tAudioEntity
-{
+struct tAudioEntity {
 	eAudioType m_nType;
 	void *m_pEntity;
 	bool m_bIsUsed;
@@ -92,8 +90,7 @@ struct tAudioEntity
 
 static_assert(sizeof(tAudioEntity) == 40, "tAudioEntity: error");
 
-struct tPedComment
-{
+struct tPedComment {
 	int32 m_nSampleIndex;
 	int32 m_entityIndex;
 	CVector m_vecPos;
@@ -318,8 +315,8 @@ public:
 	void ClearMissionAudio();                      /// ok
 	void ClearRequestedQueue();                    /// ok
 	int32 ComputeDopplerEffectedFrequency(uint32 oldFreq, float position1, float position2,
-	                                      float speedMultiplier) const; /// ok
-	int32 ComputePan(float, CVector *);                                 /// ok
+	                                      float speedMultiplier) const;                   /// ok
+	int32 ComputePan(float, CVector *);                                                   /// ok
 	uint32 ComputeVolume(int emittingVolume, float soundIntensity, float distance) const; /// ok
 	int32 CreateEntity(int32 type, CPhysical *entity);                                    /// ok
 
@@ -448,9 +445,9 @@ public:
 	void PlayerJustLeftCar() const;                        /// ok
 	void PostInitialiseGameSpecificSetup();                /// ok
 	void PostTerminateGameSpecificShutdown();              /// ok
-	void PreInitialiseGameSpecificSetup() const; //ok
-	void PreloadMissionAudio(char *);        // todo
-	void PreTerminateGameSpecificShutdown(); /// ok
+	void PreInitialiseGameSpecificSetup() const;           // ok
+	void PreloadMissionAudio(char *);                      // todo
+	void PreTerminateGameSpecificShutdown();               /// ok
 	/// processX - main logic of adding new sounds
 	void ProcessActiveQueues();                              // todo
 	bool ProcessAirBrakes(cVehicleParams *params);           /// ok

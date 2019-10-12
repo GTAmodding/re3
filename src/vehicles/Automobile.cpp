@@ -2350,7 +2350,7 @@ CAutomobile::FireTruckControl(void)
 			Sin(m_fCarGunUD));
 		cannonDir = Multiply3x3(GetMatrix(), cannonDir);
 		cannonDir.z += (CGeneral::GetRandomNumber()&0xF)/1000.0f;
-		CWaterCannon::UpdateOne((uintptr)this, &cannonPos, &cannonDir);
+		CWaterCannons::UpdateOne((uintptr)this, &cannonPos, &cannonDir);
 	}else if(m_status == STATUS_PHYSICS){
 		CFire *fire = gFireManager.FindFurthestFire_NeverMindFireMen(GetPosition(), 10.0f, 35.0f);
 		if(fire == nil)
@@ -2385,7 +2385,7 @@ CAutomobile::FireTruckControl(void)
 				Sin(m_fCarGunUD));
 			cannonDir = Multiply3x3(GetMatrix(), cannonDir);
 			cannonDir.z += (CGeneral::GetRandomNumber()&0xF)/1000.0f;
-			CWaterCannon::UpdateOne((uintptr)this, &cannonPos, &cannonDir);
+			CWaterCannons::UpdateOne((uintptr)this, &cannonPos, &cannonDir);
 		}
 	}
 }

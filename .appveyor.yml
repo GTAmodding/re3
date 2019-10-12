@@ -1,5 +1,5 @@
 version: 1.0.{build}
-image: Visual Studio 2017
+image: Visual Studio 2019
 configuration:
 - Debug
 - Release
@@ -10,7 +10,7 @@ install:
 - cmd: >-
     git submodule update --init --recursive
 
-    premake-vs2017.cmd
+    premake-vs2019.cmd
 build:
   project: build/re3.sln
   verbosity: minimal

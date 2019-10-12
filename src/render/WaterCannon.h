@@ -10,12 +10,16 @@ public:
 	CVector m_avecPos[16];
 	CVector m_avecVelocity[16];
 	char m_abUsed[16];
-
-	static void Update(void);
-	static void UpdateOne(uint32 id, CVector *pos, CVector *dir);
-	static void Render(void);
 };
 
 static_assert(sizeof(CWaterCannon) == 412, "CWaterCannon: error");
 
-extern CWaterCannon* aCannons;
+class CWaterCannons
+{
+public:
+	static void Update();
+	static void UpdateOne(uint32 id, CVector *pos, CVector *dir);
+	static void Render(void);
+};
+
+extern CWaterCannon *aCannons;

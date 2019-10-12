@@ -283,7 +283,7 @@ cAudioScriptObject::Reset()
 {
 	AudioId = 125;
 	Posn = {0.0f, 0.0f, 0.0f};
-	AudioEntity = -5;
+	AudioEntity = AEHANDLE_NONE;
 }
 
 void *
@@ -409,7 +409,7 @@ cAudioManager::AddReleasingSounds()
 		if(!m_asSamples[!m_bActiveSampleQueue]
 		               [m_abSampleQueueIndexTable[!m_bActiveSampleQueue][i]]
 		                   .m_bLoopEnded) {
-			toProcess[i] = 0;
+			toProcess[i] = false;
 			for(int32 j = 0; j < m_bSampleRequestQueuesStatus[m_bActiveSampleQueue];
 			    j++) {
 				if(sample.m_nEntityIndex ==
@@ -422,7 +422,7 @@ cAudioManager::AddReleasingSounds()
 				                  [m_abSampleQueueIndexTable[m_bActiveSampleQueue]
 				                                            [j]]
 				                      .m_counter) {
-					toProcess[i] = 1;
+					toProcess[i] = true;
 					break;
 				}
 			}
@@ -526,7 +526,7 @@ void
 cAudioManager::ClearActiveSamples()
 {
 	for(int32 i = 0; i < m_bActiveSamples; i++) {
-		m_asActiveSamples[i].m_nEntityIndex = -5;
+		m_asActiveSamples[i].m_nEntityIndex = AEHANDLE_NONE;
 		m_asActiveSamples[i].m_counter = 0;
 		m_asActiveSamples[i].m_nSampleIndex = NO_SAMPLE;
 		m_asActiveSamples[i].m_bBankIndex = 3;
@@ -3070,7 +3070,7 @@ float
 cAudioManager::GetVehicleDriveWheelSkidValue(uint8 wheel, CAutomobile *automobile,
                                              cTransmission *transmission, float velocityChange)
 {
-	int wheelState;
+	tWheelState wheelState;
 	float relativeVelChange;
 	float gasPedalAudio = automobile->m_fGasPedalAudio;
 	float modificator;
@@ -3078,12 +3078,12 @@ cAudioManager::GetVehicleDriveWheelSkidValue(uint8 wheel, CAutomobile *automobil
 	float relativeVel;
 
 	wheelState = automobile->m_aWheelState[wheel];
-	if(wheelState == 1 && gasPedalAudio > 0.4f) {
-		relativeVelChange = (gasPedalAudio + -0.4f) * 1.25f;
+	if(wheelState == WHEEL_STATE_SPINNING && gasPedalAudio > 0.4f) {
+		relativeVelChange = (gasPedalAudio - 0.4f) * 1.25f;
 
-	} else if(wheelState == 2) {
+	} else if(wheelState == WHEEL_STATE_SKIDDING) {
 		relativeVelChange = min(1.0f, Abs(velocityChange) / transmission->fMaxVelocity);
-	} else if(wheelState == 3) {
+	} else if(wheelState == WHEEL_STATE_FIXED) {
 		modificator = 0.4f;
 		relativeVelChange = gasPedalAudio;
 		if(relativeVelChange > 0.4f) {
@@ -3174,77 +3174,79 @@ char *SubZo3Label = (char *)0x6E9870;
 void
 cAudioManager::InitialisePoliceRadioZones()
 {
-	for(int32 i = 0; i < 36; i++) { ZoneSfx[i].m_aName[0] = 0; }
+	for(int32 i = 0; i < 36; i++) {
+		for(int32 j = 0; j < 8; j++) { ZoneSfx[i].m_aName[j] = 0; }
+	}
 
-	strcpy((char *)ZoneSfx, "HOSPI_2");
+	strcpy(ZoneSfx[0].m_aName, "HOSPI_2");
 	ZoneSfx[0].m_nSampleIndex = AUDIO_SAMPLE_POLICE_SCANNER_ZONE_ROCKFORD;
-	strcpy((char *)&ZoneSfx[1], "CONSTRU");
+	strcpy(ZoneSfx[1].m_aName, "CONSTRU");
 	ZoneSfx[1].m_nSampleIndex = AUDIO_SAMPLE_POLICE_SCANNER_ZONE_FORT_STAUNTON;
-	strcpy((char *)&ZoneSfx[2], "STADIUM");
+	strcpy(ZoneSfx[2].m_aName, "STADIUM");
 	ZoneSfx[2].m_nSampleIndex = AUDIO_SAMPLE_POLICE_SCANNER_ZONE_ASPATRIA;
-	strcpy((char *)&ZoneSfx[3], "YAKUSA");
+	strcpy(ZoneSfx[3].m_aName, "YAKUSA");
 	ZoneSfx[3].m_nSampleIndex = AUDIO_SAMPLE_POLICE_SCANNER_ZONE_TORRINGTON;
-	strcpy((char *)&ZoneSfx[4], "SHOPING");
+	strcpy(ZoneSfx[4].m_aName, "SHOPING");
 	ZoneSfx[4].m_nSampleIndex = AUDIO_SAMPLE_POLICE_SCANNER_ZONE_BEDFORD_POINT;
-	strcpy((char *)&ZoneSfx[5], "COM_EAS");
+	strcpy(ZoneSfx[5].m_aName, "COM_EAS");
 	ZoneSfx[5].m_nSampleIndex = AUDIO_SAMPLE_POLICE_SCANNER_ZONE_NEWPORT;
-	strcpy((char *)&ZoneSfx[6], "PARK");
+	strcpy(ZoneSfx[6].m_aName, "PARK");
 	ZoneSfx[6].m_nSampleIndex = AUDIO_SAMPLE_POLICE_SCANNER_ZONE_BELLEVILLE;
-	strcpy((char *)&ZoneSfx[7], "UNIVERS");
+	strcpy(ZoneSfx[7].m_aName, "UNIVERS");
 	ZoneSfx[7].m_nSampleIndex = AUDIO_SAMPLE_POLICE_SCANNER_ZONE_LIBERTY_CAMPUS;
-	strcpy((char *)&ZoneSfx[8], "BIG_DAM");
+	strcpy(ZoneSfx[8].m_aName, "BIG_DAM");
 	ZoneSfx[8].m_nSampleIndex = AUDIO_SAMPLE_POLICE_SCANNER_ZONE_COCHRANE;
-	strcpy((char *)&ZoneSfx[9], "SUB_IND");
+	strcpy(ZoneSfx[9].m_aName, "SUB_IND");
 	ZoneSfx[9].m_nSampleIndex = AUDIO_SAMPLE_POLICE_SCANNER_ZONE_PIKE_CREEK;
-	strcpy((char *)&ZoneSfx[10], "SWANKS");
+	strcpy(ZoneSfx[10].m_aName, "SWANKS");
 	ZoneSfx[10].m_nSampleIndex = AUDIO_SAMPLE_POLICE_SCANNER_ZONE_CEDAR_GROVE;
-	strcpy((char *)&ZoneSfx[11], "PROJECT");
+	strcpy(ZoneSfx[11].m_aName, "PROJECT");
 	ZoneSfx[11].m_nSampleIndex = AUDIO_SAMPLE_POLICE_SCANNER_ZONE_WICHITA_GARDEN;
-	strcpy((char *)&ZoneSfx[12], "AIRPORT");
+	strcpy(ZoneSfx[12].m_aName, "AIRPORT");
 	ZoneSfx[12].m_nSampleIndex = AUDIO_SAMPLE_POLICE_SCANNER_ZONE_FRANCIS_INTNL;
-	strcpy((char *)&ZoneSfx[13], "PORT_W");
+	strcpy(ZoneSfx[13].m_aName, "PORT_W");
 	ZoneSfx[13].m_nSampleIndex = AUDIO_SAMPLE_POLICE_SCANNER_ZONE_CALLAHAN_POINT;
-	strcpy((char *)&ZoneSfx[14], "PORT_S");
+	strcpy(ZoneSfx[14].m_aName, "PORT_S");
 	ZoneSfx[14].m_nSampleIndex = AUDIO_SAMPLE_POLICE_SCANNER_ZONE_ATLANTIC_QUAYS;
-	strcpy((char *)&ZoneSfx[15], "PORT_E");
+	strcpy(ZoneSfx[15].m_aName, "PORT_E");
 	ZoneSfx[15].m_nSampleIndex = AUDIO_SAMPLE_POLICE_SCANNER_ZONE_PORTLAND_HARBOUR;
-	strcpy((char *)&ZoneSfx[16], "PORT_I");
+	strcpy(ZoneSfx[16].m_aName, "PORT_I");
 	ZoneSfx[16].m_nSampleIndex = AUDIO_SAMPLE_POLICE_SCANNER_ZONE_TRENTON;
-	strcpy((char *)&ZoneSfx[17], "CHINA");
+	strcpy(ZoneSfx[17].m_aName, "CHINA");
 	ZoneSfx[17].m_nSampleIndex = AUDIO_SAMPLE_POLICE_SCANNER_ZONE_CHINATOWN;
-	strcpy((char *)&ZoneSfx[18], "REDLIGH");
+	strcpy(ZoneSfx[18].m_aName, "REDLIGH");
 	ZoneSfx[18].m_nSampleIndex = AUDIO_SAMPLE_POLICE_SCANNER_ZONE_REDLIGHT;
-	strcpy((char *)&ZoneSfx[19], "TOWERS");
+	strcpy(ZoneSfx[19].m_aName, "TOWERS");
 	ZoneSfx[19].m_nSampleIndex = AUDIO_SAMPLE_POLICE_SCANNER_ZONE_HEPBURN_HEIGHTS;
-	strcpy((char *)&ZoneSfx[20], "LITTLEI");
+	strcpy(ZoneSfx[20].m_aName, "LITTLEI");
 	ZoneSfx[20].m_nSampleIndex = AUDIO_SAMPLE_POLICE_SCANNER_ZONE_ST_MARKS;
-	strcpy((char *)&ZoneSfx[21], "HARWOOD");
+	strcpy(ZoneSfx[21].m_aName, "HARWOOD");
 	ZoneSfx[21].m_nSampleIndex = AUDIO_SAMPLE_POLICE_SCANNER_ZONE_HARWOOD;
-	strcpy((char *)&ZoneSfx[22], "EASTBAY");
+	strcpy(ZoneSfx[22].m_aName, "EASTBAY");
 	ZoneSfx[22].m_nSampleIndex = AUDIO_SAMPLE_POLICE_SCANNER_ZONE_PORTLAND_BEACH;
-	strcpy((char *)&ZoneSfx[23], "S_VIEW");
+	strcpy(ZoneSfx[23].m_aName, "S_VIEW");
 	ZoneSfx[23].m_nSampleIndex = AUDIO_SAMPLE_POLICE_SCANNER_ZONE_PORTLAND_VIEW;
-	strcpy((char *)&ZoneSfx[24], "CITYZON");
+	strcpy(ZoneSfx[24].m_aName, "CITYZON");
 	ZoneSfx[24].m_nSampleIndex = AUDIO_SAMPLE_POLICE_SCANNER_ZONE_LIBERTY_CITY;
-	strcpy((char *)&ZoneSfx[25], "IND_ZON");
+	strcpy(ZoneSfx[25].m_aName, "IND_ZON");
 	ZoneSfx[25].m_nSampleIndex = AUDIO_SAMPLE_POLICE_SCANNER_ZONE_PORTLAND;
-	strcpy((char *)&ZoneSfx[26], "COM_ZON");
+	strcpy(ZoneSfx[26].m_aName, "COM_ZON");
 	ZoneSfx[26].m_nSampleIndex = AUDIO_SAMPLE_POLICE_SCANNER_ZONE_STAUNTON;
-	strcpy((char *)&ZoneSfx[27], "SUB_ZON");
+	strcpy(ZoneSfx[27].m_aName, "SUB_ZON");
 	ZoneSfx[27].m_nSampleIndex = AUDIO_SAMPLE_POLICE_SCANNER_ZONE_SHORESIDE;
-	strcpy((char *)&ZoneSfx[28], "SUB_ZO2");
+	strcpy(ZoneSfx[28].m_aName, "SUB_ZO2");
 	ZoneSfx[28].m_nSampleIndex = AUDIO_SAMPLE_POLICE_SCANNER_ZONE_SHORESIDE;
-	strcpy((char *)&ZoneSfx[29], "SUB_ZO3");
+	strcpy(ZoneSfx[29].m_aName, "SUB_ZO3");
 	ZoneSfx[29].m_nSampleIndex = AUDIO_SAMPLE_POLICE_SCANNER_ZONE_SHORESIDE;
-	strcpy((char *)&ZoneSfx[30], "A");
+	strcpy(ZoneSfx[30].m_aName, "A");
 	ZoneSfx[30].m_nSampleIndex = AUDIO_SAMPLE_POLICE_SCANNER_ZONE_ROCKFORD;
-	strcpy((char *)&ZoneSfx[31], "A");
+	strcpy(ZoneSfx[31].m_aName, "A");
 	ZoneSfx[31].m_nSampleIndex = AUDIO_SAMPLE_POLICE_SCANNER_ZONE_ROCKFORD;
-	strcpy((char *)&ZoneSfx[32], "A");
+	strcpy(ZoneSfx[32].m_aName, "A");
 	ZoneSfx[32].m_nSampleIndex = AUDIO_SAMPLE_POLICE_SCANNER_ZONE_ROCKFORD;
-	strcpy((char *)&ZoneSfx[33], "A");
+	strcpy(ZoneSfx[33].m_aName, "A");
 	ZoneSfx[33].m_nSampleIndex = AUDIO_SAMPLE_POLICE_SCANNER_ZONE_ROCKFORD;
-	strcpy((char *)&ZoneSfx[34], "A");
+	strcpy(ZoneSfx[34].m_aName, "A");
 	ZoneSfx[34].m_nSampleIndex = AUDIO_SAMPLE_POLICE_SCANNER_ZONE_ROCKFORD;
 	strcpy(SubZo2Label, "SUB_ZO2");
 	strcpy(SubZo3Label, "SUB_ZO3");
@@ -3315,7 +3317,7 @@ cAudioManager::PlayLoadedMissionAudio()
 void
 cAudioManager::PlayOneShot(int32 index, int16 sound, float vol)
 {
-	static constexpr uint8 byte_60ABD0[168] = {
+	static constexpr uint8 byte_60ABD0[] = {
 	    3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 5, 5, 5, 3, 5, 2, 2, 1, 1, 3, 1, 3, 3, 1, 1,
 	    1, 4, 4, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 6, 1, 1, 3, 2, 2, 2, 2, 0, 0, 6,
 	    6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -3678,31 +3680,31 @@ cAudioManager::PreTerminateGameSpecificShutdown()
 {
 	if(m_nBridgeEntity >= 0) {
 		DestroyEntity(m_nBridgeEntity);
-		m_nBridgeEntity = -5;
+		m_nBridgeEntity = AEHANDLE_NONE;
 	}
 	if(m_nPoliceChannelEntity >= 0) {
 		DestroyEntity(m_nPoliceChannelEntity);
-		m_nPoliceChannelEntity = -5;
+		m_nPoliceChannelEntity = AEHANDLE_NONE;
 	}
 	if(m_nWaterCannonEntity >= 0) {
 		DestroyEntity(m_nWaterCannonEntity);
-		m_nWaterCannonEntity = -5;
+		m_nWaterCannonEntity = AEHANDLE_NONE;
 	}
 	if(m_nFireAudioEntity >= 0) {
 		DestroyEntity(m_nFireAudioEntity);
-		m_nFireAudioEntity = -5;
+		m_nFireAudioEntity = AEHANDLE_NONE;
 	}
 	if(m_nCollisionEntity >= 0) {
 		DestroyEntity(m_nCollisionEntity);
-		m_nCollisionEntity = -5;
+		m_nCollisionEntity = AEHANDLE_NONE;
 	}
 	if(m_nFrontEndEntity >= 0) {
 		DestroyEntity(m_nFrontEndEntity);
-		m_nFrontEndEntity = -5;
+		m_nFrontEndEntity = AEHANDLE_NONE;
 	}
 	if(m_nProjectileEntity >= 0) {
 		DestroyEntity(m_nProjectileEntity);
-		m_nProjectileEntity = -5;
+		m_nProjectileEntity = AEHANDLE_NONE;
 	}
 }
 
@@ -3981,7 +3983,7 @@ cAudioManager::ProcessBoatMovingOverWater(cVehicleParams *params)
 	if(velocityChange <= 0.0005f && params->m_pVehicle->GetPosition().y) return 1;
 
 	velocityChange = min(0.75f, velocityChange);
-	multiplier = (velocityChange - 0.0005f) * 4 / 3;
+	multiplier = (velocityChange - 0.0005f) * 1.3342f;
 	CalculateDistance((bool *)params, params->m_fDistance);
 	vol = (30.f * multiplier);
 	m_sQueueSample.m_bVolume = ComputeVolume(vol, 50.f, m_sQueueSample.m_fDistance);
@@ -8354,7 +8356,7 @@ cAudioManager::ProcessVehicleReverseWarning(cVehicleParams *params)
 			m_sQueueSample.m_bIsDistant = 0;
 			m_sQueueSample.field_16 = 2;
 			m_sQueueSample.m_nFrequency =
-			    (100 * m_sQueueSample.m_nEntityIndex & 0x3FF) +
+			    (100 * m_sQueueSample.m_nEntityIndex & 1023) +
 			    SampleManager.GetSampleBaseFrequency(
 			        AUDIO_SAMPLE_VEHICLE_REVERSE_WARNING);
 			m_sQueueSample.m_nLoopCount = 0;
@@ -8779,29 +8781,30 @@ cAudioManager::ReportCollision(CEntity *entity1, CEntity *entity2, uint8 surface
 	CVector v1;
 	CVector v2;
 
-	if(m_bIsInitialised && m_nCollisionEntity >= 0 && !m_bUserPause &&
-	   (velocity >= 0.0016f || collisionPower >= 0.01f)) {
-		if((entity1->m_status & 7) == ENTITY_TYPE_BUILDING) {
-			v1 = v2 = entity2->GetPosition();
-		} else if((entity2->m_status & 7) == ENTITY_TYPE_BUILDING) {
-			v1 = v2 = entity1->GetPosition();
-		} else {
-			v1 = entity1->GetPosition();
-			v2 = entity2->GetPosition();
-		}
-		CVector pos = (v1 + v2) * 0.5f;
-		dist = GetDistanceSquared(&pos);
-		if(dist < 3600.f) {
-			m_sCollisionManager.m_sQueue.m_pEntity1 = entity1;
-			m_sCollisionManager.m_sQueue.m_pEntity2 = entity2;
-			m_sCollisionManager.m_sQueue.m_bSurface1 = surface1;
-			m_sCollisionManager.m_sQueue.m_bSurface2 = surface2;
-			m_sCollisionManager.m_sQueue.m_fIntensity1 = collisionPower;
-			m_sCollisionManager.m_sQueue.m_fIntensity2 = velocity;
-			m_sCollisionManager.m_sQueue.m_vecPosition = pos;
-			m_sCollisionManager.m_sQueue.m_fDistance = dist;
-			m_sCollisionManager.AddCollisionToRequestedQueue();
-		}
+	if(!m_bIsInitialised || m_nCollisionEntity < 0 || m_bUserPause ||
+	   (velocity < 0.0016f && collisionPower < 0.01f))
+		return;
+
+	if(entity1->IsBuilding()) {
+		v1 = v2 = entity2->GetPosition();
+	} else if(entity2->IsBuilding()) {
+		v1 = v2 = entity1->GetPosition();
+	} else {
+		v1 = entity1->GetPosition();
+		v2 = entity2->GetPosition();
+	}
+	CVector pos = (v1 + v2) * 0.5f;
+	dist = GetDistanceSquared(&pos);
+	if(dist < SQR(60.f)) {
+		m_sCollisionManager.m_sQueue.m_pEntity1 = entity1;
+		m_sCollisionManager.m_sQueue.m_pEntity2 = entity2;
+		m_sCollisionManager.m_sQueue.m_bSurface1 = surface1;
+		m_sCollisionManager.m_sQueue.m_bSurface2 = surface2;
+		m_sCollisionManager.m_sQueue.m_fIntensity1 = collisionPower;
+		m_sCollisionManager.m_sQueue.m_fIntensity2 = velocity;
+		m_sCollisionManager.m_sQueue.m_vecPosition = pos;
+		m_sCollisionManager.m_sQueue.m_fDistance = dist;
+		m_sCollisionManager.AddCollisionToRequestedQueue();
 	}
 }
 
@@ -9692,7 +9695,7 @@ cAudioManager::SetupJumboTaxiSound(uint8 vol)
 {
 	if(m_sQueueSample.m_fDistance >= 180.f) return 0;
 
-	uint8 emittingVol = (vol + (vol * m_sQueueSample.m_fDistance / 180)) / 2;
+	uint8 emittingVol = (vol >> 1) + ((vol >> 1) * m_sQueueSample.m_fDistance / 180);
 
 	if(m_sQueueSample.m_fDistance / 180 < 0.7f)
 		emittingVol -= emittingVol * gJumboVolOffsetPercentage / 100;

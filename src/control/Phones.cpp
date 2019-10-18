@@ -15,6 +15,8 @@ CPhone *&CPhoneInfo::pickedUpPhone = *(CPhone**)0x6283B0;
 bool &CPhoneInfo::isPhoneBeingPickedUp = *(bool*)0x6283B4;
 CPed *&CPhoneInfo::pedWhoPickingUpPhone = *(CPed**)0x6283B8;
 
+WRAPPER void CPhoneInfo::Update(void) { EAXJMP(0x42F7A0); }
+
 int
 CPhoneInfo::FindNearestFreePhone(CVector *pos)
 {

@@ -22,6 +22,7 @@ class CAccidentManager
 public:
 	uint16 CountActiveAccidents();
 	CAccident* FindNearestAccident(CVector, float*);
+	void Update(void);
 };
 
 extern CAccidentManager& gAccidentManager;

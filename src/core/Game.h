@@ -30,6 +30,7 @@ public:
 	static void FinalShutdown(void);
 	static void ShutDownForRestart(void);
 	static void Process(void);
+	static void ReloadIPLs(void);
 
 	// NB: these do something on PS2
 	static void TidyUpMemory(bool, bool) {}

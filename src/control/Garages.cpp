@@ -25,6 +25,9 @@ bool &CGarages::PlayerInGarage = *(bool *)0x95CD83;
 int32 &CGarages::PoliceCarsCollected = *(int32 *)0x941444;
 uint32 &CGarages::GarageToBeTidied = *(uint32 *)0x623570;
 
+WRAPPER void CGarages::Init(void) { EAXJMP(0x421C60); }
+WRAPPER void CGarages::Update(void) { EAXJMP(0x421E40); }
+
 bool
 CGarages::IsModelIndexADoor(uint32 id)
 {

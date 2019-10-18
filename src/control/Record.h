@@ -11,6 +11,7 @@ class CRecordDataForChase
 public:
 	static uint8 &Status;
 
+	static void SaveOrRetrieveDataForThisFrame(void);
 	static void ProcessControlCars(void);
 	static void SaveOrRetrieveCarPositions(void);
 };
@@ -20,4 +21,6 @@ class CRecordDataForGame
 {
 public:
 	static uint16 &RecordingState;
+
+	static void SaveOrRetrieveDataForThisFrame(void);
 };

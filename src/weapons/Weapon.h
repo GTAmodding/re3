@@ -73,5 +73,6 @@ public:
 	static void DoTankDoomAiming(CEntity *playerVehicle, CEntity *playerPed, CVector *start, CVector *end);
 	bool HitsGround(CEntity* holder, CVector* firePos, CEntity* aimingTo);
 	static void InitialiseWeapons(void);
+	static void UpdateWeapons(void);
 };
 static_assert(sizeof(CWeapon) == 0x18, "CWeapon: error");

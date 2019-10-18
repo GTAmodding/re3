@@ -106,4 +106,5 @@ class CPacManPickups
 {
 public:
 	static void Render(void);
+	static void Update(void);
 };

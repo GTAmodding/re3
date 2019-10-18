@@ -47,6 +47,7 @@ uint8 aWeaponBlues[] = { 0, 0, 255, 0, 255, 255, 0, 128, 255, 0, 255, 0, 128, 25
 float aWeaponScale[] = { 1.0f, 2.0f, 1.5f, 1.0f, 1.0f, 1.5f, 1.0f, 2.0f, 1.0f, 2.0f, 2.5f, 1.0f, 1.0f, 1.0f, 1.0f };
 
 WRAPPER void CPacManPickups::Render(void) { EAXJMP(0x432F60); }
+WRAPPER void CPacManPickups::Update(void) { EAXJMP(0x432800); }
 
 
 void

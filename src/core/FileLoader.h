@@ -39,4 +39,6 @@ public:
 	static void LoadPickup(const char *line);
 
 	static void LoadMapZones(const char *filename);
+
+	static void ReloadPaths(const char *filename);
 };

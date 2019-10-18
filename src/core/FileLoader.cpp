@@ -25,6 +25,8 @@
 #include "CdStream.h"
 #include "FileLoader.h"
 
+WRAPPER void CFileLoader::ReloadPaths(const char *filename) { EAXJMP(0x476DB0); }
+
 char CFileLoader::ms_line[256];
 
 const char*

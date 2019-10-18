@@ -4,6 +4,7 @@ class CSpecialFX
 {
 public:
 	static void Render(void);
+	static void Update(void);
 };
 
 class CMotionBlurStreaks

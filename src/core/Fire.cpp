@@ -32,4 +32,5 @@ CFire* CFireManager::FindNearestFire(CVector vecPos, float* pDistance)
 }
 
 WRAPPER void CFireManager::StartFire(CEntity *entityOnFire, CEntity *culprit, float, uint32) { EAXJMP(0x479590); }
+WRAPPER void CFireManager::Update(void) { EAXJMP(0x479310); }
 WRAPPER CFire *CFireManager::FindFurthestFire_NeverMindFireMen(CVector coors, float, float) { EAXJMP(0x479430); }

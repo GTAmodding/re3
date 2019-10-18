@@ -6,6 +6,8 @@
 
 CAccidentManager& gAccidentManager = *(CAccidentManager*)0x87FD10;
 
+WRAPPER void CAccidentManager::Update(void) { EAXJMP(0x456710); }
+
 uint16 CAccidentManager::CountActiveAccidents()
 {
 	uint16 accidents = 0;

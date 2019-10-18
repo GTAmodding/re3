@@ -28,4 +28,6 @@ public:
 	static bool IsPointWithinHideOutGarage(CVector&);
 	static bool IsPointWithinAnyGarage(CVector&);
 	static void PlayerArrestedOrDied();
+	static void Init(void);
+	static void Update(void);
 };

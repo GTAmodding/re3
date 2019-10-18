@@ -6,6 +6,7 @@
 #include "Ped.h"
 #include "World.h"
 
+WRAPPER void CWeapon::UpdateWeapons(void) { EAXJMP(0x55C310); }
 WRAPPER bool CWeapon::Fire(CEntity*, CVector*) { EAXJMP(0x55C380); }
 WRAPPER void CWeapon::FireFromCar(CAutomobile *car, bool left) { EAXJMP(0x55C940); }
 WRAPPER void CWeapon::AddGunshell(CEntity*, CVector const&, CVector2D const&, float) { EAXJMP(0x55F770); }

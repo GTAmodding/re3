@@ -5,6 +5,7 @@
 #include "Vehicle.h"
 
 WRAPPER void CTrafficLights::DisplayActualLight(CEntity *ent) { EAXJMP(0x455800); }
+WRAPPER void CTrafficLights::ScanForLightsOnMap(void) { EAXJMP(0x454F40); }
 WRAPPER bool CTrafficLights::ShouldCarStopForLight(CVehicle*, bool) { EAXJMP(0x455350); }
 WRAPPER bool CTrafficLights::ShouldCarStopForBridge(CVehicle*) { EAXJMP(0x456460); }
 

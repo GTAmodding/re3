@@ -56,6 +56,7 @@ public:
 	int GrabPhone(float, float);
 	void Initialise(void);
 	void Shutdown(void);
+	void Update(void);
 };
 
 extern CPhoneInfo &gPhoneInfo;

@@ -9092,7 +9092,7 @@ cAudioManager::ServiceSoundEffects()
 	ServiceCollisions();
 	AddReleasingSounds();
 	ProcessMissionAudio();
-	sub_57C2B0();
+	AdjustSamplesVolume();
 	ProcessActiveQueues();
 	for(int32 i = 0; i < m_nScriptObjectEntityTotal; ++i) {
 		object = (cAudioScriptObject *)m_asAudioEntities[m_anScriptObjectEntityIndices[i]]
@@ -10242,27 +10242,31 @@ cAudioManager::UsesSirenSwitching(int32 model) const
 	}
 }
 
-WRAPPER
 void
-cAudioManager::sub_57C2B0()
+cAudioManager::AdjustSamplesVolume()
 {
-	EAXJMP(0x57C2B0);
+	for(int i = 0; i < m_bSampleRequestQueuesStatus[m_bActiveSampleQueue];
+	    i++) {
+		tActiveSample *pSample =
+		    &m_asSamples[i][(int32)m_abSampleQueueIndexTable[i] + 1];
+
+		if(!pSample->m_bBankIndex) // all non-speech sounds on PC
+			pSample->m_bEmittingVolume = ComputeEmittingVolume(
+			    pSample->m_bEmittingVolume,
+			    pSample->m_fSoundIntensity, pSample->m_fDistance);
+	}
 }
 
 int32
-cAudioManager::sub_57C320(uint8 a1, float a2, float a3)
+cAudioManager::ComputeEmittingVolume(uint8 emittingVolume, float intensity,
+                                     float dist)
 {
-	float v4;
-	float v5;
-	int32 v6;
-
-	v4 = 0.25f * a2;
-	v5 = a2 - v4;
-	if(a3 <= v5)
-		v6 = a1;
-	else
-		v6 = ((v4 - (a3 - v5)) * (float)a1 / v4);
-	return v6;
+	float quatIntensity = intensity / 4.0f;
+	float diffIntensity = intensity - quatIntensity;
+	if(dist > diffIntensity)
+		return (quatIntensity - (dist - diffIntensity)) *
+		       (float)emittingVolume / quatIntensity;
+	return emittingVolume;
 }
 
 STARTPATCHES
@@ -10487,7 +10491,11 @@ InjectHook(0x56AC80, &cAudioManager::UpdateGasPedalAudio, PATCH_JUMP);
 InjectHook(0x56C600, &cAudioManager::UsesReverseWarning, PATCH_JUMP);
 InjectHook(0x56C3C0, &cAudioManager::UsesSiren, PATCH_JUMP);
 InjectHook(0x56C3F0, &cAudioManager::UsesSirenSwitching, PATCH_JUMP);
-InjectHook(0x57C320, &cAudioManager::sub_57C320, PATCH_JUMP);
+
+InjectHook(0x57C2B0, &cAudioManager::AdjustSamplesVolume, PATCH_JUMP);
+InjectHook(0x57C320, &cAudioManager::ComputeEmittingVolume, PATCH_JUMP);
+
+
 InjectHook(0x5755C0, &cPedComments::Add, PATCH_JUMP);
 InjectHook(0x575730, &cPedComments::Process, PATCH_JUMP);
 InjectHook(0x5685E0, &cAudioCollisionManager::AddCollisionToRequestedQueue, PATCH_JUMP);

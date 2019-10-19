@@ -4,7 +4,9 @@
 #include "DMAudio.h"
 #include "common.h"
 
-struct tActiveSample {
+class tActiveSample
+{
+public:
 	int32 m_nEntityIndex;
 	int32 m_counter;
 	int32 m_nSampleIndex;
@@ -53,7 +55,8 @@ struct tActiveSample {
 
 static_assert(sizeof(tActiveSample) == 92, "tActiveSample: error");
 
-enum eAudioType : int32 {
+enum eAudioType : int32
+{
 	AUDIOTYPE_PHYSICAL = 0,
 	AUDIOTYPE_EXPLOSION = 1,
 	AUDIOTYPE_FIRE = 2,
@@ -74,7 +77,9 @@ enum eAudioType : int32 {
 class CPhysical;
 class CAutomobile;
 
-struct tAudioEntity {
+class tAudioEntity
+{
+public:
 	eAudioType m_nType;
 	void *m_pEntity;
 	bool m_bIsUsed;
@@ -90,7 +95,9 @@ struct tAudioEntity {
 
 static_assert(sizeof(tAudioEntity) == 40, "tAudioEntity: error");
 
-struct tPedComment {
+class tPedComment
+{
+public:
 	int32 m_nSampleIndex;
 	int32 m_entityIndex;
 	CVector m_vecPos;
@@ -254,13 +261,10 @@ public:
 	uint8 field_13;
 	uint8 field_14;
 	uint8 field_15;
-	// 100
 	int32 m_nTimer;
 	tActiveSample m_sQueueSample;
-	// 224
 	bool m_bActiveSampleQueue;
 	uint8 gap_109[3];
-	// 264
 	tActiveSample m_asSamples[2][27];
 	uint8 m_abSampleQueueIndexTable[2][27];
 	uint8 m_bSampleRequestQueuesStatus[2];
@@ -563,8 +567,10 @@ public:
 	bool UsesSiren(int32 model) const;
 	bool UsesSirenSwitching(int32 model) const;
 
-	void sub_57C2B0();                              // todo (weird) and obtain name
-	int32 sub_57C320(uint8 a1, float a2, float a3); /// ok (get name)
+	// only used in pc
+	void AdjustSamplesVolume(); /// ok
+	int32 ComputeEmittingVolume(uint8 emittingVolume, float intensity,
+	                            float dist); /// ok
 };
 
 static_assert(sizeof(cAudioManager) == 19220, "cAudioManager: error");

@@ -55,7 +55,7 @@ CAutomobile::CAutomobile(int32 id, uint8 CreatedBy)
 {
 	int i;
 
-	m_vehType = VEHICLE_TYPE_AUTOMOBILE;
+	m_vehType = VEHICLE_TYPE_CAR;
 
 	CVehicleModelInfo *mi = (CVehicleModelInfo*)CModelInfo::GetModelInfo(id);
 	m_fFireBlowUpTimer = 0.0f;

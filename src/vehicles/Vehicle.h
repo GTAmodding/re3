@@ -230,7 +230,7 @@ public:
 	virtual float GetHeightAboveRoad(void);
 	virtual void PlayCarHorn(void) {}
 
-	bool IsCar(void) { return m_vehType == VEHICLE_TYPE_AUTOMOBILE; }
+	bool IsCar(void) { return m_vehType == VEHICLE_TYPE_CAR; }
 	bool IsBoat(void) { return m_vehType == VEHICLE_TYPE_BOAT; }
 	bool IsTrain(void) { return m_vehType == VEHICLE_TYPE_TRAIN; }
 	bool IsHeli(void) { return m_vehType == VEHICLE_TYPE_HELI; }

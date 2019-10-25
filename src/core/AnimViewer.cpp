@@ -255,7 +255,7 @@ CAnimViewer::Update(void)
 			if (modelInfo->m_type == MITYPE_VEHICLE) {
 
 				CVehicleModelInfo* veh = (CVehicleModelInfo*)modelInfo;
-				if (veh->m_vehicleType != VEHICLE_TYPE_AUTOMOBILE) {
+				if (veh->m_vehicleType != VEHICLE_TYPE_CAR) {
 					// Not ready yet
 /*					if (veh->m_vehicleType == VEHICLE_TYPE_BOAT)
 					{

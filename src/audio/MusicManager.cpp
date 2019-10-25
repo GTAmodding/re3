@@ -64,11 +64,14 @@ cMusicManager::DisplayRadioStationName()
 		if(SampleManager.IsMP3RadioChannelAvailable()) {
 			gStreamedSound = MusicManager.m_nCurrentStreamedSound;
 
-			if(gStreamedSound != STREAMED_SOUND_CITY_AMBIENT &&
-			   gStreamedSound != STREAMED_SOUND_WATER_AMBIENT) {
-				if(gStreamedSound > STREAMED_SOUND_RADIO_MP3_PLAYER) return;
-			} else {
+			if(gStreamedSound == STREAMED_SOUND_CITY_AMBIENT ||
+			   gStreamedSound == STREAMED_SOUND_WATER_AMBIENT) {
 				gStreamedSound = STREAMED_SOUND_RADIO_POLICE;
+			} else {
+
+				if(gStreamedSound >
+				   STREAMED_SOUND_RADIO_MP3_PLAYER)
+					return;
 			}
 
 			pRetune = gNumRetunePresses + gStreamedSound;

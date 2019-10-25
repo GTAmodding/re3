@@ -738,7 +738,7 @@ CFileLoader::LoadVehicleObject(const char *line)
 	if(strncmp(type, "car", 4) == 0){
 		mi->m_wheelId = misc;
 		mi->m_wheelScale = wheelScale;
-		mi->m_vehicleType = VEHICLE_TYPE_AUTOMOBILE;
+		mi->m_vehicleType = VEHICLE_TYPE_CAR;
 	}else if(strncmp(type, "boat", 5) == 0){
 		mi->m_vehicleType = VEHICLE_TYPE_BOAT;
 	}else if(strncmp(type, "train", 6) == 0){

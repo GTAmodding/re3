@@ -592,7 +592,7 @@ void CCarAI::MakeWayForCarWithSiren(CVehicle *pVehicle)
 		CVehicle* vehicle = CPools::GetVehiclePool()->GetSlot(i);
 		if (!vehicle)
 			continue;
-		if (vehicle->m_vehType != VEHICLE_TYPE_AUTOMOBILE && vehicle->m_vehType != VEHICLE_TYPE_BIKE)
+		if (vehicle->m_vehType != VEHICLE_TYPE_CAR && vehicle->m_vehType != VEHICLE_TYPE_BIKE)
 			continue;
 		if (vehicle->m_status != STATUS_SIMPLE && vehicle->m_status != STATUS_PHYSICS)
 			continue;

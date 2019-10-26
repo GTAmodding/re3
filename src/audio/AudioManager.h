@@ -214,7 +214,7 @@ public:
 	int16 m_awAudioEvent[4];
 	uint8 gap_18[2];
 	float m_afVolume[4];
-	uint8 m_Loops;
+	uint8 m_AudioEvents;
 	uint8 field_25[3];
 
 	// no methods

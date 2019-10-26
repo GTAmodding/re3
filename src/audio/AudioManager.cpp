@@ -48,20 +48,40 @@ bool &bPlayerJustEnteredCar = *(bool *)0x6508C4;
 bool &g_bMissionAudioLoadFailed = *(bool *)0x95CD8E;
 uint32 *gMinTimeToNextReport = (uint32 *)0x8E2828;
 uint8 &gSpecialSuspectLastSeenReport = *(uint8 *)0x95CD4D;
-bool hornPatternsArray[8][44] = {
-	{false, false, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, false, false, false, false, false, false, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, false, false, false, false},
-	{false, false, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, false, false},
-	{false, false, true, true, true, true, true, true, true, true, true, true, false, false, false, false, true, true, true, true, true, false, false, false, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, false},
-	{false, false, true, true, true, true, true, false, false, true, true, true, true, true, false, false, false, true, true, true, true, true, true, true, true, true, true, false, false, false, true, true, true, true, true, true, true, true, true, true, true, true, true, false},
-	{false, false, true, true, true, true, true, true, true, true, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false},
-	{false, false, true, true, true, false, false, false, true, true, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false},
-	{false, false, true, true, true, true, false, false, false, false, true, true, true, false, false, true, true, true, false, false, true, true, true, true, true, true, false, false, false, false, false, true, true, true, true, true, true, true, true, true, true, true, false, false},
-	{false, false, true, true, true, true, false, false, true, true, true, true, true, false, false, false, true, true, true, true, true, true, false, false, false, false, true, true, true, true, true, true, true, true, true, true, true, true, true, false, false, false, false, false},
+
+constexpr bool hornPatternsArray[8][44] = {
+    {false, false, true,  true,  true,  true,  true,  true,  true, true, true,  true,  true,  true, true,
+     true,  true,  false, false, false, false, false, false, true, true, true,  true,  true,  true, true,
+     true,  true,  true,  true,  true,  true,  true,  true,  true, true, false, false, false, false},
+    {false, false, true, true, true, true, true, true, true, true, true, true, true,  true, true,
+     true,  true,  true, true, true, true, true, true, true, true, true, true, true,  true, true,
+     true,  true,  true, true, true, true, true, true, true, true, true, true, false, false},
+    {false, false, true, true, true, true, true,  true,  true,  true, true, true, false, false, false,
+     false, true,  true, true, true, true, false, false, false, true, true, true, true,  true,  true,
+     true,  true,  true, true, true, true, true,  true,  true,  true, true, true, true,  false},
+    {false, false, true, true, true, true, true, false, false, true, true, true, true,  true,  false,
+     false, false, true, true, true, true, true, true,  true,  true, true, true, false, false, false,
+     true,  true,  true, true, true, true, true, true,  true,  true, true, true, true,  false},
+    {false, false, true,  true,  true,  true,  true,  true,  true,  true,  true,  false, false, false, false,
+     false, false, false, false, false, false, false, false, false, false, false, false, false, false, false,
+     false, false, false, false, false, false, false, false, false, false, false, false, false, false},
+    {false, false, true,  true,  true,  false, false, false, true,  true,  true,  false, false, false, false,
+     false, false, false, false, false, false, false, false, false, false, false, false, false, false, false,
+     false, false, false, false, false, false, false, false, false, false, false, false, false, false},
+    {false, false, true, true,  true,  true, false, false, false, false, true, true,  true,  false, false,
+     true,  true,  true, false, false, true, true,  true,  true,  true,  true, false, false, false, false,
+     false, true,  true, true,  true,  true, true,  true,  true,  true,  true, true,  false, false},
+    {false, false, true, true, true, true, false, false, true,  true,  true,  true,  true,  false, false,
+     false, true,  true, true, true, true, true,  false, false, false, false, true,  true,  true,  true,
+     true,  true,  true, true, true, true, true,  true,  true,  false, false, false, false, false},
 };
 
 constexpr int totalAudioEntitiesSlots = 200;
 constexpr int maxVolume = 127;
-constexpr int policeChannel = 28;
+constexpr int channels = ARRAY_SIZE(cAudioManager::m_asActiveSamples);
+constexpr int policeChannel = channels + 1;
+constexpr int allChannels = channels + 2;
+
 constexpr uint8 panTable[64]{0,  3,  8,  12, 16, 19, 22, 24, 26, 28, 30, 31, 33, 34, 36, 37, 39, 40, 41, 42, 44, 45,
                              46, 47, 48, 49, 49, 50, 51, 52, 53, 53, 54, 55, 55, 56, 56, 57, 57, 58, 58, 58, 59, 59,
                              59, 60, 60, 61, 61, 61, 61, 62, 62, 62, 62, 62, 63, 63, 63, 63, 63, 63, 63, 63};
@@ -621,7 +641,7 @@ cAudioManager::CreateEntity(int32 type, CPhysical *entity)
 			m_asAudioEntities[i].m_awAudioEvent[1] = SOUND_TOTAL_PED_SOUNDS;
 			m_asAudioEntities[i].m_awAudioEvent[2] = SOUND_TOTAL_PED_SOUNDS;
 			m_asAudioEntities[i].m_awAudioEvent[3] = SOUND_TOTAL_PED_SOUNDS;
-			m_asAudioEntities[i].m_Loops = 0;
+			m_asAudioEntities[i].m_AudioEvents = 0;
 			m_anAudioEntityIndices[m_nAudioEntitiesTotal++] = i;
 			return i;
 		}
@@ -2571,9 +2591,9 @@ cAudioManager::InitialisePoliceRadio()
 	policeChannelTimer = 0;
 	policeChannelTimerSeconds = 0;
 	policeChannelCounterSeconds = 0;
-	for(int32 i = 0; i < 10; i++) { crimes[i].type = 0; }
+	for(int32 i = 0; i < ARRAY_SIZE(crimes); i++) { crimes[i].type = 0; }
 
-	SampleManager.SetChannelReverbFlag(28, 0);
+	SampleManager.SetChannelReverbFlag(policeChannel, 0);
 	gSpecialSuspectLastSeenReport = 0;
 	for(int32 i = 0; i < 18; i++) { gMinTimeToNextReport[i] = m_nTimeOfRecentCrime; }
 }
@@ -2674,7 +2694,7 @@ cAudioManager::InterrogateAudioEntities()
 {
 	for(int32 i = 0; i < m_nAudioEntitiesTotal; i++) {
 		ProcessEntity(m_anAudioEntityIndices[i]);
-		m_asAudioEntities[m_anAudioEntityIndices[i]].m_Loops = 0;
+		m_asAudioEntities[m_anAudioEntityIndices[i]].m_AudioEvents = 0;
 	}
 }
 
@@ -2734,7 +2754,7 @@ cAudioManager::PlayLoadedMissionAudio()
 void
 cAudioManager::PlayOneShot(int32 index, int16 sound, float vol)
 {
-	static constexpr uint8 byte_60ABD0[] = {
+	static constexpr uint8 OneShotPriority[] = {
 	    3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 5, 5, 5, 3, 5, 2, 2, 1, 1, 3, 1, 3, 3, 1, 1, 1, 4, 4, 3, 1, 1,
 	    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 6, 1, 1, 3, 2, 2, 2, 2, 0, 0, 6, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 	    1, 2, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 3, 1, 1, 1, 9,
@@ -2743,42 +2763,41 @@ cAudioManager::PlayOneShot(int32 index, int16 sound, float vol)
 
 	if(m_bIsInitialised) {
 		if(index >= 0 && index < totalAudioEntitiesSlots) {
-			if(m_asAudioEntities[index].m_bIsUsed) {
+			tAudioEntity &entity = m_asAudioEntities[index];
+			if(entity.m_bIsUsed) {
 				if(sound < SOUND_TOTAL_SOUNDS) {
-					if(m_asAudioEntities[index].m_nType == AUDIOTYPE_SCRIPTOBJECT) {
+					if(entity.m_nType == AUDIOTYPE_SCRIPTOBJECT) {
 						if(m_nScriptObjectEntityTotal < 40) {
-							m_asAudioEntities[index].m_awAudioEvent[0] = sound;
-							m_asAudioEntities[index].m_Loops = 1;
+							entity.m_awAudioEvent[0] = sound;
+							entity.m_AudioEvents = 1;
 							m_anScriptObjectEntityIndices[m_nScriptObjectEntityTotal++] =
 							    index;
 						}
 					} else {
 						int32 i = 0;
-						while(1) {
-							if(i >= m_asAudioEntities[index].m_Loops) {
-								if(m_asAudioEntities[index].m_Loops < 4) {
-									m_asAudioEntities[index].m_awAudioEvent[i] =
-									    sound;
-									m_asAudioEntities[index].m_afVolume[i] = vol;
-									++m_asAudioEntities[index].m_Loops;
+						while(true) {
+							if(i >= entity.m_AudioEvents) {
+								if(entity.m_AudioEvents < 4) {
+									entity.m_awAudioEvent[i] = sound;
+									entity.m_afVolume[i] = vol;
+									++entity.m_AudioEvents;
 								}
 								return;
 							}
-							if(byte_60ABD0[m_asAudioEntities[index].m_awAudioEvent[i]] >
-							   byte_60ABD0[sound])
+							if(OneShotPriority[entity.m_awAudioEvent[i]] >
+							   OneShotPriority[sound])
 								break;
 							++i;
 						}
 						if(i < 3) {
-							memmove(&m_asAudioEntities[index].m_awAudioEvent[i + 1],
-							        &m_asAudioEntities[index].m_awAudioEvent[i], 3 - i);
-							memmove(&m_asAudioEntities[index].m_afVolume[i + 1],
-							        &m_asAudioEntities[index].m_afVolume[i], 3 - i);
+							memmove(&entity.m_awAudioEvent[i + 1],
+							        &entity.m_awAudioEvent[i], (3 - i) * 2);
+							memmove(&entity.m_afVolume[i + 1], &entity.m_afVolume[i],
+							        (3 - i) * 4);
 						}
-						m_asAudioEntities[index].m_awAudioEvent[i] = sound;
-						m_asAudioEntities[index].m_afVolume[i] = vol;
-						if(m_asAudioEntities[index].m_Loops < 4)
-							++m_asAudioEntities[index].m_Loops;
+						entity.m_awAudioEvent[i] = sound;
+						entity.m_afVolume[i] = vol;
+						if(entity.m_AudioEvents < 4) ++entity.m_AudioEvents;
 					}
 				}
 			}
@@ -2851,27 +2870,6 @@ cAudioManager::PlaySuspectLastSeen(float x, float y, float z)
 							    (policeChannelTimerSeconds + 1) % 60;
 						}
 						if(policeChannelTimer == 60) {
-							if(policeChannelTimer != 60) {
-								crimesSamples[policeChannelTimerSeconds] = sample;
-								++policeChannelTimer;
-								policeChannelTimerSeconds =
-								    (policeChannelTimerSeconds + 1) % 60;
-							}
-							if(policeChannelTimer != 60) {
-								crimesSamples[policeChannelTimerSeconds] =
-								    m_anRandomTable[2] % 3 +
-								    AUDIO_SAMPLE_POLICE_SCANNER_SMALL_CRACKLE_1;
-								++policeChannelTimer;
-								policeChannelTimerSeconds =
-								    (policeChannelTimerSeconds + 1) % 60;
-							}
-							if(policeChannelTimer != 60) {
-								crimesSamples[policeChannelTimerSeconds] =
-								    TOTAL_AUDIO_SAMPLES;
-								++policeChannelTimer;
-								policeChannelTimerSeconds =
-								    (policeChannelTimerSeconds + 1) % 60;
-							}
 							gSpecialSuspectLastSeenReport = 1;
 							return;
 						}
@@ -3894,7 +3892,7 @@ cAudioManager::ProcessFrontEnd()
 
 	static uint32 counter = 0;
 
-	for(uint32 i = 0; i < m_asAudioEntities[m_sQueueSample.m_nEntityIndex].m_Loops; i++) {
+	for(uint32 i = 0; i < m_asAudioEntities[m_sQueueSample.m_nEntityIndex].m_AudioEvents; i++) {
 		processed = 0;
 		switch(m_asAudioEntities[m_sQueueSample.m_nEntityIndex].m_awAudioEvent[i]) {
 		case SOUND_WEAPON_SNIPER_SHOT_NO_ZOOM:
@@ -6931,7 +6929,7 @@ void
 cAudioManager::ProcessReverb() const
 {
 	if(SampleManager.UpdateReverb() && m_bDynamicAcousticModelingStatus) {
-		for(uint32 i = 0; i < 28; i++) {
+		for(uint32 i = 0; i < channels; i++) { // bug? 
 			if(m_asActiveSamples[i].m_bReverbFlag) SampleManager.SetChannelReverbFlag(i, 1);
 		}
 	}
@@ -7059,7 +7057,7 @@ cAudioManager::ProcessScriptObject(int32 id)
 	cAudioScriptObject *entity = (cAudioScriptObject *)m_asAudioEntities[id].m_pEntity;
 	if(entity) {
 		m_sQueueSample.m_vecPos = entity->Posn;
-		if(m_asAudioEntities[id].m_Loops == 1)
+		if(m_asAudioEntities[id].m_AudioEvents == 1)
 			ProcessOneShotScriptObject(m_asAudioEntities[id].m_awAudioEvent[0]);
 		else
 			ProcessLoopingScriptObject(entity->AudioId);
@@ -7684,7 +7682,7 @@ cAudioManager::ProcessWeather(int32 id)
 	uint8 vol;
 	static uint8 counter = 0;
 
-	if(m_asAudioEntities[id].m_Loops && m_asAudioEntities[id].m_awAudioEvent[0] == SOUND_LIGHTNING) {
+	if(m_asAudioEntities[id].m_AudioEvents && m_asAudioEntities[id].m_awAudioEvent[0] == SOUND_LIGHTNING) {
 		if(m_asAudioEntities[id].m_afVolume[0] >= 10.f) {
 			m_sQueueSample.m_nSampleIndex = AUDIO_SAMPLE_EXPLOSION_CAR;
 			m_sQueueSample.m_bBankIndex = 0;
@@ -8136,7 +8134,7 @@ cAudioManager::ServiceSoundEffects()
 	else
 		field_2 = 1;
 	if(m_bUserPause && !m_bPreviousUserPause) {
-		for(int32 i = 0; i < 29; i++) SampleManager.StopChannel(i);
+		for(int32 i = 0; i < allChannels; i++) SampleManager.StopChannel(i);
 
 		ClearRequestedQueue();
 		if(m_bActiveSampleQueue) {
@@ -8164,7 +8162,8 @@ cAudioManager::ServiceSoundEffects()
 	ProcessActiveQueues();
 	for(int32 i = 0; i < m_nScriptObjectEntityTotal; ++i) {
 		object = (cAudioScriptObject *)m_asAudioEntities[m_anScriptObjectEntityIndices[i]].m_pEntity;
-		if(object) { delete object; }
+		delete object;
+		m_asAudioEntities[m_anScriptObjectEntityIndices[i]].m_pEntity = nil;
 		DestroyEntity(m_anScriptObjectEntityIndices[i]);
 	}
 	m_nScriptObjectEntityTotal = 0;
@@ -8530,23 +8529,6 @@ cAudioManager::SetupCrimeReport()
 					policeChannelTimerSeconds = (policeChannelTimerSeconds + 1) % 60;
 				}
 				if(policeChannelTimer == 60) {
-					if(policeChannelTimer != 60) {
-						crimesSamples[policeChannelTimerSeconds] = sampleIndex;
-						++policeChannelTimer;
-						policeChannelTimerSeconds = (policeChannelTimerSeconds + 1) % 60;
-					}
-					if(policeChannelTimer != 60) {
-						crimesSamples[policeChannelTimerSeconds] =
-						    m_anRandomTable[2] % 3 +
-						    AUDIO_SAMPLE_POLICE_SCANNER_SMALL_CRACKLE_1;
-						++policeChannelTimer;
-						policeChannelTimerSeconds = (policeChannelTimerSeconds + 1) % 60;
-					}
-					if(policeChannelTimer != 60) {
-						crimesSamples[policeChannelTimerSeconds] = TOTAL_AUDIO_SAMPLES;
-						++policeChannelTimer;
-						policeChannelTimerSeconds = (policeChannelTimerSeconds + 1) % 60;
-					}
 					crimes[i].type = 0;
 					AgeCrimes();
 					return 1;

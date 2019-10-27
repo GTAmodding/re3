@@ -135,6 +135,7 @@ public:
 };
 
 extern cSampleManager &SampleManager;
+extern int32 (&BankStartOffset)[MAX_SAMPLEBANKS];
 
 static char StreamedNameTable[][25]=
 {

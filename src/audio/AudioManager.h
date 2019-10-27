@@ -576,8 +576,8 @@ public:
 	void PlayerJustLeftCar() const;                        /// ok
 	void PostInitialiseGameSpecificSetup();                /// ok
 	void PostTerminateGameSpecificShutdown();              /// ok
-	void PreInitialiseGameSpecificSetup() const;           // ok
-	void PreloadMissionAudio(char *);                      // todo
+	void PreInitialiseGameSpecificSetup() const;           /// ok
+	void PreloadMissionAudio(const char *name);            /// ok
 	void PreTerminateGameSpecificShutdown();               /// ok
 	/// processX - main logic of adding new sounds
 	void ProcessActiveQueues();                              // todo

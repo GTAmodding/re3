@@ -18,7 +18,7 @@
 #pragma comment( lib, "mss32.lib" )
 
 cSampleManager &SampleManager = *(cSampleManager *)0x7341E0;
-int32 (&BankStartOffset)[MAX_SAMPLEBANKS] = *(int32 (*)[MAX_SAMPLEBANKS])*(int *)0x6FAB70;
+extern int32 (&BankStartOffset)[MAX_SAMPLEBANKS] = *(int32 (*)[MAX_SAMPLEBANKS])*(int *)0x6FAB70;
 
 ///////////////////////////////////////////////////////////////
 

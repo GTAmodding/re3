@@ -50,7 +50,6 @@ uint32 &gNextCryTime = *(uint32*)0x6508C0;
 uint8 &jumboVolOffset = *(uint8 *)0x6508ED;
 uint8 &gJumboVolOffsetPercentage = *(uint8 *)0x6508ED;
 char &g_nMissionAudioPlayingStatus = *(char *)0x60ED88;
-int32 *BankStartOffset = (int32 *)0x6FAB70; //[2]
 int32 &g_nMissionAudioSfx = *(int32 *)0x60ED84;
 bool &bPlayerJustEnteredCar = *(bool *)0x6508C4;
 bool &g_bMissionAudioLoadFailed = *(bool *)0x95CD8E;
@@ -2131,16 +2130,16 @@ uint32
 cAudioManager::GetSpecialCharacterTalkSfx(int32 modelIndex, int32 sound)
 {
 	char *modelName = CModelInfo::GetModelInfo(modelIndex)->GetName();
-	if(strcmp(modelName, "eight") == 0 || strcmp(modelName, "eight2") == 0) { return GetEightTalkSfx(sound); }
-	if(strcmp(modelName, "frankie") == 0) { return GetFrankieTalkSfx(sound); }
-	if(strcmp(modelName, "misty") == 0) { return GetMistyTalkSfx(sound); }
-	if(strcmp(modelName, "ojg") == 0 || strcmp(modelName, "ojg_p") == 0) { return GetOJGTalkSfx(sound); }
-	if(strcmp(modelName, "cat") == 0) { return GetCatatalinaTalkSfx(sound); }
-	if(strcmp(modelName, "bomber") == 0) { return GetBomberTalkSfx(sound); }
-	if(strcmp(modelName, "s_guard") == 0) { return GetSecurityGuardTalkSfx(sound); }
-	if(strcmp(modelName, "chunky") == 0) { return GetChunkyTalkSfx(sound); }
-	if(strcmp(modelName, "asuka") == 0) { return GetGenericFemaleTalkSfx(sound); }
-	if(strcmp(modelName, "maria") == 0) { return GetGenericFemaleTalkSfx(sound); }
+	if(strcmpi(modelName, "eight") == 0 || strcmpi(modelName, "eight2") == 0) { return GetEightTalkSfx(sound); }
+	if(strcmpi(modelName, "frankie") == 0) { return GetFrankieTalkSfx(sound); }
+	if(strcmpi(modelName, "misty") == 0) { return GetMistyTalkSfx(sound); }
+	if(strcmpi(modelName, "ojg") == 0 || strcmpi(modelName, "ojg_p") == 0) { return GetOJGTalkSfx(sound); }
+	if(strcmpi(modelName, "cat") == 0) { return GetCatatalinaTalkSfx(sound); }
+	if(strcmpi(modelName, "bomber") == 0) { return GetBomberTalkSfx(sound); }
+	if(strcmpi(modelName, "s_guard") == 0) { return GetSecurityGuardTalkSfx(sound); }
+	if(strcmpi(modelName, "chunky") == 0) { return GetChunkyTalkSfx(sound); }
+	if(strcmpi(modelName, "asuka") == 0) { return GetGenericFemaleTalkSfx(sound); }
+	if(strcmpi(modelName, "maria") == 0) { return GetGenericFemaleTalkSfx(sound); }
 
 	return GetGenericMaleTalkSfx(sound);
 }
@@ -3039,11 +3038,92 @@ cAudioManager::PreInitialiseGameSpecificSetup() const
 	BankStartOffset[1] = SFX_COP_VOICE_1_ARREST_1;
 }
 
-WRAPPER
-void
-cAudioManager::PreloadMissionAudio(char *)
+struct MissionAudioData {
+	const char *m_pName;
+	int32 m_nId;
+};
+
+constexpr MissionAudioData MissionAudioNameSfxAssoc[] = {
+    {"lib_a1", STREAMED_SOUND_MISSION_LIB_A1},   {"lib_a2", STREAMED_SOUND_MISSION_LIB_A2},
+    {"lib_a", STREAMED_SOUND_MISSION_LIB_A},     {"lib_b", STREAMED_SOUND_MISSION_LIB_B},
+    {"lib_c", STREAMED_SOUND_MISSION_LIB_C},     {"lib_d", STREAMED_SOUND_MISSION_LIB_D},
+    {"l2_a", STREAMED_SOUND_MISSION_L2_A},       {"j4t_1", STREAMED_SOUND_MISSION_J4T_1},
+    {"j4t_2", STREAMED_SOUND_MISSION_J4T_2},     {"j4t_3", STREAMED_SOUND_MISSION_J4T_3},
+    {"j4t_4", STREAMED_SOUND_MISSION_J4T_4},     {"j4_a", STREAMED_SOUND_MISSION_J4_A},
+    {"j4_b", STREAMED_SOUND_MISSION_J4_B},       {"j4_c", STREAMED_SOUND_MISSION_J4_C},
+    {"j4_d", STREAMED_SOUND_MISSION_J4_D},       {"j4_e", STREAMED_SOUND_MISSION_J4_E},
+    {"j4_f", STREAMED_SOUND_MISSION_J4_F},       {"j6_1", STREAMED_SOUND_MISSION_J6_1},
+    {"j6_a", STREAMED_SOUND_MISSION_J6_A},       {"j6_b", STREAMED_SOUND_MISSION_J6_B},
+    {"j6_c", STREAMED_SOUND_MISSION_J6_C},       {"j6_d", STREAMED_SOUND_MISSION_J6_D},
+    {"t4_a", STREAMED_SOUND_MISSION_T4_A},       {"s1_a", STREAMED_SOUND_MISSION_S1_A},
+    {"s1_a1", STREAMED_SOUND_MISSION_S1_A1},     {"s1_b", STREAMED_SOUND_MISSION_S1_B},
+    {"s1_c", STREAMED_SOUND_MISSION_S1_C},       {"s1_c1", STREAMED_SOUND_MISSION_S1_C1},
+    {"s1_d", STREAMED_SOUND_MISSION_S1_D},       {"s1_e", STREAMED_SOUND_MISSION_S1_E},
+    {"s1_f", STREAMED_SOUND_MISSION_S1_F},       {"s1_g", STREAMED_SOUND_MISSION_S1_G},
+    {"s1_h", STREAMED_SOUND_MISSION_S1_H},       {"s1_i", STREAMED_SOUND_MISSION_S1_I},
+    {"s1_j", STREAMED_SOUND_MISSION_S1_J},       {"s1_k", STREAMED_SOUND_MISSION_S1_K},
+    {"s1_l", STREAMED_SOUND_MISSION_S1_L},       {"s3_a", STREAMED_SOUND_MISSION_S3_A},
+    {"s3_b", STREAMED_SOUND_MISSION_S3_B},       {"el3_a", STREAMED_SOUND_MISSION_EL3_A},
+    {"mf1_a", STREAMED_SOUND_MISSION_MF1_A},     {"mf2_a", STREAMED_SOUND_MISSION_MF2_A},
+    {"mf3_a", STREAMED_SOUND_MISSION_MF3_A},     {"mf3_b", STREAMED_SOUND_MISSION_MF3_B},
+    {"mf3_b1", STREAMED_SOUND_MISSION_MF3_B1},   {"mf3_c", STREAMED_SOUND_MISSION_MF3_C},
+    {"mf4_a", STREAMED_SOUND_MISSION_MF4_A},     {"mf4_b", STREAMED_SOUND_MISSION_MF4_B},
+    {"mf4_c", STREAMED_SOUND_MISSION_MF4_C},     {"a1_a", STREAMED_SOUND_MISSION_A1_A},
+    {"a3_a", STREAMED_SOUND_MISSION_A3_A},       {"a5_a", STREAMED_SOUND_MISSION_A5_A},
+    {"a4_a", STREAMED_SOUND_MISSION_A4_A},       {"a4_b", STREAMED_SOUND_MISSION_A4_B},
+    {"a4_c", STREAMED_SOUND_MISSION_A4_C},       {"a4_d", STREAMED_SOUND_MISSION_A4_D},
+    {"k1_a", STREAMED_SOUND_MISSION_K1_A},       {"k3_a", STREAMED_SOUND_MISSION_K3_A},
+    {"r1_a", STREAMED_SOUND_MISSION_R1_A},       {"r2_a", STREAMED_SOUND_MISSION_R2_A},
+    {"r2_b", STREAMED_SOUND_MISSION_R2_B},       {"r2_c", STREAMED_SOUND_MISSION_R2_C},
+    {"r2_d", STREAMED_SOUND_MISSION_R2_D},       {"r2_e", STREAMED_SOUND_MISSION_R2_E},
+    {"r2_f", STREAMED_SOUND_MISSION_R2_F},       {"r2_g", STREAMED_SOUND_MISSION_R2_G},
+    {"r2_h", STREAMED_SOUND_MISSION_R2_H},       {"r5_a", STREAMED_SOUND_MISSION_R5_A},
+    {"r6_a", STREAMED_SOUND_MISSION_R6_A},       {"r6_a1", STREAMED_SOUND_MISSION_R6_A1},
+    {"r6_b", STREAMED_SOUND_MISSION_R6_B},       {"lo2_a", STREAMED_SOUND_MISSION_LO2_A},
+    {"lo6_a", STREAMED_SOUND_MISSION_LO6_A},     {"yd2_a", STREAMED_SOUND_MISSION_YD2_A},
+    {"yd2_b", STREAMED_SOUND_MISSION_YD2_B},     {"yd2_c", STREAMED_SOUND_MISSION_YD2_C},
+    {"yd2_c1", STREAMED_SOUND_MISSION_YD2_C1},   {"yd2_d", STREAMED_SOUND_MISSION_YD2_D},
+    {"yd2_e", STREAMED_SOUND_MISSION_YD2_E},     {"yd2_f", STREAMED_SOUND_MISSION_YD2_F},
+    {"yd2_g", STREAMED_SOUND_MISSION_YD2_G},     {"yd2_h", STREAMED_SOUND_MISSION_YD2_H},
+    {"yd2_ass", STREAMED_SOUND_MISSION_YD2_ASS}, {"yd2_ok", STREAMED_SOUND_MISSION_YD2_OK},
+    {"h5_a", STREAMED_SOUND_MISSION_H5_A},       {"h5_b", STREAMED_SOUND_MISSION_H5_B},
+    {"h5_c", STREAMED_SOUND_MISSION_H5_C},       {"ammu_a", STREAMED_SOUND_MISSION_AMMU_A},
+    {"ammu_b", STREAMED_SOUND_MISSION_AMMU_B},   {"ammu_c", STREAMED_SOUND_MISSION_AMMU_C},
+    {"door_1", STREAMED_SOUND_MISSION_DOOR_1},   {"door_2", STREAMED_SOUND_MISSION_DOOR_2},
+    {"door_3", STREAMED_SOUND_MISSION_DOOR_3},   {"door_4", STREAMED_SOUND_MISSION_DOOR_4},
+    {"door_5", STREAMED_SOUND_MISSION_DOOR_5},   {"door_6", STREAMED_SOUND_MISSION_DOOR_6},
+    {"t3_a", STREAMED_SOUND_MISSION_T3_A},       {"t3_b", STREAMED_SOUND_MISSION_T3_B},
+    {"t3_c", STREAMED_SOUND_MISSION_T3_C},       {"k1_b", STREAMED_SOUND_MISSION_K1_B},
+    {"c_1", STREAMED_SOUND_MISSION_CAT1}};
+
+int32
+FindMissionAudioSfx(const char *name)
 {
-	EAXJMP(0x579550);
+	for(uint32 i = 0; i < ARRAY_SIZE(MissionAudioNameSfxAssoc); ++i) {
+		if(strcmpi(MissionAudioNameSfxAssoc[i].m_pName, name) == 0) return MissionAudioNameSfxAssoc[i].m_nId;
+	}
+	debug("Can't find mission audio %s", name);
+	return NO_SAMPLE;
+}
+
+void
+cAudioManager::PreloadMissionAudio(const char *name)
+{
+	if(m_bIsInitialised) {
+		int32 missionAudioSfx = FindMissionAudioSfx(name);
+		if(missionAudioSfx != NO_SAMPLE) {
+			m_sMissionAudio.m_nSampleIndex = missionAudioSfx;
+			m_sMissionAudio.m_bLoadingStatus = 0;
+			m_sMissionAudio.m_bPlayStatus = 0;
+			m_sMissionAudio.field_22 = 0;
+			m_sMissionAudio.field_24 =
+			    field_19192 * SampleManager.GetStreamedFileLength(missionAudioSfx) / 1000;
+			m_sMissionAudio.field_24 *= 4;
+			m_sMissionAudio.m_bIsPlayed = 0;
+			m_sMissionAudio.field_12 = 1;
+			g_bMissionAudioLoadFailed = 0;
+		}
+	}
 }
 
 void
@@ -5525,7 +5605,7 @@ cAudioManager::ProcessPedOneShots(cPedParams *params)
 	static uint8 iSound = 21;
 
 	weapon = nil;
-	for(uint32 i = 0; i < m_asAudioEntities[m_sQueueSample.m_nEntityIndex].m_Loops; i++) {
+	for(uint32 i = 0; i < m_asAudioEntities[m_sQueueSample.m_nEntityIndex].m_AudioEvents; i++) {
 		noReflection = 0;
 		processed = 0;
 		m_sQueueSample.m_bRequireReflection = 0;
@@ -8887,46 +8967,47 @@ cAudioManager::SetupPedComments(cPedParams *params, uint32 sound)
 void
 cAudioManager::SetupSuspectLastSeenReport()
 {
-	CAutomobile *automobile;
+	CVehicle *veh;
 	uint8 color1;
-	int32 index;
 	int32 main_color;
 	int32 sample;
 
 	int32 color_pre_modifier;
 	int32 color_post_modifier;
 
-	constexpr int32 colors[] = {
-	    3032, 248,  3032, 3032, 249,  3032, 3032, 250,  3032, 3032, 251,  3032, 258,  250,  3032, 3032, 252,  3032,
-	    3032, 253,  3032, 260,  250,  3032, 259,  250,  254,  259,  3032, 3032, 258,  3032, 3032, 258,  3032, 3032,
-	    258,  251,  3032, 3032, 251,  3032, 3032, 251,  3032, 3032, 251,  3032, 3032, 251,  3032, 3032, 251,  3032,
-	    3032, 251,  3032, 259,  3032, 3032, 258,  3032, 3032, 258,  3032, 3032, 258,  3032, 3032, 3032, 255,  3032,
-	    3032, 255,  3032, 3032, 255,  3032, 3032, 255,  3032, 3032, 255,  3032, 3032, 255,  3032, 259,  3032, 3032,
-	    258,  3032, 3032, 258,  3032, 3032, 258,  3032, 3032, 3032, 253,  3032, 3032, 253,  3032, 3032, 253,  3032,
-	    3032, 253,  3032, 3032, 253,  3032, 3032, 253,  3032, 259,  3032, 3032, 258,  3032, 3032, 258,  3032, 3032,
-	    258,  3032, 3032, 3032, 256,  3032, 3032, 256,  3032, 3032, 256,  3032, 3032, 256,  3032, 3032, 256,  3032,
-	    3032, 256,  3032, 259,  3032, 3032, 258,  3032, 3032, 258,  3032, 3032, 258,  3032, 3032, 3032, 250,  3032,
-	    3032, 250,  3032, 3032, 250,  3032, 3032, 250,  3032, 3032, 250,  3032, 3032, 250,  3032, 259,  3032, 3032,
-	    258,  3032, 3032, 258,  3032, 3032, 258,  3032, 3032, 3032, 252,  3032, 3032, 252,  3032, 3032, 252,  3032,
-	    3032, 252,  3032, 3032, 252,  3032, 3032, 252,  3032, 259,  3032, 3032, 258,  3032, 3032, 258,  3032, 3032,
-	    258,  3032, 3032, 3032, 257,  3032, 3032, 257,  3032, 3032, 257,  3032, 3032, 257,  3032, 3032, 257,  3032,
-	    3032, 257,  3032, 259,  3032, 3032, 259,  3032, 3032, 259,  3032, 3032, 259,  3032, 3032, 259,  3032, 3032,
-	    259,  3032, 3032, 259,  3032, 3032, 259,  3032, 3032, 259,  3032, 3032, 259,  3032, 3032, 259,  3032, 3032,
-	    258,  3032, 3032, 258,  3032, 3032, 258,  3032, 3032, 258,  3032, 3032, 258,  3032, 3032};
+	constexpr int32 gCarColourTable[][3] = {
+	    {3032, 248, 3032}, {3032, 249, 3032}, {3032, 250, 3032}, {3032, 251, 3032}, {258, 250, 3032},
+	    {3032, 252, 3032}, {3032, 253, 3032}, {260, 250, 3032},  {259, 250, 254},   {259, 3032, 3032},
+	    {258, 3032, 3032}, {258, 3032, 3032}, {258, 251, 3032},  {3032, 251, 3032}, {3032, 251, 3032},
+	    {3032, 251, 3032}, {3032, 251, 3032}, {3032, 251, 3032}, {3032, 251, 3032}, {259, 3032, 3032},
+	    {258, 3032, 3032}, {258, 3032, 3032}, {258, 3032, 3032}, {3032, 255, 3032}, {3032, 255, 3032},
+	    {3032, 255, 3032}, {3032, 255, 3032}, {3032, 255, 3032}, {3032, 255, 3032}, {259, 3032, 3032},
+	    {258, 3032, 3032}, {258, 3032, 3032}, {258, 3032, 3032}, {3032, 253, 3032}, {3032, 253, 3032},
+	    {3032, 253, 3032}, {3032, 253, 3032}, {3032, 253, 3032}, {3032, 253, 3032}, {259, 3032, 3032},
+	    {258, 3032, 3032}, {258, 3032, 3032}, {258, 3032, 3032}, {3032, 256, 3032}, {3032, 256, 3032},
+	    {3032, 256, 3032}, {3032, 256, 3032}, {3032, 256, 3032}, {3032, 256, 3032}, {259, 3032, 3032},
+	    {258, 3032, 3032}, {258, 3032, 3032}, {258, 3032, 3032}, {3032, 250, 3032}, {3032, 250, 3032},
+	    {3032, 250, 3032}, {3032, 250, 3032}, {3032, 250, 3032}, {3032, 250, 3032}, {259, 3032, 3032},
+	    {258, 3032, 3032}, {258, 3032, 3032}, {258, 3032, 3032}, {3032, 252, 3032}, {3032, 252, 3032},
+	    {3032, 252, 3032}, {3032, 252, 3032}, {3032, 252, 3032}, {3032, 252, 3032}, {259, 3032, 3032},
+	    {258, 3032, 3032}, {258, 3032, 3032}, {258, 3032, 3032}, {3032, 257, 3032}, {3032, 257, 3032},
+	    {3032, 257, 3032}, {3032, 257, 3032}, {3032, 257, 3032}, {3032, 257, 3032}, {259, 3032, 3032},
+	    {259, 3032, 3032}, {259, 3032, 3032}, {259, 3032, 3032}, {259, 3032, 3032}, {259, 3032, 3032},
+	    {259, 3032, 3032}, {259, 3032, 3032}, {259, 3032, 3032}, {259, 3032, 3032}, {259, 3032, 3032},
+	    {258, 3032, 3032}, {258, 3032, 3032}, {258, 3032, 3032}, {258, 3032, 3032}, {258, 3032, 3032}};
 
 	if(MusicManager.m_nMusicMode != 2) {
-		automobile = (CAutomobile *)FindPlayerVehicle();
-		if(automobile) {
+		veh = FindPlayerVehicle();
+		if(veh) {
 			if(60 - policeChannelTimer > 9) {
-				color1 = automobile->m_currentColour1;
+				color1 = veh->m_currentColour1;
 				if(color1 >= 95) {
 					debug("\n *** UNKNOWN CAR COLOUR %d *** ", color1);
 				} else {
-					index = 3 * color1;
-					main_color = colors[index + 1]; // todo refactor struct
-					color_pre_modifier = colors[index];
-					color_post_modifier = colors[index + 2];
-					switch(automobile->m_modelIndex) {
+					main_color = gCarColourTable[color1][1];
+					color_pre_modifier = gCarColourTable[color1][0];
+					color_post_modifier = gCarColourTable[color1][2];
+					switch(veh->m_modelIndex) {
 					case MI_LANDSTAL:
 					case MI_BLISTA: sample = SFX_POLICE_RADIO_CRUISER; break;
 					case MI_IDAHO:
@@ -8977,7 +9058,7 @@ cAudioManager::SetupSuspectLastSeenReport()
 						break;
 					default:
 						debug("\n *** UNKNOWN CAR MODEL INDEX %d *** ",
-						      automobile->m_modelIndex);
+						      veh->m_modelIndex);
 						return;
 					}
 					if(policeChannelTimer != 60) {
@@ -9317,6 +9398,7 @@ InjectHook(0x580500, &cAudioManager::PlaySuspectLastSeen, PATCH_JUMP);
 InjectHook(0x569420, &cAudioManager::PostInitialiseGameSpecificSetup, PATCH_JUMP);
 InjectHook(0x569640, &cAudioManager::PostTerminateGameSpecificShutdown, PATCH_JUMP);
 InjectHook(0x569400, &cAudioManager::PreInitialiseGameSpecificSetup, PATCH_JUMP);
+InjectHook(0x579550, &cAudioManager::PreloadMissionAudio, PATCH_JUMP);
 InjectHook(0x569570, &cAudioManager::PreTerminateGameSpecificShutdown, PATCH_JUMP);
 // InjectHook(0x57BA60, &cAudioManager::ProcessActiveQueues, PATCH_JUMP);
 InjectHook(0x56C940, &cAudioManager::ProcessAirBrakes, PATCH_JUMP);

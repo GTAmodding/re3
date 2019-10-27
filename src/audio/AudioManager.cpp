@@ -3887,16 +3887,20 @@ void
 cAudioManager::ProcessFrontEnd()
 {
 	bool processed;
+	bool processedPickup;
+	bool processedMission;
 	int16 sample;
 
-	static uint32 counter = 0;
+	static uint8 counter = 0;
+	static uint32 cPickupNextFrame = 0;
+	static uint32 cPartMisComNextFrame = 0;
 
 	for(uint32 i = 0; i < m_asAudioEntities[m_sQueueSample.m_nEntityIndex].m_AudioEvents; i++) {
+		processedPickup = 0;
 		processed = 0;
+		processedMission = 0;
 		switch(m_asAudioEntities[m_sQueueSample.m_nEntityIndex].m_awAudioEvent[i]) {
-		case SOUND_WEAPON_SNIPER_SHOT_NO_ZOOM:
-			m_sQueueSample.m_nSampleIndex = SFX_ERROR_FIRE_RIFLE;
-			break;
+		case SOUND_WEAPON_SNIPER_SHOT_NO_ZOOM: m_sQueueSample.m_nSampleIndex = SFX_ERROR_FIRE_RIFLE; break;
 		case SOUND_WEAPON_ROCKET_SHOT_NO_ZOOM:
 			m_sQueueSample.m_nSampleIndex = SFX_ERROR_FIRE_ROCKET_LAUNCHER;
 			break;
@@ -3904,7 +3908,7 @@ cAudioManager::ProcessFrontEnd()
 		case SOUND_GARAGE_BAD_VEHICLE:
 		case SOUND_3C:
 			m_sQueueSample.m_nSampleIndex = SFX_PICKUP_ERROR_LEFT;
-			processed = 1;
+			processed = true;
 			break;
 		case SOUND_GARAGE_OPENING:
 		case SOUND_GARAGE_BOMB1_SET:
@@ -3920,16 +3924,19 @@ cAudioManager::ProcessFrontEnd()
 		case SOUND_EVIDENCE_PICKUP:
 		case SOUND_UNLOAD_GOLD:
 			m_sQueueSample.m_nSampleIndex = SFX_PICKUP_2_LEFT;
-			processed = 1;
+			processedPickup = true;
+			processed = true;
 			break;
 		case SOUND_PICKUP_WEAPON_BOUGHT:
 		case SOUND_PICKUP_WEAPON:
 			m_sQueueSample.m_nSampleIndex = SFX_PICKUP_1_LEFT;
-			processed = 1;
+			processedPickup = true;
+			processed = true;
 			break;
 		case SOUND_4A:
 			m_sQueueSample.m_nSampleIndex = SFX_PICKUP_ERROR_LEFT;
-			processed = 1;
+			processedPickup = true;
+			processed = true;
 			break;
 		case SOUND_PICKUP_BONUS:
 		case SOUND_PICKUP_MONEY:
@@ -3938,58 +3945,63 @@ cAudioManager::ProcessFrontEnd()
 		case SOUND_PICKUP_PACMAN_PACKAGE:
 		case SOUND_PICKUP_FLOAT_PACKAGE:
 			m_sQueueSample.m_nSampleIndex = SFX_PICKUP_3_LEFT;
-			processed = 1;
+			processedPickup = true;
+			processed = true;
 			break;
 		case SOUND_PAGER: m_sQueueSample.m_nSampleIndex = SFX_PAGER; break;
 		case SOUND_RACE_START_3:
 		case SOUND_RACE_START_2:
 		case SOUND_RACE_START_1:
 		case SOUND_CLOCK_TICK: m_sQueueSample.m_nSampleIndex = SFX_TIMER_BEEP; break;
-		case SOUND_RACE_START_GO:
-			m_sQueueSample.m_nSampleIndex = SFX_PART_MISSION_COMPLETE;
-			break;
+		case SOUND_RACE_START_GO: m_sQueueSample.m_nSampleIndex = SFX_PART_MISSION_COMPLETE; break;
 		case SOUND_PART_MISSION_COMPLETE:
 			m_sQueueSample.m_nSampleIndex = SFX_PART_MISSION_COMPLETE;
+			processedMission = true;
 			break;
 		case SOUND_FRONTEND_MENU_STARTING:
-			processed = 1;
 			m_sQueueSample.m_nSampleIndex = SFX_START_BUTTON_LEFT;
+			processed = true;
 			break;
 		case SOUND_FRONTEND_MENU_COMPLETED:
-			processed = 1;
 			m_sQueueSample.m_nSampleIndex = SFX_PAGE_CHANGE_AND_BACK_LEFT;
+			processed = true;
 			break;
 		case SOUND_FRONTEND_MENU_DENIED:
-			processed = 1;
 			m_sQueueSample.m_nSampleIndex = SFX_HIGHLIGHT_LEFT;
+			processed = true;
 			break;
 		case SOUND_FRONTEND_MENU_SUCCESS:
-			processed = 1;
 			m_sQueueSample.m_nSampleIndex = SFX_SELECT_LEFT;
+			processed = true;
 			break;
 		case SOUND_FRONTEND_EXIT:
-			processed = 1;
 			m_sQueueSample.m_nSampleIndex = SFX_SUB_MENU_BACK_LEFT;
+			processed = true;
 			break;
 		case SOUND_9A:
-			processed = 1;
 			m_sQueueSample.m_nSampleIndex = SFX_STEREO_LEFT;
+			processed = true;
 			break;
 		case SOUND_9B: m_sQueueSample.m_nSampleIndex = SFX_MONO; break;
 		case SOUND_FRONTEND_AUDIO_TEST:
-			m_sQueueSample.m_nSampleIndex =
-			    m_anRandomTable[0] % 3 + SFX_NOISE_BURST_1;
+			m_sQueueSample.m_nSampleIndex = m_anRandomTable[0] % 3 + SFX_NOISE_BURST_1;
 			break;
 		case SOUND_FRONTEND_FAIL:
-			processed = 1;
 			m_sQueueSample.m_nSampleIndex = SFX_ERROR_LEFT;
+			processed = true;
 			break;
 		case SOUND_FRONTEND_NO_RADIO:
-		case SOUND_FRONTEND_RADIO_CHANGE:
-			m_sQueueSample.m_nSampleIndex = SFX_RADIO_CLICK;
-			break;
+		case SOUND_FRONTEND_RADIO_CHANGE: m_sQueueSample.m_nSampleIndex = SFX_RADIO_CLICK; break;
 		case SOUND_A0: m_sQueueSample.m_nSampleIndex = SFX_INFO; break;
 		default: continue;
+		}
+
+		if(processedPickup) {
+			if(m_nTimeOfRecentCrime <= cPickupNextFrame) continue;
+			cPickupNextFrame = m_nTimeOfRecentCrime + 5;
+		} else if(processedMission) {
+			if(m_nTimeOfRecentCrime <= cPartMisComNextFrame) continue;
+			cPartMisComNextFrame = m_nTimeOfRecentCrime + 5;
 		}
 
 		sample = m_asAudioEntities[m_sQueueSample.m_nEntityIndex].m_awAudioEvent[i];

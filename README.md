@@ -1,76 +1,82 @@
-# Intro
+# re3
+[![Build status](https://ci.appveyor.com/api/projects/status/hyiwgegks122h8jg?svg=true)](https://ci.appveyor.com/project/aap/re3/branch/master)
+<a href="https://discord.gg/jYpXxTm"><img src="https://img.shields.io/badge/discord-join-7289DA.svg?logo=discord&longCache=true&style=flat" /></a>
+<a href="https://ci.appveyor.com/api/projects/aap/re3/artifacts/bin/Debug/re3.dll?branch=master&job=Configuration%3A+Debug"><img src="https://img.shields.io/badge/download-debug-9cf.svg" /></a>
+<a href="https://ci.appveyor.com/api/projects/aap/re3/artifacts/bin/Release/re3.dll?branch=master&job=Configuration%3A+Release"><img src="https://img.shields.io/badge/download-release-blue.svg" /></a>
+
+## Intro
 
 The aim of this project is to reverse GTA III for PC by replacing
 parts of the game [one by one](https://en.wikipedia.org/wiki/Ship_of_Theseus)
 such that we have a working game at all times.
 
-Apparently you can download a binary of the latest version here:
-[Debug](https://ci.appveyor.com/api/projects/aap/re3/artifacts/bin/Debug/re3.dll?branch=master&job=Configuration%3A+Debug), 
-[Release](https://ci.appveyor.com/api/projects/aap/re3/artifacts/bin/Release/re3.dll?branch=master&job=Configuration%3A+Release).
+## How can I try it?
 
-Build status:
-[![Build status](https://ci.appveyor.com/api/projects/status/hyiwgegks122h8jg?svg=true)](https://ci.appveyor.com/project/aap/re3/branch/master)
+- re3 requires game assets to work, so you need to own a copy of GTA III.
+- Since re3 is currently a DLL that works with original GTA III, you need Simple DLL Loader. You can get it [here](https://github.com/aap/simpledllloader).
+- Build re3 or download it from one of the above links (Debug or Release).
+- Make sure you included the re3 in `plugins.cfg` or `dlls.cfg`.
+- re3 start the script `main_freeroam.scm` that comes along with it by default, so you should copy it to from `gamefiles/` to your game's `data/` directory.
 
-Re3 starts the script main_freeroam.scm by default. Make sure you copy it to your data directory.
+![#ffa500](https://placehold.it/15/ffa500/000000?text=+) **Notice**
 
-# Strategy
+If you want to load original script/story, press and hold G while game is loading.
+This includes both starting new game and loading save game.
+
+## I want to contribute, where should I start?
 
 A good approach is to start at the fringes of the code base,
 i.e. classes that don't depend on code that we don't have reversed yet.
 If a function uses only few unreversed functions that would be inconvenient
 to reverse at the time, calling the original functions is acceptable.
 
-# Progress
-
-This is a list of some things that have been reversed to some non-trivial extent.
-Not everything is listed, check the code.
-(TODO: keep this list at least a bit up to date...)
-
+### Unreversed / incomplete classes (at least the ones we know)
 ```
-CPool
-CTxdStore
-CVector
-CVector2D
-CMatrix
-CModelInfo
-CBaseModelInfo
-CSimpleModelInfo
-CTimeModelInfo
-CClumpModelInfo
-CPedModelInfo
-CVehicleModelInfo
-CVisibilityPlugins
-CRenderer
-CSprite
-CSprite2d
-CFont
-CEntity
-CPhysical
-CCollision
-CCullZones
-CTheZones
-CPathFind
+CAudioManager, cDMAudio, cSampleManager and all audio - being worked on
+CAccidentManager
+CBoat
+CBrightLights
+CBulletInfo
+CBulletTraces
 CCam
-CParticle
-CParticleMgr
-CPointLights
-CCoronas
-CAntennas
-CClouds
-CHud
+CCamera
+CCivilianPed
+CCopPed
+CCrane
+CCranes
+CCullZone
+CCullZones
+CEmergencyPed
+CExplosion
+CFallingGlassPane
+CFire
+CFireManager
+CGame
+CGarage
+CGarages
+CGlass
+CMenuManager
+CMotionBlurStreaks
+CPacManPickups
+CPed - being worked on
+CPedIK
+CPhoneInfo - one function left
+CPlayerInfo
+CPlayerPed
+CProjectile
+CProjectileInfo
+CRoadBlocks
+CRunningScript - being worked on
+CStats
+CSpecialFX
+CTrafficLights
+CWaterCannon
+CWaterCannons
+CWeapon
+CWeaponEffects
 ```
 
-# Low hanging fruit
-
-There are a couple of things that have been reversed for other projects
-already that could probably be put into this project without too much effort.
-Again, the list is not complete:
-
-* ~~Animation (https://github.com/aap/iii_anim)~~
-* File Loader (https://github.com/aap/librwgta/tree/master/tools/IIItest)
-* ...
-
-# Coding style
+### Coding style
 
 I started writing in [Plan 9 style](http://man.cat-v.org/plan_9/6/style),
 but realize that this is not the most popular style, so I'm willing to compromise.
@@ -178,7 +184,7 @@ but here are some observations:
 
 * Generally, try to make the code look as if R* could have written it
 
-# Environment Variables
+### Environment Variables
 Here you can find a list of variables that you might need to set in windows:
 ```
 "GTA_III_RE_DIR" * path to "gta3_re" game folder usually where this plugin run.

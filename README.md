@@ -16,12 +16,18 @@ such that we have a working game at all times.
 - Since re3 is currently a DLL that works with original GTA III, you need Simple DLL Loader. You can get it [here](https://github.com/aap/simpledllloader).
 - Build re3 or download it from one of the above links (Debug or Release).
 - Make sure you included the re3 in `plugins.cfg` or `dlls.cfg`.
-- re3 start the script `main_freeroam.scm` that comes along with it by default, so you should copy it to from `gamefiles/` to your game's `data/` directory.
+- re3 starts the script `main_freeroam.scm` that comes along with it by default, so you should copy it to from `gamefiles/` to your game's `data/` directory.
 
 ![#ffa500](https://placehold.it/15/ffa500/000000?text=+) **Notice**
 
 If you want to load original script/story, press and hold G while game is loading.
 This includes both starting new game and loading save game.
+
+![#ffa500](https://placehold.it/15/ffa500/000000?text=+) **Notice if you will build it**
+
+There are various settings at the very bottom of `config.h`, you may want to take a look there. i.e. FIX_BUGS define fixes the bugs we've came across.
+
+https://github.com/GTAmodding/re3/blob/readme/src/core/config.h
 
 ## I want to contribute, where should I start?
 

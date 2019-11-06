@@ -144,17 +144,17 @@ enum Config {
 #	define CHATTYSPLASH	// print what the game is loading
 #endif
 
-#define FIX_BUGS		// fix bugs in the game, TODO: use this more
+#define FIX_BUGS		// fixes bugs that we've came across during reversing, TODO: use this more
 
 // Pad
 #define KANGAROO_CHEAT
 
 // Hud & radar
 #define ASPECT_RATIO_SCALE
-#define TRIANGULAR_BLIPS
+#define TRIANGULAR_BLIPS	// height indicating triangular radar blips, as in VC
 
 // Script
-#define USE_DEBUG_SCRIPT_LOADER
+#define USE_DEBUG_SCRIPT_LOADER	// makes game load main_freeroam.scm by default
 
 // Vehicles
 #define EXPLODING_AIRTRAIN	// can blow up jumbo jet with rocket launcher
@@ -165,6 +165,6 @@ enum Config {
 
 // Peds
 #define ANIMATE_PED_COL_MODEL
-#define VC_PED_PORTS
-#define NEW_WALK_AROUND_ALGORITHM
+#define VC_PED_PORTS			// various ports from VC's CPed, mostly subtle
+#define NEW_WALK_AROUND_ALGORITHM	// to make walking around vehicles/objects less awkward
 #define CANCELLABLE_CAR_ENTER

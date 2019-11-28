@@ -7635,11 +7635,55 @@ cAudioManager::ProcessVehicleRoadNoise(cVehicleParams *params)
 	return 1;
 }
 
-WRAPPER
 void
-cAudioManager::ProcessVehicleSirenOrAlarm(void *)
+cAudioManager::ProcessVehicleSirenOrAlarm(cVehicleParams *params)
 {
-	EAXJMP(0x56C420);
+	if(params->m_fDistance < 12100.f) {
+		CVehicle *veh = params->m_pVehicle;
+		if(veh->m_bSirenOrAlarm == 0 && veh->m_nAlarmState <= 0) return;
+
+		CalculateDistance((bool *)params, params->m_fDistance);
+		m_sQueueSample.m_bVolume = ComputeVolume(80, 110.f, m_sQueueSample.m_fDistance);
+		if(m_sQueueSample.m_bVolume) {
+			m_sQueueSample.m_counter = 5;
+			if(UsesSiren(params->m_nIndex)) {
+				if(params->m_pVehicle->m_status == STATUS_ABANDONED) return;
+				if(veh->m_nCarHornTimer && params->m_nIndex != FIRETRUK) {
+					m_sQueueSample.m_nSampleIndex = SFX_SIREN_FAST;
+					if(params->m_nIndex == FBICAR)
+						m_sQueueSample.m_nFrequency = 16113;
+					else
+						m_sQueueSample.m_nFrequency =
+						    SampleManager.GetSampleBaseFrequency(SFX_SIREN_FAST);
+					m_sQueueSample.m_counter = 60;
+				} else {
+					m_sQueueSample.m_nSampleIndex =
+					    CarSounds[params->m_nIndex].m_nSirenOrAlarmSample;
+					m_sQueueSample.m_nFrequency =
+					    CarSounds[params->m_nIndex].m_nSirenOrAlarmFrequency;
+				}
+			} else {
+				m_sQueueSample.m_nSampleIndex = CarSounds[params->m_nIndex].m_nSirenOrAlarmSample;
+				m_sQueueSample.m_nFrequency = CarSounds[params->m_nIndex].m_nSirenOrAlarmFrequency;
+			}
+			m_sQueueSample.m_bBankIndex = 0;
+			m_sQueueSample.m_bIsDistant = 0;
+			m_sQueueSample.field_16 = 1;
+			m_sQueueSample.m_nLoopCount = 0;
+			m_sQueueSample.m_bEmittingVolume = 80;
+			m_sQueueSample.m_nLoopStart =
+			    SampleManager.GetSampleLoopStartOffset(m_sQueueSample.m_nSampleIndex);
+			m_sQueueSample.m_nLoopEnd = SampleManager.GetSampleLoopEndOffset(m_sQueueSample.m_nSampleIndex);
+			m_sQueueSample.field_48 = 7.0f;
+			m_sQueueSample.m_fSoundIntensity = 110.0f;
+			m_sQueueSample.field_56 = 0;
+			m_sQueueSample.field_76 = 5;
+			m_sQueueSample.m_bReverbFlag = 1;
+			m_sQueueSample.m_bRequireReflection = 0;
+			AddSampleToRequestedQueue();
+			return;
+		}
+	}
 }
 
 void
@@ -9594,6 +9638,7 @@ InjectHook(0x56C770, &cAudioManager::ProcessVehicleDoors, PATCH_JUMP);
 InjectHook(0x56C200, &cAudioManager::ProcessVehicleHorn, PATCH_JUMP);
 InjectHook(0x56C640, &cAudioManager::ProcessVehicleReverseWarning, PATCH_JUMP);
 InjectHook(0x56A230, &cAudioManager::ProcessVehicleRoadNoise, PATCH_JUMP);
+InjectHook(0x56C420, &cAudioManager::ProcessVehicleSirenOrAlarm, PATCH_JUMP);
 InjectHook(0x56BCB0, &cAudioManager::ProcessVehicleSkidding, PATCH_JUMP);
 InjectHook(0x575F30, &cAudioManager::ProcessWaterCannon, PATCH_JUMP);
 InjectHook(0x578370, &cAudioManager::ProcessWeather, PATCH_JUMP);

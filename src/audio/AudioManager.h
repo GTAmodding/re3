@@ -640,7 +640,7 @@ public:
 	void ProcessVehicleOneShots(void *);                       // todo
 	bool ProcessVehicleReverseWarning(cVehicleParams *params); /// ok
 	bool ProcessVehicleRoadNoise(cVehicleParams *params);      /// ok
-	void ProcessVehicleSirenOrAlarm(void *);                   // todo
+	void ProcessVehicleSirenOrAlarm(cVehicleParams *params);   /// ok
 	void ProcessVehicleSkidding(cVehicleParams *params);       /// ok
 	void ProcessWaterCannon(int32);                            /// ok
 	void ProcessWeather(int32 id);                             /// ok

@@ -809,7 +809,7 @@ public:
 class cPedParams
 {
 public:
-	char m_bDistanceCalculated;
+	bool m_bDistanceCalculated;
 	char gap_1[3];
 	float m_fDistance;
 	CPed *m_pPed;

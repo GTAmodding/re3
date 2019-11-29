@@ -286,7 +286,7 @@ class cTransmission;
 class cVehicleParams
 {
 public:
-	uint8 m_bDistancECalculated;
+	bool m_bDistanceCalculated;
 	char gap_1[3];
 	float m_fDistance;
 	CVehicle *m_pVehicle;
@@ -295,4 +295,4 @@ public:
 	float m_fVelocityChange;
 };
 
-static_assert(sizeof(cVehicleParams) == 0x18, "CVehicle: error");
+static_assert(sizeof(cVehicleParams) == 0x18, "cVehicleParams: error");

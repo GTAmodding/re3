@@ -440,11 +440,11 @@ public:
 	void AddSampleToRequestedQueue();                        /// ok
 	void AgeCrimes();                                        /// ok
 
-	void CalculateDistance(bool *ptr, float dist); /// ok
-	bool CheckForAnAudioFileOnCD() const;          /// ok
-	void ClearActiveSamples();                     /// ok
-	void ClearMissionAudio();                      /// ok
-	void ClearRequestedQueue();                    /// ok
+	void CalculateDistance(bool &condition, float dist); /// ok
+	bool CheckForAnAudioFileOnCD() const;                /// ok
+	void ClearActiveSamples();                           /// ok
+	void ClearMissionAudio();                            /// ok
+	void ClearRequestedQueue();                          /// ok
 	int32 ComputeDopplerEffectedFrequency(uint32 oldFreq, float position1, float position2,
 	                                      float speedMultiplier) const;                   /// ok
 	int32 ComputePan(float, CVector *);                                                   /// ok

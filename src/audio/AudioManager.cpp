@@ -517,11 +517,11 @@ cAudioManager::AgeCrimes()
 }
 
 void
-cAudioManager::CalculateDistance(bool *ptr, float dist)
+cAudioManager::CalculateDistance(bool &condition, float dist)
 {
-	if(*ptr == false) {
+	if(condition == false) {
 		m_sQueueSample.m_fDistance = Sqrt(dist);
-		*ptr = true;
+		condition = true;
 	}
 }
 
@@ -3180,7 +3180,7 @@ cAudioManager::ProcessAirBrakes(cVehicleParams *params)
 	   (automobile->m_fVelocityChangeForAudio > -0.025f || params->m_fVelocityChange <= 0.025f))
 		return 1;
 
-	CalculateDistance((bool *)params, params->m_fDistance);
+	CalculateDistance(params->m_bDistanceCalculated, params->m_fDistance);
 	rand = m_anRandomTable[0] % 10 + 70;
 	m_sQueueSample.m_bVolume = ComputeVolume(rand, 30.0f, m_sQueueSample.m_fDistance);
 	if(m_sQueueSample.m_bVolume) {
@@ -3272,7 +3272,7 @@ cAudioManager::ProcessBoatEngine(cVehicleParams *params)
 	if(params->m_fDistance < 2500.f) {
 		boat = (CBoat *)params->m_pVehicle;
 		if(params->m_nIndex == REEFER) {
-			CalculateDistance((bool *)params, params->m_fDistance);
+			CalculateDistance(params->m_bDistanceCalculated, params->m_fDistance);
 			m_sQueueSample.m_bVolume = ComputeVolume(80, 50.f, m_sQueueSample.m_fDistance);
 			if(m_sQueueSample.m_bVolume) {
 				m_sQueueSample.m_counter = 39;
@@ -3378,7 +3378,7 @@ cAudioManager::ProcessBoatEngine(cVehicleParams *params)
 					m_sQueueSample.m_nSampleIndex = SFX_POLICE_BOAT_ACCEL;
 				}
 			}
-			CalculateDistance((bool *)params, params->m_fDistance);
+			CalculateDistance(params->m_bDistanceCalculated, params->m_fDistance);
 			m_sQueueSample.m_bVolume = ComputeVolume(emittingVol, 50.f, m_sQueueSample.m_fDistance);
 			if(!m_sQueueSample.m_bVolume) return 1;
 			m_sQueueSample.m_nFrequency += (m_sQueueSample.m_nEntityIndex << 16) % 1000;
@@ -3417,7 +3417,7 @@ cAudioManager::ProcessBoatMovingOverWater(cVehicleParams *params)
 
 	velocityChange = min(0.75f, velocityChange);
 	multiplier = (velocityChange - 0.0005f) * 1.3342f;
-	CalculateDistance((bool *)params, params->m_fDistance);
+	CalculateDistance(params->m_bDistanceCalculated, params->m_fDistance);
 	vol = (30.f * multiplier);
 	m_sQueueSample.m_bVolume = ComputeVolume(vol, 50.f, m_sQueueSample.m_fDistance);
 	if(m_sQueueSample.m_bVolume) {
@@ -3447,13 +3447,13 @@ void
 cAudioManager::ProcessBridge()
 {
 	float dist;
-	bool something = false;
+	bool distCalculated = false;
 
 	if(CBridge::pLiftRoad) {
 		m_sQueueSample.m_vecPos = CBridge::pLiftRoad->GetPosition();
 		dist = GetDistanceSquared(&m_sQueueSample.m_vecPos);
 		if(dist < 202500.0f) {
-			CalculateDistance(&something, dist);
+			CalculateDistance(distCalculated, dist);
 			switch(CBridge::State) {
 			case STATE_BRIDGE_LOCKED:
 			case STATE_LIFT_PART_IS_UP:
@@ -3583,7 +3583,7 @@ cAudioManager::ProcessCarBombTick(cVehicleParams *params)
 	if(params->m_fDistance >= 1600.f) return 0;
 	automobile = (CAutomobile *)params->m_pVehicle;
 	if(automobile->bEngineOn && automobile->m_bombType == CARBOMB_TIMEDACTIVE) {
-		CalculateDistance((bool *)params, params->m_fDistance);
+		CalculateDistance(params->m_bDistanceCalculated, params->m_fDistance);
 		m_sQueueSample.m_bVolume = ComputeVolume(60, 40.f, m_sQueueSample.m_fDistance);
 		if(m_sQueueSample.m_bVolume) {
 			m_sQueueSample.m_counter = 35;
@@ -3749,7 +3749,7 @@ cAudioManager::ProcessEngineDamage(cVehicleParams *params)
 			m_sQueueSample.field_16 = 7;
 			m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(SFX_CAR_ON_FIRE);
 		}
-		CalculateDistance((bool *)params, params->m_fDistance);
+		CalculateDistance(params->m_bDistanceCalculated, params->m_fDistance);
 		m_sQueueSample.m_bVolume = ComputeVolume(emittingVolume, 40.f, m_sQueueSample.m_fDistance);
 		if(m_sQueueSample.m_bVolume) {
 			m_sQueueSample.m_counter = 28;
@@ -3932,12 +3932,12 @@ void
 cAudioManager::ProcessFireHydrant()
 {
 	float distSquared;
-	bool something = false;
+	bool distCalculated = false;
 
 	m_sQueueSample.m_vecPos = *(CVector *)((size_t)m_asAudioEntities[m_sQueueSample.m_nEntityIndex].m_pEntity + 52);
 	distSquared = GetDistanceSquared(&m_sQueueSample.m_vecPos);
 	if(distSquared < 1225.f) {
-		CalculateDistance(&something, distSquared);
+		CalculateDistance(distCalculated, distSquared);
 		m_sQueueSample.m_bVolume = ComputeVolume(40, 35.f, m_sQueueSample.m_fDistance);
 		if(m_sQueueSample.m_bVolume) {
 			m_sQueueSample.m_counter = 0;
@@ -4154,7 +4154,7 @@ cAudioManager::ProcessHelicopter(cVehicleParams *params)
 
 	if(gHeliSfxRanges[0].m_fMaxDistance * gHeliSfxRanges[0].m_fMaxDistance <= params->m_fDistance) return 0;
 
-	CalculateDistance((bool *)params, params->m_fDistance);
+	CalculateDistance(params->m_bDistanceCalculated, params->m_fDistance);
 	heli = (CHeli *)params->m_pVehicle;
 	for(uint32 i = 0; i < 3; i++) {
 		MaxDist = gHeliSfxRanges[i].m_fMaxDistance;
@@ -4253,7 +4253,7 @@ cAudioManager::ProcessJumbo(cVehicleParams *params)
 	float position;
 
 	if(params->m_fDistance < 193600.0f) {
-		CalculateDistance((bool *)params, params->m_fDistance);
+		CalculateDistance(params->m_bDistanceCalculated, params->m_fDistance);
 		plane = (CPlane *)params->m_pVehicle;
 		DoJumboVolOffset();
 		position = PlanePathPosition[plane->m_nPlaneId];
@@ -5213,7 +5213,7 @@ cAudioManager::ProcessModelCarEngine(cVehicleParams *params)
 				else
 					emittingVol = 90;
 				if(emittingVol) {
-					CalculateDistance((bool *)params, params->m_fDistance);
+					CalculateDistance(params->m_bDistanceCalculated, params->m_fDistance);
 					m_sQueueSample.m_bVolume =
 					    ComputeVolume(emittingVol, 30.f, m_sQueueSample.m_fDistance);
 					if(m_sQueueSample.m_bVolume) {
@@ -5536,7 +5536,7 @@ cAudioManager::ProcessPedHeadphones(cPedParams *params)
 	if(params->m_fDistance < 49.f) {
 		ped = params->m_pPed;
 		if(!ped->bIsAimingGun || ped->m_bodyPartBleeding != 2) {
-			CalculateDistance((bool *)params, params->m_fDistance);
+			CalculateDistance(params->m_bDistanceCalculated, params->m_fDistance);
 			if(ped->bInVehicle && ped->m_nPedState == PED_DRIVING) {
 				emittingVol = 10;
 				veh = ped->m_pMyVehicle;
@@ -6994,7 +6994,7 @@ cAudioManager::ProcessRainOnVehicle(cVehicleParams *params)
 		veh = params->m_pVehicle;
 		if(veh->m_bRainAudioCounter >= 2) {
 			veh->m_bRainAudioCounter = 0;
-			CalculateDistance((bool *)params, params->m_fDistance);
+			CalculateDistance(params->m_bDistanceCalculated, params->m_fDistance);
 			emittingVol = 30.f * CWeather::Rain;
 			m_sQueueSample.m_bVolume = ComputeVolume(emittingVol, 22.f, m_sQueueSample.m_fDistance);
 			if(m_sQueueSample.m_bVolume) {
@@ -7043,7 +7043,7 @@ cAudioManager::ProcessReverseGear(cVehicleParams *params)
 	if(params->m_fDistance >= 900.f) return 0;
 	veh = params->m_pVehicle;
 	if(veh->bEngineOn && (veh->m_fGasPedal < 0.0f || !veh->m_nCurrentGear)) {
-		CalculateDistance((bool *)params, params->m_fDistance);
+		CalculateDistance(params->m_bDistanceCalculated, params->m_fDistance);
 		automobile = (CAutomobile *)params->m_pVehicle;
 		if(automobile->m_nWheelsOnGround) {
 			modificator = params->m_fVelocityChange / params->m_pTransmission->fMaxReverseVelocity;
@@ -7261,7 +7261,7 @@ cAudioManager::ProcessTrainNoise(cVehicleParams *params)
 	if(params->m_fDistance >= 90000.f) return 0;
 
 	if(params->m_fVelocityChange > 0.0f) {
-		CalculateDistance((bool *)params, params->m_fDistance);
+		CalculateDistance(params->m_bDistanceCalculated, params->m_fDistance);
 		train = (CTrain *)params->m_pVehicle;
 		speedMultipler = min(1.0f, train->m_fSpeed * 250.f / 51.f);
 		emittingVol = (75.f * speedMultipler);
@@ -7326,7 +7326,7 @@ cAudioManager::ProcessVehicle(CVehicle *veh)
 	cVehicleParams params;
 	m_sQueueSample.m_vecPos = veh->GetPosition();
 
-	params.m_bDistancECalculated = 0;
+	params.m_bDistanceCalculated = false;
 	params.m_fDistance = GetDistanceSquared(&m_sQueueSample.m_vecPos);
 	params.m_pVehicle = veh;
 	params.m_pTransmission = nil;
@@ -7419,7 +7419,7 @@ cAudioManager::ProcessVehicleDoors(cVehicleParams *params)
 	if(params->m_fDistance >= 1600.f) return 0;
 
 	automobile = (CAutomobile *)params->m_pVehicle;
-	CalculateDistance((bool *)params, params->m_fDistance);
+	CalculateDistance(params->m_bDistanceCalculated, params->m_fDistance);
 	for(int32 i = 0; i < 6; i++) {
 		if(automobile->Damage.GetDoorStatus(i) == 2) {
 			doorState = automobile->Doors[i].m_nDoorState;
@@ -7475,7 +7475,7 @@ cAudioManager::ProcessVehicleHorn(cVehicleParams *params)
 		   automobile->m_modelIndex != MI_MRWHOOP) {
 			if(automobile->m_nCarHornTimer) {
 				if(!params->m_pVehicle->m_status) {
-					CalculateDistance((bool *)params, params->m_fDistance);
+					CalculateDistance(params->m_bDistanceCalculated, params->m_fDistance);
 					m_sQueueSample.m_bVolume = ComputeVolume(80, 40.f, m_sQueueSample.m_fDistance);
 					if(m_sQueueSample.m_bVolume) {
 						m_sQueueSample.m_counter = 4;
@@ -7507,7 +7507,7 @@ cAudioManager::ProcessVehicleHorn(cVehicleParams *params)
 					automobile->field_22D =
 					    (LOBYTE(m_nTimeOfRecentCrime) + LOBYTE(m_sQueueSample.m_nEntityIndex)) & 7;
 				if(hornPatternsArray[automobile->field_22D][44 - automobile->m_nCarHornTimer]) {
-					CalculateDistance((bool *)params, params->m_fDistance);
+					CalculateDistance(params->m_bDistanceCalculated, params->m_fDistance);
 					m_sQueueSample.m_bVolume = ComputeVolume(80, 40.f, m_sQueueSample.m_fDistance);
 					if(m_sQueueSample.m_bVolume) {
 						m_sQueueSample.m_counter = 4;
@@ -7553,7 +7553,7 @@ cAudioManager::ProcessVehicleReverseWarning(cVehicleParams *params)
 	if(params->m_fDistance >= 2500.f) return 0;
 
 	if(veh->bEngineOn && veh->m_fGasPedal < 0.0f) {
-		CalculateDistance((bool *)params, params->m_fDistance);
+		CalculateDistance(params->m_bDistanceCalculated, params->m_fDistance);
 		m_sQueueSample.m_bVolume = ComputeVolume(60, 50.f, m_sQueueSample.m_fDistance);
 		if(m_sQueueSample.m_bVolume) {
 			m_sQueueSample.m_counter = 12;
@@ -7595,7 +7595,7 @@ cAudioManager::ProcessVehicleRoadNoise(cVehicleParams *params)
 		if(params->m_pVehicle->m_vecMoveSpeed.z) {
 			velocity = Abs(params->m_fVelocityChange);
 			if(velocity > 0.0f) {
-				CalculateDistance((bool *)params, params->m_fDistance);
+				CalculateDistance(params->m_bDistanceCalculated, params->m_fDistance);
 				emittingVol =
 				    30.f * min(1.f, velocity / (0.5f * params->m_pTransmission->fMaxVelocity));
 				m_sQueueSample.m_bVolume = ComputeVolume(emittingVol, 95.f, m_sQueueSample.m_fDistance);
@@ -7642,7 +7642,7 @@ cAudioManager::ProcessVehicleSirenOrAlarm(cVehicleParams *params)
 		CVehicle *veh = params->m_pVehicle;
 		if(veh->m_bSirenOrAlarm == 0 && veh->m_nAlarmState <= 0) return;
 
-		CalculateDistance((bool *)params, params->m_fDistance);
+		CalculateDistance(params->m_bDistanceCalculated, params->m_fDistance);
 		m_sQueueSample.m_bVolume = ComputeVolume(80, 110.f, m_sQueueSample.m_fDistance);
 		if(m_sQueueSample.m_bVolume) {
 			m_sQueueSample.m_counter = 5;
@@ -7698,7 +7698,7 @@ cAudioManager::ProcessVehicleSkidding(cVehicleParams *params)
 	if(params->m_fDistance >= 1600.f) return;
 	automobile = (CAutomobile *)params->m_pVehicle;
 	if(!automobile->m_nWheelsOnGround) return;
-	CalculateDistance((bool *)params, params->m_fDistance);
+	CalculateDistance(params->m_bDistanceCalculated, params->m_fDistance);
 	for(int32 i = 0; i < 4; i++) {
 		if(!automobile->m_aWheelState[i] || automobile->Damage.GetWheelStatus(i) == WHEEL_STATUS_MISSING)
 			continue;
@@ -7887,7 +7887,7 @@ cAudioManager::ProcessWetRoadNoise(cVehicleParams *params)
 		if(params->m_pVehicle->m_vecMoveSpeed.z) {
 			velChange = Abs(params->m_fVelocityChange);
 			if(velChange > 0.f) {
-				CalculateDistance((bool *)params, params->m_fDistance);
+				CalculateDistance(params->m_bDistanceCalculated, params->m_fDistance);
 				relativeVelocity =
 				    min(1.0f, velChange / (0.5f * params->m_pTransmission->fMaxVelocity));
 				emittingVol = 23.0f * relativeVelocity * CWeather::WetRoads;
@@ -8916,14 +8916,14 @@ cAudioManager::SetupPedComments(cPedParams *params, uint32 sound)
 		soundIntensity = 50.f;
 
 		if(params->m_fDistance < maxDist) {
-			CalculateDistance((bool *)params, params->m_fDistance);
+			CalculateDistance(params->m_bDistanceCalculated, params->m_fDistance);
 			if(sound != SOUND_PAGER) {
 				switch(sound) {
 				case SOUND_AMMUNATION_WELCOME_1:
 				case SOUND_AMMUNATION_WELCOME_2:
 				case SOUND_AMMUNATION_WELCOME_3: emittingVol = maxVolume; break;
 				default:
-					if(CWorld::GetIsLineOfSightClear(TheCamera.GetGameCamPosition(),
+					if(CWorld::GetIsLineOfSightClear(TheCamera.GetPosition(),
 					                                 m_sQueueSample.m_vecPos, 1, 0, 0, 0, 0, 0,
 					                                 0)) {
 						emittingVol = maxVolume;
@@ -8977,14 +8977,14 @@ cAudioManager::SetupPedComments(cPedParams *params, uint32 sound)
 		}
 
 		if(params->m_fDistance < maxDist) {
-			CalculateDistance((bool *)params, params->m_fDistance);
+			CalculateDistance(params->m_bDistanceCalculated, params->m_fDistance);
 			if(sound != SOUND_PAGER) {
 				switch(sound) {
 				case SOUND_AMMUNATION_WELCOME_1:
 				case SOUND_AMMUNATION_WELCOME_2:
 				case SOUND_AMMUNATION_WELCOME_3: emittingVol = maxVolume; break;
 				default:
-					if(CWorld::GetIsLineOfSightClear(TheCamera.GetGameCamPosition(),
+					if(CWorld::GetIsLineOfSightClear(TheCamera.GetPosition(),
 					                                 m_sQueueSample.m_vecPos, 1, 0, 0, 0, 0, 0,
 					                                 0)) {
 						emittingVol = maxVolume;

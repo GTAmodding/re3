@@ -517,11 +517,11 @@ cAudioManager::AgeCrimes()
 }
 
 void
-cAudioManager::CalculateDistance(bool &condition, float dist)
+cAudioManager::CalculateDistance(bool &distCalculated, float dist)
 {
-	if(condition == false) {
+	if(!distCalculated) {
 		m_sQueueSample.m_fDistance = Sqrt(dist);
-		condition = true;
+		distCalculated = true;
 	}
 }
 

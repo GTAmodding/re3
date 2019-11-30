@@ -6491,7 +6491,6 @@ cAudioManager::ProcessPlayersVehicleEngine(cVehicleParams *params, CAutomobile *
 	float relativeVelocityChange;
 	float accelerationMultipler;
 	uint8 wheelInUseCounter;
-	uint8 i;
 	float time;
 	int baseFreq;
 	uint8 vol;
@@ -6539,19 +6538,15 @@ cAudioManager::ProcessPlayersVehicleEngine(cVehicleParams *params, CAutomobile *
 	velocityChange = params->m_fVelocityChange;
 	relativeVelocityChange = 2.0f * velocityChange / transmission->fMaxVelocity;
 
-	accelerationMultipler = 0.0f;
-
-	if(relativeVelocityChange > 1.0f) accelerationMultipler = relativeVelocityChange;
-
+	accelerationMultipler = min(min(1.f, relativeVelocityChange), 0.f);
 	gasPedalAudio = accelerationMultipler;
 	currentGear = params->m_pVehicle->m_nCurrentGear;
+
 	if(transmission->nDriveType == '4') {
 		wheelInUseCounter = 0;
-		i = 0;
-		do {
+		for (uint8 i = 0; i < 4; i++){
 			if(automobile->m_aWheelState[i]) ++wheelInUseCounter;
-			++i;
-		} while(i < 4);
+		}
 		if(wheelInUseCounter > 2) lostTraction = 1;
 	} else if(transmission->nDriveType == 'F') {
 		if((automobile->m_aWheelState[0] || automobile->m_aWheelState[2]) &&
@@ -6622,7 +6617,8 @@ cAudioManager::ProcessPlayersVehicleEngine(cVehicleParams *params, CAutomobile *
 	if(!nCruising) {
 		if(accelerateState < 150 || !automobile->m_nWheelsOnGround || automobile->bIsHandbrakeOn ||
 		   lostTraction ||
-		   currentGear < 2u && velocityChange - automobile->m_fVelocityChangeForAudio >= 0.01f) {
+		   currentGear < 2 &&
+		       velocityChange - automobile->m_fVelocityChangeForAudio < 0.01f) { // here could be used abs
 			if(!automobile->m_nWheelsOnGround || automobile->bIsHandbrakeOn || lostTraction) {
 				if(!automobile->m_nWheelsOnGround && automobile->m_nDriveWheelsOnGround ||
 				   (automobile->bIsHandbrakeOn && !bHandbrakeOnLastFrame ||

@@ -7,6 +7,8 @@
 #include "World.h"
 #include "RpAnimBlend.h"
 #include "General.h"
+#include "Pools.h"
+#include "Darkel.h"
 
 CPlayerPed::~CPlayerPed()
 {
@@ -380,7 +382,9 @@ CPlayerPed::SetRealMoveAnim(void)
 						curRunAssoc->flags &= ~ASSOC_RUNNING;
 						curRunAssoc->blendAmount = 0.0f;
 						curRunAssoc->blendDelta = 0.0f;
-					} else if (curSprintAssoc->blendDelta < 0.0f) {
+					} else if (curSprintAssoc->blendDelta >= 0.0f) {
+
+						// Stop sprinting when tired
 						curSprintAssoc->flags |= ASSOC_DELETEFADEDOUT;
 						curSprintAssoc->blendDelta = -1.0f;
 						curRunAssoc->blendDelta = 1.0f;
@@ -450,6 +454,212 @@ CPlayerPed::SetRealMoveAnim(void)
 	}
 }
 
+void
+CPlayerPed::RestoreSprintEnergy(float restoreSpeed)
+{
+	if (m_fCurrentStamina < m_fMaxStamina)
+		m_fCurrentStamina += restoreSpeed * CTimer::GetTimeStep() * 0.5f;
+}
+
+bool
+CPlayerPed::DoWeaponSmoothSpray(void)
+{
+	if (m_nPedState == PED_ATTACK && !m_pPointGunAt) {
+		eWeaponType weapon = GetWeapon()->m_eWeaponType;
+		if (weapon == WEAPONTYPE_FLAMETHROWER || weapon == WEAPONTYPE_COLT45 || weapon == WEAPONTYPE_UZI || weapon == WEAPONTYPE_SHOTGUN || 
+			weapon == WEAPONTYPE_AK47 || weapon == WEAPONTYPE_M16 || weapon == WEAPONTYPE_HELICANNON)
+			return true;
+	}
+	return false;
+}
+
+void
+CPlayerPed::DoStuffToGoOnFire(void)
+{
+	if (m_nPedState == PED_SNIPER_MODE)
+		TheCamera.ClearPlayerWeaponMode();
+}
+
+bool
+CPlayerPed::DoesTargetHaveToBeBroken(CVector target, CWeapon *weaponUsed)
+{
+	CVector distVec = target - GetPosition();
+
+	if (distVec.Magnitude() > CWeaponInfo::GetWeaponInfo(weaponUsed->m_eWeaponType)->m_fRange)
+		return true;
+
+	if (weaponUsed->m_eWeaponType != WEAPONTYPE_SHOTGUN && weaponUsed->m_eWeaponType != WEAPONTYPE_AK47)
+		return false;
+
+	distVec.Normalise();
+
+	if (DotProduct(distVec,GetForward()) < 0.4f)
+		return true;
+
+	return false;
+}
+
+// Cancels landing anim while running & jumping? I think
+void
+CPlayerPed::RunningLand(CPad *padUsed)
+{
+	CAnimBlendAssociation *landAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_FALL_LAND);
+	if (landAssoc && landAssoc->currentTime == 0.0f && m_fMoveSpeed > 1.5f
+		&& padUsed && (padUsed->GetPedWalkLeftRight() != 0.0f || padUsed->GetPedWalkUpDown() != 0.0f)) {
+
+		landAssoc->blendDelta = -1000.0f;
+		landAssoc->flags |= ASSOC_DELETEFADEDOUT;
+
+		CAnimManager::AddAnimation(GetClump(), ASSOCGRP_STD, ANIM_JUMP_LAND)->SetFinishCallback(FinishJumpCB, this);
+
+		if (m_nPedState == PED_JUMP)
+			RestorePreviousState();
+	}
+}
+
+bool
+CPlayerPed::IsThisPedAttackingPlayer(CPed *suspect)
+{
+	if (suspect->m_pPointGunAt == this)
+		return true;
+
+	switch (suspect->m_objective) {
+		case OBJECTIVE_KILL_CHAR_ON_FOOT:
+		case OBJECTIVE_KILL_CHAR_ANY_MEANS:
+			if (suspect->m_pedInObjective == this)
+				return true;
+
+			break;
+		default:
+			break;
+	}
+	return false;
+}
+
+void
+CPlayerPed::PlayerControlSniper(CPad *padUsed)
+{
+	ProcessWeaponSwitch(padUsed);
+	TheCamera.PlayerExhaustion = (1.0f - (m_fCurrentStamina - -150.0f) / 300.0f) * 0.9f + 0.1f;
+
+	if (!padUsed->GetTarget()) {
+		RestorePreviousState();
+		TheCamera.ClearPlayerWeaponMode();
+	}
+
+	if (padUsed->WeaponJustDown()) {
+		CVector firePos(0.0f, 0.0f, 0.6f);
+		firePos = GetMatrix() * firePos;
+		GetWeapon()->Fire(this, &firePos);
+	}
+	GetWeapon()->Update(m_audioEntityId);
+}
+
+// I think R* also used goto in here.
+void
+CPlayerPed::ProcessWeaponSwitch(CPad *padUsed)
+{
+	if (CDarkel::FrenzyOnGoing())
+		goto switchDetectDone;
+
+	// The fact that m_nSelectedWepSlot is int8 makes below loops circular loop.
+
+	if (padUsed->CycleWeaponRightJustDown() && !m_pPointGunAt) {
+
+		if (TheCamera.PlayerWeaponMode.Mode != CCam::MODE_M16_1STPERSON
+			&& TheCamera.PlayerWeaponMode.Mode != CCam::MODE_M16_1STPERSON_RUNABOUT
+			&& TheCamera.PlayerWeaponMode.Mode != CCam::MODE_SNIPER
+			&& TheCamera.PlayerWeaponMode.Mode != CCam::MODE_SNIPER_RUNABOUT
+			&& TheCamera.PlayerWeaponMode.Mode != CCam::MODE_ROCKETLAUNCHER
+			&& TheCamera.PlayerWeaponMode.Mode != CCam::MODE_ROCKETLAUNCHER_RUNABOUT) {
+
+			for (m_nSelectedWepSlot = m_currentWeapon + 1; m_nSelectedWepSlot < WEAPONTYPE_TOTAL_INVENTORY_WEAPONS; ++m_nSelectedWepSlot) {
+				if (HasWeapon(m_nSelectedWepSlot) && GetWeapon(m_nSelectedWepSlot).HasWeaponAmmoToBeUsed()) {
+					goto switchDetectDone;
+				}
+			}
+			m_nSelectedWepSlot = WEAPONTYPE_UNARMED;
+		}
+	} else if (padUsed->CycleWeaponLeftJustDown() && !m_pPointGunAt) {
+		if (TheCamera.PlayerWeaponMode.Mode != CCam::MODE_M16_1STPERSON
+			&& TheCamera.PlayerWeaponMode.Mode != CCam::MODE_SNIPER
+			&& TheCamera.PlayerWeaponMode.Mode != CCam::MODE_ROCKETLAUNCHER) {
+
+			for (m_nSelectedWepSlot = m_currentWeapon - 1; m_nSelectedWepSlot >= 0; --m_nSelectedWepSlot) {
+				if (HasWeapon(m_nSelectedWepSlot) && GetWeapon(m_nSelectedWepSlot).HasWeaponAmmoToBeUsed()) {
+					goto switchDetectDone;
+				}
+			}
+			m_nSelectedWepSlot = WEAPONTYPE_DETONATOR;
+		}
+	} else if (CWeaponInfo::GetWeaponInfo((eWeaponType)m_currentWeapon)->m_eWeaponFire != WEAPON_FIRE_MELEE) {
+		if (GetWeapon(m_currentWeapon).m_nAmmoTotal <= 0) {
+			if (TheCamera.PlayerWeaponMode.Mode != CCam::MODE_M16_1STPERSON
+				&& TheCamera.PlayerWeaponMode.Mode != CCam::MODE_SNIPER
+				&& TheCamera.PlayerWeaponMode.Mode != CCam::MODE_ROCKETLAUNCHER) {
+
+				for (m_nSelectedWepSlot = m_currentWeapon - 1; m_nSelectedWepSlot >= 0; --m_nSelectedWepSlot) {
+					if (m_nSelectedWepSlot == WEAPONTYPE_BASEBALLBAT && HasWeapon(WEAPONTYPE_BASEBALLBAT)
+						|| GetWeapon(m_nSelectedWepSlot).m_nAmmoTotal > 0 && m_nSelectedWepSlot != WEAPONTYPE_MOLOTOV && m_nSelectedWepSlot != WEAPONTYPE_GRENADE) {
+						goto switchDetectDone;
+					}
+				}
+				m_nSelectedWepSlot = WEAPONTYPE_UNARMED;
+			}
+		}
+	}
+
+switchDetectDone:
+	if (m_nSelectedWepSlot != m_currentWeapon) {
+		if (m_nPedState != PED_ATTACK && m_nPedState != PED_AIM_GUN && m_nPedState != PED_FIGHT)
+			MakeChangesForNewWeapon(m_nSelectedWepSlot);
+	}
+}
+
+void
+CPlayerPed::PlayerControlM16(CPad *padUsed)
+{
+	ProcessWeaponSwitch(padUsed);
+	TheCamera.PlayerExhaustion = (1.0f - (m_fCurrentStamina - -150.0f) / 300.0f) * 0.9f + 0.1f;
+
+	if (!padUsed->GetTarget()) {
+		RestorePreviousState();
+		TheCamera.ClearPlayerWeaponMode();
+	}
+
+	if (padUsed->GetWeapon()) {
+		CVector firePos(0.0f, 0.0f, 0.6f);
+		firePos = GetMatrix() * firePos;
+		GetWeapon()->Fire(this, &firePos);
+	}
+	GetWeapon()->Update(m_audioEntityId);
+}
+
+void
+CPlayerPed::PlayerControlFighter(CPad *padUsed)
+{
+	float leftRight = padUsed->GetPedWalkLeftRight();
+	float upDown = padUsed->GetPedWalkUpDown();
+	float displacement = sqrt(upDown * upDown + leftRight * leftRight);
+
+	if (displacement > 0.0f) {
+		m_fRotationDest = CGeneral::GetRadianAngleBetweenPoints(0.0f, 0.0f, -leftRight, upDown) - TheCamera.Orientation;
+		m_takeAStepAfterAttack = displacement > 120.0f;
+		if (padUsed->GetSprint() && displacement > 60.0f)
+			bIsAttacking = false;
+	}
+
+	if (!CWeaponInfo::GetWeaponInfo(GetWeapon()->m_eWeaponType)->m_bHeavy && padUsed->JumpJustDown()) {
+		if (m_bShouldEvade && m_pEvadingFrom) {
+			SetEvasiveDive((CPhysical*)m_pEvadingFrom, 1);
+			m_bShouldEvade = false;
+			m_pEvadingFrom = nil;
+		} else {
+			SetJump();
+		}
+	}
+}
+
 class CPlayerPed_ : public CPlayerPed
 {
 public:
@@ -468,4 +678,14 @@ STARTPATCHES
 	InjectHook(0x4F2560, &CPlayerPed::MakeChangesForNewWeapon, PATCH_JUMP);
 	InjectHook(0x4F07C0, &CPlayerPed::ReApplyMoveAnims, PATCH_JUMP);
 	InjectHook(0x4F0880, &CPlayerPed::SetRealMoveAnim, PATCH_JUMP);
+	InjectHook(0x4F1810, &CPlayerPed::PlayerControlFighter, PATCH_JUMP);
+	InjectHook(0x4F1340, &CPlayerPed::RestoreSprintEnergy, PATCH_JUMP);
+	InjectHook(0x4F1380, &CPlayerPed::DoWeaponSmoothSpray, PATCH_JUMP);
+	InjectHook(0x4F36E0, &CPlayerPed::DoStuffToGoOnFire, PATCH_JUMP);
+	InjectHook(0x4F3350, &CPlayerPed::DoesTargetHaveToBeBroken, PATCH_JUMP);
+	InjectHook(0x4F31D0, &CPlayerPed::RunningLand, PATCH_JUMP);
+	InjectHook(0x4F2D00, &CPlayerPed::IsThisPedAttackingPlayer, PATCH_JUMP);
+	InjectHook(0x4F1CF0, &CPlayerPed::PlayerControlSniper, PATCH_JUMP);
+	InjectHook(0x4F2310, &CPlayerPed::ProcessWeaponSwitch, PATCH_JUMP);
+	InjectHook(0x4F1DF0, &CPlayerPed::PlayerControlM16, PATCH_JUMP);
 ENDPATCHES

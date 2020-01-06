@@ -88,6 +88,19 @@ CWeapon::HitsGround(CEntity *holder, CVector *firePos, CEntity *aimingTo)
 	return false;
 }
 
+bool
+CWeapon::HasWeaponAmmoToBeUsed(void)
+{
+	switch (m_eWeaponType) {
+		case WEAPONTYPE_UNARMED:
+		case WEAPONTYPE_BASEBALLBAT:
+			return true;
+			break;
+		default:
+			return m_nAmmoTotal != 0;
+	}
+}
+
 STARTPATCHES
 	InjectHook(0x55C330, &CWeapon::Initialise, PATCH_JUMP);
 	InjectHook(0x5639D0, &CWeapon::Reload, PATCH_JUMP);

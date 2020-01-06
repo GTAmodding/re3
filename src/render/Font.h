@@ -41,11 +41,12 @@ enum {
 
 class CFont
 {
-	static CFontDetails &Details;
 	static int16 Size[3][193];
 	static int16 &NewLine;
 	static CSprite2d *Sprite;	//[3]
 public:
+	static CFontDetails& Details;
+
 	static void Initialise(void);
 	static void Shutdown(void);
 	static void InitPerFrame(void);

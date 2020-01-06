@@ -15,7 +15,8 @@ enum eWeaponType
 	WEAPONTYPE_MOLOTOV,
 	WEAPONTYPE_GRENADE,
 	WEAPONTYPE_DETONATOR,
-	WEAPONTYPE_TOTAL_INVENTORY_WEAPONS,
+	WEAPONTYPE_TOTAL_INVENTORY_WEAPONS = 13,
+	WEAPONTYPE_HELICANNON = 13,
 	WEAPONTYPE_TOTALWEAPONS,
 	WEAPONTYPE_ARMOUR,
 	WEAPONTYPE_RAMMEDBYCAR,
@@ -72,6 +73,7 @@ public:
 	bool IsType2Handed(void);
 	static void DoTankDoomAiming(CEntity *playerVehicle, CEntity *playerPed, CVector *start, CVector *end);
 	bool HitsGround(CEntity* holder, CVector* firePos, CEntity* aimingTo);
+	bool HasWeaponAmmoToBeUsed(void);
 	static void InitialiseWeapons(void);
 	static void UpdateWeapons(void);
 };

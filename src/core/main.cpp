@@ -141,9 +141,29 @@ Idle(void *arg)
 	CTimer::Update();
 	CSprite2d::InitPerFrame();
 	CFont::InitPerFrame();
+
+	// We're basically merging FrontendIdle and Idle (just like TheGame on PS2)
+#ifdef PS2_SAVE_DIALOG
+	// Only exists on PC FrontendIdle, probably some PS2 bug fix
+	if (FrontEndMenuManager.m_bMenuActive)
+		CSprite2d::SetRecipNearClip();
+	
+	if (FrontEndMenuManager.m_bGameNotLoaded) {
+		CPad::UpdatePads();
+		FrontEndMenuManager.Process();
+	} else {
+		CPointLights::InitPerFrame();
+		CGame::Process();
+		DMAudio.Service();
+	}
+
+	if (RsGlobal.quit)
+		return;
+#else
 	CPointLights::InitPerFrame();
 	CGame::Process();
 	DMAudio.Service();
+#endif
 
 	if(CGame::bDemoMode && CTimer::GetTimeInMilliseconds() > (3*60 + 30)*1000 && !CCutsceneMgr::IsCutsceneProcessing()){
 		FrontEndMenuManager.m_bStartGameLoading = true;
@@ -159,14 +179,16 @@ Idle(void *arg)
 	if(arg == nil)
 		return;
 
-	if((!FrontEndMenuManager.m_bMenuActive || FrontEndMenuManager.field_452 == 1) &&
+	if((!FrontEndMenuManager.m_bMenuActive || FrontEndMenuManager.m_bRenderGameInMenu) &&
 	   TheCamera.GetScreenFadeStatus() != FADE_2){
 #ifdef GTA_PC
-		// This is from SA, but it's nice for windowed mode
-		RwV2d pos;
-		pos.x = SCREEN_WIDTH/2.0f;
-		pos.y = SCREEN_HEIGHT/2.0f;
-		RsMouseSetPos(&pos);
+		if (!FrontEndMenuManager.m_bRenderGameInMenu) {
+			// This is from SA, but it's nice for windowed mode
+			RwV2d pos;
+			pos.x = SCREEN_WIDTH / 2.0f;
+			pos.y = SCREEN_HEIGHT / 2.0f;
+			RsMouseSetPos(&pos);
+		}
 #endif
 		CRenderer::ConstructRenderList();
 		CRenderer::PreRender();
@@ -210,6 +232,11 @@ Idle(void *arg)
 			return;
 	}
 
+#ifdef PS2_SAVE_DIALOG
+	if (FrontEndMenuManager.m_bMenuActive)
+#endif
+		DefinedState();
+
 	RenderMenus();
 	DoFade();
 	Render2dStuffAfterFade();
@@ -228,7 +255,7 @@ FrontendIdle(void)
 #endif
 
 	CTimer::Update();
-	CSprite2d::SetRecipNearClip();
+	CSprite2d::SetRecipNearClip(); // this should be on InitialiseRenderWare according to PS2 asm. seems like a bug fix
 	CSprite2d::InitPerFrame();
 	CFont::InitPerFrame();
 	CPad::UpdatePads();
@@ -248,11 +275,11 @@ FrontendIdle(void)
 	if(!RsCameraBeginUpdate(Scene.camera))
 		return;
 
-	DefinedState();
+	DefinedState(); // seems redundant, but breaks resolution change.
 	RenderMenus();
 	DoFade();
 	Render2dStuffAfterFade();
-	CFont::DrawFonts();
+//	CFont::DrawFonts(); // redundant
 	DoRWStuffEndOfFrame();
 }
 
@@ -744,16 +771,16 @@ LoadingScreen(const char *str1, const char *str2, const char *splashscreen)
 #ifdef CHATTYSPLASH
 			// my attempt
 			static wchar tmpstr[80];
-			float scale = SCREEN_SCALE_Y(0.8f);
-			vpos -= 50*scale;
-			CFont::SetScale(scale, scale);
+			float yscale = SCREEN_SCALE_Y(0.9f);
+			vpos -= 45*yscale;
+			CFont::SetScale(SCREEN_SCALE_X(0.75f), yscale);
 			CFont::SetPropOn();
 			CFont::SetRightJustifyOff();
 			CFont::SetFontStyle(FONT_BANK);
 			CFont::SetColor(CRGBA(255, 255, 255, 255));
 			AsciiToUnicode(str1, tmpstr);
 			CFont::PrintString(hpos, vpos, tmpstr);
-			vpos += 25*scale;
+			vpos += 22*yscale;
 			AsciiToUnicode(str2, tmpstr);
 			CFont::PrintString(hpos, vpos, tmpstr);
 #endif
@@ -999,7 +1026,11 @@ AppEventHandler(RsEvent event, void *param)
 
 		case rsFRONTENDIDLE:
 		{
+#ifdef PS2_SAVE_DIALOG
+			Idle((void*)1);
+#else
 			FrontendIdle();
+#endif
 
 			return rsEVENTPROCESSED;
 		}

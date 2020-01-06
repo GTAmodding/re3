@@ -7,8 +7,8 @@
 #define MENUHEADER_WIDTH 0.84f
 #define MENUHEADER_HEIGHT 1.6f
 
-#define MENUACTION_POS_X 40.0f
-#define MENUACTION_POS_Y 37.5f
+#define MENUACTION_X_MARGIN 40.0f
+#define MENUACTION_POS_Y 60.0f
 #define MENUACTION_WIDTH 0.405f
 #define MENUACTION_HEIGHT 0.63f
 
@@ -41,7 +41,8 @@
 #define MENUDROP_COLOR_A 150
 #define MENUDROP_COLOR_SIZE -1
 
-#define MENUSLIDER_X 306.0f
+#define MENUSLIDER_X 256.0f
+#define MENUSLIDER_UNK 256.0f
 
 enum eLanguages
 {
@@ -326,7 +327,17 @@ enum eCheckHover
 	HOVEROPTION_19,
 	HOVEROPTION_20,
 	HOVEROPTION_CHANGESKIN,
-	HOVEROPTION_42 = 42,
+	HOVEROPTION_INCREASE_BRIGHTNESS = 32,
+	HOVEROPTION_DECREASE_BRIGHTNESS,
+	HOVEROPTION_INCREASE_DRAWDIST,
+	HOVEROPTION_DECREASE_DRAWDIST,
+	HOVEROPTION_INCREASE_MUSICVOLUME,
+	HOVEROPTION_DECREASE_MUSICVOLUME,
+	HOVEROPTION_INCREASE_SFXVOLUME,
+	HOVEROPTION_DECREASE_SFXVOLUME,
+	HOVEROPTION_INCREASE_MOUSESENS,
+	HOVEROPTION_DECREASE_MOUSESENS,
+	HOVEROPTION_42,
 };
 
 enum eMenuColumns
@@ -404,7 +415,7 @@ public:
 	int m_nCurrExOption;
 	bool m_bSkinsFound;
 	bool m_bQuitGameNoCD;
- char field_452;
+ bool m_bRenderGameInMenu;
 	bool m_bSaveMenuActive;
 	bool m_bLoadingSavedGame;
  char field_455;
@@ -467,9 +478,11 @@ public:
 	static bool &m_bShutDownFrontEndRequested;
 	static bool &m_PrefsAllowNastyGame;
 	
-	static float &headingYStart;
-	static float &unkX;
-	static float &unkY;
+	static float &menuXYpadding;
+	static float &actionTextScaleX;
+	static float &actionTextScaleY;
+	static int &sthWithButtons;
+	static int &sthWithButtons2;
 
 public:
 	static void BuildStatLine(char *text, void *stat, uint8 aFloat, void *stat2);
@@ -479,7 +492,7 @@ public:
 	void CheckSliderMovement(int);
 	int CostructStatLine(int);
 	void DisplayHelperText();
-	float DisplaySlider(float, float, float, float, float, float);
+	int DisplaySlider(float, float, float, float, float, float);
 	void DoSettingsBeforeStartingAGame();
 	void Draw();
 	void DrawControllerBound(int, int, int, uint8);
@@ -487,6 +500,9 @@ public:
 	void DrawControllerSetupScreen();
 	void DrawFrontEnd();
 	void DrawFrontEndNormal();
+#ifdef PS2_SAVE_DIALOG
+	void DrawFrontEndSaveZone();
+#endif
 	void DrawPlayerSetupScreen();
 	int FadeIn(int alpha);
 	void FilterOutColorMarkersFromString(uint16, CRGBA &);

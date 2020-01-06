@@ -123,15 +123,15 @@ CFont::InitPerFrame(void)
 void
 CFont::PrintChar(float x, float y, uint16 c)
 {
-	if(x <= 0.0f || x >= SCREEN_WIDTH ||
-	   y <= 0.0f || y >= SCREEN_HEIGHT)	// BUG: game uses SCREENW again
+	if(x <= 0.0f || x > SCREEN_WIDTH ||
+	   y <= 0.0f || y > SCREEN_HEIGHT)	// BUG: game uses SCREENW again
 		return;
 
 	float w = GetCharacterWidth(c) / 32.0f;
 	float xoff = c & 0xF;
 	float yoff = c >> 4;
 
-	if(Details.style == 0 || Details.style == 2){
+	if(Details.style == FONT_BANK || Details.style == FONT_HEADING){
 		if(Details.dropShadowPosition != 0){
 			CSprite2d::AddSpriteToBank(Details.bank + Details.style,	// BUG: game doesn't add bank
 				CRect(x + SCREEN_SCALE_X(Details.dropShadowPosition),

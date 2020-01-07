@@ -14,6 +14,8 @@ public:
 	static void SaveOrRetrieveDataForThisFrame(void);
 	static void ProcessControlCars(void);
 	static void SaveOrRetrieveCarPositions(void);
+	static void StartChaseScene(float);
+	static void CleanUpChaseScene();
 };
 
 

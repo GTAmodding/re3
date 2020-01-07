@@ -317,7 +317,7 @@ public:
 	uint8 bChangedSeat : 1;
 	uint8 bUpdateAnimHeading : 1;
 	uint8 bBodyPartJustCameOff : 1;
-	uint8 m_ped_flagC40 : 1;
+	uint8 bIsShooting : 1;
 	uint8 bFindNewNodeAfterStateRestore : 1;
 
 	uint8 bHasACamera : 1; // does ped possess a camera to document accidents involves fire/explosion
@@ -339,16 +339,16 @@ public:
 	uint8 bFleeAfterExitingCar : 1;
 
 	uint8 bWanderPathAfterExitingCar : 1;
-	uint8 m_ped_flagF2 : 1;
-	uint8 m_ped_flagF4 : 1; // Unfinished feature from VC, probably bDontDragMeOutCar
+	uint8 bIsLeader : 1;
+	uint8 bDontDragMeOutCar : 1; // unfinished feature
 	uint8 m_ped_flagF8 : 1;
 	uint8 bWillBeQuickJacked : 1;
 	uint8 bCancelEnteringCar : 1; // after door is opened or couldn't be opened due to it's locked
 	uint8 bObstacleShowedUpDuringKillObjective : 1;
 	uint8 bDuckAndCover : 1;
 
-	uint8 bStillOnValidPoly : 1;
-	uint8 m_ped_flagG2 : 1;
+	uint8 bStillOnValidPoly : 1; // set if the polygon the ped is on is still valid for collision
+	uint8 bAllowMedicsToReviveMe : 1;
 	uint8 bResetWalkAnims : 1;
 	uint8 bStartWanderPathOnFoot : 1; // exits the car if he's in it, reset after path found
 	uint8 bOnBoat : 1; // not just driver, may be just standing
@@ -358,12 +358,12 @@ public:
 
 	uint8 m_ped_flagH1 : 1;
 	uint8 bHitSteepSlope : 1; // has ped collided/is standing on a steep slope (surface type)
-	uint8 m_ped_flagH4 : 1;
+	uint8 bCullExtraFarAway : 1; // special ped only gets culled if it's extra far away (for roadblocks)
 	uint8 bClearObjective : 1;
-	uint8 bTryingToReachDryLand : 1;
+	uint8 bTryingToReachDryLand : 1; // has ped just exited boat and trying to get to dry land
 	uint8 bCollidedWithMyVehicle : 1;
-	uint8 bRichFromMugging : 1; // ped has lots of cash from mugging people - will drop money if someone points gun to him
-	uint8 m_ped_flagH80 : 1;
+	uint8 bRichFromMugging : 1; // ped has lots of cash cause they've been mugging people
+	uint8 bChrisCriminal : 1; // Is a criminal as killed during Chris' police mission (should be counted as such)
 
 	uint8 bShakeFist : 1;  // test shake hand at look entity
 	uint8 bNoCriticalHits : 1; // if set, limbs won't came off

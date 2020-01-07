@@ -11,3 +11,5 @@ WRAPPER void CRecordDataForGame::SaveOrRetrieveDataForThisFrame(void) { EAXJMP(0
 WRAPPER void CRecordDataForChase::SaveOrRetrieveDataForThisFrame(void) { EAXJMP(0x4347F0); }
 WRAPPER void CRecordDataForChase::ProcessControlCars(void) { EAXJMP(0x435540); }
 WRAPPER void CRecordDataForChase::SaveOrRetrieveCarPositions(void) { EAXJMP(0x434B20); }
+WRAPPER void CRecordDataForChase::StartChaseScene(float) { EAXJMP(0x435690); }
+WRAPPER void CRecordDataForChase::CleanUpChaseScene() { EAXJMP(0x4357C0); }

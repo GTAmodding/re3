@@ -497,7 +497,7 @@ CPed::CPed(uint32 pedType) : m_pedIK(this)
 	bChangedSeat = false;
 	bUpdateAnimHeading = false;
 	bBodyPartJustCameOff = false;
-	m_ped_flagC40 = false;
+	bIsShooting = false;
 	bFindNewNodeAfterStateRestore = false;
 
 	bHasACamera = false;
@@ -519,8 +519,8 @@ CPed::CPed(uint32 pedType) : m_pedIK(this)
 	bFleeAfterExitingCar = false;
 
 	bWanderPathAfterExitingCar = false;
-	m_ped_flagF2 = false;
-	m_ped_flagF4 = false;
+	bIsLeader = false;
+	bDontDragMeOutCar = false;
 	m_ped_flagF8 = false;
 	bWillBeQuickJacked = false;
 	bCancelEnteringCar = false;
@@ -528,7 +528,7 @@ CPed::CPed(uint32 pedType) : m_pedIK(this)
 	bDuckAndCover = false;
 
 	bStillOnValidPoly = false;
-	m_ped_flagG2 = true;
+	bAllowMedicsToReviveMe = true;
 	bResetWalkAnims = false;
 	bStartWanderPathOnFoot = false;
 	bOnBoat = false;
@@ -538,12 +538,12 @@ CPed::CPed(uint32 pedType) : m_pedIK(this)
 
 	m_ped_flagH1 = false;
 	bHitSteepSlope = false;
-	m_ped_flagH4 = false;
+	bCullExtraFarAway = false;
 	bClearObjective = false;
 	bTryingToReachDryLand = false;
 	bCollidedWithMyVehicle = false;
 	bRichFromMugging = false;
-	m_ped_flagH80 = false;
+	bChrisCriminal = false;
 
 	bShakeFist = false;
 	bNoCriticalHits = false;
@@ -7731,7 +7731,7 @@ CPed::GetNearestDoor(CVehicle *veh, CVector &posToOpen)
 
 			CPed *rfPassenger = veh->pPassengers[0];
 			if (!rfPassenger
-				|| rfPassenger->m_leader != this && !rfPassenger->m_ped_flagF4 && (veh->VehicleCreatedBy != MISSION_VEHICLE || m_objective != OBJECTIVE_ENTER_CAR_AS_DRIVER)
+				|| rfPassenger->m_leader != this && !rfPassenger->bDontDragMeOutCar && (veh->VehicleCreatedBy != MISSION_VEHICLE || m_objective != OBJECTIVE_ENTER_CAR_AS_DRIVER)
 				|| veh->IsRoomForPedToLeaveCar(CAR_DOOR_LF, enterOffset) == 0) {
 
 				if ((veh->m_nGettingInFlags & CAR_DOOR_FLAG_RF) == 0
@@ -9223,7 +9223,7 @@ CPed::ProcessControl(void)
 	}
 
 	CVisibilityPlugins::SetClumpAlpha(GetClump(), alpha);
-	m_ped_flagC40 = false;
+	bIsShooting = false;
 	BuildPedLists();
 	bIsInWater = false;
 	ProcessBuoyancy();
@@ -10776,7 +10776,7 @@ CPed::PedAnimDoorOpenCB(CAnimBlendAssociation* animAssoc, void* arg)
 		}
 
 		if (ped->m_vehEnterType != CAR_DOOR_LF && ped->m_vehEnterType != CAR_DOOR_LR) {
-			if (pedToDragOut && !pedToDragOut->m_ped_flagF4) {
+			if (pedToDragOut && !pedToDragOut->bDontDragMeOutCar) {
 				if (pedToDragOut->m_nPedState != PED_DRIVING) {
 					ped->QuitEnteringCar();
 					pedToDragOut = nil;
@@ -10807,9 +10807,9 @@ CPed::PedAnimDoorOpenCB(CAnimBlendAssociation* animAssoc, void* arg)
 			}
 		} else {
 			if (pedToDragOut) {
-				if (pedToDragOut->m_nPedState != PED_DRIVING || pedToDragOut->m_ped_flagF4) {
+				if (pedToDragOut->m_nPedState != PED_DRIVING || pedToDragOut->bDontDragMeOutCar) {
 
-					// BUG: Player freezes in that condition due to it's objective isn't restored. It's an unfinished feature, used in VC.
+					// BUG: Player freezes in that condition due to its objective isn't restored. It's an unfinished feature, used in VC.
 					ped->QuitEnteringCar();
 					pedToDragOut = nil;
 				} else {
@@ -15860,7 +15860,7 @@ CPed::SeekCar(void)
 									break;
 								case STATUS_ABANDONED:
 									if (m_vehEnterType == CAR_DOOR_RF && vehToSeek->pPassengers[0]) {
-										if (vehToSeek->pPassengers[0]->m_ped_flagF4) {
+										if (vehToSeek->pPassengers[0]->bDontDragMeOutCar) {
 											if (IsPlayer())
 												CPed::SetEnterCar(vehToSeek, m_vehEnterType);
 										} else {
@@ -15892,7 +15892,7 @@ void
 CPed::ServiceTalking(void)
 {
 	if (!bBodyPartJustCameOff || m_bodyPartBleeding != PED_HEAD) {
-		if (strcmpi(CModelInfo::GetModelInfo(m_modelIndex)->GetName(), "bomber")) {
+		if (CGeneral::faststricmp(CModelInfo::GetModelInfo(m_modelIndex)->GetName(), "bomber")) {
 			if (m_nPedState == PED_ON_FIRE)
 				m_queuedSound = SOUND_PED_BURNING;
 		} else {

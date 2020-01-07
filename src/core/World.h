@@ -22,6 +22,8 @@
 #define WORLD_MAX_X (WORLD_MIN_X + WORLD_SIZE_X)
 #define WORLD_MAX_Y (WORLD_MIN_Y + WORLD_SIZE_Y)
 
+#define MAP_Z_LOW_LIMIT -100.0f
+
 enum
 {
 	ENTITYLIST_BUILDINGS,
@@ -103,11 +105,15 @@ public:
 	static CEntity *TestSphereAgainstSectorList(CPtrList&, CVector, float, CEntity*, bool);
 	static void FindObjectsInRangeSectorList(CPtrList&, CVector&, float, bool, short*, short, CEntity**);
 	static void FindObjectsInRange(CVector&, float, bool, short*, short, CEntity**, bool, bool, bool, bool, bool);
+	static void FindObjectsOfTypeInRangeSectorList(uint32, CPtrList&, CVector&, float, bool, short*, short, CEntity**);
+	static void FindObjectsOfTypeInRange(uint32, CVector&, float, bool, short*, short, CEntity**, bool, bool, bool, bool, bool);
 	static float FindGroundZForCoord(float x, float y);
 	static float FindGroundZFor3DCoord(float x, float y, float z, bool *found);
 	static float FindRoofZFor3DCoord(float x, float y, float z, bool *found);
 	static void RemoveReferencesToDeletedObject(CEntity*);
 	static void FindObjectsKindaColliding(const CVector &, float, bool, int16*, int16, CEntity **, bool, bool, bool, bool, bool);
+	static void FindObjectsIntersectingCube(const CVector &, const CVector &, int16*, int16, CEntity **, bool, bool, bool, bool, bool);
+	static void FindObjectsIntersectingAngledCollisionBox(const CColBox &, const CMatrix &, const CVector &, float, float, float, float, int16*, int16, CEntity **, bool, bool, bool, bool, bool);
 
 	static float GetSectorX(float f) { return ((f - WORLD_MIN_X)/SECTOR_SIZE_X); }
 	static float GetSectorY(float f) { return ((f - WORLD_MIN_Y)/SECTOR_SIZE_Y); }

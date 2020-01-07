@@ -44,6 +44,10 @@ WRAPPER void CWorld::RemoveStaticObjects() { EAXJMP(0x4B4D50); }
 WRAPPER void CWorld::RemoveReferencesToDeletedObject(CEntity*) { EAXJMP(0x4B3BF0); }
 WRAPPER void CWorld::FindObjectsKindaColliding(const CVector &, float, bool, int16*, int16, CEntity **, bool, bool, bool, bool, bool){ EAXJMP(0x4B2A30); }
 WRAPPER void CWorld::ClearExcitingStuffFromArea(const CVector &pos, float radius, uint8) { EAXJMP(0x4B4E70) };
+WRAPPER void CWorld::FindObjectsIntersectingCube(const CVector &, const CVector &, int16*, int16, CEntity **, bool, bool, bool, bool, bool) { EAXJMP(0x4B2E70); }
+WRAPPER void CWorld::FindObjectsIntersectingAngledCollisionBox(const CColBox &, const CMatrix &, const CVector &, float, float, float, float, int16*, int16, CEntity **, bool, bool, bool, bool, bool) { EAXJMP(0x4B3280); }
+WRAPPER void CWorld::FindObjectsOfTypeInRange(uint32, CVector&, float, bool, short*, short, CEntity**, bool, bool, bool, bool, bool) { EAXJMP(0x4B2600); }
+WRAPPER void CWorld::FindObjectsOfTypeInRangeSectorList(uint32, CPtrList&, CVector&, float, bool, short*, short, CEntity**) { EAXJMP(0x4B2960); }
 
 void
 CWorld::Initialise()
@@ -960,7 +964,7 @@ CWorld::RemoveFallenPeds(void)
 	for(int poolIndex = poolSize-1; poolIndex >= 0; poolIndex--) {
 		CPed *ped = CPools::GetPedPool()->GetSlot(poolIndex);
 		if (ped) {
-			if (ped->GetPosition().z < -100.0f) {
+			if (ped->GetPosition().z < MAP_Z_LOW_LIMIT) {
 				if (ped->CharCreatedBy != RANDOM_CHAR || ped->IsPlayer()) {
 					int closestNode = ThePaths.FindNodeClosestToCoors(ped->GetPosition(), PATH_PED, 999999.9f, false, false);
 					CVector newPos = ThePaths.m_pathNodes[closestNode].pos;
@@ -982,7 +986,7 @@ CWorld::RemoveFallenCars(void)
 	for (int poolIndex = poolSize - 1; poolIndex >= 0; poolIndex--) {
 		CVehicle* veh = CPools::GetVehiclePool()->GetSlot(poolIndex);
 		if (veh) {
-			if (veh->GetPosition().z < -100.0f) {
+			if (veh->GetPosition().z < MAP_Z_LOW_LIMIT) {
 				if (veh->VehicleCreatedBy == MISSION_VEHICLE || veh == FindPlayerVehicle() || (veh->pDriver && veh->pDriver->IsPlayer())) {
 					int closestNode = ThePaths.FindNodeClosestToCoors(veh->GetPosition(), PATH_CAR, 999999.9f, false, false);
 					CVector newPos = ThePaths.m_pathNodes[closestNode].pos;

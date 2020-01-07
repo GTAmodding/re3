@@ -75,6 +75,17 @@ CPlayerPed::SetWantedLevelNoDrop(int32 level)
 	m_pWanted->SetWantedLevelNoDrop(level);
 }
 
+void
+CPlayerPed::MakeObjectTargettable(int32 handle)
+{
+	for (int i = 0; i < ARRAY_SIZE(m_nTargettableObjects); i++) {
+		if (CPools::GetObjectPool()->GetAt(m_nTargettableObjects[i]) == nil) {
+			m_nTargettableObjects[i] = handle;
+			return;
+		}
+	}
+}
+
 // I don't know the actual purpose of parameter
 void
 CPlayerPed::AnnoyPlayerPed(bool annoyedByPassingEntity)

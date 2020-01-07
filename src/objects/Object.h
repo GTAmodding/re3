@@ -71,6 +71,8 @@ public:
 	CObject(int32, bool);
 	~CObject(void);
 
+	void ProcessControl(void);
+	void Teleport(CVector);
 	void Render(void);
 	bool SetupLighting(void);
 	void RemoveLighting(bool reset);

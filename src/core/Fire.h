@@ -31,11 +31,16 @@ class CFireManager
 	CFire m_aFires[NUM_FIRES];
 public:
 	void StartFire(CEntity *entityOnFire, CEntity *culprit, float, uint32);
+	void StartFire(CVector, float, uint8);
 	void Update(void);
 	CFire *FindFurthestFire_NeverMindFireMen(CVector coors, float, float);
 	CFire *FindNearestFire(CVector, float*);
+	uint32 GetTotalActiveFires() const;
 	void ExtinguishPoint(CVector, float);
-
-	uint32 GetTotalActiveFires() const { return m_nTotalFires; }
+	int32 StartScriptFire(const CVector& pos, CEntity* culprit, float, uint8);
+	bool IsScriptFireExtinguish(int16);
+	void RemoveScriptFire(int16);
+	void RemoveAllScriptFires(void);
+	void SetScriptFireAudio(int16, bool);
 };
 extern CFireManager &gFireManager;

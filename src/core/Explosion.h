@@ -28,4 +28,5 @@ public:
 	static uint8 GetExplosionType(uint8 id);
 	static void ResetExplosionActiveCounter(uint8 id);
 	static void RemoveAllExplosionsInArea(CVector, float);
+	static bool TestForExplosionInArea(eExplosionType, float, float, float, float, float, float);
 };

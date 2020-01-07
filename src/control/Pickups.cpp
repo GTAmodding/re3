@@ -46,8 +46,21 @@ uint8 aWeaponGreens[] = { 0, 255, 128, 255, 0, 255, 128, 255, 0, 255, 255, 0, 25
 uint8 aWeaponBlues[] = { 0, 0, 255, 0, 255, 255, 0, 128, 255, 0, 255, 0, 128, 255, 0, 0 };
 float aWeaponScale[] = { 1.0f, 2.0f, 1.5f, 1.0f, 1.0f, 1.5f, 1.0f, 2.0f, 1.0f, 2.0f, 2.5f, 1.0f, 1.0f, 1.0f, 1.0f };
 
-WRAPPER void CPacManPickups::Render(void) { EAXJMP(0x432F60); }
+WRAPPER void CPacManPickups::Init(void) { EAXJMP(0x432760); }
 WRAPPER void CPacManPickups::Update(void) { EAXJMP(0x432800); }
+WRAPPER void CPacManPickups::GeneratePMPickUps(CVector, float, int16, uint8) { EAXJMP(0x432AE0); }
+WRAPPER void CPacManPickups::GeneratePMPickUpsForRace(int32) { EAXJMP(0x432D50); }
+WRAPPER void CPacManPickups::GenerateOnePMPickUp(CVector) { EAXJMP(0x432F20); }
+WRAPPER void CPacManPickups::Render(void) { EAXJMP(0x432F60); }
+WRAPPER void CPacManPickups::DoCleanUpPacManStuff(void) { EAXJMP(0x433150); }
+WRAPPER void CPacManPickups::StartPacManRace(int32) { EAXJMP(0x433340); }
+WRAPPER void CPacManPickups::StartPacManRecord(void) { EAXJMP(0x433360); }
+WRAPPER uint32 CPacManPickups::QueryPowerPillsEatenInRace(void) { EAXJMP(0x4333A0); }
+WRAPPER void CPacManPickups::ResetPowerPillsEatenInRace(void) { EAXJMP(0x4333B0); }
+WRAPPER void CPacManPickups::CleanUpPacManStuff(void) { EAXJMP(0x4333C0); }
+WRAPPER void CPacManPickups::StartPacManScramble(CVector, float, int16) { EAXJMP(0x4333D0); }
+WRAPPER uint32 CPacManPickups::QueryPowerPillsCarriedByPlayer(void) { EAXJMP(0x4333F0); }
+WRAPPER void CPacManPickups::ResetPowerPillsCarriedByPlayer(void) { EAXJMP(0x433410); }
 
 
 void

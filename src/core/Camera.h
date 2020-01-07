@@ -491,6 +491,9 @@ int     m_iModeObbeCamIsInForCar;
 	void TakeControlWithSpline(short);
 	void RestoreWithJumpCut(void);
 	void SetCameraDirectlyInFrontForFollowPed_CamOnAString(void);
+	void SetCameraDirectlyBehindForFollowPed_CamOnAString(void);
+	void SetZoomValueFollowPedScript(int16);
+	void SetZoomValueCamStringScript(int16);
 
 	void dtor(void) { this->CCamera::~CCamera(); }
 };

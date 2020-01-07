@@ -105,6 +105,20 @@ extern uint16 CostOfWeapon[20];
 class CPacManPickups
 {
 public:
-	static void Render(void);
+	static void Init(void);
 	static void Update(void);
+	static void GeneratePMPickUps(CVector, float, int16, uint8);
+	static void GeneratePMPickUpsForRace(int32);
+	static void GenerateOnePMPickUp(CVector);
+	static void Render(void);
+	static void DoCleanUpPacManStuff(void);
+	static void StartPacManRace(int32);
+	static void StartPacManRecord(void);
+	static uint32 QueryPowerPillsEatenInRace(void);
+	static void ResetPowerPillsEatenInRace(void);
+	static void CleanUpPacManStuff(void);
+	static void StartPacManScramble(CVector, float, int16);
+	static uint32 QueryPowerPillsCarriedByPlayer(void);
+	static void ResetPowerPillsCarriedByPlayer(void);
+
 };

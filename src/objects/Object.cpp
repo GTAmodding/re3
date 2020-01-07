@@ -9,6 +9,8 @@
 WRAPPER void CObject::ObjectDamage(float amount) { EAXJMP(0x4BB240); }
 WRAPPER void CObject::DeleteAllTempObjectInArea(CVector, float) { EAXJMP(0x4BBED0); }
 WRAPPER void CObject::Init(void) { EAXJMP(0x4BAEC0); }
+WRAPPER void CObject::ProcessControl(void) { EAXJMP(0x4BB040); }
+WRAPPER void CObject::Teleport(CVector) { EAXJMP(0x4BBDA0); }
 
 int16 &CObject::nNoTempObjects = *(int16*)0x95CCA2;
 int16 &CObject::nBodyCastHealth = *(int16*)0x5F7D4C;	// 1000

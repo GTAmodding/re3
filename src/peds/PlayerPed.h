@@ -67,6 +67,7 @@ public:
 	void PlayerControlM16(CPad*);
 	void PlayerControlFighter(CPad*);
 	void ProcessWeaponSwitch(CPad*);
+	void MakeObjectTargettable(int32);
 
 	static void SetupPlayerPed(int32);
 	static void DeactivatePlayerPed(int32);

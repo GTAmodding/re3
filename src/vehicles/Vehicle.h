@@ -2,6 +2,7 @@
 
 #include "Physical.h"
 #include "AutoPilot.h"
+#include "ModelIndices.h"
 
 class CPed;
 class CFire;
@@ -267,6 +268,7 @@ public:
 
 	bool IsAlarmOn(void) { return m_nAlarmState != 0 && m_nAlarmState != -1; }
 	CVehicleModelInfo* GetModelInfo() { return (CVehicleModelInfo*)CModelInfo::GetModelInfo(GetModelIndex()); }
+	bool IsTaxi(void) { return GetModelIndex() == MI_TAXI || GetModelIndex() == MI_CABBIE || GetModelIndex() == MI_BORGNINE; }
 	
 	static bool &bWheelsOnlyCheat;
 	static bool &bAllDodosCheat;

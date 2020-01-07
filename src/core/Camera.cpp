@@ -33,6 +33,8 @@ WRAPPER void CCamera::LoadPathSplines(int file) { EAXJMP(0x46D1D0); }
 WRAPPER uint32 CCamera::GetCutSceneFinishTime(void) { EAXJMP(0x46B920); }
 WRAPPER void CCamera::FinishCutscene(void) { EAXJMP(0x46B560); }
 WRAPPER void CCamera::RestoreWithJumpCut(void) { EAXJMP(0x46FAE0); };
+WRAPPER void CCamera::SetZoomValueFollowPedScript(int16) { EAXJMP(0x46FF30); }
+WRAPPER void CCamera::SetZoomValueCamStringScript(int16) { EAXJMP(0x46FF90); }
 
 bool
 CCamera::GetFading()
@@ -1352,6 +1354,14 @@ CCamera::TakeControlWithSpline(short nSwitch)
 void CCamera::SetCameraDirectlyInFrontForFollowPed_CamOnAString()
 {
 	m_bCamDirectlyInFront = true;
+	CPlayerPed *player = FindPlayerPed();
+	if (player)
+		m_PedOrientForBehindOrInFront = CGeneral::GetATanOfXY(player->GetForward().x, player->GetForward().y);
+}
+
+void CCamera::SetCameraDirectlyBehindForFollowPed_CamOnAString()
+{
+	m_bCamDirectlyBehind = true;
 	CPlayerPed *player = FindPlayerPed();
 	if (player)
 		m_PedOrientForBehindOrInFront = CGeneral::GetATanOfXY(player->GetForward().x, player->GetForward().y);

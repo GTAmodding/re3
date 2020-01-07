@@ -1,5 +1,6 @@
 #pragma once
 #include "common.h"
+#include "PedType.h"
 #include "Text.h"
 #include "Sprite2d.h"
 
@@ -8,6 +9,7 @@ class CBuilding;
 class CVehicle;
 class CPed;
 class CObject;
+class CPlayerInfo;
 
 struct CScriptRectangle 
 {
@@ -90,6 +92,29 @@ public:
 		m_anLocalVariables[NUM_LOCAL_VARS] += timeStep;
 		m_anLocalVariables[NUM_LOCAL_VARS + 1] += timeStep;
 	}
+
+	bool ThisIsAValidRandomPed(uint32 pedtype){
+		switch (pedtype){
+		case PEDTYPE_CIVMALE:
+		case PEDTYPE_CIVFEMALE:
+		case PEDTYPE_GANG1:
+		case PEDTYPE_GANG2:
+		case PEDTYPE_GANG3:
+		case PEDTYPE_GANG4:
+		case PEDTYPE_GANG5:
+		case PEDTYPE_GANG6:
+		case PEDTYPE_GANG7:
+		case PEDTYPE_GANG8:
+		case PEDTYPE_GANG9:
+		case PEDTYPE_CRIMINAL:
+		case PEDTYPE_PROSTITUTE:
+			return true;
+		default:
+			return false;
+		}
+	}
+
+	float LimitAngleOnCircle(float angle) { return angle < 0.0f ? angle + 360.0f : angle; }
 
 	void CollectParameters(uint32*, int16);
 	int32 CollectNextParameterWithoutIncreasingPC(uint32);
@@ -339,6 +364,9 @@ public:
 	static void Process();
 	static CRunningScript* StartTestScript();
 	static bool IsPlayerOnAMission();
+	static bool IsPedStopped(CPed*);
+	static bool IsPlayerStopped(CPlayerInfo*);
+	static bool IsVehicleStopped(CVehicle*);
 
 	static void ReadObjectNamesFromScript();
 	static void UpdateObjectIndices();
@@ -348,7 +376,7 @@ public:
 	static void HighlightImportantArea(uint32, float, float, float, float, float);
 	static void DrawDebugSquare(float, float, float, float);
 	static void DrawDebugCube(float, float, float, float, float, float);
-	static bool IsVehicleStopped(CVehicle*);
+	static void AddToInvisibilitySwapArray(CEntity*, bool);
 
 	static int32 Read4BytesFromScript(uint32* pIp){
 		int32 retval = 0;

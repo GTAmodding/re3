@@ -1,6 +1,7 @@
 #include "common.h"
 #include "patcher.h"
 #include "Game.h"
+#include "General.h"
 #include "World.h"
 #include "Entity.h"
 #include "Population.h"
@@ -77,6 +78,12 @@ CPopulation::RemovePed(CEntity* ent)
 {
 	CWorld::Remove(ent);
 	delete ent;
+}
+
+int32
+CPopulation::ChooseCivilianOccupation(int32 group)
+{
+	return ms_pPedGroups[group].models[CGeneral::GetRandomNumberInRange(0, 8)];
 }
 
 STARTPATCHES

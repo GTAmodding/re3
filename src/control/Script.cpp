@@ -5,7 +5,9 @@
 #include "ScriptCommands.h"
 
 #include "Boat.h"
+#include "BulletInfo.h"
 #include "Camera.h"
+#include "CarAI.h"
 #include "CarCtrl.h"
 #include "CarGen.h"
 #include "CivilianPed.h"
@@ -28,24 +30,33 @@
 #include "Messages.h"
 #include "ModelIndices.h"
 #include "Pad.h"
+#include "ParticleObject.h"
 #include "PedRoutes.h"
 #include "Phones.h"
 #include "Pickups.h"
+#include "Plane.h"
 #include "PlayerInfo.h"
 #include "PlayerPed.h"
 #include "PointLights.h"
 #include "Pools.h"
 #include "Population.h"
+#include "ProjectileInfo.h"
+#include "Record.h"
 #include "Remote.h"
 #include "Restart.h"
 #include "Replay.h"
 #include "Shadows.h"
+#include "Stats.h"
 #include "Streaming.h"
 #include "Text.h"
 #include "User.h"
+#include "WaterLevel.h"
 #include "Weather.h"
 #include "World.h"
 #include "Zones.h"
+
+#define PICKUP_PLACEMENT_OFFSET 0.5f
+#define PED_FIND_Z_OFFSET 5.0f
 
 uint8 (&CTheScripts::ScriptSpace)[SIZE_SCRIPT_SPACE] = *(uint8(*)[SIZE_SCRIPT_SPACE])*(uintptr*)0x74B248;
 CRunningScript(&CTheScripts::ScriptsArray)[MAX_NUM_SCRIPTS] = *(CRunningScript(*)[MAX_NUM_SCRIPTS])*(uintptr*)0x6F5C08;
@@ -1265,7 +1276,7 @@ int8 CRunningScript::ProcessCommandsFrom0To99(int32 command)
 		CWorld::Players[index].m_pPed->CharCreatedBy = MISSION_CHAR;
 		CPlayerPed::DeactivatePlayerPed(index);
 		CVector pos = *(CVector*)&ScriptParams[1];
-		if (pos.z <= -100.0f)
+		if (pos.z <= MAP_Z_LOW_LIMIT)
 			pos.z = CWorld::FindGroundZForCoord(pos.x, pos.y);
 		pos.z += CWorld::Players[index].m_pPed->GetDistanceFromCentreOfMassToBaseOfModel();
 		CWorld::Players[index].m_pPed->GetPosition() = pos;
@@ -1292,7 +1303,7 @@ int8 CRunningScript::ProcessCommandsFrom0To99(int32 command)
 		CollectParameters(&m_nIp, 4);
 		CVector pos = *(CVector*)&ScriptParams[1];
 		int index = ScriptParams[0];
-		if (pos.z <= -100.0f)
+		if (pos.z <= MAP_Z_LOW_LIMIT)
 			pos.z = CWorld::FindGroundZForCoord(pos.x, pos.y);
 		CPlayerPed* ped = CWorld::Players[index].m_pPed;
 		if (!ped->bInVehicle) {
@@ -1315,18 +1326,17 @@ int8 CRunningScript::ProcessCommandsFrom0To99(int32 command)
 	{
 		CollectParameters(&m_nIp, 6);
 		CPlayerPed* ped = CWorld::Players[ScriptParams[0]].m_pPed;
-		float x1, y1, x2, y2;
-		x1 = *(float*)&ScriptParams[1];
-		y1 = *(float*)&ScriptParams[2];
-		x2 = *(float*)&ScriptParams[3];
-		y2 = *(float*)&ScriptParams[4];
+		float x1 = *(float*)&ScriptParams[1];
+		float y1 = *(float*)&ScriptParams[2];
+		float x2 = *(float*)&ScriptParams[3];
+		float y2 = *(float*)&ScriptParams[4];
 		if (!ped->bInVehicle)
 			UpdateCompareFlag(ped->IsWithinArea(x1, y1, x2, y2));
 		else
 			UpdateCompareFlag(ped->m_pMyVehicle->IsWithinArea(x1, y1, x2, y2));
 		if (!ScriptParams[5])
 			return 0;
-		CTheScripts::HighlightImportantArea((uint32)this + m_nIp, x1, y1, x2, y2, -100.0f);
+		CTheScripts::HighlightImportantArea((uint32)this + m_nIp, x1, y1, x2, y2, MAP_Z_LOW_LIMIT);
 		if (CTheScripts::DbgFlag)
 			CTheScripts::DrawDebugSquare(x1, y1, x2, y2);
 		return 0;
@@ -1335,13 +1345,12 @@ int8 CRunningScript::ProcessCommandsFrom0To99(int32 command)
 	{
 		CollectParameters(&m_nIp, 8);
 		CPlayerPed* ped = CWorld::Players[ScriptParams[0]].m_pPed;
-		float x1, y1, z1, x2, y2, z2;
-		x1 = *(float*)&ScriptParams[1];
-		y1 = *(float*)&ScriptParams[2];
-		z1 = *(float*)&ScriptParams[3];
-		x2 = *(float*)&ScriptParams[4];
-		y2 = *(float*)&ScriptParams[5];
-		z2 = *(float*)&ScriptParams[6];
+		float x1 = *(float*)&ScriptParams[1];
+		float y1 = *(float*)&ScriptParams[2];
+		float z1 = *(float*)&ScriptParams[3];
+		float x2 = *(float*)&ScriptParams[4];
+		float y2 = *(float*)&ScriptParams[5];
+		float z2 = *(float*)&ScriptParams[6];
 		if (ped->bInVehicle)
 			UpdateCompareFlag(ped->m_pMyVehicle->IsWithinArea(x1, y1, z1, x2, y2, z2));
 		else
@@ -1664,13 +1673,23 @@ int8 CRunningScript::ProcessCommandsFrom100To199(int32 command)
 		CGeneral::GetRandomNumber();
 		CGeneral::GetRandomNumber();
 		CGeneral::GetRandomNumber(); /* To make it EXTRA random! */
+#ifdef FIX_BUGS
+		*ptr = CGeneral::GetRandomNumberInRange(0.0f, 1.0f);
+#else
 		*ptr = CGeneral::GetRandomNumber() / 65536.0f;
 		/* Between 0 and 0.5 on PC (oh well...), never used in original script. */
+#endif
+
 		return 0;
 	}
 	case COMMAND_GENERATE_RANDOM_INT:
+#ifdef FIX_BUGS
+		// Not a very good fix but before switching to PS2 rand, it sort of works
+		*GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL) = CGeneral::GetRandomNumberInRange(0, 65535);
+#else
 		/* On PC between 0 and 32767, even though script expects values between 0 and 65536 */
 		*GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL) = CGeneral::GetRandomNumber();
+#endif
 		return 0;
 	case COMMAND_CREATE_CHAR:
 	{
@@ -1712,9 +1731,9 @@ int8 CRunningScript::ProcessCommandsFrom100To199(int32 command)
 			ped = new CCivilianPed(ScriptParams[0], ScriptParams[1]);
 		ped->CharCreatedBy = MISSION_CHAR;
 		ped->bRespondsToThreats = false;
-		ped->m_ped_flagG2 = false;
+		ped->bAllowMedicsToReviveMe = false;
 		CVector pos = *(CVector*)&ScriptParams[2];
-		if (pos.z <= -100.0f)
+		if (pos.z <= MAP_Z_LOW_LIMIT)
 			pos.z = CWorld::FindGroundZForCoord(pos.x, pos.y);
 		pos.z += 1.0f;
 		ped->GetPosition() = pos;
@@ -1776,7 +1795,7 @@ int8 CRunningScript::ProcessCommandsFrom100To199(int32 command)
 		CPed* ped = CPools::GetPedPool()->GetAt(ScriptParams[0]);
 		assert(ped);
 		CVector pos = *(CVector*)&ScriptParams[1];
-		if (pos.z <= -100.0f)
+		if (pos.z <= MAP_Z_LOW_LIMIT)
 			pos.z = CWorld::FindGroundZForCoord(pos.x, pos.y);
 		ped->ClearAll();
 		ped->SetFollowPath(pos);
@@ -1822,7 +1841,7 @@ int8 CRunningScript::ProcessCommandsFrom100To199(int32 command)
 		else
 			vehicle = nil;
 		CVector pos = *(CVector*)&ScriptParams[1];
-		if (pos.z <= -100.0f)
+		if (pos.z <= MAP_Z_LOW_LIMIT)
 			pos.z = CWorld::FindGroundZForCoord(pos.x, pos.y);
 		/* The following block was once again written
 		 * by someone not familiar with virtual functions.
@@ -1853,7 +1872,7 @@ int8 CRunningScript::ProcessCommandsFrom100To199(int32 command)
 		 * assert(ped);
 		 * CEntity* entityToMove = ped->bInVehicle ? ped->m_pMyVehicle : ped;
 		 * CVector pos = *(CVector*)&ScriptParams[1];
-		 * if (pos.z <= -100.0f)
+		 * if (pos.z <= MAP_Z_LOW_LIMIT)
 		 *	pos.z = CWorld::FindGroundZForCoord(pos.x, pos.y);
 		 * pos.z += entityToMove->GetDistanceFromCentreOfMassToBaseOfModel();
 		 * entityToMove->Teleport(pos);
@@ -1879,18 +1898,17 @@ int8 CRunningScript::ProcessCommandsFrom100To199(int32 command)
 			vehicle = ped->m_pMyVehicle;
 		else
 			vehicle = nil;
-		float x1, y1, x2, y2;
-		x1 = *(float*)&ScriptParams[1];
-		y1 = *(float*)&ScriptParams[2];
-		x2 = *(float*)&ScriptParams[3];
-		y2 = *(float*)&ScriptParams[4];
+		float x1 = *(float*)&ScriptParams[1];
+		float y1 = *(float*)&ScriptParams[2];
+		float x2 = *(float*)&ScriptParams[3];
+		float y2 = *(float*)&ScriptParams[4];
 		if (vehicle)
 			UpdateCompareFlag(ped->m_pMyVehicle->IsWithinArea(x1, y1, x2, y2));
 		else
 			UpdateCompareFlag(ped->IsWithinArea(x1, y1, x2, y2));
 		if (!ScriptParams[5])
 			return 0;
-		CTheScripts::HighlightImportantArea((uint32)this + m_nIp, x1, y1, x2, y2, -100.0f);
+		CTheScripts::HighlightImportantArea((uint32)this + m_nIp, x1, y1, x2, y2, MAP_Z_LOW_LIMIT);
 		if (CTheScripts::DbgFlag)
 			CTheScripts::DrawDebugSquare(x1, y1, x2, y2);
 		return 0;
@@ -1905,13 +1923,12 @@ int8 CRunningScript::ProcessCommandsFrom100To199(int32 command)
 			vehicle = ped->m_pMyVehicle;
 		else
 			vehicle = nil;
-		float x1, y1, z1, x2, y2, z2;
-		x1 = *(float*)&ScriptParams[1];
-		y1 = *(float*)&ScriptParams[2];
-		z1 = *(float*)&ScriptParams[3];
-		x2 = *(float*)&ScriptParams[4];
-		y2 = *(float*)&ScriptParams[5];
-		z2 = *(float*)&ScriptParams[6];
+		float x1 = *(float*)&ScriptParams[1];
+		float y1 = *(float*)&ScriptParams[2];
+		float z1 = *(float*)&ScriptParams[3];
+		float x2 = *(float*)&ScriptParams[4];
+		float y2 = *(float*)&ScriptParams[5];
+		float z2 = *(float*)&ScriptParams[6];
 		if (vehicle)
 			UpdateCompareFlag(ped->m_pMyVehicle->IsWithinArea(x1, y1, z1, x2, y2, z2));
 		else
@@ -1930,7 +1947,7 @@ int8 CRunningScript::ProcessCommandsFrom100To199(int32 command)
 		if (CModelInfo::IsBoatModel(ScriptParams[0])) {
 			CBoat* boat = new CBoat(ScriptParams[0], MISSION_VEHICLE);
 			CVector pos = *(CVector*)&ScriptParams[1];
-			if (pos.z <= -100.0f)
+			if (pos.z <= MAP_Z_LOW_LIMIT)
 				pos.z = CWorld::FindGroundZForCoord(pos.x, pos.y);
 			pos.z += boat->GetDistanceFromCentreOfMassToBaseOfModel();
 			boat->GetPosition() = pos;
@@ -1948,7 +1965,7 @@ int8 CRunningScript::ProcessCommandsFrom100To199(int32 command)
 			if (!CModelInfo::IsBikeModel(ScriptParams[0]))
 				car = new CAutomobile(ScriptParams[0], MISSION_VEHICLE);
 			CVector pos = *(CVector*)&ScriptParams[1];
-			if (pos.z <= -100.0f)
+			if (pos.z <= MAP_Z_LOW_LIMIT)
 				pos.z = CWorld::FindGroundZForCoord(pos.x, pos.y);
 			pos.z += car->GetDistanceFromCentreOfMassToBaseOfModel();
 			car->GetPosition() = pos;
@@ -1992,7 +2009,7 @@ int8 CRunningScript::ProcessCommandsFrom100To199(int32 command)
 		CVehicle* car = CPools::GetVehiclePool()->GetAt(ScriptParams[0]);
 		assert(car);
 		CVector pos = *(CVector*)&ScriptParams[1];
-		if (pos.z <= -100.0f)
+		if (pos.z <= MAP_Z_LOW_LIMIT)
 			pos.z = CWorld::FindGroundZForCoord(pos.x, pos.y);
 		pos.z += car->GetDistanceFromCentreOfMassToBaseOfModel();
 		if (CCarCtrl::JoinCarWithRoadSystemGotoCoors(car, pos, false))
@@ -2040,7 +2057,7 @@ int8 CRunningScript::ProcessCommandsFrom100To199(int32 command)
 		CVehicle* car = CPools::GetVehiclePool()->GetAt(ScriptParams[0]);
 		assert(car);
 		CVector pos = *(CVector*)&ScriptParams[1];
-		if (pos.z <= -100.0f)
+		if (pos.z <= MAP_Z_LOW_LIMIT)
 			pos.z = CWorld::FindGroundZForCoord(pos.x, pos.y);
 		pos.z += car->GetDistanceFromCentreOfMassToBaseOfModel();
 		car->bIsStatic = false;
@@ -2123,15 +2140,14 @@ int8 CRunningScript::ProcessCommandsFrom100To199(int32 command)
 		CollectParameters(&m_nIp, 6);
 		CVehicle* vehicle = CPools::GetVehiclePool()->GetAt(ScriptParams[0]);
 		assert(vehicle);
-		float x1, y1, x2, y2;
-		x1 = *(float*)&ScriptParams[1];
-		y1 = *(float*)&ScriptParams[2];
-		x2 = *(float*)&ScriptParams[3];
-		y2 = *(float*)&ScriptParams[4];
+		float x1 = *(float*)&ScriptParams[1];
+		float y1 = *(float*)&ScriptParams[2];
+		float x2 = *(float*)&ScriptParams[3];
+		float y2 = *(float*)&ScriptParams[4];
 		UpdateCompareFlag(vehicle->IsWithinArea(x1, y1, x2, y2));
 		if (!ScriptParams[5])
 			return 0;
-		CTheScripts::HighlightImportantArea((uint32)this + m_nIp, x1, y1, x2, y2, -100.0f);
+		CTheScripts::HighlightImportantArea((uint32)this + m_nIp, x1, y1, x2, y2, MAP_Z_LOW_LIMIT);
 		if (CTheScripts::DbgFlag)
 			CTheScripts::DrawDebugSquare(x1, y1, x2, y2);
 		return 0;
@@ -2141,13 +2157,12 @@ int8 CRunningScript::ProcessCommandsFrom100To199(int32 command)
 		CollectParameters(&m_nIp, 8);
 		CVehicle* vehicle = CPools::GetVehiclePool()->GetAt(ScriptParams[0]);
 		assert(vehicle);
-		float x1, y1, z1, x2, y2, z2;
-		x1 = *(float*)&ScriptParams[1];
-		y1 = *(float*)&ScriptParams[2];
-		z1 = *(float*)&ScriptParams[3];
-		x2 = *(float*)&ScriptParams[4];
-		y2 = *(float*)&ScriptParams[5];
-		z2 = *(float*)&ScriptParams[6];
+		float x1 = *(float*)&ScriptParams[1];
+		float y1 = *(float*)&ScriptParams[2];
+		float z1 = *(float*)&ScriptParams[3];
+		float x2 = *(float*)&ScriptParams[4];
+		float y2 = *(float*)&ScriptParams[5];
+		float z2 = *(float*)&ScriptParams[6];
 		UpdateCompareFlag(vehicle->IsWithinArea(x1, y1, z1, x2, y2, z2));
 		if (!ScriptParams[7])
 			return 0;
@@ -2530,10 +2545,10 @@ int8 CRunningScript::ProcessCommandsFrom200To299(int32 command)
 	{
 		CollectParameters(&m_nIp, 4);
 		int mi = ScriptParams[0] >= 0 ? ScriptParams[0] : CTheScripts::UsedObjectArray[-ScriptParams[0]].index;
-		CObject* pObj = new CObject(mi, 0);
+		CObject* pObj = new CObject(mi, false);
 		pObj->ObjectCreatedBy = MISSION_OBJECT;
 		CVector pos = *(CVector*)&ScriptParams[1];
-		if (pos.z <= -100.0f)
+		if (pos.z <= MAP_Z_LOW_LIMIT)
 			pos.z = CWorld::FindGroundZForCoord(pos.x, pos.y);
 		pos.z += pObj->GetDistanceFromCentreOfMassToBaseOfModel();
 		pObj->GetPosition() = pos;
@@ -2578,7 +2593,7 @@ int8 CRunningScript::ProcessCommandsFrom200To299(int32 command)
 	{
 		CollectParameters(&m_nIp, 5);
 		CVector pos = *(CVector*)&ScriptParams[1];
-		if (pos.z <= -100.0f)
+		if (pos.z <= MAP_Z_LOW_LIMIT)
 			pos.z = CWorld::FindGroundZForCoord(pos.x, pos.y);
 		CRemote::GivePlayerRemoteControlledCar(pos.x, pos.y, pos.z, DEGTORAD(*(float*)&ScriptParams[4]), MI_RCBANDIT);
 		return 0;
@@ -2755,7 +2770,7 @@ int8 CRunningScript::ProcessCommandsFrom200To299(int32 command)
 			pPed = new CCivilianPed(ScriptParams[1], ScriptParams[2]);
 		pPed->CharCreatedBy = MISSION_CHAR;
 		pPed->bRespondsToThreats = false;
-		pPed->m_ped_flagG2 = false;
+		pPed->bAllowMedicsToReviveMe = false;
 		pPed->GetPosition() = pVehicle->GetPosition();
 		pPed->SetOrientation(0.0f, 0.0f, 0.0f);
 		pPed->SetPedState(PED_DRIVING);
@@ -2787,7 +2802,7 @@ int8 CRunningScript::ProcessCommandsFrom200To299(int32 command)
 		CollectParameters(&m_nIp, 4);
 		CVector pos = *(CVector*)&ScriptParams[1];
 		CPlayerInfo* pPlayer = &CWorld::Players[ScriptParams[0]];
-		if (pos.z <= -100.0f)
+		if (pos.z <= MAP_Z_LOW_LIMIT)
 			pos.z = CWorld::FindGroundZForCoord(pos.x, pos.y);
 		if (pPlayer->m_pPed->bInVehicle){
 			assert(pPlayer->m_pPed->m_pMyVehicle);
@@ -2886,16 +2901,15 @@ int8 CRunningScript::ProcessCommandsFrom300To399(int32 command)
 		CollectParameters(&m_nIp, 6);
 		CVehicle* pVehicle = CPools::GetVehiclePool()->GetAt(ScriptParams[0]);
 		assert(pVehicle);
-		float x1, y1, x2, y2;
-		x1 = *(float*)&ScriptParams[1];
-		y1 = *(float*)&ScriptParams[2];
-		x2 = *(float*)&ScriptParams[3];
-		y2 = *(float*)&ScriptParams[4];
+		float x1 = *(float*)&ScriptParams[1];
+		float y1 = *(float*)&ScriptParams[2];
+		float x2 = *(float*)&ScriptParams[3];
+		float y2 = *(float*)&ScriptParams[4];
 		UpdateCompareFlag(pVehicle->m_status == STATUS_WRECKED &&
 			pVehicle->IsWithinArea(x1, y1, x2, y2));
 		if (!ScriptParams[5])
 			return 0;
-		CTheScripts::HighlightImportantArea((uint32)this + m_nIp, x1, y1, x2, y2, -100.0f);
+		CTheScripts::HighlightImportantArea((uint32)this + m_nIp, x1, y1, x2, y2, MAP_Z_LOW_LIMIT);
 		if (CTheScripts::DbgFlag)
 			CTheScripts::DrawDebugSquare(x1, y1, x2, y2);
 		return 0;
@@ -2905,13 +2919,12 @@ int8 CRunningScript::ProcessCommandsFrom300To399(int32 command)
 		CollectParameters(&m_nIp, 8);
 		CVehicle* pVehicle = CPools::GetVehiclePool()->GetAt(ScriptParams[0]);
 		assert(pVehicle);
-		float x1, y1, z1, x2, y2, z2;
-		x1 = *(float*)&ScriptParams[1];
-		y1 = *(float*)&ScriptParams[2];
-		z1 = *(float*)&ScriptParams[3];
-		x2 = *(float*)&ScriptParams[4];
-		y2 = *(float*)&ScriptParams[5];
-		z2 = *(float*)&ScriptParams[6];
+		float x1 = *(float*)&ScriptParams[1];
+		float y1 = *(float*)&ScriptParams[2];
+		float z1 = *(float*)&ScriptParams[3];
+		float x2 = *(float*)&ScriptParams[4];
+		float y2 = *(float*)&ScriptParams[5];
+		float z2 = *(float*)&ScriptParams[6];
 		UpdateCompareFlag(pVehicle->m_status == STATUS_WRECKED &&
 			pVehicle->IsWithinArea(x1, y1, z1, x2, y2, z2));
 		if (!ScriptParams[7])
@@ -3132,7 +3145,7 @@ int8 CRunningScript::ProcessCommandsFrom300To399(int32 command)
 	{
 		CollectParameters(&m_nIp, 4);
 		CVector pos = *(CVector*)&ScriptParams[0];
-		if (pos.z <= -100.0f)
+		if (pos.z <= MAP_Z_LOW_LIMIT)
 			pos.z = CWorld::FindGroundZForCoord(pos.x, pos.y);
 		TheCamera.TakeControlNoEntity(pos, ScriptParams[3], 1);
 		return 0;
@@ -3186,7 +3199,7 @@ int8 CRunningScript::ProcessCommandsFrom300To399(int32 command)
 	{
 		CollectParameters(&m_nIp, 5);
 		CVector pos = *(CVector*)&ScriptParams[0];
-		if (pos.z <= -100.0f)
+		if (pos.z <= MAP_Z_LOW_LIMIT)
 			pos.z = CWorld::FindGroundZForCoord(pos.x, pos.y);
 		// Useless call
 		CRadar::GetActualBlipArrayIndex(CollectNextParameterWithoutIncreasingPC(m_nIp));
@@ -3214,7 +3227,7 @@ int8 CRunningScript::ProcessCommandsFrom300To399(int32 command)
 		CollectParameters(&m_nIp, 4);
 		CVector pos = *(CVector*)&ScriptParams[0];
 		float angle = *(float*)&ScriptParams[3];
-		if (pos.z <= -100.0f)
+		if (pos.z <= MAP_Z_LOW_LIMIT)
 			pos.z = CWorld::FindGroundZForCoord(pos.x, pos.y);
 		CRestart::AddHospitalRestartPoint(pos, angle);
 		return 0;
@@ -3224,7 +3237,7 @@ int8 CRunningScript::ProcessCommandsFrom300To399(int32 command)
 		CollectParameters(&m_nIp, 4);
 		CVector pos = *(CVector*)&ScriptParams[0];
 		float angle = *(float*)&ScriptParams[3];
-		if (pos.z <= -100.0f)
+		if (pos.z <= MAP_Z_LOW_LIMIT)
 			pos.z = CWorld::FindGroundZForCoord(pos.x, pos.y);
 		CRestart::AddPoliceRestartPoint(pos, angle);
 		return 0;
@@ -3234,7 +3247,7 @@ int8 CRunningScript::ProcessCommandsFrom300To399(int32 command)
 		CollectParameters(&m_nIp, 4);
 		CVector pos = *(CVector*)&ScriptParams[0];
 		float angle = *(float*)&ScriptParams[3];
-		if (pos.z <= -100.0f)
+		if (pos.z <= MAP_Z_LOW_LIMIT)
 			pos.z = CWorld::FindGroundZForCoord(pos.x, pos.y);
 		CRestart::OverrideNextRestart(pos, angle);
 		return 0;
@@ -3463,7 +3476,7 @@ int8 CRunningScript::ProcessCommandsFrom300To399(int32 command)
 	{
 		CollectParameters(&m_nIp, 3);
 		CVector pos = *(CVector*)&ScriptParams[0];
-		if (pos.z <= -100.0f)
+		if (pos.z <= MAP_Z_LOW_LIMIT)
 			pos.z = CWorld::FindGroundZForCoord(pos.x, pos.y);
 		// Useless call
 		CRadar::GetActualBlipArrayIndex(CollectNextParameterWithoutIncreasingPC(m_nIp));
@@ -3477,7 +3490,7 @@ int8 CRunningScript::ProcessCommandsFrom300To399(int32 command)
 	{
 		CollectParameters(&m_nIp, 3);
 		CVector pos = *(CVector*)&ScriptParams[0];
-		if (pos.z <= -100.0f)
+		if (pos.z <= MAP_Z_LOW_LIMIT)
 			pos.z = CWorld::FindGroundZForCoord(pos.x, pos.y);
 		// Useless call
 		CRadar::GetActualBlipArrayIndex(CollectNextParameterWithoutIncreasingPC(m_nIp));
@@ -3615,7 +3628,7 @@ int8 CRunningScript::ProcessCommandsFrom400To499(int32 command)
 		CPed* pPed = CPools::GetPedPool()->GetAt(ScriptParams[0]);
 		assert(pPed);
 		CVector pos = *(CVector*)&ScriptParams[1];
-		if (pos.z <= -100.0f)
+		if (pos.z <= MAP_Z_LOW_LIMIT)
 			pos.z = CWorld::FindGroundZForCoord(pos.x, pos.y);
 		pPed->bScriptObjectiveCompleted = false;
 		pPed->SetObjective(OBJECTIVE_GUARD_SPOT, pos);
@@ -3780,7 +3793,7 @@ int8 CRunningScript::ProcessCommandsFrom400To499(int32 command)
 		CObject* pObject = CPools::GetObjectPool()->GetAt(ScriptParams[0]);
 		assert(pObject);
 		CVector pos = *(CVector*)&ScriptParams[1];
-		if (pos.z <= -100.0f)
+		if (pos.z <= MAP_Z_LOW_LIMIT)
 			pos.z = CWorld::FindGroundZForCoord(pos.x, pos.y);
 		pObject->Teleport(pos);
 		CTheScripts::ClearSpaceForMissionEntity(pos, pObject);
@@ -3890,6 +3903,7 @@ int8 CRunningScript::ProcessCommandsFrom400To499(int32 command)
 	{
 		CollectParameters(&m_nIp, 1);
 		CPed* pPed = CPools::GetPedPool()->GetAt(ScriptParams[0]);
+		assert(pPed);
 		CTheScripts::MissionCleanup.RemoveEntityFromList(ScriptParams[0], CLEANUP_CHAR);
 		return 0;
 	}
@@ -3897,6 +3911,7 @@ int8 CRunningScript::ProcessCommandsFrom400To499(int32 command)
 	{
 		CollectParameters(&m_nIp, 1);
 		CVehicle* pVehicle = CPools::GetVehiclePool()->GetAt(ScriptParams[0]);
+		assert(pVehicle);
 		CTheScripts::MissionCleanup.RemoveEntityFromList(ScriptParams[0], CLEANUP_CAR);
 		return 0;
 	}
@@ -3904,6 +3919,7 @@ int8 CRunningScript::ProcessCommandsFrom400To499(int32 command)
 	{
 		CollectParameters(&m_nIp, 1);
 		CObject* pObject = CPools::GetObjectPool()->GetAt(ScriptParams[0]);
+		assert(pObject);
 		CTheScripts::MissionCleanup.RemoveEntityFromList(ScriptParams[0], CLEANUP_OBJECT);
 		return 0;
 	}
@@ -3949,7 +3965,7 @@ int8 CRunningScript::ProcessCommandsFrom400To499(int32 command)
 			pPed = new CCivilianPed(ScriptParams[1], ScriptParams[2]);
 		pPed->CharCreatedBy = MISSION_CHAR;
 		pPed->bRespondsToThreats = false;
-		pPed->m_ped_flagG2 = false;
+		pPed->bAllowMedicsToReviveMe = false;
 		pPed->GetPosition() = pVehicle->GetPosition();
 		pPed->SetOrientation(0.0f, 0.0f, 0.0f);
 		pPed->SetPedState(PED_DRIVING);
@@ -4557,9 +4573,8 @@ int8 CRunningScript::ProcessCommandsFrom500To599(int32 command)
 		if (model < 0)
 			model = CTheScripts::UsedObjectArray[-model].index;
 		CVector pos = *(CVector*)&ScriptParams[2];
-		if (pos.z <= -100.0f)
-			pos.z = CWorld::FindGroundZForCoord(pos.x, pos.y) + 0.5f;
-		// unused?
+		if (pos.z <= MAP_Z_LOW_LIMIT)
+			pos.z = CWorld::FindGroundZForCoord(pos.x, pos.y) + PICKUP_PLACEMENT_OFFSET;
 		CPickups::GetActualPickupIndex(CollectNextParameterWithoutIncreasingPC(m_nIp));
 		ScriptParams[0] = CPickups::GenerateNewOne(pos, model, ScriptParams[1], 0);
 		StoreParameters(&m_nIp, 1);
@@ -4959,10 +4974,8 @@ int8 CRunningScript::ProcessCommandsFrom500To599(int32 command)
 		CollectParameters(&m_nIp, 1);
 		char name[16];
 		strncpy(name, (char*)&CTheScripts::ScriptSpace[m_nIp], 8);
-		for (int i = 0; i < 8; i++) {
-			if (name[i] >= 'A' && name[i] <= 'Z')
-				name[i] += 'a' - 'A';
-		}
+		for (int i = 0; i < 8; i++)
+			name[i] = tolower(name[i]);
 		CStreaming::RequestSpecialChar(ScriptParams[0] - 1, name, STREAMFLAGS_DEPENDENCY | STREAMFLAGS_SCRIPTOWNED);
 		m_nIp += 8;
 		return 0;
@@ -5103,7 +5116,7 @@ int8 CRunningScript::ProcessCommandsFrom500To599(int32 command)
 	{
 		CollectParameters(&m_nIp, 9);
 		CVector pos = *(CVector*)&ScriptParams[0];
-		if (pos.z <= -100.0f)
+		if (pos.z <= MAP_Z_LOW_LIMIT)
 			pos.z = CWorld::FindGroundZForCoord(pos.x, pos.y);
 		CCoronas::RegisterCorona((uint32)this + m_nIp, ScriptParams[6], ScriptParams[7], ScriptParams[8],
 			255, pos, *(float*)&ScriptParams[3], 150.0f, ScriptParams[4], ScriptParams[5], 1, 0, 0, 0.0f);
@@ -5134,7 +5147,7 @@ int8 CRunningScript::ProcessCommandsFrom500To599(int32 command)
 	{
 		CollectParameters(&m_nIp, 4);
 		CVector pos = *(CVector*)&ScriptParams[0];
-		if (pos.z <= -100.0f)
+		if (pos.z <= MAP_Z_LOW_LIMIT)
 			pos.z = CWorld::FindGroundZForCoord(pos.x, pos.y);
 		CRestart::OverrideNextRestart(pos, *(float*)&ScriptParams[3]);
 		if (CWorld::Players[CWorld::PlayerInFocus].m_WBState != WBSTATE_PLAYING) //TODO: enum
@@ -5149,6 +5162,2611 @@ int8 CRunningScript::ProcessCommandsFrom500To599(int32 command)
 		return 0;
 	}
 	//case COMMAND_SET_COLL_OBJ_NO_OBJ:
+	default:
+		assert(0);
+	}
+	return -1;
+}
+#endif
+
+#if 0
+WRAPPER int8 CRunningScript::ProcessCommandsFrom600To699(int32 command) { EAXJMP(0x444B20); }
+#else
+int8 CRunningScript::ProcessCommandsFrom600To699(int32 command)
+{
+	switch (command){
+	/* Collective commands are not implemented until LCS.
+	case COMMAND_SET_COLL_OBJ_WAIT_ON_FOOT:
+	case COMMAND_SET_COLL_OBJ_FLEE_ON_FOOT_TILL_SAFE:
+	case COMMAND_SET_COLL_OBJ_GUARD_SPOT:
+	case COMMAND_SET_COLL_OBJ_GUARD_AREA:
+	case COMMAND_SET_COLL_OBJ_WAIT_IN_CAR:
+	case COMMAND_SET_COLL_OBJ_KILL_CHAR_ON_FOOT:
+	case COMMAND_SET_COLL_OBJ_KILL_PLAYER_ON_FOOT:
+	case COMMAND_SET_COLL_OBJ_KILL_CHAR_ANY_MEANS:
+	case COMMAND_SET_COLL_OBJ_KILL_PLAYER_ANY_MEANS:
+	case COMMAND_SET_COLL_OBJ_FLEE_CHAR_ON_FOOT_TILL_SAFE:
+	case COMMAND_SET_COLL_OBJ_FLEE_PLAYER_ON_FOOT_TILL_SAFE:
+	case COMMAND_SET_COLL_OBJ_FLEE_CHAR_ON_FOOT_ALWAYS:
+	case COMMAND_SET_COLL_OBJ_FLEE_PLAYER_ON_FOOT_ALWAYS:
+	case COMMAND_SET_COLL_OBJ_GOTO_CHAR_ON_FOOT:
+	case COMMAND_SET_COLL_OBJ_GOTO_PLAYER_ON_FOOT:
+	case COMMAND_SET_COLL_OBJ_LEAVE_CAR:
+	case COMMAND_SET_COLL_OBJ_ENTER_CAR_AS_PASSENGER:
+	case COMMAND_SET_COLL_OBJ_ENTER_CAR_AS_DRIVER:
+	case COMMAND_SET_COLL_OBJ_FOLLOW_CAR_IN_CAR:
+	case COMMAND_SET_COLL_OBJ_FIRE_AT_OBJECT_FROM_VEHICLE:
+	case COMMAND_SET_COLL_OBJ_DESTROY_OBJECT:
+	case COMMAND_SET_COLL_OBJ_DESTROY_CAR:
+	case COMMAND_SET_COLL_OBJ_GOTO_AREA_ON_FOOT:
+	case COMMAND_SET_COLL_OBJ_GOTO_AREA_IN_CAR:
+	case COMMAND_SET_COLL_OBJ_FOLLOW_CAR_ON_FOOT_WITH_OFFSET:
+	case COMMAND_SET_COLL_OBJ_GUARD_ATTACK:
+	case COMMAND_SET_COLL_OBJ_FOLLOW_ROUTE:
+	case COMMAND_SET_COLL_OBJ_GOTO_COORD_ON_FOOT:
+	case COMMAND_SET_COLL_OBJ_GOTO_COORD_IN_CAR:
+	case COMMAND_SET_COLL_OBJ_RUN_TO_AREA:
+	case COMMAND_SET_COLL_OBJ_RUN_TO_COORD:
+	case COMMAND_ADD_PEDS_IN_AREA_TO_COLL:
+	case COMMAND_ADD_PEDS_IN_VEHICLE_TO_COLL:
+	case COMMAND_CLEAR_COLL:
+	case COMMAND_IS_COLL_IN_CARS:
+	case COMMAND_LOCATE_COLL_ANY_MEANS_2D:
+	case COMMAND_LOCATE_COLL_ON_FOOT_2D:
+	case COMMAND_LOCATE_COLL_IN_CAR_2D:
+	case COMMAND_LOCATE_STOPPED_COLL_ANY_MEANS_2D:
+	case COMMAND_LOCATE_STOPPED_COLL_ON_FOOT_2D:
+	case COMMAND_LOCATE_STOPPED_COLL_IN_CAR_2D:
+	case COMMAND_LOCATE_COLL_ANY_MEANS_CHAR_2D:
+	case COMMAND_LOCATE_COLL_ON_FOOT_CHAR_2D:
+	case COMMAND_LOCATE_COLL_IN_CAR_CHAR_2D:
+	case COMMAND_LOCATE_COLL_ANY_MEANS_CAR_2D:
+	case COMMAND_LOCATE_COLL_ON_FOOT_CAR_2D:
+	case COMMAND_LOCATE_COLL_IN_CAR_CAR_2D:
+	case COMMAND_LOCATE_COLL_ANY_MEANS_PLAYER_2D:
+	case COMMAND_LOCATE_COLL_ON_FOOT_PLAYER_2D:
+	case COMMAND_LOCATE_COLL_IN_CAR_PLAYER_2D:
+	case COMMAND_IS_COLL_IN_AREA_2D:
+	case COMMAND_IS_COLL_IN_AREA_ON_FOOT_2D:
+	case COMMAND_IS_COLL_IN_AREA_IN_CAR_2D:
+	case COMMAND_IS_COLL_STOPPED_IN_AREA_2D:
+	case COMMAND_IS_COLL_STOPPED_IN_AREA_ON_FOOT_2D:
+	case COMMAND_IS_COLL_STOPPED_IN_AREA_IN_CAR_2D:
+	case COMMAND_GET_NUMBER_OF_PEDS_IN_COLL:
+	*/
+	case COMMAND_SET_CHAR_HEED_THREATS:
+	{
+		CollectParameters(&m_nIp, 2);
+		CPed* pPed = CPools::GetPedPool()->GetAt(ScriptParams[0]);
+		assert(pPed);
+		pPed->bRespondsToThreats = (ScriptParams[1] != 0);
+		return 0;
+	}
+	case COMMAND_SET_PLAYER_HEED_THREATS:
+	{
+		CollectParameters(&m_nIp, 2);
+		CPed* pPed = CWorld::Players[ScriptParams[0]].m_pPed;
+		assert(pPed);
+		pPed->bRespondsToThreats = (ScriptParams[1] != 0);
+		return 0;
+	}
+	case COMMAND_GET_CONTROLLER_MODE:
+		ScriptParams[0] = 0;
+		StoreParameters(&m_nIp, 1);
+		return 0;
+	case COMMAND_SET_CAN_RESPRAY_CAR:
+	{
+		CollectParameters(&m_nIp, 2);
+		CVehicle* pVehicle = CPools::GetVehiclePool()->GetAt(ScriptParams[0]);
+		assert(pVehicle);
+		assert(pVehicle->m_vehType == VEHICLE_TYPE_CAR);
+		((CAutomobile*)pVehicle)->bFixedColour = (ScriptParams[1] == 0);
+		return 0;
+	}
+	case COMMAND_IS_TAXI:
+	{
+		CollectParameters(&m_nIp, 1);
+		CVehicle* pVehicle = CPools::GetVehiclePool()->GetAt(ScriptParams[0]);
+		assert(pVehicle);
+		int mi = pVehicle->GetModelIndex();
+		UpdateCompareFlag(mi == MI_TAXI || mi == MI_CABBIE || mi == MI_BORGNINE);
+		return 0;
+	}
+	case COMMAND_UNLOAD_SPECIAL_CHARACTER:
+		CollectParameters(&m_nIp, 1);
+		CStreaming::SetMissionDoesntRequireSpecialChar(ScriptParams[0] - 1);
+		return 0;
+	case COMMAND_RESET_NUM_OF_MODELS_KILLED_BY_PLAYER:
+		CDarkel::ResetModelsKilledByPlayer();
+		return 0;
+	case COMMAND_GET_NUM_OF_MODELS_KILLED_BY_PLAYER:
+		CollectParameters(&m_nIp, 1);
+		ScriptParams[0] = CDarkel::QueryModelsKilledByPlayer(ScriptParams[0]);
+		StoreParameters(&m_nIp, 1);
+		return 0;
+	case COMMAND_ACTIVATE_GARAGE:
+		CollectParameters(&m_nIp, 1);
+		CGarages::ActivateGarage(ScriptParams[0]);
+		return 0;
+	case COMMAND_SWITCH_TAXI_TIMER:
+	{
+		CollectParameters(&m_nIp, 1);
+		if (ScriptParams[0] != 0){
+			CWorld::Players[CWorld::PlayerInFocus].m_nUnusedTaxiTimer = CTimer::GetTimeInMilliseconds();
+			CWorld::Players[CWorld::PlayerInFocus].m_bUnusedTaxiThing = true;
+		}else{
+			CWorld::Players[CWorld::PlayerInFocus].m_bUnusedTaxiThing = false;
+		}
+		return 0;
+	}
+	case COMMAND_CREATE_OBJECT_NO_OFFSET:
+	{
+		CollectParameters(&m_nIp, 4);
+		int mi = ScriptParams[0] >= 0 ? ScriptParams[0] : CTheScripts::UsedObjectArray[-ScriptParams[0]].index;
+		CObject* pObj = new CObject(mi, false);
+;		pObj->ObjectCreatedBy = MISSION_OBJECT;
+		CVector pos = *(CVector*)&ScriptParams[1];
+		if (pos.z <= MAP_Z_LOW_LIMIT)
+			pos.z = CWorld::FindGroundZForCoord(pos.x, pos.y);
+		pObj->GetPosition() = pos;
+		pObj->SetOrientation(0.0f, 0.0f, 0.0f);
+		pObj->GetMatrix().UpdateRW();
+		pObj->UpdateRwFrame();
+		CTheScripts::ClearSpaceForMissionEntity(pos, pObj);
+		CWorld::Add(pObj);
+		ScriptParams[0] = CPools::GetObjectPool()->GetIndex(pObj);
+		StoreParameters(&m_nIp, 1);
+		if (m_bIsMissionScript)
+			CTheScripts::MissionCleanup.AddEntityToList(ScriptParams[0], CLEANUP_OBJECT);
+		return 0;
+	}
+	case COMMAND_IS_BOAT:
+	{
+		CollectParameters(&m_nIp, 1);
+		CVehicle* pVehicle = CPools::GetVehiclePool()->GetAt(ScriptParams[0]);
+		assert(pVehicle);
+		UpdateCompareFlag(pVehicle->m_vehType == VEHICLE_TYPE_BOAT);
+		return 0;
+	}
+	case COMMAND_SET_CHAR_OBJ_GOTO_AREA_ANY_MEANS:
+	{
+		CollectParameters(&m_nIp, 5);
+		CPed* pPed = CPools::GetPedPool()->GetAt(ScriptParams[0]);
+		assert(pPed);
+		float infX = *(float*)&ScriptParams[1];
+		float infY = *(float*)&ScriptParams[2];
+		float supX = *(float*)&ScriptParams[3];
+		float supY = *(float*)&ScriptParams[4];
+		if (infX > supX) {
+			infX = *(float*)&ScriptParams[3];
+			supX = *(float*)&ScriptParams[1];
+		}
+		if (infY > supY) {
+			infY = *(float*)&ScriptParams[4];
+			supY = *(float*)&ScriptParams[2];
+		}
+		CVector pos;
+		pos.x = (infX + supX) / 2;
+		pos.y = (infY + supY) / 2;
+		pos.z = CWorld::FindGroundZForCoord(pos.x, pos.y);
+		float radius = max(pos.x - infX, pos.y - infY);
+		pPed->bScriptObjectiveCompleted = false;
+		pPed->SetObjective(OBJECTIVE_GOTO_AREA_ANY_MEANS, pos, radius);
+		return 0;
+	}
+	//case COMMAND_SET_COLL_OBJ_GOTO_AREA_ANY_MEANS:
+	case COMMAND_IS_PLAYER_STOPPED:
+	{
+		CollectParameters(&m_nIp, 1);
+		CPlayerInfo* pPlayer = &CWorld::Players[ScriptParams[0]];
+		UpdateCompareFlag(CTheScripts::IsPlayerStopped(pPlayer));
+		return 0;
+	}
+	case COMMAND_IS_CHAR_STOPPED:
+	{
+		CollectParameters(&m_nIp, 1);
+		CPed* pPed = CPools::GetPedPool()->GetAt(ScriptParams[0]);
+		UpdateCompareFlag(CTheScripts::IsPedStopped(pPed));
+		return 0;
+	}
+	case COMMAND_MESSAGE_WAIT:
+		CollectParameters(&m_nIp, 2);
+		m_nWakeTime = CTimer::GetTimeInMilliseconds() + ScriptParams[0];
+		if (ScriptParams[1] != 0)
+			m_bSkipWakeTime = true;
+		return 1;
+	case COMMAND_ADD_PARTICLE_EFFECT:
+	{
+		CollectParameters(&m_nIp, 5);
+		CVector pos = *(CVector*)&ScriptParams[1];
+		if (pos.z <= MAP_Z_LOW_LIMIT)
+			pos.z = CWorld::FindGroundZForCoord(pos.x, pos.y);
+		CParticleObject::AddObject(ScriptParams[0], pos, ScriptParams[4] != 0);
+		return 0;
+	}
+	case COMMAND_SWITCH_WIDESCREEN:
+		CollectParameters(&m_nIp, 1);
+		if (ScriptParams[0] != 0)
+			TheCamera.SetWideScreenOn();
+		else
+			TheCamera.SetWideScreenOff();
+		return 0;
+	case COMMAND_ADD_SPRITE_BLIP_FOR_CAR:
+	{
+		CollectParameters(&m_nIp, 2);
+		CVehicle* pVehicle = CPools::GetVehiclePool()->GetAt(ScriptParams[0]);
+		assert(pVehicle);
+		CRadar::GetActualBlipArrayIndex(CollectNextParameterWithoutIncreasingPC(m_nIp));
+		int id = CRadar::SetEntityBlip(BLIP_CAR, ScriptParams[0], 0, BLIP_DISPLAY_BOTH);
+		CRadar::SetBlipSprite(id, ScriptParams[1]);
+		ScriptParams[0] = id;
+		StoreParameters(&m_nIp, 1);
+		return 0;
+	}
+	case COMMAND_ADD_SPRITE_BLIP_FOR_CHAR:
+	{
+		CollectParameters(&m_nIp, 2);
+		CPed* pPed = CPools::GetPedPool()->GetAt(ScriptParams[0]);
+		assert(pPed);
+		CRadar::GetActualBlipArrayIndex(CollectNextParameterWithoutIncreasingPC(m_nIp));
+		int id = CRadar::SetEntityBlip(BLIP_CHAR, ScriptParams[0], 1, BLIP_DISPLAY_BOTH);
+		CRadar::SetBlipSprite(id, ScriptParams[1]);
+		ScriptParams[0] = id;
+		StoreParameters(&m_nIp, 1);
+		return 0;
+	}
+	case COMMAND_ADD_SPRITE_BLIP_FOR_OBJECT:
+	{
+		CollectParameters(&m_nIp, 2);
+		CObject* pObject = CPools::GetObjectPool()->GetAt(ScriptParams[0]);
+		assert(pObject);
+		CRadar::GetActualBlipArrayIndex(CollectNextParameterWithoutIncreasingPC(m_nIp));
+		int id = CRadar::SetEntityBlip(BLIP_OBJECT, ScriptParams[0], 6, BLIP_DISPLAY_BOTH);
+		CRadar::SetBlipSprite(id, ScriptParams[1]);
+		ScriptParams[0] = id;
+		StoreParameters(&m_nIp, 1);
+		return 0;
+	}
+	case COMMAND_ADD_SPRITE_BLIP_FOR_CONTACT_POINT:
+	{
+		CollectParameters(&m_nIp, 4);
+		CVector pos = *(CVector*)&ScriptParams[0];
+		if (pos.z <= MAP_Z_LOW_LIMIT)
+			pos.z = CWorld::FindGroundZForCoord(pos.x, pos.y);
+		CRadar::GetActualBlipArrayIndex(CollectNextParameterWithoutIncreasingPC(m_nIp));
+		int id = CRadar::SetCoordBlip(BLIP_CONTACT_POINT, pos, 2, BLIP_DISPLAY_BOTH);
+		CRadar::SetBlipSprite(id, ScriptParams[3]);
+		ScriptParams[0] = id;
+		StoreParameters(&m_nIp, 1);
+		return 0;
+	}
+	case COMMAND_ADD_SPRITE_BLIP_FOR_COORD:
+	{
+		CollectParameters(&m_nIp, 4);
+		CVector pos = *(CVector*)&ScriptParams[0];
+		if (pos.z <= MAP_Z_LOW_LIMIT)
+			pos.z = CWorld::FindGroundZForCoord(pos.x, pos.y);
+		CRadar::GetActualBlipArrayIndex(CollectNextParameterWithoutIncreasingPC(m_nIp));
+		int id = CRadar::SetCoordBlip(BLIP_COORD, pos, 5, BLIP_DISPLAY_BOTH);
+		CRadar::SetBlipSprite(id, ScriptParams[3]);
+		ScriptParams[0] = id;
+		StoreParameters(&m_nIp, 1);
+		return 0;
+	}
+	case COMMAND_SET_CHAR_ONLY_DAMAGED_BY_PLAYER:
+	{
+		CollectParameters(&m_nIp, 2);
+		CPed* pPed = CPools::GetPedPool()->GetAt(ScriptParams[0]);
+		assert(pPed);
+		pPed->bOnlyDamagedByPlayer = (ScriptParams[1] != 0);
+		return 0;
+	}
+	case COMMAND_SET_CAR_ONLY_DAMAGED_BY_PLAYER:
+	{
+		CollectParameters(&m_nIp, 2);
+		CVehicle* pVehicle = CPools::GetVehiclePool()->GetAt(ScriptParams[0]);
+		assert(pVehicle);
+		pVehicle->bOnlyDamagedByPlayer = (ScriptParams[1] != 0);
+		return 0;
+	}
+	case COMMAND_SET_CHAR_PROOFS:
+	{
+		CollectParameters(&m_nIp, 6);
+		CPed* pPed = CPools::GetPedPool()->GetAt(ScriptParams[0]);
+		assert(pPed);
+		pPed->bBulletProof = (ScriptParams[1] != 0);
+		pPed->bFireProof = (ScriptParams[2] != 0);
+		pPed->bExplosionProof = (ScriptParams[3] != 0);
+		pPed->bCollisionProof = (ScriptParams[4] != 0);
+		pPed->bMeleeProof = (ScriptParams[5] != 0);
+		return 0;
+	}
+	case COMMAND_SET_CAR_PROOFS:
+	{
+		CollectParameters(&m_nIp, 6);
+		CVehicle* pVehicle = CPools::GetVehiclePool()->GetAt(ScriptParams[0]);
+		assert(pVehicle);
+		pVehicle->bBulletProof = (ScriptParams[1] != 0);
+		pVehicle->bFireProof = (ScriptParams[2] != 0);
+		pVehicle->bExplosionProof = (ScriptParams[3] != 0);
+		pVehicle->bCollisionProof = (ScriptParams[4] != 0);
+		pVehicle->bMeleeProof = (ScriptParams[5] != 0);
+		return 0;
+	}
+	case COMMAND_IS_PLAYER_IN_ANGLED_AREA_2D:
+	case COMMAND_IS_PLAYER_IN_ANGLED_AREA_ON_FOOT_2D:
+	case COMMAND_IS_PLAYER_IN_ANGLED_AREA_IN_CAR_2D:
+	case COMMAND_IS_PLAYER_STOPPED_IN_ANGLED_AREA_2D:
+	case COMMAND_IS_PLAYER_STOPPED_IN_ANGLED_AREA_ON_FOOT_2D:
+	case COMMAND_IS_PLAYER_STOPPED_IN_ANGLED_AREA_IN_CAR_2D:
+	case COMMAND_IS_PLAYER_IN_ANGLED_AREA_3D:
+	case COMMAND_IS_PLAYER_IN_ANGLED_AREA_ON_FOOT_3D:
+	case COMMAND_IS_PLAYER_IN_ANGLED_AREA_IN_CAR_3D:
+	case COMMAND_IS_PLAYER_STOPPED_IN_ANGLED_AREA_3D:
+	case COMMAND_IS_PLAYER_STOPPED_IN_ANGLED_AREA_ON_FOOT_3D:
+	case COMMAND_IS_PLAYER_STOPPED_IN_ANGLED_AREA_IN_CAR_3D:
+		PlayerInAngledAreaCheckCommand(command, &m_nIp);
+		return 0;
+	case COMMAND_DEACTIVATE_GARAGE:
+		CollectParameters(&m_nIp, 1);
+		CGarages::DeActivateGarage(ScriptParams[0]);
+		return 0;
+	case COMMAND_GET_NUMBER_OF_CARS_COLLECTED_BY_GARAGE:
+		CollectParameters(&m_nIp, 1);
+		ScriptParams[0] = CGarages::QueryCarsCollected(ScriptParams[0]);
+		StoreParameters(&m_nIp, 1);
+		return 0;
+	case COMMAND_HAS_CAR_BEEN_TAKEN_TO_GARAGE:
+		CollectParameters(&m_nIp, 2);
+		UpdateCompareFlag(CGarages::HasThisCarBeenCollected(ScriptParams[0], ScriptParams[1] - 1));
+		return 0;
+	default:
+		assert(0);
+	}
+	return -1;
+}
+#endif
+
+#if 0
+WRAPPER int8 CRunningScript::ProcessCommandsFrom700To799(int32 command) { EAXJMP(0x4458A0); }
+#else
+int8 CRunningScript::ProcessCommandsFrom700To799(int32 command)
+{
+	switch (command){
+	case COMMAND_SET_SWAT_REQUIRED:
+		CollectParameters(&m_nIp, 1);
+		FindPlayerPed()->m_pWanted->m_bSwatRequired = (ScriptParams[0] != 0);
+		return 0;
+	case COMMAND_SET_FBI_REQUIRED:
+		CollectParameters(&m_nIp, 1);
+		FindPlayerPed()->m_pWanted->m_bFbiRequired = (ScriptParams[0] != 0);
+		return 0;
+	case COMMAND_SET_ARMY_REQUIRED:
+		CollectParameters(&m_nIp, 1);
+		FindPlayerPed()->m_pWanted->m_bArmyRequired = (ScriptParams[0] != 0);
+		return 0;
+	case COMMAND_IS_CAR_IN_WATER:
+	{
+		CollectParameters(&m_nIp, 1);
+		CVehicle* pVehicle = CPools::GetVehiclePool()->GetAt(ScriptParams[0]);
+		assert(pVehicle);
+		UpdateCompareFlag(pVehicle->bIsInWater);
+		return 0;
+	}
+	case COMMAND_GET_CLOSEST_CHAR_NODE:
+	{
+		CollectParameters(&m_nIp, 3);
+		CVector pos = *(CVector*)&ScriptParams[0];
+		if (pos.z <= MAP_Z_LOW_LIMIT)
+			pos.z = CWorld::FindGroundZForCoord(pos.x, pos.y);
+		CPathNode* pNode = &ThePaths.m_pathNodes[ThePaths.FindNodeClosestToCoors(pos, 1, 999999.9f)];
+		*(CVector*)&ScriptParams[0] = pNode->pos;
+		StoreParameters(&m_nIp, 3);
+		return 0;
+	}
+	case COMMAND_GET_CLOSEST_CAR_NODE:
+	{
+		CollectParameters(&m_nIp, 3);
+		CVector pos = *(CVector*)&ScriptParams[0];
+		if (pos.z <= MAP_Z_LOW_LIMIT)
+			pos.z = CWorld::FindGroundZForCoord(pos.x, pos.y);
+		CPathNode* pNode = &ThePaths.m_pathNodes[ThePaths.FindNodeClosestToCoors(pos, 0, 999999.9f)];
+		*(CVector*)&ScriptParams[0] = pNode->pos;
+		StoreParameters(&m_nIp, 3);
+		return 0;
+	}
+	case COMMAND_CAR_GOTO_COORDINATES_ACCURATE:
+	{
+		CollectParameters(&m_nIp, 4);
+		CVehicle* pVehicle = CPools::GetVehiclePool()->GetAt(ScriptParams[0]);
+		assert(pVehicle);
+		CVector pos = *(CVector*)&ScriptParams[1];
+		if (pos.z <= MAP_Z_LOW_LIMIT)
+			pos.z = CWorld::FindGroundZForCoord(pos.x, pos.y);
+		pos.z += pVehicle->GetDistanceFromCentreOfMassToBaseOfModel();
+		if (CCarCtrl::JoinCarWithRoadSystemGotoCoors(pVehicle, pos, false))
+			pVehicle->AutoPilot.m_nCarMission = MISSION_GOTO_COORDS_STRAIGHT_ACCURATE;
+		else
+			pVehicle->AutoPilot.m_nCarMission = MISSION_GOTOCOORDS_ACCURATE;
+		pVehicle->m_status = STATUS_PHYSICS;
+		pVehicle->bEngineOn = true;
+		pVehicle->AutoPilot.m_nCruiseSpeed = min(6, pVehicle->AutoPilot.m_nCruiseSpeed);
+		pVehicle->AutoPilot.m_nAntiReverseTimer = CTimer::GetTimeInMilliseconds();
+		return 0;
+	}
+	case COMMAND_START_PACMAN_RACE:
+		CollectParameters(&m_nIp, 1);
+		CPacManPickups::StartPacManRace(ScriptParams[0]);
+		return 0;
+	case COMMAND_START_PACMAN_RECORD:
+		CPacManPickups::StartPacManRecord();
+		return 0;
+	case COMMAND_GET_NUMBER_OF_POWER_PILLS_EATEN:
+		ScriptParams[0] = CPacManPickups::QueryPowerPillsEatenInRace();
+		StoreParameters(&m_nIp, 1);
+		return 0;
+	case COMMAND_CLEAR_PACMAN:
+		CPacManPickups::CleanUpPacManStuff();
+		return 0;
+	case COMMAND_START_PACMAN_SCRAMBLE:
+	{
+		CollectParameters(&m_nIp, 5);
+		CVector pos = *(CVector*)&ScriptParams[0];
+		if (pos.z <= MAP_Z_LOW_LIMIT)
+			pos.z = CWorld::FindGroundZForCoord(pos.x, pos.y);
+		CPacManPickups::StartPacManScramble(pos, *(float*)&ScriptParams[3], ScriptParams[4]);
+		return 0;
+	}
+	case COMMAND_GET_NUMBER_OF_POWER_PILLS_CARRIED:
+		ScriptParams[0] = CPacManPickups::QueryPowerPillsCarriedByPlayer();
+		return 0;
+	case COMMAND_CLEAR_NUMBER_OF_POWER_PILLS_CARRIED:
+		CPacManPickups::ResetPowerPillsCarriedByPlayer();
+		return 0;
+	case COMMAND_IS_CAR_ON_SCREEN:
+	{
+		CollectParameters(&m_nIp, 1);
+		CVehicle* pVehicle = CPools::GetVehiclePool()->GetAt(ScriptParams[0]);
+		assert(pVehicle);
+		UpdateCompareFlag(TheCamera.IsSphereVisible(pVehicle->GetBoundCentre(), pVehicle->GetBoundRadius()));
+		return 0;
+	}
+	case COMMAND_IS_CHAR_ON_SCREEN:
+	{
+		CollectParameters(&m_nIp, 1);
+		CPed* pPed = CPools::GetPedPool()->GetAt(ScriptParams[0]);
+		assert(pPed);
+		UpdateCompareFlag(TheCamera.IsSphereVisible(pPed->GetBoundCentre(), pPed->GetBoundRadius()));
+		return 0;
+	}
+	case COMMAND_IS_OBJECT_ON_SCREEN:
+	{
+		CollectParameters(&m_nIp, 1);
+		CObject* pObject = CPools::GetObjectPool()->GetAt(ScriptParams[0]);
+		assert(pObject);
+		UpdateCompareFlag(TheCamera.IsSphereVisible(pObject->GetBoundCentre(), pObject->GetBoundRadius()));
+		return 0;
+	}
+	case COMMAND_GOSUB_FILE:
+	{
+		CollectParameters(&m_nIp, 2);
+		assert(m_nStackPointer < MAX_STACK_DEPTH);
+		m_anStack[m_nStackPointer++] = m_nIp;
+		m_nIp = ScriptParams[0];
+		// ScriptParams[1] == filename
+		return 0;
+	}
+	case COMMAND_GET_GROUND_Z_FOR_3D_COORD:
+	{
+		CollectParameters(&m_nIp, 3);
+		CVector pos = *(CVector*)&ScriptParams[0];
+		bool success;
+		*(float*)&ScriptParams[0] = CWorld::FindGroundZFor3DCoord(pos.x, pos.y, pos.z, &success);
+		StoreParameters(&m_nIp, 1);
+		return 0;
+	}
+	case COMMAND_START_SCRIPT_FIRE:
+	{
+		CollectParameters(&m_nIp, 3);
+		CVector pos = *(CVector*)&ScriptParams[0];
+		if (pos.z <= MAP_Z_LOW_LIMIT)
+			pos.z = CWorld::FindGroundZForCoord(pos.x, pos.y);
+		ScriptParams[0] = gFireManager.StartScriptFire(pos, nil, 0.8f, 1);
+		StoreParameters(&m_nIp, 1);
+		return 0;
+	}
+	case COMMAND_IS_SCRIPT_FIRE_EXTINGUISHED:
+		CollectParameters(&m_nIp, 1);
+		UpdateCompareFlag(gFireManager.IsScriptFireExtinguish(ScriptParams[0]));
+		return 0;
+	case COMMAND_REMOVE_SCRIPT_FIRE:
+		CollectParameters(&m_nIp, 1);
+		gFireManager.RemoveScriptFire(ScriptParams[0]);
+		return 0;
+	case COMMAND_SET_COMEDY_CONTROLS:
+	{
+		CollectParameters(&m_nIp, 2);
+		CVehicle* pVehicle = CPools::GetVehiclePool()->GetAt(ScriptParams[0]);
+		assert(pVehicle);
+		pVehicle->bComedyControls = (ScriptParams[1] != 0);
+		return 0;
+	}
+	case COMMAND_BOAT_GOTO_COORDS:
+	{
+		CollectParameters(&m_nIp, 4);
+		CVehicle* pVehicle = CPools::GetVehiclePool()->GetAt(ScriptParams[0]);
+		assert(pVehicle);
+		assert(pVehicle->m_vehType == VEHICLE_TYPE_BOAT);
+		CBoat* pBoat = (CBoat*)pVehicle;
+		CVector pos = *(CVector*)&ScriptParams[1];
+		if (pos.z <= MAP_Z_LOW_LIMIT)
+			CWaterLevel::GetWaterLevel(pos.x, pos.y, pos.z, &pos.z, false);
+		pBoat->AutoPilot.m_nCarMission = MISSION_GOTOCOORDS_ASTHECROWSWIMS;
+		pBoat->AutoPilot.m_vecDestinationCoors = pos;
+		pBoat->m_status = STATUS_PHYSICS;
+		pBoat->AutoPilot.m_nCruiseSpeed = max(6, pBoat->AutoPilot.m_nCruiseSpeed);
+		pBoat->AutoPilot.m_nAntiReverseTimer = CTimer::GetTimeInMilliseconds();
+		return 0;
+	}
+	case COMMAND_BOAT_STOP:
+	{
+		CollectParameters(&m_nIp, 1);
+		CVehicle* pVehicle = CPools::GetVehiclePool()->GetAt(ScriptParams[0]);
+		assert(pVehicle);
+		assert(pVehicle->m_vehType == VEHICLE_TYPE_BOAT);
+		CBoat* pBoat = (CBoat*)pVehicle;
+		pBoat->AutoPilot.m_nCarMission = MISSION_NONE;
+		pBoat->m_status = STATUS_PHYSICS;
+		pBoat->bEngineOn = false;
+		pBoat->AutoPilot.m_nCruiseSpeed = 0;
+		return 0;
+	}
+	case COMMAND_IS_PLAYER_SHOOTING_IN_AREA:
+	{
+		CollectParameters(&m_nIp, 6);
+		CPed* pPed = CWorld::Players[ScriptParams[0]].m_pPed;
+		assert(pPed);
+		float x1 = *(float*)&ScriptParams[1];
+		float y1 = *(float*)&ScriptParams[2];
+		float x2 = *(float*)&ScriptParams[3];
+		float y2 = *(float*)&ScriptParams[4];
+		UpdateCompareFlag(pPed->bIsShooting && pPed->IsWithinArea(x1, y1, x2, y2));
+		if (!ScriptParams[5])
+			return 0;
+		CTheScripts::HighlightImportantArea((uint32)this + m_nIp, x1, y1, x2, y2, MAP_Z_LOW_LIMIT);
+		if (CTheScripts::DbgFlag)
+			CTheScripts::DrawDebugSquare(x1, y1, x2, y2);
+		return 0;
+	}
+	case COMMAND_IS_CHAR_SHOOTING_IN_AREA:
+	{
+		CollectParameters(&m_nIp, 6);
+		CPed* pPed = CPools::GetPedPool()->GetAt(ScriptParams[0]);
+		assert(pPed);
+		float x1 = *(float*)&ScriptParams[1];
+		float y1 = *(float*)&ScriptParams[2];
+		float x2 = *(float*)&ScriptParams[3];
+		float y2 = *(float*)&ScriptParams[4];
+		UpdateCompareFlag(pPed->bIsShooting && pPed->IsWithinArea(x1, y1, x2, y2));
+		if (!ScriptParams[5])
+			return 0;
+		CTheScripts::HighlightImportantArea((uint32)this + m_nIp, x1, y1, x2, y2, MAP_Z_LOW_LIMIT);
+		if (CTheScripts::DbgFlag)
+			CTheScripts::DrawDebugSquare(x1, y1, x2, y2);
+		return 0;
+	}
+	case COMMAND_IS_CURRENT_PLAYER_WEAPON:
+	{
+		CollectParameters(&m_nIp, 2); 
+		CPed* pPed = CWorld::Players[ScriptParams[0]].m_pPed;
+		assert(pPed);
+		UpdateCompareFlag(ScriptParams[1] == pPed->m_weapons[pPed->m_currentWeapon].m_eWeaponType);
+		return 0;
+	}
+	case COMMAND_IS_CURRENT_CHAR_WEAPON:
+	{
+		CollectParameters(&m_nIp, 2);
+		CPed* pPed = CPools::GetPedPool()->GetAt(ScriptParams[0]);
+		assert(pPed);
+		UpdateCompareFlag(ScriptParams[1] == pPed->m_weapons[pPed->m_currentWeapon].m_eWeaponType);
+		return 0;
+	}
+	case COMMAND_CLEAR_NUMBER_OF_POWER_PILLS_EATEN:
+		CPacManPickups::ResetPowerPillsEatenInRace();
+		return 0;
+	case COMMAND_ADD_POWER_PILL:
+	{
+		CollectParameters(&m_nIp, 3);
+		CVector pos = *(CVector*)&ScriptParams[0];
+		if (pos.z <= MAP_Z_LOW_LIMIT)
+			pos.z = CWorld::FindGroundZForCoord(pos.x, pos.y);
+		CPacManPickups::GenerateOnePMPickUp(pos);
+		return 0;
+	}
+	case COMMAND_SET_BOAT_CRUISE_SPEED:
+	{
+		CollectParameters(&m_nIp, 2);
+		CVehicle* pVehicle = CPools::GetVehiclePool()->GetAt(ScriptParams[0]);
+		assert(pVehicle);
+		assert(pVehicle->m_vehType == VEHICLE_TYPE_BOAT);
+		CBoat* pBoat = (CBoat*)pVehicle;
+		pBoat->AutoPilot.m_nCruiseSpeed = ScriptParams[1];
+	}
+	case COMMAND_GET_RANDOM_CHAR_IN_AREA:
+	{
+		CollectParameters(&m_nIp, 4);
+		int ped_handle = -1;
+		CVector pos = FindPlayerCoors();
+		float x1 = *(float*)&ScriptParams[1];
+		float y1 = *(float*)&ScriptParams[2];
+		float x2 = *(float*)&ScriptParams[3];
+		float y2 = *(float*)&ScriptParams[4];
+		int i = CPools::GetPedPool()->GetSize();
+		while (--i && ped_handle == -1){
+			CPed* pPed = CPools::GetPedPool()->GetSlot(i);
+			if (!pPed)
+				continue;
+			if (CTheScripts::LastRandomPedId == CPools::GetPedPool()->GetIndex(pPed))
+				continue;
+			if (pPed->CharCreatedBy != RANDOM_CHAR)
+				continue;
+			if (!pPed->IsPedInControl())
+				continue;
+			if (pPed->bRemoveFromWorld)
+				continue;
+			if (pPed->bFadeOut)
+				continue;
+			if (pPed->GetModelIndex() == MI_SCUM_WOM || pPed->GetModelIndex() == MI_SCUM_MAN)
+				continue;
+			if (!ThisIsAValidRandomPed(pPed->m_nPedType))
+				continue;
+			if (pPed->bIsLeader || pPed->m_leader)
+				continue;
+			if (!pPed->IsWithinArea(x1, y1, x2, y2))
+				continue;
+			if (pos.z - PED_FIND_Z_OFFSET > pPed->GetPosition().z)
+				continue;
+			if (pos.z + PED_FIND_Z_OFFSET < pPed->GetPosition().z)
+				continue;
+			ped_handle = CPools::GetPedPool()->GetIndex(pPed);
+			CTheScripts::LastRandomPedId = ped_handle;
+			pPed->CharCreatedBy = MISSION_CHAR;
+			pPed->bRespondsToThreats = false;
+			++CPopulation::ms_nTotalMissionPeds;
+			if (m_bIsMissionScript)
+				CTheScripts::MissionCleanup.AddEntityToList(ped_handle, CLEANUP_CHAR);
+		}
+		ScriptParams[0] = ped_handle;
+		StoreParameters(&m_nIp, 1);
+		return 0;
+	}
+	case COMMAND_GET_RANDOM_CHAR_IN_ZONE:
+	{
+		char zone[8];
+		strncpy(zone, (const char*)&CTheScripts::ScriptSpace[m_nIp], 8);
+		int nZone = CTheZones::FindZoneByLabelAndReturnIndex(zone);
+		if (nZone != -1)
+			m_nIp += 8;
+		CZone* pZone = CTheZones::GetZone(nZone);
+		int ped_handle = -1;
+		CVector pos = FindPlayerCoors();
+		int i = CPools::GetPedPool()->GetSize();
+		while (--i && ped_handle == -1) {
+			CPed* pPed = CPools::GetPedPool()->GetSlot(i);
+			if (!pPed)
+				continue;
+			if (CTheScripts::LastRandomPedId == CPools::GetPedPool()->GetIndex(pPed))
+				continue;
+			if (pPed->CharCreatedBy != RANDOM_CHAR)
+				continue;
+			if (!pPed->IsPedInControl())
+				continue;
+			if (pPed->bRemoveFromWorld)
+				continue;
+			if (pPed->bFadeOut)
+				continue;
+			if (pPed->GetModelIndex() == MI_SCUM_WOM || pPed->GetModelIndex() == MI_SCUM_MAN)
+				continue;
+			if (!ThisIsAValidRandomPed(pPed->m_nPedType))
+				continue;
+			if (pPed->bIsLeader || pPed->m_leader)
+				continue;
+			if (!CTheZones::PointLiesWithinZone(pPed->GetPosition(), pZone))
+				continue;
+			if (pos.z - PED_FIND_Z_OFFSET > pPed->GetPosition().z)
+				continue;
+			if (pos.z + PED_FIND_Z_OFFSET < pPed->GetPosition().z)
+				continue;
+			ped_handle = CPools::GetPedPool()->GetIndex(pPed);
+			CTheScripts::LastRandomPedId = ped_handle;
+			pPed->CharCreatedBy = MISSION_CHAR;
+			pPed->bRespondsToThreats = false;
+			++CPopulation::ms_nTotalMissionPeds;
+			if (m_bIsMissionScript)
+				CTheScripts::MissionCleanup.AddEntityToList(ped_handle, CLEANUP_CHAR);
+		}
+		ScriptParams[0] = ped_handle;
+		StoreParameters(&m_nIp, 1);
+		return 0;
+	}
+	case COMMAND_IS_PLAYER_IN_TAXI:
+	{
+		CollectParameters(&m_nIp, 1);
+		CPed* pPed = CWorld::Players[ScriptParams[0]].m_pPed;
+		assert(pPed);
+		UpdateCompareFlag(pPed->bInVehicle && pPed->m_pMyVehicle->IsTaxi());
+		return 0;
+	}
+	case COMMAND_IS_PLAYER_SHOOTING:
+	{
+		CollectParameters(&m_nIp, 1);
+		CPed* pPed = CWorld::Players[ScriptParams[0]].m_pPed;
+		assert(pPed);
+		UpdateCompareFlag(pPed->bIsShooting);
+		return 0;
+	}
+	case COMMAND_IS_CHAR_SHOOTING:
+	{
+		CollectParameters(&m_nIp, 1);
+		CPed* pPed = CPools::GetPedPool()->GetAt(ScriptParams[0]);
+		assert(pPed);
+		UpdateCompareFlag(pPed->bIsShooting);
+		return 0;
+	}
+	case COMMAND_CREATE_MONEY_PICKUP:
+	{
+		CollectParameters(&m_nIp, 4);
+		CVector pos = *(CVector*)&ScriptParams[0];
+		if (pos.z <= MAP_Z_LOW_LIMIT)
+			pos.z = CWorld::FindGroundZForCoord(pos.x, pos.y) + PICKUP_PLACEMENT_OFFSET;
+		CPickups::GetActualPickupIndex(CollectNextParameterWithoutIncreasingPC(m_nIp));
+		ScriptParams[0] = CPickups::GenerateNewOne(pos, MI_MONEY, PICKUP_MONEY, ScriptParams[3]);
+		StoreParameters(&m_nIp, 1);
+		return 0;
+	}
+	case COMMAND_SET_CHAR_ACCURACY:
+	{
+		CollectParameters(&m_nIp, 2);
+		CPed* pPed = CPools::GetPedPool()->GetAt(ScriptParams[0]);
+		assert(pPed);
+		pPed->m_wepAccuracy = ScriptParams[1];
+		return 0;
+	}
+	case COMMAND_GET_CAR_SPEED:
+	{
+		CollectParameters(&m_nIp, 1);
+		CVehicle* pVehicle = CPools::GetVehiclePool()->GetAt(ScriptParams[0]);
+		assert(pVehicle);
+		*(float*)&ScriptParams[0] = pVehicle->GetSpeed().Magnitude() * GAME_SPEED_TO_METERS_PER_SECOND;
+		StoreParameters(&m_nIp, 1);
+		return 0;
+	}
+	case COMMAND_LOAD_CUTSCENE:
+	{
+		char name[8];
+		strncpy(name, (const char*)&CTheScripts::ScriptSpace[m_nIp], 8);
+		m_nIp += 8;
+		CCutsceneMgr::LoadCutsceneData(name);
+		return 0;
+	}
+	case COMMAND_CREATE_CUTSCENE_OBJECT:
+	{
+		CollectParameters(&m_nIp, 1);
+		CCutsceneObject* pCutObj = CCutsceneMgr::CreateCutsceneObject(ScriptParams[0]);
+		ScriptParams[0] = CPools::GetObjectPool()->GetIndex(pCutObj);
+		StoreParameters(&m_nIp, 1);
+		return 0;
+	}
+	case COMMAND_SET_CUTSCENE_ANIM:
+	{
+		CollectParameters(&m_nIp, 1);
+		char name[8];
+		CObject* pObject = CPools::GetObjectPool()->GetAt(ScriptParams[0]);
+		assert(pObject);
+		strncpy(name, (const char*)&CTheScripts::ScriptSpace[m_nIp], 8);
+		m_nIp += 8;
+		CCutsceneMgr::SetCutsceneAnim(name, pObject);
+		return 0;
+	}
+	case COMMAND_START_CUTSCENE:
+		CCutsceneMgr::ms_cutsceneLoadStatus = 1;
+		return 0;
+	case COMMAND_GET_CUTSCENE_TIME:
+		ScriptParams[0] = CCutsceneMgr::GetCutsceneTimeInMilleseconds();
+		StoreParameters(&m_nIp, 1);
+		return 0;
+	case COMMAND_HAS_CUTSCENE_FINISHED:
+		UpdateCompareFlag(CCutsceneMgr::HasCutsceneFinished());
+		return 0;
+	case COMMAND_CLEAR_CUTSCENE:
+		CCutsceneMgr::DeleteCutsceneData();
+		return 0;
+	case COMMAND_RESTORE_CAMERA_JUMPCUT:
+		TheCamera.RestoreWithJumpCut();
+		return 0;
+	case COMMAND_CREATE_COLLECTABLE1:
+	{
+		CollectParameters(&m_nIp, 3);
+		CVector pos = *(CVector*)&ScriptParams[0];
+		if (pos.z <= MAP_Z_LOW_LIMIT)
+			pos.z = CWorld::FindGroundZForCoord(pos.x, pos.y) + PICKUP_PLACEMENT_OFFSET;
+		CPickups::GenerateNewOne(pos, MI_COLLECTABLE1, PICKUP_COLLECTABLE1, 0);
+		return 0;
+	}
+	case COMMAND_SET_COLLECTABLE1_TOTAL:
+		CollectParameters(&m_nIp, 1);
+		CWorld::Players[CWorld::PlayerInFocus].m_nTotalPackages = ScriptParams[0];
+		return 0;
+	case COMMAND_IS_PROJECTILE_IN_AREA:
+	{
+		CollectParameters(&m_nIp, 6);
+		float infX = *(float*)&ScriptParams[0];
+		float infY = *(float*)&ScriptParams[1];
+		float infZ = *(float*)&ScriptParams[2];
+		float supX = *(float*)&ScriptParams[3];
+		float supY = *(float*)&ScriptParams[4];
+		float supZ = *(float*)&ScriptParams[5];
+		if (infX > supX) {
+			infX = *(float*)&ScriptParams[3];
+			supX = *(float*)&ScriptParams[0];
+		}
+		if (infY > supY) {
+			infY = *(float*)&ScriptParams[4];
+			supY = *(float*)&ScriptParams[1];
+		}
+		if (infZ > supZ) {
+			infZ = *(float*)&ScriptParams[5];
+			supZ = *(float*)&ScriptParams[2];
+		}
+		UpdateCompareFlag(CProjectileInfo::IsProjectileInRange(infX, supX, infY, supY, infZ, supZ, false));
+		if (CTheScripts::DbgFlag)
+			CTheScripts::DrawDebugCube(infX, infY, infZ, supX, supY, supZ);
+		return 0;
+	}
+	case COMMAND_DESTROY_PROJECTILES_IN_AREA:
+	{
+		CollectParameters(&m_nIp, 6);
+		float infX = *(float*)&ScriptParams[0];
+		float infY = *(float*)&ScriptParams[1];
+		float infZ = *(float*)&ScriptParams[2];
+		float supX = *(float*)&ScriptParams[3];
+		float supY = *(float*)&ScriptParams[4];
+		float supZ = *(float*)&ScriptParams[5];
+		if (infX > supX) {
+			infX = *(float*)&ScriptParams[3];
+			supX = *(float*)&ScriptParams[0];
+		}
+		if (infY > supY) {
+			infY = *(float*)&ScriptParams[4];
+			supY = *(float*)&ScriptParams[1];
+		}
+		if (infZ > supZ) {
+			infZ = *(float*)&ScriptParams[5];
+			supZ = *(float*)&ScriptParams[2];
+		}
+		UpdateCompareFlag(CProjectileInfo::IsProjectileInRange(infX, supX, infY, supY, infZ, supZ, true));
+		if (CTheScripts::DbgFlag)
+			CTheScripts::DrawDebugCube(infX, infY, infZ, supX, supY, supZ);
+		return 0;
+	}
+	case COMMAND_DROP_MINE:
+	{
+		CollectParameters(&m_nIp, 3);
+		CVector pos = *(CVector*)&ScriptParams[0];
+		if (pos.z <= MAP_Z_LOW_LIMIT)
+			pos.z = CWorld::FindGroundZForCoord(pos.x, pos.y) + PICKUP_PLACEMENT_OFFSET;
+		CPickups::GenerateNewOne(pos, MI_CARMINE, PICKUP_MINE_INACTIVE, 0);
+		return 0;
+	}
+	case COMMAND_DROP_NAUTICAL_MINE:
+	{
+		CollectParameters(&m_nIp, 3);
+		CVector pos = *(CVector*)&ScriptParams[0];
+		if (pos.z <= MAP_Z_LOW_LIMIT)
+			pos.z = CWorld::FindGroundZForCoord(pos.x, pos.y) + PICKUP_PLACEMENT_OFFSET;
+		CPickups::GenerateNewOne(pos, MI_NAUTICALMINE, PICKUP_MINE_INACTIVE, 0);
+		return 0;
+	}
+	case COMMAND_IS_CHAR_MODEL:
+	{
+		CollectParameters(&m_nIp, 2);
+		CPed* pPed = CPools::GetPedPool()->GetAt(ScriptParams[0]);
+		assert(pPed);
+		UpdateCompareFlag(ScriptParams[1] == pPed->GetModelIndex());
+		return 0;
+	}
+	case COMMAND_LOAD_SPECIAL_MODEL:
+	{
+		CollectParameters(&m_nIp, 1);
+		char name[8];
+		strncpy(name, (const char*)&CTheScripts::ScriptSpace[m_nIp], 8);
+		for (int i = 0; i < 8; i++)
+			name[i] = tolower(name[i]);
+		CStreaming::RequestSpecialModel(ScriptParams[0], name, STREAMFLAGS_DEPENDENCY | STREAMFLAGS_SCRIPTOWNED);
+		m_nIp += 8;
+		return 0;
+	}
+	case COMMAND_CREATE_CUTSCENE_HEAD:
+	{
+		CollectParameters(&m_nIp, 2);
+		CObject* pObject = CPools::GetObjectPool()->GetAt(ScriptParams[0]);
+		assert(pObject);
+		CCutsceneHead* pCutHead = CCutsceneMgr::AddCutsceneHead(pObject, ScriptParams[1]);
+		ScriptParams[0] = CPools::GetObjectPool()->GetIndex(pCutHead);
+		StoreParameters(&m_nIp, 1);
+		return 0;
+	}
+	case COMMAND_SET_CUTSCENE_HEAD_ANIM:
+	{
+		CollectParameters(&m_nIp, 1);
+		CObject* pCutHead = CPools::GetObjectPool()->GetAt(ScriptParams[0]);
+		assert(pCutHead);
+		char name[8];
+		strncpy(name, (const char*)&CTheScripts::ScriptSpace[m_nIp], 8);
+		m_nIp += 8;
+		CTimer::Stop();
+		CCutsceneMgr::SetHeadAnim(name, pCutHead);
+		CTimer::Update();
+		return 0;
+	}
+	case COMMAND_SIN:
+		CollectParameters(&m_nIp, 1);
+		*(float*)&ScriptParams[0] = Sin(DEGTORAD(*(float*)&ScriptParams[0]));
+		StoreParameters(&m_nIp, 1);
+		return 0;
+	case COMMAND_COS:
+		CollectParameters(&m_nIp, 1);
+		*(float*)&ScriptParams[0] = Cos(DEGTORAD(*(float*)&ScriptParams[0]));
+		StoreParameters(&m_nIp, 1);
+		return 0;
+	case COMMAND_GET_CAR_FORWARD_X:
+	{
+		CollectParameters(&m_nIp, 1);
+		CVehicle* pVehicle = CPools::GetVehiclePool()->GetAt(ScriptParams[0]);
+		float forwardX = pVehicle->GetForward().x / pVehicle->GetForward().Magnitude2D();
+		*(float*)&ScriptParams[0] = forwardX;
+		StoreParameters(&m_nIp, 1);
+		return 0;
+	}
+	case COMMAND_GET_CAR_FORWARD_Y:
+	{
+		CollectParameters(&m_nIp, 1);
+		CVehicle* pVehicle = CPools::GetVehiclePool()->GetAt(ScriptParams[0]);
+		float forwardY = pVehicle->GetForward().y / pVehicle->GetForward().Magnitude2D();
+		*(float*)&ScriptParams[0] = forwardY;
+		StoreParameters(&m_nIp, 1);
+		return 0;
+	}
+	case COMMAND_CHANGE_GARAGE_TYPE:
+		CollectParameters(&m_nIp, 2);
+		CGarages::ChangeGarageType(ScriptParams[0], (eGarageType)ScriptParams[1]);
+		return 0;
+	case COMMAND_ACTIVATE_CRUSHER_CRANE:
+	{
+		CollectParameters(&m_nIp, 10);
+		float infX = *(float*)&ScriptParams[2];
+		float infY = *(float*)&ScriptParams[3];
+		float supX = *(float*)&ScriptParams[4];
+		float supY = *(float*)&ScriptParams[5];
+		if (infX > supX) {
+			infX = *(float*)&ScriptParams[4];
+			supX = *(float*)&ScriptParams[2];
+		}
+		if (infY > supY) {
+			infY = *(float*)&ScriptParams[5];
+			supY = *(float*)&ScriptParams[3];
+		}
+		CCranes::ActivateCrane(infX, supX, infY, supY,
+			*(float*)&ScriptParams[6], *(float*)&ScriptParams[7], *(float*)&ScriptParams[8],
+			DEGTORAD(*(float*)&ScriptParams[8]), true, false,
+			*(float*)&ScriptParams[0], *(float*)&ScriptParams[1]);
+		return 0;
+	}
+	case COMMAND_PRINT_WITH_2_NUMBERS:
+	{
+		wchar* text = CTheScripts::GetTextByKeyFromScript(&m_nIp);
+		CollectParameters(&m_nIp, 4);
+		CMessages::AddMessageWithNumber(text, ScriptParams[2], ScriptParams[3], ScriptParams[0], ScriptParams[1], -1, -1, -1, -1);
+		return 0;
+	}
+	case COMMAND_PRINT_WITH_2_NUMBERS_NOW:
+	{
+		wchar* text = CTheScripts::GetTextByKeyFromScript(&m_nIp);
+		CollectParameters(&m_nIp, 4);
+		CMessages::AddMessageJumpQWithNumber(text, ScriptParams[2], ScriptParams[3], ScriptParams[0], ScriptParams[1], -1, -1, -1, -1);
+		return 0;
+	}
+	case COMMAND_PRINT_WITH_2_NUMBERS_SOON:
+	{
+		wchar* text = CTheScripts::GetTextByKeyFromScript(&m_nIp);
+		CollectParameters(&m_nIp, 4);
+		CMessages::AddMessageSoonWithNumber(text, ScriptParams[2], ScriptParams[3], ScriptParams[0], ScriptParams[1], -1, -1, -1, -1);
+		return 0;
+	}
+	case COMMAND_PRINT_WITH_3_NUMBERS:
+	{
+		wchar* text = CTheScripts::GetTextByKeyFromScript(&m_nIp);
+		CollectParameters(&m_nIp, 5);
+		CMessages::AddMessageWithNumber(text, ScriptParams[3], ScriptParams[4], ScriptParams[0], ScriptParams[1], ScriptParams[2], -1, -1, -1);
+		return 0;
+	}
+	case COMMAND_PRINT_WITH_3_NUMBERS_NOW:
+	{
+		wchar* text = CTheScripts::GetTextByKeyFromScript(&m_nIp);
+		CollectParameters(&m_nIp, 5);
+		CMessages::AddMessageJumpQWithNumber(text, ScriptParams[3], ScriptParams[4], ScriptParams[0], ScriptParams[1], ScriptParams[2], -1, -1, -1);
+		return 0;
+	}
+	case COMMAND_PRINT_WITH_3_NUMBERS_SOON:
+	{
+		wchar* text = CTheScripts::GetTextByKeyFromScript(&m_nIp);
+		CollectParameters(&m_nIp, 5);
+		CMessages::AddMessageSoonWithNumber(text, ScriptParams[3], ScriptParams[4], ScriptParams[0], ScriptParams[1], ScriptParams[2], -1, -1, -1);
+		return 0;
+	}
+	case COMMAND_PRINT_WITH_4_NUMBERS:
+	{
+		wchar* text = CTheScripts::GetTextByKeyFromScript(&m_nIp);
+		CollectParameters(&m_nIp, 6);
+		CMessages::AddMessageWithNumber(text, ScriptParams[4], ScriptParams[5], ScriptParams[0], ScriptParams[1], ScriptParams[2], ScriptParams[3], -1, -1);
+		return 0;
+	}
+	case COMMAND_PRINT_WITH_4_NUMBERS_NOW:
+	{
+		wchar* text = CTheScripts::GetTextByKeyFromScript(&m_nIp);
+		CollectParameters(&m_nIp, 6);
+		CMessages::AddMessageJumpQWithNumber(text, ScriptParams[4], ScriptParams[5], ScriptParams[0], ScriptParams[1], ScriptParams[2], ScriptParams[3], -1, -1);
+		return 0;
+	}
+	case COMMAND_PRINT_WITH_4_NUMBERS_SOON:
+	{
+		wchar* text = CTheScripts::GetTextByKeyFromScript(&m_nIp);
+		CollectParameters(&m_nIp, 6);
+		CMessages::AddMessageSoonWithNumber(text, ScriptParams[4], ScriptParams[5], ScriptParams[0], ScriptParams[1], ScriptParams[2], ScriptParams[3], -1, -1);
+		return 0;
+	}
+	case COMMAND_PRINT_WITH_5_NUMBERS:
+	{
+		wchar* text = CTheScripts::GetTextByKeyFromScript(&m_nIp);
+		CollectParameters(&m_nIp, 7);
+		CMessages::AddMessageWithNumber(text, ScriptParams[5], ScriptParams[6], ScriptParams[0], ScriptParams[1], ScriptParams[2], ScriptParams[3], ScriptParams[4], -1);
+		return 0;
+	}
+	case COMMAND_PRINT_WITH_5_NUMBERS_NOW:
+	{
+		wchar* text = CTheScripts::GetTextByKeyFromScript(&m_nIp);
+		CollectParameters(&m_nIp, 7);
+		CMessages::AddMessageJumpQWithNumber(text, ScriptParams[5], ScriptParams[6], ScriptParams[0], ScriptParams[1], ScriptParams[2], ScriptParams[3], ScriptParams[4], -1);
+		return 0;
+	}
+	case COMMAND_PRINT_WITH_5_NUMBERS_SOON:
+	{
+		wchar* text = CTheScripts::GetTextByKeyFromScript(&m_nIp);
+		CollectParameters(&m_nIp, 7);
+		CMessages::AddMessageSoonWithNumber(text, ScriptParams[5], ScriptParams[6], ScriptParams[0], ScriptParams[1], ScriptParams[2], ScriptParams[3], ScriptParams[4], -1);
+		return 0;
+	}
+	case COMMAND_PRINT_WITH_6_NUMBERS:
+	{
+		wchar* text = CTheScripts::GetTextByKeyFromScript(&m_nIp);
+		CollectParameters(&m_nIp, 8);
+		CMessages::AddMessageWithNumber(text, ScriptParams[6], ScriptParams[7], ScriptParams[0], ScriptParams[1], ScriptParams[2], ScriptParams[3], ScriptParams[4], ScriptParams[5]);
+		return 0;
+	}
+	case COMMAND_PRINT_WITH_6_NUMBERS_NOW:
+	{
+		wchar* text = CTheScripts::GetTextByKeyFromScript(&m_nIp);
+		CollectParameters(&m_nIp, 8);
+		CMessages::AddMessageJumpQWithNumber(text, ScriptParams[6], ScriptParams[7], ScriptParams[0], ScriptParams[1], ScriptParams[2], ScriptParams[3], ScriptParams[4], ScriptParams[5]);
+		return 0;
+	}
+	case COMMAND_PRINT_WITH_6_NUMBERS_SOON:
+	{
+		wchar* text = CTheScripts::GetTextByKeyFromScript(&m_nIp);
+		CollectParameters(&m_nIp, 8);
+		CMessages::AddMessageSoonWithNumber(text, ScriptParams[6], ScriptParams[7], ScriptParams[0], ScriptParams[1], ScriptParams[2], ScriptParams[3], ScriptParams[4], ScriptParams[5]);
+		return 0;
+	}
+	case COMMAND_SET_CHAR_OBJ_FOLLOW_CHAR_IN_FORMATION:
+	{
+		CollectParameters(&m_nIp, 3);
+		CPed* pPed = CPools::GetPedPool()->GetAt(ScriptParams[0]);
+		assert(pPed);
+		CPed* pTargetPed = CPools::GetPedPool()->GetAt(ScriptParams[1]);
+		pPed->bScriptObjectiveCompleted = false;
+		pPed->SetObjective(OBJECTIVE_FOLLOW_PED_IN_FORMATION, pTargetPed);
+		pPed->SetFormation((eFormation)ScriptParams[2]);
+		return 0;
+	}
+	case COMMAND_PLAYER_MADE_PROGRESS:
+		CollectParameters(&m_nIp, 1);
+		CStats::ProgressMade += ScriptParams[0];
+		return 0;
+	case COMMAND_SET_PROGRESS_TOTAL:
+		CollectParameters(&m_nIp, 1);
+		CStats::TotalProgressInGame = ScriptParams[0];
+		return 0;
+	case COMMAND_REGISTER_JUMP_DISTANCE:
+		CollectParameters(&m_nIp, 1);
+		CStats::MaximumJumpDistance = max(CStats::MaximumJumpDistance, *(float*)&ScriptParams[0]);
+		return 0;
+	case COMMAND_REGISTER_JUMP_HEIGHT:
+		CollectParameters(&m_nIp, 1);
+		CStats::MaximumJumpHeight = max(CStats::MaximumJumpHeight, *(float*)&ScriptParams[0]);
+		return 0;
+	case COMMAND_REGISTER_JUMP_FLIPS:
+		CollectParameters(&m_nIp, 1);
+		CStats::MaximumJumpFlips = max(CStats::MaximumJumpFlips, ScriptParams[0]);
+		return 0;
+	case COMMAND_REGISTER_JUMP_SPINS:
+		CollectParameters(&m_nIp, 1);
+		CStats::MaximumJumpSpins = max(CStats::MaximumJumpSpins, ScriptParams[0]);
+		return 0;
+	case COMMAND_REGISTER_JUMP_STUNT:
+		CollectParameters(&m_nIp, 1);
+		CStats::BestStuntJump = max(CStats::BestStuntJump, ScriptParams[0]);
+		return 0;
+	case COMMAND_REGISTER_UNIQUE_JUMP_FOUND:
+		++CStats::NumberOfUniqueJumpsFound;
+		return 0;
+	case COMMAND_SET_UNIQUE_JUMPS_TOTAL:
+		CollectParameters(&m_nIp, 1);
+		CStats::TotalNumberOfUniqueJumps = ScriptParams[0];
+		return 0;
+	case COMMAND_REGISTER_PASSENGER_DROPPED_OFF_TAXI:
+		++CStats::PassengersDroppedOffWithTaxi;
+		return 0;
+	case COMMAND_REGISTER_MONEY_MADE_TAXI:
+		CollectParameters(&m_nIp, 1);
+		CStats::MoneyMadeWithTaxi += ScriptParams[0];
+		return 0;
+	case COMMAND_REGISTER_MISSION_GIVEN:
+		++CStats::MissionsGiven;
+		return 0;
+	case COMMAND_REGISTER_MISSION_PASSED:
+	{
+		char name[8];
+		strncpy(name, (const char*)&CTheScripts::ScriptSpace[m_nIp], 8);
+		m_nIp += 8;
+		strncpy(CStats::LastMissionPassedName, name, 8);
+		++CStats::MissionsPassed;
+		CStats::CheckPointReachedSuccessfully();
+		return 0;
+	}
+	case COMMAND_SET_CHAR_RUNNING:
+	{
+		CollectParameters(&m_nIp, 2);
+		CPed* pPed = CPools::GetPedPool()->GetAt(ScriptParams[0]);
+		assert(pPed);
+		pPed->bIsRunning = (ScriptParams[1] != 0);
+		return 0;
+	}
+	case COMMAND_REMOVE_ALL_SCRIPT_FIRES:
+		gFireManager.RemoveAllScriptFires();
+		return 0;
+	case COMMAND_IS_FIRST_CAR_COLOUR:
+	{
+		CollectParameters(&m_nIp, 2);
+		CVehicle* pVehicle = CPools::GetVehiclePool()->GetAt(ScriptParams[0]);
+		assert(pVehicle);
+		UpdateCompareFlag(pVehicle->m_currentColour1 == ScriptParams[1]);
+		return 0;
+	}
+	case COMMAND_IS_SECOND_CAR_COLOUR:
+	{
+		CollectParameters(&m_nIp, 2);
+		CVehicle* pVehicle = CPools::GetVehiclePool()->GetAt(ScriptParams[0]);
+		assert(pVehicle);
+		UpdateCompareFlag(pVehicle->m_currentColour2 == ScriptParams[1]);
+		return 0;
+	}
+	case COMMAND_HAS_CHAR_BEEN_DAMAGED_BY_WEAPON:
+	{
+		CollectParameters(&m_nIp, 2);
+		CPed* pPed = CPools::GetPedPool()->GetAt(ScriptParams[0]);
+		if (!pPed)
+			printf("HAS_CHAR_BEEN_DAMAGED_BY_WEAPON - Character doesn't exist\n");
+		UpdateCompareFlag(pPed && pPed->m_lastWepDam == ScriptParams[1]);
+		return 0;
+	}
+	case COMMAND_HAS_CAR_BEEN_DAMAGED_BY_WEAPON:
+	{
+		CollectParameters(&m_nIp, 2);
+		CVehicle* pVehicle = CPools::GetVehiclePool()->GetAt(ScriptParams[0]);
+		if (!pVehicle)
+			printf("HAS_CAR_BEEN_DAMAGED_BY_WEAPON - Vehicle doesn't exist\n");
+		UpdateCompareFlag(pVehicle && pVehicle->m_nLastWeaponDamage == ScriptParams[1]);
+		return 0;
+	}
+	case COMMAND_IS_CHAR_IN_CHARS_GROUP:
+	{
+		CollectParameters(&m_nIp, 2);
+		CPed* pPed = CPools::GetPedPool()->GetAt(ScriptParams[0]);
+		CPed* pLeader = CPools::GetPedPool()->GetAt(ScriptParams[1]);
+		assert(pPed);
+		assert(pLeader);
+		UpdateCompareFlag(pPed->m_leader == pLeader);
+		return 0;
+	}
+	default:
+		assert(0);
+	}
+	return -1;
+}
+#endif
+
+#if 0
+WRAPPER int8 CRunningScript::ProcessCommandsFrom800To899(int32 command) { EAXJMP(0x448240); }
+#else
+int8 CRunningScript::ProcessCommandsFrom800To899(int32 command)
+{
+	CMatrix tmp_matrix;
+	switch (command) {
+	case COMMAND_IS_CHAR_IN_PLAYERS_GROUP:
+	{
+		CollectParameters(&m_nIp, 2);
+		CPed* pPed = CPools::GetPedPool()->GetAt(ScriptParams[0]);
+		CPed* pLeader = CWorld::Players[ScriptParams[1]].m_pPed;
+		assert(pPed);
+		assert(pLeader);
+		UpdateCompareFlag(pPed->m_leader == pLeader);
+		return 0;
+	}
+	case COMMAND_EXPLODE_CHAR_HEAD:
+	{
+		CollectParameters(&m_nIp, 1);
+		CPed* pPed = CPools::GetPedPool()->GetAt(ScriptParams[0]);
+		assert(pPed);
+		if (pPed->m_nPedState == PED_DRIVING) {
+			pPed->SetDead();
+			if (!pPed->IsPlayer())
+				pPed->FlagToDestroyWhenNextProcessed();
+		}
+		else if (CGame::nastyGame && pPed->IsPedInControl()) {
+			RwMatrix tmp_rw;
+			CPedIK::GetWorldMatrix(pPed->m_pFrames[PED_HEAD]->frame, &tmp_rw);
+			pPed->ApplyHeadShot(WEAPONTYPE_SNIPERRIFLE, tmp_rw.pos, true);
+		}
+		else {
+			pPed->SetDie(ANIM_KO_SHOT_FRONT1, 4.0f, 0.0f);
+		}
+		return 0;
+	}
+	case COMMAND_EXPLODE_PLAYER_HEAD:
+	{
+		CollectParameters(&m_nIp, 1);
+		CPed* pPed = CWorld::Players[ScriptParams[0]].m_pPed;
+		assert(pPed);
+		if (CGame::nastyGame) {
+			RwMatrix tmp_rw;
+			CPedIK::GetWorldMatrix(pPed->m_pFrames[PED_HEAD]->frame, &tmp_rw);
+			pPed->ApplyHeadShot(WEAPONTYPE_SNIPERRIFLE, tmp_rw.pos, true);
+		}
+		else {
+			pPed->SetDie(ANIM_KO_SHOT_FRONT1, 4.0f, 0.0f);
+		}
+		return 0;
+	}
+	case COMMAND_ANCHOR_BOAT:
+	{
+		CollectParameters(&m_nIp, 2);
+		CBoat* pBoat = (CBoat*)CPools::GetVehiclePool()->GetAt(ScriptParams[0]);
+		assert(pBoat && pBoat->m_vehType == VEHICLE_TYPE_BOAT);
+		pBoat->m_bIsAnchored = (ScriptParams[1] == 0);
+		return 0;
+	}
+	case COMMAND_SET_ZONE_GROUP:
+	{
+		char zone[8];
+		CTheScripts::ReadTextLabelFromScript(&m_nIp, zone);
+		m_nIp += 8;
+		CollectParameters(&m_nIp, 2);
+		int zone_id = CTheZones::FindZoneByLabelAndReturnIndex(zone);
+		if (zone_id < 0) {
+			printf("Couldn't find zone - %s\n", zone);
+			return 0;
+		}
+		CTheZones::SetPedGroup(zone_id, ScriptParams[0], ScriptParams[1]);
+		return 0;
+	}
+	case COMMAND_START_CAR_FIRE:
+	{
+		CollectParameters(&m_nIp, 1);
+		CVehicle* pVehicle = CPools::GetVehiclePool()->GetAt(ScriptParams[0]);
+		assert(pVehicle);
+		ScriptParams[0] = gFireManager.StartScriptFire(pVehicle->GetPosition(), pVehicle, 0.8f, 1);
+		StoreParameters(&m_nIp, 1);
+		return 0;
+	}
+	case COMMAND_START_CHAR_FIRE:
+	{
+		CollectParameters(&m_nIp, 1);
+		CPed* pPed = CPools::GetPedPool()->GetAt(ScriptParams[0]);
+		assert(pPed);
+		ScriptParams[0] = gFireManager.StartScriptFire(pPed->GetPosition(), pPed, 0.8f, 1);
+		StoreParameters(&m_nIp, 1);
+		return 0;
+	}
+	case COMMAND_GET_RANDOM_CAR_OF_TYPE_IN_AREA:
+	{
+		CollectParameters(&m_nIp, 5);
+		int handle = -1;
+		uint32 i = CPools::GetVehiclePool()->GetSize();
+		float infX = *(float*)&ScriptParams[0];
+		float infY = *(float*)&ScriptParams[1];
+		float supX = *(float*)&ScriptParams[2];
+		float supY = *(float*)&ScriptParams[3];
+		while (i--) {
+			CVehicle* pVehicle = CPools::GetVehiclePool()->GetSlot(i);
+			if (!pVehicle)
+				continue;
+			if (ScriptParams[4] != pVehicle->GetModelIndex() && ScriptParams[4] >= 0)
+				continue;
+			if (pVehicle->VehicleCreatedBy != RANDOM_VEHICLE)
+				continue;
+			if (!pVehicle->IsWithinArea(infX, infY, supX, supY))
+				continue;
+			handle = CPools::GetVehiclePool()->GetIndex(pVehicle);
+			pVehicle->VehicleCreatedBy = MISSION_VEHICLE;
+			++CCarCtrl::NumMissionCars;
+			--CCarCtrl::NumRandomCars;
+			if (m_bIsMissionScript)
+				CTheScripts::MissionCleanup.AddEntityToList(handle, CLEANUP_CAR);
+		}
+		ScriptParams[0] = handle;
+		StoreParameters(&m_nIp, 1);
+		return 0;
+	}
+	case COMMAND_GET_RANDOM_CAR_OF_TYPE_IN_ZONE:
+	{
+		char zone[8];
+		CTheScripts::ReadTextLabelFromScript(&m_nIp, zone);
+		int zone_id = CTheZones::FindZoneByLabelAndReturnIndex(zone);
+		if (zone_id != -1)
+			m_nIp += 8;
+		CZone* pZone = CTheZones::GetZone(zone_id);
+		CollectParameters(&m_nIp, 1);
+		int handle = -1;
+		uint32 i = CPools::GetVehiclePool()->GetSize();
+		while (i--) {
+			CVehicle* pVehicle = CPools::GetVehiclePool()->GetSlot(i);
+			if (!pVehicle)
+				continue;
+			if (ScriptParams[0] != pVehicle->GetModelIndex() && ScriptParams[0] >= 0)
+				continue;
+			if (pVehicle->VehicleCreatedBy != RANDOM_VEHICLE)
+				continue;
+			if (!CTheZones::PointLiesWithinZone(pVehicle->GetPosition(), pZone))
+				continue;
+			handle = CPools::GetVehiclePool()->GetIndex(pVehicle);
+			pVehicle->VehicleCreatedBy = MISSION_VEHICLE;
+			++CCarCtrl::NumMissionCars;
+			--CCarCtrl::NumRandomCars;
+			if (m_bIsMissionScript)
+				CTheScripts::MissionCleanup.AddEntityToList(handle, CLEANUP_CAR);
+		}
+		ScriptParams[0] = handle;
+		StoreParameters(&m_nIp, 1);
+		return 0;
+	}
+	case COMMAND_HAS_RESPRAY_HAPPENED:
+	{
+		CollectParameters(&m_nIp, 1);
+		UpdateCompareFlag(CGarages::HasResprayHappened(ScriptParams[0]));
+		return 0;
+	}
+	case COMMAND_SET_CAMERA_ZOOM:
+	{
+		CollectParameters(&m_nIp, 1);
+		if (TheCamera.Cams[TheCamera.ActiveCam].Mode == CCam::MODE_FOLLOWPED)
+			TheCamera.SetZoomValueFollowPedScript(ScriptParams[0]);
+		else if (TheCamera.Cams[TheCamera.ActiveCam].Mode == CCam::MODE_CAM_ON_A_STRING)
+			TheCamera.SetZoomValueCamStringScript(ScriptParams[0]);
+		return 0;
+	}
+	case COMMAND_CREATE_PICKUP_WITH_AMMO:
+	{
+		CollectParameters(&m_nIp, 6);
+		int16 model = ScriptParams[0];
+		if (model < 0)
+			model = CTheScripts::UsedObjectArray[-model].index;
+		CVector pos = *(CVector*)&ScriptParams[3];
+		if (pos.z <= MAP_Z_LOW_LIMIT)
+			pos.z = CWorld::FindGroundZForCoord(pos.x, pos.y) + PICKUP_PLACEMENT_OFFSET;
+		CPickups::GetActualPickupIndex(CollectNextParameterWithoutIncreasingPC(m_nIp));
+		ScriptParams[0] = CPickups::GenerateNewOne(pos, model, ScriptParams[1], ScriptParams[2]);
+		StoreParameters(&m_nIp, 1);
+		return 0;
+	}
+	case COMMAND_SET_CAR_RAM_CAR:
+	{
+		CollectParameters(&m_nIp, 2);
+		CVehicle* pVehicle = CPools::GetVehiclePool()->GetAt(ScriptParams[0]);
+		assert(pVehicle);
+		CVehicle* pTarget = CPools::GetVehiclePool()->GetAt(ScriptParams[1]);
+		assert(pTarget);
+		CCarAI::TellCarToRamOtherCar(pVehicle, pTarget);
+		return 0;
+	}
+	case COMMAND_SET_CAR_BLOCK_CAR:
+	{
+		CollectParameters(&m_nIp, 2);
+		CVehicle* pVehicle = CPools::GetVehiclePool()->GetAt(ScriptParams[0]);
+		assert(pVehicle);
+		CVehicle* pTarget = CPools::GetVehiclePool()->GetAt(ScriptParams[1]);
+		assert(pTarget);
+		CCarAI::TellCarToBlockOtherCar(pVehicle, pTarget);
+		return 0;
+	}
+	case COMMAND_SET_CHAR_OBJ_CATCH_TRAIN:
+	{
+		CollectParameters(&m_nIp, 1);
+		CPed* pPed = CPools::GetPedPool()->GetAt(ScriptParams[0]);
+		assert(pPed);
+		pPed->bScriptObjectiveCompleted = false;
+		pPed->SetObjective(OBJECTIVE_CATCH_TRAIN);
+		return 0;
+	}
+	//case COMMAND_SET_COLL_OBJ_CATCH_TRAIN:
+	case COMMAND_SET_PLAYER_NEVER_GETS_TIRED:
+	{
+		CollectParameters(&m_nIp, 2);
+		CPlayerInfo* pPlayer = &CWorld::Players[ScriptParams[0]];
+		pPlayer->m_bInfiniteSprint = (ScriptParams[1] != 0);
+		return 0;
+	}
+	case COMMAND_SET_PLAYER_FAST_RELOAD:
+	{
+		CollectParameters(&m_nIp, 2);
+		CPlayerInfo* pPlayer = &CWorld::Players[ScriptParams[0]];
+		pPlayer->m_bFastReload = (ScriptParams[1] != 0);
+		return 0;
+	}
+	case COMMAND_SET_CHAR_BLEEDING:
+	{
+		CollectParameters(&m_nIp, 2);
+		CPed* pPed = CPools::GetPedPool()->GetAt(ScriptParams[0]);
+		assert(pPed);
+		pPed->bPedIsBleeding = (ScriptParams[1] != 0);
+		return 0;
+	}
+	case COMMAND_SET_CAR_FUNNY_SUSPENSION:
+	{
+		CollectParameters(&m_nIp, 2);
+		CVehicle* pVehicle = CPools::GetVehiclePool()->GetAt(ScriptParams[0]);
+		assert(pVehicle);
+		// no action
+		return 0;
+	}
+	case COMMAND_SET_CAR_BIG_WHEELS:
+	{
+		CollectParameters(&m_nIp, 2);
+		CVehicle* pVehicle = CPools::GetVehiclePool()->GetAt(ScriptParams[0]);
+		assert(pVehicle);
+		assert(pVehicle->m_vehType == VEHICLE_TYPE_CAR);
+		CAutomobile* pCar = (CAutomobile*)pVehicle;
+		pCar->bBigWheels = (ScriptParams[1] != 0);
+		return 0;
+	}
+	case COMMAND_SET_FREE_RESPRAYS:
+		CollectParameters(&m_nIp, 1);
+		CGarages::RespraysAreFree = (ScriptParams[0] != 0);
+		return 0;
+	case COMMAND_SET_PLAYER_VISIBLE:
+	{
+		CollectParameters(&m_nIp, 2);
+		CPed* pPed = CWorld::Players[ScriptParams[0]].m_pPed;
+		assert(pPed);
+		pPed->bIsVisible = (ScriptParams[1] != 0);
+		return 0;
+	}
+	case COMMAND_SET_CHAR_VISIBLE:
+	{
+		CollectParameters(&m_nIp, 2);
+		CPed* pPed = CPools::GetPedPool()->GetAt(ScriptParams[0]);
+		assert(pPed);
+		pPed->bIsVisible = (ScriptParams[1] != 0);
+		return 0;
+	}
+	case COMMAND_SET_CAR_VISIBLE:
+	{
+		CollectParameters(&m_nIp, 2);
+		CVehicle* pVehicle = CPools::GetVehiclePool()->GetAt(ScriptParams[0]);
+		assert(pVehicle);
+		pVehicle->bIsVisible = (ScriptParams[1] != 0);
+		return 0;
+	}
+	case COMMAND_IS_AREA_OCCUPIED:
+	{
+		CollectParameters(&m_nIp, 11);
+		float infX = *(float*)&ScriptParams[0];
+		float infY = *(float*)&ScriptParams[1];
+		float infZ = *(float*)&ScriptParams[2];
+		float supX = *(float*)&ScriptParams[3];
+		float supY = *(float*)&ScriptParams[4];
+		float supZ = *(float*)&ScriptParams[5];
+		if (infX > supX) {
+			infX = *(float*)&ScriptParams[3];
+			supX = *(float*)&ScriptParams[0];
+		}
+		if (infY > supY) {
+			infY = *(float*)&ScriptParams[4];
+			supY = *(float*)&ScriptParams[1];
+		}
+		if (infZ > supZ) {
+			infZ = *(float*)&ScriptParams[5];
+			supZ = *(float*)&ScriptParams[2];
+		}
+		int16 total;
+		CWorld::FindObjectsIntersectingCube(CVector(infX, infY, infZ), CVector(supX, supY, supZ), &total, 2, nil,
+			ScriptParams[7], ScriptParams[8], ScriptParams[9], ScriptParams[10], ScriptParams[11]);
+		UpdateCompareFlag(total > 0);
+		return 0;
+	}
+	case COMMAND_START_DRUG_RUN:
+		CPlane::CreateIncomingCesna();
+		return 0;
+	case COMMAND_HAS_DRUG_RUN_BEEN_COMPLETED:
+		UpdateCompareFlag(CPlane::HasCesnaLanded());
+		return 0;
+	case COMMAND_HAS_DRUG_PLANE_BEEN_SHOT_DOWN:
+		UpdateCompareFlag(CPlane::HasCesnaBeenDestroyed());
+		return 0;
+	case COMMAND_SAVE_PLAYER_FROM_FIRES:
+		CollectParameters(&m_nIp, 1);
+		gFireManager.ExtinguishPoint(CWorld::Players[ScriptParams[0]].GetPos(), 3.0f);
+		return 0;
+	case COMMAND_DISPLAY_TEXT:
+	{
+		CollectParameters(&m_nIp, 2);
+		wchar* text = CTheScripts::GetTextByKeyFromScript(&m_nIp);
+		CTheScripts::IntroTextLines[CTheScripts::NumberOfIntroTextLinesThisFrame].m_fAtX = *(float*)&ScriptParams[0];
+		CTheScripts::IntroTextLines[CTheScripts::NumberOfIntroTextLinesThisFrame].m_fAtY = *(float*)&ScriptParams[1];
+		uint16 len = CMessages::GetWideStringLength(text);
+		for (uint16 i = 0; i < len; i++)
+			CTheScripts::IntroTextLines[CTheScripts::NumberOfIntroTextLinesThisFrame].m_Text[i] = text[i];
+		for (uint16 i = len; i < SCRIPT_TEXT_MAX_LENGTH; i++)
+			CTheScripts::IntroTextLines[CTheScripts::NumberOfIntroTextLinesThisFrame].m_Text[i] = 0;
+		++CTheScripts::NumberOfIntroTextLinesThisFrame;
+		return 0;
+	}
+	case COMMAND_SET_TEXT_SCALE:
+	{
+		CollectParameters(&m_nIp, 2);
+		CTheScripts::IntroTextLines[CTheScripts::NumberOfIntroTextLinesThisFrame].m_fScaleX = *(float*)&ScriptParams[0];
+		CTheScripts::IntroTextLines[CTheScripts::NumberOfIntroTextLinesThisFrame].m_fScaleY = *(float*)&ScriptParams[1];
+		return 0;
+	}
+	case COMMAND_SET_TEXT_COLOUR:
+	{
+		CollectParameters(&m_nIp, 4);
+		CTheScripts::IntroTextLines[CTheScripts::NumberOfIntroTextLinesThisFrame].m_sColor =
+			CRGBA(ScriptParams[0], ScriptParams[1], ScriptParams[2], ScriptParams[3]);
+		return 0;
+	}
+	case COMMAND_SET_TEXT_JUSTIFY:
+	{
+		CollectParameters(&m_nIp, 1);
+		CTheScripts::IntroTextLines[CTheScripts::NumberOfIntroTextLinesThisFrame].m_bJustify = (ScriptParams[0] != 0);
+		return 0;
+	}
+	case COMMAND_SET_TEXT_CENTRE:
+	{
+		CollectParameters(&m_nIp, 1);
+		CTheScripts::IntroTextLines[CTheScripts::NumberOfIntroTextLinesThisFrame].m_bCentered = (ScriptParams[0] != 0);
+		return 0;
+	}
+	case COMMAND_SET_TEXT_WRAPX:
+	{
+		CollectParameters(&m_nIp, 1);
+		CTheScripts::IntroTextLines[CTheScripts::NumberOfIntroTextLinesThisFrame].m_fWrapX = *(float*)&ScriptParams[0];
+		return 0;
+	}
+	case COMMAND_SET_TEXT_CENTRE_SIZE:
+	{
+		CollectParameters(&m_nIp, 1);
+		CTheScripts::IntroTextLines[CTheScripts::NumberOfIntroTextLinesThisFrame].m_fCenterSize = *(float*)&ScriptParams[0];
+		return 0;
+	}
+	case COMMAND_SET_TEXT_BACKGROUND:
+	{
+		CollectParameters(&m_nIp, 1);
+		CTheScripts::IntroTextLines[CTheScripts::NumberOfIntroTextLinesThisFrame].m_bBackground = (ScriptParams[0] != 0);
+		return 0;
+	}
+	case COMMAND_SET_TEXT_BACKGROUND_COLOUR:
+	{
+		CollectParameters(&m_nIp, 4);
+		CTheScripts::IntroTextLines[CTheScripts::NumberOfIntroTextLinesThisFrame].m_sBackgroundColor =
+			CRGBA(ScriptParams[0], ScriptParams[1], ScriptParams[2], ScriptParams[3]);
+		return 0;
+	}
+	case COMMAND_SET_TEXT_BACKGROUND_ONLY_TEXT:
+	{
+		CollectParameters(&m_nIp, 1);
+		CTheScripts::IntroTextLines[CTheScripts::NumberOfIntroTextLinesThisFrame].m_bBackgroundOnly = (ScriptParams[0] != 0);
+		return 0;
+	}
+	case COMMAND_SET_TEXT_PROPORTIONAL:
+	{
+		CollectParameters(&m_nIp, 1);
+		CTheScripts::IntroTextLines[CTheScripts::NumberOfIntroTextLinesThisFrame].m_bTextProportional = (ScriptParams[0] != 0);
+		return 0;
+	}
+	case COMMAND_SET_TEXT_FONT:
+	{
+		CollectParameters(&m_nIp, 1);
+		CTheScripts::IntroTextLines[CTheScripts::NumberOfIntroTextLinesThisFrame].m_nFont = ScriptParams[0];
+		return 0;
+	}
+	case COMMAND_INDUSTRIAL_PASSED:
+		CStats::IndustrialPassed = true;
+		DMAudio.PlayRadioAnnouncement(13); //TODO: enum?
+		return 0;
+	case COMMAND_COMMERCIAL_PASSED:
+		CStats::CommercialPassed = true;
+		DMAudio.PlayRadioAnnouncement(14); //TODO: enum?
+		return 0;
+	case COMMAND_SUBURBAN_PASSED:
+		CStats::SuburbanPassed = true;
+		return 0;
+	case COMMAND_ROTATE_OBJECT:
+	{
+		CollectParameters(&m_nIp, 4);
+		CObject* pObject = CPools::GetObjectPool()->GetAt(ScriptParams[0]);
+		assert(pObject);
+		float heading = LimitAngleOnCircle(
+			RADTODEG(Atan2(-pObject->GetForward().x, pObject->GetForward().y)));
+		float headingTarget = *(float*)&ScriptParams[1];
+		float rotateBy = *(float*)&ScriptParams[2];
+		if (headingTarget == heading) { // using direct comparasion here is fine
+			UpdateCompareFlag(true);
+			return 0;
+		}
+		float angleClockwise = LimitAngleOnCircle(headingTarget - heading);
+		float angleCounterclockwise = LimitAngleOnCircle(heading - headingTarget);
+		float newHeading;
+		if (angleClockwise < angleCounterclockwise)
+			newHeading = rotateBy < angleClockwise ? heading + rotateBy : headingTarget;
+		else
+			newHeading = rotateBy < angleCounterclockwise ? heading - rotateBy : headingTarget;
+		bool obstacleInPath = false;
+		if (ScriptParams[3]) {
+			CVector pos = pObject->GetPosition();
+			tmp_matrix.SetRotateZ(DEGTORAD(newHeading));
+			tmp_matrix.GetPosition() += pos;
+			CColModel* pColModel = pObject->GetColModel();
+			CVector cp1 = tmp_matrix * pColModel->boundingBox.min;
+			CVector cp2 = tmp_matrix * CVector(pColModel->boundingBox.max.x, pColModel->boundingBox.min.y, pColModel->boundingBox.min.z);
+			CVector cp3 = tmp_matrix * CVector(pColModel->boundingBox.min.x, pColModel->boundingBox.max.y, pColModel->boundingBox.min.z);
+			CVector cp4 = tmp_matrix * CVector(pColModel->boundingBox.min.x, pColModel->boundingBox.min.y, pColModel->boundingBox.max.z);
+			int16 collisions;
+			CWorld::FindObjectsIntersectingAngledCollisionBox(pColModel->boundingBox, tmp_matrix, pos,
+				min(cp1.x, min(cp2.x, min(cp3.x, cp4.x))),
+				min(cp1.y, min(cp2.y, min(cp3.y, cp4.y))),
+				max(cp1.x, max(cp2.x, max(cp3.x, cp4.x))),
+				max(cp1.y, max(cp2.y, max(cp3.y, cp4.y))),
+				&collisions, 2, nil, false, true, true, false, false);
+			if (collisions > 0)
+				obstacleInPath = true;
+		}
+		if (obstacleInPath) {
+			UpdateCompareFlag(true);
+			return 0;
+		}
+		pObject->SetHeading(DEGTORAD(newHeading));
+		pObject->GetMatrix().UpdateRW();
+		pObject->UpdateRwFrame();
+		UpdateCompareFlag(newHeading == headingTarget); // using direct comparasion here is fine
+		return 0;
+	}
+	case COMMAND_SLIDE_OBJECT:
+	{
+		CollectParameters(&m_nIp, 8);
+		CObject* pObject = CPools::GetObjectPool()->GetAt(ScriptParams[0]);
+		assert(pObject);
+		CVector pos = pObject->GetPosition();
+		CVector posTarget = *(CVector*)&ScriptParams[1];
+		CVector slideBy = *(CVector*)&ScriptParams[4];
+		if (posTarget == pos) { // using direct comparasion here is fine
+			UpdateCompareFlag(true);
+			return 0;
+		}
+		CVector posDiff = pos - posTarget;
+		CVector newPosition;
+		if (posDiff.x < 0)
+			newPosition.x = -posDiff.x < slideBy.x ? posTarget.x : pos.x + slideBy.x;
+		else
+			newPosition.x = posDiff.x < slideBy.x ? posTarget.x : pos.x - slideBy.x;
+		if (posDiff.y < 0)
+			newPosition.y = -posDiff.y < slideBy.y ? posTarget.y : pos.y + slideBy.y;
+		else
+			newPosition.y = posDiff.y < slideBy.y ? posTarget.y : pos.y - slideBy.y;
+		if (posDiff.z < 0)
+			newPosition.z = -posDiff.z < slideBy.z ? posTarget.z : pos.z + slideBy.z;
+		else
+			newPosition.z = posDiff.z < slideBy.z ? posTarget.z : pos.z - slideBy.z;
+		bool obstacleInPath = false;
+		if (ScriptParams[7]) {
+			tmp_matrix = pObject->GetMatrix();
+			tmp_matrix.GetPosition() = newPosition;
+			CColModel* pColModel = pObject->GetColModel();
+			CVector cp1 = tmp_matrix * pColModel->boundingBox.min;
+			CVector cp2 = tmp_matrix * CVector(pColModel->boundingBox.max.x, pColModel->boundingBox.min.y, pColModel->boundingBox.min.z);
+			CVector cp3 = tmp_matrix * CVector(pColModel->boundingBox.min.x, pColModel->boundingBox.max.y, pColModel->boundingBox.min.z);
+			CVector cp4 = tmp_matrix * CVector(pColModel->boundingBox.min.x, pColModel->boundingBox.min.y, pColModel->boundingBox.max.z);
+			int16 collisions;
+			CWorld::FindObjectsIntersectingAngledCollisionBox(pColModel->boundingBox, tmp_matrix, pos,
+				min(cp1.x, min(cp2.x, min(cp3.x, cp4.x))),
+				min(cp1.y, min(cp2.y, min(cp3.y, cp4.y))),
+				max(cp1.x, max(cp2.x, max(cp3.x, cp4.x))),
+				max(cp1.y, max(cp2.y, max(cp3.y, cp4.y))),
+				&collisions, 2, nil, false, true, true, false, false);
+			if (collisions > 0)
+				obstacleInPath = true;
+		}
+		if (obstacleInPath) {
+			UpdateCompareFlag(true);
+			return 0;
+		}
+		pObject->Teleport(newPosition);
+		UpdateCompareFlag(newPosition == posTarget); // using direct comparasion here is fine
+		return 0;
+	}
+	case COMMAND_REMOVE_CHAR_ELEGANTLY:
+	{
+		CollectParameters(&m_nIp, 1);
+		CPed* pPed = CPools::GetPedPool()->GetAt(ScriptParams[0]);
+		if (pPed && pPed->CharCreatedBy == MISSION_CHAR){
+			CWorld::RemoveReferencesToDeletedObject(pPed);
+			if (pPed->bInVehicle){
+				if (pPed->m_pMyVehicle){
+					if (pPed == pPed->m_pMyVehicle->pDriver){
+						pPed->m_pMyVehicle->RemoveDriver();
+						pPed->m_pMyVehicle->m_status = STATUS_ABANDONED;
+						if (pPed->m_pMyVehicle->m_nDoorLock == CARLOCK_LOCKED_INITIALLY)
+							pPed->m_pMyVehicle->m_nDoorLock = CARLOCK_UNLOCKED;
+						if (pPed->m_nPedType == PEDTYPE_COP && pPed->m_pMyVehicle->IsLawEnforcementVehicle())
+							pPed->m_pMyVehicle->ChangeLawEnforcerState(0);
+					}else{
+						pPed->m_pMyVehicle->RemovePassenger(pPed);
+					}
+				}
+				delete pPed;
+				--CPopulation::ms_nTotalMissionPeds;
+			}else{
+				pPed->CharCreatedBy = RANDOM_CHAR;
+				pPed->bRespondsToThreats = true;
+				pPed->bScriptObjectiveCompleted = false;
+				pPed->ClearLeader();
+				--CPopulation::ms_nTotalMissionPeds;
+				pPed->bFadeOut = true;
+			}
+		}
+		if (m_bIsMissionScript)
+			CTheScripts::MissionCleanup.RemoveEntityFromList(ScriptParams[0], CLEANUP_CHAR);
+		return 0;
+	}
+	case COMMAND_SET_CHAR_STAY_IN_SAME_PLACE:
+	{
+		CollectParameters(&m_nIp, 2);
+		CPed* pPed = CPools::GetPedPool()->GetAt(ScriptParams[0]);
+		assert(pPed);
+		pPed->bKindaStayInSamePlace = (ScriptParams[1] != 0);
+		return 0;
+	}
+	case COMMAND_IS_NASTY_GAME:
+		UpdateCompareFlag(CGame::nastyGame);
+		return 0;
+	case COMMAND_UNDRESS_CHAR:
+	{
+		CollectParameters(&m_nIp, 1);
+		CPed* pPed = CPools::GetPedPool()->GetAt(ScriptParams[0]);
+		assert(pPed);
+		char name[8];
+		CTheScripts::ReadTextLabelFromScript(&m_nIp, name);
+		for (int i = 0; i < 8; i++)
+			name[i] = tolower(name[i]);
+		int mi = pPed->GetModelIndex();
+		pPed->DeleteRwObject();
+		if (pPed->IsPlayer())
+			mi = 0;
+		CStreaming::RequestSpecialModel(mi, name, STREAMFLAGS_DEPENDENCY | STREAMFLAGS_SCRIPTOWNED);
+		m_nIp += 8;
+		CWorld::Remove(pPed);
+		return 0;
+	}
+	case COMMAND_DRESS_CHAR:
+	{
+		CollectParameters(&m_nIp, 1);
+		CPed* pPed = CPools::GetPedPool()->GetAt(ScriptParams[0]);
+		assert(pPed);
+		int mi = pPed->GetModelIndex();
+		pPed->m_modelIndex = -1;
+		pPed->SetModelIndex(mi);
+		CWorld::Add(pPed);
+		return 0;
+	}
+	case COMMAND_START_CHASE_SCENE:
+		CollectParameters(&m_nIp, 1);
+		CTimer::Suspend();
+		CStreaming::DeleteAllRwObjects();
+		CRecordDataForChase::StartChaseScene(*(float*)&ScriptParams[0]);
+		CTimer::Resume();
+		return 0;
+	case COMMAND_STOP_CHASE_SCENE:
+		CRecordDataForChase::CleanUpChaseScene();
+		return 0;
+	case COMMAND_IS_EXPLOSION_IN_AREA:
+	{
+		CollectParameters(&m_nIp, 7);
+		float infX = *(float*)&ScriptParams[1];
+		float infY = *(float*)&ScriptParams[2];
+		float infZ = *(float*)&ScriptParams[3];
+		float supX = *(float*)&ScriptParams[4];
+		float supY = *(float*)&ScriptParams[5];
+		float supZ = *(float*)&ScriptParams[6];
+		if (infX > supX) {
+			infX = *(float*)&ScriptParams[4];
+			supX = *(float*)&ScriptParams[1];
+		}
+		if (infY > supY) {
+			infY = *(float*)&ScriptParams[5];
+			supY = *(float*)&ScriptParams[2];
+		}
+		if (infZ > supZ) {
+			infZ = *(float*)&ScriptParams[6];
+			supZ = *(float*)&ScriptParams[3];
+		}
+		UpdateCompareFlag(CExplosion::TestForExplosionInArea((eExplosionType)ScriptParams[0],
+			infX, supX, infY, supY, infZ, supZ));
+		return 0;
+	}
+	case COMMAND_IS_EXPLOSION_IN_ZONE:
+	{
+		CollectParameters(&m_nIp, 1);
+		char zone[8];
+		CTheScripts::ReadTextLabelFromScript(&m_nIp, zone);
+		int zone_id = CTheZones::FindZoneByLabelAndReturnIndex(zone);
+		if (zone_id != -1)
+			m_nIp += 8;
+		CZone* pZone = CTheZones::GetZone(zone_id);
+		UpdateCompareFlag(CExplosion::TestForExplosionInArea((eExplosionType)ScriptParams[0],
+			pZone->minx, pZone->maxx, pZone->miny, pZone->maxy, pZone->minz, pZone->maxz));
+		return 0;
+	}
+	case COMMAND_START_DRUG_DROP_OFF:
+		CPlane::CreateDropOffCesna();
+		return 0;
+	case COMMAND_HAS_DROP_OFF_PLANE_BEEN_SHOT_DOWN:
+		UpdateCompareFlag(CPlane::HasDropOffCesnaBeenShotDown());
+		return 0;
+	case COMMAND_FIND_DROP_OFF_PLANE_COORDINATES:
+	{
+		CVector pos = CPlane::FindDropOffCesnaCoordinates();
+		*(CVector*)&ScriptParams[0] = pos;
+		StoreParameters(&m_nIp, 3);
+		return 0;
+	}
+	case COMMAND_CREATE_FLOATING_PACKAGE:
+	{
+		CollectParameters(&m_nIp, 3);
+		CVector pos = *(CVector*)&ScriptParams[0];
+		if (pos.z <= MAP_Z_LOW_LIMIT)
+			pos.z = CWorld::FindGroundZForCoord(pos.x, pos.y) + PICKUP_PLACEMENT_OFFSET;
+		ScriptParams[0] = CPickups::GenerateNewOne(pos, MI_FLOATPACKAGE1, PICKUP_FLOATINGPACKAGE, 0);
+		StoreParameters(&m_nIp, 1);
+		return 0;
+	}
+	case COMMAND_PLACE_OBJECT_RELATIVE_TO_CAR:
+	{
+		CollectParameters(&m_nIp, 5);
+		CObject* pObject = CPools::GetObjectPool()->GetAt(ScriptParams[0]);
+		assert(pObject);
+		CVehicle* pVehicle = CPools::GetVehiclePool()->GetAt(ScriptParams[1]);
+		assert(pVehicle);
+		CVector offset = *(CVector*)&ScriptParams[2];
+		CPhysical::PlacePhysicalRelativeToOtherPhysical(pVehicle, pObject, offset);
+		return 0;
+	}
+	case COMMAND_MAKE_OBJECT_TARGETTABLE:
+	{
+		CollectParameters(&m_nIp, 1);
+		CObject* pObject = CPools::GetObjectPool()->GetAt(ScriptParams[0]);
+		assert(pObject);
+		CPlayerPed* pPlayerPed = CWorld::Players[CWorld::PlayerInFocus].m_pPed;
+		assert(pPlayerPed);
+		pPlayerPed->MakeObjectTargettable(ScriptParams[0]);
+		return 0;
+	}
+	case COMMAND_ADD_ARMOUR_TO_PLAYER:
+	{
+		CollectParameters(&m_nIp, 2);
+		CPlayerPed* pPlayerPed = CWorld::Players[ScriptParams[0]].m_pPed;
+		assert(pPlayerPed);
+		pPlayerPed->m_fArmour = clamp(pPlayerPed->m_fArmour + ScriptParams[1], 0.0f, 100.0f);
+		return 0;
+	}
+	case COMMAND_ADD_ARMOUR_TO_CHAR:
+	{
+		CollectParameters(&m_nIp, 2);
+		CPed* pPed = CPools::GetPedPool()->GetAt(ScriptParams[0]);
+		assert(pPed);
+		pPed->m_fArmour = clamp(pPed->m_fArmour + ScriptParams[1], 0.0f, 100.0f);
+		return 0;
+	}
+	case COMMAND_OPEN_GARAGE:
+	{
+		CollectParameters(&m_nIp, 1);
+		CGarages::Garages[ScriptParams[0]].OpenThisGarage();
+		return 0;
+	}
+	case COMMAND_CLOSE_GARAGE:
+	{
+		CollectParameters(&m_nIp, 1);
+		CGarages::Garages[ScriptParams[0]].CloseThisGarage();
+		return 0;
+	}
+	case COMMAND_WARP_CHAR_FROM_CAR_TO_COORD:
+	{
+		CollectParameters(&m_nIp, 4);
+		CPed* pPed = CPools::GetPedPool()->GetAt(ScriptParams[0]);
+		assert(pPed);
+		CVector pos = *(CVector*)&ScriptParams[1];
+		if (pos.z <= MAP_Z_LOW_LIMIT)
+			pos.z = CWorld::FindGroundZForCoord(pos.x, pos.y);
+		if (pPed->bInVehicle){
+			if (pPed->m_pMyVehicle->bIsBus)
+				pPed->bRenderPedInCar = true;
+			if (pPed->m_pMyVehicle->pDriver == pPed){
+				pPed->m_pMyVehicle->RemoveDriver();
+				pPed->m_pMyVehicle->m_status = STATUS_ABANDONED;
+				pPed->m_pMyVehicle->bEngineOn = false;
+				pPed->m_pMyVehicle->AutoPilot.m_nCruiseSpeed = 0;
+			}else{
+				pPed->m_pMyVehicle->RemovePassenger(pPed);
+			}
+			pPed->m_pMyVehicle->SetMoveSpeed(0.0f, 0.0f, -0.00001f);
+			pPed->m_pMyVehicle->SetTurnSpeed(0.0f, 0.0f, 0.0f);
+		}
+		pPed->bInVehicle = false;
+		pPed->m_pMyVehicle = nil;
+		pPed->SetPedState(PED_IDLE);
+		pPed->m_nLastPedState = PED_NONE;
+		pPed->bUsesCollision = true;
+		pPed->SetMoveSpeed(0.0f, 0.0f, 0.0f);
+		pPed->AddWeaponModel(CWeaponInfo::GetWeaponInfo(pPed->m_weapons[pPed->m_currentWeapon].m_eWeaponType)->m_nModelId);
+		pPed->RemoveInCarAnims();
+		if (pPed->m_pVehicleAnim)
+			pPed->m_pVehicleAnim->blendDelta = -1000.0f;
+		pPed->m_pVehicleAnim = nil;
+		pPed->RestartNonPartialAnims();
+		pPed->SetMoveState(PEDMOVE_NONE);
+		CAnimManager::BlendAnimation(pPed->GetClump(), pPed->m_animGroup, ANIM_IDLE_STANCE, 100.0f);
+		pos.z += pPed->GetDistanceFromCentreOfMassToBaseOfModel();
+		pPed->Teleport(pos);
+		CTheScripts::ClearSpaceForMissionEntity(pos, pPed);
+		return 0;
+	}
+	case COMMAND_SET_VISIBILITY_OF_CLOSEST_OBJECT_OF_TYPE:
+	{
+		CollectParameters(&m_nIp, 6);
+		CVector pos = *(CVector*)&ScriptParams[0];
+		if (pos.z <= MAP_Z_LOW_LIMIT)
+			pos.z = CWorld::FindGroundZForCoord(pos.x, pos.y);
+		float range = *(float*)&ScriptParams[3];
+		int mi = ScriptParams[4] < 0 ? CTheScripts::UsedObjectArray[-ScriptParams[4]].index : ScriptParams[4];
+		int16 total;
+		CEntity* apEntities[16];
+		CWorld::FindObjectsOfTypeInRange(mi, pos, range, true, &total, 16, apEntities, true, false, false, true, true);
+		if (total == 0)
+			CWorld::FindObjectsOfTypeInRangeSectorList(mi, CWorld::GetBigBuildingList(LEVEL_NONE), pos, range, true, &total, 16, apEntities);
+		if (total == 0)
+			CWorld::FindObjectsOfTypeInRangeSectorList(mi, CWorld::GetBigBuildingList(CTheZones::FindZoneForPoint(pos)), pos, range, true, &total, 16, apEntities);
+		CEntity* pClosestEntity = nil;
+		float min_dist = 2 * range;
+		for (int i = 0; i < total; i++) {
+			float dist = (apEntities[i]->GetPosition() - pos).Magnitude();
+			if (dist < min_dist) {
+				min_dist = dist;
+				pClosestEntity = apEntities[i];
+			}
+		}
+		if (pClosestEntity) {
+			pClosestEntity->bIsVisible = (ScriptParams[5] != 0);
+			CTheScripts::AddToInvisibilitySwapArray(pClosestEntity, ScriptParams[5] != 0);
+		}
+		return 0;
+	}
+	case COMMAND_HAS_CHAR_SPOTTED_CHAR:
+	{
+		CollectParameters(&m_nIp, 2);
+		CPed* pPed = CPools::GetPedPool()->GetAt(ScriptParams[0]);
+		assert(pPed);
+		CPed* pTarget = CPools::GetPedPool()->GetAt(ScriptParams[1]);
+		assert(pTarget);
+		UpdateCompareFlag(pPed->OurPedCanSeeThisOne(pTarget));
+		return 0;
+	}
+	case COMMAND_SET_CHAR_OBJ_HAIL_TAXI:
+	{
+		CollectParameters(&m_nIp, 1);
+		CPed* pPed = CPools::GetPedPool()->GetAt(ScriptParams[0]);
+		assert(pPed);
+		pPed->bScriptObjectiveCompleted = false;
+		pPed->SetObjective(OBJECTIVE_HAIL_TAXI);
+		return 0;
+	}
+	case COMMAND_HAS_OBJECT_BEEN_DAMAGED:
+	{
+		CollectParameters(&m_nIp, 1);
+		CObject* pObject = CPools::GetObjectPool()->GetAt(ScriptParams[0]);
+		assert(pObject);
+		UpdateCompareFlag(pObject->bHasBeenDamaged || !pObject->bIsVisible);
+		return 0;
+	}
+	case COMMAND_START_KILL_FRENZY_HEADSHOT:
+	{
+		wchar* text = CTheScripts::GetTextByKeyFromScript(&m_nIp);
+		CollectParameters(&m_nIp, 8);
+		CDarkel::StartFrenzy((eWeaponType)ScriptParams[0], ScriptParams[1], ScriptParams[2],
+			ScriptParams[3], text, ScriptParams[4], ScriptParams[5],
+			ScriptParams[6], ScriptParams[7] != 0, true);
+		return 0;
+	}
+	case COMMAND_ACTIVATE_MILITARY_CRANE:
+	{
+		CollectParameters(&m_nIp, 10);
+		float infX = *(float*)&ScriptParams[2];
+		float infY = *(float*)&ScriptParams[3];
+		float supX = *(float*)&ScriptParams[4];
+		float supY = *(float*)&ScriptParams[5];
+		if (infX > supX) {
+			infX = *(float*)&ScriptParams[4];
+			supX = *(float*)&ScriptParams[2];
+		}
+		if (infY > supY) {
+			infY = *(float*)&ScriptParams[5];
+			supY = *(float*)&ScriptParams[3];
+		}
+		CCranes::ActivateCrane(infX, supX, infY, supY,
+			*(float*)&ScriptParams[6], *(float*)&ScriptParams[7], *(float*)&ScriptParams[8],
+			DEGTORAD(*(float*)&ScriptParams[9]), false, true,
+			*(float*)&ScriptParams[0], *(float*)&ScriptParams[1]);
+		return 0;
+	}
+	case COMMAND_WARP_PLAYER_INTO_CAR:
+	{
+		CollectParameters(&m_nIp, 2);
+		CPed* pPed = CWorld::Players[ScriptParams[0]].m_pPed;
+		assert(pPed);
+		CVehicle* pVehicle = CPools::GetVehiclePool()->GetAt(ScriptParams[1]);
+		assert(pVehicle);
+		pPed->SetObjective(OBJECTIVE_ENTER_CAR_AS_DRIVER, pVehicle);
+		pPed->WarpPedIntoCar(pVehicle);
+		return 0;
+	}
+	case COMMAND_WARP_CHAR_INTO_CAR:
+	{
+		CollectParameters(&m_nIp, 2);
+		CPed* pPed = CPools::GetPedPool()->GetAt(ScriptParams[0]);
+		assert(pPed);
+		CVehicle* pVehicle = CPools::GetVehiclePool()->GetAt(ScriptParams[1]);
+		assert(pVehicle);
+		pPed->SetObjective(OBJECTIVE_ENTER_CAR_AS_DRIVER, pVehicle);
+		pPed->WarpPedIntoCar(pVehicle);
+		return 0;
+	}
+	//case COMMAND_SWITCH_CAR_RADIO:
+	//case COMMAND_SET_AUDIO_STREAM:
+	case COMMAND_PRINT_WITH_2_NUMBERS_BIG:
+	{
+		wchar* text = CTheScripts::GetTextByKeyFromScript(&m_nIp);
+		CollectParameters(&m_nIp, 4);
+		CMessages::AddBigMessageWithNumber(text, ScriptParams[2], ScriptParams[3] - 1, ScriptParams[0], ScriptParams[1], -1, -1, -1, -1);
+		return 0;
+	}
+	case COMMAND_PRINT_WITH_3_NUMBERS_BIG:
+	{
+		wchar* text = CTheScripts::GetTextByKeyFromScript(&m_nIp);
+		CollectParameters(&m_nIp, 5);
+		CMessages::AddBigMessageWithNumber(text, ScriptParams[3], ScriptParams[4] - 1, ScriptParams[0], ScriptParams[1], ScriptParams[2], -1, -1, -1);
+		return 0;
+	}
+	case COMMAND_PRINT_WITH_4_NUMBERS_BIG:
+	{
+		wchar* text = CTheScripts::GetTextByKeyFromScript(&m_nIp);
+		CollectParameters(&m_nIp, 6);
+		CMessages::AddBigMessageWithNumber(text, ScriptParams[4], ScriptParams[5] - 1, ScriptParams[0], ScriptParams[1], ScriptParams[2], ScriptParams[3], -1, -1);
+		return 0;
+	}
+	case COMMAND_PRINT_WITH_5_NUMBERS_BIG:
+	{
+		wchar* text = CTheScripts::GetTextByKeyFromScript(&m_nIp);
+		CollectParameters(&m_nIp, 7);
+		CMessages::AddBigMessageWithNumber(text, ScriptParams[5], ScriptParams[6] - 1, ScriptParams[0], ScriptParams[1], ScriptParams[2], ScriptParams[3], ScriptParams[4], -1);
+		return 0;
+	}
+	case COMMAND_PRINT_WITH_6_NUMBERS_BIG:
+	{
+		wchar* text = CTheScripts::GetTextByKeyFromScript(&m_nIp);
+		CollectParameters(&m_nIp, 8);
+		CMessages::AddBigMessageWithNumber(text, ScriptParams[6], ScriptParams[7] - 1, ScriptParams[0], ScriptParams[1], ScriptParams[2], ScriptParams[3], ScriptParams[4], ScriptParams[5]);
+		return 0;
+	}
+	case COMMAND_SET_CHAR_WAIT_STATE:
+	{
+		CollectParameters(&m_nIp, 3);
+		CPed* pPed = CPools::GetPedPool()->GetAt(ScriptParams[0]);
+		assert(pPed);
+		pPed->SetWaitState((eWaitState)ScriptParams[1], ScriptParams[2] >= 0 ? &ScriptParams[2] : nil);
+		return 0;
+	}
+	case COMMAND_SET_CAMERA_BEHIND_PLAYER:
+		TheCamera.SetCameraDirectlyBehindForFollowPed_CamOnAString();
+		return 0;
+	case COMMAND_SET_MOTION_BLUR:
+		CollectParameters(&m_nIp, 1);
+		TheCamera.SetMotionBlur(0, 0, 0, 0, ScriptParams[0]);
+		return 0;
+	case COMMAND_PRINT_STRING_IN_STRING:
+	{
+		wchar* text = CTheScripts::GetTextByKeyFromScript(&m_nIp);
+		wchar* string = CTheScripts::GetTextByKeyFromScript(&m_nIp);
+		CollectParameters(&m_nIp, 2);
+		CMessages::AddMessageWithString(text, ScriptParams[0], ScriptParams[1], string);
+		return 0;
+	}
+	case COMMAND_CREATE_RANDOM_CHAR:
+	{
+		CollectParameters(&m_nIp, 3);
+		CZoneInfo zoneinfo;
+		CTheZones::GetZoneInfoForTimeOfDay(&CWorld::Players[CWorld::PlayerInFocus].GetPos(), &zoneinfo);
+		int mi;
+		int pedtype = PEDTYPE_COP;
+		int attempt = 0;
+		while (pedtype != PEDTYPE_CIVMALE && pedtype != PEDTYPE_CIVFEMALE && attempt < 5) {
+			mi = CPopulation::ChooseCivilianOccupation(zoneinfo.pedGroup);
+			if (CModelInfo::GetModelInfo(mi)->GetRwObject())
+				pedtype = ((CPedModelInfo*)(CModelInfo::GetModelInfo(mi)))->m_pedType;
+			attempt++;
+		}
+		if (!CModelInfo::GetModelInfo(mi)->GetRwObject()) {
+			mi = MI_MALE01;
+			pedtype = ((CPedModelInfo*)(CModelInfo::GetModelInfo(mi)))->m_pedType;
+		}
+		CPed* ped = new CCivilianPed(pedtype, mi);
+		ped->CharCreatedBy = MISSION_CHAR;
+		ped->bRespondsToThreats = false;
+		ped->bAllowMedicsToReviveMe = false;
+		CVector pos = *(CVector*)&ScriptParams[0];
+		if (pos.z <= MAP_Z_LOW_LIMIT)
+			pos.z = CWorld::FindGroundZForCoord(pos.x, pos.y);
+		pos.z += 1.0f;
+		ped->GetPosition() = pos;
+		ped->SetOrientation(0.0f, 0.0f, 0.0f);
+		CTheScripts::ClearSpaceForMissionEntity(pos, ped);
+		CWorld::Add(ped);
+		ped->m_nZoneLevel = CTheZones::GetLevelFromPosition(pos);
+		CPopulation::ms_nTotalMissionPeds++;
+		ScriptParams[0] = CPools::GetPedPool()->GetIndex(ped);
+		StoreParameters(&m_nIp, 1);
+		if (m_bIsMissionScript)
+			CTheScripts::MissionCleanup.AddEntityToList(ScriptParams[0], CLEANUP_CHAR);
+		return 0;
+	}
+	case COMMAND_SET_CHAR_OBJ_STEAL_ANY_CAR:
+	{
+		CollectParameters(&m_nIp, 1);
+		CPed* pPed = CPools::GetPedPool()->GetAt(ScriptParams[0]);
+		assert(pPed);
+		pPed->bScriptObjectiveCompleted = false;
+		pPed->SetObjective(OBJECTIVE_STEAL_ANY_CAR);
+		return 0;
+	}
+	case COMMAND_SET_2_REPEATED_PHONE_MESSAGES:
+	{
+		CollectParameters(&m_nIp, 1);
+		wchar* text1 = CTheScripts::GetTextByKeyFromScript(&m_nIp);
+		wchar* text2 = CTheScripts::GetTextByKeyFromScript(&m_nIp);
+		gPhoneInfo.SetPhoneMessage_Repeatedly(ScriptParams[0], text1, text2, nil, nil, nil, nil);
+		return 0;
+	}
+	case COMMAND_SET_2_PHONE_MESSAGES:
+	{
+		CollectParameters(&m_nIp, 1);
+		wchar* text1 = CTheScripts::GetTextByKeyFromScript(&m_nIp);
+		wchar* text2 = CTheScripts::GetTextByKeyFromScript(&m_nIp);
+		gPhoneInfo.SetPhoneMessage_JustOnce(ScriptParams[0], text1, text2, nil, nil, nil, nil);
+		return 0;
+	}
+	case COMMAND_SET_3_REPEATED_PHONE_MESSAGES:
+	{
+		CollectParameters(&m_nIp, 1);
+		wchar* text1 = CTheScripts::GetTextByKeyFromScript(&m_nIp);
+		wchar* text2 = CTheScripts::GetTextByKeyFromScript(&m_nIp);
+		wchar* text3 = CTheScripts::GetTextByKeyFromScript(&m_nIp);
+		gPhoneInfo.SetPhoneMessage_Repeatedly(ScriptParams[0], text1, text2, text3, nil, nil, nil);
+		return 0;
+	}
+	case COMMAND_SET_3_PHONE_MESSAGES:
+	{
+		CollectParameters(&m_nIp, 1);
+		wchar* text1 = CTheScripts::GetTextByKeyFromScript(&m_nIp);
+		wchar* text2 = CTheScripts::GetTextByKeyFromScript(&m_nIp);
+		wchar* text3 = CTheScripts::GetTextByKeyFromScript(&m_nIp);
+		gPhoneInfo.SetPhoneMessage_JustOnce(ScriptParams[0], text1, text2, text3, nil, nil, nil);
+		return 0;
+	}
+	case COMMAND_SET_4_REPEATED_PHONE_MESSAGES:
+	{
+		CollectParameters(&m_nIp, 1);
+		wchar* text1 = CTheScripts::GetTextByKeyFromScript(&m_nIp);
+		wchar* text2 = CTheScripts::GetTextByKeyFromScript(&m_nIp);
+		wchar* text3 = CTheScripts::GetTextByKeyFromScript(&m_nIp);
+		wchar* text4 = CTheScripts::GetTextByKeyFromScript(&m_nIp);
+		gPhoneInfo.SetPhoneMessage_Repeatedly(ScriptParams[0], text1, text2, text3, text4, nil, nil);
+		return 0;
+	}
+	case COMMAND_SET_4_PHONE_MESSAGES:
+	{
+		CollectParameters(&m_nIp, 1);
+		wchar* text1 = CTheScripts::GetTextByKeyFromScript(&m_nIp);
+		wchar* text2 = CTheScripts::GetTextByKeyFromScript(&m_nIp);
+		wchar* text3 = CTheScripts::GetTextByKeyFromScript(&m_nIp);
+		wchar* text4 = CTheScripts::GetTextByKeyFromScript(&m_nIp);
+		gPhoneInfo.SetPhoneMessage_JustOnce(ScriptParams[0], text1, text2, text3, text4, nil, nil);
+		return 0;
+	}
+	case COMMAND_IS_SNIPER_BULLET_IN_AREA:
+	{
+		CollectParameters(&m_nIp, 6);
+		float infX = *(float*)&ScriptParams[0];
+		float infY = *(float*)&ScriptParams[1];
+		float infZ = *(float*)&ScriptParams[2];
+		float supX = *(float*)&ScriptParams[3];
+		float supY = *(float*)&ScriptParams[4];
+		float supZ = *(float*)&ScriptParams[5];
+		if (infX > supX) {
+			infX = *(float*)&ScriptParams[3];
+			supX = *(float*)&ScriptParams[0];
+		}
+		if (infY > supY) {
+			infY = *(float*)&ScriptParams[4];
+			supY = *(float*)&ScriptParams[1];
+		}
+		if (infZ > supZ) {
+			infZ = *(float*)&ScriptParams[5];
+			supZ = *(float*)&ScriptParams[2];
+		}
+		UpdateCompareFlag(CBulletInfo::TestForSniperBullet(infX, supX, infY, supY, infZ, supZ));
+		return 0;
+	}
+	case COMMAND_GIVE_PLAYER_DETONATOR:
+		CGarages::GivePlayerDetonator();
+		return 0;
+	//case COMMAND_SET_COLL_OBJ_STEAL_ANY_CAR:
+	case COMMAND_SET_OBJECT_VELOCITY:
+	{
+		CollectParameters(&m_nIp, 4);
+		CObject* pObject = CPools::GetObjectPool()->GetAt(ScriptParams[0]);
+		assert(pObject);
+		pObject->SetMoveSpeed(*(CVector*)&ScriptParams[1] * METERS_PER_SECOND_TO_GAME_SPEED);
+		return 0;
+	}
+	case COMMAND_SET_OBJECT_COLLISION:
+	{
+		CollectParameters(&m_nIp, 2);
+		CObject* pObject = CPools::GetObjectPool()->GetAt(ScriptParams[0]);
+		assert(pObject);
+		pObject->bUsesCollision = (ScriptParams[1] != 0);
+		return 0;
+	}
+	case COMMAND_IS_ICECREAM_JINGLE_ON:
+	{
+		CollectParameters(&m_nIp, 1);
+		CVehicle* pVehicle = CPools::GetVehiclePool()->GetAt(ScriptParams[0]);
+		assert(pVehicle);
+		// Adding this check to correspond to command name.
+		// All original game scripts always assume that the vehicle is actually Mr. Whoopee,
+		// but maybe there are mods that use it as "is horn activated"?
+		assert(pVehicle->GetModelIndex() == MI_MRWHOOP);
+		UpdateCompareFlag(pVehicle->m_bSirenOrAlarm);
+		return 0;
+	}
+	default:
+		assert(0);
+	}
+	return -1;
+}
+#endif
+
+#if 1
+WRAPPER int8 CRunningScript::ProcessCommandsFrom900To999(int32 command) { EAXJMP(0x44CB80); }
+#else
+int8 CRunningScript::ProcessCommandsFrom900To999(int32 command)
+{
+	switch (command){
+	case COMMAND_PRINT_STRING_IN_STRING_NOW:
+	case COMMAND_PRINT_STRING_IN_STRING_SOON:
+	case COMMAND_SET_5_REPEATED_PHONE_MESSAGES:
+	case COMMAND_SET_5_PHONE_MESSAGES:
+	case COMMAND_SET_6_REPEATED_PHONE_MESSAGES:
+	case COMMAND_SET_6_PHONE_MESSAGES:
+	case COMMAND_IS_POINT_OBSCURED_BY_A_MISSION_ENTITY:
+	case COMMAND_LOAD_ALL_MODELS_NOW:
+	case COMMAND_ADD_TO_OBJECT_VELOCITY:
+	case COMMAND_DRAW_SPRITE:
+	case COMMAND_DRAW_RECT:
+	case COMMAND_LOAD_SPRITE:
+	case COMMAND_LOAD_TEXTURE_DICTIONARY:
+	case COMMAND_REMOVE_TEXTURE_DICTIONARY:
+	case COMMAND_SET_OBJECT_DYNAMIC:
+	case COMMAND_SET_CHAR_ANIM_SPEED:
+	case COMMAND_PLAY_MISSION_PASSED_TUNE:
+	case COMMAND_CLEAR_AREA:
+	case COMMAND_FREEZE_ONSCREEN_TIMER:
+	case COMMAND_SWITCH_CAR_SIREN:
+	case COMMAND_SWITCH_PED_ROADS_ON_ANGLED:
+	case COMMAND_SWITCH_PED_ROADS_OFF_ANGLED:
+	case COMMAND_SWITCH_ROADS_ON_ANGLED:
+	case COMMAND_SWITCH_ROADS_OFF_ANGLED:
+	case COMMAND_SET_CAR_WATERTIGHT:
+	case COMMAND_ADD_MOVING_PARTICLE_EFFECT:
+	case COMMAND_SET_CHAR_CANT_BE_DRAGGED_OUT:
+	case COMMAND_TURN_CAR_TO_FACE_COORD:
+	case COMMAND_IS_CRANE_LIFTING_CAR:
+	case COMMAND_DRAW_SPHERE:
+	case COMMAND_SET_CAR_STATUS:
+	case COMMAND_IS_CHAR_MALE:
+	case COMMAND_SCRIPT_NAME:
+	case COMMAND_CHANGE_GARAGE_TYPE_WITH_CAR_MODEL:
+	case COMMAND_FIND_DRUG_PLANE_COORDINATES:
+	case COMMAND_SAVE_INT_TO_DEBUG_FILE:
+	case COMMAND_SAVE_FLOAT_TO_DEBUG_FILE:
+	case COMMAND_SAVE_NEWLINE_TO_DEBUG_FILE:
+	case COMMAND_POLICE_RADIO_MESSAGE:
+	case COMMAND_SET_CAR_STRONG:
+	case COMMAND_REMOVE_ROUTE:
+	case COMMAND_SWITCH_RUBBISH:
+	case COMMAND_REMOVE_PARTICLE_EFFECTS_IN_AREA:
+	case COMMAND_SWITCH_STREAMING:
+	case COMMAND_IS_GARAGE_OPEN:
+	case COMMAND_IS_GARAGE_CLOSED:
+	case COMMAND_START_CATALINA_HELI:
+	case COMMAND_CATALINA_HELI_TAKE_OFF:
+	case COMMAND_REMOVE_CATALINA_HELI:
+	case COMMAND_HAS_CATALINA_HELI_BEEN_SHOT_DOWN:
+	case COMMAND_SWAP_NEAREST_BUILDING_MODEL:
+	case COMMAND_SWITCH_WORLD_PROCESSING:
+	case COMMAND_REMOVE_ALL_PLAYER_WEAPONS:
+	case COMMAND_GRAB_CATALINA_HELI:
+	case COMMAND_CLEAR_AREA_OF_CARS:
+	case COMMAND_SET_ROTATING_GARAGE_DOOR:
+	case COMMAND_ADD_SPHERE:
+	case COMMAND_REMOVE_SPHERE:
+	case COMMAND_CATALINA_HELI_FLY_AWAY:
+	case COMMAND_SET_EVERYONE_IGNORE_PLAYER:
+	case COMMAND_STORE_CAR_CHAR_IS_IN_NO_SAVE:
+	case COMMAND_STORE_CAR_PLAYER_IS_IN_NO_SAVE:
+	case COMMAND_IS_PHONE_DISPLAYING_MESSAGE:
+	case COMMAND_DISPLAY_ONSCREEN_TIMER_WITH_STRING:
+	case COMMAND_DISPLAY_ONSCREEN_COUNTER_WITH_STRING:
+	case COMMAND_CREATE_RANDOM_CAR_FOR_CAR_PARK:
+	case COMMAND_IS_COLLISION_IN_MEMORY:
+	case COMMAND_SET_WANTED_MULTIPLIER:
+	case COMMAND_SET_CAMERA_IN_FRONT_OF_PLAYER:
+	case COMMAND_IS_CAR_VISIBLY_DAMAGED:
+	case COMMAND_DOES_OBJECT_EXIST:
+	case COMMAND_LOAD_SCENE:
+	case COMMAND_ADD_STUCK_CAR_CHECK:
+	case COMMAND_REMOVE_STUCK_CAR_CHECK:
+	case COMMAND_IS_CAR_STUCK:
+	case COMMAND_LOAD_MISSION_AUDIO:
+	case COMMAND_HAS_MISSION_AUDIO_LOADED:
+	case COMMAND_PLAY_MISSION_AUDIO:
+	case COMMAND_HAS_MISSION_AUDIO_FINISHED:
+	case COMMAND_GET_CLOSEST_CAR_NODE_WITH_HEADING:
+	case COMMAND_HAS_IMPORT_GARAGE_SLOT_BEEN_FILLED:
+	case COMMAND_CLEAR_THIS_PRINT:
+	case COMMAND_CLEAR_THIS_BIG_PRINT:
+	case COMMAND_SET_MISSION_AUDIO_POSITION:
+	case COMMAND_ACTIVATE_SAVE_MENU:
+	case COMMAND_HAS_SAVE_GAME_FINISHED:
+	case COMMAND_NO_SPECIAL_CAMERA_FOR_THIS_GARAGE:
+	case COMMAND_ADD_BLIP_FOR_PICKUP_OLD:
+	case COMMAND_ADD_BLIP_FOR_PICKUP:
+	case COMMAND_ADD_SPRITE_BLIP_FOR_PICKUP:
+	case COMMAND_SET_PED_DENSITY_MULTIPLIER:
+	case COMMAND_FORCE_RANDOM_PED_TYPE:
+	case COMMAND_SET_TEXT_DRAW_BEFORE_FADE:
+	case COMMAND_GET_COLLECTABLE1S_COLLECTED:
+	case COMMAND_REGISTER_EL_BURRO_TIME:
+	case COMMAND_SET_SPRITES_DRAW_BEFORE_FADE:
+	case COMMAND_SET_TEXT_RIGHT_JUSTIFY:
+	case COMMAND_PRINT_HELP:
+	case COMMAND_CLEAR_HELP:
+	case COMMAND_FLASH_HUD_OBJECT:
+	default:
+		assert(0);
+	}
+	return -1;
+}
+#endif
+
+#if 1
+WRAPPER int8 CRunningScript::ProcessCommandsFrom1000To1099(int32 command) { EAXJMP(0x588490); }
+#else
+int8 CRunningScript::ProcessCommandsFrom1000To1099(int32 command)
+{
+	switch (command){
+	case COMMAND_FLASH_RADAR_BLIP:
+	case COMMAND_IS_CHAR_IN_CONTROL:
+	case COMMAND_SET_GENERATE_CARS_AROUND_CAMERA:
+	case COMMAND_CLEAR_SMALL_PRINTS:
+	case COMMAND_HAS_MILITARY_CRANE_COLLECTED_ALL_CARS:
+	case COMMAND_SET_UPSIDEDOWN_CAR_NOT_DAMAGED:
+	case COMMAND_CAN_PLAYER_START_MISSION:
+	case COMMAND_MAKE_PLAYER_SAFE_FOR_CUTSCENE:
+	case COMMAND_USE_TEXT_COMMANDS:
+	case COMMAND_SET_THREAT_FOR_PED_TYPE:
+	case COMMAND_CLEAR_THREAT_FOR_PED_TYPE:
+	case COMMAND_GET_CAR_COLOURS:
+	case COMMAND_SET_ALL_CARS_CAN_BE_DAMAGED:
+	case COMMAND_SET_CAR_CAN_BE_DAMAGED:
+	case COMMAND_MAKE_PLAYER_UNSAFE:
+	case COMMAND_LOAD_COLLISION:
+	case COMMAND_GET_BODY_CAST_HEALTH:
+	case COMMAND_SET_CHARS_CHATTING:
+	case COMMAND_MAKE_PLAYER_SAFE:
+	case COMMAND_SET_CAR_STAYS_IN_CURRENT_LEVEL:
+	case COMMAND_SET_CHAR_STAYS_IN_CURRENT_LEVEL:
+	case COMMAND_REGISTER_4X4_ONE_TIME:
+	case COMMAND_REGISTER_4X4_TWO_TIME:
+	case COMMAND_REGISTER_4X4_THREE_TIME:
+	case COMMAND_REGISTER_4X4_MAYHEM_TIME:
+	case COMMAND_REGISTER_LIFE_SAVED:
+	case COMMAND_REGISTER_CRIMINAL_CAUGHT:
+	case COMMAND_REGISTER_AMBULANCE_LEVEL:
+	case COMMAND_REGISTER_FIRE_EXTINGUISHED:
+	case COMMAND_TURN_PHONE_ON:
+	case COMMAND_REGISTER_LONGEST_DODO_FLIGHT:
+	case COMMAND_REGISTER_DEFUSE_BOMB_TIME:
+	case COMMAND_SET_TOTAL_NUMBER_OF_KILL_FRENZIES:
+	case COMMAND_BLOW_UP_RC_BUGGY:
+	case COMMAND_REMOVE_CAR_FROM_CHASE:
+	case COMMAND_IS_FRENCH_GAME:
+	case COMMAND_IS_GERMAN_GAME:
+	case COMMAND_CLEAR_MISSION_AUDIO:
+	case COMMAND_SET_FADE_IN_AFTER_NEXT_ARREST:
+	case COMMAND_SET_FADE_IN_AFTER_NEXT_DEATH:
+	case COMMAND_SET_GANG_PED_MODEL_PREFERENCE:
+	case COMMAND_SET_CHAR_USE_PEDNODE_SEEK:
+	case COMMAND_SWITCH_VEHICLE_WEAPONS:
+	case COMMAND_SET_GET_OUT_OF_JAIL_FREE:
+	case COMMAND_SET_FREE_HEALTH_CARE:
+	case COMMAND_IS_CAR_DOOR_CLOSED:
+	case COMMAND_LOAD_AND_LAUNCH_MISSION:
+	case COMMAND_LOAD_AND_LAUNCH_MISSION_INTERNAL:
+	case COMMAND_SET_OBJECT_DRAW_LAST:
+	case COMMAND_GET_AMMO_IN_PLAYER_WEAPON:
+	case COMMAND_GET_AMMO_IN_CHAR_WEAPON:
+	case COMMAND_REGISTER_KILL_FRENZY_PASSED:
+	case COMMAND_SET_CHAR_SAY:
+	case COMMAND_SET_NEAR_CLIP:
+	case COMMAND_SET_RADIO_CHANNEL:
+	case COMMAND_OVERRIDE_HOSPITAL_LEVEL:
+	case COMMAND_OVERRIDE_POLICE_STATION_LEVEL:
+	case COMMAND_FORCE_RAIN:
+	case COMMAND_DOES_GARAGE_CONTAIN_CAR:
+	case COMMAND_SET_CAR_TRACTION:
+	case COMMAND_ARE_MEASUREMENTS_IN_METRES:
+	case COMMAND_CONVERT_METRES_TO_FEET:
+	case COMMAND_MARK_ROADS_BETWEEN_LEVELS:
+	case COMMAND_MARK_PED_ROADS_BETWEEN_LEVELS:
+	case COMMAND_SET_CAR_AVOID_LEVEL_TRANSITIONS:
+	case COMMAND_SET_CHAR_AVOID_LEVEL_TRANSITIONS:
+	case COMMAND_IS_THREAT_FOR_PED_TYPE:
+	case COMMAND_CLEAR_AREA_OF_CHARS:
+	case COMMAND_SET_TOTAL_NUMBER_OF_MISSIONS:
+	case COMMAND_CONVERT_METRES_TO_FEET_INT:
+	case COMMAND_REGISTER_FASTEST_TIME:
+	case COMMAND_REGISTER_HIGHEST_SCORE:
+	case COMMAND_WARP_CHAR_INTO_CAR_AS_PASSENGER:
+	case COMMAND_IS_CAR_PASSENGER_SEAT_FREE:
+	case COMMAND_GET_CHAR_IN_CAR_PASSENGER_SEAT:
+	case COMMAND_SET_CHAR_IS_CHRIS_CRIMINAL:
+	case COMMAND_START_CREDITS:
+	case COMMAND_STOP_CREDITS:
+	case COMMAND_ARE_CREDITS_FINISHED:
+	case COMMAND_CREATE_SINGLE_PARTICLE:
+	case COMMAND_SET_CHAR_IGNORE_LEVEL_TRANSITIONS:
+	case COMMAND_GET_CHASE_CAR:
+	case COMMAND_START_BOAT_FOAM_ANIMATION:
+	case COMMAND_UPDATE_BOAT_FOAM_ANIMATION:
+	case COMMAND_SET_MUSIC_DOES_FADE:
+	case COMMAND_SET_INTRO_IS_PLAYING:
+	case COMMAND_SET_PLAYER_HOOKER:
+	case COMMAND_PLAY_END_OF_GAME_TUNE:
+	case COMMAND_STOP_END_OF_GAME_TUNE:
+	case COMMAND_GET_CAR_MODEL:
+	case COMMAND_IS_PLAYER_SITTING_IN_CAR:
+	case COMMAND_IS_PLAYER_SITTING_IN_ANY_CAR:
+	case COMMAND_SET_SCRIPT_FIRE_AUDIO:
+	case COMMAND_ARE_ANY_CAR_CHEATS_ACTIVATED:
+	case COMMAND_SET_CHAR_SUFFERS_CRITICAL_HITS:
+	case COMMAND_IS_PLAYER_LIFTING_A_PHONE:
+	case COMMAND_IS_CHAR_SITTING_IN_CAR:
+	case COMMAND_IS_CHAR_SITTING_IN_ANY_CAR:
+	case COMMAND_IS_PLAYER_ON_FOOT:
+	case COMMAND_IS_CHAR_ON_FOOT:
+	default:
+		assert(0);
+	}
+	return -1;
+}
+#endif
+
+#if 1
+WRAPPER int8 CRunningScript::ProcessCommandsFrom1100To1199(int32 command) { EAXJMP(0x589D00); }
+#else
+int8 CRunningScript::ProcessCommandsFrom1100To1199(int32 command)
+{
+	switch (command) {
+	case COMMAND_LOAD_COLLISION_WITH_SCREEN:
+	case COMMAND_LOAD_SPLASH_SCREEN:
+	case COMMAND_SET_CAR_IGNORE_LEVEL_TRANSITIONS:
+	case COMMAND_MAKE_CRAIGS_CAR_A_BIT_STRONGER:
+	case COMMAND_SET_JAMES_CAR_ON_PATH_TO_PLAYER:
+	case COMMAND_LOAD_END_OF_GAME_TUNE:
+	case COMMAND_ENABLE_PLAYER_CONTROL_CAMERA:
+	case COMMAND_SET_OBJECT_ROTATION:
+	case COMMAND_GET_DEBUG_CAMERA_COORDINATES:
+	case COMMAND_GET_DEBUG_CAMERA_FRONT_VECTOR:
+	case COMMAND_IS_PLAYER_TARGETTING_ANY_CHAR:
+	case COMMAND_IS_PLAYER_TARGETTING_CHAR:
+	case COMMAND_IS_PLAYER_TARGETTING_OBJECT:
+	case COMMAND_TERMINATE_ALL_SCRIPTS_WITH_THIS_NAME:
+	case COMMAND_DISPLAY_TEXT_WITH_NUMBER:
+	case COMMAND_DISPLAY_TEXT_WITH_2_NUMBERS:
+	case COMMAND_FAIL_CURRENT_MISSION:
+	case COMMAND_GET_CLOSEST_OBJECT_OF_TYPE:
+	case COMMAND_PLACE_OBJECT_RELATIVE_TO_OBJECT:
+	case COMMAND_SET_ALL_OCCUPANTS_OF_CAR_LEAVE_CAR:
+	case COMMAND_SET_INTERPOLATION_PARAMETERS:
+	case COMMAND_GET_CLOSEST_CAR_NODE_WITH_HEADING_TOWARDS_POINT:
+	case COMMAND_GET_CLOSEST_CAR_NODE_WITH_HEADING_AWAY_POINT:
+	case COMMAND_GET_DEBUG_CAMERA_POINT_AT:
+	case COMMAND_ATTACH_CHAR_TO_CAR:
+	case COMMAND_DETACH_CHAR_FROM_CAR:
+	case COMMAND_SET_CAR_STAY_IN_FAST_LANE:
+	case COMMAND_CLEAR_CHAR_LAST_WEAPON_DAMAGE:
+	case COMMAND_CLEAR_CAR_LAST_WEAPON_DAMAGE:
+	case COMMAND_GET_RANDOM_COP_IN_AREA:
+	case COMMAND_GET_RANDOM_COP_IN_ZONE:
+	case COMMAND_SET_CHAR_OBJ_FLEE_CAR:
+	case COMMAND_GET_DRIVER_OF_CAR:
+	case COMMAND_GET_NUMBER_OF_FOLLOWERS:
+	case COMMAND_GIVE_REMOTE_CONTROLLED_MODEL_TO_PLAYER:
+	case COMMAND_GET_CURRENT_PLAYER_WEAPON:
+	case COMMAND_GET_CURRENT_CHAR_WEAPON:
+	case COMMAND_LOCATE_CHAR_ANY_MEANS_OBJECT_2D:
+	case COMMAND_LOCATE_CHAR_ON_FOOT_OBJECT_2D:
+	case COMMAND_LOCATE_CHAR_IN_CAR_OBJECT_2D:
+	case COMMAND_LOCATE_CHAR_ANY_MEANS_OBJECT_3D:
+	case COMMAND_LOCATE_CHAR_ON_FOOT_OBJECT_3D:
+	case COMMAND_LOCATE_CHAR_IN_CAR_OBJECT_3D:
+	case COMMAND_SET_CAR_TEMP_ACTION:
+	case COMMAND_SET_CAR_HANDBRAKE_TURN_RIGHT:
+	case COMMAND_SET_CAR_HANDBRAKE_STOP:
+	case COMMAND_IS_CHAR_ON_ANY_BIKE:
+	case COMMAND_LOCATE_SNIPER_BULLET_2D:
+	case COMMAND_LOCATE_SNIPER_BULLET_3D:
+	case COMMAND_GET_NUMBER_OF_SEATS_IN_MODEL:
+	case COMMAND_IS_PLAYER_ON_ANY_BIKE:
+	case COMMAND_IS_CHAR_LYING_DOWN:
+	case COMMAND_CAN_CHAR_SEE_DEAD_CHAR:
+	case COMMAND_SET_ENTER_CAR_RANGE_MULTIPLIER:
 	default:
 		assert(0);
 	}
@@ -5190,12 +7808,33 @@ bool CTheScripts::IsVehicleStopped(CVehicle* pVehicle)
 	return 0.01f * CTimer::GetTimeStep() >= pVehicle->m_fDistanceTravelled;
 }
 
-WRAPPER int8 CRunningScript::ProcessCommandsFrom600To699(int32 command) { EAXJMP(0x444B20); }
-WRAPPER int8 CRunningScript::ProcessCommandsFrom700To799(int32 command) { EAXJMP(0x4458A0); }
-WRAPPER int8 CRunningScript::ProcessCommandsFrom800To899(int32 command) { EAXJMP(0x448240); }
-WRAPPER int8 CRunningScript::ProcessCommandsFrom900To999(int32 command) { EAXJMP(0x44CB80); }
-WRAPPER int8 CRunningScript::ProcessCommandsFrom1000To1099(int32 command) { EAXJMP(0x588490); }
-WRAPPER int8 CRunningScript::ProcessCommandsFrom1100To1199(int32 command) { EAXJMP(0x589D00); }
+void CTheScripts::AddToInvisibilitySwapArray(CEntity* pEntity, bool remove)
+{
+	int i = 0;
+	bool found = false;
+	while (i < MAX_NUM_INVISIBILITY_SETTINGS && !found) {
+		if (InvisibilitySettingArray[i] == pEntity)
+			found = true;
+		else
+			i++;
+	}
+	if (found) {
+		if (remove)
+			InvisibilitySettingArray[i] = nil;
+	}
+	else if (!remove) {
+		int j = 0;
+		while (i < MAX_NUM_INVISIBILITY_SETTINGS && !found) {
+			if (InvisibilitySettingArray[i] == nil)
+				found = true;
+			else
+				i++;
+		}
+		if (found)
+			InvisibilitySettingArray[i] = pEntity;
+	}
+
+}
 
 WRAPPER void CRunningScript::LocatePlayerCommand(int32, uint32*) { EAXJMP(0x44FE10); }
 WRAPPER void CRunningScript::LocatePlayerCharCommand(int32, uint32*) { EAXJMP(0x4501E0); }
@@ -5224,6 +7863,8 @@ WRAPPER void CTheScripts::CleanUpThisObject(CObject*) { EAXJMP(0x454910); }
 WRAPPER void CTheScripts::ReadObjectNamesFromScript() { EAXJMP(0x454960); }
 WRAPPER void CTheScripts::UpdateObjectIndices() { EAXJMP(0x454AD0); }
 WRAPPER void CTheScripts::ReadMultiScriptFileOffsetsFromScript() { EAXJMP(0x454BC0); }
+WRAPPER bool CTheScripts::IsPedStopped(CPed*) { EAXJMP(0x454670); }
+WRAPPER bool CTheScripts::IsPlayerStopped(CPlayerInfo*) { EAXJMP(0x4546C0); }
 
 STARTPATCHES
 InjectHook(0x437AE0, &CMissionCleanup::Init, PATCH_JUMP);

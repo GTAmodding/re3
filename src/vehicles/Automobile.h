@@ -87,8 +87,8 @@ public:
 	uint8 m_bombType : 3;
 	uint8 bTaxiLight : 1;
 	uint8 bHadDriver : 1;		// for bombs
-	uint8 m_auto_flagA20 : 1;
-	uint8 m_auto_flagA40 : 1;
+	uint8 bFixedColour : 1;
+	uint8 bBigWheels : 1;
 	uint8 bWaterTight : 1;	// no damage for non-player peds
 	uint8 bNotDamagedUpsideDown : 1;
 	uint8 bMoreResistantToDamage : 1;

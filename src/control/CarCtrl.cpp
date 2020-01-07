@@ -953,7 +953,7 @@ void CCarCtrl::SlowCarDownForPedsSectorList(CPtrList& lst, CVehicle* pVehicle, f
 						if (visibilityAngle > PI)
 							visibilityAngle = TWOPI - visibilityAngle;
 						if (visibilityAngle < HALFPI || pVehicle->m_nCarHornTimer){
-							/* if ped sees the danger of if car horn is on */
+							/* if ped sees the danger or if car horn is on */
 							pPed->SetFlee(pVehicle, 2000);
 							pPed->bUsePedNodeSeek = false;
 							pPed->SetMoveState(PEDMOVE_RUN);

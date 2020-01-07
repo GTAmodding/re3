@@ -47,4 +47,5 @@ public:
 	static CPed *AddPedInCar(CVehicle *vehicle);
 	static bool IsPointInSafeZone(CVector *coors);
 	static void RemovePed(CEntity* ent);
+	static int32 ChooseCivilianOccupation(int32);
 };

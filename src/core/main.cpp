@@ -234,9 +234,8 @@ Idle(void *arg)
 
 #ifdef PS2_SAVE_DIALOG
 	if (FrontEndMenuManager.m_bMenuActive)
-#endif
 		DefinedState();
-
+#endif
 	RenderMenus();
 	DoFade();
 	Render2dStuffAfterFade();

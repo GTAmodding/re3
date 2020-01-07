@@ -45,7 +45,7 @@ CWeapon::Reload(void)
 bool
 CWeapon::IsType2Handed(void)
 {
-	return m_eWeaponType >= WEAPONTYPE_SHOTGUN &&  m_eWeaponType <= WEAPONTYPE_FLAMETHROWER && m_eWeaponType != WEAPONTYPE_ROCKETLAUNCHER;
+	return m_eWeaponType >= WEAPONTYPE_SHOTGUN && m_eWeaponType <= WEAPONTYPE_FLAMETHROWER && m_eWeaponType != WEAPONTYPE_ROCKETLAUNCHER;
 }
 
 bool
@@ -95,7 +95,6 @@ CWeapon::HasWeaponAmmoToBeUsed(void)
 		case WEAPONTYPE_UNARMED:
 		case WEAPONTYPE_BASEBALLBAT:
 			return true;
-			break;
 		default:
 			return m_nAmmoTotal != 0;
 	}

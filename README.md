@@ -66,6 +66,7 @@ CPedPath
 CPlayerPed
 CRoadBlocks
 CRunningScript - being worked on
+CShotInfo
 CStats
 CSpecialFX
 CTrafficLights

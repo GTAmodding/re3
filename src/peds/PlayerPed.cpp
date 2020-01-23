@@ -9,13 +9,13 @@
 #include "General.h"
 #include "Pools.h"
 #include "Darkel.h"
+#include "CarCtrl.h"
 
 CPlayerPed::~CPlayerPed()
 {
 	delete m_pWanted;
 }
 
-WRAPPER void CPlayerPed::KeepAreaAroundPlayerClear(void) { EAXJMP(0x4F3460); }
 WRAPPER void CPlayerPed::ProcessControl(void) { EAXJMP(0x4EFD90); }
 
 CPlayerPed::CPlayerPed(void) : CPed(PEDTYPE_PLAYER1)
@@ -40,7 +40,7 @@ CPlayerPed::CPlayerPed(void) : CPed(PEDTYPE_PLAYER1)
 	field_1367 = 0;
 	m_nShotDelay = 0;
 	field_1376 = 0.0f;
-	field_1380 = 0;
+	m_bHaveTargetSelected = false;
 	m_bHasLockOnTarget = false;
 	m_bCanBeDamaged = true;
 	m_fWalkAngle = 0.0f;
@@ -58,7 +58,7 @@ void CPlayerPed::ClearWeaponTarget()
 	if (m_nPedType == PEDTYPE_PLAYER1) {
 		m_pPointGunAt = nil;
 		TheCamera.ClearPlayerWeaponMode();
-		CWeaponEffects::ClearCrosshair();
+		CWeaponEffects::ClearCrossHair();
 	}
 	ClearPointGunAt();
 }
@@ -651,12 +651,12 @@ CPlayerPed::PlayerControlFighter(CPad *padUsed)
 {
 	float leftRight = padUsed->GetPedWalkLeftRight();
 	float upDown = padUsed->GetPedWalkUpDown();
-	float displacement = sqrt(upDown * upDown + leftRight * leftRight);
+	float padMove = sqrt(upDown * upDown + leftRight * leftRight);
 
-	if (displacement > 0.0f) {
+	if (padMove > 0.0f) {
 		m_fRotationDest = CGeneral::GetRadianAngleBetweenPoints(0.0f, 0.0f, -leftRight, upDown) - TheCamera.Orientation;
-		m_takeAStepAfterAttack = displacement > 120.0f;
-		if (padUsed->GetSprint() && displacement > 60.0f)
+		m_takeAStepAfterAttack = padMove > 120.0f;
+		if (padUsed->GetSprint() && padMove > 60.0f)
 			bIsAttacking = false;
 	}
 
@@ -669,6 +669,401 @@ CPlayerPed::PlayerControlFighter(CPad *padUsed)
 			SetJump();
 		}
 	}
+}
+
+void
+CPlayerPed::PlayerControl1stPersonRunAround(CPad *padUsed)
+{
+	float leftRight = padUsed->GetPedWalkLeftRight();
+	float upDown = padUsed->GetPedWalkUpDown();
+	float padMove = sqrt(upDown * upDown + leftRight * leftRight);
+	float padMoveInGameUnit = padMove / 60.0f;
+	if (padMoveInGameUnit > 0.0f) {
+		m_fRotationDest = CGeneral::LimitRadianAngle(TheCamera.Orientation);
+		m_fMoveSpeed = min(padMoveInGameUnit, 0.07f * CTimer::GetTimeStep() + m_fMoveSpeed);
+	} else {
+		m_fMoveSpeed = 0.0f;
+	}
+
+	if (m_nPedState == PED_JUMP) {
+		if (bIsInTheAir) {
+			if (bUsesCollision && !bHitSteepSlope &&
+				(!bHitSomethingLastFrame || m_vecDamageNormal.z > 0.6f)
+				&& m_fDistanceTravelled < CTimer::GetTimeStep() * 0.02 && m_vecMoveSpeed.MagnitudeSqr() < 0.01f) {
+
+				float angleSin = Sin(m_fRotationCur); // originally sin(DEGTORAD(RADTODEG(m_fRotationCur))) o_O
+				float angleCos = Cos(m_fRotationCur);
+				ApplyMoveForce(-angleSin * 3.0f, 3.0f * angleCos, 0.05f);
+			}
+		} else if (bIsLanding) {
+			m_fMoveSpeed = 0.0f;
+		}
+	}
+	if (!(CWeaponInfo::GetWeaponInfo(GetWeapon()->m_eWeaponType)->m_bHeavy)
+		&& padUsed->GetSprint()) {
+		m_nMoveState = PEDMOVE_SPRINT;
+	}
+	if (m_nPedState != PED_FIGHT)
+		SetRealMoveAnim();
+
+	if (!bIsInTheAir && !(CWeaponInfo::GetWeaponInfo(GetWeapon()->m_eWeaponType)->m_bHeavy)
+		&& padUsed->JumpJustDown() && m_nPedState != PED_JUMP) {
+		ClearAttack();
+		ClearWeaponTarget();
+		if (m_bShouldEvade && m_pEvadingFrom) {
+			SetEvasiveDive((CPhysical*)m_pEvadingFrom, 1);
+			m_bShouldEvade = false;
+			m_pEvadingFrom = nil;
+		} else {
+			SetJump();
+		}
+	}
+}
+
+void
+CPlayerPed::KeepAreaAroundPlayerClear(void)
+{
+	BuildPedLists();
+	for (int i = 0; i < m_numNearPeds; ++i) {
+		CPed *nearPed = m_nearPeds[i];
+		if (nearPed->CharCreatedBy == RANDOM_CHAR && !nearPed->DyingOrDead()) {
+			if (nearPed->GetIsOnScreen()) {
+				if (nearPed->m_objective == OBJECTIVE_NONE) {
+					nearPed->SetFindPathAndFlee(this, 5000, true);
+				} else {
+					if (nearPed->m_nPedState == PED_ENTER_CAR || nearPed->m_nPedState == PED_CARJACK)
+						nearPed->QuitEnteringCar();
+
+					nearPed->ClearObjective();
+				}
+			} else {
+				nearPed->FlagToDestroyWhenNextProcessed();
+			}
+		}
+	}
+	CVector playerPos = (InVehicle() ? m_pMyVehicle->GetPosition() : GetPosition());
+
+	CVector pos = GetPosition();
+	int16 lastVehicle;
+	CEntity *vehicles[8];
+	CWorld::FindObjectsInRange(pos, 15.0f, true, &lastVehicle, 6, vehicles, false, true, false, false, false);
+
+	for (int i = 0; i < lastVehicle; i++) {
+		CVehicle *veh = (CVehicle*)vehicles[i];
+		if (veh->VehicleCreatedBy != MISSION_VEHICLE) {
+			if (veh->m_status != STATUS_PLAYER && veh->m_status != STATUS_PLAYER_DISABLED) {
+				if ((veh->GetPosition() - playerPos).MagnitudeSqr() > 25.0f) {
+					veh->AutoPilot.m_nTempAction = TEMPACT_WAIT;
+					veh->AutoPilot.m_nTimeTempAction = CTimer::GetTimeInMilliseconds() + 5000;
+				} else {
+					if (DotProduct2D(playerPos - veh->GetPosition(), veh->GetForward()) > 0.0f)
+						veh->AutoPilot.m_nTempAction = TEMPACT_REVERSE;
+					else
+						veh->AutoPilot.m_nTempAction = TEMPACT_GOFORWARD;
+
+					veh->AutoPilot.m_nTimeTempAction = CTimer::GetTimeInMilliseconds() + 2000;
+				}
+				CCarCtrl::PossiblyRemoveVehicle(veh);
+			}
+		}
+	}
+}
+
+void
+CPlayerPed::EvaluateNeighbouringTarget(CEntity *candidate, CEntity **targetPtr, float *lastCloseness, float distLimit, float angleOffset, bool lookToLeft)
+{
+	CVector distVec = candidate->GetPosition() - GetPosition();
+	if (distVec.Magnitude2D() <= distLimit) {
+		if (!DoesTargetHaveToBeBroken(candidate->GetPosition(), GetWeapon())) {
+#ifdef VC_PED_PORTS
+			float angleBetweenUs = CGeneral::GetATanOfXY(candidate->GetPosition().x - TheCamera.GetPosition().x,
+															candidate->GetPosition().y - TheCamera.GetPosition().y);
+#else
+			float angleBetweenUs = CGeneral::GetATanOfXY(distVec.x, distVec.y);
+#endif
+			angleBetweenUs = CGeneral::LimitAngle(angleBetweenUs - angleOffset);
+			float closeness;
+			if (lookToLeft) {
+				closeness = angleBetweenUs > 0.0f ? -Abs(angleBetweenUs) : -100000.0f;
+			} else {
+				closeness = angleBetweenUs > 0.0f ? -100000.0f : -Abs(angleBetweenUs);
+			}
+
+			if (closeness > *lastCloseness) {
+				*targetPtr = candidate;
+				*lastCloseness = closeness;
+			}
+		}
+	}
+}
+
+void
+CPlayerPed::EvaluateTarget(CEntity *candidate, CEntity **targetPtr, float *lastCloseness, float distLimit, float angleOffset, bool priority)
+{
+	CVector distVec = candidate->GetPosition() - GetPosition();
+	float dist = distVec.Magnitude2D();
+	if (dist <= distLimit) {
+		if (!DoesTargetHaveToBeBroken(candidate->GetPosition(), GetWeapon())) {
+			float angleBetweenUs = CGeneral::GetATanOfXY(distVec.x, distVec.y);
+			angleBetweenUs = CGeneral::LimitAngle(angleBetweenUs - angleOffset);
+
+			float closeness = -dist - 5.0f * Abs(angleBetweenUs);
+			if (priority) {
+				closeness += 5.0f;
+			}
+
+			if (closeness > *lastCloseness) {
+				*targetPtr = candidate;
+				*lastCloseness = closeness;
+			}
+		}
+	}
+}
+
+bool
+CPlayerPed::FindNextWeaponLockOnTarget(CEntity *previousTarget, bool lookToLeft)
+{
+	CEntity *nextTarget = nil;
+	float weaponRange = CWeaponInfo::GetWeaponInfo(GetWeapon()->m_eWeaponType)->m_fRange;
+	// nextTarget = nil;
+	float lastCloseness = -10000.0f;
+	// unused
+	// CGeneral::GetATanOfXY(GetForward().x, GetForward().y);
+	CVector distVec = previousTarget->GetPosition() - GetPosition();
+	float referenceBeta = CGeneral::GetATanOfXY(distVec.x, distVec.y);
+
+	for (int h = CPools::GetPedPool()->GetSize() - 1; h >= 0; h--) {
+		CPed *pedToCheck = CPools::GetPedPool()->GetSlot(h);
+		if (pedToCheck) {
+			if (pedToCheck != FindPlayerPed() && pedToCheck != previousTarget) {
+				if (!pedToCheck->DyingOrDead() && !pedToCheck->bInVehicle
+					&& pedToCheck->m_leader != FindPlayerPed() && OurPedCanSeeThisOne(pedToCheck)) {
+
+					EvaluateNeighbouringTarget(pedToCheck, &nextTarget, &lastCloseness,
+						weaponRange, referenceBeta, lookToLeft);
+				}
+			}
+		}
+	}
+	for (int i = 0; i < ARRAY_SIZE(m_nTargettableObjects); i++) {
+		CObject *obj = CPools::GetObjectPool()->GetAt(m_nTargettableObjects[i]);
+		if (obj)
+			EvaluateNeighbouringTarget(obj, &nextTarget, &lastCloseness, weaponRange, referenceBeta, lookToLeft);
+	}
+	if (!nextTarget)
+		return false;
+
+	m_pPointGunAt = nextTarget;
+	if (nextTarget)
+		nextTarget->RegisterReference((CEntity**)&m_pPointGunAt);
+	SetPointGunAt(nextTarget);
+	return true;
+}
+
+bool
+CPlayerPed::FindWeaponLockOnTarget(void)
+{
+	CEntity *nextTarget = nil;
+	float weaponRange = CWeaponInfo::GetWeaponInfo(GetWeapon()->m_eWeaponType)->m_fRange;
+
+	if (m_pPointGunAt) {
+		CVector distVec = m_pPointGunAt->GetPosition() - GetPosition();
+		if (distVec.Magnitude2D() > weaponRange) {
+			m_pPointGunAt = nil;
+			return false;
+		} else {
+			return true;
+		}
+	}
+
+	// nextTarget = nil;
+	float lastCloseness = -10000.0f;
+	float referenceBeta = CGeneral::GetATanOfXY(GetForward().x, GetForward().y);
+	for (int h = CPools::GetPedPool()->GetSize() - 1; h >= 0; h--) {
+		CPed *pedToCheck = CPools::GetPedPool()->GetSlot(h);
+		if (pedToCheck) {
+			if (pedToCheck != FindPlayerPed()) {
+				if (!pedToCheck->DyingOrDead() && !pedToCheck->bInVehicle
+					&& pedToCheck->m_leader != FindPlayerPed() && OurPedCanSeeThisOne(pedToCheck)) {
+
+					EvaluateTarget(pedToCheck, &nextTarget, &lastCloseness,
+						weaponRange, referenceBeta, IsThisPedAttackingPlayer(pedToCheck));
+				}
+			}
+		}
+	}
+	for (int i = 0; i < ARRAY_SIZE(m_nTargettableObjects); i++) {
+		CObject *obj = CPools::GetObjectPool()->GetAt(m_nTargettableObjects[i]);
+		if (obj)
+			EvaluateTarget(obj, &nextTarget, &lastCloseness, weaponRange, referenceBeta, false);
+	}
+	if (!nextTarget)
+		return false;
+
+	m_pPointGunAt = nextTarget;
+	if (nextTarget)
+		nextTarget->RegisterReference((CEntity**)&m_pPointGunAt);
+	SetPointGunAt(nextTarget);
+	return true;
+}
+
+void
+CPlayerPed::ProcessAnimGroups(void)
+{
+	AssocGroupId groupToSet;
+	if ((m_fWalkAngle <= -DEGTORAD(50.0f) || m_fWalkAngle >= DEGTORAD(50.0f))
+		&& TheCamera.Cams[TheCamera.ActiveCam].Using3rdPersonMouseCam()
+		&& CanStrafeOrMouseControl()) {
+
+		if (m_fWalkAngle >= -DEGTORAD(130.0f) && m_fWalkAngle <= DEGTORAD(130.0f)) {
+			if (m_fWalkAngle > 0.0f) {
+				if (GetWeapon()->m_eWeaponType == WEAPONTYPE_ROCKETLAUNCHER)
+					groupToSet = ASSOCGRP_ROCKETLEFT;
+				else
+					groupToSet = ASSOCGRP_PLAYERLEFT;
+			} else {
+				if (GetWeapon()->m_eWeaponType == WEAPONTYPE_ROCKETLAUNCHER)
+					groupToSet = ASSOCGRP_ROCKETRIGHT;
+				else
+					groupToSet = ASSOCGRP_PLAYERRIGHT;
+			}
+		} else {
+			if (GetWeapon()->m_eWeaponType == WEAPONTYPE_ROCKETLAUNCHER)
+				groupToSet = ASSOCGRP_ROCKETBACK;
+			else
+				groupToSet = ASSOCGRP_PLAYERBACK;
+		}
+	} else {
+		if (GetWeapon()->m_eWeaponType == WEAPONTYPE_ROCKETLAUNCHER) {
+			groupToSet = ASSOCGRP_PLAYERROCKET;
+		} else {
+			if (GetWeapon()->m_eWeaponType == WEAPONTYPE_BASEBALLBAT) {
+				groupToSet = ASSOCGRP_PLAYERBBBAT;
+			} else if (GetWeapon()->m_eWeaponType != WEAPONTYPE_COLT45 && GetWeapon()->m_eWeaponType != WEAPONTYPE_UZI) {
+				if (!GetWeapon()->IsType2Handed()) {
+					groupToSet = ASSOCGRP_PLAYER;
+				} else {
+					groupToSet = ASSOCGRP_PLAYER2ARMED;
+				}
+			} else {
+				groupToSet = ASSOCGRP_PLAYER1ARMED;
+			}
+		}
+	}
+
+	if (m_animGroup != groupToSet) {
+		m_animGroup = groupToSet;
+		ReApplyMoveAnims();
+	}
+}
+
+void
+CPlayerPed::ProcessPlayerWeapon(CPad *padUsed)
+{
+	CWeaponInfo *weaponInfo = CWeaponInfo::GetWeaponInfo(GetWeapon()->m_eWeaponType);
+	if (m_bHasLockOnTarget && !m_pPointGunAt) {
+		TheCamera.ClearPlayerWeaponMode();
+		CWeaponEffects::ClearCrossHair();
+		ClearPointGunAt();
+	}
+	if (!m_pFire) {
+		if (GetWeapon()->m_eWeaponType == WEAPONTYPE_ROCKETLAUNCHER ||
+			GetWeapon()->m_eWeaponType == WEAPONTYPE_SNIPERRIFLE || GetWeapon()->m_eWeaponType == WEAPONTYPE_M16) {
+			if (padUsed->TargetJustDown()) {
+				SetStoredState();
+				m_nPedState = PED_SNIPER_MODE;
+				if (GetWeapon()->m_eWeaponType == WEAPONTYPE_ROCKETLAUNCHER)
+					TheCamera.SetNewPlayerWeaponMode(CCam::MODE_ROCKETLAUNCHER, 0, 0);
+				else if (GetWeapon()->m_eWeaponType == WEAPONTYPE_SNIPERRIFLE)
+					TheCamera.SetNewPlayerWeaponMode(CCam::MODE_SNIPER, 0, 0);
+				else
+					TheCamera.SetNewPlayerWeaponMode(CCam::MODE_M16_1STPERSON, 0, 0);
+
+				m_fMoveSpeed = 0.0f;
+				CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ANIM_IDLE_STANCE, 1000.0f);
+			}
+			if (GetWeapon()->m_eWeaponType == WEAPONTYPE_ROCKETLAUNCHER || GetWeapon()->m_eWeaponType == WEAPONTYPE_SNIPERRIFLE
+				|| TheCamera.PlayerWeaponMode.Mode == CCam::MODE_M16_1STPERSON)
+				return;
+		}
+	}
+
+	if (padUsed->GetWeapon() && m_nMoveState != PEDMOVE_SPRINT) {
+		if (m_nSelectedWepSlot == m_currentWeapon) {
+			if (m_pPointGunAt) {
+				SetAttack(m_pPointGunAt);
+			} else if (m_currentWeapon != WEAPONTYPE_UNARMED) {
+				if (m_nPedState == PED_ATTACK) {
+					if (padUsed->WeaponJustDown()) {
+						m_bHaveTargetSelected = true;
+					} else if (!m_bHaveTargetSelected) {
+						field_1376 += CTimer::GetTimeStepNonClipped();
+					}
+				} else {
+					field_1376 = 0.0f;
+					m_bHaveTargetSelected = false;
+				}
+				SetAttack(nil);
+			} else if (padUsed->WeaponJustDown()) {
+				if (m_fMoveSpeed < 1.0f)
+					StartFightAttack(padUsed->GetWeapon());
+				else
+					SetAttack(nil);
+			}
+		}
+	} else {
+		m_pedIK.m_flags &= ~CPedIK::LOOKING;
+		if (m_nPedState == PED_ATTACK) {
+			m_bHaveTargetSelected = true;
+			bIsAttacking = false;
+		}
+	}
+	if (padUsed->GetTarget() && m_nSelectedWepSlot == m_currentWeapon && m_nMoveState != PEDMOVE_SPRINT) {
+		if (m_pPointGunAt) {
+			// what??
+			if (!m_pPointGunAt
+				|| CCamera::m_bUseMouse3rdPerson || m_pPointGunAt->IsPed() && ((CPed*)m_pPointGunAt)->bInVehicle) {
+				ClearWeaponTarget();
+				return;
+			}
+			if (CPlayerPed::DoesTargetHaveToBeBroken(m_pPointGunAt->GetPosition(), GetWeapon())) {
+				ClearWeaponTarget();
+				return;
+			}
+			if (m_pPointGunAt) {
+				if (padUsed->ShiftTargetLeftJustDown())
+					FindNextWeaponLockOnTarget(m_pPointGunAt, true);
+				if (padUsed->ShiftTargetRightJustDown())
+					FindNextWeaponLockOnTarget(m_pPointGunAt, false);
+			}
+			TheCamera.SetNewPlayerWeaponMode(CCam::MODE_SYPHON, 0, 0);
+			TheCamera.UpdateAimingCoors(GetPosition());
+		} else if (weaponInfo->m_bCanAim && !CCamera::m_bUseMouse3rdPerson) {
+			if (padUsed->TargetJustDown())
+				FindWeaponLockOnTarget();
+		}
+	} else if (m_pPointGunAt) {
+		ClearWeaponTarget();
+	}
+
+	if (m_pPointGunAt) {
+#ifndef VC_PED_PORTS
+		CVector markPos = m_pPointGunAt->GetPosition();
+#else
+		CVector markPos;
+		if (m_pPointGunAt->IsPed()) {
+			((CPed*)m_pPointGunAt)->m_pedIK.GetComponentPosition((RwV3d*)markPos, PED_MID);
+		} else {
+			markPos = m_pPointGunAt->GetPosition();
+		}
+#endif
+		if (bCanPointGunAtTarget) {
+			CWeaponEffects::MarkTarget(markPos, 64, 0, 0, 255, 0.8f);
+		} else {
+			CWeaponEffects::MarkTarget(markPos, 64, 32, 0, 255, 0.8f);
+		}
+	}
+	m_bHasLockOnTarget = m_pPointGunAt != nil;
 }
 
 class CPlayerPed_ : public CPlayerPed
@@ -699,4 +1094,8 @@ STARTPATCHES
 	InjectHook(0x4F1CF0, &CPlayerPed::PlayerControlSniper, PATCH_JUMP);
 	InjectHook(0x4F2310, &CPlayerPed::ProcessWeaponSwitch, PATCH_JUMP);
 	InjectHook(0x4F1DF0, &CPlayerPed::PlayerControlM16, PATCH_JUMP);
+	InjectHook(0x4F3460, &CPlayerPed::KeepAreaAroundPlayerClear, PATCH_JUMP);
+	InjectHook(0x4F1970, &CPlayerPed::PlayerControl1stPersonRunAround, PATCH_JUMP);
+	InjectHook(0x4F1EF0, &CPlayerPed::ProcessPlayerWeapon, PATCH_JUMP);
+	InjectHook(0x4F2640, &CPlayerPed::ProcessAnimGroups, PATCH_JUMP);
 ENDPATCHES

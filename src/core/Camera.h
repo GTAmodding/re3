@@ -494,6 +494,8 @@ int     m_iModeObbeCamIsInForCar;
 	void SetCameraDirectlyBehindForFollowPed_CamOnAString(void);
 	void SetZoomValueFollowPedScript(int16);
 	void SetZoomValueCamStringScript(int16);
+	void SetNewPlayerWeaponMode(int16, int16, int16);
+	void UpdateAimingCoors(CVector const &);
 
 	void dtor(void) { this->CCamera::~CCamera(); }
 };

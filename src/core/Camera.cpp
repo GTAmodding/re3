@@ -1379,6 +1379,21 @@ CCamera::SetWideScreenOff(void)
 	m_bWantsToSwitchWidescreenOff = m_WideScreenOn;
 }
 
+void
+CCamera::SetNewPlayerWeaponMode(int16 mode, int16 minZoom, int16 maxZoom)
+{
+	PlayerWeaponMode.Mode = mode;
+	PlayerWeaponMode.MaxZoom = maxZoom;
+	PlayerWeaponMode.MinZoom = minZoom;
+	PlayerWeaponMode.Duration = 0.0f;
+}
+
+void
+CCamera::UpdateAimingCoors(CVector const &coors)
+{
+	m_cvecAimingTargetCoors = coors;
+}
+
 STARTPATCHES
 	InjectHook(0x42C760, (bool (CCamera::*)(const CVector &center, float radius, const CMatrix *mat))&CCamera::IsSphereVisible, PATCH_JUMP);
 	InjectHook(0x46FD00, &CCamera::SetFadeColour, PATCH_JUMP);

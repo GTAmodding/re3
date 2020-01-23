@@ -20,11 +20,11 @@ public:
 	int32 m_nSpeedTimer;
 	int32 m_nShotDelay;
 	float field_1376;	// m_fAttackButtonCounter?
-	int8 field_1380;	// bHaveTargetSelected?
+	bool m_bHaveTargetSelected;	// may have better name
 	int8 field_1381;
 	int8 field_1382;
 	int8 field_1383;
-	CEntity *m_pEvadingFrom;
+	CEntity *m_pEvadingFrom;	// is this CPhysical?
 	int32 m_nTargettableObjects[4];
 	bool m_bAdrenalineActive;
 	bool m_bHasLockOnTarget;
@@ -68,6 +68,13 @@ public:
 	void PlayerControlFighter(CPad*);
 	void ProcessWeaponSwitch(CPad*);
 	void MakeObjectTargettable(int32);
+	void PlayerControl1stPersonRunAround(CPad *padUsed);
+	void EvaluateNeighbouringTarget(CEntity*, CEntity**, float*, float, float, bool);
+	void EvaluateTarget(CEntity*, CEntity**, float*, float, float, bool);
+	bool FindNextWeaponLockOnTarget(CEntity*, bool);
+	bool FindWeaponLockOnTarget(void);
+	void ProcessAnimGroups(void);
+	void ProcessPlayerWeapon(CPad*);
 
 	static void SetupPlayerPed(int32);
 	static void DeactivatePlayerPed(int32);

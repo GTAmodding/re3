@@ -1068,7 +1068,7 @@ CPed::FinishedAttackCB(CAnimBlendAssociation *attackAssoc, void *arg)
 	if (attackAssoc) {
 		switch (attackAssoc->animId) {
 			case ANIM_WEAPON_START_THROW:
-				if ((!ped->IsPlayer() || ((CPlayerPed*)ped)->field_1380) && ped->IsPlayer()) {
+				if ((!ped->IsPlayer() || ((CPlayerPed*)ped)->m_bHaveTargetSelected) && ped->IsPlayer()) {
 					attackAssoc->blendDelta = -1000.0f;
 					newAnim = CAnimManager::AddAnimation(ped->GetClump(), ASSOCGRP_STD, ANIM_WEAPON_THROWU);
 				} else {
@@ -1141,7 +1141,7 @@ CPed::Attack(void)
 		return;
 
 	if (reloadAnimAssoc) {
-		if (!IsPlayer() || ((CPlayerPed*)this)->field_1380)
+		if (!IsPlayer() || ((CPlayerPed*)this)->m_bHaveTargetSelected)
 			ClearAttack();
 
 		return;
@@ -1162,7 +1162,7 @@ CPed::Attack(void)
 
 		if (!weaponAnimAssoc) {
 			if (attackShouldContinue) {
-				if (ourWeaponFire != WEAPON_FIRE_PROJECTILE || !IsPlayer() || ((CPlayerPed*)this)->field_1380) {
+				if (ourWeaponFire != WEAPON_FIRE_PROJECTILE || !IsPlayer() || ((CPlayerPed*)this)->m_bHaveTargetSelected) {
 					if (!CGame::nastyGame || ourWeaponFire != WEAPON_FIRE_MELEE || CheckForPedsOnGroundToAttack(this, nil) < PED_ON_THE_FLOOR) {
 						weaponAnimAssoc = CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ourWeapon->m_AnimToPlay, 8.0f);
 					}
@@ -1178,7 +1178,7 @@ CPed::Attack(void)
 
 					if (IsPlayer()) {
 						((CPlayerPed*)this)->field_1376 = 0.0f;
-						((CPlayerPed*)this)->field_1380 = false;
+						((CPlayerPed*)this)->m_bHaveTargetSelected = false;
 					}
 				}
 			} else
@@ -4641,7 +4641,7 @@ CPed::SetAttack(CEntity *victim)
 	}
 
 	if (RpAnimBlendClumpGetAssociation(GetClump(), ANIM_AK_RELOAD)) {
-		if (!IsPlayer() || m_nPedState != PED_ATTACK || ((CPlayerPed*)this)->field_1380)
+		if (!IsPlayer() || m_nPedState != PED_ATTACK || ((CPlayerPed*)this)->m_bHaveTargetSelected)
 			bIsAttacking = false;
 		else
 			bIsAttacking = true;
@@ -5720,15 +5720,8 @@ CPed::CollideWithPed(CPed *collideWith)
 			SetLookTimer(800);
 		}
 	} else {
-		bool doWeRun = true;
-		if (m_nMoveState != PEDMOVE_RUN && m_nMoveState != PEDMOVE_SPRINT)
-			doWeRun = false;
-
-		SetFlee(collideWith, 5000);
-		bUsePedNodeSeek = true;
-		m_pNextPathNode = nil;
-		if (!doWeRun)
-			SetMoveState(PEDMOVE_WALK);
+		bool isRunning = m_nMoveState == PEDMOVE_RUN || m_nMoveState == PEDMOVE_SPRINT;
+		SetFindPathAndFlee(collideWith, 5000, !isRunning);
 	}
 }
 
@@ -12982,9 +12975,7 @@ CPed::ProcessObjective(void)
 					else
 						time = 6000;
 
-					SetFlee(m_pedInObjective, time);
-					bUsePedNodeSeek = true;
-					m_pNextPathNode = nil;
+					SetFindPathAndFlee(m_pedInObjective, time);
 				}
 				break;
 			}
@@ -13506,10 +13497,7 @@ CPed::ProcessObjective(void)
 					if (m_pedInObjective->m_nPedState == PED_FLEE_ENTITY && m_fleeFrom == this
 						|| m_pedInObjective->m_objective == OBJECTIVE_FLEE_CHAR_ON_FOOT_TILL_SAFE && m_pedInObjective->m_pedInObjective == this) {
 						ClearObjective();
-						SetFlee(m_pedInObjective, 15000);
-						bUsePedNodeSeek = true;
-						m_pNextPathNode = nil;
-						SetMoveState(PEDMOVE_WALK);
+						SetFindPathAndFlee(m_pedInObjective, 15000, true);
 						return;
 					}
 					float distWithTargetScSqr = distWithTarget.MagnitudeSqr();
@@ -13536,10 +13524,7 @@ CPed::ProcessObjective(void)
 									ClearObjective();
 									if (m_pedInObjective->m_objective != OBJECTIVE_KILL_CHAR_ON_FOOT
 										|| m_pedInObjective->m_pedInObjective != this) {
-										SetFlee(m_pedInObjective, 15000);
-										bUsePedNodeSeek = true;
-										m_pNextPathNode = nil;
-										SetMoveState(PEDMOVE_WALK);
+										SetFindPathAndFlee(m_pedInObjective, 15000, true);
 										m_nLastPedState = PED_WANDER_PATH;
 									} else {
 										SetObjective(OBJECTIVE_FLEE_CHAR_ON_FOOT_TILL_SAFE, m_pedInObjective);
@@ -13783,11 +13768,7 @@ CPed::SetDirectionToWalkAroundObject(CEntity *obj)
 #endif
 		if (CharCreatedBy != MISSION_CHAR && obj->m_modelIndex == MI_PHONEBOOTH1) {
 			bool isRunning = m_nMoveState == PEDMOVE_RUN || m_nMoveState == PEDMOVE_SPRINT;
-			SetFlee(obj, 5000);
-			bUsePedNodeSeek = true;
-			m_pNextPathNode = nil;
-			if (!isRunning)
-				SetMoveState(PEDMOVE_WALK);
+			SetFindPathAndFlee(obj, 5000, !isRunning);
 			return;
 		}
 

@@ -6,16 +6,17 @@ public:
 	bool m_bCrosshair;
 	int8 gap_1[3];
 	CVector m_vecPos;
-	int8 field_16;
-	int8 field_17;
-	int8 field_18;
-	int8 field_19;
-	float field_20;
+	uint8 m_red;
+	uint8 m_green;
+	uint8 m_blue;
+	uint8 m_alpha;
+	float m_size;
 	int32 field_24;
 	RwTexture *m_pTexture;
 	RwRaster *m_pRaster;
 
 public:
 	static void Render(void);
-	static void ClearCrosshair();
+	static void ClearCrossHair();
+	static void MarkTarget(CVector, uint8, uint8, uint8, uint8, float);
 };

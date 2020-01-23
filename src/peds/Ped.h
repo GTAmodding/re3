@@ -792,6 +792,24 @@ public:
 	void ReplaceWeaponWhenExitingVehicle(void);
 	void RemoveWeaponWhenEnteringVehicle(void);
 	bool IsNotInWreckedVehicle();
+	// My additions, because there were many, many instances of that.
+	inline void SetFindPathAndFlee(CEntity *fleeFrom, int time, bool walk = false)
+	{
+		SetFlee(fleeFrom, time);
+		bUsePedNodeSeek = true;
+		m_pNextPathNode = nil;
+		if (walk)
+			SetMoveState(PEDMOVE_WALK);
+	}
+
+	inline void SetFindPathAndFlee(CVector2D const &from, int time, bool walk = false)
+	{
+		SetFlee(from, time);
+		bUsePedNodeSeek = true;
+		m_pNextPathNode = nil;
+		if (walk)
+			SetMoveState(PEDMOVE_WALK);
+	}
 
 	// set by 0482:set_threat_reaction_range_multiplier opcode
 	static uint16 &nThreatReactionRangeMultiplier;

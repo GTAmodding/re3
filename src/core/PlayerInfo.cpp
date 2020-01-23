@@ -212,9 +212,9 @@ CPlayerInfo::IsRestartingAfterArrest()
 	return m_WBState == WBSTATE_BUSTED;
 }
 
-// lastClosestness is passed to other calls of this function
+// lastCloseness is passed to other calls of this function
 void
-CPlayerInfo::EvaluateCarPosition(CEntity *carToTest, CPed *player, float carBoundCentrePedDist, float *lastClosestness, CVehicle **closestCarOutput)
+CPlayerInfo::EvaluateCarPosition(CEntity *carToTest, CPed *player, float carBoundCentrePedDist, float *lastCloseness, CVehicle **closestCarOutput)
 {
 	// This dist used for determining the angle to face
 	CVector2D dist(carToTest->GetPosition() - player->GetPosition());
@@ -229,9 +229,9 @@ CPlayerInfo::EvaluateCarPosition(CEntity *carToTest, CPed *player, float carBoun
 
 	// This dist used for evaluating cars' distances, weird...
 	// Accounts inverted needed turn (or needed turn in long way) and car dist.
-	float closestness = (1.0f - Abs(neededTurn) / TWOPI) * (10.0f - carBoundCentrePedDist);
-	if (closestness > *lastClosestness) {
-		*lastClosestness = closestness;
+	float closeness = (1.0f - Abs(neededTurn) / TWOPI) * (10.0f - carBoundCentrePedDist);
+	if (closeness > *lastCloseness) {
+		*lastCloseness = closeness;
 		*closestCarOutput = (CVehicle*)carToTest;
 	}
 }
@@ -312,7 +312,7 @@ INITSAVEBUF
 }
 
 void
-CPlayerInfo::FindClosestCarSectorList(CPtrList& carList, CPed* ped, float unk1, float unk2, float unk3, float unk4, float* lastClosestness, CVehicle** closestCarOutput)
+CPlayerInfo::FindClosestCarSectorList(CPtrList& carList, CPed* ped, float unk1, float unk2, float unk3, float unk4, float* lastCloseness, CVehicle** closestCarOutput)
 {
 	for (CPtrNode* node = carList.first; node; node = node->next) {
 		CVehicle *car = (CVehicle*)node->item;
@@ -328,7 +328,7 @@ CPlayerInfo::FindClosestCarSectorList(CPtrList& carList, CPed* ped, float unk1, 
 				if (Abs(ped->GetPosition().z - carCentre.z) < 2.0f) {
 					float dist = (ped->GetPosition() - carCentre).Magnitude2D();
 					if (dist <= 10.0f && !CCranes::IsThisCarBeingCarriedByAnyCrane(car)) {
-						EvaluateCarPosition(car, ped, dist, lastClosestness, closestCarOutput);
+						EvaluateCarPosition(car, ped, dist, lastCloseness, closestCarOutput);
 					}
 				}
 			}
@@ -434,7 +434,7 @@ CPlayerInfo::Process(void)
 			// Enter vehicle
 			if (CPad::GetPad(0)->ExitVehicleJustDown()) {
 				bool weAreOnBoat = false;
-				float lastClosestness = 0.0f;
+				float lastCloseness = 0.0f;
 				CVehicle *carBelow = nil;
 				CEntity *surfaceBelow = m_pPed->m_pCurrentPhysSurface;
 				if (surfaceBelow && surfaceBelow->IsVehicle()) {
@@ -472,9 +472,9 @@ CPlayerInfo::Process(void)
 						for (int curX = minXSector; curX <= maxXSector; curX++) {
 							CSector *sector = CWorld::GetSector(curX, curY);
 							FindClosestCarSectorList(sector->m_lists[ENTITYLIST_VEHICLES], m_pPed,
-								minX, minY, maxX, maxY, &lastClosestness, &carBelow);
+								minX, minY, maxX, maxY, &lastCloseness, &carBelow);
 							FindClosestCarSectorList(sector->m_lists[ENTITYLIST_VEHICLES_OVERLAP], m_pPed,
-								minX, minY, maxX, maxY, &lastClosestness, &carBelow);
+								minX, minY, maxX, maxY, &lastCloseness, &carBelow);
 						}
 					}
 				}

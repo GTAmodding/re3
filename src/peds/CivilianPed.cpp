@@ -60,20 +60,13 @@ CCivilianPed::CivilianAI(void)
 				if (!threatPed->IsPlayer() || !RunToReportCrime(CRIME_POSSESSION_GUN)) {
 					if (threatDistSqr < sq(10.0f)) {
 						Say(SOUND_PED_FLEE_SPRINT);
-						SetFlee(m_threatEntity, 10000);
-						bUsePedNodeSeek = true;
-						m_pNextPathNode = nil;
+						SetFindPathAndFlee(m_threatEntity, 10000);
 					} else {
-						SetFlee(m_threatEntity->GetPosition(), 5000);
-						bUsePedNodeSeek = true;
-						m_pNextPathNode = nil;
-						SetMoveState(PEDMOVE_WALK);
+						SetFindPathAndFlee(m_threatEntity->GetPosition(), 5000, true);
 					}
 				}
 			} else if (m_objective != OBJECTIVE_NONE || GetWeapon()->IsTypeMelee()) {
-				SetFlee(m_threatEntity, 5000);
-				bUsePedNodeSeek = true;
-				m_pNextPathNode = nil;
+				SetFindPathAndFlee(m_threatEntity, 5000);
 				if (threatDistSqr < sq(20.0f)) {
 					SetMoveState(PEDMOVE_RUN);
 					Say(SOUND_PED_FLEE_SPRINT);
@@ -81,9 +74,7 @@ CCivilianPed::CivilianAI(void)
 					SetMoveState(PEDMOVE_WALK);
 				}
 			} else if (threatPed->IsPlayer() && FindPlayerPed()->m_pWanted->m_CurrentCops)  {
-				SetFlee(m_threatEntity, 5000);
-				bUsePedNodeSeek = true;
-				m_pNextPathNode = nil;
+				SetFindPathAndFlee(m_threatEntity, 5000);
 				if (threatDistSqr < sq(10.0f)) {
 					SetMoveState(PEDMOVE_RUN);
 				} else {
@@ -95,15 +86,11 @@ CCivilianPed::CivilianAI(void)
 		} else {
 			if (threatDistSqr < sq(10.0f)) {
 				Say(SOUND_PED_FLEE_SPRINT);
-				SetFlee(m_threatEntity, 10000);
-				bUsePedNodeSeek = true;
-				m_pNextPathNode = nil;
+				SetFindPathAndFlee(m_threatEntity, 10000);
 				SetMoveState(PEDMOVE_SPRINT);
 			} else {
 				Say(SOUND_PED_FLEE_SPRINT);
-				SetFlee(m_threatEntity, 5000);
-				bUsePedNodeSeek = true;
-				m_pNextPathNode = nil;
+				SetFindPathAndFlee(m_threatEntity, 5000);
 				SetMoveState(PEDMOVE_RUN);
 			}
 		}
@@ -113,9 +100,7 @@ CCivilianPed::CivilianAI(void)
 		float eventDistSqr = (m_pEventEntity->GetPosition() - GetPosition()).MagnitudeSqr2D();
 		if (IsGangMember() && m_nPedType == ((CPed*)m_pEventEntity)->m_nPedType) {
 			if (eventDistSqr < sq(5.0f)) {
-				SetFlee(m_pEventEntity, 2000);
-				bUsePedNodeSeek = true;
-				m_pNextPathNode = nil;
+				SetFindPathAndFlee(m_pEventEntity, 2000);
 				SetMoveState(PEDMOVE_RUN);
 			}
 		} else if (IsGangMember() || eventDistSqr > sq(5.0f)) {
@@ -150,9 +135,7 @@ CCivilianPed::CivilianAI(void)
 			if(!eligibleToReport || !RunToReportCrime(crime))
 #endif
 			{
-				SetFlee(m_pEventEntity, 5000);
-				bUsePedNodeSeek = true;
-				m_pNextPathNode = nil;
+				SetFindPathAndFlee(m_pEventEntity, 5000);
 				SetMoveState(PEDMOVE_RUN);
 			}
 		}
@@ -188,19 +171,14 @@ CCivilianPed::CivilianAI(void)
 				if (threatPed->GetWeapon()->IsTypeMelee() || !GetWeapon()->IsTypeMelee()) {
 					if (threatPed->IsPlayer() && FindPlayerPed()->m_pWanted->m_CurrentCops) {
 						if (m_objective == OBJECTIVE_KILL_CHAR_ON_FOOT || m_objective == OBJECTIVE_KILL_CHAR_ANY_MEANS) {
-							SetFlee(m_threatEntity, 10000);
-							bUsePedNodeSeek = true;
-							m_pNextPathNode = nil;
+							SetFindPathAndFlee(m_threatEntity, 10000);
 						}
 					} else {
 						SetObjective(OBJECTIVE_KILL_CHAR_ON_FOOT, m_threatEntity);
 					}
 				}
 			} else {
-				SetFlee(m_threatEntity, 10000);
-				bUsePedNodeSeek = true;
-				m_pNextPathNode = nil;
-				SetMoveState(PEDMOVE_WALK);
+				SetFindPathAndFlee(m_threatEntity, 10000, true);
 			}
 		}
 	}

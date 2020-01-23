@@ -651,7 +651,7 @@ CPlayerPed::PlayerControlFighter(CPad *padUsed)
 {
 	float leftRight = padUsed->GetPedWalkLeftRight();
 	float upDown = padUsed->GetPedWalkUpDown();
-	float padMove = sqrt(upDown * upDown + leftRight * leftRight);
+	float padMove = Sqrt(upDown * upDown + leftRight * leftRight);
 
 	if (padMove > 0.0f) {
 		m_fRotationDest = CGeneral::GetRadianAngleBetweenPoints(0.0f, 0.0f, -leftRight, upDown) - TheCamera.Orientation;
@@ -676,7 +676,7 @@ CPlayerPed::PlayerControl1stPersonRunAround(CPad *padUsed)
 {
 	float leftRight = padUsed->GetPedWalkLeftRight();
 	float upDown = padUsed->GetPedWalkUpDown();
-	float padMove = sqrt(upDown * upDown + leftRight * leftRight);
+	float padMove = Sqrt(upDown * upDown + leftRight * leftRight);
 	float padMoveInGameUnit = padMove / 60.0f;
 	if (padMoveInGameUnit > 0.0f) {
 		m_fRotationDest = CGeneral::LimitRadianAngle(TheCamera.Orientation);

@@ -301,7 +301,7 @@ cDMAudio::ClearMissionAudio(void)
 	AudioManager.ClearMissionAudio();
 }
 
-int32
+uint8
 cDMAudio::GetRadioInCar(void)
 {
 	return MusicManager.GetRadioInCar();

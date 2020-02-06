@@ -2,7 +2,7 @@
 
 #include "audio_enums.h"
 
-class tMP3Sample
+class tStreamedSample
 {
 public:
 	uint32 m_nLength;
@@ -10,52 +10,46 @@ public:
 	uint32 m_nLastPosCheckTimer;
 };
 
+class CVehicle;
+
 class cMusicManager
 {
 public:
 	bool m_bIsInitialised;
-	uint8 field_1;
+	bool m_bDisabled;
 	uint8 m_nMusicMode;
 	uint8 m_nCurrentStreamedSound;
 	uint8 m_nPreviousStreamedSound;
-	uint8 field_5;
-	uint8 field_6;
-	uint8 field_7;
-	bool m_bAnnouncement;
+	bool m_bFrontendTrackFinished;
+	bool m_bPlayInFrontend;
+	bool m_bSetNextStation;
+	uint8 m_nAnnouncement;
 	bool m_bPreviousPlayerInCar;
 	bool m_bPlayerInCar;
 	bool m_bAnnouncementInProgress;
-	tMP3Sample m_asMP3Samples[TOTAL_STREAMED_SOUNDS];
-	uint8 field_2364;
-	uint8 field_2365;
-	uint8 field_2366;
-	uint8 field_2367;
-	uint32 field_2368;
-	uint32 field_2372;
-	uint32 field_2376;
-	uint8 field_2380;
-	uint8 field_2381;
-	uint8 field_2382;
+	tStreamedSample m_aTracks[TOTAL_STREAMED_SOUNDS];
+	bool m_bResetTimers;
+	uint32 m_nResetTime;
+	uint32 m_nLastTrackServiceTime;
+	uint32 m_nTimer;
+	bool m_bDoTrackService;
+	bool m_bIgnoreTimeDelay;
+	bool m_bDontServiceAmbienceTrack;
 	bool m_bRadioSetByScript;
 	uint8 m_nRadioStation;
-	uint8 field_2385;
-	uint8 field_2386;
-	uint8 field_2387;
-	uint32 m_nRadioPosition;
-	bool m_bRadioInCar;
-	uint8 field_2393;
-	uint8 field_2394;
-	uint8 field_2395;
+	int32 m_nRadioPosition;
+	uint8 m_nRadioInCar;
 
 public:
+	cMusicManager();
 	bool IsInitialised() { return m_bIsInitialised; }
 	uint32 GetMusicMode() { return m_nMusicMode; }
 	uint8 GetCurrentTrack() { return m_nCurrentStreamedSound; }
 
-	void Initialise();
+	bool Initialise();
 	void Terminate();
 
-	void ChangeMusicMode(int32 mode);
+	void ChangeMusicMode(uint8 mode);
 	void StopFrontEndTrack();
 
 	bool PlayerInCar();
@@ -66,7 +60,7 @@ public:
 	void PreloadCutSceneMusic(uint8);
 	void PlayPreloadedCutSceneMusic(void);
 	void StopCutSceneMusic(void);
-	int32 GetRadioInCar(void);
+	uint8 GetRadioInCar(void);
 	void SetRadioInCar(uint32);
 	void SetRadioChannelByScript(uint8, int32);
 
@@ -74,6 +68,20 @@ public:
 
 	void ResetTimers(int32);
 	void Service();
+	void ServiceFrontEndMode();
+	void ServiceGameMode();
+	void ServiceAmbience();
+	void ServiceTrack();
+
+	bool UsesPoliceRadio(CVehicle *veh);
+	uint32 GetTrackStartPos(uint8);
+
+	void ComputeAmbienceVol(uint8 reset, uint8& outVolume);
+	bool ServiceAnnouncement();
+
+	uint8 GetCarTuning();
+	uint8 GetNextCarTuning();
+	bool ChangeRadioChannel();
 };
 
 static_assert(sizeof(cMusicManager) == 0x95C, "cMusicManager: error");

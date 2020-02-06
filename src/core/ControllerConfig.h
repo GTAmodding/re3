@@ -116,6 +116,8 @@ public:
 #ifdef __DINPUT_INCLUDED__
 	DIJOYSTATE2           m_OldState;
 	DIJOYSTATE2           m_NewState;
+#else
+	uint8 ___padd[0x110 * 2];
 #endif
 	wchar                 m_aActionNames[MAX_CONTROLLERACTIONS][ACTIONNAME_LENGTH];
 	bool                  m_aButtonStates[MAX_BUTTONS];

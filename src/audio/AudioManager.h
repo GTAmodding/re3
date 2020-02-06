@@ -337,6 +337,7 @@ public:
 	uint32 GetFrameCounter() const { return m_nTimeOfRecentCrime; }
 	float GetReflectionsDistance(int32 idx) const { return m_afReflectionsDistances[idx]; }
 	int32 GetRandomNumber(int32 idx) const { return m_anRandomTable[idx]; }
+	bool IsMissionAudioPlaying() const { return m_sMissionAudio.m_bPlayStatus == 1; }
 
 	// "Should" be in alphabetic order, except "getXTalkSfx"
 	void AddDetailsToRequestedOrderList(uint8 sample); /// ok (check once more)

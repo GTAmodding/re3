@@ -515,6 +515,7 @@ int     m_iModeObbeCamIsInForCar;
 
 	void dtor(void) { this->CCamera::~CCamera(); }
 };
+static_assert(offsetof(CCamera, DistanceToWater) == 0xe4, "CCamera: error");
 static_assert(offsetof(CCamera, m_WideScreenOn) == 0x70, "CCamera: error");
 static_assert(offsetof(CCamera, WorldViewerBeingUsed) == 0x75, "CCamera: error");
 static_assert(offsetof(CCamera, m_uiNumberOfTrainCamNodes) == 0x84, "CCamera: error");

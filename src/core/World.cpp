@@ -864,10 +864,9 @@ CVehicle*
 FindPlayerVehicle(void)
 {
 	CPlayerPed *ped = FindPlayerPed();
-	if(ped->InVehicle())
+	if(ped && ped->InVehicle())
 		return ped->m_pMyVehicle;
-	else
-		return nil;
+	return nil;
 }
 
 CVehicle*

@@ -2134,7 +2134,7 @@ _WinMain(HINSTANCE instance,
 		CPad::ResetCheats();
 		CPad::StopPadsShaking();
 		
-		DMAudio.ChangeMusicMode(MUSICMODE_OFF);
+		DMAudio.ChangeMusicMode(MUSICMODE_DISABLE);
 		
 		CTimer::Stop();
 		

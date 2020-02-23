@@ -8544,7 +8544,7 @@ int8 CRunningScript::ProcessCommands1000To1099(int32 command)
 		CTimer::Stop();
 		CGame::currLevel = (eLevelName)ScriptParams[0];
 		CStreaming::RemoveUnusedBigBuildings(CGame::currLevel);
-		CStreaming::RemoveIslandsNotUsed(CGame::currLevel);
+		CStreaming::RemoveUnusedBuildings(CGame::currLevel);
 		CCollision::SortOutCollisionAfterLoad();
 		CStreaming::RequestIslands(CGame::currLevel);
 		CStreaming::LoadAllRequestedModels(true);
@@ -9013,7 +9013,7 @@ int8 CRunningScript::ProcessCommands1000To1099(int32 command)
 	}
 	case COMMAND_SET_MUSIC_DOES_FADE:
 		CollectParameters(&m_nIp, 1);
-		TheCamera.m_bMusicFading = (ScriptParams[0] == 0);
+		TheCamera.m_bIgnoreFadingStuffForMusic = (ScriptParams[0] == 0);
 		return 0;
 	case COMMAND_SET_INTRO_IS_PLAYING:
 		CollectParameters(&m_nIp, 1);
@@ -9162,7 +9162,7 @@ int8 CRunningScript::ProcessCommands1100To1199(int32 command)
 			DMAudio.Service();
 			CPopulation::DealWithZoneChange(CCollision::ms_collisionInMemory, CGame::currLevel, false);
 			CStreaming::RemoveUnusedBigBuildings(CGame::currLevel);
-			CStreaming::RemoveIslandsNotUsed(CGame::currLevel);
+			CStreaming::RemoveUnusedBuildings(CGame::currLevel);
 			CCollision::SortOutCollisionAfterLoad();
 			CStreaming::RequestIslands(CGame::currLevel);
 			CStreaming::RequestBigBuildings(CGame::currLevel);

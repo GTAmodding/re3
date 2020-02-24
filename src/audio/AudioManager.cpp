@@ -3172,11 +3172,74 @@ cAudioManager::ProcessCarBombTick(cVehicleParams *params)
 	return true;
 }
 
-WRAPPER
 void
-cAudioManager::ProcessCesna(void *)
+cAudioManager::ProcessCesna(cVehicleParams *params)
 {
-	EAXJMP(0x56ADF0);
+	static uint8 nAccel = 0;
+
+	//((CAutomobile *)params->m_pVehicle)->Damage.GetEngineStatus();
+
+	if(FindPlayerVehicle() == params->m_pVehicle) {
+		if(params->m_nIndex == DODO) {
+			if(Pads[0].GetAccelerate() <= 0) {
+				if(nAccel) --nAccel;
+			} else if(nAccel < 60) {
+				++nAccel;
+			}
+			AddPlayerCarSample(85 * (60 - nAccel) / 60 + 20, 8500 * nAccel / 60 + 17000, SFX_CESNA_IDLE, 0,
+			                   52, 1);
+			AddPlayerCarSample(85 * nAccel / 60 + 20, 8500 * nAccel / 60 + 17000, SFX_CESNA_REV, 0, 2, 1);
+		}
+	} else if(params->m_nIndex == DODO) {
+		AddPlayerCarSample(105, 17000, SFX_CESNA_IDLE, 0, 52, 1);
+	} else if(params->m_fDistance < 40000.f) {
+		CalculateDistance(params->m_bDistanceCalculated, params->m_fDistance);
+		m_sQueueSample.m_bVolume = ComputeVolume(80, 200.f, m_sQueueSample.m_fDistance);
+		if(m_sQueueSample.m_bVolume) {
+			m_sQueueSample.m_counter = 52;
+			m_sQueueSample.m_nSampleIndex = SFX_CESNA_IDLE;
+			m_sQueueSample.m_bBankIndex = 0;
+			m_sQueueSample.m_bIsDistant = 0;
+			m_sQueueSample.field_16 = 0;
+			m_sQueueSample.m_nFrequency = 12500;
+			m_sQueueSample.m_nLoopCount = 0;
+			m_sQueueSample.field_76 = 8;
+			m_sQueueSample.m_bEmittingVolume = 80;
+			m_sQueueSample.m_nLoopStart =
+			    SampleManager.GetSampleLoopStartOffset(m_sQueueSample.m_nSampleIndex);
+			m_sQueueSample.m_nLoopEnd = SampleManager.GetSampleLoopEndOffset(m_sQueueSample.m_nSampleIndex);
+			m_sQueueSample.field_48 = 8.0;
+			m_sQueueSample.m_fSoundIntensity = 200.0f;
+			m_sQueueSample.field_56 = 0;
+			m_sQueueSample.m_bReverbFlag = 1;
+			m_sQueueSample.m_bRequireReflection = 0;
+			AddSampleToRequestedQueue();
+		}
+		if(params->m_fDistance < 8100.f) {
+			m_sQueueSample.m_bVolume = ComputeVolume(80, 90.f, m_sQueueSample.m_fDistance);
+			if(m_sQueueSample.m_bVolume) {
+				m_sQueueSample.m_counter = 2;
+				m_sQueueSample.m_nSampleIndex = SFX_CESNA_REV;
+				m_sQueueSample.m_bBankIndex = 0;
+				m_sQueueSample.m_bIsDistant = 0;
+				m_sQueueSample.field_16 = 0;
+				m_sQueueSample.m_nFrequency = 25000;
+				m_sQueueSample.m_nLoopCount = 0;
+				m_sQueueSample.field_76 = 4;
+				m_sQueueSample.m_bEmittingVolume = 80;
+				m_sQueueSample.m_nLoopStart =
+				    SampleManager.GetSampleLoopStartOffset(m_sQueueSample.m_nSampleIndex);
+				m_sQueueSample.m_nLoopEnd =
+				    SampleManager.GetSampleLoopEndOffset(m_sQueueSample.m_nSampleIndex);
+				m_sQueueSample.field_48 = 8.0;
+				m_sQueueSample.m_fSoundIntensity = 90.0f;
+				m_sQueueSample.field_56 = 0;
+				m_sQueueSample.m_bReverbFlag = 1;
+				m_sQueueSample.m_bRequireReflection = 0;
+				AddSampleToRequestedQueue();
+			}
+		}
+	}
 }
 
 void

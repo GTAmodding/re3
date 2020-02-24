@@ -498,7 +498,7 @@ public:
 	void ProcessBridgeOneShots();                            /// ok
 	void ProcessBridgeWarning();                             /// ok
 	bool ProcessCarBombTick(cVehicleParams *params);         /// ok
-	void ProcessCesna(void *);                               // todo requires CPlane
+	void ProcessCesna(cVehicleParams *params);               /// ok
 	void ProcessCinemaScriptObject(uint8 sound);             /// ok
 	void ProcessCrane();                                     // todo requires CCrane
 	void ProcessDocksScriptObject(uint8 sound);              /// ok

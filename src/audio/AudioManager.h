@@ -354,10 +354,10 @@ public:
 	void ClearMissionAudio();                            /// ok
 	void ClearRequestedQueue();                          /// ok
 	int32 ComputeDopplerEffectedFrequency(uint32 oldFreq, float position1, float position2,
-	                                      float speedMultiplier) const;                   /// ok
-	int32 ComputePan(float, CVector *);                                                   /// ok
+	                                      float speedMultiplier) const;                    /// ok
+	int32 ComputePan(float, CVector *);                                                    /// ok
 	uint8 ComputeVolume(uint8 emittingVolume, float soundIntensity, float distance) const; /// ok
-	int32 CreateEntity(int32 type, void* entity);                                    /// ok
+	int32 CreateEntity(int32 type, void *entity);                                          /// ok
 
 	void DestroyAllGameCreatedEntities(); /// ok
 	void DestroyEntity(int32 id);         /// ok
@@ -535,7 +535,7 @@ public:
 	void ProcessProjectiles();                                 /// ok
 	void ProcessRainOnVehicle(cVehicleParams *params);         /// ok
 	void ProcessReverb() const;                                /// ok
-	bool ProcessReverseGear(cVehicleParams *a2);               /// ok
+	bool ProcessReverseGear(cVehicleParams *params);           /// ok
 	void ProcessSawMillScriptObject(uint8 sound);              /// ok
 	void ProcessScriptObject(int32 id);                        /// ok
 	void ProcessShopScriptObject(uint8 sound);                 /// ok
@@ -558,12 +558,12 @@ public:
 	int32 RandomDisplacement(uint32 seed) const;
 	void ReacquireDigitalHandle() const;
 	void ReleaseDigitalHandle() const;
-	void ReportCollision(CEntity *entity1, CEntity *entity2, uint8 surface1, uint8 surface2,
-	                     float collisionPower, float intensity2); /// ok
-	void ReportCrime(int32 crime, const CVector *pos);            /// ok
-	void ResetAudioLogicTimers(uint32 timer);                      /// ok
-	void ResetPoliceRadio();                                      /// ok
-	void ResetTimers(uint32 time);                                /// ok
+	void ReportCollision(CEntity *entity1, CEntity *entity2, uint8 surface1, uint8 surface2, float collisionPower,
+	                     float intensity2);            /// ok
+	void ReportCrime(int32 crime, const CVector *pos); /// ok
+	void ResetAudioLogicTimers(uint32 timer);          /// ok
+	void ResetPoliceRadio();                           /// ok
+	void ResetTimers(uint32 time);                     /// ok
 
 	void Service();                                    /// ok
 	void ServiceCollisions();                          /// ok
@@ -585,7 +585,7 @@ public:
 	void SetUpLoopingCollisionSound(cAudioCollision *col, uint8 counter); /// ok
 	void SetUpOneShotCollisionSound(cAudioCollision *col);                /// ok
 	bool SetupCrimeReport();                                              /// ok
-	bool SetupJumboEngineSound(uint8 a2, int32 a3);                       // todo
+	bool SetupJumboEngineSound(uint8 vol, int32 freq);                    /// ok
 	bool SetupJumboFlySound(uint8 emittingVol);                           /// ok
 	bool SetupJumboRumbleSound(uint8 emittingVol);                        /// ok
 	bool SetupJumboTaxiSound(uint8 vol);                                  /// ok

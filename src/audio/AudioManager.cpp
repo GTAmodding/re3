@@ -7922,8 +7922,34 @@ cAudioManager::SetSpeakerConfig(int32 conf) const
 	SampleManager.SetSpeakerConfig(conf);
 }
 
-WRAPPER
-bool cAudioManager::SetupJumboEngineSound(uint8, int32) { EAXJMP(0x56F140); }
+bool
+cAudioManager::SetupJumboEngineSound(uint8 vol, int32 freq)
+{
+	if(m_sQueueSample.m_fDistance >= 180.f) return 0;
+
+	uint8 emittingVol = vol - gJumboVolOffsetPercentage % 50;
+	m_sQueueSample.m_bVolume = ComputeVolume(emittingVol, 180.f, m_sQueueSample.m_fDistance);
+	if(m_sQueueSample.m_bVolume) {
+		m_sQueueSample.m_counter = 3;
+		m_sQueueSample.m_nSampleIndex = SFX_JUMBO_ENGINE;
+		m_sQueueSample.m_bBankIndex = 0;
+		m_sQueueSample.m_bIsDistant = 0;
+		m_sQueueSample.field_16 = 1;
+		m_sQueueSample.m_nFrequency = freq;
+		m_sQueueSample.m_nLoopCount = 0;
+		m_sQueueSample.m_bEmittingVolume = emittingVol;
+		m_sQueueSample.m_nLoopStart = SampleManager.GetSampleLoopStartOffset(m_sQueueSample.m_nSampleIndex);
+		m_sQueueSample.m_nLoopEnd = SampleManager.GetSampleLoopEndOffset(m_sQueueSample.m_nSampleIndex);
+		m_sQueueSample.field_48 = 4.0;
+		m_sQueueSample.m_fSoundIntensity = 180.0f;
+		m_sQueueSample.field_56 = 0;
+		m_sQueueSample.field_76 = 4;
+		m_sQueueSample.m_bReverbFlag = 1;
+		m_sQueueSample.m_bRequireReflection = 0;
+		AddSampleToRequestedQueue();
+	}
+	return true;
+}
 
 bool
 cAudioManager::SetupJumboFlySound(uint8 emittingVol)

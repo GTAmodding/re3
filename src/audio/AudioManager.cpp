@@ -9,6 +9,7 @@
 #include "Boat.h"
 #include "Bridge.h"
 #include "Camera.h"
+#include "Cranes.h"
 #include "DMAudio.h"
 #include "Entity.h"
 #include "Explosion.h"
@@ -3293,11 +3294,58 @@ cAudioManager::ProcessCinemaScriptObject(uint8 sound)
 	}
 }
 
-WRAPPER
 void
 cAudioManager::ProcessCrane()
 {
-	EAXJMP(0x578910);
+	CCrane *crane = (CCrane *)m_asAudioEntities[m_sQueueSample.m_nEntityIndex].m_pEntity;
+	float distSquared;
+
+	bool distCalculated = false;
+
+	if(crane) {
+		if(crane->m_bCraneActive == 1) {
+			if(crane->m_bCraneStatus) {
+				m_sQueueSample.m_vecPos = crane->m_pObject->GetPosition();
+				distSquared = GetDistanceSquared(&this->m_sQueueSample.m_vecPos);
+				if(distSquared < 6400.f) {
+					CalculateDistance(distCalculated, distSquared);
+					m_sQueueSample.m_bVolume = ComputeVolume(100, 80.f, m_sQueueSample.m_fDistance);
+					if(m_sQueueSample.m_bVolume) {
+						m_sQueueSample.m_counter = 0;
+						m_sQueueSample.m_nSampleIndex = SFX_CRANE_MAGNET;
+						m_sQueueSample.m_bBankIndex = 0;
+						m_sQueueSample.m_bIsDistant = 0;
+						m_sQueueSample.field_16 = 2;
+						m_sQueueSample.m_nFrequency = 6000;
+						m_sQueueSample.m_nLoopCount = 0;
+						m_sQueueSample.m_bEmittingVolume = 100;
+						m_sQueueSample.m_nLoopStart = SampleManager.GetSampleLoopStartOffset(
+						    m_sQueueSample.m_nSampleIndex);
+						m_sQueueSample.m_nLoopEnd =
+						    SampleManager.GetSampleLoopEndOffset(m_sQueueSample.m_nSampleIndex);
+						m_sQueueSample.field_48 = 4.0f;
+						m_sQueueSample.m_fSoundIntensity = 80.0f;
+						m_sQueueSample.field_56 = 0;
+						m_sQueueSample.field_76 = 3;
+						m_sQueueSample.m_bReverbFlag = 1;
+						m_sQueueSample.m_bRequireReflection = 0;
+						AddSampleToRequestedQueue();
+					}
+					if(m_asAudioEntities[m_sQueueSample.m_nEntityIndex].m_AudioEvents) {
+						m_sQueueSample.m_counter = 1;
+						m_sQueueSample.m_nSampleIndex = SFX_COL_CAR_2;
+						m_sQueueSample.m_nFrequency =
+						    SampleManager.GetSampleBaseFrequency(SFX_COL_CAR_2);
+						m_sQueueSample.m_nLoopCount = 1;
+						m_sQueueSample.field_56 = 1;
+						m_sQueueSample.m_bReverbFlag = 1;
+						m_sQueueSample.m_bRequireReflection = 1;
+						AddSampleToRequestedQueue();
+					}
+				}
+			}
+		}
+	}
 }
 
 void

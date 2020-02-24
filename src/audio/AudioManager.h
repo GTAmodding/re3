@@ -500,13 +500,13 @@ public:
 	bool ProcessCarBombTick(cVehicleParams *params);         /// ok
 	void ProcessCesna(cVehicleParams *params);               /// ok
 	void ProcessCinemaScriptObject(uint8 sound);             /// ok
-	void ProcessCrane();                                     // todo requires CCrane
+	void ProcessCrane();                                     /// ok
 	void ProcessDocksScriptObject(uint8 sound);              /// ok
 	bool ProcessEngineDamage(cVehicleParams *params);        /// ok
 	void ProcessEntity(int32 sound);                         /// ok
 	void ProcessExplosions(int32 explosion);                 /// ok
 	void ProcessFireHydrant();                               /// ok
-	void ProcessFires(int32 entity);                         // todo requires gFireManager
+	void ProcessFires(int32 entity);                         /// ok
 	void ProcessFrontEnd();                                  /// ok
 	void ProcessGarages();                                   // todo requires CGarages::aGarages
 	bool ProcessHelicopter(cVehicleParams *params);          /// ok

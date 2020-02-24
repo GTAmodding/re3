@@ -3636,11 +3636,83 @@ cAudioManager::ProcessFireHydrant()
 	}
 }
 
-WRAPPER
-void
-cAudioManager::ProcessFires(int32 entity)
+void cAudioManager::ProcessFires(int32)
 {
-	EAXJMP(0x575CD0);
+	CEntity *entity;
+	uint8 emittingVol;
+	float maxDist;
+	float distSquared;
+
+	for(uint8 i = 0; i < NUM_FIRES; i++) {
+		if(gFireManager.m_aFires[i].m_bIsOngoing && gFireManager.m_aFires[i].m_bAudioSet) {
+			entity = gFireManager.m_aFires[i].m_pEntity;
+			if(entity) {
+				switch(entity->m_type & 7) {
+				case ENTITY_TYPE_BUILDING:
+					maxDist = 2500.f;
+					m_sQueueSample.m_fSoundIntensity = 50.0f;
+					m_sQueueSample.m_nSampleIndex = SFX_CAR_ON_FIRE;
+					emittingVol = 100;
+					m_sQueueSample.m_nFrequency =
+					    8 / 10 * SampleManager.GetSampleBaseFrequency(SFX_CAR_ON_FIRE);
+					m_sQueueSample.m_nFrequency += i * ((uint32)m_sQueueSample.m_nFrequency >> 6);
+					m_sQueueSample.field_16 = 6;
+					break;
+				case ENTITY_TYPE_PED:
+					maxDist = 625.f;
+					m_sQueueSample.m_fSoundIntensity = 25.0f;
+					m_sQueueSample.m_nSampleIndex = SFX_PED_ON_FIRE;
+					m_sQueueSample.m_nFrequency =
+					    SampleManager.GetSampleBaseFrequency(SFX_PED_ON_FIRE);
+					emittingVol = 60;
+					m_sQueueSample.m_nFrequency += i * ((uint32)m_sQueueSample.m_nFrequency >> 6);
+					m_sQueueSample.field_16 = 10;
+					break;
+				default:
+					maxDist = 2500.f;
+					m_sQueueSample.m_fSoundIntensity = 50.0f;
+					m_sQueueSample.m_nSampleIndex = SFX_CAR_ON_FIRE;
+					m_sQueueSample.m_nFrequency =
+					    SampleManager.GetSampleBaseFrequency(SFX_CAR_ON_FIRE);
+					m_sQueueSample.m_nFrequency += i * ((uint32)m_sQueueSample.m_nFrequency >> 6);
+					emittingVol = 80;
+					m_sQueueSample.field_16 = 8;
+				}
+			} else {
+				maxDist = 2500.f;
+				m_sQueueSample.m_fSoundIntensity = 50.0;
+				m_sQueueSample.m_nSampleIndex = SFX_CAR_ON_FIRE;
+				m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(SFX_CAR_ON_FIRE);
+				m_sQueueSample.m_nFrequency += i * ((uint32)m_sQueueSample.m_nFrequency >> 6);
+				emittingVol = 80;
+				m_sQueueSample.field_16 = 8;
+			}
+			m_sQueueSample.m_vecPos = gFireManager.m_aFires[i].m_vecPos;
+			distSquared = GetDistanceSquared(&m_sQueueSample.m_vecPos);
+			if(distSquared < maxDist) {
+				m_sQueueSample.m_fDistance = Sqrt(distSquared);
+				m_sQueueSample.m_bVolume = ComputeVolume(emittingVol, m_sQueueSample.m_fSoundIntensity,
+				                                         m_sQueueSample.m_fDistance);
+				if(m_sQueueSample.m_bVolume) {
+					m_sQueueSample.m_counter = i;
+					m_sQueueSample.m_bBankIndex = 0;
+					m_sQueueSample.field_48 = 2.0;
+					m_sQueueSample.field_76 = 10;
+					m_sQueueSample.m_bIsDistant = 0;
+					m_sQueueSample.m_nLoopCount = 0;
+					m_sQueueSample.field_56 = 0;
+					m_sQueueSample.m_bEmittingVolume = emittingVol;
+					m_sQueueSample.m_nLoopStart =
+					    SampleManager.GetSampleLoopStartOffset(m_sQueueSample.m_nSampleIndex);
+					m_sQueueSample.m_nLoopEnd =
+					    SampleManager.GetSampleLoopEndOffset(m_sQueueSample.m_nSampleIndex);
+					m_sQueueSample.m_bReverbFlag = 1;
+					m_sQueueSample.m_bRequireReflection = 0;
+					AddSampleToRequestedQueue();
+				}
+			}
+		}
+	}
 }
 
 void

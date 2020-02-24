@@ -28,8 +28,8 @@ class CFireManager
 		MAX_FIREMEN_ATTENDING = 2,
 	};
 	uint32 m_nTotalFires;
-	CFire m_aFires[NUM_FIRES];
 public:
+	CFire m_aFires[NUM_FIRES];
 	void StartFire(CEntity *entityOnFire, CEntity *culprit, float, uint32);
 	void StartFire(CVector, float, uint8);
 	void Update(void);

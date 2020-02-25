@@ -991,7 +991,7 @@ float
 CPathFind::FindNodeOrientationForCarPlacement(int32 nodeId)
 {
 	if(m_pathNodes[nodeId].numLinks == 0)
-		return 0.0;
+		return 0.0f;
 	CVector dir = m_pathNodes[m_connections[m_pathNodes[nodeId].firstLink]].pos - m_pathNodes[nodeId].pos;
 	dir.z = 0.0f;
 	dir.Normalise();
@@ -1008,7 +1008,7 @@ CPathFind::FindNodeOrientationForCarPlacementFacingDestination(int32 nodeId, flo
 	CVector dir;
 
 	if(m_pathNodes[nodeId].numLinks == 0)
-		return 0.0;
+		return 0.0f;
 
 	int bestNode = m_connections[m_pathNodes[nodeId].firstLink];
 #ifdef FIX_BUGS

@@ -619,7 +619,7 @@ void CHud::Draw()
 		CFont::SetPropOff();
 		CFont::SetFontStyle(FONT_HEADING);
 		CFont::SetRightJustifyOn();
-		CFont::SetRightJustifyWrap(0.0);
+		CFont::SetRightJustifyWrap(0.0f);
 
 		sprintf(sTemp, "%02d:%02d", CClock::GetHours(), CClock::GetMinutes());
 		AsciiToUnicode(sTemp, sPrint);
@@ -773,7 +773,7 @@ void CHud::Draw()
 					fStep = 2.0f;
 				PagerXOffset += fStep * CTimer::GetTimeStep();
 				if (PagerXOffset > 150.0f) {
-					PagerXOffset = 150.0;
+					PagerXOffset = 150.0f;
 					PagerOn = 0;
 				}
 			}
@@ -934,13 +934,13 @@ void CHud::Draw()
 					BigMessageInUse[0] += CTimer::GetTimeStep();
 
 					if (BigMessageInUse[0] >= 120.0f) {
-						BigMessageInUse[0] = 120.0;
+						BigMessageInUse[0] = 120.0f;
 						BigMessageAlpha[0] -= (CTimer::GetTimeStepInMilliseconds() * 0.3f);
 					}
 
 					if (BigMessageAlpha[0] <= 0.0f) {
 						m_BigMessage[0][0] = 0;
-						BigMessageAlpha[0] = 0.0;
+						BigMessageAlpha[0] = 0.0f;
 					}
 				}
 				else {
@@ -977,7 +977,7 @@ void CHud::Draw()
 				BigMessageAlpha[2] += (CTimer::GetTimeStepInSeconds() * 255.0f);
 
 				if (BigMessageAlpha[2] > 255.0f)
-					BigMessageAlpha[2] = 255.0;
+					BigMessageAlpha[2] = 255.0f;
 
 				CFont::SetBackgroundOff();
 
@@ -997,12 +997,12 @@ void CHud::Draw()
 				CFont::PrintString(SCREEN_SCALE_FROM_RIGHT(20.0f), SCREEN_SCALE_FROM_BOTTOM(82.0f), m_BigMessage[2]);
 			}
 			else {
-				BigMessageAlpha[2] = 0.0;
-				BigMessageInUse[2] = 1.0;
+				BigMessageAlpha[2] = 0.0f;
+				BigMessageInUse[2] = 1.0f;
 			}
 		}
 		else {
-			BigMessageInUse[2] = 0.0;
+			BigMessageInUse[2] = 0.0f;
 		}
 	}
 }
@@ -1231,12 +1231,12 @@ void CHud::DrawAfterFade()
 				BigMessageInUse[1] += CTimer::GetTimeStep();
 
 				if (BigMessageInUse[1] >= 120.0f) {
-					BigMessageInUse[1] = 120.0;
+					BigMessageInUse[1] = 120.0f;
 					BigMessageAlpha[1] -= (CTimer::GetTimeStepInMilliseconds() * 0.3f);
 				}
 				if (BigMessageAlpha[1] <= 0) {
 					m_BigMessage[1][0] = 0;
-					BigMessageAlpha[1] = 0.0;
+					BigMessageAlpha[1] = 0.0f;
 				}
 			}
 			else {

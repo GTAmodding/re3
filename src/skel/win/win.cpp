@@ -584,7 +584,7 @@ void _psPrintCpuInfo()
 RwBool
 psInitialise(void)
 {
-	PsGlobal.lastMousePos.x = PsGlobal.lastMousePos.y = 0.0;
+	PsGlobal.lastMousePos.x = PsGlobal.lastMousePos.y = 0.0f;
 
 	RsGlobal.ps = &PsGlobal;
 	

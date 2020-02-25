@@ -103,7 +103,7 @@ void CTimer::Update(void)
 		{
 			m_snTimeInMilliseconds = m_snTimeInMilliseconds + upd;
 			m_snTimeInMillisecondsNonClipped = m_snTimeInMillisecondsNonClipped + upd;
-			ms_fTimeStep = updInCyclesScaled / (double)_nCyclesPerMS / 20.0;
+			ms_fTimeStep = updInCyclesScaled / (double)_nCyclesPerMS / 20.0f;
 		}
 	}
 	else

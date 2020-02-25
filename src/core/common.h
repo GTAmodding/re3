@@ -4,7 +4,6 @@
 #define _USE_MATH_DEFINES
 #pragma warning(disable: 4244)	// int to float
 #pragma warning(disable: 4800)	// int to bool
-#pragma warning(disable: 4305)	// double to float
 #pragma warning(disable: 4838)  // narrowing conversion
 #pragma warning(disable: 4996)  // POSIX names
 

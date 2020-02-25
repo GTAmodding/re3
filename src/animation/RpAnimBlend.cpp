@@ -183,8 +183,8 @@ RpAnimBlendClumpGetMainAssociation(RpClump *clump, CAnimBlendAssociation **assoc
 
 	CAnimBlendAssociation *mainAssoc = nil;
 	CAnimBlendAssociation *secondAssoc = nil;
-	float mainBlend = 0.0;
-	float secondBlend = 0.0;
+	float mainBlend = 0.0f;
+	float secondBlend = 0.0f;
 	for(CAnimBlendLink *link = clumpData->link.next; link; link = link->next){
 		CAnimBlendAssociation *assoc = CAnimBlendAssociation::FromLink(link);
 
@@ -215,7 +215,7 @@ RpAnimBlendClumpGetMainPartialAssociation(RpClump *clump)
 	if(clumpData == nil) return nil;
 
 	CAnimBlendAssociation *mainAssoc = nil;
-	float mainBlend = 0.0;
+	float mainBlend = 0.0f;
 	for(CAnimBlendLink *link = clumpData->link.next; link; link = link->next){
 		CAnimBlendAssociation *assoc = CAnimBlendAssociation::FromLink(link);
 

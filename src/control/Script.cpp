@@ -174,7 +174,7 @@ void CMissionCleanup::Process()
 {
 	CPopulation::m_AllRandomPedsThisType = -1;
 	CPopulation::PedDensityMultiplier = 1.0f;
-	CCarCtrl::CarDensityMultiplier = 1.0;
+	CCarCtrl::CarDensityMultiplier = 1.0f;
 	FindPlayerPed()->m_pWanted->m_fCrimeSensitivity = 1.0f;
 	TheCamera.Restore();
 	TheCamera.SetWideScreenOff();

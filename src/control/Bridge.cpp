@@ -24,7 +24,7 @@ uint32& CBridge::TimeOfBridgeBecomingOperational = *(uint32*)0x8F2BC0;
 void CBridge::Init()
 {
 	FindBridgeEntities();
-	OldLift = -1.0;
+	OldLift = -1.0f;
 	if (pLiftPart && pWeight)
 	{
 		DefaultZLiftPart   = pLiftPart->GetPosition().z;
@@ -60,32 +60,32 @@ void CBridge::Update()
 		if (timeElapsed < 10000)
 		{
 			State = STATE_LIFT_PART_MOVING_DOWN;
-			liftHeight = 25.0 - timeElapsed / 10000.0 * 25.0;
+			liftHeight = 25.0 - timeElapsed / 10000.0 * 25.0f;
 		}
 		else if (timeElapsed < 40000)
 		{
-			liftHeight = 0.0;
+			liftHeight = 0.0f;
 			State = STATE_LIFT_PART_IS_DOWN;
 		}
 		else if (timeElapsed < 50000)
 		{
-			liftHeight = 0.0;
+			liftHeight = 0.0f;
 			State = STATE_LIFT_PART_ABOUT_TO_MOVE_UP;
 		}
 		else if (timeElapsed < 60000)
 		{
 			State = STATE_LIFT_PART_MOVING_UP;
-			liftHeight = (timeElapsed - 50000) / 10000.0 * 25.0;
+			liftHeight = (timeElapsed - 50000) / 10000.0 * 25.0f;
 		}
 		else
 		{
-			liftHeight = 25.0;
+			liftHeight = 25.0f;
 			State = STATE_LIFT_PART_IS_UP;
 		}
 	}
 	else
 	{
-		liftHeight = 25.0;
+		liftHeight = 25.0f;
 		TimeOfBridgeBecomingOperational = 0;
 		State = STATE_BRIDGE_LOCKED;
 	}

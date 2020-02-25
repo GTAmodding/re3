@@ -80,7 +80,7 @@ CPopulation::Initialise()
 	ms_nNumDummy = 0;
 
 	m_AllRandomPedsThisType = -1;
-	PedDensityMultiplier = 1.0;
+	PedDensityMultiplier = 1.0f;
 	bZoneChangeHasHappened = false;
 	m_CountDownToPedsAtStart = 2;
 	

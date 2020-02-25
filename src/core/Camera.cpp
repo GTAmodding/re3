@@ -416,17 +416,17 @@ CCam::Process_FollowPed(const CVector &CameraTarget, float TargetOrientation, fl
 	// BUG? is this ever used?
 	// The values seem to be roughly m_fPedZoomValueSmooth + 1.85
 	if(ResetStatics){
-		if(TheCamera.PedZoomIndicator == 1.0) m_fRealGroundDist = 2.090556f;
-		if(TheCamera.PedZoomIndicator == 2.0) m_fRealGroundDist = 3.34973f;
-		if(TheCamera.PedZoomIndicator == 3.0) m_fRealGroundDist = 4.704914f;
-		if(TheCamera.PedZoomIndicator == 4.0) m_fRealGroundDist = 2.090556f;
+		if(TheCamera.PedZoomIndicator == 1.0f) m_fRealGroundDist = 2.090556f;
+		if(TheCamera.PedZoomIndicator == 2.0f) m_fRealGroundDist = 3.34973f;
+		if(TheCamera.PedZoomIndicator == 3.0f) m_fRealGroundDist = 4.704914f;
+		if(TheCamera.PedZoomIndicator == 4.0f) m_fRealGroundDist = 2.090556f;
 	}
 	// And what is this? It's only used for collision and rotation it seems
 	float RealGroundDist;
-	if(TheCamera.PedZoomIndicator == 1.0) RealGroundDist = 2.090556f;
-	if(TheCamera.PedZoomIndicator == 2.0) RealGroundDist = 3.34973f;
-	if(TheCamera.PedZoomIndicator == 3.0) RealGroundDist = 4.704914f;
-	if(TheCamera.PedZoomIndicator == 4.0) RealGroundDist = 2.090556f;
+	if(TheCamera.PedZoomIndicator == 1.0f) RealGroundDist = 2.090556f;
+	if(TheCamera.PedZoomIndicator == 2.0f) RealGroundDist = 3.34973f;
+	if(TheCamera.PedZoomIndicator == 3.0f) RealGroundDist = 4.704914f;
+	if(TheCamera.PedZoomIndicator == 4.0f) RealGroundDist = 2.090556f;
 	if(m_fCloseInPedHeightOffset >  0.00001f)
 		RealGroundDist = 1.7016;
 

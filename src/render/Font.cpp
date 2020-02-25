@@ -84,7 +84,7 @@ CFont::Initialise(void)
 	Sprite[2].SetTexture("font1", "font1_mask");
 	SetScale(1.0f, 1.0f);
 	SetSlantRefPoint(SCREEN_WIDTH, 0.0f);
-	SetSlant(0.0);
+	SetSlant(0.0f);
 	SetColor(CRGBA(0xFF, 0xFF, 0xFF, 0));
 	SetJustifyOff();
 	SetCentreOff();
@@ -95,7 +95,7 @@ CFont::Initialise(void)
 	SetBackGroundOnlyTextOff();
 	SetPropOn();
 	SetFontStyle(0);
-	SetRightJustifyWrap(0.0);
+	SetRightJustifyWrap(0.0f);
 	SetAlphaFade(255.0f);
 	SetDropShadowPosition(0);
 	CTxdStore::PopCurrentTxd();

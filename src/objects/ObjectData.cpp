@@ -90,7 +90,7 @@ CObjectData::SetObjectData(int32 modelId, CObject &object)
 	object.m_nCollisionDamageEffect = objinfo->m_nCollisionDamageEffect;
 	object.m_nSpecialCollisionResponseCases = objinfo->m_nSpecialCollisionResponseCases;
 	object.m_bCameraToAvoidThisObject = objinfo->m_bCameraToAvoidThisObject;
-	if(object.m_fMass >= 99998.0){
+	if(object.m_fMass >= 99998.0f){
 		object.bInfiniteMass = true;
 		object.bAffectedByGravity = false;
 		object.bExplosionProof = true;

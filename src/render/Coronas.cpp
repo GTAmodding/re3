@@ -457,7 +457,7 @@ CCoronas::RenderReflections(void)
 				continue;
 
 			// Don't draw if reflection is too high
-			if(aCoronas[i].heightAboveRoad < 20.0){
+			if(aCoronas[i].heightAboveRoad < 20.0f){
 				// don't draw if camera is below road
 				if(CCoronas::aCoronas[i].coors.z - aCoronas[i].heightAboveRoad > TheCamera.GetPosition().z)
 					continue;

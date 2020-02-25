@@ -215,7 +215,7 @@ Idle(void *arg)
 		RenderEffects();
 
 		if((TheCamera.m_BlurType == MBLUR_NONE || TheCamera.m_BlurType == MBLUR_NORMAL) &&
-		   TheCamera.m_ScreenReductionPercentage > 0.0)
+		   TheCamera.m_ScreenReductionPercentage > 0.0f)
 		        TheCamera.SetMotionBlurAlpha(150);
 		TheCamera.RenderMotionBlur();
 

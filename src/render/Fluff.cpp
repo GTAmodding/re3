@@ -106,17 +106,17 @@ void CMovingThings::Init()
 	Num = 0;
 	
 	// Initialize scroll bars
-	 aScrollBars[0].Init(CVector(  228.3f,    -669.0f,     39.0f  ), SCROLL_BUSINESS,       0.0,     0.5,     0.5,   255, 128, 0,   0.3);
-	 aScrollBars[1].Init(CVector(  772.0f,     164.0f,     -9.5f  ), SCROLL_TRAFFIC,        0.0,     0.5,     0.25,  128, 255, 0,   0.3);
-	 aScrollBars[2].Init(CVector(-1089.61f,   -584.224f,   13.246f), SCROLL_AIRPORT_DOORS,  0.0,    -0.1706,  0.107, 255, 0,   0,   0.11);
-	 aScrollBars[3].Init(CVector(-1089.61f,   -602.04602f, 13.246f), SCROLL_AIRPORT_DOORS,  0.0,    -0.1706,  0.107, 0,   255, 0,   0.11);
-	 aScrollBars[4].Init(CVector(-1089.61f,   -619.81702f, 13.246f), SCROLL_AIRPORT_DOORS,  0.0,    -0.1706,  0.107, 255, 128, 0,   0.11);
-	 aScrollBars[5].Init(CVector(-754.578f,   -633.50897f, 18.411f), SCROLL_AIRPORT_FRONT,  0.0,     0.591,   0.52,  100, 100, 255, 0.3);
-	 aScrollBars[6].Init(CVector( -754.578f,  -586.672f,   18.411f), SCROLL_AIRPORT_FRONT,  0.0,     0.591,   0.52,  100, 100, 255, 0.3);
-	 aScrollBars[7].Init(CVector(   85.473f, -1069.512f,   30.5f  ), SCROLL_STORE,          0.625,  -0.3125,  0.727, 100, 100, 255, 0.5);
-	 aScrollBars[8].Init(CVector(   74.823f, -1086.879f,   31.495f), SCROLL_ENTERTAINMENT, -0.2083,  0.1041,  0.5,   255, 255, 128, 0.3);
-	 aScrollBars[9].Init(CVector(  -36.459f, -1031.2371f,  32.534f), SCROLL_ENTERTAINMENT, -0.1442,  0.0721,  0.229, 150, 255, 50,  0.3);
-	aScrollBars[10].Init(CVector( 1208.0f,     -62.208f,   19.157f), SCROLL_USED_CARS,      0.0642, -0.20365, 0.229, 255, 128, 0,   0.3);
+	 aScrollBars[0].Init(CVector(  228.3f,    -669.0f,     39.0f  ), SCROLL_BUSINESS,       0.0f,     0.5f,     0.5f,   255, 128, 0,   0.3f);
+	 aScrollBars[1].Init(CVector(  772.0f,     164.0f,     -9.5f  ), SCROLL_TRAFFIC,        0.0f,     0.5f,     0.25f,  128, 255, 0,   0.3f);
+	 aScrollBars[2].Init(CVector(-1089.61f,   -584.224f,   13.246f), SCROLL_AIRPORT_DOORS,  0.0f,    -0.1706f,  0.107f, 255, 0,   0,   0.11f);
+	 aScrollBars[3].Init(CVector(-1089.61f,   -602.04602f, 13.246f), SCROLL_AIRPORT_DOORS,  0.0f,    -0.1706f,  0.107f, 0,   255, 0,   0.11f);
+	 aScrollBars[4].Init(CVector(-1089.61f,   -619.81702f, 13.246f), SCROLL_AIRPORT_DOORS,  0.0f,    -0.1706f,  0.107f, 255, 128, 0,   0.11f);
+	 aScrollBars[5].Init(CVector(-754.578f,   -633.50897f, 18.411f), SCROLL_AIRPORT_FRONT,  0.0f,     0.591f,   0.52f,  100, 100, 255, 0.3f);
+	 aScrollBars[6].Init(CVector( -754.578f,  -586.672f,   18.411f), SCROLL_AIRPORT_FRONT,  0.0f,     0.591f,   0.52f,  100, 100, 255, 0.3f);
+	 aScrollBars[7].Init(CVector(   85.473f, -1069.512f,   30.5f  ), SCROLL_STORE,          0.625f,  -0.3125f,  0.727f, 100, 100, 255, 0.5f);
+	 aScrollBars[8].Init(CVector(   74.823f, -1086.879f,   31.495f), SCROLL_ENTERTAINMENT, -0.2083f,  0.1041f,  0.5f,   255, 255, 128, 0.3f);
+	 aScrollBars[9].Init(CVector(  -36.459f, -1031.2371f,  32.534f), SCROLL_ENTERTAINMENT, -0.1442f,  0.0721f,  0.229f, 150, 255, 50,  0.3f);
+	aScrollBars[10].Init(CVector( 1208.0f,     -62.208f,   19.157f), SCROLL_USED_CARS,      0.0642f, -0.20365f, 0.229f, 255, 128, 0,   0.3f);
 
 	// Initialize tower clocks
 	aTowerClocks[0].Init(CVector(59.4f, -1081.3f, 54.15f), -1.0f,  0.0f, 0, 0, 0, 80.0f, 2.0f);
@@ -406,9 +406,9 @@ void CScrollBar::Update()
 					m_pMessage = "KEEP YOUR EYES ON THE ROAD AND NOT ON THIS SIGN  ";
 					break;
 				case 4:
-					if (CWeather::Foggyness > 0.5)
+					if (CWeather::Foggyness > 0.5f)
 						m_pMessage = "POOR VISIBILITY !   ";
-					else if (CWeather::WetRoads > 0.5)
+					else if (CWeather::WetRoads > 0.5f)
 						m_pMessage = "ROADS ARE SLIPPERY !   ";
 					else
 						m_pMessage = "ENJOY YOUR TRIP   ";
@@ -562,7 +562,7 @@ void CScrollBar::Update()
 						"ONE FOR ALL THE FAMILY. . . ";
 					break;
 				case 9:
-					m_pMessage = (char*)FindTimeMessage();
+					m_pMessage = FindTimeMessage();
 					break;
 				}
 			}
@@ -686,7 +686,7 @@ void CScrollBar::Render()
 						r / 2,
 						g / 2,
 						b / 2,
-						255, 1.0 / screenCoord.z, 255);
+						255, 1.0f / screenCoord.z, 255);
 				}
 			}
 		}
@@ -849,11 +849,11 @@ void CDigitalClock::Render()
 						{
 							CSprite::RenderBufferedOneXLUSprite(
 								screenCoord.x, screenCoord.y, screenCoord.z,
-								screenW * m_fScale * 0.12,
-								screenW * m_fScale * 0.12,
+								screenW * m_fScale * 0.12f,
+								screenW * m_fScale * 0.12f,
 								r, g, b,
 								255,
-								1.0 / screenCoord.z,
+								1.0f / screenCoord.z,
 								255);
 						}
 					}

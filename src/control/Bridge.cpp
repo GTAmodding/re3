@@ -60,7 +60,7 @@ void CBridge::Update()
 		if (timeElapsed < 10000)
 		{
 			State = STATE_LIFT_PART_MOVING_DOWN;
-			liftHeight = 25.0 - timeElapsed / 10000.0 * 25.0f;
+			liftHeight = 25.0f - timeElapsed / 10000.0f * 25.0f;
 		}
 		else if (timeElapsed < 40000)
 		{
@@ -75,7 +75,7 @@ void CBridge::Update()
 		else if (timeElapsed < 60000)
 		{
 			State = STATE_LIFT_PART_MOVING_UP;
-			liftHeight = (timeElapsed - 50000) / 10000.0 * 25.0f;
+			liftHeight = (timeElapsed - 50000) / 10000.0f * 25.0f;
 		}
 		else
 		{

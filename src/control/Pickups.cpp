@@ -704,9 +704,9 @@ CPickups::DoPickUpEffects(CEntity *entity)
 			aWeaponReds[colorId] * colorModifier, aWeaponGreens[colorId] * colorModifier, aWeaponBlues[colorId] * colorModifier,
 			4.0f, 1.0f, 40.0f, false, 0.0f);
 
-		float radius = (double)(rand() & 0xF) * 0.1 + 3.0f;
+		float radius = (rand() & 0xF) * 0.1f + 3.0f;
 		CPointLights::AddLight(CPointLights::LIGHT_POINT, pos, CVector(0.0f, 0.0f, 0.0f), radius, aWeaponReds[colorId] * modifiedSin / 256.0f, aWeaponGreens[colorId] * modifiedSin / 256.0f, aWeaponBlues[colorId] * modifiedSin / 256.0f, CPointLights::FOG_NONE, true);
-		float size = (double)(rand() & 0xF) * 0.0005 + 0.6;
+		float size = (rand() & 0xF) * 0.0005f + 0.6f;
 		CCoronas::RegisterCorona( (uintptr)entity,
 			aWeaponReds[colorId] * modifiedSin / 2.0f, aWeaponGreens[colorId] * modifiedSin / 2.0f, aWeaponBlues[colorId] * modifiedSin / 2.0f,
 			255,

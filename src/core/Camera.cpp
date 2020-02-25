@@ -428,7 +428,7 @@ CCam::Process_FollowPed(const CVector &CameraTarget, float TargetOrientation, fl
 	if(TheCamera.PedZoomIndicator == 3.0f) RealGroundDist = 4.704914f;
 	if(TheCamera.PedZoomIndicator == 4.0f) RealGroundDist = 2.090556f;
 	if(m_fCloseInPedHeightOffset >  0.00001f)
-		RealGroundDist = 1.7016;
+		RealGroundDist = 1.7016f;
 
 
 	bool Shooting = false;

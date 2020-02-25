@@ -10171,7 +10171,7 @@ CPed::ProcessControl(void)
 		}
 
 		if (!bIsStanding && m_vecMoveSpeed.z > 0.25f) {
-			double airResistance = Pow(0.95, CTimer::GetTimeStep());
+			float airResistance = Pow(0.95f, CTimer::GetTimeStep());
 
 			m_vecMoveSpeed *= airResistance;
 		}
@@ -15050,7 +15050,7 @@ CPed::ProcessBuoyancy(void)
 				m_vecMoveSpeed.y *= speedMult;
 				if (m_vecMoveSpeed.z >= -0.1f) {
 					if (m_vecMoveSpeed.z < -0.04f)
-						m_vecMoveSpeed.z = -0.02;
+						m_vecMoveSpeed.z = -0.02f;
 				} else {
 					m_vecMoveSpeed.z = -0.01f;
 					DMAudio.PlayOneShot(m_audioEntityId, SOUND_SPLASH, 0.0f);

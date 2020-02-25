@@ -1,8 +1,8 @@
 #pragma once
 
 enum Config {
-	NUMCDIMAGES = 12,	// gta3.img duplicates (not used on PC)
-	MAX_CDIMAGES = 8,	// additional cdimages
+	NUMCDIMAGES = 12, // gta3.img duplicates (not used on PC)
+	MAX_CDIMAGES = 8, // additional cdimages
 	MAX_CDCHANNELS = 5,
 
 	MODELINFOSIZE = 5500,
@@ -20,15 +20,15 @@ enum Config {
 	XTRACOMPSMODELSIZE = 2,
 	TWODFXSIZE = 2000,
 
-	MAXVEHICLESLOADED = 50,	// 70 on mobile
+	MAXVEHICLESLOADED = 50, // 70 on mobile
 
 	NUMOBJECTINFO = 168, // object.dat
 
 	// Pool sizes
 	NUMPTRNODES = 30000,  // 26000 on PS2
 	NUMENTRYINFOS = 5400, // 3200 on PS2
-	NUMPEDS = 140,		  // 90 on PS2
-	NUMVEHICLES = 110,	// 70 on PS2
+	NUMPEDS = 140,        // 90 on PS2
+	NUMVEHICLES = 110,    // 70 on PS2
 	NUMBUILDINGS = 5500,  // 4915 on PS2
 	NUMTREADABLES = 1214,
 	NUMOBJECTS = 450,
@@ -90,6 +90,8 @@ enum Config {
 	NUM_FIRES = 40,
 	NUM_GARAGES = 32,
 	NUM_PROJECTILES = 32,
+
+	NUM_WATERCANNONS = 3,
 
 	NUMPEDROUTES = 200,
 	NUMPHONES = 50,

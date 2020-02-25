@@ -22,4 +22,5 @@ public:
 	static void Render(void);
 };
 
-extern CWaterCannon *aCannons;
+extern CWaterCannon (&aCannons)[NUM_WATERCANNONS];
+

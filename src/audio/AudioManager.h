@@ -331,10 +331,10 @@ public:
 	uint8 m_bUserPause;
 	uint8 m_bPreviousUserPause;
 	uint8 field_19195; // time?
-	uint32 m_nTimeOfRecentCrime;
+	uint32 m_FrameCounter;
 
 	// getters
-	uint32 GetFrameCounter() const { return m_nTimeOfRecentCrime; }
+	uint32 GetFrameCounter() const { return m_FrameCounter; }
 	float GetReflectionsDistance(int32 idx) const { return m_afReflectionsDistances[idx]; }
 	int32 GetRandomNumber(int32 idx) const { return m_anRandomTable[idx]; }
 	bool IsMissionAudioPlaying() const { return m_sMissionAudio.m_bPlayStatus == 1; }
@@ -508,7 +508,7 @@ public:
 	void ProcessFireHydrant();                               /// ok
 	void ProcessFires(int32 entity);                         /// ok
 	void ProcessFrontEnd();                                  /// ok
-	void ProcessGarages();                                   // todo requires CGarages::aGarages
+	void ProcessGarages();                                   /// ok
 	bool ProcessHelicopter(cVehicleParams *params);          /// ok
 	void ProcessHomeScriptObject(uint8 sound);               /// ok
 	void ProcessJumbo(cVehicleParams *);                     /// ok

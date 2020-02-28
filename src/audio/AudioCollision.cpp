@@ -8,6 +8,8 @@
 #include "SurfaceTable.h"
 #include "sampman.h"
 
+constexpr int CollisionSoundIntensity = 60;
+
 void
 cAudioCollisionManager::AddCollisionToRequestedQueue()
 {
@@ -146,7 +148,8 @@ cAudioManager::SetUpLoopingCollisionSound(cAudioCollision *col, uint8 counter)
 		uint8 emittingVol = SetLoopingCollisionRequestedSfxFreqAndGetVol(col);
 		if(emittingVol) {
 			m_sQueueSample.m_fDistance = Sqrt(col->m_fDistance);
-			m_sQueueSample.m_bVolume = ComputeVolume(emittingVol, 60.f, m_sQueueSample.m_fDistance);
+			m_sQueueSample.m_bVolume =
+			    ComputeVolume(emittingVol, CollisionSoundIntensity, m_sQueueSample.m_fDistance);
 			if(m_sQueueSample.m_bVolume) {
 				m_sQueueSample.m_counter = counter;
 				m_sQueueSample.m_vecPos = col->m_vecPosition;
@@ -160,7 +163,7 @@ cAudioManager::SetUpLoopingCollisionSound(cAudioCollision *col, uint8 counter)
 				m_sQueueSample.m_nLoopEnd =
 				    SampleManager.GetSampleLoopEndOffset(m_sQueueSample.m_nSampleIndex);
 				m_sQueueSample.field_48 = 4.0f;
-				m_sQueueSample.m_fSoundIntensity = 60.0f;
+				m_sQueueSample.m_fSoundIntensity = CollisionSoundIntensity;
 				m_sQueueSample.field_56 = 0;
 				m_sQueueSample.field_76 = 5;
 				m_sQueueSample.m_bReverbFlag = true;
@@ -212,7 +215,8 @@ cAudioManager::SetUpOneShotCollisionSound(cAudioCollision *col)
 		emittingVol = 40.f * ratio;
 		if(emittingVol) {
 			m_sQueueSample.m_fDistance = Sqrt(col->m_fDistance);
-			m_sQueueSample.m_bVolume = ComputeVolume(emittingVol, 60.f, m_sQueueSample.m_fDistance);
+			m_sQueueSample.m_bVolume =
+			    ComputeVolume(emittingVol, CollisionSoundIntensity, m_sQueueSample.m_fDistance);
 			if(m_sQueueSample.m_bVolume) {
 				m_sQueueSample.m_nSampleIndex = gOneShotCol[s1];
 				switch(m_sQueueSample.m_nSampleIndex) {
@@ -277,7 +281,7 @@ cAudioManager::SetUpOneShotCollisionSound(cAudioCollision *col)
 				m_sQueueSample.m_nLoopStart = 0;
 				m_sQueueSample.m_nLoopEnd = -1;
 				m_sQueueSample.field_48 = 4.0f;
-				m_sQueueSample.m_fSoundIntensity = 60.0f;
+				m_sQueueSample.m_fSoundIntensity = CollisionSoundIntensity;
 				m_sQueueSample.field_56 = 1;
 				m_sQueueSample.m_bReverbFlag = true;
 				m_sQueueSample.m_bRequireReflection = false;
@@ -356,7 +360,7 @@ void
 cAudioManager::ReportCollision(CEntity *entity1, CEntity *entity2, uint8 surface1, uint8 surface2, float collisionPower,
                                float velocity)
 {
-	float dist;
+	float distSquared;
 	CVector v1;
 	CVector v2;
 
@@ -373,8 +377,8 @@ cAudioManager::ReportCollision(CEntity *entity1, CEntity *entity2, uint8 surface
 		v2 = entity2->GetPosition();
 	}
 	CVector pos = (v1 + v2) * 0.5f;
-	dist = GetDistanceSquared(&pos);
-	if(dist < SQR(60.f)) {
+	distSquared = GetDistanceSquared(&pos);
+	if(distSquared < SQR(CollisionSoundIntensity)) {
 		m_sCollisionManager.m_sQueue.m_pEntity1 = entity1;
 		m_sCollisionManager.m_sQueue.m_pEntity2 = entity2;
 		m_sCollisionManager.m_sQueue.m_bSurface1 = surface1;
@@ -382,7 +386,7 @@ cAudioManager::ReportCollision(CEntity *entity1, CEntity *entity2, uint8 surface
 		m_sCollisionManager.m_sQueue.m_fIntensity1 = collisionPower;
 		m_sCollisionManager.m_sQueue.m_fIntensity2 = velocity;
 		m_sCollisionManager.m_sQueue.m_vecPosition = pos;
-		m_sCollisionManager.m_sQueue.m_fDistance = dist;
+		m_sCollisionManager.m_sQueue.m_fDistance = distSquared;
 		m_sCollisionManager.AddCollisionToRequestedQueue();
 	}
 }

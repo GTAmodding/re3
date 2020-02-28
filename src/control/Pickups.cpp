@@ -1,27 +1,29 @@
 #include "common.h"
 #include "patcher.h"
 #include "main.h"
-#include "Pickups.h"
+
 #include "Camera.h"
-#include "Entity.h"
-#include "Timer.h"
-#include "Shadows.h"
 #include "Coronas.h"
-#include "World.h"
-#include "ModelIndices.h"
-#include "PlayerPed.h"
-#include "Object.h"
-#include "Pools.h"
-#include "Pad.h"
-#include "Script.h"
 #include "Darkel.h"
-#include "Garages.h"
+#include "Entity.h"
 #include "Explosion.h"
-#include "WaterLevel.h"
-#include "SpecialFX.h"
-#include "PointLights.h"
-#include "Sprite.h"
 #include "Font.h"
+#include "Garages.h"
+#include "General.h"
+#include "ModelIndices.h"
+#include "Object.h"
+#include "Pad.h"
+#include "Pickups.h"
+#include "PlayerPed.h"
+#include "PointLights.h"
+#include "Pools.h"
+#include "Script.h"
+#include "Shadows.h"
+#include "SpecialFX.h"
+#include "Sprite.h"
+#include "Timer.h"
+#include "WaterLevel.h"
+#include "World.h"
 
 CPickup(&CPickups::aPickUps)[NUMPICKUPS] = *(CPickup(*)[NUMPICKUPS])*(uintptr*)0x878C98;
 int16 CPickups::NumMessages;// = *(int16*)0x95CC98;
@@ -693,7 +695,7 @@ CPickups::DoPickUpEffects(CEntity *entity)
 
 		CVector &pos = entity->GetPosition();
 
-		float colorModifier = ((double)(rand() & 0x1F) * 0.015f + 1.0f) * modifiedSin * 0.15f;
+		float colorModifier = ((CGeneral::GetRandomNumber() & 0x1F) * 0.015f + 1.0f) * modifiedSin * 0.15f;
 		CShadows::StoreStaticShadow(
 			(uintptr)entity,
 			SHADOWTYPE_ADDITIVE,
@@ -704,9 +706,9 @@ CPickups::DoPickUpEffects(CEntity *entity)
 			aWeaponReds[colorId] * colorModifier, aWeaponGreens[colorId] * colorModifier, aWeaponBlues[colorId] * colorModifier,
 			4.0f, 1.0f, 40.0f, false, 0.0f);
 
-		float radius = (rand() & 0xF) * 0.1f + 3.0f;
+		float radius = (CGeneral::GetRandomNumber() & 0xF) * 0.1f + 3.0f;
 		CPointLights::AddLight(CPointLights::LIGHT_POINT, pos, CVector(0.0f, 0.0f, 0.0f), radius, aWeaponReds[colorId] * modifiedSin / 256.0f, aWeaponGreens[colorId] * modifiedSin / 256.0f, aWeaponBlues[colorId] * modifiedSin / 256.0f, CPointLights::FOG_NONE, true);
-		float size = (rand() & 0xF) * 0.0005f + 0.6f;
+		float size = (CGeneral::GetRandomNumber() & 0xF) * 0.0005f + 0.6f;
 		CCoronas::RegisterCorona( (uintptr)entity,
 			aWeaponReds[colorId] * modifiedSin / 2.0f, aWeaponGreens[colorId] * modifiedSin / 2.0f, aWeaponBlues[colorId] * modifiedSin / 2.0f,
 			255,

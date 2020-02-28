@@ -53,8 +53,8 @@ enum eScriptSounds : int16
 	SCRIPT_SOUND_CHINATOWN_RESTAURANT_L = 43,
 	SCRIPT_SOUND_CIPRIANI_RESAURANT_S = 44,
 	SCRIPT_SOUND_CIPRIANI_RESAURANT_L = 45,
-	SCRIPT_SOUND_46 = 46,
-	SCRIPT_SOUND_47 = 47,
+	SCRIPT_SOUND_46_S = 46,
+	SCRIPT_SOUND_47_L = 47,
 	SCRIPT_SOUND_MARCO_BISTRO_S = 48,
 	SCRIPT_SOUND_MARCO_BISTRO_L = 49,
 	SCRIPT_SOUND_AIRPORT_LOOP_S = 50,
@@ -224,9 +224,11 @@ static_assert(sizeof(tPedComment) == 28, "tPedComment: error");
 class cPedComments
 {
 public:
-	tPedComment m_asPedComments[2][20];
-	uint8 indexMap[2][20];
-	uint8 nrOfCommentsInBank[2];
+	static constexpr int pedCommentsBanks = 2;
+	static constexpr int pedCommentsSlots = 20;
+	tPedComment m_asPedComments[pedCommentsBanks][pedCommentsSlots];
+	uint8 indexMap[pedCommentsBanks][pedCommentsSlots];
+	uint8 nrOfCommentsInBank[pedCommentsBanks];
 	uint8 activeBank;
 	uint8 gap_1163[1];
 
@@ -607,10 +609,20 @@ public:
 	uint8 ComputeEmittingVolume(uint8 emittingVolume, float intensity,
 	                            float dist); /// ok
 public:
-	static const int channels = ARRAY_SIZE(cAudioManager::m_asActiveSamples);
-	static const int policeChannel = channels + 1;
-	static const int allChannels = channels + 2;
-	static const int maxVolume = 127;
+	static constexpr int channels = ARRAY_SIZE(cAudioManager::m_asActiveSamples);
+	static constexpr int policeChannel = channels + 1;
+	static constexpr int allChannels = channels + 2;
+	static constexpr int maxVolume = 127;
+
+	static constexpr int scriptObjectIntensityS = 30;
+	static constexpr int scriptObjectIntensityL = 80;
+	static constexpr int bridgeIntensity = 400;
+	static constexpr int rocketLauncherIntensity = 90;
+	static constexpr int molotovIntensity = 30;
+	static constexpr int molotovVolume = 50;
+
+	static constexpr int rainOnVehicleIntensity = 22;
+	static constexpr int reverseGearIntensity = 30;
 };
 
 static_assert(sizeof(cAudioManager) == 19220, "cAudioManager: error");

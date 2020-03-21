@@ -21,6 +21,8 @@ uint8 &cDisplay = *(uint8 *)0x650BA1;
 int32 &gRetuneCounter = *(int32*)0x650B84;
 bool& bHasStarted = *(bool*)0x650B7C;
 
+constexpr int maxVolume = 127;
+
 cMusicManager::cMusicManager()
 {
 	m_bIsInitialised = false;
@@ -365,7 +367,7 @@ cMusicManager::Service()
 	if (!m_bIsInitialised || m_bDisabled) return;
 
 	if (m_nMusicMode == MUSICMODE_CUTSCENE) {
-		SampleManager.SetStreamedVolumeAndPan(AudioManager.maxVolume, 63, 1, 0);
+		SampleManager.SetStreamedVolumeAndPan(maxVolume, 63, 1, 0);
 		return;
 	}
 
@@ -666,7 +668,7 @@ cMusicManager::PreloadCutSceneMusic(uint8 track)
 		while (SampleManager.IsStreamPlaying(0))
 			SampleManager.StopStreamedFile(0);
 		SampleManager.PreloadStreamedFile(track, 0);
-		SampleManager.SetStreamedVolumeAndPan(AudioManager.maxVolume, 63, 1, 0);
+		SampleManager.SetStreamedVolumeAndPan(maxVolume, 63, 1, 0);
 		m_nCurrentStreamedSound = track;
 	}
 }

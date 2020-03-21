@@ -53,6 +53,21 @@ uint8 &gJumboVolOffsetPercentage = *(uint8 *)0x6508ED;
 bool &bPlayerJustEnteredCar = *(bool *)0x6508C4;
 bool &g_bMissionAudioLoadFailed = *(bool *)0x95CD8E;
 
+const int channels = ARRAY_SIZE(cAudioManager::m_asActiveSamples);
+const int policeChannel = channels + 1;
+const int allChannels = channels + 2;
+const int maxVolume = 127;
+
+const int scriptObjectIntensityS = 30;
+const int scriptObjectIntensityL = 80;
+const int bridgeIntensity = 400;
+const int rocketLauncherIntensity = 90;
+const int molotovIntensity = 30;
+const int molotovVolume = 50;
+
+const int rainOnVehicleIntensity = 22;
+const int reverseGearIntensity = 30;
+
 constexpr bool hornPatternsArray[8][44] = {
     {false, false, true,  true,  true,  true,  true,  true,  true, true, true,  true,  true,  true, true,
      true,  true,  false, false, false, false, false, false, true, true, true,  true,  true,  true, true,
@@ -165,8 +180,8 @@ cPedComments::Add(tPedComment *com)
 {
 	uint8 index;
 
-	if(nrOfCommentsInBank[activeBank] >= pedCommentsSlots) {
-		index = indexMap[activeBank][pedCommentsSlots - 1];
+	if(nrOfCommentsInBank[activeBank] >= NUM_PED_COMMENTS_SLOTS) {
+		index = indexMap[activeBank][NUM_PED_COMMENTS_SLOTS - 1];
 		if(m_asPedComments[activeBank][index].m_bVolume > com->m_bVolume) return;
 	} else {
 		index = nrOfCommentsInBank[activeBank]++;
@@ -187,7 +202,7 @@ cPedComments::Add(tPedComment *com)
 			}
 		}
 
-		if(i < index) memmove(&indexMap[activeBank][i + 1], &indexMap[activeBank][i], pedCommentsSlots -1 - i);
+		if(i < index) memmove(&indexMap[activeBank][i + 1], &indexMap[activeBank][i], NUM_PED_COMMENTS_SLOTS -1 - i);
 	}
 
 	indexMap[activeBank][i] = index;
@@ -221,7 +236,7 @@ cPedComments::Process()
 			AudioManager.m_sQueueSample.m_nLoopCount = 1;
 			AudioManager.m_sQueueSample.m_nLoopStart = 0;
 			AudioManager.m_sQueueSample.m_nLoopEnd = -1;
-			AudioManager.m_sQueueSample.m_bEmittingVolume = AudioManager.maxVolume;
+			AudioManager.m_sQueueSample.m_bEmittingVolume = maxVolume;
 			AudioManager.m_sQueueSample.field_48 = 3.0f;
 			switch(sampleIndex) {
 			case SFX_POLICE_HELI_1:
@@ -268,7 +283,7 @@ cPedComments::Process()
 			}
 		}
 
-		for(uint32 i = 0; i < pedCommentsSlots; i++) { indexMap[actualUsedBank][i] = pedCommentsSlots; }
+		for(uint32 i = 0; i < NUM_PED_COMMENTS_SLOTS; i++) { indexMap[actualUsedBank][i] = NUM_PED_COMMENTS_SLOTS; }
 		nrOfCommentsInBank[actualUsedBank] = 0;
 	}
 }

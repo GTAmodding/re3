@@ -2,6 +2,7 @@
 
 #include "DMAudio.h"
 #include "common.h"
+#include "core/config.h"
 #include "AudioCollision.h"
 #include "PoliceRadio.h"
 
@@ -194,9 +195,9 @@ public:
 	void *m_pEntity;
 	bool m_bIsUsed;
 	uint8 m_bStatus;
-	int16 m_awAudioEvent[4];
+	int16 m_awAudioEvent[NUM_AUDIOENTITY_EVENTS];
 	uint8 gap_18[2];
-	float m_afVolume[4];
+	float m_afVolume[NUM_AUDIOENTITY_EVENTS];
 	uint8 m_AudioEvents;
 	uint8 field_25[3];
 
@@ -224,11 +225,9 @@ static_assert(sizeof(tPedComment) == 28, "tPedComment: error");
 class cPedComments
 {
 public:
-	static constexpr int pedCommentsBanks = 2;
-	static constexpr int pedCommentsSlots = 20;
-	tPedComment m_asPedComments[pedCommentsBanks][pedCommentsSlots];
-	uint8 indexMap[pedCommentsBanks][pedCommentsSlots];
-	uint8 nrOfCommentsInBank[pedCommentsBanks];
+	tPedComment m_asPedComments[NUM_PED_COMMENTS_BANKS][NUM_PED_COMMENTS_SLOTS];
+	uint8 indexMap[NUM_PED_COMMENTS_BANKS][NUM_PED_COMMENTS_SLOTS];
+	uint8 nrOfCommentsInBank[NUM_PED_COMMENTS_BANKS];
 	uint8 activeBank;
 	uint8 gap_1163[1];
 
@@ -306,16 +305,16 @@ public:
 	tSound m_sQueueSample;
 	bool m_bActiveSampleQueue;
 	uint8 gap_109[3];
-	tSound m_asSamples[2][27];
-	uint8 m_abSampleQueueIndexTable[2][27];
-	uint8 m_bSampleRequestQueuesStatus[2];
-	tSound m_asActiveSamples[27];
-	tAudioEntity m_asAudioEntities[200];
-	int32 m_anAudioEntityIndices[200];
+	tSound m_asSamples[NUM_SOUNDS_SAMPLES_BANKS][NUM_SOUNDS_SAMPLES_SLOTS];
+	uint8 m_abSampleQueueIndexTable[NUM_SOUNDS_SAMPLES_BANKS][NUM_SOUNDS_SAMPLES_SLOTS];
+	uint8 m_bSampleRequestQueuesStatus[NUM_SOUNDS_SAMPLES_BANKS];
+	tSound m_asActiveSamples[NUM_SOUNDS_SAMPLES_SLOTS];
+	tAudioEntity m_asAudioEntities[NUM_AUDIOENTITIES];
+	int32 m_anAudioEntityIndices[NUM_AUDIOENTITIES];
 	int32 m_nAudioEntitiesTotal;
-	CVector m_avecReflectionsPos[5];
-	float m_afReflectionsDistances[5];
-	int32 m_anScriptObjectEntityIndices[40];
+	CVector m_avecReflectionsPos[NUM_AUDIO_REFLECTIONS];
+	float m_afReflectionsDistances[NUM_AUDIO_REFLECTIONS];
+	int32 m_anScriptObjectEntityIndices[NUM_SCRIPT_MAX_ENTITIES];
 	int32 m_nScriptObjectEntityTotal;
 	cPedComments m_sPedComments;
 	int32 m_nFireAudioEntity;
@@ -608,21 +607,6 @@ public:
 	void AdjustSamplesVolume(); /// ok
 	uint8 ComputeEmittingVolume(uint8 emittingVolume, float intensity,
 	                            float dist); /// ok
-public:
-	static constexpr int channels = ARRAY_SIZE(cAudioManager::m_asActiveSamples);
-	static constexpr int policeChannel = channels + 1;
-	static constexpr int allChannels = channels + 2;
-	static constexpr int maxVolume = 127;
-
-	static constexpr int scriptObjectIntensityS = 30;
-	static constexpr int scriptObjectIntensityL = 80;
-	static constexpr int bridgeIntensity = 400;
-	static constexpr int rocketLauncherIntensity = 90;
-	static constexpr int molotovIntensity = 30;
-	static constexpr int molotovVolume = 50;
-
-	static constexpr int rainOnVehicleIntensity = 22;
-	static constexpr int reverseGearIntensity = 30;
 };
 
 static_assert(sizeof(cAudioManager) == 19220, "cAudioManager: error");

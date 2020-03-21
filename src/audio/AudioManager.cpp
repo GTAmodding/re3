@@ -7255,8 +7255,8 @@ cAudioManager::ProcessVehicleHorn(cVehicleParams *params)
 					if(automobile->m_nCarHornTimer == 44)
 						automobile->field_22D =
 						    (uint8(m_FrameCounter) + uint8(m_sQueueSample.m_nEntityIndex)) & 7;
+					if (!hornPatternsArray[automobile->field_22D][44 - automobile->m_nCarHornTimer]) return;
 				}
-				if(!hornPatternsArray[automobile->field_22D][44 - automobile->m_nCarHornTimer]) return;
 
 				CalculateDistance(params->m_bDistanceCalculated, params->m_fDistance);
 				m_sQueueSample.m_bVolume = ComputeVolume(80, 40.f, m_sQueueSample.m_fDistance);

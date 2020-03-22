@@ -8,7 +8,7 @@
 #include "SurfaceTable.h"
 #include "sampman.h"
 
-constexpr int CollisionSoundIntensity = 60;
+const int CollisionSoundIntensity = 60;
 
 void
 cAudioCollisionManager::AddCollisionToRequestedQueue()

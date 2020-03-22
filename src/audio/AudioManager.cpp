@@ -68,7 +68,8 @@ const int molotovVolume = 50;
 const int rainOnVehicleIntensity = 22;
 const int reverseGearIntensity = 30;
 
-constexpr bool hornPatternsArray[8][44] = {
+
+const bool hornPatternsArray[8][44] = {
     {false, false, true,  true,  true,  true,  true,  true,  true, true, true,  true,  true,  true, true,
      true,  true,  false, false, false, false, false, false, true, true, true,  true,  true,  true, true,
      true,  true,  true,  true,  true,  true,  true,  true,  true, true, false, false, false, false},
@@ -95,9 +96,9 @@ constexpr bool hornPatternsArray[8][44] = {
      true,  true,  true, true, true, true, true,  true,  true,  false, false, false, false, false},
 };
 
-constexpr int totalAudioEntitiesSlots = 200;
+const int totalAudioEntitiesSlots = 200;
 
-constexpr uint8 panTable[64]{0,  3,  8,  12, 16, 19, 22, 24, 26, 28, 30, 31, 33, 34, 36, 37, 39, 40, 41, 42, 44, 45,
+const uint8 panTable[64]{0,  3,  8,  12, 16, 19, 22, 24, 26, 28, 30, 31, 33, 34, 36, 37, 39, 40, 41, 42, 44, 45,
                              46, 47, 48, 49, 49, 50, 51, 52, 53, 53, 54, 55, 55, 56, 56, 57, 57, 58, 58, 58, 59, 59,
                              59, 60, 60, 61, 61, 61, 61, 62, 62, 62, 62, 62, 63, 63, 63, 63, 63, 63, 63, 63};
 
@@ -215,8 +216,8 @@ cPedComments::Process()
 	uint8 actualUsedBank;
 	tPedComment *comment;
 
-	static constexpr int defaultIntensity = 50;
-	static constexpr int policeHeliIntensity = 400;
+	static const int defaultIntensity = 50;
+	static const int policeHeliIntensity = 400;
 
 	if(!AudioManager.m_bUserPause) {
 		if(nrOfCommentsInBank[activeBank]) {
@@ -2510,7 +2511,7 @@ cAudioManager::PlayLoadedMissionAudio()
 void
 cAudioManager::PlayOneShot(int32 index, int16 sound, float vol)
 {
-	static constexpr uint8 OneShotPriority[] = {
+	static const uint8 OneShotPriority[] = {
 	    3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 5, 5, 5, 3, 5, 2, 2, 1, 1, 3, 1, 3, 3, 1, 1, 1, 4, 4, 3, 1, 1,
 	    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 6, 1, 1, 3, 2, 2, 2, 2, 0, 0, 6, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 	    1, 2, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 3, 1, 1, 1, 9,
@@ -2625,7 +2626,7 @@ struct MissionAudioData {
 	int32 m_nId;
 };
 
-constexpr MissionAudioData MissionAudioNameSfxAssoc[] = {
+const MissionAudioData MissionAudioNameSfxAssoc[] = {
     {"lib_a1", STREAMED_SOUND_MISSION_LIB_A1},   {"lib_a2", STREAMED_SOUND_MISSION_LIB_A2},
     {"lib_a", STREAMED_SOUND_MISSION_LIB_A},     {"lib_b", STREAMED_SOUND_MISSION_LIB_B},
     {"lib_c", STREAMED_SOUND_MISSION_LIB_C},     {"lib_d", STREAMED_SOUND_MISSION_LIB_D},
@@ -2845,7 +2846,7 @@ cAudioManager::ProcessBoatEngine(cVehicleParams *params)
 	static uint16 LastAccel = 0;
 	static uint8 LastVol = 0;
 
-    static constexpr int intensity = 50;
+	static const int intensity = 50;
 
 	if(params->m_fDistance < SQR(intensity)) {
 		boat = (CBoat *)params->m_pVehicle;
@@ -3305,7 +3306,7 @@ cAudioManager::ProcessCrane()
 	CCrane *crane = (CCrane *)m_asAudioEntities[m_sQueueSample.m_nEntityIndex].m_pEntity;
 	float distSquared;
 	bool distCalculated = false;
-    static constexpr int intensity = 80;
+	static const int intensity = 80;
 
 	if(crane) {
 		if(crane->m_bCraneActive == 1) {
@@ -3604,7 +3605,7 @@ cAudioManager::ProcessFireHydrant()
 {
 	float distSquared;
 	bool distCalculated = false;
-	static constexpr int intensity = 35;
+	static const int intensity = 35;
 
 	m_sQueueSample.m_vecPos = ((CEntity*)m_asAudioEntities[m_sQueueSample.m_nEntityIndex].m_pEntity)->GetPosition();
 	distSquared = GetDistanceSquared(&m_sQueueSample.m_vecPos);
@@ -4022,7 +4023,7 @@ cAudioManager::ProcessHelicopter(cVehicleParams *params)
 	float dist;
 	float baseDist;
 	int32 emittingVol;
-	static constexpr tHelicopterSampleData gHeliSfxRanges[3] = {
+	static const tHelicopterSampleData gHeliSfxRanges[3] = {
 	    {400.f, 380.f, 100}, {100.f, 70.f, maxVolume}, {60.f, 30.f, maxVolume}};
 
 	if(gHeliSfxRanges[0].m_fMaxDistance * gHeliSfxRanges[0].m_fMaxDistance <= params->m_fDistance) return false;

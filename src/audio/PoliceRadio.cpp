@@ -11,9 +11,9 @@
 #include "Vehicle.h"
 #include "World.h"
 
-constexpr int maxVolume = 127;
-constexpr int channels = ARRAY_SIZE(cAudioManager::m_asActiveSamples);
-constexpr int policeChannel = channels + 1;
+const int maxVolume = 127;
+const int channels = ARRAY_SIZE(cAudioManager::m_asActiveSamples);
+const int policeChannel = channels + 1;
 
 struct tPoliceRadioZone {
 	char m_aName[8];

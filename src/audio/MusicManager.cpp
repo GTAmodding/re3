@@ -21,7 +21,7 @@ uint8 &cDisplay = *(uint8 *)0x650BA1;
 int32 &gRetuneCounter = *(int32*)0x650B84;
 bool& bHasStarted = *(bool*)0x650B7C;
 
-constexpr int maxVolume = 127;
+const int maxVolume = 127;
 
 cMusicManager::cMusicManager()
 {

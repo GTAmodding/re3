@@ -19,6 +19,7 @@
 #include "Ped.h"
 #include "debugmenu_public.h"
 #include "Particle.h"
+#include "Console.h"
 
 #include <vector>
 #include <list>

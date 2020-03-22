@@ -370,3 +370,6 @@ inline T *WriteSaveBuf(uint8 *&buf, const T &value)
 	assert(ReadSaveBuf<char>(buf) == c);\
 	assert(ReadSaveBuf<char>(buf) == d);\
 	assert(ReadSaveBuf<uint32>(buf) == size);
+
+
+void cprintf(char*, ...);

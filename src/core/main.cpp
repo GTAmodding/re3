@@ -49,6 +49,7 @@
 #include "Frontend.h"
 #include "AnimViewer.h"
 #include "Script.h"
+#include "Console.h"
 
 #define DEFAULT_VIEWWINDOW (Tan(DEGTORAD(CDraw::GetFOV() * 0.5f)))
 
@@ -429,7 +430,7 @@ Render2dStuff(void)
 	}
 
 	MusicManager.DisplayRadioStationName();
-//	TheConsole.Display();
+	TheConsole.Display();
 /*
 	if(CSceneEdit::m_bEditOn)
 		CSceneEdit::Draw();

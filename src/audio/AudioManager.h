@@ -2,7 +2,7 @@
 
 #include "DMAudio.h"
 #include "common.h"
-#include "core/config.h"
+#include "config.h"
 #include "AudioCollision.h"
 #include "PoliceRadio.h"
 

@@ -489,7 +489,7 @@ public:
 	void PreloadMissionAudio(const char *name);            /// ok
 	void PreTerminateGameSpecificShutdown();               /// ok
 	/// processX - main logic of adding new sounds
-	void ProcessActiveQueues();                              // todo
+	void ProcessActiveQueues();                              /// ok
 	bool ProcessAirBrakes(cVehicleParams *params);           /// ok
 	void ProcessAirportScriptObject(uint8 sound);            /// ok
 	bool ProcessBoatEngine(cVehicleParams *params);          /// ok
@@ -544,7 +544,7 @@ public:
 	bool ProcessTrainNoise(cVehicleParams *params);            /// ok
 	void ProcessVehicle(CVehicle *vehicle);                    /// ok
 	bool ProcessVehicleDoors(cVehicleParams *params);          /// ok
-	bool ProcessVehicleEngine(cVehicleParams *params);         // todo
+	void ProcessVehicleEngine(cVehicleParams *params);         /// ok
 	void ProcessVehicleHorn(cVehicleParams *params);           /// ok
 	void ProcessVehicleOneShots(void *);                       // todo
 	bool ProcessVehicleReverseWarning(cVehicleParams *params); /// ok

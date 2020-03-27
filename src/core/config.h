@@ -172,6 +172,7 @@ enum Config {
 #define TOGGLEABLE_BETA_FEATURES // toggleable from debug menu. doesn't have too many things
 
 // Pad
+#define XINPUT
 #define KANGAROO_CHEAT
 
 // Hud, frontend and radar

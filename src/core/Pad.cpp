@@ -5,6 +5,10 @@
 #pragma warning( pop )
 
 #include "common.h"
+#ifdef XINPUT
+#include <Xinput.h>
+#pragma comment( lib, "Xinput.lib" )
+#endif
 #include "patcher.h"
 #include "Pad.h"
 #include "ControllerConfig.h"
@@ -547,12 +551,60 @@ void CPad::AddToPCCheatString(char c)
 	#undef _CHEATCMP
 }
 
+#ifdef XINPUT
+void CPad::AffectFromXinput(uint32 pad)
+{
+	XINPUT_STATE xstate;
+	memset(&xstate, 0, sizeof(XINPUT_STATE));
+	if (XInputGetState(pad, &xstate) == ERROR_SUCCESS)
+	{
+		PCTempJoyState.Circle = (xstate.Gamepad.wButtons & XINPUT_GAMEPAD_B) ? 255 : 0;
+		PCTempJoyState.Cross = (xstate.Gamepad.wButtons & XINPUT_GAMEPAD_A) ? 255 : 0;
+		PCTempJoyState.Square = (xstate.Gamepad.wButtons & XINPUT_GAMEPAD_X) ? 255 : 0;
+		PCTempJoyState.Triangle = (xstate.Gamepad.wButtons & XINPUT_GAMEPAD_Y) ? 255 : 0;
+		PCTempJoyState.DPadDown = (xstate.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_DOWN) ? 255 : 0;
+		PCTempJoyState.DPadLeft = (xstate.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_LEFT) ? 255 : 0;
+		PCTempJoyState.DPadRight = (xstate.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_RIGHT) ? 255 : 0;
+		PCTempJoyState.DPadUp = (xstate.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_UP) ? 255 : 0;
+		PCTempJoyState.LeftShock = (xstate.Gamepad.wButtons & XINPUT_GAMEPAD_LEFT_THUMB) ? 255 : 0;
+		PCTempJoyState.LeftShoulder1 = (xstate.Gamepad.wButtons & XINPUT_GAMEPAD_LEFT_SHOULDER) ? 255 : 0;
+		PCTempJoyState.LeftShoulder2 = xstate.Gamepad.bLeftTrigger;
+		PCTempJoyState.RightShock = (xstate.Gamepad.wButtons & XINPUT_GAMEPAD_RIGHT_THUMB) ? 255 : 0;
+		PCTempJoyState.RightShoulder1 = (xstate.Gamepad.wButtons & XINPUT_GAMEPAD_RIGHT_SHOULDER) ? 255 : 0;
+		PCTempJoyState.RightShoulder2 = xstate.Gamepad.bRightTrigger;
+
+		PCTempJoyState.Select = (xstate.Gamepad.wButtons & XINPUT_GAMEPAD_BACK) ? 255 : 0;
+		PCTempJoyState.Start = (xstate.Gamepad.wButtons & XINPUT_GAMEPAD_START) ? 255 : 0;
+
+		float lx = (float)xstate.Gamepad.sThumbLX / (float)0x7FFF;
+		float ly = (float)xstate.Gamepad.sThumbLY / (float)0x7FFF;
+		float rx = (float)xstate.Gamepad.sThumbRX / (float)0x7FFF;
+		float ry = (float)xstate.Gamepad.sThumbRY / (float)0x7FFF;
+
+		if (Abs(lx) > 0.3f || Abs(ly) > 0.3f) {
+			PCTempJoyState.LeftStickX = (int32)(lx * 128.0f);
+			PCTempJoyState.LeftStickY = (int32)(-ly * 128.0f);
+		}
+
+		if (Abs(rx) > 0.3f || Abs(ry) > 0.3f) {
+			PCTempJoyState.RightStickX = (int32)(rx * 128.0f);
+			PCTempJoyState.RightStickY = (int32)(ry * 128.0f);
+		}
+	}
+}
+#endif
+
 void CPad::UpdatePads(void) 
 {
 	bool bUpdate = true;
 	
 	GetPad(0)->UpdateMouse();
+#ifdef XINPUT
+	GetPad(0)->AffectFromXinput(0);
+	GetPad(1)->AffectFromXinput(1);
+#else
 	CapturePad(0);
+#endif
 	
 
 	ControlsManager.ClearSimButtonPressCheckers();
@@ -566,9 +618,11 @@ void CPad::UpdatePads(void)
 	{
 		GetPad(0)->Update(0);
 	}
-	
+
+#if defined(MASTER) && !defined(XINPUT)
 	GetPad(1)->NewState.Clear();
 	GetPad(1)->OldState.Clear();
+#endif
 	
 	OldKeyState = NewKeyState;
 	NewKeyState = TempKeyState;

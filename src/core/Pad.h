@@ -247,6 +247,10 @@ public:
 	static char *EditString(char *pStr, int32 nSize);
 	static int32 *EditCodesForControls(int32 *pRsKeys, int32 nSize);
 
+#ifdef XINPUT
+	void AffectFromXinput(uint32 pad);
+#endif
+
 	// mouse
 	bool GetLeftMouseJustDown()           { return !!(NewMouseControllerState.LMB && !OldMouseControllerState.LMB); }
 	bool GetRightMouseJustDown()          { return !!(NewMouseControllerState.RMB && !OldMouseControllerState.RMB); }

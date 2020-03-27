@@ -417,6 +417,11 @@ void CControllerConfigManager::UpdateJoyInConfigMenus_ButtonDown(int32 button, i
 			case 13:
 				pad->PCTempJoyState.DPadUp = 255;
 				break;
+#ifdef REGISTER_START_BUTTON
+			case 12:
+				pad->PCTempJoyState.Start = 255;
+				break;
+#endif
 			case 11:
 				pad->PCTempJoyState.RightShock = 255;
 				break;
@@ -839,6 +844,11 @@ void CControllerConfigManager::UpdateJoyInConfigMenus_ButtonUp(int32 button, int
 			case 13:
 				pad->PCTempJoyState.DPadUp = 0;
 				break;
+#ifdef REGISTER_START_BUTTON
+			case 12:
+				pad->PCTempJoyState.Start = 0;
+				break;
+#endif
 			case 11:
 				pad->PCTempJoyState.RightShock = 0;
 				break;

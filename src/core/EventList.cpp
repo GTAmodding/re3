@@ -5,10 +5,13 @@
 #include "World.h"
 #include "Wanted.h"
 #include "EventList.h"
+#include "Messages.h"
+#include "Text.h"
+#include "main.h"
 
 int32 CEventList::ms_nFirstFreeSlotIndex;
-//CEvent gaEvent[NUMEVENTS];
-CEvent *gaEvent = (CEvent*)0x6EF830;
+CEvent gaEvent[NUMEVENTS];
+//CEvent *gaEvent = (CEvent*)0x6EF830;
 
 enum
 {
@@ -207,8 +210,20 @@ CEventList::ReportCrimeForEvent(eEventType type, int32 crimeId, bool copsDontCar
 	default: crime = CRIME_NONE; break;
 	}
 
-	if(crime == CRIME_NONE)
-		return;
+#ifdef VC_PED_PORTS
+	if (crime == CRIME_HIT_PED && ((CPed*)crimeId)->IsPointerValid() &&
+		FindPlayerPed()->m_pWanted->m_nWantedLevel == 0 && ((CPed*)crimeId)->m_ped_flagE2) {
+
+		if(!((CPed*)crimeId)->DyingOrDead()) {
+			sprintf(gString, "$50 Good Citizen Bonus!");
+			AsciiToUnicode(gString, gUString);
+			CMessages::AddBigMessage(gUString, 5000, 0);
+			CWorld::Players[CWorld::PlayerInFocus].m_nMoney += 50;
+		}
+	} else
+#endif
+		if(crime == CRIME_NONE)
+			return;
 
 	CVector playerPedCoors = FindPlayerPed()->GetPosition();
 	CVector playerCoors = FindPlayerCoors();

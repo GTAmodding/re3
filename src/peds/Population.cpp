@@ -576,7 +576,7 @@ CPopulation::AddToPopulation(float minDist, float maxDist, float minDistOffScree
 	}
 	// Yeah, float
 	float maxPossiblePedsForArea = (zoneInfo.pedDensity + zoneInfo.carDensity) * playerInfo->m_fRoadDensity * PedDensityMultiplier * CIniFile::PedNumberMultiplier;
-	// maxPossiblePedsForArea = min(maxPossiblePedsForArea, MaxNumberOfPedsInUse);
+	maxPossiblePedsForArea = min(maxPossiblePedsForArea, MaxNumberOfPedsInUse);
 
 	if (ms_nTotalPeds < maxPossiblePedsForArea || addCop) {
 		int decisionThreshold = CGeneral::GetRandomNumberInRange(0, 1000);

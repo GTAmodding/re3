@@ -101,6 +101,8 @@ enum Config {
 	NUMPEDGROUPS = 31,
 	NUMMODELSPERPEDGROUP = 8,
 
+	NUMROADBLOCKS = 600,
+
 	NUMVISIBLEENTITIES = 2000,
 	NUMINVISIBLEENTITIES = 150,
 
@@ -169,11 +171,12 @@ enum Config {
 #endif
 
 #define FIX_BUGS		// fixes bugs that we've came across during reversing, TODO: use this more
-#define TOGGLEABLE_BETA_FEATURES // toggleable from debug menu. doesn't have too many things
+#define TOGGLEABLE_BETA_FEATURES // toggleable from debug menu. not too many things
 
 // Pad
 #define XINPUT
 #define KANGAROO_CHEAT
+#define REGISTER_START_BUTTON // currently only in menu sadly. resumes the game
 
 // Hud, frontend and radar
 #define ASPECT_RATIO_SCALE	// Not just makes everything scale with aspect ratio, also adds support for all aspect ratios
@@ -200,5 +203,7 @@ enum Config {
 // Peds
 #define ANIMATE_PED_COL_MODEL
 #define VC_PED_PORTS			// various ports from VC's CPed, mostly subtle
-#define NEW_WALK_AROUND_ALGORITHM	// to make walking around vehicles/objects less awkward
+// #define NEW_WALK_AROUND_ALGORITHM	// to make walking around vehicles/objects less awkward
 #define CANCELLABLE_CAR_ENTER
+
+#define IMPROVED_CAMERA		// Better Debug cam, and maybe more in the future

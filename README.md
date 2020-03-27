@@ -43,7 +43,6 @@ CBoat
 CBrightLights
 CBulletInfo
 CBulletTraces
-CCam
 CCamera
 CCopPed
 CCrane

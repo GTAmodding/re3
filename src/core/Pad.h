@@ -403,6 +403,8 @@ public:
 	bool GetLeftShoulder2JustDown()  { return !!(NewState.LeftShoulder2 && !OldState.LeftShoulder2); }
 	bool GetRightShoulder1JustDown() { return !!(NewState.RightShoulder1 && !OldState.RightShoulder1); }
 	bool GetRightShoulder2JustDown() { return !!(NewState.RightShoulder2 && !OldState.RightShoulder2); }
+	bool GetLeftShockJustDown()      { return !!(NewState.LeftShock && !OldState.LeftShock); }
+	bool GetRightShockJustDown()     { return !!(NewState.RightShock && !OldState.RightShock); }
 	bool GetStartJustDown()          { return !!(NewState.Start && !OldState.Start); }
 	bool GetLeftStickXJustDown() { return !!(NewState.LeftStickX && !OldState.LeftStickX); }
 	bool GetLeftStickYJustDown() { return !!(NewState.LeftStickY && !OldState.LeftStickY); }
@@ -426,6 +428,10 @@ public:
 	bool GetLeftShoulder2(void)  { return !!NewState.LeftShoulder2; }
 	bool GetRightShoulder1(void) { return !!NewState.RightShoulder1; }
 	bool GetRightShoulder2(void) { return !!NewState.RightShoulder2; }
+	int16 GetLeftStickX(void)    { return NewState.LeftStickX; }
+	int16 GetLeftStickY(void)    { return NewState.LeftStickY; }
+	int16 GetRightStickX(void)    { return NewState.RightStickX; }
+	int16 GetRightStickY(void)    { return NewState.RightStickY; }
 
   bool ArePlayerControlsDisabled(void) { return DisablePlayerControls != PLAYERCONTROL_ENABLED; }
 };

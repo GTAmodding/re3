@@ -645,6 +645,9 @@ CRenderer::ScanWorld(void)
 
 	m_loadingPriority = false;
 	if(TheCamera.Cams[TheCamera.ActiveCam].Mode == CCam::MODE_TOPDOWN ||
+#ifdef FIX_BUGS
+	   TheCamera.Cams[TheCamera.ActiveCam].Mode == CCam::MODE_GTACLASSIC ||
+#endif
 	   TheCamera.Cams[TheCamera.ActiveCam].Mode == CCam::MODE_TOP_DOWN_PED){
 		CRect rect;
 		int x1, x2, y1, y2;
@@ -756,6 +759,9 @@ CRenderer::RequestObjectsInFrustum(void)
 	RwV3dTransformPoints((RwV3d*)vectors, (RwV3d*)vectors, 9, cammatrix);
 
 	if(TheCamera.Cams[TheCamera.ActiveCam].Mode == CCam::MODE_TOPDOWN ||
+#ifdef FIX_BUGS
+	   TheCamera.Cams[TheCamera.ActiveCam].Mode == CCam::MODE_GTACLASSIC ||
+#endif
 	   TheCamera.Cams[TheCamera.ActiveCam].Mode == CCam::MODE_TOP_DOWN_PED){
 		CRect rect;
 		int x1, x2, y1, y2;

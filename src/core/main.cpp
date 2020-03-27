@@ -325,6 +325,7 @@ DoRWStuffStartOfFrame_Horizon(int16 TopRed, int16 TopGreen, int16 TopBlue, int16
 void
 DoRWStuffEndOfFrame(void)
 {
+	CDebug::DisplayScreenStrings();	// custom
 	CDebug::DebugDisplayTextBuffer();
 	// FlushObrsPrintfs();
 	RwCameraEndUpdate(Scene.camera);

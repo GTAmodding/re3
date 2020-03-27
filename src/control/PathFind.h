@@ -11,6 +11,15 @@ public:
 
 enum
 {
+	NodeTypeExtern = 1,
+	NodeTypeIntern = 2,
+
+	UseInRoadBlock = 1,
+	ObjectEastWest = 2,
+};
+
+enum
+{
 	PATH_CAR = 0,
 	PATH_PED = 1,
 };

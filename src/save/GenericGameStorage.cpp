@@ -61,9 +61,9 @@ do {\
 	MakeSpaceForSizeInBufferPointer(presize, buf, postsize);\
 	save_func(buf, &size);\
 	CopySizeAndPreparePointer(presize, buf, postsize, reserved, size);\
-	if (!PcSaveHelper.PcClassSaveRoutine(file, work_buff, size + 4))\
+	if (!PcSaveHelper.PcClassSaveRoutine(file, work_buff, buf - work_buff))\
 		return false;\
-	totalSize += size;\
+	totalSize += buf - work_buff;\
 } while (0)
 
 bool
@@ -74,7 +74,6 @@ GenericSave(int file)
 	uint32 reserved;
 
 	uint32 totalSize;
-	uint32 i;
 	
 	wchar *lastMissionPassed;
 	wchar suffix[6];
@@ -85,13 +84,11 @@ GenericSave(int file)
 	CheckSum = 0;
 	buf = work_buff;
 	reserved = 0;
-	totalSize = 0;
 
 	// Save simple vars
-INITSAVEBUF
 	lastMissionPassed = TheText.Get(CStats::LastMissionPassedName);
 	if (*lastMissionPassed) {
-		AsciiToUnicode("'...", suffix);
+		AsciiToUnicode("...'", suffix);
 		TextCopy(saveName, lastMissionPassed);
 		int len = UnicodeStrlen(saveName);
 		saveName[len] = '\0';
@@ -104,20 +101,20 @@ INITSAVEBUF
 	WriteDataToBufferPointer(buf, saveTime);
 	WriteDataToBufferPointer(buf, SIZE_OF_ONE_GAME_IN_BYTES);
 	WriteDataToBufferPointer(buf, CGame::currLevel);
-	WriteDataToBufferPointer(buf, TheCamera.m_matrix.m_matrix.pos.x);
-	WriteDataToBufferPointer(buf, TheCamera.m_matrix.m_matrix.pos.y);
-	WriteDataToBufferPointer(buf, TheCamera.m_matrix.m_matrix.pos.z);
+	WriteDataToBufferPointer(buf, TheCamera.GetPosition().x);
+	WriteDataToBufferPointer(buf, TheCamera.GetPosition().y);
+	WriteDataToBufferPointer(buf, TheCamera.GetPosition().z);
 	WriteDataToBufferPointer(buf, CClock::ms_nMillisecondsPerGameMinute);
 	WriteDataToBufferPointer(buf, CClock::ms_nLastClockTick);
 	WriteDataToBufferPointer(buf, CClock::ms_nGameClockHours);
 	WriteDataToBufferPointer(buf, CClock::ms_nGameClockMinutes);
 	currPad = CPad::GetPad(0);
 	WriteDataToBufferPointer(buf, currPad->Mode);
-	WriteDataToBufferPointer(buf, CTimer::m_snTimeInMilliseconds);
-	WriteDataToBufferPointer(buf, CTimer::ms_fTimeScale);
-	WriteDataToBufferPointer(buf, CTimer::ms_fTimeStep);
-	WriteDataToBufferPointer(buf, CTimer::ms_fTimeStepNonClipped);
-	WriteDataToBufferPointer(buf, CTimer::m_FrameCounter);
+	WriteDataToBufferPointer(buf, CTimer::GetTimeInMilliseconds());
+	WriteDataToBufferPointer(buf, CTimer::GetTimeScale());
+	WriteDataToBufferPointer(buf, CTimer::GetTimeStep());
+	WriteDataToBufferPointer(buf, CTimer::GetTimeStepNonClipped());
+	WriteDataToBufferPointer(buf, CTimer::GetFrameCounter());
 	WriteDataToBufferPointer(buf, CTimeStep::ms_fTimeStep);
 	WriteDataToBufferPointer(buf, CTimeStep::ms_fFramesPerUpdate);
 	WriteDataToBufferPointer(buf, CTimeStep::ms_fTimeScale);
@@ -134,10 +131,8 @@ INITSAVEBUF
 	WriteDataToBufferPointer(buf, CWeather::WeatherTypeInList);
 	WriteDataToBufferPointer(buf, TheCamera.CarZoomIndicator);
 	WriteDataToBufferPointer(buf, TheCamera.PedZoomIndicator);
-#ifdef VALIDATE_SAVE_SIZE
-	_saveBufCount = buf - work_buff;
-#endif
-VALIDATESAVEBUF(SIZE_OF_SIMPLEVARS);
+
+	assert(buf - work_buff == SIZE_OF_SIMPLEVARS);
 
 	// Save scripts, block is nested within the same block as simple vars for some reason
 	presize = buf;
@@ -145,9 +140,10 @@ VALIDATESAVEBUF(SIZE_OF_SIMPLEVARS);
 	postsize = buf;
 	CTheScripts::SaveAllScripts(buf, &size);
 	CopySizeAndPreparePointer(presize, buf, postsize, reserved, size);
-	if (!PcSaveHelper.PcClassSaveRoutine(file, work_buff, size + SIZE_OF_SIMPLEVARS + 4))
+	if (!PcSaveHelper.PcClassSaveRoutine(file, work_buff, buf - work_buff))
 		return false;
-	totalSize += size + SIZE_OF_SIMPLEVARS;
+
+	totalSize = buf - work_buff;
 
 	// Save the rest
 	WRITE_BLOCK(CPools::SavePedPool);
@@ -171,8 +167,7 @@ VALIDATESAVEBUF(SIZE_OF_SIMPLEVARS);
 	WRITE_BLOCK(CPedType::Save);
 
 	// Write padding
-	i = 0;
-	do {
+	for (int i = 0; i < 4; i++) {
 		size = align4bytes(SIZE_OF_ONE_GAME_IN_BYTES - totalSize - 4);
 		if (size > sizeof(work_buff))
 			size = sizeof(work_buff);
@@ -181,15 +176,15 @@ VALIDATESAVEBUF(SIZE_OF_SIMPLEVARS);
 				return false;
 			totalSize += size;
 		}
-		i++;
-	} while (i < 4);
+	}
 	
 	// Write checksum and close
 	CFileMgr::Write(file, (const char *) &CheckSum, sizeof(CheckSum));
 	if (CFileMgr::GetErrorReadWrite(file)) {
 		PcSaveHelper.nErrorCode = SAVESTATUS_ERR_SAVE_WRITE;
-		if (CloseFile(file))
+		if (!CloseFile(file))
 			PcSaveHelper.nErrorCode = SAVESTATUS_ERR_SAVE_CLOSE;
+
 		return false;
 	}
 	

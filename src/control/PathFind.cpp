@@ -11,19 +11,10 @@ CPathFind &ThePaths = *(CPathFind*)0x8F6754;
 
 WRAPPER bool CPedPath::CalcPedRoute(uint8, CVector, CVector, CVector*, int16*, int16) { EAXJMP(0x42E680); }
 
-enum
-{
-	NodeTypeExtern = 1,
-	NodeTypeIntern = 2,
-
-	ObjectFlag1 = 1,
-	ObjectEastWest = 2,
-
-	MAX_DIST = INT16_MAX-1
-};
+#define MAX_DIST INT16_MAX-1
 
 // object flags:
-//	1
+//	1	UseInRoadBlock
 //	2	east/west road(?)
 
 CPathInfoForObject *&InfoForTileCars = *(CPathInfoForObject**)0x8F1A8C;
@@ -218,14 +209,14 @@ CPathFind::PreparePathData(void)
 			if(numIntern == 1 && numExtern == 2){
 				if(numLanes < 4){
 					if((i & 7) == 4){		// WHAT?
-						m_objectFlags[i] |= ObjectFlag1;
+						m_objectFlags[i] |= UseInRoadBlock;
 						if(maxX > maxY)
 							m_objectFlags[i] |= ObjectEastWest;
 						else
 							m_objectFlags[i] &= ~ObjectEastWest;
 					}
 				}else{
-					m_objectFlags[i] |= ObjectFlag1;
+					m_objectFlags[i] |= UseInRoadBlock;
 					if(maxX > maxY)
 						m_objectFlags[i] |= ObjectEastWest;
 					else

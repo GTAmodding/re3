@@ -20,11 +20,12 @@
 #include "Replay.h"
 #include "Population.h"
 
+CColPoint *gaTempSphereColPoints = (CColPoint*)0x6E64C0;	// [32]
+
 CPtrList *CWorld::ms_bigBuildingsList = (CPtrList*)0x6FAB60;
 CPtrList &CWorld::ms_listMovingEntityPtrs = *(CPtrList*)0x8F433C;
 CSector (*CWorld::ms_aSectors)[NUMSECTORS_X] = (CSector (*)[NUMSECTORS_Y])0x665608;
 uint16 &CWorld::ms_nCurrentScanCode = *(uint16*)0x95CC64;
-CColPoint &CWorld::ms_testSpherePoint = *(CColPoint*)0x6E64C0;
 
 uint8 &CWorld::PlayerInFocus = *(uint8 *)0x95CD61;
 CPlayerInfo (&CWorld::Players)[NUMPLAYERS] = *(CPlayerInfo (*)[NUMPLAYERS])*(uintptr*)0x9412F0;
@@ -609,9 +610,9 @@ CWorld::GetIsLineOfSightSectorListClear(CPtrList &list, const CColLine &line, bo
 }
 
 void
-CWorld::FindObjectsInRangeSectorList(CPtrList &list, CVector &centre, float distance, bool ignoreZ, short *nextObject, short lastObject, CEntity **objects)
+CWorld::FindObjectsInRangeSectorList(CPtrList &list, CVector &centre, float radius, bool ignoreZ, short *nextObject, short lastObject, CEntity **objects)
 {
-	float distSqr = distance * distance;
+	float radiusSqr = radius * radius;
 	float objDistSqr;
 
 	for (CPtrNode *node = list.first; node; node = node->next) {
@@ -625,7 +626,7 @@ CWorld::FindObjectsInRangeSectorList(CPtrList &list, CVector &centre, float dist
 			else
 				objDistSqr = diff.MagnitudeSqr();
 
-			if (objDistSqr < distSqr && *nextObject < lastObject) {
+			if (objDistSqr < radiusSqr && *nextObject < lastObject) {
 				if (objects) {
 					objects[*nextObject] = object;
 				}
@@ -636,22 +637,22 @@ CWorld::FindObjectsInRangeSectorList(CPtrList &list, CVector &centre, float dist
 }
 
 void
-CWorld::FindObjectsInRange(CVector &centre, float distance, bool ignoreZ, short *nextObject, short lastObject, CEntity **objects, bool checkBuildings, bool checkVehicles, bool checkPeds, bool checkObjects, bool checkDummies)
+CWorld::FindObjectsInRange(CVector &centre, float radius, bool ignoreZ, short *nextObject, short lastObject, CEntity **objects, bool checkBuildings, bool checkVehicles, bool checkPeds, bool checkObjects, bool checkDummies)
 {
-	int minX = GetSectorIndexX(centre.x - distance);
+	int minX = GetSectorIndexX(centre.x - radius);
 	if (minX <= 0) minX = 0;
 
-	int minY = GetSectorIndexY(centre.y - distance);
+	int minY = GetSectorIndexY(centre.y - radius);
 	if (minY <= 0) minY = 0;
 
-	int maxX = GetSectorIndexX(centre.x + distance);
+	int maxX = GetSectorIndexX(centre.x + radius);
 #ifdef FIX_BUGS
 	if (maxX >= NUMSECTORS_X) maxX = NUMSECTORS_X - 1;
 #else
 	if (maxX >= NUMSECTORS_X) maxX = NUMSECTORS_X;
 #endif
 
-	int maxY = GetSectorIndexY(centre.y + distance);
+	int maxY = GetSectorIndexY(centre.y + radius);
 #ifdef FIX_BUGS
 	if (maxY >= NUMSECTORS_Y) maxY = NUMSECTORS_Y - 1;
 #else
@@ -665,48 +666,48 @@ CWorld::FindObjectsInRange(CVector &centre, float distance, bool ignoreZ, short 
 		for(int curX = minX; curX <= maxX; curX++) {
 			CSector *sector = GetSector(curX, curY);
 			if (checkBuildings) {
-				FindObjectsInRangeSectorList(sector->m_lists[ENTITYLIST_BUILDINGS], centre, distance, ignoreZ, nextObject, lastObject, objects);
-				FindObjectsInRangeSectorList(sector->m_lists[ENTITYLIST_BUILDINGS_OVERLAP], centre, distance, ignoreZ, nextObject, lastObject, objects);
+				FindObjectsInRangeSectorList(sector->m_lists[ENTITYLIST_BUILDINGS], centre, radius, ignoreZ, nextObject, lastObject, objects);
+				FindObjectsInRangeSectorList(sector->m_lists[ENTITYLIST_BUILDINGS_OVERLAP], centre, radius, ignoreZ, nextObject, lastObject, objects);
 			}
 			if (checkVehicles) {
-				FindObjectsInRangeSectorList(sector->m_lists[ENTITYLIST_VEHICLES], centre, distance, ignoreZ, nextObject, lastObject, objects);
-				FindObjectsInRangeSectorList(sector->m_lists[ENTITYLIST_VEHICLES_OVERLAP], centre, distance, ignoreZ, nextObject, lastObject, objects);
+				FindObjectsInRangeSectorList(sector->m_lists[ENTITYLIST_VEHICLES], centre, radius, ignoreZ, nextObject, lastObject, objects);
+				FindObjectsInRangeSectorList(sector->m_lists[ENTITYLIST_VEHICLES_OVERLAP], centre, radius, ignoreZ, nextObject, lastObject, objects);
 			}
 			if (checkPeds) {
-				FindObjectsInRangeSectorList(sector->m_lists[ENTITYLIST_PEDS], centre, distance, ignoreZ, nextObject, lastObject, objects);
-				FindObjectsInRangeSectorList(sector->m_lists[ENTITYLIST_PEDS_OVERLAP], centre, distance, ignoreZ, nextObject, lastObject, objects);
+				FindObjectsInRangeSectorList(sector->m_lists[ENTITYLIST_PEDS], centre, radius, ignoreZ, nextObject, lastObject, objects);
+				FindObjectsInRangeSectorList(sector->m_lists[ENTITYLIST_PEDS_OVERLAP], centre, radius, ignoreZ, nextObject, lastObject, objects);
 			}
 			if (checkObjects) {
-				FindObjectsInRangeSectorList(sector->m_lists[ENTITYLIST_OBJECTS], centre, distance, ignoreZ, nextObject, lastObject, objects);
-				FindObjectsInRangeSectorList(sector->m_lists[ENTITYLIST_OBJECTS_OVERLAP], centre, distance, ignoreZ, nextObject, lastObject, objects);
+				FindObjectsInRangeSectorList(sector->m_lists[ENTITYLIST_OBJECTS], centre, radius, ignoreZ, nextObject, lastObject, objects);
+				FindObjectsInRangeSectorList(sector->m_lists[ENTITYLIST_OBJECTS_OVERLAP], centre, radius, ignoreZ, nextObject, lastObject, objects);
 			}
 			if (checkDummies) {
-				FindObjectsInRangeSectorList(sector->m_lists[ENTITYLIST_DUMMIES], centre, distance, ignoreZ, nextObject, lastObject, objects);
-				FindObjectsInRangeSectorList(sector->m_lists[ENTITYLIST_DUMMIES_OVERLAP], centre, distance, ignoreZ, nextObject, lastObject, objects);
+				FindObjectsInRangeSectorList(sector->m_lists[ENTITYLIST_DUMMIES], centre, radius, ignoreZ, nextObject, lastObject, objects);
+				FindObjectsInRangeSectorList(sector->m_lists[ENTITYLIST_DUMMIES_OVERLAP], centre, radius, ignoreZ, nextObject, lastObject, objects);
 			}
 		}
 	}
 }
 
 CEntity*
-CWorld::TestSphereAgainstWorld(CVector centre, float distance, CEntity *entityToIgnore, bool checkBuildings, bool checkVehicles, bool checkPeds, bool checkObjects, bool checkDummies, bool ignoreSomeObjects)
+CWorld::TestSphereAgainstWorld(CVector centre, float radius, CEntity *entityToIgnore, bool checkBuildings, bool checkVehicles, bool checkPeds, bool checkObjects, bool checkDummies, bool ignoreSomeObjects)
 {
 	CEntity* foundE = nil;
 
-	int minX = GetSectorIndexX(centre.x - distance);
+	int minX = GetSectorIndexX(centre.x - radius);
 	if (minX <= 0) minX = 0;
 
-	int minY = GetSectorIndexY(centre.y - distance);
+	int minY = GetSectorIndexY(centre.y - radius);
 	if (minY <= 0) minY = 0;
 
-	int maxX = GetSectorIndexX(centre.x + distance);
+	int maxX = GetSectorIndexX(centre.x + radius);
 #ifdef FIX_BUGS
 	if (maxX >= NUMSECTORS_X) maxX = NUMSECTORS_X - 1;
 #else
 	if (maxX >= NUMSECTORS_X) maxX = NUMSECTORS_X;
 #endif
 
-	int maxY = GetSectorIndexY(centre.y + distance);
+	int maxY = GetSectorIndexY(centre.y + radius);
 #ifdef FIX_BUGS
 	if (maxY >= NUMSECTORS_Y) maxY = NUMSECTORS_Y - 1;
 #else
@@ -719,47 +720,47 @@ CWorld::TestSphereAgainstWorld(CVector centre, float distance, CEntity *entityTo
 		for (int curX = minX; curX <= maxX; curX++) {
 			CSector* sector = GetSector(curX, curY);
 			if (checkBuildings) {
-				foundE = TestSphereAgainstSectorList(sector->m_lists[ENTITYLIST_BUILDINGS], centre, distance, entityToIgnore, false);
+				foundE = TestSphereAgainstSectorList(sector->m_lists[ENTITYLIST_BUILDINGS], centre, radius, entityToIgnore, false);
 				if (foundE)
 					return foundE;
 
-				foundE = TestSphereAgainstSectorList(sector->m_lists[ENTITYLIST_BUILDINGS_OVERLAP], centre, distance, entityToIgnore, false);
+				foundE = TestSphereAgainstSectorList(sector->m_lists[ENTITYLIST_BUILDINGS_OVERLAP], centre, radius, entityToIgnore, false);
 				if (foundE)
 					return foundE;
 			}
 			if (checkVehicles) {
-				foundE = TestSphereAgainstSectorList(sector->m_lists[ENTITYLIST_VEHICLES], centre, distance, entityToIgnore, false);
+				foundE = TestSphereAgainstSectorList(sector->m_lists[ENTITYLIST_VEHICLES], centre, radius, entityToIgnore, false);
 				if (foundE)
 					return foundE;
 
-				foundE = TestSphereAgainstSectorList(sector->m_lists[ENTITYLIST_VEHICLES_OVERLAP], centre, distance, entityToIgnore, false);
+				foundE = TestSphereAgainstSectorList(sector->m_lists[ENTITYLIST_VEHICLES_OVERLAP], centre, radius, entityToIgnore, false);
 				if (foundE)
 					return foundE;
 			}
 			if (checkPeds) {
-				foundE = TestSphereAgainstSectorList(sector->m_lists[ENTITYLIST_PEDS], centre, distance, entityToIgnore, false);
+				foundE = TestSphereAgainstSectorList(sector->m_lists[ENTITYLIST_PEDS], centre, radius, entityToIgnore, false);
 				if (foundE)
 					return foundE;
 
-				foundE = TestSphereAgainstSectorList(sector->m_lists[ENTITYLIST_PEDS_OVERLAP], centre, distance, entityToIgnore, false);
+				foundE = TestSphereAgainstSectorList(sector->m_lists[ENTITYLIST_PEDS_OVERLAP], centre, radius, entityToIgnore, false);
 				if (foundE)
 					return foundE;
 			}
 			if (checkObjects) {
-				foundE = TestSphereAgainstSectorList(sector->m_lists[ENTITYLIST_OBJECTS], centre, distance, entityToIgnore, ignoreSomeObjects);
+				foundE = TestSphereAgainstSectorList(sector->m_lists[ENTITYLIST_OBJECTS], centre, radius, entityToIgnore, ignoreSomeObjects);
 				if (foundE)
 					return foundE;
 
-				foundE = TestSphereAgainstSectorList(sector->m_lists[ENTITYLIST_OBJECTS_OVERLAP], centre, distance, entityToIgnore, ignoreSomeObjects);
+				foundE = TestSphereAgainstSectorList(sector->m_lists[ENTITYLIST_OBJECTS_OVERLAP], centre, radius, entityToIgnore, ignoreSomeObjects);
 				if (foundE)
 					return foundE;
 			}
 			if (checkDummies) {
-				foundE = TestSphereAgainstSectorList(sector->m_lists[ENTITYLIST_DUMMIES], centre, distance, entityToIgnore, false);
+				foundE = TestSphereAgainstSectorList(sector->m_lists[ENTITYLIST_DUMMIES], centre, radius, entityToIgnore, false);
 				if (foundE)
 					return foundE;
 
-				foundE = TestSphereAgainstSectorList(sector->m_lists[ENTITYLIST_DUMMIES_OVERLAP], centre, distance, entityToIgnore, false);
+				foundE = TestSphereAgainstSectorList(sector->m_lists[ENTITYLIST_DUMMIES_OVERLAP], centre, radius, entityToIgnore, false);
 				if (foundE)
 					return foundE;
 			}
@@ -806,7 +807,7 @@ CWorld::TestSphereAgainstSectorList(CPtrList &list, CVector spherePos, float rad
 				if (e->GetBoundRadius() + radius > distance) {
 					CColModel *eCol = CModelInfo::GetModelInfo(e->m_modelIndex)->GetColModel();
 					int collidedSpheres = CCollision::ProcessColModels(sphereMat, sphereCol, e->GetMatrix(),
-						*eCol, &ms_testSpherePoint, nil, nil);
+						*eCol, gaTempSphereColPoints, nil, nil);
 
 					if (collidedSpheres != 0 ||
 						(e->IsVehicle() && ((CVehicle*)e)->m_vehType == VEHICLE_TYPE_CAR &&

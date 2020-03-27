@@ -7,8 +7,11 @@
 #include "Vehicle.h"
 #include "RpAnimBlend.h"
 #include "General.h"
+#include "ZoneCull.h"
+#include "PathFind.h"
+#include "RoadBlocks.h"
 
-WRAPPER void CCopPed::ProcessControl() { EAXJMP(0x4C1400);  }
+WRAPPER void CCopPed::ProcessControl() { EAXJMP(0x4C1400); }
 
 CCopPed::CCopPed(eCopType copType) : CPed(PEDTYPE_COP)
 {
@@ -58,11 +61,16 @@ CCopPed::CCopPed(eCopType copType) : CPed(PEDTYPE_COP)
 	m_bIsDisabledCop = false;
 	field_1356 = 0;
 	m_attackTimer = 0;
-	field_1351 = 0;
+	m_bBeatingSuspect = false;
 	m_bZoneDisabledButClose = false;
 	m_bZoneDisabled = false;
 	field_1364 = -1;
 	m_pPointGunAt = nil;
+
+	// VC also initializes in here, but it keeps object
+#ifdef FIX_BUGS
+	m_wRoadblockNode = -1;
+#endif
 }
 
 CCopPed::~CCopPed()
@@ -181,15 +189,15 @@ CCopPed::ClearPursuit(void)
 	}
 }
 
-// TO-DO: m_MaxCops in for loop may be a bug, check it out after CopAI
+// TODO: I don't know why they needed that parameter.
 void
-CCopPed::SetPursuit(bool iMayAlreadyBeInPursuit)
+CCopPed::SetPursuit(bool ignoreCopLimit)
 {
 	CWanted *wanted = FindPlayerPed()->m_pWanted;
 	if (m_bIsInPursuit || !IsPedInControl())
 		return;
 
-	if (wanted->m_CurrentCops < wanted->m_MaxCops || iMayAlreadyBeInPursuit) {
+	if (wanted->m_CurrentCops < wanted->m_MaxCops || ignoreCopLimit) {
 		for (int i = 0; i < wanted->m_MaxCops; ++i) {
 			if (!wanted->m_pCops[i]) {
 				m_bIsInPursuit = true;
@@ -275,6 +283,274 @@ CCopPed::ScanForCrimes(void)
 	}
 }
 
+void
+CCopPed::CopAI(void)
+{
+	CWanted *wanted = FindPlayerPed()->m_pWanted;
+	int wantedLevel = wanted->m_nWantedLevel;
+	CPhysical *playerOrHisVeh = FindPlayerVehicle() ? (CPhysical*)FindPlayerVehicle() : (CPhysical*)FindPlayerPed();
+
+	if (wanted->m_bIgnoredByEveryone || wanted->m_bIgnoredByCops) {
+		if (m_nPedState != PED_ARREST_PLAYER)
+			ClearPursuit();
+
+		return;
+	}
+	if (CCullZones::NoPolice() && m_bIsInPursuit && !m_bIsDisabledCop) {
+		if (bHitSomethingLastFrame) {
+			m_bZoneDisabled = true;
+			m_bIsDisabledCop = true;
+#ifdef FIX_BUGS
+			m_wRoadblockNode = -1;
+#else
+			m_wRoadblockNode = 0;
+#endif
+			bKindaStayInSamePlace = true;
+			bIsRunning = false;
+			bNotAllowedToDuck = false;
+			bCrouchWhenShooting = false;
+			SetIdle();
+			ClearObjective();
+			ClearPursuit();
+			m_prevObjective = OBJECTIVE_NONE;
+			m_nLastPedState = PED_NONE;
+			SetAttackTimer(0);
+			if (m_fDistanceToTarget > 15.0f)
+				m_bZoneDisabledButClose = true;
+		}
+	} else if (m_bZoneDisabled && !CCullZones::NoPolice()) {
+		m_bZoneDisabled = false;
+		m_bIsDisabledCop = false;
+		m_bZoneDisabledButClose = false;
+		bKindaStayInSamePlace = false;
+		bCrouchWhenShooting = false;
+		bDuckAndCover = false;
+		ClearPursuit();
+	}
+	if (wantedLevel > 0) {
+		if (!m_bIsDisabledCop) {
+			if (!m_bIsInPursuit || wanted->m_CurrentCops > wanted->m_MaxCops) {
+				CCopPed *copFarthestToTarget = nil;
+				float copFarthestToTargetDist = m_fDistanceToTarget;
+
+				int oldCopNum = wanted->m_CurrentCops;
+				int maxCops = wanted->m_MaxCops;
+				
+				for (int i = 0; i < max(maxCops, oldCopNum); i++) {
+					CCopPed *cop = wanted->m_pCops[i];
+					if (cop && cop->m_fDistanceToTarget > copFarthestToTargetDist) {
+						copFarthestToTargetDist = cop->m_fDistanceToTarget;
+						copFarthestToTarget = wanted->m_pCops[i];
+					}
+				}
+
+				if (m_bIsInPursuit) {
+					if (copFarthestToTarget && oldCopNum > maxCops) {
+						if (copFarthestToTarget == this && m_fDistanceToTarget > 10.0f) {
+							ClearPursuit();
+						} else if(copFarthestToTargetDist > 10.0f)
+							copFarthestToTarget->ClearPursuit();
+					}
+				} else {
+					if (oldCopNum < maxCops) {
+						SetPursuit(true);
+					} else {
+						if (m_fDistanceToTarget <= 10.0f || copFarthestToTarget && m_fDistanceToTarget < copFarthestToTargetDist) {
+							if (copFarthestToTarget && copFarthestToTargetDist > 10.0f)
+								copFarthestToTarget->ClearPursuit();
+
+							SetPursuit(true);
+						}
+					}
+				}
+			} else
+				SetPursuit(false);
+
+			if (!m_bIsInPursuit)
+				return;
+
+			if (wantedLevel > 1 && GetWeapon()->m_eWeaponType == WEAPONTYPE_UNARMED)
+				SetCurrentWeapon(WEAPONTYPE_COLT45);
+			else if (wantedLevel == 1 && GetWeapon()->m_eWeaponType != WEAPONTYPE_UNARMED && !FindPlayerPed()->m_pCurrentPhysSurface) {
+				// i.e. if player is on top of car, cop will still use colt45.
+				SetCurrentWeapon(WEAPONTYPE_UNARMED);
+			}
+
+			if (FindPlayerVehicle()) {
+				if (m_bBeatingSuspect) {
+					--wanted->m_CopsBeatingSuspect;
+					m_bBeatingSuspect = false;
+				}
+				if (m_fDistanceToTarget * FindPlayerSpeed().Magnitude() > 4.0f)
+					ClearPursuit();
+			}
+			return;
+		}
+		float weaponRange = CWeaponInfo::GetWeaponInfo(GetWeapon()->m_eWeaponType)->m_fRange;
+		SetLookFlag(playerOrHisVeh, true);
+		TurnBody();
+		SetCurrentWeapon(WEAPONTYPE_COLT45);
+		if (!bIsDucking) {
+			if (m_attackTimer >= CTimer::GetTimeInMilliseconds()) {
+				if (m_nPedState != PED_ATTACK && m_nPedState != PED_FIGHT && !m_bZoneDisabled) {
+					CVector targetDist = playerOrHisVeh->GetPosition() - GetPosition();
+					if (m_fDistanceToTarget > 30.0f) {
+						CAnimBlendAssociation* crouchShootAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_RBLOCK_CSHOOT);
+						if (crouchShootAssoc)
+							crouchShootAssoc->blendDelta = -1000.0f;
+
+						// Target is coming onto us
+						if (DotProduct(playerOrHisVeh->m_vecMoveSpeed, targetDist) > 0.0f) {
+							m_bIsDisabledCop = false;
+							bKindaStayInSamePlace = false;
+							bNotAllowedToDuck = false;
+							bDuckAndCover = false;
+							SetPursuit(false);
+							SetObjective(OBJECTIVE_KILL_CHAR_ANY_MEANS, FindPlayerPed());
+						}
+					} else if (m_fDistanceToTarget < 5.0f
+							&& (!FindPlayerVehicle() || FindPlayerVehicle()->m_vecMoveSpeed.MagnitudeSqr() < sq(1.f/200.f))) {
+						m_bIsDisabledCop = false;
+						bKindaStayInSamePlace = false;
+						bNotAllowedToDuck = false;
+						bDuckAndCover = false;
+					} else {
+						// VC checks for != nil compared to buggy behaviour of III. I check for != -1 here.
+#ifdef VC_PED_PORTS
+						float dotProd;
+						if (m_wRoadblockNode != -1) {
+							CTreadable *roadBlockRoad = ThePaths.m_mapObjects[CRoadBlocks::RoadBlockObjects[m_wRoadblockNode]];
+							dotProd = DotProduct2D(playerOrHisVeh->GetPosition() - roadBlockRoad->GetPosition(), GetPosition() - roadBlockRoad->GetPosition());
+						} else
+							dotProd = -1.0f;
+
+						if(dotProd >= 0.0f) {
+#else
+						
+#ifndef FIX_BUGS
+						float copRoadDotProd, targetRoadDotProd;
+#else
+						float copRoadDotProd = 1.0f, targetRoadDotProd = 1.0f;
+						if (m_wRoadblockNode != -1)
+#endif
+						{
+							CTreadable* roadBlockRoad = ThePaths.m_mapObjects[CRoadBlocks::RoadBlockObjects[m_wRoadblockNode]];
+							CVector2D roadFwd = roadBlockRoad->GetForward();
+							copRoadDotProd = DotProduct2D(GetPosition() - roadBlockRoad->GetPosition(), roadFwd);
+							targetRoadDotProd = DotProduct2D(playerOrHisVeh->GetPosition() - roadBlockRoad->GetPosition(), roadFwd);
+						}
+						// Roadblock may be towards road's fwd or opposite, so check both
+						if ((copRoadDotProd >= 0.0f || targetRoadDotProd >= 0.0f)
+							&& (copRoadDotProd <= 0.0f || targetRoadDotProd <= 0.0f)) {
+#endif
+							bIsPointingGunAt = true;
+						} else {
+							m_bIsDisabledCop = false;
+							bKindaStayInSamePlace = false;
+							bNotAllowedToDuck = false;
+							bCrouchWhenShooting = false;
+							bIsDucking = false;
+							bDuckAndCover = false;
+							SetPursuit(false);
+						}
+					}
+				}
+			} else {
+				if (m_fDistanceToTarget < weaponRange) {
+					CWeaponInfo *weaponInfo = CWeaponInfo::GetWeaponInfo(GetWeapon()->m_eWeaponType);
+					CVector gunPos = weaponInfo->m_vecFireOffset;
+					for (RwFrame *i = GetNodeFrame(PED_HANDR); i; i = RwFrameGetParent(i))
+						RwV3dTransformPoints((RwV3d*)&gunPos, (RwV3d*)&gunPos, 1, RwFrameGetMatrix(i));
+
+					CColPoint foundCol;
+					CEntity *foundEnt;
+					if (!CWorld::ProcessLineOfSight(gunPos, playerOrHisVeh->GetPosition(), foundCol, foundEnt,
+						false, true, false, false, true, false, false)
+						|| foundEnt && foundEnt == playerOrHisVeh) {
+						m_pPointGunAt = playerOrHisVeh;
+						if (playerOrHisVeh)
+							playerOrHisVeh->RegisterReference((CEntity**) &m_pPointGunAt);
+
+						SetAttack(playerOrHisVeh);
+						SetShootTimer(CGeneral::GetRandomNumberInRange(500, 1000));
+					}
+					SetAttackTimer(CGeneral::GetRandomNumberInRange(100, 300));
+				}
+				SetMoveState(PEDMOVE_STILL);
+			}
+		}
+	} else {
+		if (!m_bIsDisabledCop || m_bZoneDisabled) {
+			if (m_nPedState != PED_AIM_GUN) {
+				if (m_bIsInPursuit)
+					ClearPursuit();
+
+				if (IsPedInControl()) {
+					// Entering the vehicle
+					if (m_pMyVehicle && !bInVehicle) {
+						if (m_pMyVehicle->IsLawEnforcementVehicle()) {
+							if (m_pMyVehicle->pDriver) {
+								if (m_pMyVehicle->pDriver->m_nPedType == PEDTYPE_COP) {
+									if (m_objective != OBJECTIVE_ENTER_CAR_AS_PASSENGER)
+										SetObjective(OBJECTIVE_ENTER_CAR_AS_PASSENGER, m_pMyVehicle);
+								} else if (m_pMyVehicle->pDriver->IsPlayer()) {
+									FindPlayerPed()->SetWantedLevelNoDrop(1);
+								}
+							} else if (m_objective != OBJECTIVE_ENTER_CAR_AS_DRIVER) {
+								SetObjective(OBJECTIVE_ENTER_CAR_AS_DRIVER, m_pMyVehicle);
+							}
+						} else {
+							m_pMyVehicle = nil;
+							ClearObjective();
+							SetWanderPath(CGeneral::GetRandomNumber() & 7);
+						}
+					}
+#ifdef VC_PED_PORTS
+					else {
+						if (m_objective != OBJECTIVE_KILL_CHAR_ON_FOOT && CharCreatedBy == RANDOM_CHAR) {
+							for (int i = 0; i < m_numNearPeds; i++) {
+								CPed *nearPed = m_nearPeds[i];
+								if (nearPed->CharCreatedBy == RANDOM_CHAR) {
+									if ((nearPed->m_nPedType == PEDTYPE_CRIMINAL || nearPed->IsGangMember())
+										&& nearPed->IsPedInControl()) {
+
+										bool anotherCopChasesHim = false;
+										if (nearPed->m_nPedState == PED_FLEE_ENTITY) {
+											if (nearPed->m_fleeFrom && nearPed->m_fleeFrom->IsPed() &&
+												((CPed*)nearPed->m_fleeFrom)->m_nPedType == PEDTYPE_COP) {
+												anotherCopChasesHim = true;
+											}
+										}
+										if (!anotherCopChasesHim) {
+											SetObjective(OBJECTIVE_KILL_CHAR_ON_FOOT, nearPed);
+											nearPed->SetObjective(OBJECTIVE_FLEE_CHAR_ON_FOOT_TILL_SAFE, this);
+											nearPed->m_ped_flagE2 = true;
+											return;
+										}
+									}
+								}
+							}
+						}
+					}
+#endif
+				}
+			}
+		} else {
+			if (m_bIsInPursuit && m_nPedState != PED_AIM_GUN)
+				ClearPursuit();
+
+			m_bIsDisabledCop = false;
+			bKindaStayInSamePlace = false;
+			bNotAllowedToDuck = false;
+			bCrouchWhenShooting = false;
+			bIsDucking = false;
+			bDuckAndCover = false;
+			if (m_pMyVehicle)
+				SetObjective(OBJECTIVE_ENTER_CAR_AS_DRIVER, m_pMyVehicle);
+		}
+	}
+}
+
 class CCopPed_ : public CCopPed
 {
 public:
@@ -290,4 +566,5 @@ STARTPATCHES
 	InjectHook(0x4C27D0, &CCopPed::SetPursuit, PATCH_JUMP);
 	InjectHook(0x4C2C90, &CCopPed::ArrestPlayer, PATCH_JUMP);
 	InjectHook(0x4C26A0, &CCopPed::ScanForCrimes, PATCH_JUMP);
+	InjectHook(0x4C1B50, &CCopPed::CopAI, PATCH_JUMP);
 ENDPATCHES

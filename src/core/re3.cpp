@@ -20,6 +20,7 @@
 #include "debugmenu_public.h"
 #include "Particle.h"
 #include "Console.h"
+#include "Debug.h"
 
 #include <vector>
 #include <list>
@@ -114,13 +115,16 @@ SpawnCar(int id)
 	CStreaming::LoadAllRequestedModels(false);
 	if(CStreaming::HasModelLoaded(id)){
 		playerpos = FindPlayerCoors();
-		int node = ThePaths.FindNodeClosestToCoors(playerpos, 0, 100.0f, false, false);
-		if(node < 0)
-			return;
+		int node;
+		if(!CModelInfo::IsBoatModel(id)){
+			node = ThePaths.FindNodeClosestToCoors(playerpos, 0, 100.0f, false, false);
+			if(node < 0)
+				return;
+		}
 
 		CVehicle *v;
 		if(CModelInfo::IsBoatModel(id))
-			return;
+			v = new CBoat(id, RANDOM_VEHICLE);
 		else
 			v = new CAutomobile(id, RANDOM_VEHICLE);
 
@@ -130,7 +134,11 @@ SpawnCar(int id)
 		if(carCol2)
 			DebugMenuEntrySetAddress(carCol2, &v->m_currentColour2);
 
-		v->GetPosition() = ThePaths.m_pathNodes[node].pos;
+		if(CModelInfo::IsBoatModel(id))
+			v->GetPosition() = TheCamera.GetPosition() + TheCamera.GetForward()*15.0f;
+		else
+			v->GetPosition() = ThePaths.m_pathNodes[node].pos;
+
 		v->GetPosition().z += 4.0f;
 		v->SetOrientation(0.0f, 0.0f, 3.49f);
 		v->m_status = STATUS_ABANDONED;
@@ -195,6 +203,12 @@ PlaceOnRoad(void)
 
 	if(veh->IsCar())
 		((CAutomobile*)veh)->PlaceOnRoadProperly();
+}
+
+static void
+ResetCamStatics(void)
+{
+	TheCamera.Cams[TheCamera.ActiveCam].ResetStatics = true;
 }
 
 static const char *carnames[] = {
@@ -358,7 +372,17 @@ DebugMenuPopulate(void)
 
 		DebugMenuAddCmd("Debug", "Start Credits", CCredits::Start);
 		DebugMenuAddCmd("Debug", "Stop Credits", CCredits::Stop);
-		
+
+		extern bool PrintDebugCode;
+		extern int16 &DebugCamMode;
+		DebugMenuAddVarBool8("Cam", "Print Debug Code", (int8*)&PrintDebugCode, nil);
+		DebugMenuAddVar("Cam", "Cam Mode", &DebugCamMode, nil, 1, 0, CCam::MODE_EDITOR, nil);
+		DebugMenuAddCmd("Cam", "Normal", []() { DebugCamMode = 0; });
+		DebugMenuAddCmd("Cam", "Follow Ped With Bind", []() { DebugCamMode = CCam::MODE_FOLLOW_PED_WITH_BIND; });
+		DebugMenuAddCmd("Cam", "Reaction", []() { DebugCamMode = CCam::MODE_REACTION; });
+		DebugMenuAddCmd("Cam", "Chris", []() { DebugCamMode = CCam::MODE_CHRIS; });
+		DebugMenuAddCmd("Cam", "Reset Statics", ResetCamStatics);
+
 		CTweakVars::AddDBG("Debug");
 	}
 }
@@ -433,7 +457,8 @@ void re3_debug(const char *format, ...)
 	vsprintf_s(re3_buff, re3_buffsize, format, va);
 	va_end(va);
 
-	printf("%s", re3_buff);
+//	printf("%s", re3_buff);
+	CDebug::DebugAddText(re3_buff);
 }
 
 void re3_trace(const char *filename, unsigned int lineno, const char *func, const char *format, ...)

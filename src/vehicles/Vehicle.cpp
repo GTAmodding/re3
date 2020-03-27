@@ -32,6 +32,7 @@ void CVehicle::operator delete(void *p, int handle) { CPools::GetVehiclePool()->
 WRAPPER bool CVehicle::ShufflePassengersToMakeSpace(void) { EAXJMP(0x5528A0); }
 // or Weapon.cpp?
 WRAPPER void FireOneInstantHitRound(CVector *shotSource, CVector *shotTarget, int32 damage) { EAXJMP(0x563B00); }
+WRAPPER void CVehicle::InflictDamage(CEntity *damagedBy, uint32 weaponType, float damage) { EAXJMP(0x551950); }
 
 CVehicle::CVehicle(uint8 CreatedBy)
 {

@@ -2720,6 +2720,10 @@ CPed::SetObjective(eObjective newObj, void *entity)
 			return;
 	}
 
+#ifdef VC_PED_PORTS
+	SetObjectiveTimer(0);
+	ClearPointGunAt();
+#endif
 	bObjectiveCompleted = false;
 	if (!IsTemporaryObjective(m_objective) || IsTemporaryObjective(newObj)) {
 		if (m_objective != newObj) {
@@ -3444,8 +3448,12 @@ CPed::ClearAll(void)
 	m_fleeFrom = nil;
 	m_fleeTimer = 0;
 	bUsesCollision = true;
+#ifdef VC_PED_PORTS
+	ClearPointGunAt();
+#else
 	ClearAimFlag();
 	ClearLookFlag();
+#endif
 	bIsPointingGunAt = false;
 	bRenderPedInCar = true;
 	bKnockedUpIntoAir = false;
@@ -12169,11 +12177,11 @@ CPed::PlacePedOnDryLand(void)
 	if (!CWorld::TestSphereAgainstWorld(potentialGround, 5.0f, nil, true, false, false, false, false, false))
 		return false;
 
-	CVector potentialGroundDist = CWorld::ms_testSpherePoint.point - GetPosition();
+	CVector potentialGroundDist = gaTempSphereColPoints[0].point - GetPosition();
 	potentialGroundDist.z = 0.0f;
 	potentialGroundDist.Normalise();
 
-	CVector posToCheck = 0.5f * potentialGroundDist + CWorld::ms_testSpherePoint.point;
+	CVector posToCheck = 0.5f * potentialGroundDist + gaTempSphereColPoints[0].point;
 	posToCheck.z = 3.0f + waterLevel;
 
 	if (CWorld::ProcessVerticalLine(posToCheck, waterLevel - 1.0f, foundCol, foundEnt, true, true, false, true, false, false, false)) {

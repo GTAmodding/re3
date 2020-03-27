@@ -2,7 +2,7 @@
 
 class CTimer
 {
-public:
+
 	static uint32 &m_snTimeInMilliseconds;
 	static uint32 &m_snTimeInMillisecondsPauseMode;
 	static uint32 &m_snTimeInMillisecondsNonClipped;
@@ -11,19 +11,20 @@ public:
 	static float &ms_fTimeScale;
 	static float &ms_fTimeStep;
 	static float &ms_fTimeStepNonClipped;
+public:
 	static bool  &m_UserPause;
 	static bool  &m_CodePause;
 
-	static float GetTimeStep(void) { return ms_fTimeStep; }
+	static const float &GetTimeStep(void) { return ms_fTimeStep; }
 	static void SetTimeStep(float ts) { ms_fTimeStep = ts; }
 	static float GetTimeStepInSeconds() { return ms_fTimeStep / 50.0f; }
 	static float GetTimeStepInMilliseconds() { return ms_fTimeStep / 50.0f * 1000.0f; }
-	static float GetTimeStepNonClipped(void) { return ms_fTimeStepNonClipped; }
+	static const float &GetTimeStepNonClipped(void) { return ms_fTimeStepNonClipped; }
 	static float GetTimeStepNonClippedInSeconds(void) { return ms_fTimeStepNonClipped / 50.0f; }
 	static void SetTimeStepNonClipped(float ts) { ms_fTimeStepNonClipped = ts; }
-	static uint32 GetFrameCounter(void) { return m_FrameCounter; }
+	static const uint32 &GetFrameCounter(void) { return m_FrameCounter; }
 	static void SetFrameCounter(uint32 fc) { m_FrameCounter = fc; }
-	static uint32 GetTimeInMilliseconds(void) { return m_snTimeInMilliseconds; }
+	static const uint32 &GetTimeInMilliseconds(void) { return m_snTimeInMilliseconds; }
 	static void SetTimeInMilliseconds(uint32 t) { m_snTimeInMilliseconds = t; }
 	static uint32 GetTimeInMillisecondsNonClipped(void) { return m_snTimeInMillisecondsNonClipped; }
 	static void SetTimeInMillisecondsNonClipped(uint32 t) { m_snTimeInMillisecondsNonClipped = t; }
@@ -31,7 +32,7 @@ public:
 	static void SetTimeInMillisecondsPauseMode(uint32 t) { m_snTimeInMillisecondsPauseMode = t; }
 	static uint32 GetPreviousTimeInMilliseconds(void) { return m_snPreviousTimeInMilliseconds; }
 	static void SetPreviousTimeInMilliseconds(uint32 t) { m_snPreviousTimeInMilliseconds = t; }
-	static float GetTimeScale(void) { return ms_fTimeScale; }
+	static const float &GetTimeScale(void) { return ms_fTimeScale; }
 	static void SetTimeScale(float ts) { ms_fTimeScale = ts; }
 
 	static bool GetIsPaused() { return m_UserPause || m_CodePause; }

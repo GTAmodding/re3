@@ -403,7 +403,7 @@ public:
 	int32 m_nHelperTextMsgId;
 	bool m_bLanguageLoaded;
 	bool m_bMenuActive;
-	bool m_bMenuNotProcessed;
+	bool m_bMenuStateChanged;
 	bool m_bWaitingForNewKeyBind;
 	bool m_bStartGameLoading;
 	bool m_bFirstTime;
@@ -540,8 +540,14 @@ public:
 	void WaitForUserCD();
 	void PrintController();
 
-	// New content:
-	uint8 GetNumberOfMenuOptions();
+	// New (not in function or inlined in the game)
+	void ThingsToDoBeforeLeavingPage();
+	void ScrollUpListByOne();
+	void ScrollDownListByOne();
+	void PageUpList(bool);
+	void PageDownList(bool);
+	
+	// uint8 GetNumberOfMenuOptions();
 };
 
 static_assert(sizeof(CMenuManager) == 0x564, "CMenuManager: error");

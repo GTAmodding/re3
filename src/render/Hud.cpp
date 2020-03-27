@@ -115,47 +115,43 @@ void CHud::Draw()
 		return;
 
 	if (m_Wants_To_Draw_Hud && !TheCamera.m_WideScreenOn) {
-		bool Mode_RunAround = 0;
-		bool Mode_FirstPerson = 0;
+		bool DrawCrossHair = 0;
+		bool DrawCrossHairPC = 0;
 
 		int32 WeaponType = FindPlayerPed()->m_weapons[FindPlayerPed()->m_currentWeapon].m_eWeaponType;
 		int32 Mode = TheCamera.Cams[TheCamera.ActiveCam].Mode;
 
-		if (Mode == CCam::MODE_SNIPER || Mode == CCam::MODE_ROCKETLAUNCHER || Mode == CCam::MODE_M16_1STPERSON || Mode == CCam::MODE_EDITOR)
-			Mode_FirstPerson = 1;
-		if (Mode == CCam::MODE_M16_1STPERSON_RUNABOUT || Mode == CCam::MODE_SNIPER_RUNABOUT)
-			Mode_RunAround = 1;
+		if (Mode == CCam::MODE_SNIPER || Mode == CCam::MODE_ROCKETLAUNCHER || Mode == CCam::MODE_M16_1STPERSON || Mode == CCam::MODE_HELICANNON_1STPERSON)
+			DrawCrossHair = 1;
+		if (Mode == CCam::MODE_M16_1STPERSON_RUNABOUT || Mode == CCam::MODE_ROCKETLAUNCHER_RUNABOUT || Mode == CCam::MODE_SNIPER_RUNABOUT)
+			DrawCrossHairPC = 1;
 
 		/*
 			Draw Crosshairs
 		*/
-		if (TheCamera.Cams->Using3rdPersonMouseCam() && (!CPad::GetPad(0)->GetLookBehindForPed() || TheCamera.m_bPlayerIsInGarage) || Mode == CCam::MODE_1STPERSON_RUNABOUT) {
+		if (TheCamera.Cams[TheCamera.ActiveCam].Using3rdPersonMouseCam() &&
+		    (!CPad::GetPad(0)->GetLookBehindForPed() || TheCamera.m_bPlayerIsInGarage) || Mode == CCam::MODE_1STPERSON_RUNABOUT) {
 			if (FindPlayerPed() && !FindPlayerPed()->EnteringCar()) {
 				if ((WeaponType >= WEAPONTYPE_COLT45 && WeaponType <= WEAPONTYPE_M16) || WeaponType == WEAPONTYPE_FLAMETHROWER)
-					Mode_RunAround = 1;
+					DrawCrossHairPC = 1;
 			}
 		}
 
-		if (Mode_FirstPerson || Mode_RunAround) {
+		if (DrawCrossHair || DrawCrossHairPC) {
 			RwRenderStateSet(rwRENDERSTATETEXTUREFILTER, (void *)rwFILTERLINEAR);
 
-			int32 SpriteBrightLikeADiamond = SpriteBrightness + 1;
-			if (SpriteBrightLikeADiamond > 30)
-				SpriteBrightLikeADiamond = 30;
-
-			SpriteBrightness = SpriteBrightLikeADiamond;
+			SpriteBrightness = min(SpriteBrightness+1, 30);
 
 			RwRenderStateSet(rwRENDERSTATEZWRITEENABLE, (void*)FALSE);
 
-			float fStep = Sin((CTimer::GetTimeInMilliseconds() & 1023) * 0.0061328127);
+			float fStep = Sin((CTimer::GetTimeInMilliseconds() & 1023)/1024.0f * 6.28f);
 			float fMultBright = SpriteBrightness * 0.03f * (0.25f * fStep + 0.75f);
 			CRect rect;
+			if (DrawCrossHairPC && TheCamera.Cams[TheCamera.ActiveCam].Using3rdPersonMouseCam()) {
 #ifndef ASPECT_RATIO_SCALE
-			if (Mode_RunAround && TheCamera.Cams->Using3rdPersonMouseCam()) {
 				float f3rdX = SCREEN_WIDTH * TheCamera.m_f3rdPersonCHairMultX;
 				float f3rdY = SCREEN_HEIGHT * TheCamera.m_f3rdPersonCHairMultY;
 #else
-			if (Mode_RunAround && TheCamera.Cams->Using3rdPersonMouseCam()) {
 				float f3rdX = (((TheCamera.m_f3rdPersonCHairMultX - 0.5f) / ((CDraw::GetAspectRatio()) / (DEFAULT_ASPECT_RATIO))) + 0.5f) * SCREEN_WIDTH;
 				float f3rdY = SCREEN_HEIGHT * TheCamera.m_f3rdPersonCHairMultY + SCREEN_SCALE_Y(-2.0f);
 #endif
@@ -179,14 +175,14 @@ void CHud::Draw()
 			else {
 				if (Mode == CCam::MODE_M16_1STPERSON ||
 				    Mode == CCam::MODE_M16_1STPERSON_RUNABOUT ||
-				    Mode == CCam::MODE_EDITOR) {
+				    Mode == CCam::MODE_HELICANNON_1STPERSON) {
 					rect.left = (SCREEN_WIDTH / 2) - SCREEN_SCALE_X(32.0f);
 					rect.top = (SCREEN_HEIGHT / 2) - SCREEN_SCALE_Y(32.0f);
 					rect.right = (SCREEN_WIDTH / 2) + SCREEN_SCALE_X(32.0f);
 					rect.bottom = (SCREEN_HEIGHT / 2) + SCREEN_SCALE_Y(32.0f);
 					Sprites[HUD_SITEM16].Draw(CRect(rect), CRGBA(255, 255, 255, 255));
 				}
-				else if (Mode == CCam::MODE_ROCKETLAUNCHER_RUNABOUT) {
+				else if (Mode == CCam::MODE_1STPERSON_RUNABOUT) {
 					rect.left = (SCREEN_WIDTH / 2) - SCREEN_SCALE_X(32.0f * 0.7f);
 					rect.top = (SCREEN_HEIGHT / 2) - SCREEN_SCALE_Y(32.0f * 0.7f);
 					rect.right = (SCREEN_WIDTH / 2) + SCREEN_SCALE_X(32.0f * 0.7f);
@@ -194,17 +190,18 @@ void CHud::Draw()
 
 					Sprites[HUD_SITEM16].Draw(CRect(rect), CRGBA(255, 255, 255, 255));
 				}
-				else if (Mode == CCam::MODE_ROCKETLAUNCHER || Mode == CCam::MODE_SNIPER_RUNABOUT) {
+				else if (Mode == CCam::MODE_ROCKETLAUNCHER || Mode == CCam::MODE_ROCKETLAUNCHER_RUNABOUT) {
 					RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void *)TRUE);
 					RwRenderStateSet(rwRENDERSTATESRCBLEND, (void *)rwBLENDONE);
 					RwRenderStateSet(rwRENDERSTATEDESTBLEND, (void *)rwBLENDONE);
 					RwRenderStateSet(rwRENDERSTATEZWRITEENABLE, (void*)FALSE);
 					RwRenderStateSet(rwRENDERSTATEZTESTENABLE, (void*)FALSE);
-					RwRenderStateSet(rwRENDERSTATETEXTURERASTER, gpRocketSightTex->raster);
+					RwRenderStateSet(rwRENDERSTATETEXTURERASTER, RwTextureGetRaster(gpRocketSightTex));
 
 					CSprite::RenderOneXLUSprite(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2, 1.0f, SCREEN_SCALE_X(40.0f), SCREEN_SCALE_Y(40.0f), (100.0f * fMultBright), (200.0f * fMultBright), (100.0f * fMultBright), 255, 1.0f, 255);
 				}
 				else {
+					// Sniper
 					rect.left = (SCREEN_WIDTH / 2) - SCREEN_SCALE_X(210.0f);
 					rect.top = (SCREEN_HEIGHT / 2) - SCREEN_SCALE_Y(210.0f);
 					rect.right = SCREEN_WIDTH / 2;

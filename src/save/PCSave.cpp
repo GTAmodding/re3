@@ -38,7 +38,7 @@ C_PcSave::SaveSlot(int32 slot)
 	if (file != 0) {
 		DoGameSpecificStuffBeforeSave();
 		if (GenericSave(file)) {
-			if (CFileMgr::CloseFile(file) != 0)
+			if (!!CFileMgr::CloseFile(file))
 				nErrorCode = SAVESTATUS_ERR_SAVE_CLOSE;
 			return true;
 		}
@@ -55,21 +55,21 @@ C_PcSave::PcClassSaveRoutine(int32 file, uint8 *data, uint32 size)
 	CFileMgr::Write(file, (const char*)&size, sizeof(size));
 	if (CFileMgr::GetErrorReadWrite(file)) {
 		nErrorCode = SAVESTATUS_ERR_SAVE_WRITE;
-		strncpy(SaveFileNameJustSaved, ValidSaveName, 259);
+		strncpy(SaveFileNameJustSaved, ValidSaveName, sizeof(ValidSaveName) - 1);
 		return false;
 	}
 
 	CFileMgr::Write(file, (const char*)data, align4bytes(size));
-	CheckSum += ((uint8*)&size)[0];
-	CheckSum += ((uint8*)&size)[1];
-	CheckSum += ((uint8*)&size)[2];
-	CheckSum += ((uint8*)&size)[3];
+	CheckSum += (uint8) size;
+	CheckSum += (uint8) (size >> 8);
+	CheckSum += (uint8) (size >> 16);
+	CheckSum += (uint8) (size >> 24);
 	for (int i = 0; i < align4bytes(size); i++) {
 		CheckSum += *data++;
 	}
 	if (CFileMgr::GetErrorReadWrite(file)) {
 		nErrorCode = SAVESTATUS_ERR_SAVE_WRITE;
-		strncpy(SaveFileNameJustSaved, ValidSaveName, 259);
+		strncpy(SaveFileNameJustSaved, ValidSaveName, sizeof(ValidSaveName) - 1);
 		return false;
 	}
 

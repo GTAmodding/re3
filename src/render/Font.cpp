@@ -94,7 +94,7 @@ CFont::Initialise(void)
 	SetBackgroundColor(CRGBA(0x80, 0x80, 0x80, 0x80));
 	SetBackGroundOnlyTextOff();
 	SetPropOn();
-	SetFontStyle(0);
+	SetFontStyle(FONT_BANK);
 	SetRightJustifyWrap(0.0f);
 	SetAlphaFade(255.0f);
 	SetDropShadowPosition(0);

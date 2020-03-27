@@ -63,4 +63,4 @@ public:
 	static void ReportCrimeForEvent(eEventType type, int32, bool);
 };
 
-extern CEvent *gaEvent;
+extern CEvent gaEvent[NUMEVENTS];

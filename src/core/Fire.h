@@ -7,18 +7,22 @@ class CFire
 public:
 	bool m_bIsOngoing;
 	bool m_bIsScriptFire;
-	bool m_bPropogationFlag;
+	bool m_bPropagationFlag;
 	bool m_bAudioSet;
 	CVector m_vecPos;
 	CEntity *m_pEntity;
 	CEntity *m_pSource;
-	int m_nExtinguishTime;
-	int m_nStartTime;
-	int field_20;
-	int field_24;
+	uint32 m_nExtinguishTime;
+	uint32 m_nStartTime;
+	int32 field_20;
+	uint32 m_nNextTimeToAddFlames;
 	uint32 m_nFiremenPuttingOut;
-	float field_2C;
+	float m_fStrength;
 
+	CFire();
+	~CFire();
+	void ProcessFire(void);
+	void ReportThisFire(void);
 	void Extinguish(void);
 };
 
@@ -27,20 +31,21 @@ class CFireManager
 	enum {
 		MAX_FIREMEN_ATTENDING = 2,
 	};
-	uint32 m_nTotalFires;
 public:
+	uint32 m_nTotalFires;
 	CFire m_aFires[NUM_FIRES];
-	void StartFire(CEntity *entityOnFire, CEntity *culprit, float, uint32);
-	void StartFire(CVector, float, uint8);
+	void StartFire(CVector pos, float size, bool propagation);
+	CFire *StartFire(CEntity *entityOnFire, CEntity *fleeFrom, float strength, bool propagation);
 	void Update(void);
-	CFire *FindFurthestFire_NeverMindFireMen(CVector coors, float, float);
-	CFire *FindNearestFire(CVector, float*);
+	CFire *FindFurthestFire_NeverMindFireMen(CVector coords, float minRange, float maxRange);
+	CFire *FindNearestFire(CVector vecPos, float *pDistance);
+	CFire *GetNextFreeFire(void);
 	uint32 GetTotalActiveFires() const;
-	void ExtinguishPoint(CVector, float);
-	int32 StartScriptFire(const CVector& pos, CEntity* culprit, float, uint8);
-	bool IsScriptFireExtinguish(int16);
-	void RemoveScriptFire(int16);
+	void ExtinguishPoint(CVector point, float range);
+	int32 StartScriptFire(const CVector &pos, CEntity *target, float strength, bool propagation);
+	bool IsScriptFireExtinguish(int16 index);
 	void RemoveAllScriptFires(void);
-	void SetScriptFireAudio(int16, bool);
+	void RemoveScriptFire(int16 index);
+	void SetScriptFireAudio(int16 index, bool state);
 };
 extern CFireManager &gFireManager;

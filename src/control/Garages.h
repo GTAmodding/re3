@@ -1,8 +1,7 @@
 #pragma once
-#include "Automobile.h"
-#include "audio_enums.h"
 #include "config.h"
 
+class CEntity;
 class CVehicle;
 
 enum eGarageState : int8

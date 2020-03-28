@@ -1,6 +1,7 @@
 #include "common.h"
 #include "main.h"
 #include "patcher.h"
+#include "DMAudio.h"
 #include "General.h"
 #include "ModelIndices.h"
 #include "FileMgr.h"

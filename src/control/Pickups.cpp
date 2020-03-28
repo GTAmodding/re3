@@ -5,6 +5,7 @@
 #include "Camera.h"
 #include "Coronas.h"
 #include "Darkel.h"
+#include "DMAudio.h"
 #include "Entity.h"
 #include "Explosion.h"
 #include "Font.h"

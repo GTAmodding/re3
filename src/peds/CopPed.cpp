@@ -1,5 +1,6 @@
 #include "common.h"
 #include "patcher.h"
+#include "DMAudio.h"
 #include "World.h"
 #include "PlayerPed.h"
 #include "CopPed.h"

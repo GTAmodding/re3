@@ -5,6 +5,7 @@
 #include "Accident.h"
 #include "AutoPilot.h"
 #include "CarCtrl.h"
+#include "DMAudio.h"
 #include "General.h"
 #include "HandlingMgr.h"
 #include "ModelIndices.h"

@@ -1,5 +1,6 @@
 #pragma once
-#include "Entity.h"
+
+class CEntity;
 
 enum bridgeStates {
     STATE_BRIDGE_LOCKED,

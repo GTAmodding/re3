@@ -1,5 +1,6 @@
 #include "common.h"
 #include "patcher.h"
+#include "DMAudio.h"
 #include "PlayerPed.h"
 #include "Camera.h"
 #include "WeaponEffects.h"

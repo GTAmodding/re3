@@ -1,5 +1,6 @@
 #include "common.h"
 #include "patcher.h"
+#include "DMAudio.h"
 #include "AudioScriptObject.h"
 #include "Pools.h"
 

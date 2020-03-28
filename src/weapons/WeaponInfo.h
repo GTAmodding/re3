@@ -1,7 +1,8 @@
 #pragma once
-#include "common.h"
-#include "Weapon.h"
-#include "AnimManager.h"
+
+enum AnimationId;
+enum eWeaponFire;
+enum eWeaponType;
 
 class CWeaponInfo {
 //	static CWeaponInfo(&ms_apWeaponInfos)[14];

@@ -1,5 +1,4 @@
 #pragma once
-#include "Sprite2d.h"
 
 enum eItems
 {
@@ -33,7 +32,7 @@ enum eSprites
 class CHud
 {
 public:
-	static CSprite2d *Sprites;
+	static class CSprite2d *Sprites;
 	static int32 &SpriteBrightness;
 	static wchar *m_HelpMessage;
 	static wchar *m_LastHelpMessage;

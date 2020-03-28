@@ -1,6 +1,7 @@
 #include "common.h"
 #include "patcher.h"
 #include "CivilianPed.h"
+#include "DMAudio.h"
 #include "Phones.h"
 #include "General.h"
 #include "PlayerPed.h"

@@ -10,7 +10,6 @@
 #include "AnimBlendAssociation.h"
 #include "WeaponInfo.h"
 #include "Fire.h"
-#include "DMAudio.h"
 #include "EventList.h"
 
 #define FEET_OFFSET	1.04f
@@ -456,7 +455,7 @@ public:
 	bool bRunningToPhone;
 	uint8 field_31D;
 	int16 m_phoneId;
-	eCrimeType m_crimeToReportOnPhone;
+	enum eCrimeType m_crimeToReportOnPhone;
 	uint32 m_phoneTalkTimer;
 	CAccident *m_lastAccident;
 	uint32 m_nPedType;

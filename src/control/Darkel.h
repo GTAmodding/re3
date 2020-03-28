@@ -1,9 +1,9 @@
 #pragma once
-#include "Weapon.h"
 #include "ModelIndices.h"
 
 class CVehicle;
 class CPed;
+enum eWeaponType;
 
 enum
 {

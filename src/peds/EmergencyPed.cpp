@@ -1,5 +1,6 @@
 #include "common.h"
 #include "patcher.h"
+#include "DMAudio.h"
 #include "EmergencyPed.h"
 #include "ModelIndices.h"
 #include "Vehicle.h"

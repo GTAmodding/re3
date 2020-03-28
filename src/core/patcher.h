@@ -6,7 +6,7 @@
 #define VARJMP(a) { _asm jmp a }
 #define WRAPARG(a) UNREFERENCED_PARAMETER(a)
 
-#include <string.h>	//memset
+//#include <string.h>	//memset
 
 enum
 {
@@ -113,7 +113,8 @@ template<typename AT> inline void
 Nop(AT address, unsigned int nCount)
 {
 	Protect_internal((uint32)address, nCount);
-	memset((void*)address, 0x90, nCount);
+	//memset((void*)address, 0x90, nCount);
+	for (unsigned int i = 0; i < nCount; i++) *(uint8*)(address++) = 0x90;
 	Unprotect_internal();
 }
 

@@ -2776,20 +2776,16 @@ cAudioManager::ProcessActiveQueues()
 					sample.m_nSampleIndex == m_asActiveSamples[j].m_nSampleIndex) {
 					if (sample.m_nLoopCount) {
 						if (m_FrameCounter & 1) {
-							if (!(j & 1)) { flag = 0; }
-							flag = 1;
+							flag = !!(j & 1);
 						}
 						else {
-							if (!(j & 1))
-								flag = 1;
-							else
-								flag = 0;
+							flag = !(j & 1);
 						}
 						if (flag && !SampleManager.GetChannelUsedFlag(j)) {
 							sample.m_bLoopEnded = 1;
 							m_asActiveSamples[j].m_bLoopEnded = 1;
 							m_asActiveSamples[j].m_nSampleIndex = NO_SAMPLE;
-							m_asActiveSamples[j].m_nEntityIndex = -5;
+							m_asActiveSamples[j].m_nEntityIndex = AEHANDLE_NONE;
 							continue;
 						}
 					}
@@ -4114,7 +4110,7 @@ cAudioManager::ProcessGarages()
 					m_sQueueSample.m_bEmittingVolume = 60;                                         \
 					m_sQueueSample.field_48 = 0.0f;                                                \
 					m_sQueueSample.m_fSoundIntensity = 80.0f;                                      \
-					/*m_sQueueSample.field_16 = 4;*/                                                   \
+					/*m_sQueueSample.field_16 = 4;*/                                               \
 					m_sQueueSample.m_bReverbFlag = true;                                           \
 					/*m_sQueueSample.m_bReverbFlag = true;*/                                       \
 					m_sQueueSample.m_bIsDistant = false;                                           \
@@ -4124,7 +4120,7 @@ cAudioManager::ProcessGarages()
 					m_sQueueSample.m_nLoopEnd = -1;                                                \
 					m_sQueueSample.m_counter = iSound++;                                           \
 					if(iSound < 32) iSound = 32;                                                   \
-					m_sQueueSample.m_bRequireReflection = true;                                       \
+					m_sQueueSample.m_bRequireReflection = true;                                    \
 					AddSampleToRequestedQueue();                                                   \
 				}                                                                                      \
 			}                                                                                              \

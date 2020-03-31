@@ -497,6 +497,12 @@ public:
 	static int32 &sthWithButtons;
 	static int32 &sthWithButtons2;
 
+#ifndef MASTER
+	static bool m_PrefsMarketing;
+	static bool m_PrefsDisableTutorials;
+#endif // !MASTER
+
+
 public:
 	static void BuildStatLine(char *text, void *stat, uint8 aFloat, void *stat2);
 	static void CentreMousePointer();

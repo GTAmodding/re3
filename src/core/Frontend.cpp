@@ -96,6 +96,11 @@ int32 &JoyButtonJustClicked = *(int32*)0x628D10;
 bool &holdingScrollBar = *(bool*)0x628D59;
 //int32 *pControlTemp = 0;
 
+#ifndef MASTER
+bool CMenuManager::m_PrefsMarketing = false;
+bool CMenuManager::m_PrefsDisableTutorials = false;
+#endif // !MASTER
+
 // 0x5F311C
 const char* FrontendFilenames[][2] = {
 	{"fe2_mainpanel_ul", "" },

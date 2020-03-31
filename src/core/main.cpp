@@ -51,6 +51,7 @@
 #include "Script.h"
 #include "Debug.h"
 #include "Console.h"
+#include "timebars.h"
 
 #define DEFAULT_VIEWWINDOW (Tan(DEGTORAD(CDraw::GetFOV() * 0.5f)))
 
@@ -141,6 +142,11 @@ Idle(void *arg)
 #endif
 
 	CTimer::Update();
+
+#ifdef TIMEBARS
+	tbInit();
+#endif
+
 	CSprite2d::InitPerFrame();
 	CFont::InitPerFrame();
 
@@ -155,16 +161,39 @@ Idle(void *arg)
 		FrontEndMenuManager.Process();
 	} else {
 		CPointLights::InitPerFrame();
+#ifdef TIMEBARS
+		tbStartTimer(0, "CGame::Process");
+#endif
 		CGame::Process();
+#ifdef TIMEBARS
+		tbEndTimer("CGame::Process");
+		tbStartTimer(0, "DMAudio.Service");
+#endif
 		DMAudio.Service();
+
+#ifdef TIMEBARS
+		tbEndTimer("DMAudio.Service");
+#endif
 	}
 
 	if (RsGlobal.quit)
 		return;
 #else
 	CPointLights::InitPerFrame();
+#ifdef TIMEBARS
+	tbStartTimer(0, "CGame::Process");
+#endif
 	CGame::Process();
+#ifdef TIMEBARS
+	tbEndTimer("CGame::Process");
+	tbStartTimer(0, "DMAudio.Service");
+#endif
+
 	DMAudio.Service();
+
+#ifdef TIMEBARS
+	tbEndTimer("DMAudio.Service");
+#endif
 #endif
 
 	if(CGame::bDemoMode && CTimer::GetTimeInMilliseconds() > (3*60 + 30)*1000 && !CCutsceneMgr::IsCutsceneProcessing()){
@@ -192,8 +221,18 @@ Idle(void *arg)
 			RsMouseSetPos(&pos);
 		}
 #endif
+#ifdef TIMEBARS
+		tbStartTimer(0, "CnstrRenderList");
+#endif
 		CRenderer::ConstructRenderList();
+#ifdef TIMEBARS
+		tbEndTimer("CnstrRenderList");
+		tbStartTimer(0, "PreRender");
+#endif
 		CRenderer::PreRender();
+#ifdef TIMEBARS
+		tbEndTimer("PreRender");
+#endif
 
 		if(CWeather::LightningFlash && !CCullZones::CamNoRain()){
 			if(!DoRWStuffStartOfFrame_Horizon(255, 255, 255, 255, 255, 255, 255))
@@ -211,16 +250,31 @@ Idle(void *arg)
 		RwCameraSetFarClipPlane(Scene.camera, CTimeCycle::GetFarClip());
 		RwCameraSetFogDistance(Scene.camera, CTimeCycle::GetFogStart());
 
+#ifdef TIMEBARS
+		tbStartTimer(0, "RenderScene");
+#endif
 		RenderScene();
+#ifdef TIMEBARS
+		tbEndTimer("RenderScene");
+#endif
 		RenderDebugShit();
 		RenderEffects();
 
+#ifdef TIMEBARS
+		tbStartTimer(0, "RenderMotionBlur");
+#endif
 		if((TheCamera.m_BlurType == MBLUR_NONE || TheCamera.m_BlurType == MBLUR_NORMAL) &&
 		   TheCamera.m_ScreenReductionPercentage > 0.0f)
 		        TheCamera.SetMotionBlurAlpha(150);
 		TheCamera.RenderMotionBlur();
-
+#ifdef TIMEBARS
+		tbEndTimer("RenderMotionBlur");
+		tbStartTimer(0, "Render2dStuff");
+#endif
 		Render2dStuff();
+#ifdef TIMEBARS
+		tbEndTimer("Render2dStuff");
+#endif
 	}else{
 		float viewWindow = DEFAULT_VIEWWINDOW;
 #ifdef ASPECT_RATIO_SCALE
@@ -238,10 +292,29 @@ Idle(void *arg)
 	if (FrontEndMenuManager.m_bMenuActive)
 		DefinedState();
 #endif
+#ifdef TIMEBARS
+	tbStartTimer(0, "RenderMenus");
+#endif
 	RenderMenus();
+#ifdef TIMEBARS
+	tbEndTimer("RenderMenus");
+	tbStartTimer(0, "DoFade");
+#endif
 	DoFade();
+#ifdef TIMEBARS
+	tbEndTimer("DoFade");
+	tbStartTimer(0, "Render2dStuff-Fade");
+#endif
 	Render2dStuffAfterFade();
+#ifdef TIMEBARS
+	tbEndTimer("Render2dStuff-Fade");
+#endif
 	CCredits::Render();
+
+#ifdef TIMEBARS
+	tbDisplay();
+#endif
+
 	DoRWStuffEndOfFrame();
 
 //	if(g_SlowMode) 

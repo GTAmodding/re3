@@ -34,6 +34,7 @@ public:
 	static void SetPreviousTimeInMilliseconds(uint32 t) { m_snPreviousTimeInMilliseconds = t; }
 	static const float &GetTimeScale(void) { return ms_fTimeScale; }
 	static void SetTimeScale(float ts) { ms_fTimeScale = ts; }
+	static uint32 GetCyclesPerFrame();
 
 	static bool GetIsPaused() { return m_UserPause || m_CodePause; }
 	static bool GetIsUserPaused() { return m_UserPause; }

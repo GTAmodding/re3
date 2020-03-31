@@ -214,6 +214,11 @@ void CTimer::EndUserPause(void)
 	m_UserPause = false;
 }
 
+uint32 CTimer::GetCyclesPerFrame()
+{
+	return 20;
+}
+
 #if 1
 STARTPATCHES	
 	InjectHook(0x4ACE60, CTimer::Initialise, PATCH_JUMP);

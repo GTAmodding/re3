@@ -169,8 +169,9 @@ enum Config {
 	// not in any game
 #	define NASTY_GAME	// nasty game for all languages
 #	define NO_MOVIES	// disable intro videos
-#   define NO_CDCHECK
+#	define NO_CDCHECK
 #	define CHATTYSPLASH	// print what the game is loading
+//#	define TIMEBARS		// print debug timers
 #endif
 
 #define FIX_BUGS		// fixes bugs that we've came across during reversing, TODO: use this more

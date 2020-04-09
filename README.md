@@ -43,7 +43,6 @@ CPools - save/loading
 CRecordDataForChase
 CRecordDataForGame
 CRoadBlocks
-CStats
 CTrafficLights
 CWeapon
 CWorld

@@ -11,9 +11,9 @@ public:
 	};
 	static int32 &DaysPassed;
     static int32 &HeadsPopped;
-	static bool& CommercialPassed;
-	static bool& IndustrialPassed;
-	static bool& SuburbanPassed;
+	static int32& CommercialPassed;
+	static int32& IndustrialPassed;
+	static int32& SuburbanPassed;
 	static int32 &NumberKillFrenziesPassed;
 	static int32 &PeopleKilledByOthers;
 	static int32 &HelisDestroyed;
@@ -53,7 +53,7 @@ public:
 	static int32 &TimeTakenDefuseMission;
 	static int32 &TotalNumberKillFrenzies;
     static int32 &TotalNumberMissions;
-    static int32 &ShotsMade;
+    static int32 &RoundsFiredByPlayer;
     static int32 &KgsOfExplosivesUsed;
     static int32 &InstantHitsFiredByPlayer;
     static int32 &InstantHitsHitByPlayer;
@@ -64,24 +64,27 @@ public:
 	static int32(&HighestScores)[TOTAL_HIGHEST_SCORES];
 
 public:
+	static void Init(void);
 	static void RegisterFastestTime(int32, int32);
 	static void RegisterHighestScore(int32, int32);
-	static void AnotherKillFrenzyPassed();
-	static void AnotherLifeSavedWithAmbulance();
-	static void AnotherCriminalCaught();
-	static void RegisterLevelAmbulanceMission(int32);
-	static void AnotherFireExtinguished();
+	static void RegisterElBurroTime(int32);
 	static void Register4x4OneTime(int32);
 	static void Register4x4TwoTime(int32);
 	static void Register4x4ThreeTime(int32);
 	static void Register4x4MayhemTime(int32);
+	static void AnotherLifeSavedWithAmbulance();
+	static void AnotherCriminalCaught();
+	static void RegisterLevelAmbulanceMission(int32);
+	static void AnotherFireExtinguished();
+	static wchar *FindCriminalRatingString();
 	static void RegisterLongestFlightInDodo(int32);
 	static void RegisterTimeTakenDefuseMission(int32);
+	static void AnotherKillFrenzyPassed();
 	static void SetTotalNumberKillFrenzies(int32);
 	static void SetTotalNumberMissions(int32);
-	static void CheckPointReachedUnsuccessfully() { KillsSinceLastCheckpoint = 0; };
 	static void CheckPointReachedSuccessfully() { TotalLegitimateKills += KillsSinceLastCheckpoint; KillsSinceLastCheckpoint = 0; };
-	static void RegisterElBurroTime(int32);
+	static void CheckPointReachedUnsuccessfully() { KillsSinceLastCheckpoint = 0; };
+	static int32 FindCriminalRatingNumber();
 	static void SaveStats(uint8 *buf, uint32 *size);
-	static void Init(void);
+	static void LoadStats(uint8 *buf, uint32 size);
 };

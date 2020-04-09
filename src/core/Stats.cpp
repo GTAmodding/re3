@@ -1,14 +1,14 @@
 #include "common.h"
 #include "patcher.h"
 #include "Stats.h"
-
-WRAPPER void CStats::SaveStats(uint8 *buf, uint32 *size) { EAXJMP(0x4ab3e0); }
+#include "Text.h"
+#include "World.h"
 
 int32 &CStats::DaysPassed = *(int32*)0x8F2BB8;
 int32 &CStats::HeadsPopped = *(int32*)0x8F647C;
-bool& CStats::CommercialPassed = *(bool*)0x8F4334;
-bool& CStats::IndustrialPassed = *(bool*)0x8E2A68;
-bool& CStats::SuburbanPassed = *(bool*)0x8F2740;
+int32& CStats::CommercialPassed = *(int32*)0x8F4334;
+int32& CStats::IndustrialPassed = *(int32*)0x8E2A68;
+int32& CStats::SuburbanPassed = *(int32*)0x8F2740;
 int32 &CStats::NumberKillFrenziesPassed = *(int32*)0x8E287C;
 int32 &CStats::PeopleKilledByOthers = *(int32*)0x8E2C50;
 int32 &CStats::HelisDestroyed = *(int32*)0x8E2A64;
@@ -48,7 +48,7 @@ int32& CStats::LongestFlightInDodo = *(int32*)0x8F5FE4;
 int32& CStats::TimeTakenDefuseMission = *(int32*)0x880E24;
 int32& CStats::TotalNumberKillFrenzies = *(int32*)0x8E2884;
 int32& CStats::TotalNumberMissions = *(int32*)0x8E2820;
-int32& CStats::ShotsMade = *(int32*)0x8E2BE8;
+int32& CStats::RoundsFiredByPlayer = *(int32*)0x8E2BE8;
 int32& CStats::KgsOfExplosivesUsed = *(int32*)0x8F2510;
 int32& CStats::InstantHitsFiredByPlayer = *(int32*)0x943070;
 int32& CStats::InstantHitsHitByPlayer = *(int32*)0x95CB8C;
@@ -62,7 +62,7 @@ void CStats::Init()
 {
 	PeopleKilledByOthers = 0;
 	PeopleKilledByPlayer = 0;
-	ShotsMade = 0;
+	RoundsFiredByPlayer = 0;
 	CarsExploded = 0;
 	HelisDestroyed = 0;
 	ProgressMade = 0;
@@ -200,6 +200,229 @@ void CStats::SetTotalNumberMissions(int32 total)
 	TotalNumberMissions = total;
 }
 
+wchar *CStats::FindCriminalRatingString()
+{
+	int rating = FindCriminalRatingNumber();
+
+	if (rating < 10) return TheText.Get("RATNG1");
+	if (rating < 25) return TheText.Get("RATNG2");
+	if (rating < 70) return TheText.Get("RATNG3");
+	if (rating < 150) return TheText.Get("RATNG4");
+	if (rating < 250) return TheText.Get("RATNG5");
+	if (rating < 450) return TheText.Get("RATNG6");
+	if (rating < 700) return TheText.Get("RATNG7");
+	if (rating < 1000) return TheText.Get("RATNG8");
+	if (rating < 1400) return TheText.Get("RATNG9");
+	if (rating < 1900) return TheText.Get("RATNG10");
+	if (rating < 2500) return TheText.Get("RATNG11");
+	if (rating < 3200) return TheText.Get("RATNG12");
+	if (rating < 4000) return TheText.Get("RATNG13");
+	if (rating < 5000) return TheText.Get("RATNG14");
+	return TheText.Get("RATNG15");
+}
+
+int32 CStats::FindCriminalRatingNumber()
+{
+	int32 rating;
+
+	rating = FiresExtinguished + 10 * HighestLevelAmbulanceMission + CriminalsCaught + LivesSavedWithAmbulance
+		+ 30 * HelisDestroyed + TotalLegitimateKills - 3 * TimesArrested - 3 * TimesDied
+		+ CWorld::Players[CWorld::PlayerInFocus].m_nMoney / 5000;
+	if (rating <= 0) rating = 0;
+
+	if (InstantHitsFiredByPlayer > 100)
+		rating += (float)CStats::InstantHitsHitByPlayer / (float)CStats::InstantHitsFiredByPlayer * 500.0f;
+	if (TotalProgressInGame)
+		rating += (float)CStats::ProgressMade / (float)CStats::TotalProgressInGame * 1000.0f;
+	if (!IndustrialPassed && rating >= 3521)
+		rating = 3521;
+	if (!CommercialPassed && rating >= 4552)
+		rating = 4552;
+	return rating;
+}
+
+void CStats::SaveStats(uint8 *buf, uint32 *size)
+{
+	CheckPointReachedSuccessfully();
+	uint8 *buf_start = buf;
+	*size = sizeof(PeopleKilledByPlayer) +
+		sizeof(PeopleKilledByOthers) +
+		sizeof(CarsExploded) +
+		sizeof(RoundsFiredByPlayer) +
+		sizeof(PedsKilledOfThisType) +
+		sizeof(HelisDestroyed) +
+		sizeof(ProgressMade) +
+		sizeof(TotalProgressInGame) +
+		sizeof(KgsOfExplosivesUsed) +
+		sizeof(InstantHitsFiredByPlayer) +
+		sizeof(InstantHitsHitByPlayer) +
+		sizeof(CarsCrushed) +
+		sizeof(HeadsPopped) +
+		sizeof(TimesArrested) +
+		sizeof(TimesDied) +
+		sizeof(DaysPassed) +
+		sizeof(mmRain) +
+		sizeof(MaximumJumpDistance) +
+		sizeof(MaximumJumpHeight) +
+		sizeof(MaximumJumpFlips) +
+		sizeof(MaximumJumpSpins) +
+		sizeof(BestStuntJump) +
+		sizeof(NumberOfUniqueJumpsFound) +
+		sizeof(TotalNumberOfUniqueJumps) +
+		sizeof(MissionsGiven) +
+		sizeof(MissionsPassed) +
+		sizeof(PassengersDroppedOffWithTaxi) +
+		sizeof(MoneyMadeWithTaxi) +
+		sizeof(IndustrialPassed) +
+		sizeof(CommercialPassed) +
+		sizeof(SuburbanPassed) +
+		sizeof(ElBurroTime) +
+		sizeof(DistanceTravelledOnFoot) +
+		sizeof(DistanceTravelledInVehicle) +
+		sizeof(Record4x4One) +
+		sizeof(Record4x4Two) +
+		sizeof(Record4x4Three) +
+		sizeof(Record4x4Mayhem) +
+		sizeof(LivesSavedWithAmbulance) +
+		sizeof(CriminalsCaught) +
+		sizeof(HighestLevelAmbulanceMission) +
+		sizeof(FiresExtinguished) +
+		sizeof(LongestFlightInDodo) +
+		sizeof(TimeTakenDefuseMission) +
+		sizeof(NumberKillFrenziesPassed) +
+		sizeof(TotalNumberKillFrenzies) +
+		sizeof(TotalNumberMissions) +
+		sizeof(FastestTimes) +
+		sizeof(HighestScores) +
+		sizeof(KillsSinceLastCheckpoint) +
+		sizeof(TotalLegitimateKills) +
+		sizeof(LastMissionPassedName);
+
+#define CopyToBuf(buf, data) memcpy(buf, &data, sizeof(data)); buf += sizeof(data);
+	CopyToBuf(buf, PeopleKilledByPlayer);
+	CopyToBuf(buf, PeopleKilledByOthers);
+	CopyToBuf(buf, CarsExploded);
+	CopyToBuf(buf, RoundsFiredByPlayer);
+	CopyToBuf(buf, PedsKilledOfThisType);
+	CopyToBuf(buf, HelisDestroyed);
+	CopyToBuf(buf, ProgressMade);
+	CopyToBuf(buf, TotalProgressInGame);
+	CopyToBuf(buf, KgsOfExplosivesUsed);
+	CopyToBuf(buf, InstantHitsFiredByPlayer);
+	CopyToBuf(buf, InstantHitsHitByPlayer);
+	CopyToBuf(buf, CarsCrushed);
+	CopyToBuf(buf, HeadsPopped);
+	CopyToBuf(buf, TimesArrested);
+	CopyToBuf(buf, TimesDied);
+	CopyToBuf(buf, DaysPassed);
+	CopyToBuf(buf, mmRain);
+	CopyToBuf(buf, MaximumJumpDistance);
+	CopyToBuf(buf, MaximumJumpHeight);
+	CopyToBuf(buf, MaximumJumpFlips);
+	CopyToBuf(buf, MaximumJumpSpins);
+	CopyToBuf(buf, BestStuntJump);
+	CopyToBuf(buf, NumberOfUniqueJumpsFound);
+	CopyToBuf(buf, TotalNumberOfUniqueJumps);
+	CopyToBuf(buf, MissionsGiven);
+	CopyToBuf(buf, MissionsPassed);
+	CopyToBuf(buf, PassengersDroppedOffWithTaxi);
+	CopyToBuf(buf, MoneyMadeWithTaxi);
+	CopyToBuf(buf, IndustrialPassed);
+	CopyToBuf(buf, CommercialPassed);
+	CopyToBuf(buf, SuburbanPassed);
+	CopyToBuf(buf, ElBurroTime);
+	CopyToBuf(buf, DistanceTravelledOnFoot);
+	CopyToBuf(buf, DistanceTravelledInVehicle);
+	CopyToBuf(buf, Record4x4One);
+	CopyToBuf(buf, Record4x4Two);
+	CopyToBuf(buf, Record4x4Three);
+	CopyToBuf(buf, Record4x4Mayhem);
+	CopyToBuf(buf, LivesSavedWithAmbulance);
+	CopyToBuf(buf, CriminalsCaught);
+	CopyToBuf(buf, HighestLevelAmbulanceMission);
+	CopyToBuf(buf, FiresExtinguished);
+	CopyToBuf(buf, LongestFlightInDodo);
+	CopyToBuf(buf, TimeTakenDefuseMission);
+	CopyToBuf(buf, NumberKillFrenziesPassed);
+	CopyToBuf(buf, TotalNumberKillFrenzies);
+	CopyToBuf(buf, TotalNumberMissions);
+	CopyToBuf(buf, FastestTimes);
+	CopyToBuf(buf, HighestScores);
+	CopyToBuf(buf, KillsSinceLastCheckpoint);
+	CopyToBuf(buf, TotalLegitimateKills);
+	CopyToBuf(buf, LastMissionPassedName);
+
+	assert(buf - buf_start == *size);
+#undef CopyToBuf
+}
+
+void CStats::LoadStats(uint8 *buf, uint32 size)
+{
+	uint8* buf_start = buf;
+
+#define CopyFromBuf(buf, data) memcpy(&data, buf, sizeof(data)); buf += sizeof(data);
+
+	CopyFromBuf(buf, PeopleKilledByPlayer);
+	CopyFromBuf(buf, PeopleKilledByOthers);
+	CopyFromBuf(buf, CarsExploded);
+	CopyFromBuf(buf, RoundsFiredByPlayer);
+	CopyFromBuf(buf, PedsKilledOfThisType);
+	CopyFromBuf(buf, HelisDestroyed);
+	CopyFromBuf(buf, ProgressMade);
+	CopyFromBuf(buf, TotalProgressInGame);
+	CopyFromBuf(buf, KgsOfExplosivesUsed);
+	CopyFromBuf(buf, InstantHitsFiredByPlayer);
+	CopyFromBuf(buf, InstantHitsHitByPlayer);
+	CopyFromBuf(buf, CarsCrushed);
+	CopyFromBuf(buf, HeadsPopped);
+	CopyFromBuf(buf, TimesArrested);
+	CopyFromBuf(buf, TimesDied);
+	CopyFromBuf(buf, DaysPassed);
+	CopyFromBuf(buf, mmRain);
+	CopyFromBuf(buf, MaximumJumpDistance);
+	CopyFromBuf(buf, MaximumJumpHeight);
+	CopyFromBuf(buf, MaximumJumpFlips);
+	CopyFromBuf(buf, MaximumJumpSpins);
+	CopyFromBuf(buf, BestStuntJump);
+	CopyFromBuf(buf, NumberOfUniqueJumpsFound);
+	CopyFromBuf(buf, TotalNumberOfUniqueJumps);
+	CopyFromBuf(buf, MissionsGiven);
+	CopyFromBuf(buf, MissionsPassed);
+	CopyFromBuf(buf, PassengersDroppedOffWithTaxi);
+	CopyFromBuf(buf, MoneyMadeWithTaxi);
+	CopyFromBuf(buf, IndustrialPassed);
+	CopyFromBuf(buf, CommercialPassed);
+	CopyFromBuf(buf, SuburbanPassed);
+	CopyFromBuf(buf, ElBurroTime);
+	CopyFromBuf(buf, DistanceTravelledOnFoot);
+	CopyFromBuf(buf, DistanceTravelledInVehicle);
+	CopyFromBuf(buf, Record4x4One);
+	CopyFromBuf(buf, Record4x4Two);
+	CopyFromBuf(buf, Record4x4Three);
+	CopyFromBuf(buf, Record4x4Mayhem);
+	CopyFromBuf(buf, LivesSavedWithAmbulance);
+	CopyFromBuf(buf, CriminalsCaught);
+	CopyFromBuf(buf, HighestLevelAmbulanceMission);
+	CopyFromBuf(buf, FiresExtinguished);
+	CopyFromBuf(buf, LongestFlightInDodo);
+	CopyFromBuf(buf, TimeTakenDefuseMission);
+	CopyFromBuf(buf, NumberKillFrenziesPassed);
+	CopyFromBuf(buf, TotalNumberKillFrenzies);
+	CopyFromBuf(buf, TotalNumberMissions);
+	CopyFromBuf(buf, FastestTimes);
+	CopyFromBuf(buf, HighestScores);
+	CopyFromBuf(buf, KillsSinceLastCheckpoint);
+	CopyFromBuf(buf, TotalLegitimateKills);
+	CopyFromBuf(buf, LastMissionPassedName);
+
+	assert(buf - buf_start == size);
+#undef CopyFromBuf
+}
+
 STARTPATCHES
 	InjectHook(0x48C5A3, CStats::Init, PATCH_JUMP); // CGame::ReInitGameObjectVariables
+	InjectHook(0x4AB3E0, CStats::SaveStats, PATCH_JUMP);
+	InjectHook(0x4AB670, CStats::LoadStats, PATCH_JUMP);
+	InjectHook(0x4AB090, CStats::FindCriminalRatingString, PATCH_JUMP);
+	InjectHook(0x4AB2A0, CStats::FindCriminalRatingNumber, PATCH_JUMP);
 ENDPATCHES

@@ -33,9 +33,7 @@ to reverse at the time, calling the original functions is acceptable.
 ### Unreversed / incomplete classes (at least the ones we know)
 ```
 cAudioManager - WIP
-CBoat
 CBulletInfo
-CPacManPickups
 CPedPath
 CRoadBlocks
 CWeapon

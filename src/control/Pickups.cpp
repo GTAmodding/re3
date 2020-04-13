@@ -54,23 +54,6 @@ uint8 aWeaponGreens[] = { 0, 255, 128, 255, 0, 255, 128, 255, 0, 255, 255, 0, 25
 uint8 aWeaponBlues[] = { 0, 0, 255, 0, 255, 255, 0, 128, 255, 0, 255, 0, 128, 255, 0, 0 };
 float aWeaponScale[] = { 1.0f, 2.0f, 1.5f, 1.0f, 1.0f, 1.5f, 1.0f, 2.0f, 1.0f, 2.0f, 2.5f, 1.0f, 1.0f, 1.0f, 1.0f };
 
-WRAPPER void CPacManPickups::Init(void) { EAXJMP(0x432760); }
-WRAPPER void CPacManPickups::Update(void) { EAXJMP(0x432800); }
-WRAPPER void CPacManPickups::GeneratePMPickUps(CVector, float, int16, uint8) { EAXJMP(0x432AE0); }
-WRAPPER void CPacManPickups::GeneratePMPickUpsForRace(int32) { EAXJMP(0x432D50); }
-WRAPPER void CPacManPickups::GenerateOnePMPickUp(CVector) { EAXJMP(0x432F20); }
-WRAPPER void CPacManPickups::Render(void) { EAXJMP(0x432F60); }
-WRAPPER void CPacManPickups::DoCleanUpPacManStuff(void) { EAXJMP(0x433150); }
-WRAPPER void CPacManPickups::StartPacManRace(int32) { EAXJMP(0x433340); }
-WRAPPER void CPacManPickups::StartPacManRecord(void) { EAXJMP(0x433360); }
-WRAPPER uint32 CPacManPickups::QueryPowerPillsEatenInRace(void) { EAXJMP(0x4333A0); }
-WRAPPER void CPacManPickups::ResetPowerPillsEatenInRace(void) { EAXJMP(0x4333B0); }
-WRAPPER void CPacManPickups::CleanUpPacManStuff(void) { EAXJMP(0x4333C0); }
-WRAPPER void CPacManPickups::StartPacManScramble(CVector, float, int16) { EAXJMP(0x4333D0); }
-WRAPPER uint32 CPacManPickups::QueryPowerPillsCarriedByPlayer(void) { EAXJMP(0x4333F0); }
-WRAPPER void CPacManPickups::ResetPowerPillsCarriedByPlayer(void) { EAXJMP(0x433410); }
-
-
 void
 CPickup::RemoveKeepType()
 {
@@ -289,13 +272,6 @@ CPickup::Update(CPlayerPed *player, CVehicle *vehicle, int playerId)
 				Remove();
 				DMAudio.PlayFrontEndSound(SOUND_PICKUP_MONEY, 0);
 				return true;
-			//case PICKUP_IN_SHOP_OUT_OF_STOCK:
-			//case PICKUP_MINE_INACTIVE:
-			//case PICKUP_MINE_ARMED:
-			//case PICKUP_NAUTICAL_MINE_INACTIVE:
-			//case PICKUP_NAUTICAL_MINE_ARMED:
-			//case PICKUP_FLOATINGPACKAGE:
-			//case PICKUP_FLOATINGPACKAGE_FLOATING:
 			default:
 				break;
 			}
@@ -530,14 +506,12 @@ CPickups::GenerateNewOne(CVector pos, uint32 modelIndex, uint8 type, uint32 quan
 		}
 	}
 
-	if (!bFreeFound)
-	{
+	if (!bFreeFound) {
 		for (slot = 0; slot < NUMGENERALPICKUPS; slot++) {
 			if (aPickUps[slot].m_eType == PICKUP_MONEY) break;
 		}
 
-		if (slot >= NUMGENERALPICKUPS)
-		{
+		if (slot >= NUMGENERALPICKUPS) {
 			for (slot = 0; slot < NUMGENERALPICKUPS; slot++) {
 				if (aPickUps[slot].m_eType == PICKUP_ONCE_TIMEOUT) break;
 			}
@@ -1021,6 +995,417 @@ INITSAVEBUF
 VALIDATESAVEBUF(*size)
 }
 
+void
+CPacManPickup::Update()
+{
+	if (FindPlayerVehicle() == nil) return;
+
+	CVehicle *veh = FindPlayerVehicle();
+	
+	if (DistanceSqr2D(FindPlayerVehicle()->GetPosition(), m_vecPosn.x, m_vecPosn.y) < 100.0f && veh->IsSphereTouchingVehicle(m_vecPosn.x, m_vecPosn.y, m_vecPosn.z, 1.5f)) {
+		switch (m_eType)
+		{
+		case PACMAN_SCRAMBLE:
+		{
+			veh->m_nPacManPickupsCarried++;
+			veh->m_vecMoveSpeed *= 0.65f;
+			float massMult = (veh->m_fMass + 250.0f) / veh->m_fMass;
+			veh->m_fMass *= massMult;
+			veh->m_fTurnMass *= massMult;
+			veh->m_fForceMultiplier *= massMult;
+			FindPlayerPed()->m_pWanted->m_nChaos += 10;
+			FindPlayerPed()->m_pWanted->UpdateWantedLevel();
+			DMAudio.PlayFrontEndSound(SOUND_PICKUP_PACMAN_PACKAGE, 0);
+		}
+		case PACMAN_RACE:
+			CPacManPickups::PillsEatenInRace++;
+			DMAudio.PlayFrontEndSound(SOUND_PICKUP_PACMAN_PILL, 0);
+			break;
+		default:
+			break;
+		}
+		m_eType = PACMAN_NONE;
+		if (m_pObject != nil) {
+			CWorld::Remove(m_pObject);
+			delete m_pObject;
+			m_pObject = nil;
+		}
+	}
+}
+
+int32 CollectGameState;
+int16 ThingsToCollect;
+
+CPacManPickup CPacManPickups::aPMPickUps[NUMPACMANPICKUPS];
+CVector CPacManPickups::LastPickUpCoors;
+int32 CPacManPickups::PillsEatenInRace;
+bool CPacManPickups::bPMActive;
+
+void
+CPacManPickups::Init()
+{
+	for (int i = 0; i < NUMPACMANPICKUPS; i++)
+		aPMPickUps[i].m_eType = PACMAN_NONE;
+	bPMActive = false;
+}
+
+void
+CPacManPickups::Update()
+{
+	if (FindPlayerVehicle()) {
+		float dist = Distance(FindPlayerCoors(), CVector(1072.0f, -948.0f, 14.5f));
+		switch (CollectGameState) {
+		case 1:
+			if (dist < 10.0f) {
+				ThingsToCollect -= FindPlayerVehicle()->m_nPacManPickupsCarried;
+				FindPlayerVehicle()->m_nPacManPickupsCarried = 0;
+				FindPlayerVehicle()->m_fMass /= FindPlayerVehicle()->m_fForceMultiplier;
+				FindPlayerVehicle()->m_fTurnMass /= FindPlayerVehicle()->m_fForceMultiplier;
+				FindPlayerVehicle()->m_fForceMultiplier = 1.0f;
+			}
+			if (ThingsToCollect <= 0) {
+				CollectGameState = 2;
+				ClearPMPickUps();
+			}
+			break;
+		case 2:
+			if (dist > 11.0f)
+				CollectGameState = 0;
+			break;
+		case 20:
+			if (Distance(FindPlayerCoors(), LastPickUpCoors) > 30.0f) {
+				LastPickUpCoors = FindPlayerCoors();
+				printf("%f, %f, %f,\n", LastPickUpCoors.x, LastPickUpCoors.y, LastPickUpCoors.z);
+			}
+			break;
+		default:
+			break;
+		}
+	}
+	if (bPMActive) {
+#define PACMANPICKUPS_FRAME_SPAN (4)
+		for (uint32 i = (CTimer::GetFrameCounter() % PACMANPICKUPS_FRAME_SPAN) * (NUMPACMANPICKUPS / PACMANPICKUPS_FRAME_SPAN); i < ((CTimer::GetFrameCounter() % PACMANPICKUPS_FRAME_SPAN) + 1) * (NUMPACMANPICKUPS / PACMANPICKUPS_FRAME_SPAN); i++) {
+			if (aPMPickUps[i].m_eType != PACMAN_NONE)
+				aPMPickUps[i].Update();
+		}
+#undef PACMANPICKUPS_FRAME_SPAN
+	}
+}
+
+void
+CPacManPickups::GeneratePMPickUps(CVector pos, float scrambleMult, int16 count, uint8 type)
+{
+	int i = 0;
+	while (count > 0) {
+		while (aPMPickUps[i].m_eType != PACMAN_NONE)
+			i++;
+
+		bool bPickupCreated = false;
+		while (!bPickupCreated) {
+			CVector newPos = pos;
+			CColPoint colPoint;
+			CEntity *pRoad;
+			uint16 nRand = CGeneral::GetRandomNumber();
+			newPos.x += ((nRand & 0xFF) - 128) * scrambleMult / 128.0f;
+			newPos.y += (((nRand >> 8) & 0xFF) - 128) * scrambleMult / 128.0f;
+			newPos.z = 1000.0f;
+			if (CWorld::ProcessVerticalLine(newPos, -1000.0f, colPoint, pRoad, true, false, false, false, true, false, nil) && pRoad->IsBuilding() && ((CBuilding*)pRoad)->GetIsATreadable()) {
+				newPos.z = 0.7f + colPoint.point.z;
+				aPMPickUps[i].m_eType = type;
+				aPMPickUps[i].m_vecPosn = newPos;
+				CObject *obj = new CObject(MI_BULLION, true);
+				if (obj != nil) {
+					obj->ObjectCreatedBy = MISSION_OBJECT;
+					obj->GetPosition() = aPMPickUps[i].m_vecPosn;
+					obj->SetOrientation(0.0f, 0.0f, -HALFPI);
+					obj->GetMatrix().UpdateRW();
+					obj->UpdateRwFrame();
+
+					obj->bAffectedByGravity = false;
+					obj->bExplosionProof = true;
+					obj->bUsesCollision = false;
+					obj->bIsPickup = false;
+					CWorld::Add(obj);
+				}
+				aPMPickUps[i].m_pObject = obj;
+				bPickupCreated = true;
+			}
+		}
+		count--;
+	}
+	bPMActive = true;
+}
+
+// diablo porn mission pickups
+static const CVector aRacePoints1[] = {
+	CVector(913.62219f, -155.13692f, 4.9699469f),
+	CVector(913.92401f, -124.12943f, 4.9692569f),
+	CVector(913.27899f, -93.524231f, 7.4325991f),
+	CVector(912.60852f, -63.15905f, 7.4533591f),
+	CVector(934.22144f, -42.049122f, 7.4511471f),
+	CVector(958.88092f, -23.863735f, 7.4652338f),
+	CVector(978.50812f, -0.78458798f, 5.13515f),
+	CVector(1009.4175f, -2.1041219f, 2.4461579f),
+	CVector(1040.6313f, -2.0793829f, 2.293175f),
+	CVector(1070.7863f, -2.084095f, 2.2789791f),
+	CVector(1100.5773f, -8.468729f, 5.3248072f),
+	CVector(1119.9341f, -31.738031f, 7.1913071f),
+	CVector(1122.1664f, -62.762737f, 7.4703908f),
+	CVector(1122.814f, -93.650566f, 8.5577497f),
+	CVector(1125.8253f, -124.26616f, 9.9803305f),
+	CVector(1153.8727f, -135.47169f, 14.150617f),
+	CVector(1184.0831f, -135.82845f, 14.973998f),
+	CVector(1192.0432f, -164.57816f, 19.18627f),
+	CVector(1192.7761f, -194.28871f, 24.799675f),
+	CVector(1215.1527f, -215.0714f, 25.74975f),
+	CVector(1245.79f, -215.39304f, 28.70726f),
+	CVector(1276.2477f, -216.39485f, 33.71236f),
+	CVector(1306.5535f, -216.71007f, 39.711472f),
+	CVector(1335.0244f, -224.59329f, 46.474979f),
+	CVector(1355.4879f, -246.27664f, 49.934841f),
+	CVector(1362.6003f, -276.47064f, 49.96265f),
+	CVector(1363.027f, -307.30847f, 49.969173f),
+	CVector(1365.343f, -338.08609f, 49.967789f),
+	CVector(1367.5957f, -368.01105f, 50.092304f),
+	CVector(1368.2749f, -398.38049f, 50.061268f),
+	CVector(1366.9034f, -429.98483f, 50.057545f),
+	CVector(1356.8534f, -459.09259f, 50.035545f),
+	CVector(1335.5819f, -481.13544f, 47.217903f),
+	CVector(1306.7552f, -491.07443f, 40.202629f),
+	CVector(1275.5978f, -491.33194f, 33.969223f),
+	CVector(1244.702f, -491.46451f, 29.111021f),
+	CVector(1213.2222f, -491.8754f, 25.771168f),
+	CVector(1182.7729f, -492.19995f, 24.749964f),
+	CVector(1152.6874f, -491.42221f, 21.70038f),
+	CVector(1121.5352f, -491.94604f, 20.075182f),
+	CVector(1090.7056f, -492.63751f, 17.585758f),
+	CVector(1059.6008f, -491.65762f, 14.848632f),
+	CVector(1029.113f, -489.66031f, 14.918498f),
+	CVector(998.20679f, -486.78107f, 14.945688f),
+	CVector(968.00555f, -484.91266f, 15.001229f),
+	CVector(937.74939f, -492.09015f, 14.958629f),
+	CVector(927.17352f, -520.97736f, 14.972308f),
+	CVector(929.29749f, -552.08643f, 14.978855f),
+	CVector(950.69525f, -574.47778f, 14.972788f),
+	CVector(974.02826f, -593.56024f, 14.966445f),
+	CVector(989.04779f, -620.12854f, 14.951016f),
+	CVector(1014.1639f, -637.3905f, 14.966736f),
+	CVector(1017.5961f, -667.3736f, 14.956415f),
+	CVector(1041.9735f, -685.94391f, 15.003841f),
+	CVector(1043.3064f, -716.11298f, 14.974236f),
+	CVector(1043.5337f, -746.63855f, 14.96919f),
+	CVector(1044.142f, -776.93823f, 14.965424f),
+	CVector(1044.2657f, -807.29395f, 14.97171f),
+	CVector(1017.0797f, -820.1076f, 14.975431f),
+	CVector(986.23865f, -820.37103f, 14.972883f),
+	CVector(956.10065f, -820.23291f, 14.981133f),
+	CVector(925.86914f, -820.19049f, 14.976553f),
+	CVector(897.69702f, -831.08734f, 14.962709f),
+	CVector(868.06586f, -835.99237f, 14.970685f),
+	CVector(836.93054f, -836.84387f, 14.965049f),
+	CVector(811.63586f, -853.7915f, 15.067576f),
+	CVector(811.46344f, -884.27368f, 12.247812f),
+	CVector(811.60651f, -914.70959f, 9.2393751f),
+	CVector(811.10425f, -945.16272f, 5.817255f),
+	CVector(816.54584f, -975.64587f, 4.998558f),
+	CVector(828.2951f, -1003.3685f, 5.0471172f),
+	CVector(852.28839f, -1021.5963f, 4.9371028f),
+	CVector(882.50067f, -1025.4459f, 5.14077f),
+	CVector(912.84821f, -1026.7874f, 8.3415451f),
+	CVector(943.68274f, -1026.6914f, 11.341879f),
+	CVector(974.4129f, -1027.3682f, 14.410345f),
+	CVector(1004.1079f, -1036.0778f, 14.92961f),
+	CVector(1030.1144f, -1051.1224f, 14.850387f),
+	CVector(1058.7585f, -1060.342f, 14.821624f),
+	CVector(1087.7797f, -1068.3263f, 14.800561f),
+	CVector(1099.8807f, -1095.656f, 11.877907f),
+	CVector(1130.0005f, -1101.994f, 11.853914f),
+	CVector(1160.3809f, -1101.6355f, 11.854824f),
+	CVector(1191.8524f, -1102.1577f, 11.853843f),
+	CVector(1223.3307f, -1102.7448f, 11.852233f),
+	CVector(1253.564f, -1098.1045f, 11.853944f),
+	CVector(1262.0203f, -1069.1785f, 14.8147f),
+	CVector(1290.9998f, -1059.1882f, 14.816016f),
+	CVector(1316.246f, -1041.0635f, 14.81109f),
+	CVector(1331.7539f, -1013.835f, 14.81207f),
+	CVector(1334.0579f, -983.55402f, 14.827253f),
+	CVector(1323.2429f, -954.23083f, 14.954678f),
+	CVector(1302.7495f, -932.21216f, 14.962917f),
+	CVector(1317.418f, -905.89325f, 14.967506f),
+	CVector(1337.9503f, -883.5025f, 14.969675f),
+	CVector(1352.6929f, -855.96954f, 14.967854f),
+	CVector(1357.2388f, -826.26971f, 14.97295f),
+	CVector(1384.8668f, -812.47693f, 12.907736f),
+	CVector(1410.8983f, -795.39056f, 12.052228f),
+	CVector(1433.901f, -775.55811f, 11.96265f),
+	CVector(1443.8615f, -746.92511f, 11.976114f),
+	CVector(1457.7015f, -720.00903f, 11.971177f),
+	CVector(1481.5685f, -701.30237f, 11.977908f),
+	CVector(1511.4004f, -696.83295f, 11.972709f),
+	CVector(1542.1796f, -695.61676f, 11.970441f),
+	CVector(1570.3301f, -684.6239f, 11.969202f),
+	CVector(0.0f, 0.0f, 0.0f),
+};
+
+void
+CPacManPickups::GeneratePMPickUpsForRace(int32 race)
+{
+	const CVector *pPos = nil;
+	int i = 0;
+
+	if (race == 0) pPos = aRacePoints1; // there's only one available
+	assert(pPos != nil);
+
+	while (!pPos->IsZero()) {
+		while (aPMPickUps[i].m_eType != PACMAN_NONE)
+			i++;
+
+		aPMPickUps[i].m_eType = PACMAN_RACE;
+		aPMPickUps[i].m_vecPosn = *(pPos++);
+		if (race == 0) {
+			CObject* obj = new CObject(MI_DONKEYMAG, true);
+			if (obj != nil) {
+				obj->ObjectCreatedBy = MISSION_OBJECT;
+
+				obj->GetPosition() = aPMPickUps[i].m_vecPosn;
+				obj->SetOrientation(0.0f, 0.0f, -HALFPI);
+				obj->GetMatrix().UpdateRW();
+				obj->UpdateRwFrame();
+
+				obj->bAffectedByGravity = false;
+				obj->bExplosionProof = true;
+				obj->bUsesCollision = false;
+				obj->bIsPickup = false;
+
+				CWorld::Add(obj);
+			}
+			aPMPickUps[i].m_pObject = obj;
+		} else
+			aPMPickUps[i].m_pObject = nil;
+	}
+	bPMActive = true;
+}
+
+void
+CPacManPickups::GenerateOnePMPickUp(CVector pos)
+{
+	bPMActive = true;
+	aPMPickUps[0].m_eType = PACMAN_RACE;
+	aPMPickUps[0].m_vecPosn = pos;
+}
+
+void
+CPacManPickups::Render()
+{
+	if (!bPMActive) return;
+
+	RwRenderStateSet(rwRENDERSTATEZWRITEENABLE, FALSE);
+	RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)TRUE);
+	RwRenderStateSet(rwRENDERSTATESRCBLEND, (void*)rwBLENDONE);
+	RwRenderStateSet(rwRENDERSTATEDESTBLEND, (void*)rwBLENDONE);
+	RwRenderStateSet(rwRENDERSTATETEXTURERASTER, RwTextureGetRaster(gpCoronaTexture[6]));
+
+	RwV3d pos;
+	float w, h;
+
+	for (int i = 0; i < NUMPACMANPICKUPS; i++) {
+		switch (aPMPickUps[i].m_eType)
+		{
+		case PACMAN_SCRAMBLE:
+		case PACMAN_RACE:
+			if (CSprite::CalcScreenCoors(aPMPickUps[i].m_vecPosn, &pos, &w, &h, true) && pos.z < 100.0f) {
+				if (aPMPickUps[i].m_pObject != nil) {
+					aPMPickUps[i].m_pObject->GetMatrix().SetRotateZOnly((CTimer::GetTimeInMilliseconds() % 1024) * TWOPI / 1024.0f);
+					aPMPickUps[i].m_pObject->GetMatrix().UpdateRW();
+					aPMPickUps[i].m_pObject->UpdateRwFrame();
+				}
+				float fsin = Sin((CTimer::GetTimeInMilliseconds() % 1024) * 6.28f / 1024.0f); // yes, it is 6.28f when it was TWOPI just now...
+				CSprite::RenderOneXLUSprite(pos.x, pos.y, pos.z, 0.8f * w * fsin, 0.8f * h, 100, 50, 5, 255, 1.0f / pos.z, 255);
+			}
+			break;
+		default:
+			break;
+		}
+	}
+
+	RwRenderStateSet(rwRENDERSTATESRCBLEND, (void*)rwBLENDSRCALPHA);
+	RwRenderStateSet(rwRENDERSTATEDESTBLEND, (void*)rwBLENDINVSRCALPHA);
+	RwRenderStateSet(rwRENDERSTATEZWRITEENABLE, (void*)TRUE);
+	RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, FALSE);
+}
+
+void
+CPacManPickups::ClearPMPickUps()
+{
+	bPMActive = false;
+
+	for (int i = 0; i < NUMPACMANPICKUPS; i++) {
+		if (aPMPickUps[i].m_pObject != nil) {
+			CWorld::Remove(aPMPickUps[i].m_pObject);
+			delete aPMPickUps[i].m_pObject;
+			aPMPickUps[i].m_pObject = nil;
+		}
+		aPMPickUps[i].m_eType = PACMAN_NONE;
+	}
+}
+
+void
+CPacManPickups::StartPacManRace(int32 race)
+{
+	GeneratePMPickUpsForRace(race);
+	PillsEatenInRace = 0;
+}
+
+void
+CPacManPickups::StartPacManRecord()
+{
+	CollectGameState = 20;
+	LastPickUpCoors = FindPlayerCoors();
+}
+
+uint32
+CPacManPickups::QueryPowerPillsEatenInRace()
+{
+	return PillsEatenInRace;
+}
+
+void
+CPacManPickups::ResetPowerPillsEatenInRace()
+{
+	PillsEatenInRace = 0;
+}
+
+void
+CPacManPickups::CleanUpPacManStuff()
+{
+	ClearPMPickUps();
+}
+
+void
+CPacManPickups::StartPacManScramble(CVector pos, float scrambleMult, int16 count)
+{
+	GeneratePMPickUps(pos, scrambleMult, count, PACMAN_SCRAMBLE);
+}
+
+uint32
+CPacManPickups::QueryPowerPillsCarriedByPlayer()
+{
+	if (FindPlayerVehicle())
+		return FindPlayerVehicle()->m_nPacManPickupsCarried;
+	return 0;
+}
+
+void
+CPacManPickups::ResetPowerPillsCarriedByPlayer()
+{
+	if (FindPlayerVehicle() != nil) {
+		FindPlayerVehicle()->m_nPacManPickupsCarried = 0;
+		FindPlayerVehicle()->m_fMass /= FindPlayerVehicle()->m_fForceMultiplier;
+		FindPlayerVehicle()->m_fTurnMass /= FindPlayerVehicle()->m_fForceMultiplier;
+		FindPlayerVehicle()->m_fForceMultiplier = 1.0f;
+	}
+}
+
 STARTPATCHES
 	InjectHook(0x430220, CPickups::Init, PATCH_JUMP);
 	InjectHook(0x4303D0, CPickups::Update, PATCH_JUMP);
@@ -1046,4 +1431,21 @@ STARTPATCHES
 	InjectHook(0x433E40, CPickups::Save, PATCH_JUMP);
 	InjectHook(0x433BA0, &CPickup::GiveUsAPickUpObject, PATCH_JUMP);
 	InjectHook(0x430860, &CPickup::Update, PATCH_JUMP);
+	InjectHook(0x4331B0, &CPacManPickup::Update, PATCH_JUMP);
+	InjectHook(0x432760, CPacManPickups::Init, PATCH_JUMP);
+	InjectHook(0x432800, CPacManPickups::Update, PATCH_JUMP);
+	InjectHook(0x432AE0, CPacManPickups::GeneratePMPickUps, PATCH_JUMP);
+	InjectHook(0x432D50, CPacManPickups::GeneratePMPickUpsForRace, PATCH_JUMP);
+	InjectHook(0x432F20, CPacManPickups::GenerateOnePMPickUp, PATCH_JUMP);
+	InjectHook(0x432F60, CPacManPickups::Render, PATCH_JUMP);
+	InjectHook(0x433150, CPacManPickups::ClearPMPickUps, PATCH_JUMP);
+	InjectHook(0x433340, CPacManPickups::StartPacManRace, PATCH_JUMP);
+	InjectHook(0x433360, CPacManPickups::StartPacManRecord, PATCH_JUMP);
+	InjectHook(0x4333A0, CPacManPickups::QueryPowerPillsEatenInRace, PATCH_JUMP);
+	InjectHook(0x4333B0, CPacManPickups::ResetPowerPillsEatenInRace, PATCH_JUMP);
+	InjectHook(0x4333C0, CPacManPickups::CleanUpPacManStuff, PATCH_JUMP);
+	InjectHook(0x4333D0, CPacManPickups::StartPacManScramble, PATCH_JUMP);
+	InjectHook(0x4333F0, CPacManPickups::QueryPowerPillsCarriedByPlayer, PATCH_JUMP);
+	InjectHook(0x433410, CPacManPickups::ResetPowerPillsCarriedByPlayer, PATCH_JUMP);
+
 ENDPATCHES

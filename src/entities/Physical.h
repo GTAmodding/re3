@@ -29,7 +29,7 @@ public:
 	CVector m_vecTurnSpeedAvg;
 	float m_fMass;
 	float m_fTurnMass;	// moment of inertia
-  float fForceMultiplier;
+	float m_fForceMultiplier;
 	float m_fAirResistance;
 	float m_fElasticity;
 	float m_fBuoyancy;

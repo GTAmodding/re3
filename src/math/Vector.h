@@ -83,7 +83,7 @@ public:
 		return x == right.x && y == right.y && z == right.z;
 	}
 
-	bool IsZero(void) { return x == 0.0f && y == 0.0f && z == 0.0f; }
+	bool IsZero(void) const { return x == 0.0f && y == 0.0f && z == 0.0f; }
 };
 
 inline CVector operator+(const CVector &left, const CVector &right)

@@ -482,6 +482,55 @@ CVehicle::InflictDamage(CEntity* damagedBy, eWeaponType weaponType, float damage
 }
 
 void
+CVehicle::DoFixedMachineGuns(void)
+{
+	if(CPad::GetPad(0)->GetCarGunFired() && !bGunSwitchedOff){
+		if(CTimer::GetTimeInMilliseconds() > m_nGunFiringTime + 150){
+			CVector source, target;
+			float dx, dy, len;
+
+			dx = GetForward().x;
+			dy = GetForward().y;
+			len = Sqrt(SQR(dx) + SQR(dy));
+			if(len < 0.1f) len = 0.1f;
+			dx /= len;
+			dy /= len;
+
+			m_nGunFiringTime = CTimer::GetTimeInMilliseconds();
+
+			source = GetMatrix() * CVector(2.0f, 2.5f, 1.0f);
+			target = source + CVector(dx, dy, 0.0f)*60.0f;
+			target += CVector(
+				((CGeneral::GetRandomNumber()&0xFF)-128) * 0.015f,
+				((CGeneral::GetRandomNumber()&0xFF)-128) * 0.015f,
+				((CGeneral::GetRandomNumber()&0xFF)-128) * 0.02f);
+			CWeapon::DoTankDoomAiming(this, pDriver, &source, &target);
+			FireOneInstantHitRound(&source, &target, 15);
+
+			source = GetMatrix() * CVector(-2.0f, 2.5f, 1.0f);
+			target = source + CVector(dx, dy, 0.0f)*60.0f;
+			target += CVector(
+				((CGeneral::GetRandomNumber()&0xFF)-128) * 0.015f,
+				((CGeneral::GetRandomNumber()&0xFF)-128) * 0.015f,
+				((CGeneral::GetRandomNumber()&0xFF)-128) * 0.02f);
+			CWeapon::DoTankDoomAiming(this, pDriver, &source, &target);
+			FireOneInstantHitRound(&source, &target, 15);
+
+			DMAudio.PlayOneShot(m_audioEntityId, SOUND_WEAPON_SHOT_FIRED, 0.0f);
+
+			m_nAmmoInClip--;
+			if(m_nAmmoInClip == 0){
+				m_nAmmoInClip = 20;
+				m_nGunFiringTime = CTimer::GetTimeInMilliseconds() + 1400;
+			}
+		}
+	}else{
+		if(CTimer::GetTimeInMilliseconds() > m_nGunFiringTime + 1400)
+			m_nAmmoInClip = 20;
+	}
+}
+
+void
 CVehicle::ExtinguishCarFire(void)
 {
 	m_fHealth = max(m_fHealth, 300.0f);

@@ -2,47 +2,41 @@
 
 #include "Vehicle.h"
 
+enum eBoatNodes
+{
+	BOAT_MOVING = 1,
+	BOAT_RUDDER,
+	BOAT_WINDSCREEN
+};
+
 class CBoat : public CVehicle
 {
 public:
 	// 0x288
-	float field_288;
-	float field_28C;
-	float field_290;
-	float field_294;
-	float field_298;
-	float field_29C;
-	float field_2A0;
-	float field_2A4;
+	float m_fPropellerZ;
+	float m_fPropellerY;
+	CVector m_waterMoveDrag;
+	CVector m_waterTurnDrag;
 	float m_fMovingHiRotation;
 	int32 _unk0;
 	RwFrame *m_aBoatNodes[4];
-	uint8 m_bBoatFlag1 : 1;
-	uint8 m_bBoatFlag2 : 1;
-	uint8 m_bBoatFlag3 : 1;
-	uint8 m_bBoatFlag4 : 1;
-	uint8 m_bBoatFlag5 : 1;
-	uint8 m_bBoatFlag6 : 1;
-	uint8 m_bBoatFlag7 : 1;
-	uint8 m_bBoatFlag8 : 1;
+	uint8 bBoatInWater : 1;
+	uint8 bPropellerInWater : 1;
 	bool m_bIsAnchored;
-	char _pad0[2];
-	float field_2C4;
+	float m_fOrientation;
 	int32 _unk1;
-	float field_2CC;
-	CEntity *field_2D0;
+	float m_fDamage;
+	CEntity *m_pSetOnFireEntity;
 	bool _unk2;
-	char _pad1[3];
 	float m_fAccelerate;
 	float m_fBrake;
 	float m_fSteeringLeftRight;
 	uint8 m_nPadID;
-	char _pad2[3];
 	int32 _unk3;
-	float m_fTurnForceZ;
-	CVector m_vecMoveForce;
-	float field_2FC;
-	uint16 field_300;
+	float m_fVolumeUnderWater;
+	CVector m_vecBuoyancePoint;
+	float m_fPrevVolumeUnderWater;
+	int16 m_nDeltaVolumeUnderWater;
 	uint16 m_nNumWakePoints;
 	CVector2D m_avec2dWakePoints[32];
 	float m_afWakePointLifeTime[32];
@@ -59,7 +53,10 @@ public:
 	virtual bool IsComponentPresent(int32 component) { return true; }
 	virtual void BlowUpCar(CEntity *ent);
 	
+	void ApplyWaterResistance(void);
 	void SetupModelNodes();
+	void PruneWakeTrail(void);
+	void AddWakePoint(CVector point);
 
 	static CBoat *(&apFrameWakeGeneratingBoats)[4];
 	

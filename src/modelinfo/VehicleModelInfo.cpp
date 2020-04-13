@@ -12,6 +12,7 @@
 #include "World.h"
 #include "Vehicle.h"
 #include "Automobile.h"
+#include "Boat.h"
 #include "Train.h"
 #include "Plane.h"
 #include "Heli.h"
@@ -80,9 +81,9 @@ RwObjectNameIdAssocation carIds[] = {
 };
 
 RwObjectNameIdAssocation boatIds[] = {
-	{ "boat_moving_hi",	1,	VEHICLE_FLAG_COLLAPSE },
-	{ "boat_rudder_hi",	3,	VEHICLE_FLAG_COLLAPSE },
-	{ "windscreen",		2,	VEHICLE_FLAG_WINDSCREEN | VEHICLE_FLAG_COLLAPSE },
+	{ "boat_moving_hi",	BOAT_MOVING,	VEHICLE_FLAG_COLLAPSE },
+	{ "boat_rudder_hi",	BOAT_RUDDER,	VEHICLE_FLAG_COLLAPSE },
+	{ "windscreen",		BOAT_WINDSCREEN,	VEHICLE_FLAG_WINDSCREEN | VEHICLE_FLAG_COLLAPSE },
 	{ "ped_frontseat",	BOAT_POS_FRONTSEAT,	VEHICLE_FLAG_POS | CLUMP_FLAG_NO_HIERID },
 	{ nil, 0, 0 }
 };

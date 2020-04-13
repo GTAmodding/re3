@@ -667,7 +667,7 @@ CAutomobile::ProcessControl(void)
 		if(!strongGrip1 && !CVehicle::bCheat3)
 			gripCheat = false;
 		float acceleration = pHandling->Transmission.CalculateDriveAcceleration(m_fGasPedal, m_nCurrentGear, m_fChangeGearTime, fwdSpeed, gripCheat);
-		acceleration /= fForceMultiplier;
+		acceleration /= m_fForceMultiplier;
 
 		// unused
 		if(GetModelIndex() == MI_MIAMI_RCBARON ||
@@ -718,7 +718,7 @@ CAutomobile::ProcessControl(void)
 		else
 			traction = 0.004f;
 		traction *= pHandling->fTractionMultiplier / 4.0f;
-		traction /= fForceMultiplier;
+		traction /= m_fForceMultiplier;
 		if(CVehicle::bCheat3)
 			traction *= 4.0f;
 
@@ -3791,7 +3791,7 @@ CAutomobile::BlowUpCar(CEntity *culprit)
 	}
 	ChangeLawEnforcerState(false);
 
-	gFireManager.StartFire(this, culprit, 0.8f, 1);	// TODO
+	gFireManager.StartFire(this, culprit, 0.8f, true);
 	CDarkel::RegisterCarBlownUpByPlayer(this);
 	if(GetModelIndex() == MI_RCBANDIT)
 		CExplosion::AddExplosion(this, culprit, EXPLOSION_CAR_QUICK, GetPosition(), 0);
@@ -4054,7 +4054,7 @@ CAutomobile::HasCarStoppedBecauseOfLight(void)
 			if(ThePaths.m_connections[curnode->firstLink + i] == AutoPilot.m_nNextRouteNode)
 				break;
 		if(i < curnode->numLinks &&
-		   ThePaths.m_carPathLinks[ThePaths.m_carPathConnections[curnode->firstLink + i]].trafficLightType & 3)	// TODO
+		   ThePaths.m_carPathLinks[ThePaths.m_carPathConnections[curnode->firstLink + i]].trafficLightType & 3)
 			return true;
 	}
 
@@ -4064,7 +4064,7 @@ CAutomobile::HasCarStoppedBecauseOfLight(void)
 			if(ThePaths.m_connections[curnode->firstLink + i] == AutoPilot.m_nPrevRouteNode)
 				break;
 		if(i < curnode->numLinks &&
-		   ThePaths.m_carPathLinks[ThePaths.m_carPathConnections[curnode->firstLink + i]].trafficLightType & 3)	// TODO
+		   ThePaths.m_carPathLinks[ThePaths.m_carPathConnections[curnode->firstLink + i]].trafficLightType & 3)
 			return true;
 	}
 

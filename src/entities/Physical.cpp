@@ -21,7 +21,7 @@ CPhysical::CPhysical(void)
 {
 	int i;
 
-	fForceMultiplier = 1.0f;
+	m_fForceMultiplier = 1.0f;
 	m_vecMoveSpeed = CVector(0.0f, 0.0f, 0.0f);
 	m_vecTurnSpeed = CVector(0.0f, 0.0f, 0.0f);
 	m_vecMoveFriction = CVector(0.0f, 0.0f, 0.0f);

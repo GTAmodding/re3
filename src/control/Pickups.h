@@ -102,8 +102,31 @@ extern uint16 AmmoForWeapon[20];
 extern uint16 AmmoForWeapon_OnStreet[20];
 extern uint16 CostOfWeapon[20];
 
+enum ePacmanPickupType
+{
+	PACMAN_NONE,
+	PACMAN_SCRAMBLE,
+	PACMAN_RACE,
+};
+
+class CPacManPickup
+{
+public:
+	CVector m_vecPosn;
+	CObject *m_pObject;
+	uint8 m_eType;
+
+	void Update();
+};
+
 class CPacManPickups
 {
+	friend CPacManPickup;
+
+	static CPacManPickup aPMPickUps[NUMPACMANPICKUPS];
+	static CVector LastPickUpCoors;
+	static int PillsEatenInRace;
+	static bool bPMActive;
 public:
 	static void Init(void);
 	static void Update(void);
@@ -111,11 +134,11 @@ public:
 	static void GeneratePMPickUpsForRace(int32);
 	static void GenerateOnePMPickUp(CVector);
 	static void Render(void);
-	static void DoCleanUpPacManStuff(void);
 	static void StartPacManRace(int32);
 	static void StartPacManRecord(void);
 	static uint32 QueryPowerPillsEatenInRace(void);
 	static void ResetPowerPillsEatenInRace(void);
+	static void ClearPMPickUps(void);
 	static void CleanUpPacManStuff(void);
 	static void StartPacManScramble(CVector, float, int16);
 	static uint32 QueryPowerPillsCarriedByPlayer(void);

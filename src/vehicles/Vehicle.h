@@ -269,6 +269,7 @@ public:
 	bool IsSphereTouchingVehicle(float sx, float sy, float sz, float radius);
 	bool ShufflePassengersToMakeSpace(void);
 	void InflictDamage(CEntity *damagedBy, eWeaponType weaponType, float damage);
+	void DoFixedMachineGuns(void);
 
 	bool IsAlarmOn(void) { return m_nAlarmState != 0 && m_nAlarmState != -1; }
 	CVehicleModelInfo* GetModelInfo() { return (CVehicleModelInfo*)CModelInfo::GetModelInfo(GetModelIndex()); }

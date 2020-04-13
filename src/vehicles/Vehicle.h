@@ -130,7 +130,8 @@ public:
 	int8 m_nGettingInFlags;
 	int8 m_nGettingOutFlags;
 	uint8 m_nNumMaxPassengers;
-	char field_1CD[19];
+	char field_1CD[3];
+	float field_1D0[4];
 	CEntity *m_pCurGroundEntity;
 	CFire *m_pCarFire;
 	float m_fSteerAngle;

@@ -1016,6 +1016,7 @@ CPacManPickup::Update()
 			FindPlayerPed()->m_pWanted->m_nChaos += 10;
 			FindPlayerPed()->m_pWanted->UpdateWantedLevel();
 			DMAudio.PlayFrontEndSound(SOUND_PICKUP_PACMAN_PACKAGE, 0);
+			break;
 		}
 		case PACMAN_RACE:
 			CPacManPickups::PillsEatenInRace++;

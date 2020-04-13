@@ -2,6 +2,8 @@
 
 #include "Collision.h"
 
+#define MAX_MODEL_NAME (24)
+
 enum ModeInfoType : uint8
 {
 	MITYPE_NA        = 0,
@@ -21,7 +23,7 @@ class CBaseModelInfo
 {
 protected:
 	// TODO?: make more things protected
-	char         m_name[24];
+	char         m_name[MAX_MODEL_NAME];
 	CColModel   *m_colModel;
 	C2dEffect   *m_twodEffects;
 	int16        m_objectId;

@@ -21,8 +21,7 @@ tGameBuffer& CRecordDataForGame::pDataBufferForFrame = *(tGameBuffer*)0x72CED0;
 void CRecordDataForGame::Init(void)
 {
 	RecordingState = STATE_NONE;
-	if (pDataBuffer)
-		delete[] pDataBuffer;
+	delete[] pDataBuffer;
 	pDataBufferPointer = nil;
 	pDataBuffer = nil;
 #ifndef GTA_PS2 // this stuff is not present on PS2
@@ -42,7 +41,7 @@ void CRecordDataForGame::Init(void)
 	if (RecordingState == STATE_PLAYBACK) {
 		pDataBufferPointer = new uint8[MEMORY_FOR_GAME_RECORD];
 		pDataBuffer = pDataBufferPointer;
-		pDataBuffer[CFileMgr::Read(FId, (char*)pDataBufferPointer, MEMORY_FOR_GAME_RECORD) + 8] = -1;
+		pDataBuffer[CFileMgr::Read(FId, (char*)pDataBufferPointer, MEMORY_FOR_GAME_RECORD) + 8] = (uint8)-1;
 		CFileMgr::CloseFile(FId);
 	}
 #else
@@ -71,7 +70,7 @@ void CRecordDataForGame::SaveOrRetrieveDataForThisFrame(void)
 		break;
 	}
 	case STATE_PLAYBACK:
-		if (pDataBufferPointer[8] == -1)
+		if (pDataBufferPointer[8] == (uint8)-1)
 			CPad::GetPad(0)->NewState.Clear();
 		else {
 			tGameBuffer* pData = (tGameBuffer*)pDataBufferPointer;
@@ -92,7 +91,7 @@ void CRecordDataForGame::SaveOrRetrieveDataForThisFrame(void)
 
 #define PROCESS_BUTTON_STATE_STORE(buf, os, ns, field, id) \
 	do { \
-		if (os->field != os->field){ \
+		if (os->field != ns->field){ \
 			*buf++ = id; \
 			*buf++ = ns->field; \
 		} \
@@ -102,7 +101,7 @@ uint8* CRecordDataForGame::PackCurrentPadValues(uint8* buf, CControllerState* os
 {
 	PROCESS_BUTTON_STATE_STORE(buf, os, ns, LeftStickX, 0);
 	PROCESS_BUTTON_STATE_STORE(buf, os, ns, LeftStickY, 1);
-	PROCESS_BUTTON_STATE_STORE(buf, os, ns, LeftShoulder1, 2);
+	PROCESS_BUTTON_STATE_STORE(buf, os, ns, RightStickX, 2);
 	PROCESS_BUTTON_STATE_STORE(buf, os, ns, RightStickY, 3);
 	PROCESS_BUTTON_STATE_STORE(buf, os, ns, LeftShoulder1, 4);
 	PROCESS_BUTTON_STATE_STORE(buf, os, ns, LeftShoulder2, 5);
@@ -132,7 +131,7 @@ uint8* CRecordDataForGame::UnPackCurrentPadValues(uint8* buf, uint8 total, CCont
 		switch (*buf++) {
 			PROCESS_BUTTON_STATE_RESTORE(buf, state, LeftStickX, 0);
 			PROCESS_BUTTON_STATE_RESTORE(buf, state, LeftStickY, 1);
-			PROCESS_BUTTON_STATE_RESTORE(buf, state, LeftShoulder1, 2);
+			PROCESS_BUTTON_STATE_RESTORE(buf, state, RightStickX, 2);
 			PROCESS_BUTTON_STATE_RESTORE(buf, state, RightStickY, 3);
 			PROCESS_BUTTON_STATE_RESTORE(buf, state, LeftShoulder1, 4);
 			PROCESS_BUTTON_STATE_RESTORE(buf, state, LeftShoulder2, 5);

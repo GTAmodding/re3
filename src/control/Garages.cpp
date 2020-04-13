@@ -2108,7 +2108,7 @@ void CGarages::CloseHideOutGaragesBeforeSave()
 			aGarages[i].m_eGarageType != GARAGE_HIDEOUT_THREE)
 			continue;
 		if (aGarages[i].m_eGarageState != GS_FULLYCLOSED &&
-			aGarages[i].m_eGarageType != GARAGE_HIDEOUT_ONE || !aGarages[i].IsAnyCarBlockingDoor()) {
+			(aGarages[i].m_eGarageType != GARAGE_HIDEOUT_ONE || !aGarages[i].IsAnyCarBlockingDoor())) {
 			aGarages[i].m_eGarageState = GS_FULLYCLOSED;
 			switch (aGarages[i].m_eGarageType) {
 			case GARAGE_HIDEOUT_ONE:

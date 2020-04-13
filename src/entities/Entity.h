@@ -90,6 +90,7 @@ public:
 	CReference *m_pFirstReference;
 
 	CColModel *GetColModel(void) { return CModelInfo::GetModelInfo(m_modelIndex)->GetColModel(); }
+	uint32* GetAddressOfEntityProperties() { /* AWFUL */ return (uint32*)((char*)&m_rwObject + sizeof(m_rwObject)); }
 
 	CEntity(void);
 	~CEntity(void);

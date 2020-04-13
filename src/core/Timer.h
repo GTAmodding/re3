@@ -53,6 +53,9 @@ public:
 	static void Stop(void);
 	static void StartUserPause(void);
 	static void EndUserPause(void);
+
+	friend bool GenericLoad(void);
+	friend bool GenericSave(int file);
 };
 
 #ifdef FIX_BUGS

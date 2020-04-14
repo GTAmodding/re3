@@ -530,30 +530,30 @@ public:
 	bool GetIsMenuActive() {return !!m_bMenuActive;}
 
 public:
-	static int32 &OS_Language;
-	static int8 &m_PrefsUseVibration;
-	static int8 &m_DisplayControllerOnFoot;
-	static int8 &m_PrefsUseWideScreen;
-	static int8 &m_PrefsRadioStation;
-	static int8 &m_PrefsVsync;
-	static int8 &m_PrefsVsyncDisp;
-	static int8 &m_PrefsFrameLimiter;
-	static int8 &m_PrefsShowSubtitles;
-	static int8 &m_PrefsSpeakers;
-	static int32 &m_ControlMethod;
-	static int8 &m_PrefsDMA;
-	static int32 &m_PrefsLanguage;
-	static int32 &m_PrefsBrightness;
-	static float &m_PrefsLOD;
-	static int8 &m_bFrontEnd_ReloadObrTxtGxt;
-	static int32 &m_PrefsMusicVolume;
-	static int32 &m_PrefsSfxVolume;
-	static char *m_PrefsSkinFile;
-	static int32 &m_KeyPressedCode;
+	static int32 OS_Language;
+	static int8 m_PrefsUseVibration;
+	static int8 m_DisplayControllerOnFoot;
+	static int8 m_PrefsUseWideScreen;
+	static int8 m_PrefsRadioStation;
+	static int8 m_PrefsVsync;
+	static int8 m_PrefsVsyncDisp;
+	static int8 m_PrefsFrameLimiter;
+	static int8 m_PrefsShowSubtitles;
+	static int8 m_PrefsSpeakers;
+	static int32 m_ControlMethod;
+	static int8 m_PrefsDMA;
+	static int32 m_PrefsLanguage;
+	static int32 m_PrefsBrightness;
+	static float m_PrefsLOD;
+	static int8 m_bFrontEnd_ReloadObrTxtGxt;
+	static int32 m_PrefsMusicVolume;
+	static int32 m_PrefsSfxVolume;
+	static char m_PrefsSkinFile[256];
+	static int32 m_KeyPressedCode;
 
-	static bool &m_bStartUpFrontEndRequested;
-	static bool &m_bShutDownFrontEndRequested;
-	static bool &m_PrefsAllowNastyGame;
+	static bool m_bStartUpFrontEndRequested;
+	static bool m_bShutDownFrontEndRequested;
+	static bool m_PrefsAllowNastyGame;
 	
 	static uint8 m_PrefsStereoMono;
 	static int32 m_SelectedMap;

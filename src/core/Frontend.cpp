@@ -82,34 +82,34 @@ int curBottomBarOption = -1;
 int hoveredBottomBarOption = -1;
 #endif
 
-int32 &CMenuManager::OS_Language = *(int32*)0x5F2F78;	// 9
-int8 &CMenuManager::m_PrefsUseVibration = *(int8*)0x95CD92;
-int8 &CMenuManager::m_DisplayControllerOnFoot = *(int8*)0x95CD8D;
-int8 &CMenuManager::m_PrefsVsync = *(int8*)0x5F2E58;	// 1
-int8 &CMenuManager::m_PrefsVsyncDisp = *(int8*)0x5F2E5C;	// 1
-int8 &CMenuManager::m_PrefsFrameLimiter = *(int8*)0x5F2E60;	// 1
-int8 &CMenuManager::m_PrefsShowSubtitles = *(int8*)0x5F2E54;	// 1
-int8 &CMenuManager::m_PrefsSpeakers = *(int8*)0x95CD7E;
-int32 &CMenuManager::m_ControlMethod = *(int32*)0x8F5F7C;
-int8 &CMenuManager::m_PrefsDMA = *(int8*)0x5F2F74;	// 1
-int32 &CMenuManager::m_PrefsLanguage = *(int32*)0x941238;
+int32 CMenuManager::OS_Language = LANG_ENGLISH; // *(int32*)0x5F2F78;
+int8 CMenuManager::m_PrefsUseVibration; // = *(int8*)0x95CD92;
+int8 CMenuManager::m_DisplayControllerOnFoot; // = *(int8*)0x95CD8D;
+int8 CMenuManager::m_PrefsVsync = 1; // *(int8*)0x5F2E58;
+int8 CMenuManager::m_PrefsVsyncDisp = 1; // *(int8*)0x5F2E5C;
+int8 CMenuManager::m_PrefsFrameLimiter = 1; // *(int8*)0x5F2E60;
+int8 CMenuManager::m_PrefsShowSubtitles = 1; // *(int8*)0x5F2E54;
+int8 CMenuManager::m_PrefsSpeakers; // = *(int8*)0x95CD7E;
+int32 CMenuManager::m_ControlMethod; // = *(int32*)0x8F5F7C;
+int8 CMenuManager::m_PrefsDMA = 1; // *(int8*)0x5F2F74;
+int32 CMenuManager::m_PrefsLanguage; // = *(int32*)0x941238;
 uint8 CMenuManager::m_PrefsStereoMono; // *(bool*)0x95CDB5; // unused except restore settings
 
-bool &CMenuManager::m_PrefsAllowNastyGame = *(bool*)0x5F2E64;	// true
-bool &CMenuManager::m_bStartUpFrontEndRequested = *(bool*)0x95CCF4;
-bool &CMenuManager::m_bShutDownFrontEndRequested = *(bool*)0x95CD6A;
+bool CMenuManager::m_PrefsAllowNastyGame = true; // *(bool*)0x5F2E64;
+bool CMenuManager::m_bStartUpFrontEndRequested; // = *(bool*)0x95CCF4;
+bool CMenuManager::m_bShutDownFrontEndRequested; // = *(bool*)0x95CD6A;
 
-int8 &CMenuManager::m_PrefsUseWideScreen = *(int8*)0x95CD23;
-int8 &CMenuManager::m_PrefsRadioStation = *(int8*)0x95CDA4;
-int32 &CMenuManager::m_PrefsBrightness = *(int32*)0x5F2E50;	// 256
-float &CMenuManager::m_PrefsLOD = *(float*)0x8F42C4;
-int8 &CMenuManager::m_bFrontEnd_ReloadObrTxtGxt = *(int8*)0x628CFC;
-int32 &CMenuManager::m_PrefsMusicVolume = *(int32*)0x5F2E4C;	// 102
-int32 &CMenuManager::m_PrefsSfxVolume = *(int32*)0x5F2E48;	// 102
+int8 CMenuManager::m_PrefsUseWideScreen; // = *(int8*)0x95CD23;
+int8 CMenuManager::m_PrefsRadioStation; // = *(int8*)0x95CDA4;
+int32 CMenuManager::m_PrefsBrightness = 256; // = *(int32*)0x5F2E50;
+float CMenuManager::m_PrefsLOD; // = *(float*)0x8F42C4;
+int8 CMenuManager::m_bFrontEnd_ReloadObrTxtGxt; // = *(int8*)0x628CFC;
+int32 CMenuManager::m_PrefsMusicVolume = 102; // = *(int32*)0x5F2E4C;
+int32 CMenuManager::m_PrefsSfxVolume = 102; // = *(int32*)0x5F2E48;
 
-char *CMenuManager::m_PrefsSkinFile = (char*)0x5F2E74;	//[256] "$$\"\""
+char CMenuManager::m_PrefsSkinFile[256] = "$$\"\""; // = (char*)0x5F2E74;
 
-int32 &CMenuManager::m_KeyPressedCode = *(int32*)0x5F2E70;	// -1
+int32 CMenuManager::m_KeyPressedCode = -1; // = *(int32*)0x5F2E70;
 
 // Originally that was PS2 option color, they forget it here and used in PrintBriefs once(but didn't use the output anyway)
 #ifdef PS2_LIKE_MENU
@@ -1655,7 +1655,6 @@ CMenuManager::DrawControllerBound(int32 yStart, int32 xStart, int32 unused, int8
 	}
 }
 
-// TODO: Complete aScreens and test that
 void
 CMenuManager::DrawControllerScreenExtraText(int yStart, int xStart, int lineHeight)
 {
@@ -2463,7 +2462,7 @@ CMenuManager::DrawPlayerSetupScreen()
 			m_pSelectedSkin->skinNameDisplayed[oldLength - 4] = '\0';
 			m_pSelectedSkin->skinNameOriginal[oldLength - 4] = '\0';
 
-			// Truncate to 40 bytes-39 chars, idk why. This is done in sepearate function in game.
+			// Fill to 40 bytes-39 chars, idk why. This is done in sepearate function in game.
 			strncpy(nameTemp, m_pSelectedSkin->skinNameDisplayed, 39); // game doesn't do that, but in our day strncpy to same string is forbidden
 			strncpy(m_pSelectedSkin->skinNameDisplayed, nameTemp, 39);
 			if (oldLength - 4 > 39)
@@ -4875,7 +4874,7 @@ float CMenuManager::StretchY(float y)
 void
 CMenuManager::SwitchMenuOnAndOff()
 {
-	bool menuWasActive = !!m_bMenuActive;
+	bool menuWasActive = GetIsMenuActive();
 
 	// Reminder: You need REGISTER_START_BUTTON defined to make it work.
 	if (CPad::GetPad(0)->GetStartJustDown() 

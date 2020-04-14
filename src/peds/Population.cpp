@@ -29,39 +29,54 @@
 #define PED_REMOVE_DIST			(MIN_CREATION_DIST + CREATION_RANGE + 1.0f)
 #define PED_REMOVE_DIST_SPECIAL	(MIN_CREATION_DIST + CREATION_RANGE + 15.0f) // for peds with bCullExtraFarAway flag
 
-// TO-DO: These are hard-coded, reverse them.
-// More clearly they're transition areas between zones.
-RegenerationPoint (&aSafeZones)[8] = *(RegenerationPoint(*)[8]) * (uintptr*)0x5FA578;
+// Transition areas between zones
+const RegenerationPoint aSafeZones[] = {
+	{ LEVEL_INDUSTRIAL, LEVEL_COMMERCIAL, 400.0f, 814.0f, -954.0f, -903.0f, 30.0f, 100.0f,
+		CVector(790.0f, -917.0f, 39.0f), CVector(775.0f, -921.0f, 39.0f), CVector(424.0f, -942.0f, 38.0f), CVector(439.0f, -938.0f, 38.0f) },
+	{ LEVEL_INDUSTRIAL, LEVEL_COMMERCIAL, 555.0f, 711.0f, 118.0f, 186.0f, -30.0f, -10.0f,
+		CVector(698.0f,  182.0f, -20.0f), CVector(681.0f,  178.0f, -20.0f), CVector(586.0f,  144.0f, -20.0f), CVector(577.0f,  135.0f, -20.0f) },
+	{ LEVEL_INDUSTRIAL, LEVEL_COMMERCIAL, 26.0f, 44.0f, 124.0f, 87.0f, 20.0f, 6.0f,
+		CVector(736.0f, -117.0f, -13.0f), CVector(730.0f, -115.0f, -13.0f), CVector(635.0f, -93.0f, -12.5f), CVector(650.0f, -89.0f, -12.5f) },
+	{ LEVEL_INDUSTRIAL, LEVEL_COMMERCIAL, 45.0f, 34.0f, 780.0f, 750.0f, 25.0f, 6.0f,
+		CVector(729.0f, -764.0f, -18.0f), CVector(720.0f, -769.0f, -17.0f), CVector(652.0f, -774.0f, -10.5f), CVector(659.0f, -770.0f, -10.5f) },
+	{ LEVEL_COMMERCIAL, LEVEL_SUBURBAN, 532.0f, 136.0f, 668.0f, 599.0f, 4.0f, 0.0f,
+		CVector(-172.0f, -619.0f,  44.0f), CVector(-183.0f, -623.0f,  44.0f), CVector(-511.0f, -645.0f,  41.0f), CVector(-493.0f, -639.0f,  41.5f) },
+	{ LEVEL_COMMERCIAL, LEVEL_SUBURBAN, 325.0f, 175.0f, 7.0f, 5.0f, 30.0f, 10.0f,
+		CVector(-185.0f,  40.8f, -20.5f), CVector(-202.0f,  37.0f, -20.5f), CVector(-315.0f,  65.5f, -20.5f), CVector(-306.0f,  62.4f, -20.5f) },
+	{ LEVEL_COMMERCIAL, LEVEL_SUBURBAN, 410.0f, 310.0f, 1055.0f, 1030.0f, 20.0f, 6.0f,
+		CVector(-321.0f, -1043.0f, -13.2f), CVector(-328.0f, -1045.0f, -13.2f), CVector(-398.0f, -1044.0f, -13.5f), CVector(-390.0f, -1040.5f, -13.5f) },
+	{ LEVEL_COMMERCIAL, LEVEL_SUBURBAN, 425.0f, 280.0f, 471.0f, 447.0f, 20.0f, 5.0f,
+		CVector(-292.0f, -457.0f, -11.6f), CVector(-310.0f, -461.0f, -11.6f), CVector(-413.0f, -461.0f, -11.5f), CVector(-399.0f, -457.0f, -11.3f) }
+}; // *(RegenerationPoint(*)[8]) * (uintptr*)0x5FA578;
 
-//PedGroup (&CPopulation::ms_pPedGroups)[NUMPEDGROUPS] = *(PedGroup(*)[NUMPEDGROUPS]) * (uintptr*)0x6E9248;
-PedGroup CPopulation::ms_pPedGroups[NUMPEDGROUPS];
-bool &CPopulation::ms_bGivePedsWeapons = *(bool*)0x95CCF6;
-int32 &CPopulation::m_AllRandomPedsThisType = *(int32*)0x5FA570;
-float &CPopulation::PedDensityMultiplier = *(float*)0x5FA56C;
-uint32 &CPopulation::ms_nTotalMissionPeds = *(uint32*)0x8F5F70;
-int32 &CPopulation::MaxNumberOfPedsInUse = *(int32*)0x5FA574;
-uint32& CPopulation::ms_nNumCivMale = *(uint32*)0x8F2548;
-uint32& CPopulation::ms_nNumCivFemale = *(uint32*)0x8F5F44;
-uint32& CPopulation::ms_nNumCop = *(uint32*)0x885AFC;
-bool& CPopulation::bZoneChangeHasHappened = *(bool*)0x95CD79;
-uint32& CPopulation::ms_nNumEmergency = *(uint32*)0x94071C;
-int8& CPopulation::m_CountDownToPedsAtStart = *(int8*)0x95CD4F;
-uint32& CPopulation::ms_nNumGang1 = *(uint32*)0x8F1B1C;
-uint32& CPopulation::ms_nNumGang2 = *(uint32*)0x8F1B14;
-uint32& CPopulation::ms_nTotalPeds = *(uint32*)0x95CB50;
-uint32& CPopulation::ms_nNumGang3 = *(uint32*)0x8F2548;
-uint32& CPopulation::ms_nTotalGangPeds = *(uint32*)0x885AF0;
-uint32& CPopulation::ms_nNumGang4 = *(uint32*)0x8F1B2C;
-uint32& CPopulation::ms_nTotalCivPeds = *(uint32*)0x8F2C3C;
-uint32& CPopulation::ms_nNumGang5 = *(uint32*)0x8F1B30;
-uint32& CPopulation::ms_nNumDummy = *(uint32*)0x8F1A98;
-uint32& CPopulation::ms_nNumGang6 = *(uint32*)0x8F1B20;
-uint32& CPopulation::ms_nNumGang9 = *(uint32*)0x8F1B10;
-uint32& CPopulation::ms_nNumGang7 = *(uint32*)0x8F1B28;
-uint32& CPopulation::ms_nNumGang8 = *(uint32*)0x8F1B0C;
-CVector &CPopulation::RegenerationPoint_a = *(CVector*)0x8E2AA4;
-CVector &CPopulation::RegenerationPoint_b = *(CVector*)0x8E2A98;
-CVector &CPopulation::RegenerationForward = *(CVector*)0x8F1AD4;
+PedGroup CPopulation::ms_pPedGroups[NUMPEDGROUPS]; // = *(PedGroup(*)[NUMPEDGROUPS]) * (uintptr*)0x6E9248;
+bool CPopulation::ms_bGivePedsWeapons; // = *(bool*)0x95CCF6;
+int32 CPopulation::m_AllRandomPedsThisType = -1; // = *(int32*)0x5FA570;
+float CPopulation::PedDensityMultiplier = 1.0f; // = *(float*)0x5FA56C;
+uint32 CPopulation::ms_nTotalMissionPeds; // = *(uint32*)0x8F5F70;
+int32 CPopulation::MaxNumberOfPedsInUse = 25; // *(int32*)0x5FA574;
+uint32 CPopulation::ms_nNumCivMale; // = *(uint32*)0x8F2548;
+uint32 CPopulation::ms_nNumCivFemale; // = *(uint32*)0x8F5F44;
+uint32 CPopulation::ms_nNumCop; // = *(uint32*)0x885AFC;
+bool CPopulation::bZoneChangeHasHappened; // = *(bool*)0x95CD79;
+uint32 CPopulation::ms_nNumEmergency; // = *(uint32*)0x94071C;
+int8 CPopulation::m_CountDownToPedsAtStart; // = *(int8*)0x95CD4F;
+uint32 CPopulation::ms_nNumGang1; // = *(uint32*)0x8F1B1C;
+uint32 CPopulation::ms_nNumGang2; // = *(uint32*)0x8F1B14;
+uint32 CPopulation::ms_nTotalPeds; // = *(uint32*)0x95CB50;
+uint32 CPopulation::ms_nNumGang3; // = *(uint32*)0x8F2548;
+uint32 CPopulation::ms_nTotalGangPeds; // = *(uint32*)0x885AF0;
+uint32 CPopulation::ms_nNumGang4; // = *(uint32*)0x8F1B2C;
+uint32 CPopulation::ms_nTotalCivPeds; // = *(uint32*)0x8F2C3C;
+uint32 CPopulation::ms_nNumGang5; // = *(uint32*)0x8F1B30;
+uint32 CPopulation::ms_nNumDummy; // = *(uint32*)0x8F1A98;
+uint32 CPopulation::ms_nNumGang6; // = *(uint32*)0x8F1B20;
+uint32 CPopulation::ms_nNumGang9; // = *(uint32*)0x8F1B10;
+uint32 CPopulation::ms_nNumGang7; // = *(uint32*)0x8F1B28;
+uint32 CPopulation::ms_nNumGang8; // = *(uint32*)0x8F1B0C;
+CVector CPopulation::RegenerationPoint_a; // = *(CVector*)0x8E2AA4;
+CVector CPopulation::RegenerationPoint_b; // = *(CVector*)0x8E2A98;
+CVector CPopulation::RegenerationForward; // = *(CVector*)0x8F1AD4;
 
 void
 CPopulation::Initialise()

@@ -2,6 +2,7 @@
 
 class CTimeCycle
 {
+public:
 	static int   m_nAmbientRed[NUMHOURS][NUMWEATHERS];
 	static int   m_nAmbientGreen[NUMHOURS][NUMWEATHERS];
 	static int   m_nAmbientBlue[NUMHOURS][NUMWEATHERS];
@@ -89,7 +90,6 @@ class CTimeCycle
 
 	static int   m_FogReduction;
 
-public:
 	static int   m_CurrentStoredValue;
 	static CVector m_VectorToSun[16];
 	static float m_fShadowFrontX[16];
@@ -149,4 +149,6 @@ public:
 	static float GetShadowSideY(void) { return m_fShadowSideY[m_CurrentStoredValue]; }
 	static float GetShadowDisplacementX(void) { return m_fShadowDisplacementX[m_CurrentStoredValue]; }
 	static float GetShadowDisplacementY(void) { return m_fShadowDisplacementY[m_CurrentStoredValue]; }
+	
+	static bool Save();
 };

@@ -59,6 +59,8 @@
 #include "timebars.h"
 #include "GenericGameStorage.h"
 #include "SceneEdit.h"
+#include "dexports.h"
+#include "WeatherEdit.h"
 
 GlobalScene Scene;
 
@@ -89,12 +91,6 @@ char version_name[64];
 void GameInit(void);
 void SystemInit(void);
 void TheGame(void);
-
-extern void (*DebugMenuProcess)(void);
-extern void (*DebugMenuRender)(void);
-void DebugMenuInit(void);
-void DebugMenuPopulate(void);
-
 
 void
 ValidateVersion()
@@ -324,6 +320,9 @@ PluginAttach(void)
 
 	return TRUE;
 }
+
+// forward declaration
+void DebugMenuPopulate();
 
 static RwBool 
 Initialise3D(void *param)
@@ -868,7 +867,12 @@ Render2dStuff(void)
 	if(CSceneEdit::m_bEditOn)
 		CSceneEdit::Draw();
 	else
+	{
+		if(CWeatherEdit::m_bEditOn)
+			CWeatherEdit::Draw();
+		else
 		CHud::Draw();
+	}
 	CUserDisplay::OnscnTimer.ProcessForDisplay();
 	CMessages::Display();
 	CDarkel::DrawMessages();

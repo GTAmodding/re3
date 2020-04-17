@@ -37,6 +37,7 @@
 #include "Shadows.h"
 #include "Radar.h"
 #include "Hud.h"
+#include "dexports.h"
 
 int CAnimViewer::animTxdSlot = 0;
 CEntity *CAnimViewer::pTarget = nil;
@@ -208,7 +209,6 @@ PlayAnimation(RpClump *clump, AssocGroupId animGroup, AnimationId anim)
 	animAssoc->SetRun();
 }
 
-extern void (*DebugMenuProcess)(void);
 void
 CAnimViewer::Update(void)
 {

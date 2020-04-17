@@ -17,7 +17,6 @@
 #include "Heli.h"
 #include "Automobile.h"
 #include "Ped.h"
-#include "debugmenu_public.h"
 #include "Particle.h"
 #include "Console.h"
 #include "Debug.h"
@@ -26,15 +25,13 @@
 #include "Pad.h"
 #include "PlayerPed.h"
 #include "Radar.h"
+#include "dexports.h"
 
 #include <list>
 
 #ifdef RWLIBS
 extern "C" int vsprintf(char* const _Buffer, char const* const _Format, va_list  _ArgList);
 #endif
-
-DebugMenuAPI gDebugMenuAPI;
-
 
 #ifdef USE_PS2_RAND
 unsigned __int64 myrand_seed = 1;
@@ -62,23 +59,8 @@ mysrand(unsigned int seed)
 	myrand_seed = seed;
 }
 
-void (*DebugMenuProcess)(void);
-void (*DebugMenuRender)(void);
 static void stub(void) { }
 
-void
-DebugMenuInit(void)
-{
-	if(DebugMenuLoad()){
-		DebugMenuProcess = (void(*)(void))GetProcAddress(gDebugMenuAPI.module, "DebugMenuProcess");
-		DebugMenuRender = (void(*)(void))GetProcAddress(gDebugMenuAPI.module, "DebugMenuRender");
-	}
-	if(DebugMenuProcess == nil || DebugMenuRender == nil){
-		DebugMenuProcess = stub;
-		DebugMenuRender = stub;
-	}
-
-}
 
 void WeaponCheat();
 void HealthCheat();
@@ -267,7 +249,7 @@ TWEAKSWITCH(CWeather::NewWeatherType, 0, 3, wt, NULL);
 */
 
 void
-DebugMenuPopulate(void)
+DebugMenuPopulate()
 {
 	if(DebugMenuLoad()){
 		static const char *weathers[] = {

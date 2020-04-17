@@ -315,3 +315,76 @@ CTimeCycle::Update(void)
 	else
 		m_FogReduction = max(m_FogReduction-1, 0);
 }
+
+#define NUMHOURS 24
+#define NUMWEATHERS 4
+
+static const char *header = "// Amb     Dir          Sky top			Sky bot		SunCore 		SunCorona   SunSz  SprSz	SprBght Shdw LightShd  TreeShd FarClp  FogSt	LightOnGround LowCloudsRGB TopCloudRGB BottomCloudRGB		BlurRGBA\n";
+static const char *weatherNames[] = {"SUNNY", "CLOUDY", "RAINY", "FOGGY"};
+static const char *timeNames[] = {"Midnight", "1AM", "2AM", "3AM", "4AM", "5AM", "6AM", "7AM", "8AM", "9AM", "10AM", "11AM", "Midday",
+						   "1PM", "2PM", "3PM", "4PM", "5PM", "6PM", "7PM", "8PM", "9PM", "10PM", "11PM"};
+
+bool CTimeCycle::Save()
+{
+	FILE *f;
+	CFileMgr::SetDir("");
+	if (f = fopen("DATA\\timecyc.dat", "w"), f == nil)
+		return false;
+	for (int w = 0; w < NUMWEATHERS; w++)
+	{
+		fprintf(f, "//\n/////////////////////////////////////////// %s\n//\n", weatherNames[w]);
+		for (int h = 0; h < 24; h++)
+		{
+			if ((h % 12) == 0)
+				fprintf(f, header);
+			fprintf(f, "// %s\n", timeNames[h]);
+			fprintf(f,
+					"%d %d %d\t%d %d %d\t%d %d %d\t%d %d %d\t"
+					"%d %d %d\t%d %d %d\t%.1f\t%.1f\t%.1f\t%d\t%d\t%d\t%.1f\t%.1f\t%.1f\t"
+					"%d %d %d\t%d %d %d\t%d %d %d\t%d %d %d %d\n",
+					CTimeCycle::m_nAmbientRed[h][w],
+					CTimeCycle::m_nAmbientGreen[h][w],
+					CTimeCycle::m_nAmbientBlue[h][w],
+					CTimeCycle::m_nDirectionalRed[h][w],
+					CTimeCycle::m_nDirectionalGreen[h][w],
+					CTimeCycle::m_nDirectionalBlue[h][w],
+
+					CTimeCycle::m_nSkyTopRed[h][w],
+					CTimeCycle::m_nSkyTopGreen[h][w],
+					CTimeCycle::m_nSkyTopBlue[h][w],
+					CTimeCycle::m_nSkyBottomRed[h][w],
+					CTimeCycle::m_nSkyBottomGreen[h][w],
+					CTimeCycle::m_nSkyBottomBlue[h][w],
+					CTimeCycle::m_nSunCoreRed[h][w],
+					CTimeCycle::m_nSunCoreGreen[h][w],
+					CTimeCycle::m_nSunCoreBlue[h][w],
+					CTimeCycle::m_nSunCoronaRed[h][w],
+					CTimeCycle::m_nSunCoronaGreen[h][w],
+					CTimeCycle::m_nSunCoronaBlue[h][w],
+					CTimeCycle::m_fSunSize[h][w],
+					CTimeCycle::m_fSpriteSize[h][w],
+					CTimeCycle::m_fSpriteBrightness[h][w],
+					CTimeCycle::m_nShadowStrength[h][w],
+					CTimeCycle::m_nLightShadowStrength[h][w],
+					CTimeCycle::m_nTreeShadowStrength[h][w],
+					CTimeCycle::m_fFarClip[h][w],
+					CTimeCycle::m_fFogStart[h][w],
+					CTimeCycle::m_fLightsOnGroundBrightness[h][w],
+					CTimeCycle::m_nLowCloudsRed[h][w],
+					CTimeCycle::m_nLowCloudsGreen[h][w],
+					CTimeCycle::m_nLowCloudsBlue[h][w],
+					CTimeCycle::m_nFluffyCloudsTopRed[h][w],
+					CTimeCycle::m_nFluffyCloudsTopGreen[h][w],
+					CTimeCycle::m_nFluffyCloudsTopBlue[h][w],
+					CTimeCycle::m_nFluffyCloudsBottomRed[h][w],
+					CTimeCycle::m_nFluffyCloudsBottomGreen[h][w],
+					CTimeCycle::m_nFluffyCloudsBottomBlue[h][w],
+					(int)CTimeCycle::m_fBlurRed[h][w],
+					(int)CTimeCycle::m_fBlurGreen[h][w],
+					(int)CTimeCycle::m_fBlurBlue[h][w],
+					(int)CTimeCycle::m_fBlurAlpha[h][w]);
+		}
+	}
+	fclose(f);
+	return true;
+}

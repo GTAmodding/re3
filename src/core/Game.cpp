@@ -86,8 +86,8 @@
 #include "World.h"
 #include "ZoneCull.h"
 #include "Zones.h"
-
-
+#include "dexports.h"
+#include "WeatherEdit.h"
 
 eLevelName CGame::currLevel;
 bool CGame::bDemoMode = true;
@@ -611,7 +611,6 @@ void CGame::InitialiseWhenRestarting(void)
 	DMAudio.ChangeMusicMode(MUSICMODE_GAME);
 }
 
-extern void (*DebugMenuProcess)(void);
 void CGame::Process(void) 
 {
 	CPad::UpdatePads();
@@ -623,6 +622,7 @@ void CGame::Process(void)
 		TheCamera.SetMotionBlur(0, 0, 0, 0, MBLUR_NONE);
 
 	DebugMenuProcess();
+	CWeatherEdit::Update();
 	CCutsceneMgr::Update();
 	if (!CCutsceneMgr::IsCutsceneProcessing() && !CTimer::GetIsCodePaused())
 		FrontEndMenuManager.Process();

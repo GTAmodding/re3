@@ -86,8 +86,10 @@ void ChittyChittyBangBangCheat();
 void StrongGripCheat();
 void NastyLimbsCheat();
 
+#ifdef DEBUGMENU
 DebugMenuEntry *carCol1;
 DebugMenuEntry *carCol2;
+#endif
 
 void
 SpawnCar(int id)
@@ -111,10 +113,12 @@ SpawnCar(int id)
 			v = new CAutomobile(id, RANDOM_VEHICLE);
 
 		v->bHasBeenOwnedByPlayer = true;
+#ifdef DEBUGMENU
 		if(carCol1)
 			DebugMenuEntrySetAddress(carCol1, &v->m_currentColour1);
 		if(carCol2)
 			DebugMenuEntrySetAddress(carCol2, &v->m_currentColour2);
+#endif
 
 		if(CModelInfo::IsBoatModel(id))
 			v->GetPosition() = TheCamera.GetPosition() + TheCamera.GetForward()*15.0f;
@@ -251,6 +255,7 @@ TWEAKSWITCH(CWeather::NewWeatherType, 0, 3, wt, NULL);
 void
 DebugMenuPopulate()
 {
+#ifdef DEBUGMENU
 	if(DebugMenuLoad()){
 		static const char *weathers[] = {
 			"Sunny", "Cloudy", "Rainy", "Foggy"
@@ -378,6 +383,7 @@ DebugMenuPopulate()
 
 		CTweakVars::AddDBG("Debug");
 	}
+#endif
 }
 
 /*

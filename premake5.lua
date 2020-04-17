@@ -22,7 +22,7 @@ workspace "re3"
 	files { "src/text/*.*" }
 	files { "src/vehicles/*.*" }
 	files { "src/weapons/*.*" }
-	files { "src/debug/*.*" }
+	files { "src/stuff/*.*" }
 	files { "eax/*.*" }
 
 	includedirs { "src" }
@@ -43,7 +43,7 @@ workspace "re3"
 	includedirs { "src/text" }
 	includedirs { "src/vehicles" }
 	includedirs { "src/weapons" }
-	includedirs { "src/debug" }
+	includedirs { "src/stuff" }
 	includedirs { "eax" }
 
 	includedirs { "dxsdk/include" }

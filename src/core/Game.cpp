@@ -621,8 +621,12 @@ void CGame::Process(void)
 	if (TheCamera.m_BlurType == MBLUR_NONE || TheCamera.m_BlurType == MBLUR_SNIPER || TheCamera.m_BlurType == MBLUR_NORMAL)
 		TheCamera.SetMotionBlur(0, 0, 0, 0, MBLUR_NONE);
 
+#ifdef DEBUGMENU
 	DebugMenuProcess();
+#endif
+#ifdef WEATHER_EDIT
 	CWeatherEdit::Update();
+#endif
 	CCutsceneMgr::Update();
 	if (!CCutsceneMgr::IsCutsceneProcessing() && !CTimer::GetIsCodePaused())
 		FrontEndMenuManager.Process();

@@ -62,6 +62,9 @@
 #include "dexports.h"
 #include "WeatherEdit.h"
 
+// forward declaration
+void DebugMenuPopulate();
+
 GlobalScene Scene;
 
 uint8 work_buff[55000];
@@ -321,18 +324,15 @@ PluginAttach(void)
 	return TRUE;
 }
 
-// forward declaration
-void DebugMenuPopulate();
-
 static RwBool 
 Initialise3D(void *param)
 {
 	if (RsRwInitialise(param))
 	{
-		//
+#ifdef DEBUGMENU
 		DebugMenuInit();
 		DebugMenuPopulate();
-		//
+#endif
 
 		return CGame::InitialiseRenderWare();
 	}
@@ -868,9 +868,11 @@ Render2dStuff(void)
 		CSceneEdit::Draw();
 	else
 	{
+		#ifdef WEATHER_EDIT
 		if(CWeatherEdit::m_bEditOn)
 			CWeatherEdit::Draw();
 		else
+		#endif
 		CHud::Draw();
 	}
 	CUserDisplay::OnscnTimer.ProcessForDisplay();

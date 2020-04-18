@@ -415,7 +415,7 @@ void Menu::update(void)
 			this->selectedEntry = e;
 
 		if (i >= this->scrollStart)
-			y += sz.y + leading * fontscale;
+			y += sz.y + leading;
 		if (y >= end)
 		{
 			this->isScrollingDown = true;
@@ -428,7 +428,7 @@ void Menu::update(void)
 
 		if (e->type == MENUVAR)
 		{
-			int valwidth = fontGetLen(((DebugMenuEntry_Var *)e)->getValWidth());
+			int valwidth = fontGetLen("<");
 			if (valwidth > maxValWidth)
 				maxValWidth = valwidth;
 		}
@@ -436,8 +436,8 @@ void Menu::update(void)
 			maxNameWidth = e->r.w;
 		i++;
 	}
-	if (this->r.w < maxNameWidth + maxValWidth + gap * fontscale)
-		this->r.w = maxNameWidth + maxValWidth + gap * fontscale;
+	if (this->r.w < maxNameWidth + maxValWidth + gap)
+		this->r.w = maxNameWidth + maxValWidth + gap;
 
 	this->scrollUpR = this->r;
 	this->scrollUpR.h = 16;
@@ -468,16 +468,16 @@ void Menu::draw(void)
 			break;
 		if (i >= this->scrollStart)
 		{
-			int style = FONT_NORMAL;
+			int style = dFONT_NORMAL;
 			if (i == this->selection)
-				style = this == activeMenu ? FONT_SEL_ACTIVE : FONT_SEL_INACTIVE;
-			if (style != FONT_SEL_ACTIVE && e == mouseOverEntry)
-				style = FONT_MOUSE;
+				style = this == activeMenu ? dFONT_SEL_ACTIVE : dFONT_SEL_INACTIVE;
+			if (style != dFONT_SEL_ACTIVE && e == mouseOverEntry)
+				style = dFONT_MOUSE;
 			fontPrint(e->name, e->r.x, e->r.y, style);
 			if (e->type == MENUVAR)
 			{
-				int valw = fontGetLen(((DebugMenuEntry_Var *)e)->getValWidth());
 				((DebugMenuEntry_Var *)e)->getValStr(val, 100);
+				int valw = fontGetLen(val);
 				fontPrint(val, e->r.x + this->r.w - valw, e->r.y, style);
 			}
 		}
@@ -555,8 +555,6 @@ findMenu(const char *name)
 
 void initDebug(void)
 {
-	createDebugFonts();
-
 	RwInt32 w, h, d, flags;
 	RwImage *img = readTGA((uint8 *)cursor_tga);
 	RwImageFindRasterFormat(img, rwRASTERTYPETEXTURE, &w, &h, &d, &flags);
@@ -573,13 +571,8 @@ void initDebug(void)
 	RwImageDestroy(img);
 }
 
-// forward declaration
-void destroyDebugFonts(void);
-
 void shutdownDebug()
 {
-	destroyDebugFonts();
-
 	RwRasterDestroy(cursor);
 	RwRasterDestroy(arrow);
 }
@@ -843,17 +836,10 @@ void DebugMenuRender()
 	screenWidth = RwRasterGetWidth(RwCameraGetRaster(cam));
 	screenHeight = RwRasterGetHeight(RwCameraGetRaster(cam));
 
-	if (screenHeight > 1080)
-		fontscale = 2;
-	else
-		fontscale = 1;
-
-	// !!! Important to set up the correct font for update and draw!
-	curfont = &vga;
 	Pt sz;
-	sz = fontPrint("Debug Menu", firstBorder * fontscale, topBorder, 0);
+	sz = fontPrint("Debug Menu", firstBorder, topBorder, 0);
 
-	toplevel.r.x = firstBorder * fontscale;
+	toplevel.r.x = firstBorder;
 	toplevel.r.y = topBorder + sz.y + 10;
 	toplevel.r.w = minwidth; // update menu will expand
 	toplevel.r.h = screenHeight - 10 - toplevel.r.y;

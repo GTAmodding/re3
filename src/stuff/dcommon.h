@@ -31,27 +31,18 @@ struct Pt
 	int x, y;
 };
 
-enum FontStyle
+enum dFontStyle
 {
-	FONT_NORMAL,
-	FONT_SEL_ACTIVE,
-	FONT_SEL_INACTIVE,
-	FONT_MOUSE
+	dFONT_NORMAL,
+	dFONT_SEL_ACTIVE,
+	dFONT_SEL_INACTIVE,
+	dFONT_MOUSE
 };
 
-// font
-struct Font
-{
-	RwRaster *rasters[4];
-	int glyphwidth, glyphheight;
-	int numglyphs;
-};
-extern Font vga, bios, *curfont;
-extern int fontscale;
-void createDebugFonts(void);
+
 Pt fontPrint(const char *s, float x, float y, int style);
 Pt fontGetStringSize(const char *s);
-int fontGetLen(int len);
+int fontGetLen(const char *s);
 
 #include "dmenu.h"
 

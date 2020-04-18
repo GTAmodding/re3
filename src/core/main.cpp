@@ -345,6 +345,9 @@ Terminate3D(void)
 {
 	CGame::ShutdownRenderWare();
 	
+#ifdef DEBUGMENU
+	DebugMenuShutdown();
+#endif	
 	RsRwTerminate();
 
 	return;
@@ -882,7 +885,9 @@ Render2dStuff(void)
 	CPad::PrintErrorMessage();
 	CFont::DrawFonts();
 
+#ifdef DEBUGMENU
 	DebugMenuRender();
+#endif
 }
 
 void

@@ -386,18 +386,6 @@ DebugMenuPopulate()
 #endif
 }
 
-/*
-int (*RsEventHandler_orig)(int a, int b);
-int
-delayedPatches10(int a, int b)
-{
-	DebugMenuInit();
-	DebugMenuPopulate();
-
-	return RsEventHandler_orig(a, b);
-}
-*/
-
 const int   re3_buffsize = 1024;
 static char re3_buff[re3_buffsize];
 

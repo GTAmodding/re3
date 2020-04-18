@@ -32,6 +32,7 @@ DebugMenuEntry *DebugMenuAddVar(const char *path, const char *name, float *ptr, 
 DebugMenuEntry *DebugMenuAddVar(const char *path, const char *name, double *ptr, TriggerFunc triggerFunc, double step, double lowerBound, double upperBound);
 
 void DebugMenuInit();
+void DebugMenuShutdown();
 bool DebugMenuLoad();
 void DebugMenuProcess();
 void DebugMenuRender();

@@ -150,5 +150,7 @@ public:
 	static float GetShadowDisplacementX(void) { return m_fShadowDisplacementX[m_CurrentStoredValue]; }
 	static float GetShadowDisplacementY(void) { return m_fShadowDisplacementY[m_CurrentStoredValue]; }
 	
+#ifdef WEATHER_EDIT
 	static bool Save();
+#endif
 };

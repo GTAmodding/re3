@@ -44,7 +44,6 @@ static int button1justdown, button2justdown, button3justdown;
 static float mouseX, mouseY;
 
 static int menuOn;
-static int menuInitialized;
 static int screenWidth, screenHeight;
 static RwRaster *cursor, *arrow;
 
@@ -574,6 +573,17 @@ void initDebug(void)
 	RwImageDestroy(img);
 }
 
+// forward declaration
+void destroyDebugFonts(void);
+
+void shutdownDebug()
+{
+	destroyDebugFonts();
+
+	RwRasterDestroy(cursor);
+	RwRasterDestroy(arrow);
+}
+
 void processInput(void)
 {
 	int shift = KEYDOWN(rsRSHIFT) || KEYDOWN(rsLSHIFT);
@@ -789,11 +799,12 @@ void updateMouse()
 
 void DebugMenuInit()
 {
-	if (!menuInitialized)
-	{
-		initDebug();
-		menuInitialized = 1;
-	}
+	initDebug();
+}
+
+void DebugMenuShutdown()
+{
+	shutdownDebug();
 }
 
 bool DebugMenuLoad()

@@ -316,6 +316,7 @@ CTimeCycle::Update(void)
 		m_FogReduction = max(m_FogReduction-1, 0);
 }
 
+#ifdef WEATHER_EDIT
 #define NUMHOURS 24
 #define NUMWEATHERS 4
 
@@ -388,3 +389,4 @@ bool CTimeCycle::Save()
 	fclose(f);
 	return true;
 }
+#endif

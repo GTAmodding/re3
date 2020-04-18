@@ -16,6 +16,7 @@ struct TGAHeader
 };
 #pragma pack(pop)
 
+// Should be done better
 RwImage *
 readTGA(uint8 *p)
 {

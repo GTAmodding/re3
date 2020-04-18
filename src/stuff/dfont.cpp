@@ -2,7 +2,7 @@
 #include "common.h"
 #include "rwcore.h"
 #include "rwplcore.h"
-#include "main.h"	// Camera
+#include "main.h" // Camera
 #include "Bm437_IBM_BIOS.h"
 #include "Bm437_IBM_VGA8.h"
 
@@ -54,7 +54,7 @@ void changeColors(RwImage *img, RwRGBA fg, RwRGBA bg)
 	}
 }
 
-void createDebugFont(uint8* data, Font *font)
+void createDebugFont(uint8 *data, Font *font)
 {
 	uint8 *pixels;
 	int size;
@@ -111,8 +111,18 @@ void createDebugFont(uint8* data, Font *font)
 
 void createDebugFonts(void)
 {
-	createDebugFont((uint8*)Bm437_IBM_BIOS_tga, &bios);
-	createDebugFont((uint8*)Bm437_IBM_VGA8_tga, &vga);
+	createDebugFont((uint8 *)Bm437_IBM_BIOS_tga, &bios);
+	createDebugFont((uint8 *)Bm437_IBM_VGA8_tga, &vga);
+}
+
+void destroyDebugFonts(void)
+{
+	for (int i = 0; i < 4; i++)
+		if (bios.rasters[i])
+			RwRasterDestroy(bios.rasters[i]);
+	for (int i = 0; i < 4; i++)
+		if (vga.rasters[i])
+			RwRasterDestroy(vga.rasters[i]);
 }
 
 Pt fontPrint(const char *s, float xstart, float ystart, int style)

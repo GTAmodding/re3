@@ -86,8 +86,7 @@
 #include "World.h"
 #include "ZoneCull.h"
 #include "Zones.h"
-#include "dexports.h"
-#include "WeatherEdit.h"
+#include "ImGuiIII.h"
 
 eLevelName CGame::currLevel;
 bool CGame::bDemoMode = true;
@@ -626,6 +625,9 @@ void CGame::Process(void)
 #endif
 #ifdef WEATHER_EDIT
 	CWeatherEdit::Update();
+#endif
+#ifdef IMGUI
+	CImGuiIII::Process();
 #endif
 	CCutsceneMgr::Update();
 	if (!CCutsceneMgr::IsCutsceneProcessing() && !CTimer::GetIsCodePaused())

@@ -59,8 +59,7 @@
 #include "timebars.h"
 #include "GenericGameStorage.h"
 #include "SceneEdit.h"
-#include "dexports.h"
-#include "WeatherEdit.h"
+#include "ImGuiIII.h"
 
 // forward declaration
 void DebugMenuPopulate();
@@ -333,6 +332,9 @@ Initialise3D(void *param)
 		DebugMenuInit();
 		DebugMenuPopulate();
 #endif
+#ifdef IMGUI
+		CImGuiIII::Initialize();
+#endif
 
 		return CGame::InitialiseRenderWare();
 	}
@@ -348,6 +350,9 @@ Terminate3D(void)
 #ifdef DEBUGMENU
 	DebugMenuShutdown();
 #endif	
+#ifdef IMGUI
+	CImGuiIII::Shutdown();
+#endif
 	RsRwTerminate();
 
 	return;
@@ -678,9 +683,11 @@ DisplayGameDebugText()
 	static bool bDisplayRate = false;
 
 	{
+		#ifdef DEBUGMENU
 		SETTWEAKPATH("GameDebugText");
 		TWEAKBOOL(bDisplayPosn);
 		TWEAKBOOL(bDisplayRate);
+		#endif
 	}
 
 
@@ -887,6 +894,9 @@ Render2dStuff(void)
 
 #ifdef DEBUGMENU
 	DebugMenuRender();
+#endif
+#ifdef IMGUI
+	CImGuiIII::Draw();
 #endif
 }
 

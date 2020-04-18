@@ -235,5 +235,9 @@ enum Config {
 #define IMPROVED_CAMERA		// Better Debug cam, and maybe more in the future
 #define FREE_CAM		// Rotating cam
 
-#define WEATHER_EDIT
-#define DEBUGMENU
+// This is just for references
+//#define WEATHER_EDIT
+//#define DEBUGMENU
+
+// Enables ImGui 
+#define IMGUI

@@ -232,6 +232,7 @@ void re3_assert(const char *expr, const char *filename, unsigned int lineno, con
 #define CONCAT_(x,y) x##y
 #define CONCAT(x,y) CONCAT_(x,y)
 
+#ifdef DEBUGMENU
 // Tweaking stuff for debugmenu
 #define TWEAKPATH                                   ___tw___TWEAKPATH
 #define SETTWEAKPATH(path)	                        static const char *___tw___TWEAKPATH = path;
@@ -340,6 +341,7 @@ _TWEEKCLASS(CTweakUInt16, uint16);
 _TWEEKCLASS(CTweakInt32, int32);
 _TWEEKCLASS(CTweakUInt32, uint32);
 _TWEEKCLASS(CTweakFloat, float);
+#endif
 
 #undef _TWEEKCLASS
 

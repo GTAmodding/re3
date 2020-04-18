@@ -25,7 +25,7 @@
 #include "Pad.h"
 #include "PlayerPed.h"
 #include "Radar.h"
-#include "dexports.h"
+#include "imgui.h"
 
 #include <list>
 
@@ -205,6 +205,7 @@ static const char *carnames[] = {
 	"yankee", "escape", "borgnine", "toyz", "ghost",
 };
 
+#ifdef DEBUGMENU
 static std::list<CTweakVar *> TweakVarsList;
 static bool bAddTweakVarsNow = false;
 static const char *pTweakVarsDefaultPath = NULL;
@@ -242,6 +243,7 @@ void CTweakUInt16::AddDBG(const char *path) { DebugMenuAddVar     (m_pPath == NU
 void CTweakInt32::AddDBG (const char *path) { DebugMenuAddVar     (m_pPath == NULL ? path : m_pPath, m_pVarName, (int32_t *)m_pIntVar,  NULL, m_nStep, m_nLoawerBound, m_nUpperBound, NULL); }
 void CTweakUInt32::AddDBG(const char *path) { DebugMenuAddVar     (m_pPath == NULL ? path : m_pPath, m_pVarName, (uint32_t *)m_pIntVar, NULL, m_nStep, m_nLoawerBound, m_nUpperBound, NULL); }
 void CTweakFloat::AddDBG (const char *path) { DebugMenuAddVar     (m_pPath == NULL ? path : m_pPath, m_pVarName, (float *)m_pIntVar,    NULL, m_nStep, m_nLoawerBound, m_nUpperBound); }
+#endif
 
 /*
 static const char *wt[] = {
@@ -251,6 +253,36 @@ static const char *wt[] = {
 SETTWEAKPATH("TEST");		
 TWEAKSWITCH(CWeather::NewWeatherType, 0, 3, wt, NULL);
 */
+
+#ifdef IMGUI
+void ImGuiOptions()
+{
+	if (ImGui::CollapsingHeader("Debug"))
+	{
+		ImGui::Checkbox("Draw hud", &CHud::m_Wants_To_Draw_Hud);
+		ImGui::Separator();
+		ImGui::Checkbox("Edit on", &CSceneEdit::m_bEditOn);
+		ImGui::Separator();
+		ImGui::Checkbox("Catalina Heli On", &CHeli::CatalinaHeliOn);
+		ImGui::Separator();
+		//ImGui::Checkbox("Catalina Fly By", &CHeli::StartCatalinaFlyBy);
+		//ImGui::Separator();
+		//ImGui::Checkbox("Catalina Take Off", &CHeli::CatalinaTakeOff);
+		//ImGui::Separator();
+		//ImGui::Checkbox("Catalina Fly Away", &CHeli::MakeCatalinaHeliFlyAway);
+		//ImGui::Separator();
+		ImGui::Checkbox("Show Ped Paths", &gbShowPedPaths);
+		ImGui::Separator();
+		ImGui::Checkbox("Show Car Paths", &gbShowCarPaths);
+		ImGui::Separator();
+	}
+	if (ImGui::CollapsingHeader("Cam"))
+	{
+		ImGui::Checkbox("Free Cam", &CCamera::bFreeCam);
+		ImGui::Separator();
+	}
+}
+#endif
 
 void
 DebugMenuPopulate()

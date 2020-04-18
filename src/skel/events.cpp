@@ -692,6 +692,10 @@ HandleKeyUp(RsKeyStatus *keyStatus)
 }
 
 
+#ifdef IMGUI
+RsEventStatus ImGuiEventHandler(RsEvent e, void *param);
+#endif
+
 /*
  *****************************************************************************
  */
@@ -718,6 +722,10 @@ KeyboardHandler(RsEvent event, void *param)
 			return rsEVENTNOTPROCESSED;
 		}
 	}
+
+#ifdef IMGUI
+	ImGuiEventHandler(event, param);
+#endif
 }
 
 /*

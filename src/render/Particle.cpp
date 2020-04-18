@@ -225,10 +225,12 @@ int32 Randomizer;
 int32 nParticleCreationInterval = 1;
 float fParticleScaleLimit       = 0.5f;
 
+#ifdef DEBUGMENU
 SETTWEAKPATH("Particle");
 TWEAKINT32(nParticleCreationInterval, 0, 5, 1);
 TWEAKFLOAT(fParticleScaleLimit, 0.0f, 1.0f, 0.1f);
 TWEAKFUNC(CParticle::ReloadConfig);
+#endif
 
 void CParticle::ReloadConfig()
 {

@@ -1127,7 +1127,7 @@ CMenuManager::Draw()
 
 					int extraOffset = 0;
 					if (aScreens[m_nCurrScreen].m_aEntries[rowToCheck].m_Action == MENUACTION_RADIO)
-						extraOffset = (int) 60.0f;
+						extraOffset = MENURADIO_ICON_SCALE;
 
 					// There were many unused codes in here to calculate how much space will texts gonna take.
 

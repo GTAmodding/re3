@@ -254,32 +254,152 @@ SETTWEAKPATH("TEST");
 TWEAKSWITCH(CWeather::NewWeatherType, 0, 3, wt, NULL);
 */
 
+#define DebugMenuAddVarBool8(dummy, name, x, x1)	\
+	ImGui::Checkbox(name, x);						\
+	ImGui::Separator();								\
+
+#define DebugMenuAddCmd(dummy, name, x) 			\
+	if(ImGui::Button(name))							\
+			x();									\
+	ImGui::Separator();								\
+
 #ifdef IMGUI
 void ImGuiOptions()
 {
-	if (ImGui::CollapsingHeader("Debug"))
+		/*static const char *weathers[] = {
+			"Sunny", "Cloudy", "Rainy", "Foggy"
+		};
+		DebugMenuEntry *e;
+		e = DebugMenuAddVar("Time & Weather", "Current Hour", &CClock::GetHoursRef(), nil, 1, 0, 23, nil);
+		DebugMenuEntrySetWrap(e, true);
+		e = DebugMenuAddVar("Time & Weather", "Current Minute", &CClock::GetMinutesRef(),
+			[](){ CWeather::InterpolationValue = CClock::GetMinutes()/60.0f; }, 1, 0, 59, nil);
+			DebugMenuEntrySetWrap(e, true);
+		e = DebugMenuAddVar("Time & Weather", "Old Weather", (int16*)&CWeather::OldWeatherType, nil, 1, 0, 3, weathers);
+		DebugMenuEntrySetWrap(e, true);
+		e = DebugMenuAddVar("Time & Weather", "New Weather", (int16*)&CWeather::NewWeatherType, nil, 1, 0, 3, weathers);
+		DebugMenuEntrySetWrap(e, true);*/
+		//DebugMenuAddVar("Time & Weather", "Wind", (float*)&CWeather::Wind, nil, 0.1f, 0.0f, 1.0f);
+		//DebugMenuAddVar("Time & Weather", "Time scale", (float*)0x8F2C20, nil, 0.1f, 0.0f, 10.0f);
+
+	if(ImGui::CollapsingHeader("Cheats"))
 	{
-		ImGui::Checkbox("Draw hud", &CHud::m_Wants_To_Draw_Hud);
-		ImGui::Separator();
-		ImGui::Checkbox("Edit on", &CSceneEdit::m_bEditOn);
-		ImGui::Separator();
-		ImGui::Checkbox("Catalina Heli On", &CHeli::CatalinaHeliOn);
-		ImGui::Separator();
-		//ImGui::Checkbox("Catalina Fly By", &CHeli::StartCatalinaFlyBy);
-		//ImGui::Separator();
-		//ImGui::Checkbox("Catalina Take Off", &CHeli::CatalinaTakeOff);
-		//ImGui::Separator();
-		//ImGui::Checkbox("Catalina Fly Away", &CHeli::MakeCatalinaHeliFlyAway);
-		//ImGui::Separator();
-		ImGui::Checkbox("Show Ped Paths", &gbShowPedPaths);
-		ImGui::Separator();
-		ImGui::Checkbox("Show Car Paths", &gbShowCarPaths);
-		ImGui::Separator();
+		DebugMenuAddCmd("Cheats", "Weapons", WeaponCheat);
+		DebugMenuAddCmd("Cheats", "Money", MoneyCheat);
+		DebugMenuAddCmd("Cheats", "Health", HealthCheat);
+		DebugMenuAddCmd("Cheats", "Wanted level up", WantedLevelUpCheat);
+		DebugMenuAddCmd("Cheats", "Wanted level down", WantedLevelDownCheat);
+		DebugMenuAddCmd("Cheats", "Tank", TankCheat);
+		DebugMenuAddCmd("Cheats", "Blow up cars", BlowUpCarsCheat);
+		DebugMenuAddCmd("Cheats", "Change player", ChangePlayerCheat);
+		DebugMenuAddCmd("Cheats", "Mayhem", MayhemCheat);
+		DebugMenuAddCmd("Cheats", "Everybody attacks player", EverybodyAttacksPlayerCheat);
+		DebugMenuAddCmd("Cheats", "Weapons for all", WeaponsForAllCheat);
+		DebugMenuAddCmd("Cheats", "Fast time", FastTimeCheat);
+		DebugMenuAddCmd("Cheats", "Slow time", SlowTimeCheat);
+		DebugMenuAddCmd("Cheats", "Armour", ArmourCheat);
+		DebugMenuAddCmd("Cheats", "Sunny weather", SunnyWeatherCheat);
+		DebugMenuAddCmd("Cheats", "Cloudy weather", CloudyWeatherCheat);
+		DebugMenuAddCmd("Cheats", "Rainy weather", RainyWeatherCheat);
+		DebugMenuAddCmd("Cheats", "Foggy weather", FoggyWeatherCheat);
+		DebugMenuAddCmd("Cheats", "Fast weather", FastWeatherCheat);
+		DebugMenuAddCmd("Cheats", "Only render wheels", OnlyRenderWheelsCheat);
+		DebugMenuAddCmd("Cheats", "Chitty chitty bang bang", ChittyChittyBangBangCheat);
+		DebugMenuAddCmd("Cheats", "Strong grip", StrongGripCheat);
+		DebugMenuAddCmd("Cheats", "Nasty limbs", NastyLimbsCheat);
 	}
-	if (ImGui::CollapsingHeader("Cam"))
+		/*static int spawnCarId = MI_LANDSTAL;
+		e = DebugMenuAddVar("Spawn", "Spawn Car ID", &spawnCarId, nil, 1, MI_LANDSTAL, MI_GHOST, carnames);
+		DebugMenuEntrySetWrap(e, true);
+		DebugMenuAddCmd("Spawn", "Spawn Car", [](){
+			if(spawnCarId == MI_TRAIN ||
+			   spawnCarId == MI_CHOPPER ||
+			   spawnCarId == MI_AIRTRAIN ||
+			   spawnCarId == MI_DEADDODO ||
+			   spawnCarId == MI_ESCAPE)
+				return;
+			SpawnCar(spawnCarId);
+		});
+		static uint8 dummy;
+		carCol1 = DebugMenuAddVar("Spawn", "First colour", &dummy, nil, 1, 0, 255, nil);
+		carCol2 = DebugMenuAddVar("Spawn", "Second colour", &dummy, nil, 1, 0, 255, nil);*/
+
+	if(ImGui::CollapsingHeader("Spawn"))
 	{
-		ImGui::Checkbox("Free Cam", &CCamera::bFreeCam);
-		ImGui::Separator();
+		DebugMenuAddCmd("Spawn", "Spawn Stinger", [](){ SpawnCar(MI_STINGER); });
+		DebugMenuAddCmd("Spawn", "Spawn Infernus", [](){ SpawnCar(MI_INFERNUS); });
+		DebugMenuAddCmd("Spawn", "Spawn Cheetah", [](){ SpawnCar(MI_CHEETAH); });
+		DebugMenuAddCmd("Spawn", "Spawn Esperanto", [](){ SpawnCar(MI_ESPERANT); });
+		DebugMenuAddCmd("Spawn", "Spawn Stallion", [](){ SpawnCar(MI_STALLION); });
+		DebugMenuAddCmd("Spawn", "Spawn Kuruma", [](){ SpawnCar(MI_KURUMA); });
+		DebugMenuAddCmd("Spawn", "Spawn Taxi", [](){ SpawnCar(MI_TAXI); });
+		DebugMenuAddCmd("Spawn", "Spawn Police", [](){ SpawnCar(MI_POLICE); });
+		DebugMenuAddCmd("Spawn", "Spawn Enforcer", [](){ SpawnCar(MI_ENFORCER); });
+		DebugMenuAddCmd("Spawn", "Spawn Banshee", [](){ SpawnCar(MI_BANSHEE); });
+		DebugMenuAddCmd("Spawn", "Spawn Yakuza", [](){ SpawnCar(MI_YAKUZA); });
+		DebugMenuAddCmd("Spawn", "Spawn Yardie", [](){ SpawnCar(MI_YARDIE); });
+		DebugMenuAddCmd("Spawn", "Spawn Dodo", [](){ SpawnCar(MI_DODO); });
+		DebugMenuAddCmd("Spawn", "Spawn Rhino", [](){ SpawnCar(MI_RHINO); });
+		DebugMenuAddCmd("Spawn", "Spawn Firetruck", [](){ SpawnCar(MI_FIRETRUCK); });
+		DebugMenuAddCmd("Spawn", "Spawn Predator", [](){ SpawnCar(MI_PREDATOR); });
+	}
+
+	if(ImGui::CollapsingHeader("Debug"))
+	{
+		DebugMenuAddVarBool8("Debug", "Draw hud", &CHud::m_Wants_To_Draw_Hud, nil);
+		DebugMenuAddVarBool8("Debug", "Edit on", &CSceneEdit::m_bEditOn, nil);
+#ifdef MENU_MAP
+		DebugMenuAddCmd("Debug", "Teleport to map waypoint", TeleportToWaypoint);
+#endif
+		//DebugMenuAddVar("Debug", "Engine Status", &engineStatus, nil, 1, 0, 226, nil);
+		DebugMenuAddCmd("Debug", "Set Engine Status", SetEngineStatus);
+		DebugMenuAddCmd("Debug", "Fix Car", FixCar);
+		DebugMenuAddCmd("Debug", "Toggle Comedy Controls", ToggleComedy);
+		DebugMenuAddCmd("Debug", "Place Car on Road", PlaceOnRoad);
+
+		DebugMenuAddVarBool8("Debug", "Catalina Heli On", &CHeli::CatalinaHeliOn, nil);
+		DebugMenuAddCmd("Debug", "Catalina Fly By", CHeli::StartCatalinaFlyBy);
+		DebugMenuAddCmd("Debug", "Catalina Take Off", CHeli::CatalinaTakeOff);
+		DebugMenuAddCmd("Debug", "Catalina Fly Away", CHeli::MakeCatalinaHeliFlyAway);
+		//DebugMenuAddVarBool8("Debug", "Script Heli On", 0x95CD43, nil);
+
+		DebugMenuAddVarBool8("Debug", "Show Ped Paths", &gbShowPedPaths, nil);
+		DebugMenuAddVarBool8("Debug", "Show Car Paths", &gbShowCarPaths, nil);
+		DebugMenuAddVarBool8("Debug", "Show Car Path Links", &gbShowCarPathsLinks, nil);
+		DebugMenuAddVarBool8("Debug", "Show Ped Road Groups", &gbShowPedRoadGroups, nil);
+		DebugMenuAddVarBool8("Debug", "Show Car Road Groups", &gbShowCarRoadGroups, nil);
+		DebugMenuAddVarBool8("Debug", "Show Collision Lines", &gbShowCollisionLines, nil);
+		DebugMenuAddVarBool8("Debug", "Show Collision Polys", &gbShowCollisionPolys, nil);
+		DebugMenuAddVarBool8("Debug", "Don't render Buildings", &gbDontRenderBuildings, nil);
+		DebugMenuAddVarBool8("Debug", "Don't render Big Buildings", &gbDontRenderBigBuildings, nil);
+		DebugMenuAddVarBool8("Debug", "Don't render Peds", &gbDontRenderPeds, nil);
+		DebugMenuAddVarBool8("Debug", "Don't render Vehicles", &gbDontRenderVehicles, nil);
+		DebugMenuAddVarBool8("Debug", "Don't render Objects", &gbDontRenderObjects, nil);
+#ifdef TOGGLEABLE_BETA_FEATURES
+		DebugMenuAddVarBool8("Debug", "Toggle banned particles", &CParticle::bEnableBannedParticles, nil);
+		DebugMenuAddVarBool8("Debug", "Toggle popping heads on headshot", &CPed::bPopHeadsOnHeadshot, nil);
+		DebugMenuAddVarBool8("Debug", "Toggle peds running to phones to report crimes", &CPed::bMakePedsRunToPhonesToReportCrimes, nil);
+#endif
+
+		DebugMenuAddCmd("Debug", "Start Credits", CCredits::Start);
+		DebugMenuAddCmd("Debug", "Stop Credits", CCredits::Stop);
+	}
+
+	if(ImGui::CollapsingHeader("Cam"))
+	{
+		extern bool PrintDebugCode;
+		extern int16 DebugCamMode;
+		DebugMenuAddVarBool8("Cam", "Use mouse Cam", &CCamera::m_bUseMouse3rdPerson, nil);
+#ifdef FREE_CAM
+		DebugMenuAddVarBool8("Cam", "Free Cam", &CCamera::bFreeCam, nil);
+#endif
+		DebugMenuAddVarBool8("Cam", "Print Debug Code", &PrintDebugCode, nil);
+		//DebugMenuAddVar("Cam", "Cam Mode", &DebugCamMode, nil, 1, 0, CCam::MODE_EDITOR, nil);
+		DebugMenuAddCmd("Cam", "Normal", []() { DebugCamMode = 0; });
+		DebugMenuAddCmd("Cam", "Follow Ped With Bind", []() { DebugCamMode = CCam::MODE_FOLLOW_PED_WITH_BIND; });
+		DebugMenuAddCmd("Cam", "Reaction", []() { DebugCamMode = CCam::MODE_REACTION; });
+		DebugMenuAddCmd("Cam", "Chris", []() { DebugCamMode = CCam::MODE_CHRIS; });
+		DebugMenuAddCmd("Cam", "Reset Statics", ResetCamStatics);
 	}
 }
 #endif

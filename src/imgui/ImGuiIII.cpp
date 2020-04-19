@@ -15,6 +15,11 @@ static RwTexture *g_FontTexture;
 static RwIm2DVertex *g_vertbuf;
 static int g_vertbufSize;
 
+float CImGuiIII::ms_fMouseX = 0.0f;
+float CImGuiIII::ms_fMouseY = 0.0f;
+CImGuiClassMenu CImGuiIII::ms_aClassMenuArray[MAX_IMGUI_CLASS_MENU_ENTRIES] = {0};
+uint32 CImGuiIII::ms_nClassMenuCount = 0;
+
 void RenderDrawLists(ImDrawData *draw_data)
 {
 	ImGuiIO &io = ImGui::GetIO();
@@ -41,7 +46,7 @@ void RenderDrawLists(ImDrawData *draw_data)
 	yoff = 0.5;
 #endif
 
-	rw::Camera *cam = (rw::Camera *)rw::engine->currentCamera;
+	rw::Camera *cam = Scene.camera;
 	RwIm2DVertex *vtx_dst = g_vertbuf;
 	float recipZ = 1.0f / cam->nearPlane;
 	for (int n = 0; n < draw_data->CmdListsCount; n++)
@@ -183,7 +188,7 @@ void CImGuiIII::Shutdown()
 static bool bDrawImGui = false;
 
 // forward declaration
-void ImGuiOptions();
+void ImGuiAddOptions();
 
 void CImGuiIII::Draw()
 {
@@ -197,15 +202,31 @@ void CImGuiIII::Draw()
 
 	bool p_open = true;
 	ImGuiWindowFlags window_flags = 0;
-    ImGui::SetNextWindowSize(ImVec2(550,680), ImGuiCond_FirstUseEver);
-    if (!ImGui::Begin("ImGui Demo", &p_open, window_flags))
-    {
-        ImGui::End();
-        return;
-    }
+	ImGui::SetNextWindowSize(ImVec2(550, 680), ImGuiCond_FirstUseEver);
+	if (!ImGui::Begin("Debug Menu", &p_open, window_flags))
+	{
+		ImGui::End();
+		return;
+	}
 
-	ImGuiOptions();
-
+	for (int i = 0; i < ms_nClassMenuCount; i++)
+	{
+		if (ImGui::CollapsingHeader(ms_aClassMenuArray[i].m_acClassName))
+		{
+			for (int j = 0; j < ms_aClassMenuArray[i].m_nEntriesCount; j++)
+			{
+				auto pMenu = &ms_aClassMenuArray[i].m_aEntriesArray[j];
+				if (pMenu->type == 1)
+					ImGui::Checkbox(pMenu->m_acName, pMenu->m_pVar);
+				else
+				{
+					if (ImGui::Button(pMenu->m_acName))
+						pMenu->cb();
+				}
+				ImGui::Separator();
+			}
+		}
+	}
 	ImGui::End();
 
 	//ImGui::ShowDemoWindow();
@@ -216,21 +237,27 @@ void CImGuiIII::Draw()
 
 void CImGuiIII::Process()
 {
+	static bool bInitializedOptions = false;
+	if (!bInitializedOptions)
+	{
+		ImGuiAddOptions();
+		bInitializedOptions = true;
+	}
+
 	CPad *pad = CPad::GetPad(0);
-	if(CTRLJUSTDOWN('M'))
+	if (CTRLJUSTDOWN('M'))
 		bDrawImGui = !bDrawImGui;
-	if(!bDrawImGui)
+	if (!bDrawImGui)
 		return;
 
-	pad->DisablePlayerControls = 1;
+	pad->DisablePlayerControls |= 1;
+
+	UpdateMouse();
 }
 
-void CImGuiIII::NewFrame()
+void CImGuiIII::UpdateMouse()
 {
-	ImGuiIO &io = ImGui::GetIO();
-
-	io.DisplaySize = ImVec2((float)RsGlobal.maximumWidth, (float)RsGlobal.maximumHeight);
-	io.DeltaTime = CTimer::GetTimeStep() * 0.02f;
+	CPad *pad = CPad::GetPad(0);
 
 	int dirX = 1;
 	int dirY = 1;
@@ -240,20 +267,29 @@ void CImGuiIII::NewFrame()
 	if (MousePointerStateHelper.bInvertVertically)
 		dirY = -1;
 
-	static float mx, my;
+	ms_fMouseX += CPad::NewMouseControllerState.x * dirX;
+	ms_fMouseY += CPad::NewMouseControllerState.y * dirY;
 
-	mx += CPad::NewMouseControllerState.x * dirX;
-	my += CPad::NewMouseControllerState.y * dirY;
+	if (ms_fMouseX < 0.0f)
+		ms_fMouseX = 0.0f;
+	if (ms_fMouseY < 0.0f)
+		ms_fMouseY = 0.0f;
+	if (ms_fMouseX >= (float)RsGlobal.maximumWidth)
+		ms_fMouseX = (float)RsGlobal.maximumWidth;
+	if (ms_fMouseY >= (float)RsGlobal.maximumHeight)
+		ms_fMouseY = (float)RsGlobal.maximumHeight;
 
-	if (mx < 0.0f)
-		mx = 0.0f;
-	if (my < 0.0f)
-		my = 0.0f;
-	if (mx >= (float)RsGlobal.maximumWidth)
-		mx = (float)RsGlobal.maximumWidth;
-	if (my >= (float)RsGlobal.maximumHeight)
-		my = (float)RsGlobal.maximumHeight;
-	io.MousePos = ImVec2(mx, my);
+	pad->NewMouseControllerState.x = 0.0f;
+	pad->NewMouseControllerState.y = 0.0f;
+}
+
+void CImGuiIII::NewFrame()
+{
+	ImGuiIO &io = ImGui::GetIO();
+
+	io.DisplaySize = ImVec2((float)RsGlobal.maximumWidth, (float)RsGlobal.maximumHeight);
+	io.DeltaTime = CTimer::GetTimeStep() * 0.02f;
+	io.MousePos = ImVec2(ms_fMouseX, ms_fMouseY);
 	io.MouseDown[0] = CPad::NewMouseControllerState.LMB ? true : false;
 	io.MouseDown[1] = CPad::NewMouseControllerState.RMB ? true : false;
 	io.MouseDown[2] = CPad::NewMouseControllerState.MMB ? true : false;
@@ -281,4 +317,57 @@ void CImGuiIII::NewFrame()
 	}
 #endif
 }
+
+void CImGuiIII::AddVarInt8(const char *pszClassName, const char *pszName, bool *pVal)
+{
+	int nIndex = -1;
+	for (int i = 0; i < MAX_IMGUI_CLASS_MENU_ENTRIES; i++)
+	{
+		if (stricmp(ms_aClassMenuArray[i].m_acClassName, pszClassName) == 0)
+		{
+			nIndex = i;
+			break;
+		}
+	}
+
+	if (nIndex < 0)
+	{
+		nIndex = ms_nClassMenuCount;
+		strcpy(ms_aClassMenuArray[nIndex].m_acClassName, pszClassName);
+		ms_nClassMenuCount++;
+	}
+
+	auto pMenu = &ms_aClassMenuArray[nIndex].m_aEntriesArray[ms_aClassMenuArray[nIndex].m_nEntriesCount];
+	strcpy(pMenu->m_acName, pszName);
+	pMenu->m_pVar = pVal;
+	pMenu->type = 1;
+	ms_aClassMenuArray[nIndex].m_nEntriesCount++;
+}
+
+void CImGuiIII::AddVarCmd(const char *pszClassName, const char *pszName, VoidCB cb)
+{
+	int nIndex = -1;
+	for (int i = 0; i < MAX_IMGUI_CLASS_MENU_ENTRIES; i++)
+	{
+		if (stricmp(ms_aClassMenuArray[i].m_acClassName, pszClassName) == 0)
+		{
+			nIndex = i;
+			break;
+		}
+	}
+
+	if (nIndex < 0)
+	{
+		nIndex = ms_nClassMenuCount;
+		strcpy(ms_aClassMenuArray[nIndex].m_acClassName, pszClassName);
+		ms_nClassMenuCount++;
+	}
+
+	auto pMenu = &ms_aClassMenuArray[nIndex].m_aEntriesArray[ms_aClassMenuArray[nIndex].m_nEntriesCount];
+	strcpy(pMenu->m_acName, pszName);
+	pMenu->cb = cb;
+	pMenu->type = 2;
+	ms_aClassMenuArray[nIndex].m_nEntriesCount++;
+}
+
 #endif

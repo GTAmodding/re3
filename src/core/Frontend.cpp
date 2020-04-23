@@ -3002,6 +3002,11 @@ CMenuManager::LoadSettings()
 	CMBlur::BlurOn = true;
 	MousePointerStateHelper.bInvertVertically = true;
 
+#ifndef FIX_BUGS
+#else
+	CVehicle::m_bDisableMouseSteering = true;
+#endif
+
 	// 50 is silly
 	char Ver[50];
 
@@ -4481,9 +4486,18 @@ CMenuManager::ProcessButtonPresses(void)
 							ControlsManager.InitDefaultControlConfigJoyPad(devCaps.dwButtons);
 						}
 						m_ControlMethod = CONTROL_STANDARD;
+#ifndef FIX_BUGS
 						MousePointerStateHelper.bInvertVertically = false;
+#else
+						MousePointerStateHelper.bInvertVertically = true;
+#endif
+
 						TheCamera.m_fMouseAccelHorzntl = 0.0025f;
+#ifndef FIX_BUGS
+						CVehicle::m_bDisableMouseSteering = false;
+#else
 						CVehicle::m_bDisableMouseSteering = true;
+#endif
 						TheCamera.m_bHeadBob = false;
 						SaveSettings();
 					}

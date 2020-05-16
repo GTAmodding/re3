@@ -45,7 +45,7 @@ public:
 
 	static RpAtomic *RenderWheelAtomicCB(RpAtomic *atomic);
 	static RpAtomic *RenderObjNormalAtomic(RpAtomic *atomic);
-	static RpAtomic *RenderAlphaAtomic(RpAtomic *atomic, int alpha);
+	static RpAtomic *RenderAlphaAtomic(RpAtomic *atomic, uintptr alpha);
 	static RpAtomic *RenderFadingAtomic(RpAtomic *atm, float dist);
 
 	static RpAtomic *RenderVehicleHiDetailCB(RpAtomic *atomic);
@@ -106,7 +106,7 @@ public:
 		int32 id;
 	};
 	static void SetFrameHierarchyId(RwFrame *frame, int32 id);
-	static int32 GetFrameHierarchyId(RwFrame *frame);
+	static uintptr GetFrameHierarchyId(RwFrame *frame);
 
 	static void *FrameConstructor(void *object, int32 offset, int32 len);
 	static void *FrameDestructor(void *object, int32 offset, int32 len);

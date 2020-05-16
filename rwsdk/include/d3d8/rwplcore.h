@@ -1567,7 +1567,7 @@ struct RwSurfaceProperties
 #define rwPIOVER2 (rwPI / (RwReal)(2.0f))
 #endif
 #define RWRGBALONG(r,g,b,a)                                             \
-    ((RwUInt32) (((a) << 24) | ((r) << 16) | ((g) << 8) | (b)))
+    ((uintptr) (((uintptr)(a) << 24) | ((uintptr)(r) << 16) | ((uintptr)(g) << 8) | (uintptr)(b)))
 
 /* !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 

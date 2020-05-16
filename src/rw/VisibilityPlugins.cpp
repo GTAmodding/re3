@@ -211,7 +211,7 @@ CVisibilityPlugins::RenderObjNormalAtomic(RpAtomic *atomic)
 }
 
 RpAtomic*
-CVisibilityPlugins::RenderAlphaAtomic(RpAtomic *atomic, int alpha)
+CVisibilityPlugins::RenderAlphaAtomic(RpAtomic *atomic, uintptr alpha)
 {
 	RpGeometry *geo;
 	uint32 flags;
@@ -231,7 +231,7 @@ CVisibilityPlugins::RenderFadingAtomic(RpAtomic *atomic, float camdist)
 {
 	RpAtomic *lodatm;
 	float fadefactor;
-	uint32 alpha;
+	uintptr alpha;
 	CSimpleModelInfo *mi;
 
 	mi = GetAtomicModelInfo(atomic);
@@ -802,7 +802,7 @@ CVisibilityPlugins::SetFrameHierarchyId(RwFrame *frame, int32 id)
 	FRAMEEXT(frame)->id = id;
 }
 
-int32
+uintptr
 CVisibilityPlugins::GetFrameHierarchyId(RwFrame *frame)
 {
 	return FRAMEEXT(frame)->id;

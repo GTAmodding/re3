@@ -273,9 +273,17 @@ CBoat::ProcessControl(void)
 		if(0.1f * m_fMass * GRAVITY*CTimer::GetTimeStep() < buoyanceImpulse.z){
 			bBoatInWater = true;
 			bIsInWater = true;
+			if (GetUp().z < -0.6f && Abs(GetMoveSpeed().x) < 0.05 && Abs(GetMoveSpeed().y) < 0.05) {
+				bIsDrowning = true;
+				if (pDriver)
+					pDriver->InflictDamage(nil, WEAPONTYPE_DROWNING, CTimer::GetTimeStep(), PEDPIECE_TORSO, 0);
+			}
+			else
+				bIsDrowning = false;
 		}else{
 			bBoatInWater = false;
 			bIsInWater = false;
+			bIsDrowning = false;
 		}
 
 		m_fVolumeUnderWater = mod_Buoyancy.m_volumeUnderWater;
@@ -519,6 +527,7 @@ CBoat::ProcessControl(void)
 	}else{
 		bBoatInWater = false;
 		bIsInWater = false;
+		bIsDrowning = false;
 	}
 
 	if(m_bIsAnchored){

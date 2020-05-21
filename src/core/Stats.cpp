@@ -62,6 +62,7 @@ int32 CStats::Sprayings;
 float CStats::AutoPaintingBudget;
 int32 CStats::NoMoreHurricanes;
 float CStats::FashionBudget;
+int32 CStats::SafeHouseVisits;
 
 void CStats::Init()
 {
@@ -122,6 +123,7 @@ void CStats::Init()
 	Sprayings = 0;
 	AutoPaintingBudget = 0.0f;
 	NoMoreHurricanes = 0;
+	SafeHouseVisits = 0;
 }
 
 void CStats::RegisterFastestTime(int32 index, int32 time)

@@ -2192,6 +2192,7 @@ CAutomobile::ProcessEntityCollision(CEntity *ent, CColPoint *colpoints)
 					phys->RegisterReference((CEntity**)&m_aGroundPhysical[i]);
 					m_aGroundOffset[i] = m_aWheelColPoints[i].point - phys->GetPosition();
 
+#if 0
 					if(phys->GetModelIndex() == MI_BODYCAST && GetStatus() == STATUS_PLAYER){
 						// damage body cast
 						float speed = m_vecMoveSpeed.MagnitudeSqr();
@@ -2208,6 +2209,7 @@ CAutomobile::ProcessEntityCollision(CEntity *ent, CColPoint *colpoints)
 							phys->AddToMovingList();
 						}
 					}
+#endif
 				}
 
 				m_nSurfaceTouched = m_aWheelColPoints[i].surfaceB;
@@ -2853,6 +2855,7 @@ CAutomobile::ProcessBuoyancy(void)
 
 		if(impulseRatio > 0.5f){
 			bIsInWater = true;
+			bIsDrowning = true;
 			if(m_vecMoveSpeed.z < -0.1f)
 				m_vecMoveSpeed.z = -0.1f;
 
@@ -2867,8 +2870,11 @@ CAutomobile::ProcessBuoyancy(void)
 					if(pPassengers[i]->IsPlayer() || !bWaterTight)
 						pPassengers[i]->InflictDamage(nil, WEAPONTYPE_DROWNING, CTimer::GetTimeStep(), PEDPIECE_TORSO, 0);
 				}
-		}else
+		}
+		else {
 			bIsInWater = false;
+			bIsDrowning = false;
+		}
 
 		static uint32 nGenerateRaindrops = 0;
 		static uint32 nGenerateWaterCircles = 0;
@@ -2950,6 +2956,7 @@ CAutomobile::ProcessBuoyancy(void)
 		}
 	}else{
 		bIsInWater = false;
+		bIsDrowning = false;
 		bTouchingWater = false;
 
 		static RwRGBA splashCol = {155, 155, 185, 196};
@@ -3091,11 +3098,11 @@ CAutomobile::DoDriveByShootings(void)
 	// TODO: what is this?
 	if(!lookingLeft && m_weaponDoorTimerLeft > 0.0f){
 		m_weaponDoorTimerLeft = Max(m_weaponDoorTimerLeft - CTimer::GetTimeStep()*0.1f, 0.0f);
-		ProcessOpenDoor(CAR_DOOR_LF, NUM_ANIMS, m_weaponDoorTimerLeft);
+		ProcessOpenDoor(CAR_DOOR_LF, NUM_STD_ANIMS, m_weaponDoorTimerLeft);
 	}
 	if(!lookingRight && m_weaponDoorTimerRight > 0.0f){
 		m_weaponDoorTimerRight = Max(m_weaponDoorTimerRight - CTimer::GetTimeStep()*0.1f, 0.0f);
-		ProcessOpenDoor(CAR_DOOR_RF, NUM_ANIMS, m_weaponDoorTimerRight);
+		ProcessOpenDoor(CAR_DOOR_RF, NUM_STD_ANIMS, m_weaponDoorTimerRight);
 	}
 }
 
@@ -3780,7 +3787,7 @@ CAutomobile::ProcessOpenDoor(uint32 component, uint32 anim, float time)
 	case ANIM_VAN_GETOUT:
 		ProcessDoorOpenAnimation(this, component, door, time, 0.5f, 0.6f);
 		break;
-	case NUM_ANIMS:
+	case NUM_STD_ANIMS:
 		OpenDoor(component, door, time);
 		break;
 	}

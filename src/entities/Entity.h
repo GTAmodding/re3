@@ -78,7 +78,7 @@ public:
 	uint32 bIsSubway : 1;	// set when subway, but maybe different meaning?
 	uint32 bDrawLast : 1;				// draw object last
 	uint32 bNoBrightHeadLights : 1;
-	uint32 bDoNotRender : 1;
+	uint32 bDoNotRender : 1;	//-- only applies to CObjects apparently
 	uint32 bDistanceFade : 1;			// Fade entity because it is far away
 
 	// flagsE
@@ -88,7 +88,7 @@ public:
 	uint32 bIsStaticWaitingForCollision : 1; // this is used by script created entities - they are static until the collision is loaded below them
 	uint32 m_flagE10 : 1;	// probably bDontStream
 	uint32 bUnderwater : 1;              // this object is underwater change drawing order
-	uint32 m_flagE40 : 1;
+	uint32 bHasPreRenderEffects : 1; // Object has a prerender effects attached to it
 
 	uint16 m_scanCode;
 	uint16 m_randomSeed;
@@ -112,12 +112,12 @@ public:
 #endif
 
 	CEntity(void);
-	~CEntity(void);
+	virtual ~CEntity(void);
 
 	virtual void Add(void);
 	virtual void Remove(void);
-	virtual void SetModelIndex(uint32 id) { m_modelIndex = id; CreateRwObject(); }
-	virtual void SetModelIndexNoCreate(uint32 id) { m_modelIndex = id; }
+	virtual void SetModelIndex(uint32 id);
+	virtual void SetModelIndexNoCreate(uint32 id);
 	virtual void CreateRwObject(void);
 	virtual void DeleteRwObject(void);
 	virtual CRect GetBoundRect(void);
@@ -160,6 +160,7 @@ public:
 	int16 GetModelIndex(void) const { return m_modelIndex; }
 	void UpdateRwFrame(void);
 	void SetupBigBuilding(void);
+	bool HasPreRenderEffects(void);
 
 	void AttachToRwObject(RwObject *obj);
 	void DetachFromRwObject(void);

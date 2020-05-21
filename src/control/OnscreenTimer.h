@@ -17,6 +17,7 @@ public:
 	char m_bCounterBuffer[42];
 	char m_bTimerBuffer[42];
 	bool m_bTimerProcessed;
+	bool m_bTimerGoingDown;
 	bool m_bCounterProcessed;
 
 	void Process();
@@ -42,8 +43,8 @@ public:
 	void ClearCounter(uint32 offset);
 	void ClearClock(uint32 offset);
 
-	void AddCounter(uint32 offset, uint16 type, char* text);
-	void AddClock(uint32 offset, char* text);
+	void AddCounter(uint32 offset, uint16 type, char* text, uint16 pos);
+	void AddClock(uint32 offset, char* text, bool bGoingDown);
 };
 
 VALIDATE_SIZE(COnscreenTimer, 0x78);

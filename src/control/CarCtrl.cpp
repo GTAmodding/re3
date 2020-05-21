@@ -2995,7 +2995,9 @@ void CCarCtrl::FindLinksToGoWithTheseNodes(CVehicle* pVehicle)
 			CPathNode* pNode = &ThePaths.m_pathNodes[node];
 			if (node == pVehicle->AutoPilot.m_nNextRouteNode)
 				continue;
-			float dist = CCollision::DistToLine(&pCurNode->GetPosition(), &pNode->GetPosition(), &pVehicle->GetPosition());
+			CVector vCurPos = pCurNode->GetPosition();
+			CVector vNextPos = pNode->GetPosition();
+			float dist = CCollision::DistToLine(&vCurPos, &vNextPos, &pVehicle->GetPosition());
 			if (dist < md) {
 				md = dist;
 				closestLink = curLink;

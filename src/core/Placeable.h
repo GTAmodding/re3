@@ -9,7 +9,6 @@ public:
 	CMatrix m_matrix;
 
 	CPlaceable(void);
-	virtual ~CPlaceable(void);
 	const CVector &GetPosition(void) { return m_matrix.GetPosition(); }
 	void SetPosition(float x, float y, float z) {
 		m_matrix.GetPosition().x = x;

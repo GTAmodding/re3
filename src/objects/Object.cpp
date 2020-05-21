@@ -14,7 +14,8 @@
 #include "soundlist.h"
 
 int16 CObject::nNoTempObjects;
-int16 CObject::nBodyCastHealth = 1000;
+//int16 CObject::nBodyCastHealth = 1000;
+float CObject::fDistToNearestTree;
 
 void *CObject::operator new(size_t sz) { return CPools::GetObjectPool()->New();  }
 void *CObject::operator new(size_t sz, int handle) { return CPools::GetObjectPool()->New(handle);};
@@ -161,6 +162,7 @@ CObject::ObjectDamage(float amount)
 		return;
 	static int8 nFrameGen = 0;
 	bool bBodyCastDamageEffect = false;
+#if 0
 	if (GetModelIndex() == MI_BODYCAST) {
 		if (amount > 50.0f)
 			nBodyCastHealth = (int16)(nBodyCastHealth - 0.5f * amount);
@@ -170,6 +172,7 @@ CObject::ObjectDamage(float amount)
 			bBodyCastDamageEffect = true;
 		amount = 0.0f;
 	}
+#endif
 	if ((amount * m_fCollisionDamageMultiplier > 150.0f || bBodyCastDamageEffect) && m_nCollisionDamageEffect) {
 		const CVector& vecPos = m_matrix.GetPosition();
 		const float fDirectionZ = 0.0002f * amount;
@@ -335,10 +338,13 @@ CObject::Init(void)
 		m_pCurSurface = outEntity;
 	else
 		m_pCurSurface = nil;
-	if (GetModelIndex() == MI_BODYCAST)
-		nBodyCastHealth = 1000;
-	else if (GetModelIndex() == MI_BUOY)
+
+	if (GetModelIndex() == MI_BUOY)
 		bTouchingWater = true;
+
+	// TODO(Miami): Second flag set initialization
+
+	m_area = AREA_EVERYWHERE;
 }
 
 bool

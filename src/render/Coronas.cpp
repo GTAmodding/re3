@@ -129,7 +129,8 @@ CCoronas::Update(void)
 void
 CCoronas::RegisterCorona(uint32 id, uint8 red, uint8 green, uint8 blue, uint8 alpha,
 	const CVector &coors, float size, float drawDist, RwTexture *tex,
-	int8 flareType, uint8 reflection, uint8 LOScheck, uint8 drawStreak, float someAngle)
+	int8 flareType, uint8 reflection, uint8 LOScheck, uint8 drawStreak, float someAngle,
+	bool longDist, float nearDist)
 {
 	int i;
 
@@ -192,11 +193,13 @@ CCoronas::RegisterCorona(uint32 id, uint8 red, uint8 green, uint8 blue, uint8 al
 
 void
 CCoronas::RegisterCorona(uint32 id, uint8 red, uint8 green, uint8 blue, uint8 alpha,
-		const CVector &coors, float size, float drawDist, uint8 type,
-		int8 flareType, uint8 reflection, uint8 LOScheck, uint8 drawStreak, float someAngle)
+	const CVector &coors, float size, float drawDist, uint8 type,
+	int8 flareType, uint8 reflection, uint8 LOScheck, uint8 drawStreak, float someAngle,
+	bool longDist, float nearDist)
 {
 	RegisterCorona(id, red, green, blue, alpha, coors, size, drawDist,
-		gpCoronaTexture[type], flareType, reflection, LOScheck, drawStreak, someAngle);
+		gpCoronaTexture[type], flareType, reflection, LOScheck, drawStreak, someAngle,
+		longDist, nearDist);
 }
 
 void

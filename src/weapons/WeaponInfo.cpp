@@ -11,7 +11,7 @@
 
 // Yeah...
 int32 CWeaponInfo::ms_aMaxAmmoForWeapon[WEAPONTYPE_TOTALWEAPONS] = {
-	-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1
+	-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
 };
 
 CWeaponInfo CWeaponInfo::ms_apWeaponInfos[WEAPONTYPE_TOTALWEAPONS];
@@ -19,7 +19,17 @@ CWeaponInfo CWeaponInfo::ms_apWeaponInfos[WEAPONTYPE_TOTALWEAPONS];
 // --MIAMI: Todo
 static char ms_aWeaponNames[][32] = {
 	"Unarmed",
+	"BrassKnuckle",
+	"ScrewDriver",
+	"GolfClub",
+	"NightStick",
+	"Knife",
 	"BaseballBat",
+	"Hammer",
+	"Cleaver",
+	"Machete",
+	"Katana",
+	"Chainsaw",
 	"Grenade",
 	"DetonateGrenade",
 	"Molotov",
@@ -61,8 +71,7 @@ CWeaponInfo::Initialise(void)
 		ms_apWeaponInfos[i].m_fLifespan = 0.0f;
 		ms_apWeaponInfos[i].m_fSpread = 0.0f;
 		ms_apWeaponInfos[i].m_vecFireOffset = CVector(0.0f, 0.0f, 0.0f);
-		// TODO(Miami): ASSOCGRP_UNARMED
-		ms_apWeaponInfos[i].m_AnimToPlay = ASSOCGRP_STD;
+		ms_apWeaponInfos[i].m_AnimToPlay = ASSOCGRP_UNARMED;
 		ms_apWeaponInfos[i].m_fAnimLoopStart = 0.0f;
 		ms_apWeaponInfos[i].m_fAnimLoopEnd = 0.0f;
 		ms_apWeaponInfos[i].m_fAnimFrameFire = 0.0f;

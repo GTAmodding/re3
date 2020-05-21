@@ -73,7 +73,7 @@ ALDeviceList::ALDeviceList()
 					if ((bNewName) && (actualDeviceName != NULL) && (strlen(actualDeviceName) > 0)) {
 						memset(&ALDeviceInfo, 0, sizeof(ALDEVICEINFO));
 						ALDeviceInfo.bSelected = true;
-						ALDeviceInfo.strDeviceName.assign(actualDeviceName, strlen(actualDeviceName));
+						ALDeviceInfo.strDeviceName = actualDeviceName;
 						alcGetIntegerv(device, ALC_MAJOR_VERSION, sizeof(int), &ALDeviceInfo.iMajorVersion);
 						alcGetIntegerv(device, ALC_MINOR_VERSION, sizeof(int), &ALDeviceInfo.iMinorVersion);
 

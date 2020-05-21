@@ -103,7 +103,7 @@ CCivilianPed::CivilianAI(void)
 		SetLookTimer(500);
 	} else if (closestThreatFlag == PED_FLAG_DEADPEDS) {
 		float eventDistSqr = (m_pEventEntity->GetPosition() - GetPosition()).MagnitudeSqr2D();
-		if (IsGangMember() && m_nPedType == ((CPed*)m_pEventEntity)->m_nPedType) {
+		if (((CPed*)m_pEventEntity)->bIsDrowning || IsGangMember() && m_nPedType == ((CPed*)m_pEventEntity)->m_nPedType) {
 			if (eventDistSqr < sq(5.0f)) {
 				SetFindPathAndFlee(m_pEventEntity, 2000);
 				SetMoveState(PEDMOVE_RUN);

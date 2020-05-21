@@ -23,7 +23,7 @@ CCopPed::CCopPed(eCopType copType, int32 modifier) : CPed(PEDTYPE_COP)
 	switch (copType) {
 	case COP_STREET:
 		SetModelIndex(MI_COP);
-		// GiveWeapon(WEAPONTYPE_NIGHTSTICK, 1000, true); // TODO(Miami)
+		GiveWeapon(WEAPONTYPE_NIGHTSTICK, 1000, true);
 		GiveDelayedWeapon(WEAPONTYPE_COLT45, 1000);
 		m_currentWeapon = WEAPONTYPE_UNARMED;
 		m_fArmour = 0.0f;

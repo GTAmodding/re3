@@ -62,8 +62,6 @@ void
 CClouds::Update(void)
 {
 	float s = Sin(TheCamera.Orientation - 0.85f);
-	CloudRotation += CWeather::Wind*s*0.001f;
-	IndividualRotation += (CWeather::Wind*CTimer::GetTimeStep()*0.5f + 0.3f) * 60.0f;
 #ifdef FIX_BUGS
 	CloudRotation += CWeather::Wind*s*0.001f*CTimer::GetTimeStepFix();
 	IndividualRotation += (CWeather::Wind*CTimer::GetTimeStep()*0.5f + 0.3f*CTimer::GetTimeStepFix()) * 60.0f;

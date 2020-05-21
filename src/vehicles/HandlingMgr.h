@@ -243,7 +243,7 @@ class cHandlingDataMgr
 {
 	float field_0;	// unused it seems
 public:
-	float fWheelFriction;
+	float fWheelFriction;	// wheel related
 private:
 	float field_8;	//
 	float field_C;	// unused it seems

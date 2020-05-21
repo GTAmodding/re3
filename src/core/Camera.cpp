@@ -82,10 +82,6 @@ CCamera::CCamera(void)
 	Init();
 }
 
-CCamera::CCamera(float)
-{
-}
-
 void
 CCamera::Init(void)
 {
@@ -93,12 +89,7 @@ CCamera::Init(void)
 	float fMouseAccelHorzntl = m_fMouseAccelHorzntl;
 	float fMouseAccelVertical = m_fMouseAccelVertical;
 #endif
-#ifdef FIX_BUGS
-	static const CCamera DummyCamera = CCamera(0.f);
-	*this = DummyCamera;
-#else
-	memset(this, 0, sizeof(CCamera));	// getting rid of vtable, eh?
-#endif
+	memset(this, 0, sizeof(CCamera));	// this is fine, no vtable
 #ifdef GTA3_1_1_PATCH
 	m_fMouseAccelHorzntl = fMouseAccelHorzntl;
 	m_fMouseAccelVertical = fMouseAccelVertical;

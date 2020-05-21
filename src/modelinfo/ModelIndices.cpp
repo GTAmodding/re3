@@ -3,14 +3,14 @@
 #include "General.h"
 #include "ModelIndices.h"
 
-#define X(name, var, addr) int16 var;
+#define X(name, var) int16 var;
 	MODELINDICES
 #undef X
 
 void
 InitModelIndices(void)
 {
-#define X(name, var, addr) var = -1;
+#define X(name, var) var = -1;
 	MODELINDICES
 #undef X
 }
@@ -18,7 +18,7 @@ InitModelIndices(void)
 void
 MatchModelString(const char *modelname, int16 id)
 {
-#define X(name, var, addr) \
+#define X(name, var) \
 	if(!CGeneral::faststrcmp(name, modelname)){ \
 		var = id; \
 		return; \

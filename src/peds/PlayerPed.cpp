@@ -1026,7 +1026,7 @@ CPlayerPed::ProcessAnimGroups(void)
 			if (m_fWalkAngle > 0.0f) {
 				if (GetWeapon()->m_eWeaponType == WEAPONTYPE_ROCKETLAUNCHER)
 					groupToSet = ASSOCGRP_ROCKETLEFT;
-				else if (/*GetWeapon()->m_eWeaponType == WEAPONTYPE_CHAINSAW || */
+				else if (GetWeapon()->m_eWeaponType == WEAPONTYPE_CHAINSAW ||
 					GetWeapon()->m_eWeaponType == WEAPONTYPE_FLAMETHROWER
 					/* || GetWeapon()->m_eWeaponType == WEAPONTYPE_MINIGUN*/ )
 					groupToSet = ASSOCGRP_CHAINSAWLEFT;
@@ -1035,7 +1035,7 @@ CPlayerPed::ProcessAnimGroups(void)
 			} else {
 				if (GetWeapon()->m_eWeaponType == WEAPONTYPE_ROCKETLAUNCHER)
 					groupToSet = ASSOCGRP_ROCKETRIGHT;
-				else if (/*GetWeapon()->m_eWeaponType == WEAPONTYPE_CHAINSAW || */
+				else if (GetWeapon()->m_eWeaponType == WEAPONTYPE_CHAINSAW ||
 					GetWeapon()->m_eWeaponType == WEAPONTYPE_FLAMETHROWER
 					/* || GetWeapon()->m_eWeaponType == WEAPONTYPE_MINIGUN*/)
 					groupToSet = ASSOCGRP_CHAINSAWRIGHT;
@@ -1045,7 +1045,7 @@ CPlayerPed::ProcessAnimGroups(void)
 		} else {
 			if (GetWeapon()->m_eWeaponType == WEAPONTYPE_ROCKETLAUNCHER)
 				groupToSet = ASSOCGRP_ROCKETBACK;
-			else if (/*GetWeapon()->m_eWeaponType == WEAPONTYPE_CHAINSAW || */
+			else if (GetWeapon()->m_eWeaponType == WEAPONTYPE_CHAINSAW ||
 				GetWeapon()->m_eWeaponType == WEAPONTYPE_FLAMETHROWER
 				/* || GetWeapon()->m_eWeaponType == WEAPONTYPE_MINIGUN*/)
 				groupToSet = ASSOCGRP_CHAINSAWBACK;
@@ -1057,9 +1057,9 @@ CPlayerPed::ProcessAnimGroups(void)
 			groupToSet = ASSOCGRP_PLAYERROCKET;
 		} else {
 			if (GetWeapon()->m_eWeaponType == WEAPONTYPE_BASEBALLBAT
-				/* || GetWeapon()->m_eWeaponType == WEAPONTYPE_MACHETE */)
+				 || GetWeapon()->m_eWeaponType == WEAPONTYPE_MACHETE)
 				groupToSet = ASSOCGRP_PLAYERBBBAT;
-			else if (/*GetWeapon()->m_eWeaponType == WEAPONTYPE_CHAINSAW || */
+			else if (GetWeapon()->m_eWeaponType == WEAPONTYPE_CHAINSAW ||
 				GetWeapon()->m_eWeaponType == WEAPONTYPE_FLAMETHROWER
 				/* || GetWeapon()->m_eWeaponType == WEAPONTYPE_MINIGUN*/)
 				groupToSet = ASSOCGRP_PLAYERCHAINSAW;
@@ -1067,10 +1067,9 @@ CPlayerPed::ProcessAnimGroups(void)
 				// I hope this was inlined...
 				/*
 				&& GetWeapon()->m_eWeaponType != WEAPONTYPE_PYTHON*/ && GetWeapon()->m_eWeaponType != WEAPONTYPE_TEC9
-				&& GetWeapon()->m_eWeaponType != WEAPONTYPE_SILENCED_INGRAM && GetWeapon()->m_eWeaponType != WEAPONTYPE_MP5 /*
+				&& GetWeapon()->m_eWeaponType != WEAPONTYPE_SILENCED_INGRAM && GetWeapon()->m_eWeaponType != WEAPONTYPE_MP5
 				&& GetWeapon()->m_eWeaponType != WEAPONTYPE_GOLFCLUB && GetWeapon()->m_eWeaponType != WEAPONTYPE_KATANA
-				&& GetWeapon()->m_eWeaponType != WEAPONTYPE_CAMERA
-				*/) {
+				/* && GetWeapon()->m_eWeaponType != WEAPONTYPE_CAMERA */) {
 				if (!GetWeapon()->IsType2Handed()) {
 					groupToSet = ASSOCGRP_PLAYER;
 				} else {
@@ -1088,6 +1087,7 @@ CPlayerPed::ProcessAnimGroups(void)
 	}
 }
 
+// TODO(Miami): Hella TODO
 void
 CPlayerPed::ProcessPlayerWeapon(CPad *padUsed)
 {
@@ -1099,8 +1099,9 @@ CPlayerPed::ProcessPlayerWeapon(CPad *padUsed)
 	}
 	if (!m_pFire) {
 		if (GetWeapon()->m_eWeaponType == WEAPONTYPE_ROCKETLAUNCHER ||
-			GetWeapon()->m_eWeaponType == WEAPONTYPE_SNIPERRIFLE || GetWeapon()->m_eWeaponType == WEAPONTYPE_M16) {
-			if (padUsed->TargetJustDown()) {
+			GetWeapon()->m_eWeaponType == WEAPONTYPE_SNIPERRIFLE || GetWeapon()->m_eWeaponType == WEAPONTYPE_M16 ||
+			GetWeapon()->m_eWeaponType == WEAPONTYPE_AK47) {
+			if (padUsed->TargetJustDown() || TheCamera.m_bJustJumpedOutOf1stPersonBecauseOfTarget) {
 				SetStoredState();
 				m_nPedState = PED_SNIPER_MODE;
 #ifdef FREE_CAM
@@ -1134,7 +1135,7 @@ CPlayerPed::ProcessPlayerWeapon(CPad *padUsed)
 				else
 #endif
 					SetAttack(m_pPointGunAt);
-			} else if (m_currentWeapon != WEAPONTYPE_UNARMED) {
+			} else {
 				if (m_nPedState == PED_ATTACK) {
 					if (padUsed->WeaponJustDown()) {
 						m_bHaveTargetSelected = true;
@@ -1145,12 +1146,19 @@ CPlayerPed::ProcessPlayerWeapon(CPad *padUsed)
 					m_fAttackButtonCounter = 0.0f;
 					m_bHaveTargetSelected = false;
 				}
-				SetAttack(nil);
-			} else if (padUsed->WeaponJustDown()) {
-				if (m_fMoveSpeed < 1.0f)
-					StartFightAttack(padUsed->GetWeapon());
-				else
-					SetAttack(nil);
+				if (GetWeapon()->m_eWeaponType != WEAPONTYPE_UNARMED && GetWeapon()->m_eWeaponType != WEAPONTYPE_BRASSKNUCKLE &&
+					!weaponInfo->m_bFightMode) {
+
+					if (GetWeapon()->m_eWeaponType != WEAPONTYPE_DETONATOR && GetWeapon()->m_eWeaponType != WEAPONTYPE_DETONATOR_GRENADE ||
+						padUsed->WeaponJustDown())
+
+						SetAttack(nil);
+				} else if (padUsed->WeaponJustDown()) {
+					if (m_fMoveSpeed < 1.0f || m_nPedState == PED_FIGHT)
+						StartFightAttack(padUsed->GetWeapon());
+					else
+						SetAttack(nil);
+				}
 			}
 		}
 	} else {
@@ -1185,7 +1193,7 @@ CPlayerPed::ProcessPlayerWeapon(CPad *padUsed)
 #endif
 				} else {
 					m_fRotationDest = limitedCam;
-					m_headingRate = 50.0f;
+					m_headingRate = 12.5f;
 
 					// Anim. fix for shotgun, ak47 and m16 (we must finish rot. it quickly)
 					if (weaponInfo->m_bCanAim && padUsed->WeaponJustDown()) {

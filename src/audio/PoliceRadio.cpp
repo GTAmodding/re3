@@ -14,7 +14,6 @@
 #include "Zones.h"
 #include "sampman.h"
 
-const int maxVolume = 127;
 const int channels = ARRAY_SIZE(cAudioManager::m_asActiveSamples);
 const int policeChannel = channels + 1;
 
@@ -227,7 +226,7 @@ cAudioManager::ServicePoliceRadioChannel(int32 wantedLevel)
 				}
 			} else if (!SampleManager.GetChannelUsedFlag(policeChannel)) {
 				SampleManager.PreloadStreamedFile(g_nMissionAudioSfx, 1);
-				SampleManager.SetStreamedVolumeAndPan(maxVolume, 63, 1, 1);
+				SampleManager.SetStreamedVolumeAndPan(MAX_VOLUME, 63, 1, 1);
 				SampleManager.StartPreloadedStreamedFile(1);
 				g_nMissionAudioPlayingStatus = 1;
 				bMissionAudioPhysicalPlayingStatus = 0;

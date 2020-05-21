@@ -16,7 +16,6 @@ cAudioManager AudioManager;
 const int channels = ARRAY_SIZE(cAudioManager::m_asActiveSamples);
 const int policeChannel = channels + 1;
 const int allChannels = channels + 2;
-const int maxVolume = 127;
 
 cAudioManager::cAudioManager()
 {
@@ -548,7 +547,7 @@ cAudioManager::AddSampleToRequestedQueue()
 	bool bReflections;
 
 	if (m_sQueueSample.m_nSampleIndex < TOTAL_AUDIO_SAMPLES) {
-		calculatedVolume = m_sQueueSample.m_nReleasingVolumeModificator * (maxVolume - m_sQueueSample.m_nVolume);
+		calculatedVolume = m_sQueueSample.m_nReleasingVolumeModificator * (MAX_VOLUME - m_sQueueSample.m_nVolume);
 		sampleIndex = m_SampleRequestQueuesStatus[m_nActiveSampleQueue];
 		if (sampleIndex >= m_nActiveSamples) {
 			sampleIndex = m_abSampleQueueIndexTable[m_nActiveSampleQueue][m_nActiveSamples - 1];
@@ -942,7 +941,7 @@ void
 cAudioManager::GenerateIntegerRandomNumberTable()
 {
 	for (int32 i = 0; i < ARRAY_SIZE(m_anRandomTable); i++) {
-		m_anRandomTable[i] = rand();
+		m_anRandomTable[i] = myrand();
 	}
 }
 

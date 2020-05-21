@@ -1245,9 +1245,11 @@ CRenderer::ShouldModelBeStreamed(CEntity *ent, const CVector &campos)
 void
 CRenderer::RemoveVehiclePedLights(CEntity *ent, bool reset)
 {
-	if(ent->bRenderScorched)
-		return;
-	CPointLights::RemoveLightsAffectingObject();
-	if(reset)
-		ReSetAmbientAndDirectionalColours();
+	if(!ent->bRenderScorched){
+		CPointLights::RemoveLightsAffectingObject();
+		if(reset)
+			ReSetAmbientAndDirectionalColours();
+	}
+	SetAmbientColours();
+	DeActivateDirectional();
 }

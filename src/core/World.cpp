@@ -1813,18 +1813,21 @@ void
 CWorld::RepositionOneObject(CEntity *pEntity)
 {
 	int16 modelId = pEntity->GetModelIndex();
-	if (IsTrafficLight(modelId) || IsTreeModel(modelId) || modelId == MI_PARKINGMETER ||
-	   modelId == MI_PHONEBOOTH1 || modelId == MI_WASTEBIN || modelId == MI_BIN || modelId == MI_POSTBOX1 ||
-	   modelId == MI_NEWSSTAND || modelId == MI_TRAFFICCONE || modelId == MI_DUMP1 ||
-	   modelId == MI_ROADWORKBARRIER1 || modelId == MI_BUSSIGN1 || modelId == MI_NOPARKINGSIGN1 ||
-	   modelId == MI_PHONESIGN || modelId == MI_TAXISIGN || modelId == MI_FISHSTALL01 ||
-	   modelId == MI_FISHSTALL02 || modelId == MI_FISHSTALL03 || modelId == MI_FISHSTALL04 ||
-	   modelId == MI_BAGELSTAND2 || modelId == MI_FIRE_HYDRANT || modelId == MI_BOLLARDLIGHT ||
-	   modelId == MI_PARKTABLE) {
+	if (modelId == MI_PARKINGMETER || modelId == MI_PHONEBOOTH1 || modelId == MI_WASTEBIN ||
+	    modelId == MI_BIN || modelId == MI_POSTBOX1 || modelId == MI_NEWSSTAND || modelId == MI_TRAFFICCONE ||
+	    modelId == MI_DUMP1 || modelId == MI_ROADWORKBARRIER1 || modelId == MI_BUSSIGN1 || modelId == MI_NOPARKINGSIGN1 ||
+	    modelId == MI_PHONESIGN || modelId == MI_FIRE_HYDRANT || modelId == MI_BOLLARDLIGHT ||
+	    modelId == MI_PARKTABLE || modelId == MI_PARKINGMETER2 || modelId == MI_TELPOLE02 ||
+	    modelId == MI_PARKBENCH || modelId == MI_BARRIER1 || IsTreeModel(modelId) ||
+		IsLightThatNeedsRepositioning(modelId)
+		) {
 		CVector &position = pEntity->GetMatrix().GetPosition();
-		float fBoundingBoxMinZ = pEntity->GetColModel()->boundingBox.min.z;
+		CColModel *pColModel = pEntity->GetColModel();
+		float fBoundingBoxMinZ = pColModel->boundingBox.min.z;
+		float fHeight = pColModel->boundingBox.max.z - pColModel->boundingBox.min.z;
+		if(fHeight < OBJECT_REPOSITION_OFFSET_Z) fHeight = OBJECT_REPOSITION_OFFSET_Z;
 		position.z = CWorld::FindGroundZFor3DCoord(position.x, position.y,
-		                                           position.z + OBJECT_REPOSITION_OFFSET_Z, nil) -
+		                                           position.z + fHeight, nil) -
 		             fBoundingBoxMinZ;
 		pEntity->m_matrix.UpdateRW();
 		pEntity->UpdateRwFrame();

@@ -46,7 +46,7 @@ public:
 	float m_fDistanceTravelled;
 
 	// damaged piece
-	float m_fDamageImpulse;
+	float m_fDamageImpulse; // fCollisionPower
 	CEntity *m_pDamageEntity;
 	CVector m_vecDamageNormal;
 	int16 m_nDamagePieceType;

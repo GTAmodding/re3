@@ -1,0 +1,15 @@
+language: cpp
+os: linux
+dist: focal
+matrix:
+  include:
+  - env: TARGET=release_linux-amd64-librw_gl3_glfw-oal
+  - env: TARGET=debug_linux-amd64-librw_gl3_glfw-oal
+script:
+  - sudo apt-get update
+  - sudo apt-get -y install linux-libc-dev libopenal-dev libglew-dev libglfw3-dev libsndfile1-dev libmpg123-dev gcc-8-multilib g++-8-multilib
+  - mkdir -p "$TRAVIS_BUILD_DIR/build"
+  - cd "$TRAVIS_BUILD_DIR"
+  - ./premake5Linux --with-librw gmake2
+  - cd build 
+  - CC=gcc-8 CXX=g++-8 make config=$TARGET -j4 verbose=1

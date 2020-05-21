@@ -1337,8 +1337,7 @@ CStreaming::LoadInitialPeds(void)
 void
 CStreaming::LoadInitialWeapons(void)
 {
-	// TODO(Miami): Enable when weapons have been ported
-	//CStreaming::RequestModel(MI_NIGHTSTICK, STREAMFLAGS_DONT_REMOVE);
+	CStreaming::RequestModel(MI_NIGHTSTICK, STREAMFLAGS_DONT_REMOVE);
 	CStreaming::RequestModel(MI_MISSILE, STREAMFLAGS_DONT_REMOVE);
 }
 

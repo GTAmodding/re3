@@ -18,6 +18,7 @@
 #endif
 #include "PointLights.h"
 #include "SpecialFX.h"
+#include "Script.h"
 #include "Shadows.h"
 
 #ifdef DEBUGMENU
@@ -1766,6 +1767,6 @@ CShadows::RenderIndicatorShadow(uint32 nID, uint8 ShadowType, RwTexture *pTextur
 	ASSERT(pPosn != NULL);
 
 	C3dMarkers::PlaceMarkerSet(nID, _TODOCONST(4), *pPosn, Max(fFrontX, -fSideY),
-			0, 128, 255, 128,
-			2048, 0.2f, 0);
+		SPHERE_MARKER_R, SPHERE_MARKER_G, SPHERE_MARKER_B,
+		SPHERE_MARKER_A, SPHERE_MARKER_PULSE_PERIOD, 0.2f, 0);
 }

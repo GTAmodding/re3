@@ -9,6 +9,25 @@ enum eItems
 	ITEM_RADAR = 8
 };
 
+// Thanks for vague name, R*
+enum DRAW_FADE_STATE
+{
+	HUD_WANTED_FADING = 0,
+	HUD_ENERGY_FADING,
+	HUD_SCORE_FADING,
+	HUD_WEAPON_FADING,
+};
+
+// My name
+enum eFadeOperation
+{
+	FADED_OUT = 0,
+	START_FADE_OUT,
+	FADING_IN,
+	FADING_OUT,
+	FADE_DISABLED = 5,
+};
+
 enum eSprites 
 {
 	HUD_FIST,
@@ -31,6 +50,10 @@ enum eSprites
 	HUD_SITEROCKET,
 	NUM_HUD_SPRITES,
 };
+
+// TODO(Miami): Make those 0.7f - 1.25f once fonts have been ported
+#define HUD_TEXT_SCALE_X 0.8f
+#define HUD_TEXT_SCALE_Y 1.35f
 
 class CHud
 {
@@ -82,6 +105,21 @@ public:
 	static int16 PagerTimer;
 	static int16 PagerOn;
 
+	static uint32 m_WantedFadeTimer;
+	static uint32 m_WantedState;
+	static uint32 m_WantedTimer;
+	static uint32 m_EnergyLostFadeTimer;
+	static uint32 m_EnergyLostState;
+	static uint32 m_EnergyLostTimer;
+	static uint32 m_DisplayScoreFadeTimer;
+	static uint32 m_DisplayScoreState;
+	static uint32 m_DisplayScoreTimer;
+	static uint32 m_WeaponFadeTimer;
+	static uint32 m_WeaponState;
+	static uint32 m_WeaponTimer;
+
+	static uint32 m_LastDisplayScore;
+
 public:
 	static void Draw();
 	static void DrawAfterFade();
@@ -95,4 +133,5 @@ public:
 	static void SetVehicleName(wchar *name);
 	static void SetZoneName(wchar *name);
 	static void Shutdown();
+	static float DrawFadeState(DRAW_FADE_STATE, int);
 };

@@ -20,8 +20,9 @@ void COnscreenTimer::Init() {
 		}
 
 		m_sEntries[i].m_nType = COUNTER_DISPLAY_NUMBER;
-		m_sEntries[i].m_bTimerProcessed = 0;
-		m_sEntries[i].m_bCounterProcessed = 0;
+		m_sEntries[i].m_bTimerProcessed = false;
+		m_sEntries[i].m_bCounterProcessed = false;
+		m_sEntries[i].m_bTimerGoingDown = true;
 	}
 }
 
@@ -65,26 +66,21 @@ void COnscreenTimer::ClearClock(uint32 offset) {
 	}
 }
 
-void COnscreenTimer::AddCounter(uint32 offset, uint16 type, char* text) {
-	uint32 i = 0;
-	for(uint32 i = 0; i < NUMONSCREENTIMERENTRIES; i++) {
-		if(m_sEntries[i].m_nCounterOffset == 0) {
-			break;
-		}
+void COnscreenTimer::AddCounter(uint32 offset, uint16 type, char* text, uint16 pos) {
+
+	m_sEntries[pos].m_nCounterOffset = offset;
+	if (m_sEntries[pos].m_aCounterText[0] != '\0')
 		return;
-	}
-
-	m_sEntries[i].m_nCounterOffset = offset;
 	if(text) {
-		strncpy(m_sEntries[i].m_aCounterText, text, 10);
+		strncpy(m_sEntries[pos].m_aCounterText, text, 10);
 	} else {
-		m_sEntries[i].m_aCounterText[0] = 0;
+		m_sEntries[pos].m_aCounterText[0] = 0;
 	}
 
-	m_sEntries[i].m_nType = type;
+	m_sEntries[pos].m_nType = type;
 }
 
-void COnscreenTimer::AddClock(uint32 offset, char* text) {
+void COnscreenTimer::AddClock(uint32 offset, char* text, bool bGoingDown) {
 	uint32 i = 0;
 	for(uint32 i = 0; i < NUMONSCREENTIMERENTRIES; i++) {
 		if(m_sEntries[i].m_nTimerOffset == 0) {
@@ -94,6 +90,7 @@ void COnscreenTimer::AddClock(uint32 offset, char* text) {
 	}
 
 	m_sEntries[i].m_nTimerOffset = offset;
+	m_sEntries[i].m_bTimerGoingDown = bGoingDown;
 	if(text) {
 		strncpy(m_sEntries[i].m_aTimerText, text, 10);
 	} else {
@@ -108,19 +105,24 @@ void COnscreenTimerEntry::Process() {
 
 	int32* timerPtr = CTheScripts::GetPointerToScriptVariable(m_nTimerOffset);
 	int32 oldTime = *timerPtr;
-	int32 newTime = oldTime - int32(CTimer::GetTimeStepInSeconds() * 1000);
-	if(newTime < 0) {
-		*timerPtr = 0;
-		m_bTimerProcessed = 0;
-		m_nTimerOffset = 0;
-		m_aTimerText[0] = 0;
-	} else {
-		*timerPtr = newTime;
-		int32 oldTimeSeconds = oldTime / 1000;
-		if(oldTimeSeconds < 12 && newTime / 1000 != oldTimeSeconds) {
-			DMAudio.PlayFrontEndSound(SOUND_CLOCK_TICK, newTime / 1000);
+	if (m_bTimerGoingDown) {
+		int32 newTime = oldTime - int32(CTimer::GetTimeStepInMilliseconds());
+		if (newTime < 0) {
+			*timerPtr = 0;
+			m_bTimerProcessed = 0;
+			m_nTimerOffset = 0;
+			m_aTimerText[0] = 0;
+		}
+		else {
+			*timerPtr = newTime;
+			int32 oldTimeSeconds = oldTime / 1000;
+			if (oldTimeSeconds < 12 && newTime / 1000 != oldTimeSeconds) {
+				DMAudio.PlayFrontEndSound(SOUND_CLOCK_TICK, newTime / 1000);
+			}
 		}
 	}
+	else
+		*timerPtr = oldTime + int32(CTimer::GetTimeStepInMilliseconds());
 }
 
 bool COnscreenTimerEntry::ProcessForDisplay() {

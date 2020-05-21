@@ -36,7 +36,7 @@ void CGangs::Initialise(void)
 	SetGangVehicleModel(GANG_BIKER, MI_ANGEL);
 	SetGangVehicleModel(GANG_PLAYER, -1);
 	SetGangVehicleModel(GANG_GOLFER, MI_CADDY);
-	//SetGangWeapons(GANG_GOLFER, WEAPONTYPE_GOLFCLUB, WEAPONTYPE_GOLFCLUB); // TODO(MIAMI)
+	SetGangWeapons(GANG_GOLFER, WEAPONTYPE_GOLFCLUB, WEAPONTYPE_GOLFCLUB);
 #ifdef FIX_BUGS
 	for (int i = 0; i < NUM_GANGS; i++)
 		SetGangPedModelOverride(i, -1);

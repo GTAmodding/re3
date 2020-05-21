@@ -461,17 +461,16 @@ CPopulation::AddPed(ePedType pedType, uint32 miOrCopType, CVector const &coors, 
 			if (ms_bGivePedsWeapons) {
 				eWeaponType weapon;
 
-				// TODO(Miami): Look here when weapons have been ported
 				switch (CGeneral::GetRandomNumber() & 3) {
 					case 0:
 						weapon = WEAPONTYPE_COLT45;
 						break;
 					case 1:
-						//weapon = WEAPONTYPE_NIGHTSTICK;
-						//break;
+						weapon = WEAPONTYPE_NIGHTSTICK;
+						break;
 					case 2:
-						//weapon = WEAPONTYPE_GOLFCLUB;
-						//break;
+						weapon = WEAPONTYPE_GOLFCLUB;
+						break;
 					case 3:
 						weapon = WEAPONTYPE_TEC9;
 						break;
@@ -853,18 +852,12 @@ CPopulation::ConvertToRealObject(CDummyObject *dummy)
 	if (!obj)
 		return;
 
-	bool makeInvisible;
 	CWorld::Remove(dummy);
 	delete dummy;
 	CWorld::Add(obj);
-	int16 mi = obj->GetModelIndex();
-	if (mi == MI_GLASS1 || mi == MI_GLASS2 || mi == MI_GLASS3 || mi == MI_GLASS4 ||
-		mi == MI_GLASS5 || mi == MI_GLASS6 || mi == MI_GLASS7 || mi == MI_GLASS8)
-		makeInvisible = true;
-	else
-		makeInvisible = false;
 
-	if (makeInvisible) {
+	CSimpleModelInfo *mi = (CSimpleModelInfo*)CModelInfo::GetModelInfo(obj->GetModelIndex());
+	if (IsGlass(obj->GetModelIndex()) && !mi->m_isArtistGlass) {
 		obj->bIsVisible = false;
 	} else if (obj->GetModelIndex() == MI_BUOY) {
 		obj->bIsStatic = false;
@@ -883,17 +876,9 @@ CPopulation::ConvertToDummyObject(CObject *obj)
 	dummy->GetMatrix().UpdateRW();
 	dummy->UpdateRwFrame();
 
-	bool makeInvisible;
-	int16 mi = obj->GetModelIndex();
-	if (mi == MI_GLASS1 || mi == MI_GLASS2 || mi == MI_GLASS3 || mi == MI_GLASS4 ||
-		mi == MI_GLASS5 || mi == MI_GLASS6 || mi == MI_GLASS7 || mi == MI_GLASS8)
-		makeInvisible = true;
-	else
-		makeInvisible = false;
-
-	if (makeInvisible) {
+	CSimpleModelInfo *mi = (CSimpleModelInfo*)CModelInfo::GetModelInfo(obj->GetModelIndex());
+	if (IsGlass(obj->GetModelIndex()) && !mi->m_isArtistGlass)
 		dummy->bIsVisible = false;
-	}
 
 	CWorld::Remove(obj);
 	delete obj;
@@ -1093,8 +1078,7 @@ CPopulation::AddDeadPedInFrontOfCar(const CVector& pos, CVehicle* pCulprit)
 		return nil;
 	CPed* pPed = CPopulation::AddPed(PEDTYPE_CIVMALE, MI_MALE01, pos); // TODO(MIAMI): 4th parameter
 	pPed->SetDie(ANIM_KO_SHOT_FRONT1, 4.0f, 0.0f);
-	//TODO(MIAMI): uncomment
-	//pPed->m_nPedMoney = 0;
+	pPed->m_nPedMoney = 0;
 	pPed->bDeadPedInFrontOfCar = true;
 	pPed->m_vehicleInAccident = pCulprit;
 	pCulprit->RegisterReference((CEntity**)&pPed->m_vehicleInAccident);
@@ -1108,7 +1092,7 @@ CPopulation::AddDeadPedInFrontOfCar(const CVector& pos, CVehicle* pCulprit)
 			}
 		}
 	}
-	CColPoint colpts[32];
+	CColPoint colpts[MAX_COLLISION_POINTS];
 	if (CCollision::ProcessColModels(pCulprit->GetMatrix(), *pCulprit->GetColModel(), pPed->GetMatrix(), *pPed->GetColModel(), colpts, nil, nil)) {
 		CWorld::Remove(pPed);
 		delete pPed;

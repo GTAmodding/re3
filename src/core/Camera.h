@@ -549,7 +549,6 @@ public:
 
 	// High level and misc
 	CCamera(void);
-	CCamera(float);
 	void Init(void);
 	void Process(void);
 	void CamControl(void);

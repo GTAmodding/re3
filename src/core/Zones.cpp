@@ -112,6 +112,7 @@ CTheZones::Init(void)
 		memset(&MapZoneArray[i], 0, sizeof(CZone));
 		MapZoneArray[i].type = ZONE_MAPZONE;
 	}
+	TotalNumberOfMapZones = 1;
 	strcpy(MapZoneArray[0].name, "THEMAP");
 	MapZoneArray[0].minx = -2400.0f;
 	MapZoneArray[0].miny = -2000.0f;

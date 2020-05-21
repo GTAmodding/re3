@@ -88,6 +88,7 @@ void CCranes::AddThisOneCrane(CEntity* pEntity)
 	if (pCrane->m_nAudioEntity >= 0)
 		DMAudio.SetEntityStatus(pCrane->m_nAudioEntity, 1);
 	pCrane->m_bIsTop = (MODELID_CRANE_1 != pEntity->GetModelIndex());
+#if 0
 	// Is this used to avoid military crane?
 	if (pCrane->m_bIsTop || pEntity->GetPosition().y > 0.0f) {
 		CObject* pHook = new CObject(MI_MAGNET, false);
@@ -100,6 +101,7 @@ void CCranes::AddThisOneCrane(CEntity* pEntity)
 		pCrane->SetHookMatrix();
 	}
 	else
+#endif
 		pCrane->m_pHook = nil;
 	NumCranes++;
 }

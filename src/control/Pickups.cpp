@@ -49,6 +49,16 @@ uint16 AmmoForWeapon[20] = { 0, 1, 45, 125, 25, 150, 300, 25, 5, 250, 5, 5, 0, 5
 uint16 AmmoForWeapon_OnStreet[WEAPONTYPE_TOTALWEAPONS] = {
 	0,
 	1,
+	1,
+	1,
+	1,
+	1,
+	1,
+	1,
+	1,
+	1,
+	1,
+	1,
 	4,
 	4,
 	4,
@@ -70,16 +80,20 @@ uint16 AmmoForWeapon_OnStreet[WEAPONTYPE_TOTALWEAPONS] = {
 uint16 CostOfWeapon[20] = { 0, 10, 250, 800, 1500, 3000, 5000, 10000, 25000, 25000, 2000, 2000, 0, 50000, 0, 3000, 0, 0, 0, 0 };
 
 // TODO(Miami): Those are all placeholders!!
-uint8 aWeaponReds[] = { 0, 255, 0, 128, 255, 255, 0, 255, 0, 128, 128, 255,
+uint8 aWeaponReds[] = { 0, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
+255, 0, 128, 255, 255, 0, 255, 0, 128, 128, 255,
 255, 255, 255, 255, 255, 255, 255, 255,
 255, 128, 0, 255, 0 };
-uint8 aWeaponGreens[] = { 0, 0, 255, 128, 255, 0, 255, 128, 255, 0, 255, 255,
+uint8 aWeaponGreens[] = { 0, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
+0, 255, 128, 255, 0, 255, 128, 255, 0, 255, 255,
 255, 255, 255, 255, 255, 255, 255, 255,
 0, 255, 0, 255, 0 };
-uint8 aWeaponBlues[] = { 0, 0, 0, 255, 0, 255, 255, 0, 128, 255, 0, 255,
+uint8 aWeaponBlues[] = { 0, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
+0, 0, 255, 0, 255, 255, 0, 128, 255, 0, 255,
 255, 255, 255, 255, 255, 255, 255, 255,
 0, 128, 255, 0, 0 };
-float aWeaponScale[] = { 1.0f, 1.0f, 2.0f, 1.5f, 1.0f, 1.0f, 1.5f, 1.0f, 2.0f, 1.0f, 2.0f, 2.5f,
+float aWeaponScale[] = { 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f,
+2.0f, 1.5f, 1.0f, 1.0f, 1.5f, 1.0f, 2.0f, 1.0f, 2.0f, 2.5f, 1.0f,
 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f,
 1.0f, 1.0f, 1.0f, 1.0f };
 
@@ -122,6 +136,7 @@ CPickup::GiveUsAPickUpObject(int32 handle)
 	object->bExplosionProof = true;
 	object->bUsesCollision = false;
 	object->bIsPickup = true;
+	object->bHasPreRenderEffects = true;
 
 	object->m_nBonusValue = m_eModelIndex == MI_PICKUP_BONUS ? m_nQuantity : 0;
 
@@ -1005,6 +1020,25 @@ CPickups::RenderPickUpText()
 }
 
 void
+CPickups::CreateSomeMoney(CVector pos, int money)
+{
+	bool found;
+
+	int pickupCount = Min(money / 20 + 1, 7);
+	int moneyPerPickup = money / pickupCount;
+
+	for (int i = 0; i < pickupCount; i++) {
+		// (CGeneral::GetRandomNumber() % 256) * PI / 128 gives a float up to something TWOPI-ish.
+		pos.x += 1.5f * Sin((CGeneral::GetRandomNumber() % 256) * PI / 128);
+		pos.y += 1.5f * Cos((CGeneral::GetRandomNumber() % 256) * PI / 128);
+		pos.z = CWorld::FindGroundZFor3DCoord(pos.x, pos.y, pos.z, &found) + 0.5f;
+		if (found) {
+			CPickups::GenerateNewOne(CVector(pos.x, pos.y, pos.z), MI_MONEY, PICKUP_MONEY, moneyPerPickup + (CGeneral::GetRandomNumber() & 3));
+		}
+	}
+}
+
+void
 CPickups::Load(uint8 *buf, uint32 size)
 {
 INITSAVEBUF
@@ -1149,45 +1183,6 @@ CPacManPickups::Update()
 void
 CPacManPickups::GeneratePMPickUps(CVector pos, float scrambleMult, int16 count, uint8 type)
 {
-	int i = 0;
-	while (count > 0) {
-		while (aPMPickUps[i].m_eType != PACMAN_NONE)
-			i++;
-
-		bool bPickupCreated = false;
-		while (!bPickupCreated) {
-			CVector newPos = pos;
-			CColPoint colPoint;
-			CEntity *pRoad;
-			uint16 nRand = CGeneral::GetRandomNumber();
-			newPos.x += ((nRand & 0xFF) - 128) * scrambleMult / 128.0f;
-			newPos.y += (((nRand >> 8) & 0xFF) - 128) * scrambleMult / 128.0f;
-			newPos.z = 1000.0f;
-			if (CWorld::ProcessVerticalLine(newPos, -1000.0f, colPoint, pRoad, true, false, false, false, true, false, nil) && pRoad->IsBuilding() && ((CBuilding*)pRoad)->GetIsATreadable()) {
-				newPos.z = 0.7f + colPoint.point.z;
-				aPMPickUps[i].m_eType = type;
-				aPMPickUps[i].m_vecPosn = newPos;
-				CObject *obj = new CObject(MI_BULLION, true);
-				if (obj != nil) {
-					obj->ObjectCreatedBy = MISSION_OBJECT;
-					obj->SetPosition(aPMPickUps[i].m_vecPosn);
-					obj->SetOrientation(0.0f, 0.0f, -HALFPI);
-					obj->GetMatrix().UpdateRW();
-					obj->UpdateRwFrame();
-
-					obj->bAffectedByGravity = false;
-					obj->bExplosionProof = true;
-					obj->bUsesCollision = false;
-					obj->bIsPickup = false;
-					CWorld::Add(obj);
-				}
-				aPMPickUps[i].m_pObject = obj;
-				bPickupCreated = true;
-			}
-		}
-		count--;
-	}
-	bPMActive = true;
 }
 
 // diablo porn mission pickups
@@ -1304,40 +1299,6 @@ static const CVector aRacePoints1[] = {
 void
 CPacManPickups::GeneratePMPickUpsForRace(int32 race)
 {
-	const CVector *pPos = nil;
-	int i = 0;
-
-	if (race == 0) pPos = aRacePoints1; // there's only one available
-	assert(pPos != nil);
-
-	while (!pPos->IsZero()) {
-		while (aPMPickUps[i].m_eType != PACMAN_NONE)
-			i++;
-
-		aPMPickUps[i].m_eType = PACMAN_RACE;
-		aPMPickUps[i].m_vecPosn = *(pPos++);
-		if (race == 0) {
-			CObject* obj = new CObject(MI_DONKEYMAG, true);
-			if (obj != nil) {
-				obj->ObjectCreatedBy = MISSION_OBJECT;
-
-				obj->SetPosition(aPMPickUps[i].m_vecPosn);
-				obj->SetOrientation(0.0f, 0.0f, -HALFPI);
-				obj->GetMatrix().UpdateRW();
-				obj->UpdateRwFrame();
-
-				obj->bAffectedByGravity = false;
-				obj->bExplosionProof = true;
-				obj->bUsesCollision = false;
-				obj->bIsPickup = false;
-
-				CWorld::Add(obj);
-			}
-			aPMPickUps[i].m_pObject = obj;
-		} else
-			aPMPickUps[i].m_pObject = nil;
-	}
-	bPMActive = true;
 }
 
 void

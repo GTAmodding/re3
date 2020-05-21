@@ -91,6 +91,7 @@ public:
 	static bool GivePlayerGoodiesWithPickUpMI(int16 modelIndex, int playerIndex);
 	static bool TestForPickupsInBubble(CVector pos, float range);
 	static bool TryToMerge_WeaponType(CVector pos, eWeaponType weapon, uint8 type, uint32 quantity, bool unused);
+	static void CreateSomeMoney(CVector, int);
 	static void Load(uint8 *buf, uint32 size);
 	static void Save(uint8 *buf, uint32 *size);
 

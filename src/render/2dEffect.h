@@ -4,7 +4,8 @@ enum {
 	EFFECT_LIGHT,
 	EFFECT_PARTICLE,
 	EFFECT_ATTRACTOR,
-	EFFECT_PED_ATTRACTOR
+	EFFECT_PED_ATTRACTOR,
+	EFFECT_SUNGLARE
 };
 
 enum {
@@ -35,6 +36,8 @@ enum {
 	// same order as CPointLights flags, must start at 2
 	LIGHTFLAG_FOG_NORMAL = 2,	// can have light and fog
 	LIGHTFLAG_FOG_ALWAYS = 4,	// fog only
+	LIGHTFLAG_HIDE_OBJECT = 8,	// hide the object instead of rendering light (???)
+	LIGHTFLAG_LONG_DIST = 16,
 	LIGHTFLAG_FOG = (LIGHTFLAG_FOG_NORMAL|LIGHTFLAG_FOG_ALWAYS)
 };
 

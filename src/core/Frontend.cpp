@@ -1157,10 +1157,10 @@ CMenuManager::Draw()
 			case MENUACTION_CTRLMETHOD: {
 				switch (m_ControlMethod) {
 				case 0:
-					leftText = TheText.Get("FET_SCN");
+					leftText = TheText.Get("FET_STI");
 					break;
 				case 1:
-					leftText = TheText.Get("FET_CCN");
+					leftText = TheText.Get("FET_CTI");
 					break;
 				}
 				break;

@@ -1040,6 +1040,7 @@ CFont::ParseToken(wchar *s, wchar*, bool japShit)
 wchar*
 CFont::ParseToken(wchar *s, wchar*)
 {
+	// Updated from gta vc idb file. Bold font left.
 	s++;
 	if(Details.color.r || Details.color.g || Details.color.b)
 		switch(*s){
@@ -1047,14 +1048,18 @@ CFont::ParseToken(wchar *s, wchar*)
 		case 'n':
 			NewLine = 1;
 			break;
-		case 'b': SetColor(CRGBA(0x80, 0xA7, 0xF3, 0xFF)); break;
-		case 'g': SetColor(CRGBA(0x5F, 0xA0, 0x6A, 0xFF)); break;
+		case 'b': SetColor(CRGBA(0x1B, 0x59, 0x82, 0xFF)); break;
+		case 'g': SetColor(CRGBA(0xFF, 0x96, 0xE1, 0xFF)); break;
 		case 'h': SetColor(CRGBA(0xE1, 0xE1, 0xE1, 0xFF)); break;
 		case 'l': SetColor(CRGBA(0x00, 0x00, 0x00, 0xFF)); break;
+		case 'o': SetColor(CRGBA(0xE5, 0x7D, 0x7E, 0xFF)); break;
 		case 'p': SetColor(CRGBA(0xA8, 0x6E, 0xFC, 0xFF)); break;
-		case 'r': SetColor(CRGBA(0x71, 0x2B, 0x49, 0xFF)); break;
+		case 'q': SetColor(CRGBA(0xC7, 0x90, 0xCB, 0xFF)); break;
+		case 'r': SetColor(CRGBA(0xFF, 0x96, 0xE1, 0xFF)); break;
+		case 't': SetColor(CRGBA(0x56, 0xD4, 0x92, 0xFF)); break;
 		case 'w': SetColor(CRGBA(0xAF, 0xAF, 0xAF, 0xFF)); break;
-		case 'y': SetColor(CRGBA(0xD2, 0xC4, 0x6A, 0xFF)); break;
+		case 'x': SetColor(CRGBA(0x84, 0x92, 0xC5, 0xFF)); break;
+		case 'y': SetColor(CRGBA(0xFF, 0xE3, 0x4F, 0xFF)); break;
 		}
 	while(*s != '~') s++;
 	return s+1;

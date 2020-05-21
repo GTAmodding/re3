@@ -575,7 +575,7 @@ CPickups::GenerateNewOne(CVector pos, uint32 modelIndex, uint8 type, uint32 quan
 	}
 
 	if (slot >= NUMPICKUPS) return -1;
-
+	
 	aPickUps[slot].m_eType = (ePickupType)type;
 	aPickUps[slot].m_bRemoved = false;
 	aPickUps[slot].m_nQuantity = quantity;
@@ -706,14 +706,15 @@ CPickups::DoPickUpEffects(CEntity *entity)
 
 		int16 colorId;
 
+		// There is no glow around Health, Wanted level pickup for VC. Pretty much for every pickups other than weapons?
 		if (entity->GetModelIndex() == MI_PICKUP_ADRENALINE || entity->GetModelIndex() == MI_PICKUP_CAMERA)
-			colorId = WEAPONTYPE_LAST_WEAPONTYPE;
+			colorId = 0;
 		else if (entity->GetModelIndex() == MI_PICKUP_BODYARMOUR || entity->GetModelIndex() == MI_PICKUP_BRIBE)
-			colorId = WEAPONTYPE_LAST_WEAPONTYPE + 1;
+			colorId = 0;
 		else if (entity->GetModelIndex() == MI_PICKUP_INFO || entity->GetModelIndex() == MI_PICKUP_KILLFRENZY)
-			colorId = WEAPONTYPE_LAST_WEAPONTYPE + 2;
+			colorId = 0;
 		else if (entity->GetModelIndex() == MI_PICKUP_HEALTH || entity->GetModelIndex() == MI_PICKUP_BONUS)
-			colorId = WEAPONTYPE_LAST_WEAPONTYPE + 3;
+			colorId = 0;
 		else
 			colorId = WeaponForModel(entity->GetModelIndex());
 

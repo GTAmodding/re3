@@ -59,26 +59,23 @@ public:
 	CMatrix m_objectMatrix;
 	float m_fUprootLimit;
 	int8 ObjectCreatedBy;
-	int8 bIsPickup : 1;
-	int8 bPickupObjWithMessage : 1;
-	int8 bOutOfStock : 1;
-	int8 bGlassCracked : 1;
-	int8 bGlassBroken : 1;
-	int8 bHasBeenDamaged : 1;
-	int8 bUseVehicleColours : 1;
+	uint8 bIsPickup : 1;
+	uint8 obj_flag_02 : 1;
+	uint8 bPickupObjWithMessage : 1;
+	uint8 bOutOfStock : 1;
+	uint8 bGlassCracked : 1;
+	uint8 bGlassBroken : 1;
+	uint8 bHasBeenDamaged : 1;
+	uint8 bUseVehicleColours : 1;
+	uint8 bIsWeapon : 1;
+	uint8 bIsStreetLight : 1;
 	int8 m_nBonusValue; 
 	float m_fCollisionDamageMultiplier;
 	uint8 m_nCollisionDamageEffect;
 	uint8 m_nSpecialCollisionResponseCases;
 	bool m_bCameraToAvoidThisObject;
-
-	// this batch is unused
-	int8 field_17B;
-	int8 field_17C;
-	int8 field_17D;
-	int8 field_17E;
-	int8 field_17F;
-
+	int8 m_nBeachballBounces;
+	uint32 m_obj_unused1;
 	uint32 m_nEndOfLifeTime;
 	int16 m_nRefModelIndex;
 	CEntity *m_pCurSurface;
@@ -86,8 +83,6 @@ public:
 	int8 m_colour1, m_colour2;
 
 	static int16 nNoTempObjects;
-//	static int16 nBodyCastHealth;
-
 	static float fDistToNearestTree;
 
 	static void *operator new(size_t);

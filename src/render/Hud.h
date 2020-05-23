@@ -119,11 +119,15 @@ public:
 	static uint32 m_WeaponTimer;
 
 	static uint32 m_LastDisplayScore;
+	static uint32 m_LastWanted;
 
 public:
 	static void Draw();
 	static void DrawAfterFade();
 	static void GetRidOfAllHudMessages();
+#ifdef RELOADABLES
+	static void ReloadTXD();
+#endif
 	static void Initialise();
 	static void ReInitialise();
 	static void SetBigMessage(wchar *message, int16 style);

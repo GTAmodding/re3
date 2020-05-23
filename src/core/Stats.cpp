@@ -57,6 +57,7 @@ int32 CStats::mmRain;
 int32 CStats::CarsCrushed;
 int32 CStats::FastestTimes[CStats::TOTAL_FASTEST_TIMES];
 int32 CStats::HighestScores[CStats::TOTAL_HIGHEST_SCORES];
+int32 CStats::PropertyDestroyed;
 
 int32 CStats::Sprayings;
 float CStats::AutoPaintingBudget;

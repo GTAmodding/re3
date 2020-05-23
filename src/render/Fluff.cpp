@@ -382,7 +382,7 @@ void CScrollBar::Update()
 					m_pMessage = FindTimeMessage();
 					break;
 				case 6:
-					if (CMenuManager::m_PrefsLanguage == LANGUAGE_FRENCH || CMenuManager::m_PrefsLanguage == LANGUAGE_GERMAN)
+					if (FrontEndMenuManager.m_PrefsLanguage == LANGUAGE_FRENCH || FrontEndMenuManager.m_PrefsLanguage == LANGUAGE_GERMAN)
 						m_pMessage = FindTimeMessage();
 					else
 						m_pMessage = "WWW.GRANDTHEFTAUTO3.COM    ";
@@ -602,7 +602,7 @@ void CScrollBar::Update()
 					m_pMessage = "FREE FLUFFY DICE WITH ALL PURCHASES. . .";
 					break;
 				case 9:
-					if (CMenuManager::m_PrefsLanguage == LANGUAGE_FRENCH || CMenuManager::m_PrefsLanguage == LANGUAGE_GERMAN)
+					if (FrontEndMenuManager.m_PrefsLanguage == LANGUAGE_FRENCH || FrontEndMenuManager.m_PrefsLanguage == LANGUAGE_GERMAN)
 						m_pMessage = "QUICK, TAKE A LOOK AT OUR CURRENT STOCK )CAUSE THESE AUTOS ARE MOVIN) FAST . . .  ";
 					else
 						m_pMessage = "HTTP:((ROCKSTARGAMES.COM(GRANDTHEFTAUTO3(CAPITALAUTOS    ";

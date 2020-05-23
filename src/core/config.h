@@ -204,6 +204,9 @@ enum Config {
 #else
 #define AUDIO_OAL
 #endif
+#ifdef DEBUGMENU
+#define RELOADABLES			// some debug menu options to reload TXD files
+#endif
 
 // Particle
 //#define PC_PARTICLE
@@ -222,7 +225,6 @@ enum Config {
 // Hud, frontend and radar
 #define ASPECT_RATIO_SCALE	// Not just makes everything scale with aspect ratio, also adds support for all aspect ratios
 #define TRIANGULAR_BLIPS	// height indicating triangular radar blips, as in VC
-#define PS2_SAVE_DIALOG		// PS2 style save dialog with transparent black box
 // #define PS2_LIKE_MENU	// An effort to recreate PS2 menu, cycling through tabs, different bg etc.
 #define MENU_MAP			// VC-like menu map. Make sure you have new menu.txd
 #define SCROLLABLE_STATS_PAGE	// only draggable by mouse atm

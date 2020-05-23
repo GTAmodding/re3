@@ -183,13 +183,13 @@ public:
 	uint8 bIsCarParkVehicle : 1; // Car has been created using the special CAR_PARK script command
 	uint8 bHasAlreadyBeenRecorded : 1; // Used for replays
 	uint8 bPartOfConvoy : 1;
-	//uint8 bHeliMinimumTilt : 1; // This heli should have almost no tilt really
+	uint8 bHeliMinimumTilt : 1; // This heli should have almost no tilt really
 	//uint8 bAudioChangingGear : 1; // sounds like vehicle is changing gear
 
 	uint8 bIsDrowning : 1; // is vehicle occupants taking damage in water (i.e. vehicle is dead in water)
-	//uint8 bTyresDontBurst : 1; // If this is set the tyres are invincible
+	uint8 bTyresDontBurst : 1; // If this is set the tyres are invincible
 	uint8 bCreatedAsPoliceVehicle : 1;// True if this guy was created as a police vehicle (enforcer, policecar, miamivice car etc)
-	//uint8 bRestingOnPhysical : 1; // Dont go static cause car is sitting on a physical object that might get removed
+	uint8 bRestingOnPhysical : 1; // Dont go static cause car is sitting on a physical object that might get removed
 	uint8 bParking : 1;
 	//uint8 bCanPark : 1;
 
@@ -318,6 +318,7 @@ public:
 #endif
 	static bool m_bDisableMouseSteering;
 	static bool bDisableRemoteDetonation;
+	static bool bDisableRemoteDetonationOnContact;
 };
 
 void DestroyVehicleAndDriverAndPassengers(CVehicle* pVehicle);

@@ -39,7 +39,7 @@ CText::Load(void)
 	Unload();
 
 	CFileMgr::SetDir("TEXT");
-	switch(CMenuManager::m_PrefsLanguage){
+	switch(FrontEndMenuManager.m_PrefsLanguage){
 	case LANGUAGE_AMERICAN:
 		sprintf(filename, "AMERICAN.GXT");
 		break;
@@ -241,7 +241,7 @@ CText::LoadMissionText(char *MissionTableName)
 	}
 
 	CFileMgr::SetDir("TEXT");
-	switch (CMenuManager::m_PrefsLanguage) {
+	switch (FrontEndMenuManager.m_PrefsLanguage) {
 	case LANGUAGE_AMERICAN:
 		sprintf(filename, "AMERICAN.GXT");
 		break;

@@ -38,6 +38,7 @@
 #include "Pad.h"
 #include "Particle.h"
 #include "ParticleObject.h"
+#include "PedAttractor.h"
 #include "PedRoutes.h"
 #include "Phones.h"
 #include "Pickups.h"
@@ -298,7 +299,7 @@ void CMissionCleanup::Process()
 	//TODO(MIAMI): drunkenness, enable drive by
 	//DMAudio::ShutUpPlayerTalking(0);
 	CVehicle::bDisableRemoteDetonation = false;
-	//CVehicle::bDisableRemoteDetonationOnContact = false; // TODO(MIAMI)
+	CVehicle::bDisableRemoteDetonationOnContact = false;
 	//CGameLogic::ClearShortCut(); // TODO(MIAMI)
 	CTheScripts::RiotIntensity = 0;
 	CTheScripts::StoreVehicleIndex = -1;
@@ -1948,8 +1949,8 @@ int8 CRunningScript::ProcessCommands100To199(int32 command)
 		float radius = *(float*)&ScriptParams[4];
 		eMoveState state;
 		switch (ScriptParams[5]) {
-		case 0: state = PEDMOVE_WALK;
-		case 1: state = PEDMOVE_SPRINT;
+		case 0: state = PEDMOVE_WALK; break;
+		case 1: state = PEDMOVE_SPRINT; break;
 		default: assert(0);
 		}
 		ped->ClearAll();
@@ -4413,7 +4414,7 @@ int8 CRunningScript::ProcessCommands400To499(int32 command)
 	}
 	case COMMAND_SET_CAR_HEAVY:
 	{
-		CollectParameters(&m_nIp, 1);
+		CollectParameters(&m_nIp, 2);
 		CVehicle* pVehicle = CPools::GetVehiclePool()->GetAt(ScriptParams[0]);
 		assert(pVehicle);
 		if (ScriptParams[1] != 0) {
@@ -8627,13 +8628,13 @@ int8 CRunningScript::ProcessCommands900To999(int32 command)
 	case COMMAND_ACTIVATE_SAVE_MENU:
 	{
 		CStats::SafeHouseVisits++;
-		FrontEndMenuManager.m_bSaveMenuActive = true;
+		FrontEndMenuManager.m_bActivateSaveMenu = true;
 		FindPlayerPed()->SetMoveSpeed(0.0f, 0.0f, 0.0f);
 		FindPlayerPed()->SetTurnSpeed(0.0f, 0.0f, 0.0f);
 		return 0;
 	}
 	case COMMAND_HAS_SAVE_GAME_FINISHED:
-		UpdateCompareFlag(!FrontEndMenuManager.m_bMenuActive && !FrontEndMenuManager.m_bSaveMenuActive);
+		UpdateCompareFlag(!FrontEndMenuManager.m_bMenuActive && !FrontEndMenuManager.m_bActivateSaveMenu);
 		return 0;
 	case COMMAND_NO_SPECIAL_CAMERA_FOR_THIS_GARAGE:
 		CollectParameters(&m_nIp, 1);
@@ -8944,7 +8945,7 @@ int8 CRunningScript::ProcessCommands1000To1099(int32 command)
 		CStats::SetTotalNumberKillFrenzies(ScriptParams[0]);
 		return 0;
 	case COMMAND_BLOW_UP_RC_BUGGY:
-		CWorld::Players[CWorld::PlayerInFocus].BlowUpRCBuggy();
+		CWorld::Players[CWorld::PlayerInFocus].BlowUpRCBuggy(true);
 		return 0;
 	/*
 	case COMMAND_REMOVE_CAR_FROM_CHASE:
@@ -10143,12 +10144,12 @@ int8 CRunningScript::ProcessCommands1100To1199(int32 command)
 		UpdateCompareFlag(CModelInfo::GetModelInfo(ScriptParams[0]) != nil);
 		return 0;
 	case COMMAND_SHUT_CHAR_UP:
-		CollectParameters(&m_nIp, 1);
+		CollectParameters(&m_nIp, 2);
 		debug("SHUT_CHAR_UP not implemented"); // TODO(MIAMI)
 		return 0;
 	case COMMAND_SET_ENABLE_RC_DETONATE:
 		CollectParameters(&m_nIp, 1);
-		CVehicle::bDisableRemoteDetonation = ScriptParams[0];
+		CVehicle::bDisableRemoteDetonation = !ScriptParams[0];
 		return 0;
 	case COMMAND_SET_CAR_RANDOM_ROUTE_SEED:
 	{
@@ -10463,8 +10464,23 @@ int8 CRunningScript::ProcessCommands1200To1299(int32 command)
 		return 0;
 	}
 	case COMMAND_GET_CHAR_WEAPON_IN_SLOT:
+	{
+		CollectParameters(&m_nIp, 2);
+		CPed* pPed = CPools::GetPedPool()->GetAt(ScriptParams[0]);
+		assert(pPed);
+		ScriptParams[0] = pPed->GetWeapon(ScriptParams[1]).m_eWeaponType;
+		ScriptParams[1] = pPed->GetWeapon(ScriptParams[1]).m_nAmmoTotal;
+		ScriptParams[2] = CPickups::ModelForWeapon((eWeaponType)ScriptParams[0]);
+		StoreParameters(&m_nIp, 3);
+	}
 	case COMMAND_GET_CLOSEST_STRAIGHT_ROAD:
-		assert(0);
+	{
+		CollectParameters(&m_nIp, 5);
+		debug("GET_CLOSEST_STRAIGHT_ROAD not implemented!\n");
+		for (int i = 0; i < 7; i++)
+			ScriptParams[i] = 0;
+		StoreParameters(&m_nIp, 7); // TODO(MIAMI)
+	}
 	case COMMAND_SET_CAR_FORWARD_SPEED:
 	{
 		CollectParameters(&m_nIp, 2);
@@ -10498,17 +10514,83 @@ int8 CRunningScript::ProcessCommands1200To1299(int32 command)
 		return 0;
 	}
 	case COMMAND_RESET_HAVOC_CAUSED_BY_PLAYER:
+	{
+		CollectParameters(&m_nIp, 1);
+		CWorld::Players[ScriptParams[0]].m_nHavocLevel = 0;
+		return 0;
+	}
 	case COMMAND_GET_HAVOC_CAUSED_BY_PLAYER:
+	{
+		CollectParameters(&m_nIp, 1);
+		ScriptParams[0] = CWorld::Players[ScriptParams[0]].m_nHavocLevel;
+		StoreParameters(&m_nIp, 1);
+		return 0;
+	}
 	case COMMAND_CREATE_SCRIPT_ROADBLOCK:
+	{
+		CollectParameters(&m_nIp, 6);
+		debug("CREATE_SCRIPT_ROADBLOCK not implemented\n"); // TODO(MIAMI)
+		return 0;
+	}
 	case COMMAND_CLEAR_ALL_SCRIPT_ROADBLOCKS:
+	{
+		debug("CLEAR_ALL_SCRIPT_ROADBLOCKS not implemented\n"); // TODO(MIAMI)
+		return 0;
+	}
 	case COMMAND_SET_CHAR_OBJ_WALK_TO_CHAR:
-	case COMMAND_IS_PICKUP_IN_ZONE:
+	{
+		CollectParameters(&m_nIp, 2);
+		CPed* pPed = CPools::GetPedPool()->GetAt(ScriptParams[0]);
+		assert(pPed);
+		CPed* pTargetPed = CPools::GetPedPool()->GetAt(ScriptParams[1]);
+		assert(pTargetPed);
+		pPed->bScriptObjectiveCompleted = false;
+		pPed->SetObjective(OBJECTIVE_FOLLOW_PED_IN_FORMATION, pPed);
+		return 0;
+	}
+	//case COMMAND_IS_PICKUP_IN_ZONE:
 	case COMMAND_GET_OFFSET_FROM_CHAR_IN_WORLD_COORDS:
+	{
+		CollectParameters(&m_nIp, 4);
+		CPed* pPed = CPools::GetPedPool()->GetAt(ScriptParams[0]);
+		assert(pPed);
+		CVector offset = pPed->GetMatrix() * *(CVector*)&ScriptParams[1];
+		*(CVector*)&ScriptParams[0] = pPed->GetPosition() + offset;
+		StoreParameters(&m_nIp, 3);
+		return 0;
+	}
 	case COMMAND_HAS_CHAR_BEEN_PHOTOGRAPHED:
+	{
+		CollectParameters(&m_nIp, 1);
+		CPed* pPed = CPools::GetPedPool()->GetAt(ScriptParams[0]);
+		assert(pPed);
+		bool result = false;
+		if (pPed->bHasBeenPhotographed) {
+			result = true;
+			pPed->bHasBeenPhotographed = false;
+		}
+		UpdateCompareFlag(result);
+		return 0;
+	}
 	case COMMAND_SET_CHAR_OBJ_AIM_GUN_AT_CHAR:
+	{
+		CollectParameters(&m_nIp, 2);
+		CPed* pPed = CPools::GetPedPool()->GetAt(ScriptParams[0]);
+		assert(pPed);
+		CPed* pTargetPed = CPools::GetPedPool()->GetAt(ScriptParams[1]);
+		assert(pTargetPed);
+		pPed->bScriptObjectiveCompleted = false;
+		debug("SET_CHAR_OBJ_AIM_GUN_AT_CHAR is not implemented\n");
+		//pPed->SetObjective(OBJECTIVE_AIM_GUN_AT_PED, pTargetPed); // TODO(MIAMI) -- when objective is implemented
+		return 0;
+	}
 	case COMMAND_SWITCH_SECURITY_CAMERA:
-	case COMMAND_IS_CHAR_IN_FLYING_VEHICLE:
-		assert(0);
+	{
+		CollectParameters(&m_nIp, 1);
+		debug("SWITCH_SECURITY_CAMERA is not implemented\n"); // TODO(MIAMI)
+		return 0;
+	}
+	//case COMMAND_IS_CHAR_IN_FLYING_VEHICLE:
 	case COMMAND_IS_PLAYER_IN_FLYING_VEHICLE:
 	{
 		CollectParameters(&m_nIp, 1);
@@ -10517,11 +10599,10 @@ int8 CRunningScript::ProcessCommands1200To1299(int32 command)
 		UpdateCompareFlag(pPed->bInVehicle && (pPed->m_pMyVehicle->GetVehicleAppearance() == VEHICLE_APPEARANCE_HELI || pPed->m_pMyVehicle->GetVehicleAppearance() == VEHICLE_APPEARANCE_PLANE));
 		return 0;
 	}
-	case COMMAND_HAS_SONY_CD_BEEN_READ:
-	case COMMAND_GET_NUMBER_OF_SONY_CDS_READ:
-	case COMMAND_ADD_SHORT_RANGE_BLIP_FOR_COORD_OLD:
-	case COMMAND_ADD_SHORT_RANGE_BLIP_FOR_COORD:
-		assert(0);
+	//case COMMAND_HAS_SONY_CD_BEEN_READ:
+	//case COMMAND_GET_NUMBER_OF_SONY_CDS_READ:
+	//case COMMAND_ADD_SHORT_RANGE_BLIP_FOR_COORD_OLD:
+	//case COMMAND_ADD_SHORT_RANGE_BLIP_FOR_COORD:
 	case COMMAND_ADD_SHORT_RANGE_SPRITE_BLIP_FOR_COORD:
 	{
 		CollectParameters(&m_nIp, 4);
@@ -10541,26 +10622,132 @@ int8 CRunningScript::ProcessCommands1200To1299(int32 command)
 		return 0;
 		
 	case COMMAND_SET_HELI_ORIENTATION:
+	{
+		CollectParameters(&m_nIp, 2);
+		debug("SET_HELI_ORIENTATION is not implemented\n"); // TODO(MIAMI);
+		return 0;
+	}
 	case COMMAND_CLEAR_HELI_ORIENTATION:
+	{
+		CollectParameters(&m_nIp, 1);
+		debug("SET_HELI_ORIENTATION is not implemented\n"); // TODO(MIAMI);
+		return 0;
+	}
 	case COMMAND_PLANE_GOTO_COORDS:
+	{
+		CollectParameters(&m_nIp, 5);
+		debug("PLANE_GOTO_COORS is not implemented\n"); // TODO(MIAMI)
+		return 0;
+	}
 	case COMMAND_GET_NTH_CLOSEST_CAR_NODE:
-	case COMMAND_GET_NTH_CLOSEST_CHAR_NODE:
+	{
+		CollectParameters(&m_nIp, 4);
+		debug("GET_NTH_CLOSEST_CAR_NODE is not implemented\n"); // TODO(MIAMI)
+		ScriptParams[0] = 0;
+		StoreParameters(&m_nIp, 1);
+		return 0;
+	}
+	//case COMMAND_GET_NTH_CLOSEST_CHAR_NODE:
 	case COMMAND_DRAW_WEAPONSHOP_CORONA:
+	{
+		CollectParameters(&m_nIp, 9);
+		CVector pos = *(CVector*)&ScriptParams[0];
+		if (pos.z <= MAP_Z_LOW_LIMIT)
+			pos.z = CWorld::FindGroundZForCoord(pos.x, pos.y);
+		CCoronas::RegisterCorona((uint32)this + m_nIp, ScriptParams[6], ScriptParams[7], ScriptParams[8], 255, pos, *(float*)&ScriptParams[3],
+			150.0f, ScriptParams[4], ScriptParams[5], 1, 0, 0, 0.0f, false, 0.2f);
+		return 0;
+	}
 	case COMMAND_SET_ENABLE_RC_DETONATE_ON_CONTACT:
+	{
+		CollectParameters(&m_nIp, 1);
+		CVehicle::bDisableRemoteDetonationOnContact = (ScriptParams[0] == 0);
+		return 0;
+	}
 	case COMMAND_FREEZE_CHAR_POSITION:
+	{
+		CollectParameters(&m_nIp, 2);
+		CPed* pPed = CPools::GetPedPool()->GetAt(ScriptParams[0]);
+		assert(pPed);
+		pPed->bIsFrozen = ScriptParams[1];
+		return 0;
+	}
 	case COMMAND_SET_CHAR_DROWNS_IN_WATER:
+	{
+		CollectParameters(&m_nIp, 2);
+		CPed* pPed = CPools::GetPedPool()->GetAt(ScriptParams[0]);
+		assert(pPed);
+		pPed->bDrownsInWater = ScriptParams[1];
+		return 0;
+	}
 	case COMMAND_SET_OBJECT_RECORDS_COLLISIONS:
+	{
+		CollectParameters(&m_nIp, 2);
+		CObject* pObject = CPools::GetObjectPool()->GetAt(ScriptParams[0]);
+		assert(pObject);
+		pObject->bUseCollisionRecords = ScriptParams[1];
+		return 0;
+	}
 	case COMMAND_HAS_OBJECT_COLLIDED_WITH_ANYTHING:
+	{
+		CollectParameters(&m_nIp, 1);
+		CObject* pObject = CPools::GetObjectPool()->GetAt(ScriptParams[0]);
+		assert(pObject);
+		UpdateCompareFlag(pObject->m_nCollisionRecords != 0);
+		return 0;
+	}
 	case COMMAND_REMOVE_RC_BUGGY:
-	case COMMAND_HAS_PHOTOGRAPH_BEEN_TAKEN:
+	{
+		CWorld::Players[CWorld::PlayerInFocus].BlowUpRCBuggy(false);
+		return 0;
+	}
+	//case COMMAND_HAS_PHOTOGRAPH_BEEN_TAKEN:
 	case COMMAND_GET_CHAR_ARMOUR:
-	case COMMAND_SET_CHAR_ARMOUR:
+	{
+		CollectParameters(&m_nIp, 1);
+		CPed* pPed = CPools::GetPedPool()->GetAt(ScriptParams[0]);
+		assert(pPed);
+		ScriptParams[0] = pPed->m_fArmour;
+		StoreParameters(&m_nIp, 1);
+		return 0;
+	}
+	//case COMMAND_SET_CHAR_ARMOUR:
 	case COMMAND_SET_HELI_STABILISER:
+	{
+		CollectParameters(&m_nIp, 2);
+		CVehicle* pVehicle = CPools::GetVehiclePool()->GetAt(ScriptParams[0]);
+		assert(pVehicle);
+		pVehicle->bHeliMinimumTilt = ScriptParams[1];
+		return 0;
+	}
 	case COMMAND_SET_CAR_STRAIGHT_LINE_DISTANCE:
+	{
+		CollectParameters(&m_nIp, 2);
+		CVehicle* pVehicle = CPools::GetVehiclePool()->GetAt(ScriptParams[0]);
+		assert(pVehicle);
+		pVehicle->AutoPilot.m_nSwitchDistance = ScriptParams[1];
+		return 0;
+	}
 	case COMMAND_POP_CAR_BOOT:
+	{
+		CollectParameters(&m_nIp, 1);
+		CVehicle* pVehicle = CPools::GetVehiclePool()->GetAt(ScriptParams[0]);
+		assert(pVehicle);
+		debug("POP_CAR_BOOT is not implemented\n"); // TODO(MIAMI)
+		return 0;
+	}
 	case COMMAND_SHUT_PLAYER_UP:
+	{
+		CollectParameters(&m_nIp, 2);
+		debug("SHUT_PLAYER_UP is not implemented\n"); // TODO(MIAMI)
+		return 0;
+	}
 	case COMMAND_SET_PLAYER_MOOD:
-		assert(0);
+	{
+		CollectParameters(&m_nIp, 3);
+		debug("SET_PLAYER_MOOD is not implemented\n"); // TODO(MIAMI)
+		return 0;
+	}
 	case COMMAND_REQUEST_COLLISION:
 	{
 		CollectParameters(&m_nIp, 2);
@@ -10572,12 +10759,36 @@ int8 CRunningScript::ProcessCommands1200To1299(int32 command)
 	}
 	case COMMAND_LOCATE_OBJECT_2D:
 	case COMMAND_LOCATE_OBJECT_3D:
+		LocateObjectCommand(command, &m_nIp);
+		return 0;
 	case COMMAND_IS_OBJECT_IN_WATER:
-	case COMMAND_SET_CHAR_OBJ_STEAL_ANY_CAR_EVEN_MISSION_CAR:
+	{
+		CollectParameters(&m_nIp, 1);
+		CObject* pObject = CPools::GetObjectPool()->GetAt(ScriptParams[0]);
+		assert(pObject);
+		UpdateCompareFlag(pObject->bIsInWater);
+		return 0;
+	}
+	//case COMMAND_SET_CHAR_OBJ_STEAL_ANY_CAR_EVEN_MISSION_CAR:
 	case COMMAND_IS_OBJECT_IN_AREA_2D:
 	case COMMAND_IS_OBJECT_IN_AREA_3D:
+		ObjectInAreaCheckCommand(command, &m_nIp);
+		return 0;
 	case COMMAND_TASK_TOGGLE_DUCK:
-		assert(0);
+	{
+		CollectParameters(&m_nIp, 3);
+		CPed* pPed = CPools::GetPedPool()->GetAt(ScriptParams[0]);
+		assert(pPed);
+		if (ScriptParams[1]) {
+			pPed->bIsDucking = true;
+			pPed->SetDuck(ScriptParams[2], true);
+		}
+		else {
+			pPed->ClearDuck(true);
+			pPed->bIsDucking = false;
+		}
+		return 0;
+	}
 	case COMMAND_SET_ZONE_CIVILIAN_CAR_INFO:
 	{
 		char label[12];
@@ -10604,17 +10815,88 @@ int8 CRunningScript::ProcessCommands1200To1299(int32 command)
 		return 0;
 	}
 	case COMMAND_REQUEST_ANIMATION:
+	{
+		char key[KEY_LENGTH_IN_SCRIPT];
+		CTheScripts::ReadTextLabelFromScript(&m_nIp, key);
+		m_nIp += KEY_LENGTH_IN_SCRIPT;
+		CStreaming::RequestAnim(CAnimManager::GetAnimationBlockIndex(key), STREAMFLAGS_SCRIPTOWNED);
+		return 0;
+	}
 	case COMMAND_HAS_ANIMATION_LOADED:
+	{
+		char key[KEY_LENGTH_IN_SCRIPT];
+		CTheScripts::ReadTextLabelFromScript(&m_nIp, key);
+		m_nIp += KEY_LENGTH_IN_SCRIPT;
+		UpdateCompareFlag(CAnimManager::GetAnimationBlock(key)->isLoaded);
+		return 0;
+	}
 	case COMMAND_REMOVE_ANIMATION:
+	{
+		char key[KEY_LENGTH_IN_SCRIPT];
+		CTheScripts::ReadTextLabelFromScript(&m_nIp, key);
+		m_nIp += KEY_LENGTH_IN_SCRIPT;
+		CStreaming::RemoveAnim(CAnimManager::GetAnimationBlockIndex(key));
+		return 0;
+	}
 	case COMMAND_IS_CHAR_WAITING_FOR_WORLD_COLLISION:
+	{
+		CollectParameters(&m_nIp, 1);
+		CPed* pPed = CPools::GetPedPool()->GetAt(ScriptParams[0]);
+		assert(pPed);
+		UpdateCompareFlag(pPed->bIsStaticWaitingForCollision);
+		return 0;
+	}
 	case COMMAND_IS_CAR_WAITING_FOR_WORLD_COLLISION:
+	{
+		CollectParameters(&m_nIp, 1);
+		CVehicle* pVehicle = CPools::GetVehiclePool()->GetAt(ScriptParams[0]);
+		assert(pVehicle);
+		UpdateCompareFlag(pVehicle->bIsStaticWaitingForCollision);
+		return 0;
+	}
 	case COMMAND_IS_OBJECT_WAITING_FOR_WORLD_COLLISION:
+	{
+		CollectParameters(&m_nIp, 1);
+		CObject* pObject = CPools::GetObjectPool()->GetAt(ScriptParams[0]);
+		assert(pObject);
+		UpdateCompareFlag(pObject->bIsStaticWaitingForCollision);
+		return 0;
+	}
 	case COMMAND_SET_CHAR_SHUFFLE_INTO_DRIVERS_SEAT:
+	{
+		CollectParameters(&m_nIp, 1);
+		CPed* pPed = CPools::GetPedPool()->GetAt(ScriptParams[0]);
+		assert(pPed);
+		debug("SET_CHAR_SHUFFLE_INTO_DRIVERS_SEAT is not implemented\n");
+		return 0;
+	}
 	case COMMAND_ATTACH_CHAR_TO_OBJECT:
+	{
+		CollectParameters(&m_nIp, 8);
+		debug("ATTACH_CHAR_TO_OBJECT is not implemented\n");
+		return 0;
+	}
 	case COMMAND_SET_CHAR_AS_PLAYER_FRIEND:
-	case COMMAND_DISPLAY_NTH_ONSCREEN_COUNTER:
+	{
+		CollectParameters(&m_nIp, 3);
+		CPed* pPed = CPools::GetPedPool()->GetAt(ScriptParams[0]);
+		assert(pPed);
+		pPed->bIsPlayerFriend = ScriptParams[2];
+		return 0;
+	}
+	//case COMMAND_DISPLAY_NTH_ONSCREEN_COUNTER:
 	case COMMAND_DISPLAY_NTH_ONSCREEN_COUNTER_WITH_STRING:
-		assert(0);
+	{
+		char onscreen_str[12];
+		assert(CTheScripts::ScriptSpace[m_nIp++] == ARGUMENT_GLOBALVAR);
+		int16 var = CTheScripts::Read2BytesFromScript(&m_nIp);
+		CollectParameters(&m_nIp, 2);
+		wchar* text = TheText.Get((char*)&CTheScripts::ScriptSpace[m_nIp]); // ???
+		strncpy(onscreen_str, (char*)&CTheScripts::ScriptSpace[m_nIp], KEY_LENGTH_IN_SCRIPT);
+		m_nIp += KEY_LENGTH_IN_SCRIPT;
+		CUserDisplay::OnscnTimer.AddCounter(var, ScriptParams[0], onscreen_str, ScriptParams[1] - 1);
+		return 0;
+	}
 	case COMMAND_ADD_SET_PIECE:
 	{
 		CollectParameters(&m_nIp, 13);
@@ -10633,8 +10915,7 @@ int8 CRunningScript::ProcessCommands1200To1299(int32 command)
 		debug("CLEAR_EXTRA_COLOURS not implemented, skipping\n");
 		return 0;
 	}
-	case COMMAND_CLOSE_CAR_BOOT:
-		assert(0);
+	//case COMMAND_CLOSE_CAR_BOOT:
 	case COMMAND_GET_WHEELIE_STATS:
 	{
 		CollectParameters(&m_nIp, 1);
@@ -10648,29 +10929,146 @@ int8 CRunningScript::ProcessCommands1200To1299(int32 command)
 		StoreParameters(&m_nIp, 6);
 		return 0;
 	}
-	case COMMAND_DISARM_CHAR:
+	//case COMMAND_DISARM_CHAR:
 	case COMMAND_BURST_CAR_TYRE:
+	{
+		CollectParameters(&m_nIp, 2);
+		CVehicle* pVehicle = CPools::GetVehiclePool()->GetAt(ScriptParams[0]);
+		if (pVehicle->IsBike()) {
+			if (ScriptParams[1] == 2)
+				ScriptParams[1] = 0;
+			else if (ScriptParams[1] == 3)
+				ScriptParams[1] = 1;
+			pVehicle->BurstTyre(ScriptParams[1]); // TODO(MIAMI): second param is true
+		}
+		else {
+			pVehicle->BurstTyre(ScriptParams[1]); // TODO(MIAMI): second param is true
+		}
+		return 0;
+	}
 	case COMMAND_IS_CHAR_OBJ_NO_OBJ:
+	{
+		CollectParameters(&m_nIp, 1);
+		CollectParameters(&m_nIp, 3);
+		CPed* pPed = CPools::GetPedPool()->GetAt(ScriptParams[0]);
+		assert(pPed);
+		UpdateCompareFlag(pPed->m_prevObjective == OBJECTIVE_NONE && pPed->m_objective == OBJECTIVE_NONE);
+		return 0;
+	}
 	case COMMAND_IS_PLAYER_WEARING:
+	{
+		CollectParameters(&m_nIp, 1);
+		char key[12];
+		CTheScripts::ReadTextLabelFromScript(&m_nIp, key);
+		m_nIp += KEY_LENGTH_IN_SCRIPT;
+		for (int i = 0; i < KEY_LENGTH_IN_SCRIPT; i++)
+			key[i] = tolower(key[i]);
+		CPed* pPed = CWorld::Players[ScriptParams[0]].m_pPed;
+		assert(pPed);
+		UpdateCompareFlag(strcmp(key, CModelInfo::GetModelInfo(pPed->GetModelIndex())->GetName()) == 0);
+		return 0;
+	}
 	case COMMAND_SET_PLAYER_CAN_DO_DRIVE_BY:
+	{
+		CollectParameters(&m_nIp, 2);
+		CPlayerInfo* pPlayerInfo = &CWorld::Players[ScriptParams[0]];
+		pPlayerInfo->m_bDriveByAllowed = ScriptParams[1];
+		return 0;
+	}
 	case COMMAND_SET_CHAR_OBJ_SPRINT_TO_COORD:
+	{
+		CollectParameters(&m_nIp, 3);
+		CPed* pPed = CPools::GetPedPool()->GetAt(ScriptParams[0]);
+		assert(pPed);
+		CVector pos;
+		pos.x = *(float*)&ScriptParams[1];
+		pos.y = *(float*)&ScriptParams[2];
+		pos.z = CWorld::FindGroundZForCoord(pos.x, pos.y);
+		pPed->bScriptObjectiveCompleted = false;
+		debug("SET_CHAR_OBJ_SPRINT_TO_COORD is not implemented\n");
+		//pPed->SetObjective(OBJECTIVE_SPRINT_TO_COORD, pos); // TODO(MIAMI) -- when objective is implemented
+		return 0;
+	}
 	case COMMAND_CREATE_SWAT_ROPE:
-	case COMMAND_SET_FIRST_PERSON_CONTROL_CAMERA:
-	case COMMAND_GET_NEAREST_TYRE_TO_POINT:
+	{
+		CollectParameters(&m_nIp, 3);
+		debug("SET_CHAR_OBJ_SPRINT_TO_COORD is not implemented\n");
+		return 0;
+	}
+	//case COMMAND_SET_FIRST_PERSON_CONTROL_CAMERA:
+	//case COMMAND_GET_NEAREST_TYRE_TO_POINT:
 	case COMMAND_SET_CAR_MODEL_COMPONENTS:
+	{
+		CollectParameters(&m_nIp, 3);
+		CVehicleModelInfo::SetComponentsToUse(ScriptParams[1], ScriptParams[2]);
+		return 0;
+	}
 	case COMMAND_SWITCH_LIFT_CAMERA:
+	{
+		CollectParameters(&m_nIp, 1);
+		debug("SWITCH_LIFT_CAMERA is not implemented\n"); // TODO(MIAMI)
+		return 0;
+	}
 	case COMMAND_CLOSE_ALL_CAR_DOORS:
+	{
+		CollectParameters(&m_nIp, 1);
+		debug("CLOSE_ALL_CAR_DOORS is not implemented\n"); // TODO(MIAMI)
+		return 0;
+	}
 	case COMMAND_GET_DISTANCE_BETWEEN_COORDS_2D:
+	{
+		CollectParameters(&m_nIp, 4);
+		*(float*)&ScriptParams[0] = (*(CVector2D*)&ScriptParams[0] - *(CVector2D*)&ScriptParams[2]).Magnitude();
+		StoreParameters(&m_nIp, 1);
+		return 0;
+	}
 	case COMMAND_GET_DISTANCE_BETWEEN_COORDS_3D:
+	{
+		CollectParameters(&m_nIp, 6);
+		*(float*)&ScriptParams[0] = (*(CVector*)&ScriptParams[0] - *(CVector*)&ScriptParams[3]).Magnitude();
+		StoreParameters(&m_nIp, 1);
+		return 0;
+	}
 	case COMMAND_POP_CAR_BOOT_USING_PHYSICS:
-	case COMMAND_SET_FIRST_PERSON_WEAPON_CAMERA:
+	{
+		CollectParameters(&m_nIp, 1);
+		debug("POP_CAR_BOOT_USING_PHYSICS is not implemented\n"); // TODO(MIAMI)
+		return 0;
+	}
+	//case COMMAND_SET_FIRST_PERSON_WEAPON_CAMERA:
 	case COMMAND_IS_CHAR_LEAVING_VEHICLE_TO_DIE:
+	{
+		CollectParameters(&m_nIp, 1);
+		CPed* pPed = CPools::GetPedPool()->GetAt(ScriptParams[0]);
+		assert(pPed);
+		UpdateCompareFlag(pPed->m_objective == OBJECTIVE_LEAVE_CAR_AND_DIE);
+		return 0;
+	}
 	case COMMAND_SORT_OUT_OBJECT_COLLISION_WITH_CAR:
-	case COMMAND_GET_MAX_WANTED_LEVEL:
+	{
+		CollectParameters(&m_nIp, 2);
+		CObject* pObject = CPools::GetObjectPool()->GetAt(ScriptParams[0]);
+		assert(pObject);
+		pObject->m_pCollidingEntity = CPools::GetVehiclePool()->GetAt(ScriptParams[1]);
+		return 0;
+	}
+	//case COMMAND_GET_MAX_WANTED_LEVEL:
 	case COMMAND_IS_CHAR_WANDER_PATH_CLEAR:
-	case COMMAND_PRINT_HELP_WITH_NUMBER:
+	{
+		CollectParameters(&m_nIp, 5);
+		CPed* pPed = CPools::GetPedPool()->GetAt(ScriptParams[0]);
+		assert(pPed);
+		UpdateCompareFlag(CWorld::IsWanderPathClear(pPed->GetPosition(), *(CVector*)&ScriptParams[0], *(float*)&ScriptParams[3], 4));
+		return 0;
+	}
+	//case COMMAND_PRINT_HELP_WITH_NUMBER:
 	case COMMAND_PRINT_HELP_FOREVER:
-	case COMMAND_PRINT_HELP_FOREVER_WITH_NUMBER:
+	{
+		wchar* text = CTheScripts::GetTextByKeyFromScript(&m_nIp);
+		CHud::SetHelpMessage(text, false); // TODO(MIAMI): third param is true
+		return 0;
+	}
+	//case COMMAND_PRINT_HELP_FOREVER_WITH_NUMBER:
 	default:
 		assert(0);
 	}
@@ -10683,7 +11081,8 @@ int8 CRunningScript::ProcessCommands1300To1399(int32 command)
 	case COMMAND_SET_CHAR_CAN_BE_DAMAGED_BY_MEMBERS_OF_GANG:
 	{
 		CollectParameters(&m_nIp, 3);
-		CPed *pTarget = CPools::GetPedPool()->GetAt(ScriptParams[0]);
+		CPed* pTarget = CPools::GetPedPool()->GetAt(ScriptParams[0]);
+		assert(pTarget);
 		uint8 flag = 1 << (uint8)ScriptParams[1];
 		if (ScriptParams[2])
 			pTarget->m_gangFlags |= flag;
@@ -10693,8 +11092,8 @@ int8 CRunningScript::ProcessCommands1300To1399(int32 command)
 		return 0;
 	}
 	case COMMAND_LOAD_AND_LAUNCH_MISSION_EXCLUSIVE:
-	case COMMAND_IS_MISSION_AUDIO_PLAYING:
-		assert(0);
+		return 0;
+	//case COMMAND_IS_MISSION_AUDIO_PLAYING:
 	case COMMAND_CREATE_LOCKED_PROPERTY_PICKUP:
 	{
 		CollectParameters(&m_nIp, 3);
@@ -10722,67 +11121,267 @@ int8 CRunningScript::ProcessCommands1300To1399(int32 command)
 		return 0;
 	}
 	case COMMAND_FREEZE_CAR_POSITION:
+	{
+		CollectParameters(&m_nIp, 2);
+		CVehicle* pVehicle = CPools::GetVehiclePool()->GetAt(ScriptParams[0]);
+		assert(pVehicle);
+		pVehicle->bIsFrozen = ScriptParams[1];
+		return 0;
+	}
 	case COMMAND_HAS_CHAR_BEEN_DAMAGED_BY_CHAR:
-	case COMMAND_HAS_CHAR_BEEN_DAMAGED_BY_CAR:
-	case COMMAND_HAS_CAR_BEEN_DAMAGED_BY_CHAR:
-	case COMMAND_HAS_CAR_BEEN_DAMAGED_BY_CAR:
-	case COMMAND_GET_RADIO_CHANNEL:
-	case COMMAND_DISPLAY_TEXT_WITH_3_NUMBERS:
-	case COMMAND_IS_CAR_DROWNING_IN_WATER:
+	{
+		CollectParameters(&m_nIp, 2);
+		CPed* pPed = CPools::GetPedPool()->GetAt(ScriptParams[0]);
+		CPed* pTestedPed = CPools::GetPedPool()->GetAt(ScriptParams[1]);
+		bool result = false;
+		if (pPed) {
+			if (pPed->m_lastDamEntity) {
+				if (pPed->m_lastDamEntity == pTestedPed)
+					result = true;
+				if (pTestedPed->bInVehicle && pPed->m_lastDamEntity == pTestedPed->m_pMyVehicle)
+					result = true;
+			}
+		}else
+			debug("HAS_CHAR_BEEN_DAMAGED_BY_CHAR - First character doesn't exist\n");
+		UpdateCompareFlag(result);
+		return 0;
+	}
+	//case COMMAND_HAS_CHAR_BEEN_DAMAGED_BY_CAR:
+	//case COMMAND_HAS_CAR_BEEN_DAMAGED_BY_CHAR:
+	//case COMMAND_HAS_CAR_BEEN_DAMAGED_BY_CAR:
+	//case COMMAND_GET_RADIO_CHANNEL:
+	//case COMMAND_DISPLAY_TEXT_WITH_3_NUMBERS:
+	//case COMMAND_IS_CAR_DROWNING_IN_WATER:
 	case COMMAND_IS_CHAR_DROWNING_IN_WATER:
-		assert(0);
+	{
+		CollectParameters(&m_nIp, 1);
+		CPed* pPed = CPools::GetPedPool()->GetAt(ScriptParams[0]);
+		UpdateCompareFlag(pPed && pPed->bIsDrowning);
+		return 0;
+	}
 	case COMMAND_DISABLE_CUTSCENE_SHADOWS:
 	{
-		debug("DISABLE_CUTSCENE_SHADOWS not implemented, skipping\n");
+		debug("DISABLE_CUTSCENE_SHADOWS not implemented, skipping\n"); // TODO(MIAMI)
 		return 0;
 	}
 	case COMMAND_HAS_GLASS_BEEN_SHATTERED_NEARBY:
+	{
+		CollectParameters(&m_nIp, 3);
+		static bool bShowed = false;
+		if (!bShowed) {
+			debug("HAS_GLASS_BEEN_SHATTERED_NEARBY not implemented, default to TRUE\n"); // TODO(MIAMI)
+			bShowed = true;
+		}
+		UpdateCompareFlag(true);
+		return 0;
+	}
 	case COMMAND_ATTACH_CUTSCENE_OBJECT_TO_BONE:
+	{
+		CollectParameters(&m_nIp, 3);
+		debug("ATTACH_CUTSCENE_OBJECT_TO_BONE not implemented, skipping\n"); // TODO(MIAMI)
+		return 0;
+	}
 	case COMMAND_ATTACH_CUTSCENE_OBJECT_TO_COMPONENT:
+	{
+		CollectParameters(&m_nIp, 2);
+		debug("ATTACH_CUTSCENE_OBJECT_TO_COMPONENT not implemented, skipping\n"); // TODO(MIAMI)
+		return 0;
+	}
 	case COMMAND_SET_CHAR_STAY_IN_CAR_WHEN_JACKED:
-	case COMMAND_IS_MISSION_AUDIO_LOADING:
+	{
+		CollectParameters(&m_nIp, 2);
+		CPed* pPed = CPools::GetPedPool()->GetAt(ScriptParams[0]);
+		assert(pPed);
+		pPed->bStayInCarOnJack = ScriptParams[1];
+		return 0;
+	}
+	//case COMMAND_IS_MISSION_AUDIO_LOADING:
 	case COMMAND_ADD_MONEY_SPENT_ON_WEAPONS:
+		CollectParameters(&m_nIp, 1);
+		debug("ADD_MONEY_SPENT_ON_WEAPON not implemented\n"); // TODO(MIAMI)
+		return 0;
 	case COMMAND_ADD_MONEY_SPENT_ON_PROPERTY:
-	case COMMAND_ADD_MONEY_SPENT_ON_AUTO_PAINTING:
+		CollectParameters(&m_nIp, 1);
+		debug("ADD_MONEY_SPENT_ON_PROPERTY not implemented\n"); // TODO(MIAMI)
+		return 0;
+	//case COMMAND_ADD_MONEY_SPENT_ON_AUTO_PAINTING:
 	case COMMAND_SET_CHAR_ANSWERING_MOBILE:
+	{
+		CollectParameters(&m_nIp, 2);
+		debug("SET_CHAR_ANSWERING_MOBILE not implemented\n"); // TODO(MIAMI)
+		return 0;
+	}
 	case COMMAND_SET_PLAYER_DRUNKENNESS:
-	case COMMAND_GET_PLAYER_DRUNKENNESS:
-	case COMMAND_SET_PLAYER_DRUG_LEVEL:
-	case COMMAND_GET_PLAYER_DRUG_LEVEL:
-	case COMMAND_ADD_LOAN_SHARK_VISITS:
+	{
+		CollectParameters(&m_nIp, 2);
+		debug("SET_PLAYER_DRUNKENNESS not implemented\n"); // TODO(MIAMI)
+		return 0;
+	}
+	//case COMMAND_GET_PLAYER_DRUNKENNESS:
+	//case COMMAND_SET_PLAYER_DRUG_LEVEL:
+	//case COMMAND_GET_PLAYER_DRUG_LEVEL:
+	//case COMMAND_ADD_LOAN_SHARK_VISITS:
 	case COMMAND_ADD_STORES_KNOCKED_OFF:
-	case COMMAND_ADD_MOVIE_STUNTS:
+		CollectParameters(&m_nIp, 1);
+		debug("ADD_STORES_KNOCKED_OFF not implemented\n"); // TODO(MIAMI)
+		return 0;
+	//case COMMAND_ADD_MOVIE_STUNTS:
 	case COMMAND_ADD_NUMBER_OF_ASSASSINATIONS:
+		CollectParameters(&m_nIp, 1);
+		debug("ADD_NUMBER_OF_ASSASSINATIONS not implemented\n"); // TODO(MIAMI)
+		return 0;
 	case COMMAND_ADD_PIZZAS_DELIVERED:
-	case COMMAND_ADD_GARBAGE_PICKUPS:
+		CollectParameters(&m_nIp, 1);
+		debug("ADD_PIZZAS_DELIVERED not implemented\n"); // TODO(MIAMI)
+		return 0;
+	//case COMMAND_ADD_GARBAGE_PICKUPS:
 	case COMMAND_ADD_ICE_CREAMS_SOLD:
-	case COMMAND_SET_TOP_SHOOTING_RANGE_SCORE:
-	case COMMAND_ADD_SHOOTING_RANGE_RANK:
-	case COMMAND_ADD_MONEY_SPENT_ON_GAMBLING:
-	case COMMAND_ADD_MONEY_WON_ON_GAMBLING:
-	case COMMAND_SET_LARGEST_GAMBLING_WIN:
+		CollectParameters(&m_nIp, 1);
+		debug("ADD_ICE_CREAMS_SOLD not implemented\n"); // TODO(MIAMI)
+		return 0;
+	//case COMMAND_SET_TOP_SHOOTING_RANGE_SCORE:
+	//case COMMAND_ADD_SHOOTING_RANGE_RANK:
+	//case COMMAND_ADD_MONEY_SPENT_ON_GAMBLING:
+	//case COMMAND_ADD_MONEY_WON_ON_GAMBLING:
+	//case COMMAND_SET_LARGEST_GAMBLING_WIN:
 	case COMMAND_SET_CHAR_IN_PLAYERS_GROUP_CAN_FIGHT:
+	{
+		CollectParameters(&m_nIp, 2);
+		CPed* pPed = CPools::GetPedPool()->GetAt(ScriptParams[0]);
+		assert(pPed);
+		pPed->bDontFight = !ScriptParams[1];
+		return 0;
+	}
 	case COMMAND_CLEAR_CHAR_WAIT_STATE:
+	{
+		CollectParameters(&m_nIp, 1);
+		CPed* pPed = CPools::GetPedPool()->GetAt(ScriptParams[0]);
+		assert(pPed);
+		pPed->ClearWaitState();
+		return 0;
+	}
 	case COMMAND_GET_RANDOM_CAR_OF_TYPE_IN_AREA_NO_SAVE:
+	{
+		CollectParameters(&m_nIp, 5);
+		int handle = -1;
+		uint32 i = CPools::GetVehiclePool()->GetSize();
+		float infX = *(float*)&ScriptParams[0];
+		float infY = *(float*)&ScriptParams[1];
+		float supX = *(float*)&ScriptParams[2];
+		float supY = *(float*)&ScriptParams[3];
+		while (i--) {
+			CVehicle* pVehicle = CPools::GetVehiclePool()->GetSlot(i);
+			if (!pVehicle)
+				continue;
+			if (pVehicle->GetVehicleAppearance() != VEHICLE_APPEARANCE_CAR && pVehicle->GetVehicleAppearance() != VEHICLE_APPEARANCE_BIKE)
+				continue;
+			if (ScriptParams[4] != pVehicle->GetModelIndex() && ScriptParams[4] >= 0)
+				continue;
+			if (pVehicle->VehicleCreatedBy != RANDOM_VEHICLE)
+				continue;
+			if (!pVehicle->IsWithinArea(infX, infY, supX, supY))
+				continue;
+			handle = CPools::GetVehiclePool()->GetIndex(pVehicle);
+		}
+		ScriptParams[0] = handle;
+		StoreParameters(&m_nIp, 1);
+		return 0;
+	}
 	case COMMAND_SET_CAN_BURST_CAR_TYRES:
+	{
+		CollectParameters(&m_nIp, 2);
+		CVehicle* pVehicle = CPools::GetVehiclePool()->GetAt(ScriptParams[0]);
+		assert(pVehicle);
+		pVehicle->bTyresDontBurst = !ScriptParams[1];
+		return 0;
+	}
 	case COMMAND_SET_PLAYER_AUTO_AIM:
+	{
+		CollectParameters(&m_nIp, 2);
+		CPed* pPed = CWorld::Players[ScriptParams[0]].m_pPed;
+		assert(pPed);
+		pPed->bDoomAim = ScriptParams[1];
+	}
 	case COMMAND_FIRE_HUNTER_GUN:
+	{
+		CollectParameters(&m_nIp, 1);
+		debug("FIRE_HUNTER_GUN is not implemented, skipping\n"); // TODO(MIAMI)
+		return 0;
+	}
 	case COMMAND_SET_PROPERTY_AS_OWNED:
+		CollectParameters(&m_nIp, 1);
+		debug("SET_PROPERTY_AS_OWNED not implemented\n"); // TODO(MIAMI)
+		return 0;
 	case COMMAND_ADD_BLOOD_RING_KILLS:
+		CollectParameters(&m_nIp, 1);
+		debug("ADD_BLOOD_RING_KILLS not implemented\n"); // TODO(MIAMI)
+		return 0;
 	case COMMAND_SET_LONGEST_TIME_IN_BLOOD_RING:
-		assert(0);
+		CollectParameters(&m_nIp, 1);
+		debug("SET_LONGEST_TIME_IN_BLOOD_RING not implemented\n"); // TODO(MIAMI)
+		return 0;
 	case COMMAND_REMOVE_EVERYTHING_FOR_HUGE_CUTSCENE:
 	{
 		debug("REMOVE_EVERYTHING_FOR_HUGE_CUTSCENE not implemented, skipping\n");
 		return 0;
 	}
 	case COMMAND_IS_PLAYER_TOUCHING_VEHICLE:
-	case COMMAND_IS_CHAR_TOUCHING_VEHICLE:
+	{
+		CollectParameters(&m_nIp, 2);
+		CPed* pPed = CWorld::Players[ScriptParams[0]].m_pPed;
+		assert(pPed);
+		CVehicle* pVehicle = CPools::GetVehiclePool()->GetAt(ScriptParams[1]);
+		CPhysical* pTestedEntity = pPed;
+		if (pPed->bInVehicle && pPed->m_pMyVehicle)
+			pTestedEntity = pPed->m_pMyVehicle;
+		UpdateCompareFlag(pTestedEntity->GetHasCollidedWith(pVehicle));
+		return 0;
+	}
+	//case COMMAND_IS_CHAR_TOUCHING_VEHICLE:
 	case COMMAND_CHECK_FOR_PED_MODEL_AROUND_PLAYER:
+	{
+		CollectParameters(&m_nIp, 6);
+		CVector d1 = CWorld::Players[ScriptParams[0]].GetPos() - *(CVector*)&ScriptParams[1];
+		CVector d2 = CWorld::Players[ScriptParams[0]].GetPos() + *(CVector*)&ScriptParams[1];
+		int i = CPools::GetPedPool()->GetSize();
+		bool result = false;
+		while (i--) {
+			CPed* pPed = CPools::GetPedPool()->GetSlot(i);
+			if (!pPed)
+				continue;
+			if (ScriptParams[4] != pPed->GetModelIndex() && ScriptParams[5] != pPed->GetModelIndex())
+				continue;
+			if (pPed->IsWithinArea(d1.x, d1.y, d1.z, d2.x, d2.y, d2.z))
+				result = true;
+		}
+		UpdateCompareFlag(result);
+		return 0;
+	}
 	case COMMAND_CLEAR_CHAR_FOLLOW_PATH:
+	{
+		CollectParameters(&m_nIp, 2);
+		CPed* pPed = CWorld::Players[ScriptParams[0]].m_pPed;
+		assert(pPed);
+		if (pPed->GetPedState() == PED_FOLLOW_PATH) {
+			pPed->RestorePreviousState();
+			pPed->ClearFollowPath();
+		}
+		return 0;
+	}
 	case COMMAND_SET_CHAR_CAN_BE_SHOT_IN_VEHICLE:
+	{
+		CollectParameters(&m_nIp, 2);
+		CPed* pPed = CWorld::Players[ScriptParams[0]].m_pPed;
+		assert(pPed);
+		pPed->bCanBeShotInVehicle = ScriptParams[1];
+		return 0;
+	}
 	case COMMAND_ATTACH_CUTSCENE_OBJECT_TO_VEHICLE:
-		assert(0);
+	{
+		CollectParameters(&m_nIp, 2);
+		debug("ATTACH_CUTSCENE_OBJECT_TO_VEHICLE not implemented\n"); // TODO(MIAMI)
+		return 0;
+	}
 	case COMMAND_LOAD_MISSION_TEXT:
 	{
 		char key[8];
@@ -10794,23 +11393,57 @@ int8 CRunningScript::ProcessCommands1300To1399(int32 command)
 	case COMMAND_SET_TONIGHTS_EVENT:
 	{
 		CollectParameters(&m_nIp, 1);
-		debug("skipping SET_TONIGHTS_EVENT\n");
+		debug("skipping SET_TONIGHTS_EVENT\n"); // TODO(MIAMI)
 		return 0;
 	}
 	case COMMAND_CLEAR_CHAR_LAST_DAMAGE_ENTITY:
-	case COMMAND_CLEAR_CAR_LAST_DAMAGE_ENTITY:
+	{
+		CollectParameters(&m_nIp, 1);
+		CPed* pPed = CPools::GetPedPool()->GetAt(ScriptParams[0]);
+		if (pPed)
+			pPed->m_lastDamEntity = nil;
+		else
+			debug("CLEAR_CHAR_LAST_DAMAGE_ENTITY - Character doesn't exist\n");
+		return 0;
+	}
+	//case COMMAND_CLEAR_CAR_LAST_DAMAGE_ENTITY:
 	case COMMAND_FREEZE_OBJECT_POSITION:
+	{
+		CollectParameters(&m_nIp, 2);
+		CObject* pObject = CPools::GetObjectPool()->GetAt(ScriptParams[0]);
+		assert(pObject);
+		pObject->bIsFrozen = ScriptParams[1];
+		return 0;
+	}
 	case COMMAND_SET_PLAYER_HAS_MET_DEBBIE_HARRY:
+	{
+		CollectParameters(&m_nIp, 1);
+		CTheScripts::bPlayerHasMetDebbieHarry = ScriptParams[0];
+		return 0;
+	}
 	case COMMAND_SET_RIOT_INTENSITY:
-	case COMMAND_IS_CAR_IN_ANGLED_AREA_2D:
-	case COMMAND_IS_CAR_IN_ANGLED_AREA_3D:
-	case COMMAND_REMOVE_WEAPON_FROM_CHAR:
+	{
+		CollectParameters(&m_nIp, 1);
+		CTheScripts::RiotIntensity = ScriptParams[0];
+		return 0;
+	}
+	//case COMMAND_IS_CAR_IN_ANGLED_AREA_2D:
+	//case COMMAND_IS_CAR_IN_ANGLED_AREA_3D:
+	//case COMMAND_REMOVE_WEAPON_FROM_CHAR:
 	case COMMAND_SET_UP_TAXI_SHORTCUT:
+	{
+		CollectParameters(&m_nIp, 8);
+		debug("SET_UP_TAXI_SHORTCUT is not implemented\n"); // TODO(MIAMI)
+		return 0;
+	}
 	case COMMAND_CLEAR_TAXI_SHORTCUT:
-	case COMMAND_SET_CHAR_OBJ_GOTO_CAR_ON_FOOT:
-	case COMMAND_GET_CLOSEST_WATER_NODE:
+		debug("CLEAR_TAXI_SHORTCUT is not implemented\n"); // TODO(MIAMI)
+		return 0;
+	//case COMMAND_SET_CHAR_OBJ_GOTO_CAR_ON_FOOT:
+	//case COMMAND_GET_CLOSEST_WATER_NODE:
 	case COMMAND_ADD_PORN_LEAFLET_TO_RUBBISH:
-		assert(0);
+		debug("ADD_PORN_LEAFLET_TO_RUBBISH is not implemented\n"); // TODO(MIAMI)
+		return 0;
 	case COMMAND_CREATE_CLOTHES_PICKUP:
 	{
 		CollectParameters(&m_nIp, 4);
@@ -10822,8 +11455,7 @@ int8 CRunningScript::ProcessCommands1300To1399(int32 command)
 		StoreParameters(&m_nIp, 1);
 		return 0;
 	}
-	case COMMAND_CHANGE_BLIP_THRESHOLD:
-		assert(0);
+	//case COMMAND_CHANGE_BLIP_THRESHOLD:
 	case COMMAND_MAKE_PLAYER_FIRE_PROOF:
 	{
 		CollectParameters(&m_nIp, 2);
@@ -10909,10 +11541,44 @@ int8 CRunningScript::ProcessCommands1300To1399(int32 command)
 		return 0;
 	}
 	case COMMAND_SET_CHAR_IGNORE_THREATS_BEHIND_OBJECTS:
+	{
+		CollectParameters(&m_nIp, 2);
+		CPed* pPed = CWorld::Players[ScriptParams[0]].m_pPed;
+		assert(pPed);
+		pPed->bIgnoreThreatsBehindObjects = ScriptParams[1];
+		return 0;
+	}
 	case COMMAND_ENSURE_PLAYER_HAS_DRIVE_BY_WEAPON:
+	{
+		CollectParameters(&m_nIp, 2);
+		CPed* pPed = CWorld::Players[ScriptParams[0]].m_pPed;
+		assert(pPed);
+		if (pPed->bInVehicle) {
+			if (pPed->GetWeapon(5).m_eWeaponType) { // TODO(MIAMI): enum
+				if (pPed->GetWeapon(5).m_nAmmoTotal < ScriptParams[1])
+					pPed->SetAmmo(pPed->GetWeapon(5).m_eWeaponType, ScriptParams[1]);
+			}
+			else {
+				pPed->GiveWeapon(WEAPONTYPE_UZI, ScriptParams[1], true);
+				if (pPed->m_storedWeapon == WEAPONTYPE_UNIDENTIFIED)
+					pPed->m_storedWeapon = pPed->GetWeapon()->m_eWeaponType;
+				pPed->SetCurrentWeapon(WEAPONTYPE_UZI);
+			}
+		}
+		return 0;
+	}
 	case COMMAND_MAKE_HELI_COME_CRASHING_DOWN:
+	{
+		CollectParameters(&m_nIp, 1);
+		debug("MAKE_HELI_COME_CRASHING_DOWN is not implemented\n");
+		return 0;
+	}
 	case COMMAND_ADD_EXPLOSION_NO_SOUND:
-		assert(0);
+	{
+		CollectParameters(&m_nIp, 4);
+		CExplosion::AddExplosion(nil, nil, (eExplosionType)ScriptParams[3], *(CVector*)&ScriptParams[0], 0); // TODO(MIAMI): last arg is 0
+		return 0;
+	}
 	case COMMAND_SET_OBJECT_AREA_VISIBLE:
 	{
 		CollectParameters(&m_nIp, 2);
@@ -10921,10 +11587,23 @@ int8 CRunningScript::ProcessCommands1300To1399(int32 command)
 		pObject->m_area = ScriptParams[1];
 		return 0;
 	}
-	case COMMAND_WAS_VEHICLE_EVER_POLICE:
+	//case COMMAND_WAS_VEHICLE_EVER_POLICE:
 	case COMMAND_SET_CHAR_NEVER_TARGETTED:
+	{
+		CollectParameters(&m_nIp, 2);
+		CPed* pPed = CPools::GetPedPool()->GetAt(ScriptParams[0]);
+		assert(pPed);
+		pPed->bNeverEverTargetThisPed = ScriptParams[1];
+		return 0;
+	}
 	case COMMAND_LOAD_UNCOMPRESSED_ANIM:
-		assert(0);
+	{
+		char key[KEY_LENGTH_IN_SCRIPT];
+		CTheScripts::ReadTextLabelFromScript(&m_nIp, key);
+		m_nIp += KEY_LENGTH_IN_SCRIPT;
+		debug("LOAD_UNCOMPRESSED_ANIM not implemented\n"); // TODO(MIAMI)
+		return 0;
+	}
 	case COMMAND_WAS_CUTSCENE_SKIPPED:
 	{
 		static bool bShowed = false;
@@ -10954,9 +11633,11 @@ int8 CRunningScript::ProcessCommands1300To1399(int32 command)
 		return 0;
 	}
 	case COMMAND_DOES_CHAR_EXIST:
-	case COMMAND_DOES_VEHICLE_EXIST:
-	case COMMAND_ADD_SHORT_RANGE_BLIP_FOR_CONTACT_POINT:
-		assert(0);
+		CollectParameters(&m_nIp, 1);
+		UpdateCompareFlag(CPools::GetPedPool()->GetAt(ScriptParams[0]) != 0);
+		return 0;
+	//case COMMAND_DOES_VEHICLE_EXIST:
+	//case COMMAND_ADD_SHORT_RANGE_BLIP_FOR_CONTACT_POINT:
 	case COMMAND_ADD_SHORT_RANGE_SPRITE_BLIP_FOR_CONTACT_POINT:
 	{
 		CollectParameters(&m_nIp, 4);
@@ -10971,12 +11652,55 @@ int8 CRunningScript::ProcessCommands1300To1399(int32 command)
 		return 0;
 	}
 	case COMMAND_IS_CHAR_STUCK:
+	{
+		CPed* pPed = CPools::GetPedPool()->GetAt(ScriptParams[0]);
+		assert(pPed);
+		UpdateCompareFlag(pPed->m_nWaitState == WAITSTATE_STUCK);
+	}
 	case COMMAND_SET_ALL_TAXIS_HAVE_NITRO:
+	{
+		CollectParameters(&m_nIp, 1);
+		debug("SET_ALL_TAXIS_HAVE_NITRO is not implemented\n"); // TODO(MIAMI)
+		return 0;
+	}
 	case COMMAND_SET_CHAR_STOP_SHOOT_DONT_SEEK_ENTITY:
+	{
+		CollectParameters(&m_nIp, 2);
+		CPed* pPed = CPools::GetPedPool()->GetAt(ScriptParams[0]);
+		assert(pPed);
+		if (ScriptParams[1]) {
+			pPed->bKindaStayInSamePlace = true;
+			pPed->bStopAndShoot = true;
+		}
+		else {
+			pPed->bKindaStayInSamePlace = false;
+			pPed->bStopAndShoot = false;
+		}
+		pPed->m_nLastPedState = PED_NONE;
+	}
 	case COMMAND_FREEZE_CAR_POSITION_AND_DONT_LOAD_COLLISION:
-	case COMMAND_FREEZE_CHAR_POSITION_AND_DONT_LOAD_COLLISION:
-	case COMMAND_FREEZE_OBJECT_POSITION_AND_DONT_LOAD_COLLISION:
-	case COMMAND_SET_FADE_AND_JUMPCUT_AFTER_RC_EXPLOSION:
+	{
+		CollectParameters(&m_nIp, 2);
+		CVehicle* pVehicle = CPools::GetVehiclePool()->GetAt(ScriptParams[0]);
+		assert(pVehicle);
+		if (ScriptParams[1]) {
+			pVehicle->bIsFrozen = true;
+			pVehicle->bInfiniteMass = true;
+			if (m_bIsMissionScript) {
+				CWorld::Remove(pVehicle);
+				pVehicle->bIsStaticWaitingForCollision = true;
+				CWorld::Add(pVehicle);
+			}
+		}
+		else {
+			pVehicle->bIsFrozen = false;
+			pVehicle->bInfiniteMass = false;
+		}
+		return 0;
+	}
+	//case COMMAND_FREEZE_CHAR_POSITION_AND_DONT_LOAD_COLLISION:
+	//case COMMAND_FREEZE_OBJECT_POSITION_AND_DONT_LOAD_COLLISION:
+	//case COMMAND_SET_FADE_AND_JUMPCUT_AFTER_RC_EXPLOSION:
 	default:
 		assert(0);
 	}
@@ -10987,8 +11711,31 @@ int8 CRunningScript::ProcessCommands1400To1499(int32 command)
 {
 	switch (command) {
 	case COMMAND_REGISTER_VIGILANTE_LEVEL:
+		CollectParameters(&m_nIp, 1);
+		debug("REGISTER_VIGILANTE_LEVEL not implemented\n"); // TODO(MIAMI)
 	case COMMAND_CLEAR_ALL_CHAR_ANIMS:
-		assert(0);
+	{
+		CPed* pPed = CPools::GetPedPool()->GetAt(ScriptParams[0]);
+		assert(pPed);
+		if (!pPed->bInVehicle) {
+			pPed->m_pVehicleAnim = nil;
+			pPed->RestartNonPartialAnims();
+			RpAnimBlendClumpRemoveAllAssociations(pPed->GetClump());
+			pPed->SetPedState(PED_IDLE);
+			pPed->SetMoveState(PEDMOVE_STILL);
+			pPed->m_nLastPedState = PED_NONE;
+			pPed->ClearAimFlag();
+			pPed->ClearLookFlag();
+			pPed->bIsPointingGunAt = false;
+			if (pPed->IsPlayer())
+				((CPlayerPed*)pPed)->m_fMoveSpeed = 0.0f;
+			else
+				pPed->m_nStoredMoveState = PEDMOVE_STILL;
+			CAnimManager::AddAnimation(pPed->GetClump(), pPed->m_animGroup, ANIM_IDLE_STANCE);
+			pPed->bIsPedDieAnimPlaying = false;
+		}
+		return 0;
+	}
 	case COMMAND_SET_MAXIMUM_NUMBER_OF_CARS_IN_GARAGE:
 		CollectParameters(&m_nIp, 2);
 		CGarages::SetMaxNumStoredCarsForGarage(ScriptParams[0], ScriptParams[1]);
@@ -11014,11 +11761,46 @@ int8 CRunningScript::ProcessCommands1400To1499(int32 command)
 		return 0;
 	}
 	case COMMAND_SET_PLAYER_IS_IN_STADIUM:
+	{
+		CollectParameters(&m_nIp, 1);
+		CTheScripts::bPlayerIsInTheStatium = ScriptParams[0];
+		return 0;
+	}
 	case COMMAND_GET_BUS_FARES_COLLECTED_BY_PLAYER:
+	{
+		CollectParameters(&m_nIp, 1);
+		debug("GET_BUS_FARES_COLLECTED_BY_PLAYER not implemented\n"); // TODO(MIAMI)
+		ScriptParams[0] = 0;
+		StoreParameters(&m_nIp, 1);
+	}
 	case COMMAND_SET_CHAR_OBJ_BUY_ICE_CREAM:
+	{
+		CollectParameters(&m_nIp, 2);
+		CPed* pPed = CPools::GetPedPool()->GetAt(ScriptParams[0]);
+		assert(pPed);
+		CVehicle* pVehicle = CPools::GetVehiclePool()->GetAt(ScriptParams[1]);
+		assert(pVehicle);
+		ScriptParams[0] = 0;
+		if (pPed->m_objective == OBJECTIVE_NONE && !pPed->bHasAlreadyUsedAttractor) {
+			C2dEffect* pEffect = (C2dEffect*)GetPedAttractorManager()->GetEffectForIceCreamVan(pVehicle, pPed->GetPosition()); // has to be casted, because inner methods are const
+			if ((pPed->GetPosition() - pEffect->pos).MagnitudeSqr() < SQR(20.0f)) {
+				if (GetPedAttractorManager()->HasEmptySlot(pEffect) && GetPedAttractorManager()->IsApproachable(pEffect, pVehicle->GetMatrix(), 0, pPed)) {
+					if (GetPedAttractorManager()->RegisterPedWithAttractor(pPed, pEffect, pVehicle->GetMatrix()))
+						ScriptParams[0] = 1;
+				}
+			}
+		}
+		StoreParameters(&m_nIp, 1);
+		return 0;
+	}
 	case COMMAND_DISPLAY_RADAR:
+		CollectParameters(&m_nIp, 1);
+		debug("DISPLAY_RADAR not implemented\n");
+		return 0;
 	case COMMAND_REGISTER_BEST_POSITION:
-		assert(0);
+		CollectParameters(&m_nIp, 2);
+		debug("REGISTER_BEST_POSITION not implemented\n");
+		return 0;
 	case COMMAND_IS_PLAYER_IN_INFO_ZONE:
 	{
 		CollectParameters(&m_nIp, 1);
@@ -11034,14 +11816,86 @@ int8 CRunningScript::ProcessCommands1400To1499(int32 command)
 		return 0;
 	}
 	case COMMAND_CLEAR_CHAR_ICE_CREAM_PURCHASE:
+	{
+		CollectParameters(&m_nIp, 1);
+		CPed* pPed = CPools::GetPedPool()->GetAt(ScriptParams[0]);
+		assert(pPed);
+		if (pPed->m_attractor)
+			GetPedAttractorManager()->DeRegisterPed(pPed, pPed->m_attractor);
+		return 0;
+	}
 	case COMMAND_IS_IN_CAR_FIRE_BUTTON_PRESSED:
+		UpdateCompareFlag(CPad::GetPad(0)->GetCarGunFired());
+		return 0;
 	case COMMAND_HAS_CHAR_ATTEMPTED_ATTRACTOR:
+	{
+		CollectParameters(&m_nIp, 1);
+		CPed* pPed = CPools::GetPedPool()->GetAt(ScriptParams[0]);
+		assert(pPed);
+		UpdateCompareFlag(pPed->bHasAlreadyUsedAttractor);
+		return 0;
+	}
 	case COMMAND_SET_LOAD_COLLISION_FOR_CAR_FLAG:
+	{
+		CollectParameters(&m_nIp, 2);
+		CVehicle* pVehicle = CPools::GetVehiclePool()->GetAt(ScriptParams[0]);
+		assert(pVehicle);
+		if (ScriptParams[1]) {
+			pVehicle->bDontLoadCollision = false;
+			if (m_bMissionFlag) {
+				CWorld::Remove(pVehicle);
+				pVehicle->bIsStaticWaitingForCollision = true;
+				CWorld::Add(pVehicle);
+			}
+		}
+		else {
+			pVehicle->bDontLoadCollision = true;
+			if (pVehicle->bIsStaticWaitingForCollision) {
+				pVehicle->bIsStaticWaitingForCollision = false;
+				if (!pVehicle->IsStatic())
+					pVehicle->AddToMovingList();
+			}
+		}
+		return 0;
+	}
 	case COMMAND_SET_LOAD_COLLISION_FOR_CHAR_FLAG:
-	case COMMAND_SET_LOAD_COLLISION_FOR_OBJECT_FLAG:
+	{
+		CollectParameters(&m_nIp, 2);
+		CPed* pPed = CPools::GetPedPool()->GetAt(ScriptParams[0]);
+		assert(pPed);
+		if (ScriptParams[1]) {
+			pPed->bDontLoadCollision = false;
+			if (m_bMissionFlag) {
+				CWorld::Remove(pPed);
+				pPed->bIsStaticWaitingForCollision = true;
+				CWorld::Add(pPed);
+			}
+		}
+		else {
+			pPed->bDontLoadCollision = true;
+			if (pPed->bIsStaticWaitingForCollision) {
+				pPed->bIsStaticWaitingForCollision = false;
+				if (!pPed->IsStatic())
+					pPed->AddToMovingList();
+			}
+		}
+		return 0;
+	}
+	//case COMMAND_SET_LOAD_COLLISION_FOR_OBJECT_FLAG:
 	case COMMAND_ADD_BIG_GUN_FLASH:
+	{
+		CollectParameters(&m_nIp, 6);
+		debug("ADD_BIG_GUN_FLASH not implemented\n"); // TODO(MIAMI)
+		return 0;
+	}
 	case COMMAND_HAS_CHAR_BOUGHT_ICE_CREAM:
-		assert(0);
+	{
+		CollectParameters(&m_nIp, 1);
+		CPed* pPed = CPools::GetPedPool()->GetAt(ScriptParams[0]);
+		assert(pPed);
+		UpdateCompareFlag(pPed->bBoughtIceCream);
+		return 0;
+	}
 	case COMMAND_GET_PROGRESS_PERCENTAGE:
 		*(float*)&ScriptParams[0] = CStats::GetPercentageProgress();
 		StoreParameters(&m_nIp, 1);
@@ -11059,9 +11913,16 @@ int8 CRunningScript::ProcessCommands1400To1499(int32 command)
 		return 0;
 	}
 	case COMMAND_GET_RANDOM_ICE_CREAM_CUSTOMER_IN_AREA:
-	case COMMAND_GET_RANDOM_ICE_CREAM_CUSTOMER_IN_ZONE:
+		CollectParameters(&m_nIp, 7);
+		debug("GET_RANDOM_ICE_CREAM_CUSTOMER_IN_AREA not implemented\n"); // TODO(MIAMI)
+		ScriptParams[0] = -1;
+		StoreParameters(&m_nIp, 1);
+		return 0;
+	//case COMMAND_GET_RANDOM_ICE_CREAM_CUSTOMER_IN_ZONE:
 	case COMMAND_UNLOCK_ALL_CAR_DOORS_IN_AREA:
-		assert(0);
+		CollectParameters(&m_nIp, 4);
+		debug("UNLOCK_ALL_CAR_DOORS_IN_AREA not implemented\n"); // TODO(MIAMI)
+		return 0;
 	case COMMAND_SET_GANG_ATTACK_PLAYER_WITH_COPS:
 		CollectParameters(&m_nIp, 2);
 		CGangs::SetWillAttackPlayerWithCops((ePedType)((int)PEDTYPE_GANG1 + ScriptParams[0]), !!ScriptParams[1]);
@@ -11077,7 +11938,10 @@ int8 CRunningScript::ProcessCommands1400To1499(int32 command)
 		return 0;
 	}
 	case COMMAND_REGISTER_ODDJOB_MISSION_PASSED:
-		assert(0);
+		++CStats::MissionsPassed;
+		CStats::CheckPointReachedSuccessfully();
+		CTheScripts::LastMissionPassedTime = CTimer::GetTimeInMilliseconds();
+		// CGameLogic::RemoveShortCutDropOffPointForMission(); // TODO(MIAMI)
 	case COMMAND_IS_PLAYER_IN_SHORTCUT_TAXI:
 	{
 		CollectParameters(&m_nIp, 1);
@@ -11090,10 +11954,35 @@ int8 CRunningScript::ProcessCommands1400To1499(int32 command)
 		return 0;
 	}
 	case COMMAND_IS_CHAR_DUCKING:
+	{
+		CollectParameters(&m_nIp, 1);
+		CPed* pPed = CPools::GetPedPool()->GetAt(ScriptParams[0]);
+		assert(pPed);
+		UpdateCompareFlag(RpAnimBlendClumpGetAssociation(pPed->GetClump(), ANIM_DUCK_DOWN) != nil);
+		return 0;
+	}
 	case COMMAND_CREATE_DUST_EFFECT_FOR_CUTSCENE_HELI:
+	{
+		CollectParameters(&m_nIp, 3);
+		debug("CREATE_DUST_EFFECT_FOR_CUTSCENE_HELI not implemented\n"); // TODO(MIAMI)
+		return 0;
+	}
 	case COMMAND_REGISTER_FIRE_LEVEL:
+		CollectParameters(&m_nIp, 1);
+		debug("REGISTER_FIRE_LEVEL not implemented\n"); // TODO(MIAMI)
+		return 0;
 	case COMMAND_IS_AUSTRALIAN_GAME:
+		UpdateCompareFlag(false); // should we make some check?
 	case COMMAND_DISARM_CAR_BOMB:
+	{
+		CollectParameters(&m_nIp, 1);
+		CVehicle* pVehicle = CPools::GetVehiclePool()->GetAt(ScriptParams[0]);
+		if (pVehicle->m_bombType != CARBOMB_NONE) {
+			pVehicle->m_bombType = CARBOMB_NONE;
+			pVehicle->m_pBombRigger = nil;
+		}
+		return 0;
+	}
 	default:
 		assert(0);
 	}
@@ -12022,6 +12911,64 @@ void CRunningScript::LocateCarCommand(int32 command, uint32* pIp)
 	}
 }
 
+void CRunningScript::LocateObjectCommand(int32 command, uint32* pIp)
+{
+	bool b3D, result, debug;
+	float X, Y, Z, dX, dY, dZ;
+	switch (command) {
+	case COMMAND_LOCATE_OBJECT_3D:
+		b3D = true;
+		break;
+	default:
+		b3D = false;
+		break;
+	}
+	CollectParameters(pIp, b3D ? 8 : 6);
+	CObject* pObject = CPools::GetObjectPool()->GetAt(ScriptParams[0]);
+	assert(pObject);
+	CVector pos = pObject->GetPosition();
+	X = *(float*)&ScriptParams[1];
+	Y = *(float*)&ScriptParams[2];
+	if (b3D) {
+		Z = *(float*)&ScriptParams[3];
+		dX = *(float*)&ScriptParams[4];
+		dY = *(float*)&ScriptParams[5];
+		dZ = *(float*)&ScriptParams[6];
+		debug = ScriptParams[7];
+	}
+	else {
+		dX = *(float*)&ScriptParams[3];
+		dY = *(float*)&ScriptParams[4];
+		debug = ScriptParams[5];
+	}
+	result = false;
+	bool in_area;
+	if (b3D) {
+		in_area = X - dX <= pos.x &&
+			X + dX >= pos.x &&
+			Y - dY <= pos.y &&
+			Y + dY >= pos.y &&
+			Z - dZ <= pos.z &&
+			Z + dZ >= pos.z;
+	}
+	else {
+		in_area = X - dX <= pos.x &&
+			X + dX >= pos.x &&
+			Y - dY <= pos.y &&
+			Y + dY >= pos.y;
+	}
+	result = in_area;
+	UpdateCompareFlag(result);
+	if (debug)
+		CTheScripts::HighlightImportantArea((uintptr)this + m_nIp, X - dX, Y - dY, X + dX, Y + dY, b3D ? Z : MAP_Z_LOW_LIMIT);
+	if (CTheScripts::DbgFlag) {
+		if (b3D)
+			CTheScripts::DrawDebugCube(X - dX, Y - dY, Z - dZ, X + dX, Y + dY, Z + dZ);
+		else
+			CTheScripts::DrawDebugSquare(X - dX, Y - dY, X + dX, Y + dY);
+	}
+}
+
 void CRunningScript::LocateSniperBulletCommand(int32 command, uint32* pIp)
 {
 	bool b3D, result, debug;
@@ -12506,6 +13453,88 @@ void CRunningScript::CarInAreaCheckCommand(int32 command, uint32* pIp)
 				assert(false);
 				break;
 			}
+		}
+	}
+	UpdateCompareFlag(result);
+	if (debug)
+		CTheScripts::HighlightImportantArea((uintptr)this + m_nIp, infX, infY, supX, supY, b3D ? (infZ + supZ) / 2 : MAP_Z_LOW_LIMIT);
+	if (CTheScripts::DbgFlag) {
+		if (b3D)
+			CTheScripts::DrawDebugCube(infX, infY, infZ, supX, supY, supZ);
+		else
+			CTheScripts::DrawDebugSquare(infX, infY, supX, supY);
+	}
+}
+
+void CRunningScript::ObjectInAreaCheckCommand(int32 command, uint32* pIp)
+{
+	bool b3D, result, debug;
+	float infX, infY, infZ, supX, supY, supZ;
+	switch (command) {
+	case COMMAND_IS_OBJECT_IN_AREA_3D:
+		b3D = true;
+		break;
+	default:
+		b3D = false;
+		break;
+	}
+	CollectParameters(pIp, b3D ? 8 : 6);
+	CObject* pObject = CPools::GetObjectPool()->GetAt(ScriptParams[0]);
+	assert(pObject);
+	CVector pos = pObject->GetPosition();
+	infX = *(float*)&ScriptParams[1];
+	infY = *(float*)&ScriptParams[2];
+	if (b3D) {
+		infZ = *(float*)&ScriptParams[3];
+		supX = *(float*)&ScriptParams[4];
+		supY = *(float*)&ScriptParams[5];
+		supZ = *(float*)&ScriptParams[6];
+		if (infZ > supZ) {
+			infZ = *(float*)&ScriptParams[6];
+			supZ = *(float*)&ScriptParams[3];
+		}
+		debug = ScriptParams[7];
+	}
+	else {
+		supX = *(float*)&ScriptParams[3];
+		supY = *(float*)&ScriptParams[4];
+		debug = ScriptParams[5];
+	}
+	if (infX > supX) {
+		float tmp = infX;
+		infX = supX;
+		supX = tmp;
+	}
+	if (infY > supY) {
+		float tmp = infY;
+		infY = supY;
+		supY = tmp;
+	}
+	result = false;
+	bool in_area;
+	if (b3D) {
+		in_area = infX <= pos.x &&
+			supX >= pos.x &&
+			infY <= pos.y &&
+			supY >= pos.y &&
+			infZ <= pos.z &&
+			supZ >= pos.z;
+	}
+	else {
+		in_area = infX <= pos.x &&
+			supX >= pos.x &&
+			infY <= pos.y &&
+			supY >= pos.y;
+	}
+	if (in_area) {
+		switch (command) {
+		case COMMAND_IS_OBJECT_IN_AREA_2D:
+		case COMMAND_IS_OBJECT_IN_AREA_3D:
+			result = true;
+			break;
+		default:
+			assert(false);
+			break;
 		}
 	}
 	UpdateCompareFlag(result);

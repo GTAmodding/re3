@@ -221,20 +221,20 @@ bool CGame::InitialiseOnceAfterRW(void)
 
 	if ( FrontEndMenuManager.m_nPrefsAudio3DProviderIndex == -99 || FrontEndMenuManager.m_nPrefsAudio3DProviderIndex == -2 )
 	{
-		CMenuManager::m_PrefsSpeakers = 0;
+		FrontEndMenuManager.m_PrefsSpeakers = 0;
 		int8 provider = DMAudio.AutoDetect3DProviders();
 		if ( provider != -1 )
 			FrontEndMenuManager.m_nPrefsAudio3DProviderIndex = provider;
 	}
 
 	DMAudio.SetCurrent3DProvider(FrontEndMenuManager.m_nPrefsAudio3DProviderIndex);
-	DMAudio.SetSpeakerConfig(CMenuManager::m_PrefsSpeakers);
-	DMAudio.SetDynamicAcousticModelingStatus(CMenuManager::m_PrefsDMA);
-	DMAudio.SetMusicMasterVolume(CMenuManager::m_PrefsMusicVolume);
-	DMAudio.SetEffectsMasterVolume(CMenuManager::m_PrefsSfxVolume);
+	DMAudio.SetSpeakerConfig(FrontEndMenuManager.m_PrefsSpeakers);
+	DMAudio.SetDynamicAcousticModelingStatus(FrontEndMenuManager.m_PrefsDMA);
+	DMAudio.SetMusicMasterVolume(FrontEndMenuManager.m_PrefsMusicVolume);
+	DMAudio.SetEffectsMasterVolume(FrontEndMenuManager.m_PrefsSfxVolume);
 	DMAudio.SetEffectsFadeVol(127);
 	DMAudio.SetMusicFadeVol(127);
-	CWorld::Players[0].SetPlayerSkin(CMenuManager::m_PrefsSkinFile);
+	CWorld::Players[0].SetPlayerSkin(FrontEndMenuManager.m_PrefsSkinFile);
 
 	return true;
 }
@@ -662,6 +662,22 @@ void CGame::Process(void)
 			CCarCtrl::RemoveDistantCars();
 		}
 	}
+}
+
+void
+CGame::InitAfterFocusLoss()
+{
+	/*
+	byte_869656 = byte_86969D;
+	result = cDMAudio::SetCurrent3DProvider(byte_86969D);
+	if ( !bGameStarted && !bMenuVisible )
+		byte_869642 = 1;
+	*/
+
+	//cDMAudio::SetCurrent3DProvider( ? ? ? );
+
+	if (!FrontEndMenuManager.m_bGameNotLoaded && !FrontEndMenuManager.m_bMenuActive)
+		FrontEndMenuManager.m_bStartUpFrontEndRequested = true;
 }
 
 bool

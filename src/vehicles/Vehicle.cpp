@@ -30,6 +30,7 @@ bool CVehicle::bAltDodoCheat;
 #endif
 bool CVehicle::m_bDisableMouseSteering = true;
 bool CVehicle::bDisableRemoteDetonation;
+bool CVehicle::bDisableRemoteDetonationOnContact;
 
 void *CVehicle::operator new(size_t sz) { return CPools::GetVehiclePool()->New();  }
 void *CVehicle::operator new(size_t sz, int handle) { return CPools::GetVehiclePool()->New(handle); }
@@ -104,7 +105,9 @@ CVehicle::CVehicle(uint8 CreatedBy)
 	m_nCarHornPattern = 0;
 	m_nCarHornDelay = 0;
 	bPartOfConvoy = false;
+	bHeliMinimumTilt = false;
 	bIsDrowning = false;
+	bTyresDontBurst = false;
 	bCreatedAsPoliceVehicle = false;
 	bParking = false;
 	m_nAlarmState = 0;
@@ -127,6 +130,9 @@ CVehicle::CVehicle(uint8 CreatedBy)
 	AutoPilot.m_bStayInCurrentLevel = false;
 	AutoPilot.m_bIgnorePathfinding = false;
 	AutoPilot.m_nSwitchDistance = 20;
+
+// TODO(MIAMI)
+	bRestingOnPhysical = false;
 }
 
 CVehicle::~CVehicle()

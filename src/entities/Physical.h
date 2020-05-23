@@ -18,8 +18,7 @@ public:
 	// The not properly indented fields haven't been checked properly yet
 
 	int32 m_audioEntityId;
-  float unk1;
-	CTreadable *m_treadable[2];	// car and ped
+	float m_phys_unused1;
 	uint32 m_nLastTimeCollided;
 	CVector m_vecMoveSpeed;		// velocity
 	CVector m_vecTurnSpeed;		// angular velocity
@@ -37,16 +36,15 @@ public:
 	CEntryInfoList m_entryInfoList;
 	CPtrNode *m_movingListNode;
 
-  char field_EC;
+	int8 m_phys_unused2;
 	uint8 m_nStaticFrames;
 	uint8 m_nCollisionRecords;
-	bool m_bIsVehicleBeingShifted;
 	CEntity *m_aCollisionRecords[PHYSICAL_MAX_COLLISIONRECORDS];
 
 	float m_fDistanceTravelled;
 
 	// damaged piece
-	float m_fDamageImpulse; // fCollisionPower
+	float m_fDamageImpulse;
 	CEntity *m_pDamageEntity;
 	CVector m_vecDamageNormal;
 	int16 m_nDamagePieceType;
@@ -54,11 +52,16 @@ public:
 	uint8 bIsHeavy : 1;
 	uint8 bAffectedByGravity : 1;
 	uint8 bInfiniteMass : 1;
+	uint8 m_phy_flagA08 : 1;
 	uint8 bIsInWater : 1;
-	uint8 m_phy_flagA10 : 1; // unused
 	uint8 m_phy_flagA20 : 1; // unused
 	uint8 bHitByTrain : 1;
 	uint8 bSkipLineCol : 1;
+
+	uint8 bIsFrozen : 1;
+	uint8 bDontLoadCollision : 1;
+	uint8 m_bIsVehicleBeingShifted : 1;	// wrong name - also used on but never set for peds
+	uint8 bJustCheckCollision : 1;	// just see if there is a collision
 
 	uint8 m_nSurfaceTouched;
 	int8 m_nZoneLevel;
@@ -86,7 +89,6 @@ public:
 	void RemoveRefsToEntity(CEntity *ent);
 	static void PlacePhysicalRelativeToOtherPhysical(CPhysical *other, CPhysical *phys, CVector localPos);
 
-	float GetDistanceSq(void) { return m_vecMoveSpeed.MagnitudeSqr() * sq(CTimer::GetTimeStep()); }
 	// get speed of point p relative to entity center
 	CVector GetSpeed(const CVector &r);
 	CVector GetSpeed(void) { return GetSpeed(CVector(0.0f, 0.0f, 0.0f)); }
@@ -94,7 +96,7 @@ public:
 		return 1.0f / (CrossProduct(pos, dir).MagnitudeSqr()/m_fTurnMass +
 		               1.0f/m_fMass);
 	}
-	float GetMassTime(const CVector &pos, const CVector &dir, float t) {
+	float GetMassTweak(const CVector &pos, const CVector &dir, float t) {
 		return 1.0f / (CrossProduct(pos, dir).MagnitudeSqr()/(m_fTurnMass*t) +
 		               1.0f/(m_fMass*t));
 	}
@@ -156,11 +158,13 @@ public:
 	void ApplyFrictionTurnForce(const CVector &j, const CVector &p) { ApplyFrictionTurnForce(j.x, j.y, j.z, p.x, p.y, p.z); }
 	// springRatio: 1.0 fully extended, 0.0 fully compressed
 	bool ApplySpringCollision(float springConst, CVector &springDir, CVector &point, float springRatio, float bias);
+	bool ApplySpringCollisionAlt(float springConst, CVector &springDir, CVector &point, float springRatio, float bias, CVector &forceDir);
 	bool ApplySpringDampening(float damping, CVector &springDir, CVector &point, CVector &speed);
 	void ApplyGravity(void);
 	void ApplyFriction(void);
 	void ApplyAirResistance(void);
 	bool ApplyCollision(CPhysical *B, CColPoint &colpoint, float &impulseA, float &impulseB);
+	bool ApplyCollision(CColPoint &colpoint, float &impulse);
 	bool ApplyCollisionAlt(CEntity *B, CColPoint &colpoint, float &impulse, CVector &moveSpeed, CVector &turnSpeed);
 	bool ApplyFriction(CPhysical *B, float adhesiveLimit, CColPoint &colpoint);
 	bool ApplyFriction(float adhesiveLimit, CColPoint &colpoint);

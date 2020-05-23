@@ -50,6 +50,7 @@ public:
 	int32 m_nExplosionsSinceLastReward;
 	int32 field_268;
 	int32 field_272;
+	uint32 m_nHavocLevel;
 	bool m_bInfiniteSprint;
 	bool m_bFastReload;
 	bool m_bFireproof;
@@ -73,7 +74,7 @@ public:
 	bool IsPlayerInRemoteMode(void);
 	void PlayerFailedCriticalMission(void);
 	void Clear(void);
-	void BlowUpRCBuggy(void);
+	void BlowUpRCBuggy(bool);
 	void CancelPlayerEnteringCars(CVehicle*);
 	bool IsRestartingAfterDeath(void);
 	bool IsRestartingAfterArrest(void);

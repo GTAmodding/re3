@@ -330,6 +330,8 @@ CObject::Init(void)
 	m_colour1 = 0;
 	m_colour2 = 0;
 	m_nBonusValue = 0;
+	bIsWeapon = false;
+// TODO(MIAMI): some new field here
 	m_pCollidingEntity = nil;
 	CColPoint point;
 	CEntity* outEntity = nil;
@@ -342,7 +344,9 @@ CObject::Init(void)
 	if (GetModelIndex() == MI_BUOY)
 		bTouchingWater = true;
 
-	// TODO(Miami): Second flag set initialization
+	if(CModelInfo::GetModelInfo(GetModelIndex())->GetModelType() == MITYPE_WEAPON)
+		bIsWeapon = true;
+	bIsStreetLight = IsLightObject(GetModelIndex());
 
 	m_area = AREA_EVERYWHERE;
 }

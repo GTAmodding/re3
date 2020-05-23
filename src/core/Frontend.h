@@ -95,42 +95,6 @@ enum eLanguages
 #endif
 };
 
-/*
-enum eFrontendSprites
-{
-	FE2_MAINPANEL_UL,
-	FE2_MAINPANEL_UR,
-	FE2_MAINPANEL_DL,
-	FE2_MAINPANEL_DR,
-	FE2_MAINPANEL_DR2,
-	FE2_TABACTIVE,
-	FE_ICONBRIEF,
-	FE_ICONSTATS,
-	FE_ICONCONTROLS,
-	FE_ICONSAVE,
-	FE_ICONAUDIO,
-	FE_ICONDISPLAY,
-	FE_ICONLANGUAGE,
-	FE_CONTROLLER,
-	FE_CONTROLLERSH,
-	FE_ARROWS1,
-	FE_ARROWS2,
-	FE_ARROWS3,
-	FE_ARROWS4,
-	FE_RADIO1,
-	FE_RADIO2,
-	FE_RADIO3,
-	FE_RADIO4,
-	FE_RADIO5,
-	FE_RADIO6,
-	FE_RADIO7,
-	FE_RADIO8,
-	FE_RADIO9,
-
-	NUM_FE_SPRITES
-};
-*/
-
 enum eMenuSprites
 {
 	MENUSPRITE_BACKGROUND,
@@ -176,22 +140,6 @@ enum eSaveSlot
 	SAVESLOT_8,
 	SAVESLOT_LABEL = 36
 };
-
-#ifdef MENU_MAP
-enum MapSprites
-{
-	MAPMID1,
-	MAPMID2,
-	MAPMID3,
-	MAPBOT1,
-	MAPBOT2,
-	MAPBOT3,
-	MAPTOP1,
-	MAPTOP2,
-	MAPTOP3,
-	NUM_MAP_SPRITES
-};
-#endif
 
 enum eMenuScreen
 {
@@ -380,7 +328,10 @@ enum eMenuAction
 	MENUACTION_LANG_JAP,
 #endif
 #ifdef IMPROVED_VIDEOMODE
-	MENUACTION_SCREENMODE
+	MENUACTION_SCREENMODE,
+#endif
+#ifdef FREE_CAM
+	MENUACTION_FREECAM
 #endif
 };
 
@@ -480,70 +431,162 @@ struct CMenuScreen
 	} m_aEntries[NUM_MENUROWS];
 };
 
+struct MenuTrapezoid
+{
+	float topRight_x;
+	float topRight_y;
+	float topLeft_x;
+	float topLeft_y;
+	float bottomLeft_x;
+	float bottomLeft_y;
+	float bottomRight_x;
+	float bottomRight_y;
+	float old_topRight_x;
+	float old_topRight_y;
+	float old_topLeft_x;
+	float old_topLeft_y;
+	float old_bottomLeft_x;
+	float old_bottomLeft_y;
+	float old_bottomRight_x;
+	float old_bottomRight_y;
+	float mult_topRight_x;
+	float mult_topRight_y;
+	float mult_topLeft_x;
+	float mult_topLeft_y;
+	float mult_bottomLeft_x;
+	float mult_bottomLeft_y;
+	float mult_bottomRight_x;
+	float mult_bottomRight_y;
+
+	MenuTrapezoid(float x1, float y1, float x2, float y2, float x3, float y3, float x4, float y4) {
+		topRight_x = x1;
+		topRight_y = y1;
+		topLeft_x = x2;
+		topLeft_y = y2;
+		bottomLeft_x = x3;
+		bottomLeft_y = y3;
+		bottomRight_x = x4;
+		bottomRight_y = y4;
+	};
+};
+
 class CMenuManager
 {
 public:
-	int32 m_nPrefsVideoMode;
-	int32 m_nDisplayVideoMode;
+	int8 m_StatsScrollDirection;
+	float m_StatsScrollSpeed;
+	uint8 field_8;
+	bool m_PrefsUseVibration;
+	bool m_PrefsShowHud;
+	int32 m_PrefsRadarMode;
+	uint8 field_10;
+	bool m_bShutDownFrontEndRequested;
+	bool m_bStartUpFrontEndRequested;
+	int32 m_KeyPressedCode;
+	int32 m_PrefsBrightness;
+	float m_PrefsLOD;
+	int8 m_PrefsShowSubtitles;
+	int8 m_PrefsShowLegends;
+	int8 m_PrefsUseWideScreen;
+	int8 m_PrefsVsync; // TODO(Miami): Are we sure?
+	int8 m_PrefsVsyncDisp;
+	int8 m_PrefsFrameLimiter;
 	int8 m_nPrefsAudio3DProviderIndex;
-	bool m_bKeyChangeNotProcessed;
-	char m_aSkinName[256];
-	int32 m_nHelperTextMsgId;
-	bool m_bLanguageLoaded;
+	int8 m_PrefsSpeakers;
+	int8 m_PrefsDMA;
+	uint8 m_PrefsSfxVolume;
+	uint8 m_PrefsMusicVolume;
+	uint8 m_PrefsRadioStation;
+	uint8 field_2C;
+	int32 m_nCurrOption;
+	bool m_bQuitGameNoCD;
+	bool m_bMenuMapActive;
+	bool m_AllowNavigation;
+	uint8 field_37;
 	bool m_bMenuActive;
-	bool m_bMenuStateChanged;
-	bool m_bWaitingForNewKeyBind;
 	bool m_bWantToRestart;
 	bool m_bFirstTime;
-	bool m_bGameNotLoaded;
-	int32 m_nMousePosX;
-	int32 m_nMousePosY;
+	bool m_bActivateSaveMenu;
+	bool m_bWantToLoad;
+	float m_fMapSize;
+	float m_fMapCenterX;
+	float m_fMapCenterY;
+	uint32 OS_Language;
+	int32 m_PrefsLanguage;
+	int32 field_54;
+	int8 m_bLanguageLoaded;
+	uint8 m_PrefsAllowNastyGame;
+	uint8 m_PrefsMP3BoostVolume;
+	uint8 m_ControlMethod;
+	int32 m_nPrefsVideoMode;
+	int32 m_nDisplayVideoMode;
 	int32 m_nMouseTempPosX;
 	int32 m_nMouseTempPosY;
+	bool m_bGameNotLoaded;
+	int8 m_3DProviderOnLastSaveLoad;
+	bool m_bFrontEnd_ReloadObrTxtGxt;
+	int32 *pEditString;
+	uint8 field_74[4];
+	int32 *pControlEdit;
+	bool m_OnlySaveMenu;
+	int32 m_menuTransitionProgress;
+	CSprite2d m_aFrontEndSprites[NUM_MENU_SPRITES];
+	bool m_bSpritesLoaded;
+	int32 field_F0;
+	int32 m_LastRadioScrollDir;
+	int32 m_nCurrScreen;
+	int32 m_nPrevScreen;
+	int32 m_nCurrSaveSlot;
+	int32 m_LastScreenSwitch;
+	uint32 m_nMenuFadeAlpha;
+	int32 bOptionHighlightTransitionBlend;
+	bool bMenuChangeOngoing;
+	int32 MouseButtonJustClicked;
+	int32 JoyButtonJustClicked;
+	bool DisplayComboButtonErrMsg;
+	bool m_NoEmptyBinding;
+	bool m_ShowEmptyBindingError;
+	int32 m_nHelperTextAlpha;
+	bool m_bPressedPgUpOnList;
+	bool m_bPressedPgDnOnList;
+	bool m_bPressedUpOnList;
+	bool m_bPressedDownOnList;
+	bool m_bPressedScrollButton;
+	uint8 field_129;
+	uint8 field_12A;
+	uint8 field_12B;
+	int32 m_nMousePosX;
+	int32 m_nMousePosY;
+	int32 m_nMouseOldPosX;
+	int32 m_nMouseOldPosY;
+	int32 m_nHoverOption;
 	bool m_bShowMouse;
+	int32 m_nPrevOption;
+	bool m_bStartWaitingForKeyBind;
+	bool m_bWaitingForNewKeyBind;
+	bool m_bKeyChangeNotProcessed;
+	int32 m_CurrCntrlAction;
+	uint8 field_150;
+	uint8 field_151;
+	uint8 field_152;
+	uint8 field_153;
+	int32 m_nSelectedContSetupColumn;
+	bool m_bKeyIsOK;
+	bool field_159;
+	uint8 m_nCurrExLayer;
+	char m_PrefsSkinFile[256];
+	char m_aSkinName[256];
+	uint8 field_35B;
+	int32 m_nHelperTextMsgId;
 	tSkinInfo m_pSkinListHead;
 	tSkinInfo *m_pSelectedSkin;
 	int32 m_nFirstVisibleRowOnList;
 	float m_nScrollbarTopMargin;
 	int32 m_nTotalListRow;
 	int32 m_nSkinsTotal;
- char _unk0[4];
+	uint8 field_67C[4];
 	int32 m_nSelectedListRow;
 	bool m_bSkinsEnumerated;
-	bool m_bQuitGameNoCD;
- bool m_bRenderGameInMenu;
-	bool m_bSaveMenuActive;
-	bool m_bWantToLoad;
- char field_455;
-	bool m_bStartWaitingForKeyBind;
-	bool m_bSpritesLoaded;
-	//CSprite2d m_aFrontEndSprites[NUM_FE_SPRITES];
-	//CSprite2d m_aMenuSprites[NUM_MENU_SPRITES];
-	CSprite2d m_aFrontEndSprites[NUM_MENU_SPRITES];
- int32 field_518;
-	int32 m_nMenuFadeAlpha;
-	bool m_bPressedPgUpOnList;
-	bool m_bPressedPgDnOnList;
-	bool m_bPressedUpOnList;
-	bool m_bPressedDownOnList;
-	bool m_bPressedScrollButton;
-	int32 m_CurrCntrlAction;
- char _unk1[4];
- int32 m_nSelectedContSetupColumn;
-	 bool m_bKeyIsOK;
- bool field_535;
-	int8 m_nCurrExLayer;
-	int32 m_nHelperTextAlpha;
-	int32 m_nMouseOldPosX;
-	int32 m_nMouseOldPosY;
-	int32 m_nHoverOption;
-	int32 m_nCurrScreen;
-	int32 m_nCurrOption;
-	int32 m_nPrevOption;
-	int32 m_nPrevScreen;
- uint32 field_558;
-	int32 m_nCurrSaveSlot;
-	int32 m_nScreenChangeDelayTimer;
 
 #ifdef IMPROVED_VIDEOMODE
 	int32 m_nPrefsWidth;
@@ -554,107 +597,63 @@ public:
 	int32 m_nSelectedScreenMode;
 #endif
 
-public:
 	bool GetIsMenuActive() {return !!m_bMenuActive;}
 
-public:
-	static int32 OS_Language;
-	static int8 m_PrefsUseVibration;
-	static int8 m_DisplayControllerOnFoot;
-	static int8 m_PrefsUseWideScreen;
-	static int8 m_PrefsRadioStation;
-	static int8 m_PrefsVsync;
-	static int8 m_PrefsVsyncDisp;
-	static int8 m_PrefsFrameLimiter;
-	static int8 m_PrefsShowSubtitles;
-	static int8 m_PrefsSpeakers;
-	static int32 m_ControlMethod;
-	static int8 m_PrefsDMA;
-	static int32 m_PrefsLanguage;
-	static int32 m_PrefsBrightness;
-	static float m_PrefsLOD;
-	static int8 m_bFrontEnd_ReloadObrTxtGxt;
-	static int32 m_PrefsMusicVolume;
-	static int32 m_PrefsSfxVolume;
-	static char m_PrefsSkinFile[256];
-	static int32 m_KeyPressedCode;
-
-	static bool m_bStartUpFrontEndRequested;
-	static bool m_bShutDownFrontEndRequested;
-	static bool m_PrefsAllowNastyGame;
-	
 	static uint8 m_PrefsStereoMono;
-	static int32 m_SelectedMap;
-	static int32 m_SelectedGameType;
-	static uint8 m_PrefsPlayerRed;
-	static uint8 m_PrefsPlayerGreen;
-	static uint8 m_PrefsPlayerBlue;
 
 #ifndef MASTER
 	static bool m_PrefsMarketing;
 	static bool m_PrefsDisableTutorials;
 #endif // !MASTER
 
-#ifdef MENU_MAP
-	static bool bMenuMapActive;
-	static bool bMapMouseShownOnce;
-	static bool bMapLoaded;
-	static float fMapSize;
-	static float fMapCenterY;
-	static float fMapCenterX;
-	static CSprite2d m_aMapSprites[NUM_MAP_SPRITES];
+	CMenuManager(void);
+	~CMenuManager(void) { UnloadTextures(); }
+	
+	void Initialise();
 	void PrintMap();
-#endif
-
-public:
+	void SetFrontEndRenderStates();
 	static void BuildStatLine(Const char *text, void *stat, bool itsFloat, void *stat2);
 	static void CentreMousePointer();
 	void CheckCodesForControls(int);
 	bool CheckHover(int x1, int x2, int y1, int y2);
 	void CheckSliderMovement(int);
-	int CostructStatLine(int);
 	void DisplayHelperText();
 	int DisplaySlider(float, float, float, float, float, float);
 	void DoSettingsBeforeStartingAGame();
-	void Draw();
+	void DrawStandardMenus();
 	void DrawControllerBound(int32, int32, int32, int8);
 	void DrawControllerScreenExtraText(int, int, int);
 	void DrawControllerSetupScreen();
 	void DrawFrontEnd();
-	void DrawFrontEndNormal();
-#ifdef PS2_SAVE_DIALOG
-	void DrawFrontEndSaveZone();
-#endif
+	void DrawBackground();
 	void DrawPlayerSetupScreen();
 	int FadeIn(int alpha);
 	void FilterOutColorMarkersFromString(wchar*, CRGBA &);
 	int GetStartOptionsCntrlConfigScreens();
-	static void InitialiseChangedLanguageSettings();
+	void InitialiseChangedLanguageSettings();
 	void LoadAllTextures();
 	void LoadSettings();
 	void MessageScreen(const char *);
 	// TODO(MIAMI): implement the second argument
 	void MessageScreen(const char *str, bool) { MessageScreen(str); }
-	void PickNewPlayerColour();
 	void PrintBriefs();
 	static void PrintErrorMessage();
 	void PrintStats();
 	void Process();
 	void ProcessButtonPresses();
+	void ProcessFileActions();
 	void ProcessOnOffMenuOptions();
-	static void RequestFrontEndShutDown();
-	static void RequestFrontEndStartUp();
+	void RequestFrontEndShutDown();
+	void RequestFrontEndStartUp();
 	void ResetHelperText();
 	void SaveLoadFileError_SetUpErrorScreen();
 	void SaveSettings();
 	void SetHelperText(int text);
-	void ShutdownJustMenu();
 	float StretchX(float);
 	float StretchY(float);
 	void SwitchMenuOnAndOff();
 	void UnloadTextures();
 	void WaitForUserCD();
-	void PrintController();
 	int GetNumOptionsCntrlConfigScreens();
 	int ConstructStatLine(int);
 
@@ -669,7 +668,7 @@ public:
 };
 
 #ifndef IMPROVED_VIDEOMODE
-VALIDATE_SIZE(CMenuManager, 0x564);
+VALIDATE_SIZE(CMenuManager, 0x688);
 #endif
 
 extern CMenuManager FrontEndMenuManager;

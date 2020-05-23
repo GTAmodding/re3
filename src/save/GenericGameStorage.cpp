@@ -341,8 +341,8 @@ GenericLoad()
 	LoadSaveDataBlock();
 	ReadDataFromBlock("Loading PedType Stuff \n", CPedType::Load);
 
-	DMAudio.SetMusicMasterVolume(CMenuManager::m_PrefsMusicVolume);
-	DMAudio.SetEffectsMasterVolume(CMenuManager::m_PrefsSfxVolume);
+	DMAudio.SetMusicMasterVolume(FrontEndMenuManager.m_PrefsMusicVolume);
+	DMAudio.SetEffectsMasterVolume(FrontEndMenuManager.m_PrefsSfxVolume);
 	if (!CloseFile(file)) {
 		PcSaveHelper.nErrorCode = SAVESTATUS_ERR_LOAD_CLOSE;
 		return false;

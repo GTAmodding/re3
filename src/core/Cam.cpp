@@ -29,7 +29,7 @@ bool PrintDebugCode = false;
 int16 DebugCamMode;
 
 #ifdef FREE_CAM
-bool CCamera::bFreeCam = true;
+bool CCamera::bFreeCam;
 int nPreviousMode = -1;
 #endif
 
@@ -3630,7 +3630,7 @@ CCam::Process_Fixed(const CVector &CameraTarget, float, float, float)
 	if(TheCamera.m_bUseSpecialFovTrain)
 		FOV = TheCamera.m_fFovForTrain;
 
-	if(CMenuManager::m_ControlMethod == 0 && Using3rdPersonMouseCam()){
+	if(FrontEndMenuManager.m_ControlMethod == 0 && Using3rdPersonMouseCam()){
 		CPed *player = FindPlayerPed();
 		if(player && player->CanStrafeOrMouseControl()){
 			float Heading = Front.Heading();

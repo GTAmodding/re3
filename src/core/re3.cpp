@@ -69,7 +69,7 @@ mysrand(unsigned int seed)
 #ifdef DEBUGMENU
 void WeaponCheat();
 void HealthCheat();
-void TankCheat();
+void VehicleCheat(bool something, int model);
 void BlowUpCarsCheat();
 void ChangePlayerCheat();
 void MayhemCheat();
@@ -293,7 +293,7 @@ DebugMenuPopulate(void)
 		DebugMenuAddCmd("Cheats", "Health", HealthCheat);
 		DebugMenuAddCmd("Cheats", "Wanted level up", WantedLevelUpCheat);
 		DebugMenuAddCmd("Cheats", "Wanted level down", WantedLevelDownCheat);
-		DebugMenuAddCmd("Cheats", "Tank", TankCheat);
+		DebugMenuAddCmd("Cheats", "Tank", []() { VehicleCheat(true, MI_TAXI); });
 		DebugMenuAddCmd("Cheats", "Blow up cars", BlowUpCarsCheat);
 		DebugMenuAddCmd("Cheats", "Change player", ChangePlayerCheat);
 		DebugMenuAddCmd("Cheats", "Mayhem", MayhemCheat);
@@ -384,6 +384,13 @@ DebugMenuPopulate(void)
 
 		DebugMenuAddCmd("Debug", "Start Credits", CCredits::Start);
 		DebugMenuAddCmd("Debug", "Stop Credits", CCredits::Stop);
+
+#ifdef RELOADABLES
+		DebugMenuAddCmd("Reload", "HUD.TXD", CHud::ReloadTXD);
+		DebugMenuAddCmd("Reload", "FONTS.TXD", NULL);
+		DebugMenuAddCmd("Reload", "FRONTEN1.TXD", NULL);
+		DebugMenuAddCmd("Reload", "FRONTEN2.TXD", NULL);
+#endif
 
 		extern bool PrintDebugCode;
 		extern int16 DebugCamMode;

@@ -225,10 +225,10 @@ enum eObjective : uint32 {
 	OBJECTIVE_USE_STOP_ATTRACTOR,
 	OBJECTIVE_USE_PIZZA_ATTRACTOR,
 	OBJECTIVE_USE_SHELTER_ATTRACTOR,
-	OBJ_46,
+	OBJECTIVE_AIM_GUN_AT_PED,
 	OBJ_47,
 	OBJECTIVE_WAIT_FOR_RAIN_TO_END,
-	OBJ_49,
+	OBJECTIVE_SPRINT_TO_COORD,
 	OBJ_50,
 	OBJ_51,
 	OBJECTIVE_WAIT_FOR_BUS,
@@ -442,10 +442,10 @@ public:
 	//uint32 b155_10
 	uint32 bMiamiViceCop : 1;
 	uint32 bMoneyHasBeenGivenByScript : 1; //
-	//uint32 b155_80
+	uint32 bHasBeenPhotographed : 1;  //
 
 	uint32 bIsDrowning : 1;
-	uint32 bCanDrownInWater : 1; // Originally bDrownsInWater
+	uint32 bDrownsInWater : 1;
 	//uint32 b156_4
 	//uint32 b156_8
 	uint32 bIsPlayerFriend : 1;
@@ -453,23 +453,23 @@ public:
 	uint32 bHeadStuckInCollision : 1;
 #endif
 	uint32 bDeadPedInFrontOfCar : 1;
-	//uint32 b156_80
+	uint32 bStayInCarOnJack : 1;
 
-	//uint32 b157_1
-	//uint32 b157_2
-	//uint32 b157_4
+	uint32 bDontFight : 1;
+	uint32 bDoomAim : 1;
+	uint32 bCanBeShotInVehicle : 1;
 	//uint32 b157_8
 	//uint32 b157_10
 	//uint32 b157_20
 	//uint32 b157_40
-	//uint32 b157_80
+	uint32 bIgnoreThreatsBehindObjects : 1;
 
-	//uint32 b158_1
+	uint32 bNeverEverTargetThisPed : 1;
 	//uint32 b158_2
-	//uint32 b158_4
+	uint32 b158_4 : 1;
 	//uint32 b158_8
 	//uint32 b158_10
-	//uint32 b158_20
+	uint32 bBoughtIceCream : 1;
 	//uint32 b158_40
 	//uint32 b158_80
 

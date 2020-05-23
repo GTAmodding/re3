@@ -10,7 +10,7 @@ public:
 		TOTAL_HIGHEST_SCORES = 16
 	};
 	static int32 DaysPassed;
-    static int32 HeadsPopped;
+	static int32 HeadsPopped;
 	static int32 CommercialPassed;
 	static int32 IndustrialPassed;
 	static int32 SuburbanPassed;
@@ -52,16 +52,17 @@ public:
 	static int32 LongestFlightInDodo;
 	static int32 TimeTakenDefuseMission;
 	static int32 TotalNumberKillFrenzies;
-    static int32 TotalNumberMissions;
-    static int32 RoundsFiredByPlayer;
-    static int32 KgsOfExplosivesUsed;
-    static int32 InstantHitsFiredByPlayer;
-    static int32 InstantHitsHitByPlayer;
-    static int32 BestTimeBombDefusal;
-    static int32 mmRain;
-    static int32 CarsCrushed;
+	static int32 TotalNumberMissions;
+	static int32 RoundsFiredByPlayer;
+	static int32 KgsOfExplosivesUsed;
+	static int32 InstantHitsFiredByPlayer;
+	static int32 InstantHitsHitByPlayer;
+	static int32 BestTimeBombDefusal;
+	static int32 mmRain;
+	static int32 CarsCrushed;
 	static int32 FastestTimes[TOTAL_FASTEST_TIMES];
 	static int32 HighestScores[TOTAL_HIGHEST_SCORES];
+	static int32 PropertyDestroyed;
 	static int32 Sprayings;
 	static float AutoPaintingBudget;
 	static int32 NoMoreHurricanes;

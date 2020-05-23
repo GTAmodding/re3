@@ -57,7 +57,8 @@ void CCarGenerator::DoInternalProcessing()
 		mi = -m_nModelIndex;
 		if (m_nModelIndex == -1 || !CStreaming::HasModelLoaded(mi)) {
 			CZoneInfo pZone;
-			CTheZones::GetZoneInfoForTimeOfDay(&FindPlayerCoors(), &pZone);
+			CVector pos = FindPlayerCoors();
+			CTheZones::GetZoneInfoForTimeOfDay(&pos, &pZone);
 			mi = CCarCtrl::ChooseCarModel(CCarCtrl::ChooseCarRating(&pZone));
 			if (mi < 0)
 				return;

@@ -205,6 +205,8 @@ void CControllerConfigManager::InitDefaultControlConfiguration()
 																		          
 	SetControllerKeyAssociatedWithAction    (PED_LOOKBEHIND,                      rsPADEND,   KEYBOARD);
 	SetControllerKeyAssociatedWithAction    (PED_LOOKBEHIND,                      rsCAPSLK,   OPTIONAL_EXTRA);
+
+	SetControllerKeyAssociatedWithAction    (PED_DUCK,                            'C',        KEYBOARD);
 																		          
 	SetControllerKeyAssociatedWithAction    (PED_FIREWEAPON,                      rsPADINS,   KEYBOARD);
 	SetControllerKeyAssociatedWithAction    (PED_FIREWEAPON,                      rsLCTRL,    OPTIONAL_EXTRA);
@@ -217,6 +219,8 @@ void CControllerConfigManager::InitDefaultControlConfiguration()
 																		          
 	SetControllerKeyAssociatedWithAction    (PED_JUMPING,                         rsRCTRL,    KEYBOARD);
 	SetControllerKeyAssociatedWithAction    (PED_JUMPING,                         ' ',        OPTIONAL_EXTRA);
+
+	SetControllerKeyAssociatedWithAction    (PED_ANSWER_PHONE,                    rsTAB,      KEYBOARD);
 																              
 	if ( _dwOperatingSystemVersion == OS_WIN98 )											              
 		SetControllerKeyAssociatedWithAction(PED_SPRINT,                          rsSHIFT,    OPTIONAL_EXTRA); // BUG: must be KEYBOARD ?											              
@@ -259,7 +263,7 @@ void CControllerConfigManager::InitDefaultControlConfiguration()
 	SetControllerKeyAssociatedWithAction    (VEHICLE_TURRETDOWN,                  rsPADRIGHT, KEYBOARD);
 										    
 	SetControllerKeyAssociatedWithAction    (CAMERA_CHANGE_VIEW_ALL_SITUATIONS,   rsHOME,     KEYBOARD);
-	SetControllerKeyAssociatedWithAction    (CAMERA_CHANGE_VIEW_ALL_SITUATIONS,   'C',        OPTIONAL_EXTRA);
+	SetControllerKeyAssociatedWithAction    (CAMERA_CHANGE_VIEW_ALL_SITUATIONS,   'V',        OPTIONAL_EXTRA);
 
 	for (int32 i = 0; i < MAX_SIMS; i++)
 	{
@@ -336,13 +340,14 @@ void CControllerConfigManager::InitDefaultControlConfigJoyPad(uint32 buttons)
 			SetControllerKeyAssociatedWithAction(TOGGLE_SUBMISSIONS,                11, JOYSTICK);
 		case 10:
 			SetControllerKeyAssociatedWithAction(VEHICLE_HORN,                      10, JOYSTICK);
+			SetControllerKeyAssociatedWithAction(PED_DUCK,                          10, JOYSTICK);
 		case 9:
 			SetControllerKeyAssociatedWithAction(CAMERA_CHANGE_VIEW_ALL_SITUATIONS,  9, JOYSTICK);
 		case 8:
 			SetControllerKeyAssociatedWithAction(VEHICLE_HANDBRAKE,                  8, JOYSTICK);
 			SetControllerKeyAssociatedWithAction(PED_LOCK_TARGET,                    8, JOYSTICK);
 		case 7:
-			SetControllerKeyAssociatedWithAction(PED_CENTER_CAMERA_BEHIND_PLAYER,    7, JOYSTICK);
+			SetControllerKeyAssociatedWithAction(PED_ANSWER_PHONE,                   7, JOYSTICK);
 			SetControllerKeyAssociatedWithAction(VEHICLE_CHANGE_RADIO_STATION,       7, JOYSTICK);
 		case 6:
 			SetControllerKeyAssociatedWithAction(PED_CYCLE_WEAPON_RIGHT,             6, JOYSTICK);
@@ -384,13 +389,14 @@ void CControllerConfigManager::InitDefaultControlConfigJoyPad(uint32 buttons)
 			SetControllerKeyAssociatedWithAction(TOGGLE_SUBMISSIONS,                11, JOYSTICK);
 		case 10:
 			SetControllerKeyAssociatedWithAction(VEHICLE_HORN,                      10, JOYSTICK);
+			SetControllerKeyAssociatedWithAction(PED_DUCK,                          10, JOYSTICK);
 		case 9:
 			SetControllerKeyAssociatedWithAction(CAMERA_CHANGE_VIEW_ALL_SITUATIONS,  9, JOYSTICK);
 		case 8:
 			SetControllerKeyAssociatedWithAction(VEHICLE_HANDBRAKE,                  8, JOYSTICK);
 			SetControllerKeyAssociatedWithAction(PED_LOCK_TARGET,                    8, JOYSTICK);
 		case 7:
-			SetControllerKeyAssociatedWithAction(PED_CENTER_CAMERA_BEHIND_PLAYER,    7, JOYSTICK);
+			SetControllerKeyAssociatedWithAction(PED_ANSWER_PHONE,                   7, JOYSTICK);
 			SetControllerKeyAssociatedWithAction(VEHICLE_CHANGE_RADIO_STATION,       7, JOYSTICK);
 		case 6:
 			SetControllerKeyAssociatedWithAction(PED_CYCLE_WEAPON_RIGHT,             6, JOYSTICK);
@@ -431,6 +437,8 @@ void CControllerConfigManager::InitialiseControllerActionNameArray()
 	SETACTIONNAME(PED_CYCLE_TARGET_LEFT);
 	SETACTIONNAME(PED_CYCLE_TARGET_RIGHT);
 	SETACTIONNAME(PED_CENTER_CAMERA_BEHIND_PLAYER);
+	SETACTIONNAME(PED_DUCK);
+	SETACTIONNAME(PED_ANSWER_PHONE);
 	SETACTIONNAME(VEHICLE_LOOKBEHIND);
 	SETACTIONNAME(VEHICLE_LOOKLEFT);
 	SETACTIONNAME(VEHICLE_LOOKRIGHT);
@@ -754,6 +762,8 @@ void CControllerConfigManager::AffectControllerStateOn_ButtonDown_FirstPersonOnl
 		state.Square = 255;
 	if (button == GetControllerKeyAssociatedWithAction(PED_SNIPER_ZOOM_OUT, type))
 		state.Cross = 255;
+	if (button == GetControllerKeyAssociatedWithAction(PED_DUCK, type))
+		state.RightShock = 255;
 }
 
 void CControllerConfigManager::AffectControllerStateOn_ButtonDown_ThirdPersonOnly(int32 button, eControllerType type, CControllerState &state)
@@ -762,14 +772,18 @@ void CControllerConfigManager::AffectControllerStateOn_ButtonDown_ThirdPersonOnl
 		state.RightShock = 255;
 	if (button == GetControllerKeyAssociatedWithAction(PED_JUMPING, type))
 		state.Square = 255;
+	if (button == GetControllerKeyAssociatedWithAction(PED_ANSWER_PHONE, type))
+		state.LeftShoulder1 = 255;
 	if (button == GetControllerKeyAssociatedWithAction(PED_CYCLE_WEAPON_LEFT, type))
 		state.LeftShoulder2 = 255;
 	if (button == GetControllerKeyAssociatedWithAction(PED_CYCLE_WEAPON_RIGHT, type))
 		state.RightShoulder2 = 255;
 	if (button == GetControllerKeyAssociatedWithAction(PED_SPRINT, type))
 		state.Cross = 255;
+	if (button == GetControllerKeyAssociatedWithAction(PED_DUCK, type))
+		state.RightShock = 255;
 	
-	if (CMenuManager::m_ControlMethod == CONTROL_CLASSIC)
+	if (FrontEndMenuManager.m_ControlMethod == CONTROL_CLASSIC)
 	{
 		if (button == GetControllerKeyAssociatedWithAction(PED_CYCLE_TARGET_LEFT, type))
 			state.LeftShoulder2 = 255;
@@ -835,7 +849,7 @@ void CControllerConfigManager::AffectControllerStateOn_ButtonDown_FirstAndThirdP
 			state.RightStickX = 128;
 	}
 
-	if (CMenuManager::m_ControlMethod == CONTROL_CLASSIC)
+	if (FrontEndMenuManager.m_ControlMethod == CONTROL_CLASSIC)
 	{
 		if (button == GetControllerKeyAssociatedWithAction(PED_1RST_PERSON_LOOK_UP, type))
 		{
@@ -1616,8 +1630,12 @@ void CControllerConfigManager::DeleteMatching3rdPersonControls(e_ControllerActio
 			ClearSettingsAssociatedWithAction(PED_JUMPING, type);
 		if (key == GetControllerKeyAssociatedWithAction(PED_SPRINT, type))
 			ClearSettingsAssociatedWithAction(PED_SPRINT, type);
+		if (key == GetControllerKeyAssociatedWithAction(PED_DUCK, type))
+			ClearSettingsAssociatedWithAction(PED_DUCK, type);
+		if (key == GetControllerKeyAssociatedWithAction(PED_ANSWER_PHONE, type))
+			ClearSettingsAssociatedWithAction(PED_ANSWER_PHONE, type);
 
-		if (CMenuManager::m_ControlMethod == CONTROL_CLASSIC)
+		if (FrontEndMenuManager.m_ControlMethod == CONTROL_CLASSIC)
 		{
 			if (key == GetControllerKeyAssociatedWithAction(PED_CYCLE_TARGET_LEFT, type))
 				ClearSettingsAssociatedWithAction(PED_CYCLE_TARGET_LEFT, type);
@@ -1640,7 +1658,7 @@ void CControllerConfigManager::DeleteMatching1rst3rdPersonControls(e_ControllerA
 		if (key == GetControllerKeyAssociatedWithAction(GO_BACK, type))
 			ClearSettingsAssociatedWithAction(GO_BACK, type);
 
-		if (CMenuManager::m_ControlMethod == CONTROL_CLASSIC)
+		if (FrontEndMenuManager.m_ControlMethod == CONTROL_CLASSIC)
 		{
 			if (key == GetControllerKeyAssociatedWithAction(PED_1RST_PERSON_LOOK_LEFT, type))
 				ClearSettingsAssociatedWithAction(PED_1RST_PERSON_LOOK_LEFT, type);
@@ -1803,6 +1821,8 @@ e_ControllerActionType CControllerConfigManager::GetActionType(e_ControllerActio
 	case PED_CYCLE_WEAPON_RIGHT:
 	case PED_JUMPING:
 	case PED_SPRINT:
+	case PED_DUCK:
+	case PED_ANSWER_PHONE:
 	case PED_CYCLE_TARGET_LEFT:
 	case PED_CYCLE_TARGET_RIGHT:
 	case PED_CENTER_CAMERA_BEHIND_PLAYER:

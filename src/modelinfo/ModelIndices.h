@@ -400,6 +400,18 @@ IsLightThatNeedsRepositioning(int16 id)
 }
 
 inline bool
+IsLightObject(int16 id)
+{
+	return id == MI_TRAFFICLIGHTS_MIAMI ||
+		id == MI_MLAMPPOST ||
+		id == MI_SINGLESTREETLIGHTS1 ||
+		id == MI_SINGLESTREETLIGHTS2 ||
+		id == MI_SINGLESTREETLIGHTS3 ||
+		id == MI_DOUBLESTREETLIGHTS ||
+		id == MI_TRAFFICLIGHTS_TWOVERTICAL;
+}
+
+inline bool
 IsBodyPart(int16 id)
 {
 	return id == MI_BODYPARTA || id == MI_BODYPARTB;
@@ -455,7 +467,8 @@ inline bool
 IsExplosiveThingModel(int16 id)
 {
 	return id == MI_EXPLODINGBARREL ||
-		id == MI_PETROLPUMP;
+		id == MI_PETROLPUMP ||
+		id == MI_PETROLPUMP2;
 }
 
 inline bool 

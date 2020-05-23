@@ -294,7 +294,6 @@ private:
 		case GARAGE_HIDEOUT_TEN: return 9;
 		case GARAGE_HIDEOUT_ELEVEN: return 10;
 		case GARAGE_HIDEOUT_TWELVE: return 11;
-		default: assert(0);
 		}
 		return -1;
 	}

@@ -59,6 +59,7 @@
 #include "Floater.h"
 #include "Streaming.h"
 #include "PedAttractor.h"
+#include "Debug.h"
 
 #define CAN_SEE_ENTITY_ANGLE_THRESHOLD	DEGTORAD(60.0f)
 
@@ -603,14 +604,25 @@ CPed::CPed(uint32 pedType) : m_pedIK(this)
 	bCarPassenger = false;
 	bMiamiViceCop = false;
 	bMoneyHasBeenGivenByScript = false;
+	bHasBeenPhotographed = false;
 
 	bIsDrowning = false;
-	bCanDrownInWater = true;
+	bDrownsInWater = true;
 #ifdef VC_PED_PORTS
 	bHeadStuckInCollision = false;
 #endif
 	bIsPlayerFriend = true;
 	bDeadPedInFrontOfCar = false;
+	bStayInCarOnJack = false;
+
+	bDontFight = false;
+	bDoomAim = true;
+	bCanBeShotInVehicle = true;
+	bIgnoreThreatsBehindObjects = false;
+
+	bNeverEverTargetThisPed = false;
+
+	bBoughtIceCream = false;
 
 	if ((CGeneral::GetRandomNumber() & 3) == 0)
 		bHasACamera = true;
@@ -4116,7 +4128,7 @@ CPed::InflictDamage(CEntity *damagedBy, eWeaponType method, float damage, ePedPi
 	if (DyingOrDead())
 		return false;
 
-	if (method == WEAPONTYPE_DROWNING && !bCanDrownInWater)
+	if (method == WEAPONTYPE_DROWNING && !bDrownsInWater)
 		return false;
 
 	if (!bUsesCollision && (!bInVehicle || m_nPedState != PED_DRIVING) && method != WEAPONTYPE_DROWNING)
@@ -6014,7 +6026,6 @@ CPed::SetWaitState(eWaitState state, void *time)
 		case WAITSTATE_GROUND_ATTACK:
 		case WAITSTATE_LANCESITTING:
 		case WAITSTATE_PLAYANIM_HANDSUP_SIMPLE:
-			assert(0);
 		default:
 			ClearWaitState();
 			RestoreHeadingRate();
@@ -18522,7 +18533,7 @@ CPed::Save(uint8*& buf)
 	CopyToBuf(buf, m_fHealth);
 	CopyToBuf(buf, m_fArmour);
 	SkipSaveBuf(buf, 148);
-	for (int i = 0; i < 10; i++) // has to be hardcoded
+	for (int i = 0; i < 13; i++) // has to be hardcoded
 		m_weapons[i].Save(buf);
 	SkipSaveBuf(buf, 5);
 	CopyToBuf(buf, m_maxWeaponTypeAllowed);
@@ -18544,8 +18555,10 @@ CPed::Load(uint8*& buf)
 	SkipSaveBuf(buf, 148);
 
 	CWeapon bufWeapon;
-	for (int i = 0; i < 10; i++) { // has to be hardcoded
+	for (int i = 0; i < 13; i++) { // has to be hardcoded
 		bufWeapon.Load(buf);
+		if (i >= 10)
+			continue; // tmp hack before we fix save/load
 
 		if (bufWeapon.m_eWeaponType != WEAPONTYPE_UNARMED) {
 			int modelId = CWeaponInfo::GetWeaponInfo(bufWeapon.m_eWeaponType)->m_nModelId;

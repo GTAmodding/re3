@@ -149,13 +149,14 @@ CPlayerInfo::Clear(void)
 }
 
 void
-CPlayerInfo::BlowUpRCBuggy(void)
+CPlayerInfo::BlowUpRCBuggy(bool actually)
 {
 	if (!m_pRemoteVehicle || m_pRemoteVehicle->bRemoveFromWorld)
 		return;
 
 	CRemote::TakeRemoteControlledCarFromPlayer();
-	m_pRemoteVehicle->BlowUpCar(FindPlayerPed());
+	if (actually)
+		m_pRemoteVehicle->BlowUpCar(FindPlayerPed());
 }
 
 void

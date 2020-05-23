@@ -178,7 +178,7 @@ CColStore::LoadCollision(const CVector2D &pos)
 		}else{
 			for (int j = 0; j < MAX_CLEANUP; j++) {
 				CPhysical* pEntity = CTheScripts::MissionCleanup.DoesThisEntityWaitForCollision(j);
-				if (pEntity /* !pEntity->bDontLoadCollision && !pEntity->bIsFrozen */) {
+				if (pEntity && !pEntity->bDontLoadCollision && !pEntity->bIsFrozen) {
 					if (GetBoundingBox(i).IsPointInside(pEntity->GetPosition(), -80.0f))
 						wantThisOne = true;
 				}

@@ -86,9 +86,9 @@ SetLightsWithTimeOfDayColour(RpWorld *)
 		RwFrameTransform(RpLightGetFrame(pDirect), &mat, rwCOMBINEREPLACE);
 	}
 
-	if(CMenuManager::m_PrefsBrightness > 256){
-		float f1 = 2.0f * (CMenuManager::m_PrefsBrightness/256.0f - 1.0f) * 0.6f + 1.0f;
-		float f2 = 3.0f * (CMenuManager::m_PrefsBrightness/256.0f - 1.0f) * 0.6f + 1.0f;
+	if(FrontEndMenuManager.m_PrefsBrightness > 256){
+		float f1 = 2.0f * (FrontEndMenuManager.m_PrefsBrightness/256.0f - 1.0f) * 0.6f + 1.0f;
+		float f2 = 3.0f * (FrontEndMenuManager.m_PrefsBrightness/256.0f - 1.0f) * 0.6f + 1.0f;
 
 		AmbientLightColourForFrame.red = Min(1.0f, AmbientLightColourForFrame.red * f2);
 		AmbientLightColourForFrame.green = Min(1.0f, AmbientLightColourForFrame.green * f2);

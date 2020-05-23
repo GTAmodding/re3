@@ -176,7 +176,7 @@ psCameraBeginUpdate(RwCamera *camera)
 void
 psCameraShowRaster(RwCamera *camera)
 {
-	if (CMenuManager::m_PrefsVsync)
+	if (FrontEndMenuManager.m_PrefsVsync)
 		RwCameraShowRaster(camera, PSGLOBAL(window), rwRASTERFLIPWAITVSYNC);
 	else
 		RwCameraShowRaster(camera, PSGLOBAL(window), rwRASTERFLIPDONTWAIT);
@@ -944,7 +944,7 @@ void InitialiseLanguage()
 		|| primLayout	  == LANG_GERMAN )
 	{
 		CGame::nastyGame = false;
-		CMenuManager::m_PrefsAllowNastyGame = false;
+		FrontEndMenuManager.m_PrefsAllowNastyGame = false;
 		CGame::germanGame = true;
 	}
 	
@@ -953,7 +953,7 @@ void InitialiseLanguage()
 		|| primLayout	  == LANG_FRENCH )
 	{
 		CGame::nastyGame = false;
-		CMenuManager::m_PrefsAllowNastyGame = false;
+		FrontEndMenuManager.m_PrefsAllowNastyGame = false;
 		CGame::frenchGame = true;
 	}
 	
@@ -964,7 +964,7 @@ void InitialiseLanguage()
 
 #ifdef NASTY_GAME
 	CGame::nastyGame = true;
-	CMenuManager::m_PrefsAllowNastyGame = true;
+	FrontEndMenuManager.m_PrefsAllowNastyGame = true;
 	CGame::noProstitutes = false;
 #endif
 	
@@ -999,33 +999,33 @@ void InitialiseLanguage()
 		}
 	}
 	
-	CMenuManager::OS_Language = primUserLCID;
+	FrontEndMenuManager.OS_Language = primUserLCID;
 
 	switch ( lang )
 	{
 		case LANG_GERMAN:
 		{
-			CMenuManager::m_PrefsLanguage = LANGUAGE_GERMAN;
+			FrontEndMenuManager.m_PrefsLanguage = LANGUAGE_GERMAN;
 			break;
 		}
 		case LANG_SPANISH:
 		{
-			CMenuManager::m_PrefsLanguage = LANGUAGE_SPANISH;
+			FrontEndMenuManager.m_PrefsLanguage = LANGUAGE_SPANISH;
 			break;
 		}
 		case LANG_FRENCH:
 		{
-			CMenuManager::m_PrefsLanguage = LANGUAGE_FRENCH;
+			FrontEndMenuManager.m_PrefsLanguage = LANGUAGE_FRENCH;
 			break;
 		}
 		case LANG_ITALIAN:
 		{
-			CMenuManager::m_PrefsLanguage = LANGUAGE_ITALIAN;
+			FrontEndMenuManager.m_PrefsLanguage = LANGUAGE_ITALIAN;
 			break;
 		}
 		default:
 		{
-			CMenuManager::m_PrefsLanguage = LANGUAGE_AMERICAN;
+			FrontEndMenuManager.m_PrefsLanguage = LANGUAGE_AMERICAN;
 			break;
 		}
 	}
@@ -1486,7 +1486,7 @@ main(int argc, char *argv[])
 						
 						FrontEndMenuManager.m_bGameNotLoaded = true;
 						
-						CMenuManager::m_bStartUpFrontEndRequested = true;
+						FrontEndMenuManager.m_bStartUpFrontEndRequested = true;
 						
 						if ( defaultFullscreenRes )
 						{
@@ -1535,7 +1535,7 @@ main(int argc, char *argv[])
 						float ms = (float)CTimer::GetCurrentTimeInCycles() / (float)CTimer::GetCyclesPerMillisecond();
 						if ( RwInitialised )
 						{
-							if (!CMenuManager::m_PrefsFrameLimiter || (1000.0f / (float)RsGlobal.maxFPS) < ms)
+							if (!FrontEndMenuManager.m_PrefsFrameLimiter || (1000.0f / (float)RsGlobal.maxFPS) < ms)
 								RsEventHandler(rsIDLE, (void *)TRUE);
 						}
 						break;
@@ -1546,7 +1546,7 @@ main(int argc, char *argv[])
 						float ms = (float)CTimer::GetCurrentTimeInCycles() / (float)CTimer::GetCyclesPerMillisecond();
 						if (RwInitialised)
 						{
-							if (!CMenuManager::m_PrefsFrameLimiter || (1000.0f / (float)RsGlobal.maxFPS) < ms)
+							if (!FrontEndMenuManager.m_PrefsFrameLimiter || (1000.0f / (float)RsGlobal.maxFPS) < ms)
 								RsEventHandler(rsANIMVIEWER, (void*)TRUE);
 						}
 						break;

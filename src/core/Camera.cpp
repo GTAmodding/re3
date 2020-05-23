@@ -3037,33 +3037,25 @@ CCamera::SetNearClipScript(float clip)
 void
 CCamera::ProcessFade(void)
 {
-	float fade = (CTimer::GetTimeInMilliseconds() - m_uiFadeTimeStarted)/1000.0f;
-	// Why even set CDraw::FadeValue if m_fFLOATingFade sets it anyway?
 	if(m_bFading){
 		if(m_iFadingDirection == FADE_IN){
 			if(m_fTimeToFadeOut != 0.0f){
-				m_fFLOATingFade = 255.0f - 255.0f*fade/m_fTimeToFadeOut;
-				if(m_fFLOATingFade <= 0.0f){
-					m_bFading = false;
-					CDraw::FadeValue = 0;
-					m_fFLOATingFade = 0.0f;
-				}
+				m_fFLOATingFade -= CTimer::GetTimeStepInSeconds() * 255.0f / m_fTimeToFadeOut;
 			}else{
+				m_fFLOATingFade = 0.0f;
+			}
+			if (m_fFLOATingFade <= 0.0f) {
 				m_bFading = false;
-				CDraw::FadeValue = 0;
 				m_fFLOATingFade = 0.0f;
 			}
 		}else if(m_iFadingDirection == FADE_OUT){
 			if(m_fTimeToFadeOut != 0.0f){
-				m_fFLOATingFade = 255.0f*fade/m_fTimeToFadeOut;
-				if(m_fFLOATingFade >= 255.0f){
-					m_bFading = false;
-					CDraw::FadeValue = 255;
-					m_fFLOATingFade = 255.0f;
-				}
+				m_fFLOATingFade += CTimer::GetTimeStepInSeconds() * 255.0f / m_fTimeToFadeOut;
 			}else{
+				m_fFLOATingFade = 255.0f;
+			}
+			if (m_fFLOATingFade >= 255.0f) {
 				m_bFading = false;
-				CDraw::FadeValue = 255;
 				m_fFLOATingFade = 255.0f;
 			}
 		}

@@ -59,6 +59,8 @@ public:
 	static void InitialiseWhenRestarting(void);
 	static void Process(void);
 
+	static void InitAfterFocusLoss(void);
+
 	static bool IsInInterior(void) { return currArea != AREA_MAIN_MAP; }
 	static bool CanSeeOutSideFromCurrArea(void);
 	

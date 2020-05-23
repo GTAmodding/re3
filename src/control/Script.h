@@ -488,6 +488,8 @@ private:
 	void PlayerInAngledAreaCheckCommand(int32, uint32*);
 	void CharInAreaCheckCommand(int32, uint32*);
 	void CarInAreaCheckCommand(int32, uint32*);
+	void LocateObjectCommand(int32, uint32*);
+	void ObjectInAreaCheckCommand(int32, uint32*);
 
 	float LimitAngleOnCircle(float angle) { return angle < 0.0f ? angle + 360.0f : angle; }
 

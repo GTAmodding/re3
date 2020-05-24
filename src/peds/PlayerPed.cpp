@@ -47,19 +47,12 @@ CPlayerPed::CPlayerPed(void) : CPed(PEDTYPE_PLAYER1)
 	m_nSpeedTimer = 0;
 	m_bSpeedTimerFlag = false;
 
-	// This should be something inlined
 	// TODO(Miami)
-
 	// if (pPointGunAt)
 	//	m_pPointGunAt->CleanUpOldReference(&m_pPointGunAt);
+
 	m_pPointGunAt = nil;
-	if (m_nPedState == PED_FOLLOW_PATH)
-		ClearFollowPath();
-
-	// TODO(Miami)
-	// This should be something inlined
-
-	m_nPedState = PED_IDLE;
+	SetPedState(PED_IDLE);
 	m_fMaxStamina = 150.0f;
 	m_fCurrentStamina = m_fMaxStamina;
 	m_fStaminaProgress = 0.0f;
@@ -290,10 +283,7 @@ CPlayerPed::SetInitialState(void)
 		m_pFire->Extinguish();
 
 	RpAnimBlendClumpRemoveAllAssociations(GetClump());
-	if (m_nPedState == PED_FOLLOW_PATH)
-		ClearFollowPath();
-
-	m_nPedState = PED_IDLE;
+	SetPedState(PED_IDLE);
 	SetMoveState(PEDMOVE_STILL);
 	m_nLastPedState = PED_NONE;
 	m_animGroup = ASSOCGRP_PLAYER;
@@ -546,6 +536,8 @@ CPlayerPed::RestoreSprintEnergy(float restoreSpeed)
 		m_fCurrentStamina += restoreSpeed * CTimer::GetTimeStep() * 0.5f;
 }
 
+
+// TODO(Miami)
 bool
 CPlayerPed::DoWeaponSmoothSpray(void)
 {
@@ -553,7 +545,7 @@ CPlayerPed::DoWeaponSmoothSpray(void)
 		eWeaponType weapon = GetWeapon()->m_eWeaponType;
 		if (weapon == WEAPONTYPE_FLAMETHROWER || weapon == WEAPONTYPE_COLT45 || weapon == WEAPONTYPE_UZI ||
 			weapon == WEAPONTYPE_TEC9 || weapon == WEAPONTYPE_SILENCED_INGRAM || weapon == WEAPONTYPE_MP5 ||
-			weapon == WEAPONTYPE_SHOTGUN || weapon == WEAPONTYPE_AK47 || weapon == WEAPONTYPE_M16 || weapon == WEAPONTYPE_HELICANNON)
+			weapon == WEAPONTYPE_SHOTGUN || weapon == WEAPONTYPE_RUGER || weapon == WEAPONTYPE_M4 || weapon == WEAPONTYPE_HELICANNON)
 			return true;
 	}
 	return false;
@@ -574,7 +566,7 @@ CPlayerPed::DoesTargetHaveToBeBroken(CVector target, CWeapon *weaponUsed)
 	if (distVec.Magnitude() > CWeaponInfo::GetWeaponInfo(weaponUsed->m_eWeaponType)->m_fRange)
 		return true;
 
-	if (weaponUsed->m_eWeaponType != WEAPONTYPE_SHOTGUN && weaponUsed->m_eWeaponType != WEAPONTYPE_AK47)
+	if (weaponUsed->m_eWeaponType != WEAPONTYPE_SHOTGUN && weaponUsed->m_eWeaponType != WEAPONTYPE_RUGER)
 		return false;
 
 	distVec.Normalise();
@@ -1099,8 +1091,8 @@ CPlayerPed::ProcessPlayerWeapon(CPad *padUsed)
 	}
 	if (!m_pFire) {
 		if (GetWeapon()->m_eWeaponType == WEAPONTYPE_ROCKETLAUNCHER ||
-			GetWeapon()->m_eWeaponType == WEAPONTYPE_SNIPERRIFLE || GetWeapon()->m_eWeaponType == WEAPONTYPE_M16 ||
-			GetWeapon()->m_eWeaponType == WEAPONTYPE_AK47) {
+			GetWeapon()->m_eWeaponType == WEAPONTYPE_SNIPERRIFLE || GetWeapon()->m_eWeaponType == WEAPONTYPE_M4 ||
+			GetWeapon()->m_eWeaponType == WEAPONTYPE_RUGER) {
 			if (padUsed->TargetJustDown() || TheCamera.m_bJustJumpedOutOf1stPersonBecauseOfTarget) {
 				SetStoredState();
 				m_nPedState = PED_SNIPER_MODE;
@@ -1261,7 +1253,7 @@ CPlayerPed::ProcessPlayerWeapon(CPad *padUsed)
 #else
 		CVector markPos;
 		if (m_pPointGunAt->IsPed()) {
-			((CPed*)m_pPointGunAt)->m_pedIK.GetComponentPosition((RwV3d*)markPos, PED_MID);
+			((CPed*)m_pPointGunAt)->m_pedIK.GetComponentPosition((RwV3d)markPos, PED_MID);
 		} else {
 			markPos = m_pPointGunAt->GetPosition();
 		}
@@ -1514,7 +1506,7 @@ CPlayerPed::ProcessControl(void)
 			}
 			break;
 		case PED_SNIPER_MODE:
-			if (FindPlayerPed()->GetWeapon()->m_eWeaponType == WEAPONTYPE_M16) {
+			if (FindPlayerPed()->GetWeapon()->m_eWeaponType == WEAPONTYPE_M4) {
 				if (padUsed)
 					PlayerControlM16(padUsed);
 			} else if (padUsed) {
@@ -1622,6 +1614,21 @@ CPlayerPed::ProcessControl(void)
 	if (!bIsVisible && IsClumpSkinned(GetClump()))
 		UpdateRpHAnim();
 #endif
+}
+
+bool
+CPlayerPed::DoesPlayerWantNewWeapon(eWeaponType weapon, bool onlyIfSlotIsEmpty)
+{
+	uint32 slot = CWeaponInfo::GetWeaponInfo(weapon)->m_nWeaponSlot;
+
+	if (!HasWeaponSlot(slot) || GetWeapon(slot).m_eWeaponType == weapon)
+		return true;
+
+	if (onlyIfSlotIsEmpty)
+		return false;
+
+	// Check if he's using that slot right now.
+	return m_nPedState != PED_ATTACK && m_nPedState != PED_AIM_GUN || slot != m_currentWeapon;
 }
 
 #ifdef COMPATIBLE_SAVES

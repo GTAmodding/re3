@@ -274,7 +274,7 @@ psNativeTextureSupport(void)
  *****************************************************************************
  */
 RwBool
-psInitialise(void)
+psInitialize(void)
 {
 	PsGlobal.lastMousePos.x = PsGlobal.lastMousePos.y = 0.0f;
 
@@ -789,7 +789,7 @@ RwBool _psSetVideoMode(RwInt32 subSystem, RwInt32 videoMode)
 	
 	useDefault = TRUE;
 	
-	if ( RsEventHandler(rsRWINITIALISE, &openParams) == rsEVENTERROR )
+	if ( RsEventHandler(rsRWINITIALIZE, &openParams) == rsEVENTERROR )
 		return FALSE;
 
 	RwInitialised = TRUE;
@@ -1312,7 +1312,7 @@ main(int argc, char *argv[])
 	 * Initialize the platform independent data.
 	 * This will in turn initialize the platform specific data...
 	 */
-	if( RsEventHandler(rsINITIALISE, nil) == rsEVENTERROR )
+	if( RsEventHandler(rsINITIALIZE, nil) == rsEVENTERROR )
 	{
 		return FALSE;
 	}
@@ -1355,7 +1355,7 @@ main(int argc, char *argv[])
 	/* 
 	 * Initialize the 3D (RenderWare) components of the app...
 	 */
-	if( rsEVENTERROR == RsEventHandler(rsRWINITIALISE, &openParams) )
+	if( rsEVENTERROR == RsEventHandler(rsRWINITIALIZE, &openParams) )
 	{
 		RsEventHandler(rsTERMINATE, nil);
 

@@ -328,7 +328,7 @@ PluginAttach(void)
 static RwBool 
 Initialise3D(void *param)
 {
-	if (RsRwInitialise(param))
+	if (RsRwInitialize(param))
 	{
 #ifdef DEBUGMENU
 		DebugMenuInit();
@@ -1149,10 +1149,10 @@ AppEventHandler(RsEvent event, void *param)
 {
 	switch( event )
 	{
-		case rsINITIALISE:
+		case rsINITIALIZE:
 		{
 			CGame::InitialiseOnceBeforeRW();
-			return RsInitialise() ? rsEVENTPROCESSED : rsEVENTERROR;
+			return RsInitialize() ? rsEVENTPROCESSED : rsEVENTERROR;
 		}
 
 		case rsCAMERASIZE:
@@ -1164,7 +1164,7 @@ AppEventHandler(RsEvent event, void *param)
 			return rsEVENTPROCESSED;
 		}
 
-		case rsRWINITIALISE:
+		case rsRWINITIALIZE:
 		{
 			return Initialise3D(param) ? rsEVENTPROCESSED : rsEVENTERROR;
 		}

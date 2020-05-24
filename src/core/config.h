@@ -199,11 +199,6 @@ enum Config {
 #define USE_TXD_CDIMAGE		// generate and load textures from txd.img
 #define IMPROVED_VIDEOMODE	// save and load videomode parameters instead of a magic number
 //#define USE_TEXTURE_POOL
-#ifdef _WIN32
-#define AUDIO_MSS
-#else
-#define AUDIO_OAL
-#endif
 #ifdef DEBUGMENU
 #define RELOADABLES			// some debug menu options to reload TXD files
 #endif

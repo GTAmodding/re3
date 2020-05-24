@@ -1,7 +1,7 @@
-#include "channel.h"
+#include "common.h"
 
 #ifdef AUDIO_OAL
-#include "common.h"
+#include "channel.h"
 #include "sampman.h"
 
 #ifndef _WIN32

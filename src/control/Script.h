@@ -516,7 +516,7 @@ private:
 		}
 	}
 
-	bool CheckDamagedWeaponType(int32 type, int32 actual);
+	bool CheckDamagedWeaponType(int32 actual, int32 type);
 	
 	static bool ThisIsAValidRandomCop(int32 mi, bool cop, bool swat, bool fbi, bool army, bool miami);
 };

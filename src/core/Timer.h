@@ -58,7 +58,7 @@ public:
 	friend bool GenericSave(int file);
 
 #ifdef FIX_BUGS
-	static float GetDefaultTimeStep(void) { return 5.0f / 3.0f; }
+	static float GetDefaultTimeStep(void) { return 50.0f / 30.0f; }
 	static float GetTimeStepFix(void) { return GetTimeStep() / GetDefaultTimeStep(); }
 #endif
 };

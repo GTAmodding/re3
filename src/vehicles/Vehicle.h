@@ -120,13 +120,9 @@ enum eVehicleAppearance
 	VEHICLE_APPEARANCE_PLANE,
 };
 
-// Or Weapon.h?
-void FireOneInstantHitRound(CVector *shotSource, CVector *shotTarget, int32 damage);
-
 class CVehicle : public CPhysical
 {
 public:
-	// 0x128
 	tHandlingData *pHandling;
 	CAutoPilot AutoPilot;
 	uint8 m_currentColour1;

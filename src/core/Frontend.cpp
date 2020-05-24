@@ -2241,7 +2241,7 @@ CMenuManager::DrawBackground()
 		m_menuTransitionProgress = 255;
 	}
 
-	m_aFrontEndSprites[MENUSPRITE_BACKGROUND].Draw(CRect(0.0f, 0.0f, SCREEN_WIDTH, SCREEN_HEIGHT), CRGBA(255, 255, 255, Min(255, m_nMenuFadeAlpha)));
+	m_aFrontEndSprites[MENUSPRITE_BACKGROUND].Draw(CRect(0.0f, 0.0f, SCREEN_WIDTH, SCREEN_HEIGHT), CRGBA(255, 255, 255, FadeIn(255)));
 
 	SetFrontEndRenderStates();
 
@@ -2264,7 +2264,7 @@ CMenuManager::DrawBackground()
 	if (m_menuTransitionProgress == 255) {
 		m_aFrontEndSprites[MENUSPRITE_VCLOGO].Draw(CRect(MENU_X(27.0f), MENU_Y(8.0f), MENU_X(157.0f), MENU_Y(138.0f)), CRGBA(255, 255, 255, 255));
 	} else {
-		m_aFrontEndSprites[MENUSPRITE_VCLOGO].Draw(CRect(MENU_X(27.0f), MENU_Y(8.0f), MENU_X(157.0f), MENU_Y(138.0f)), CRGBA(255, 255, 255, Min(m_nMenuFadeAlpha, 255)));
+		m_aFrontEndSprites[MENUSPRITE_VCLOGO].Draw(CRect(MENU_X(27.0f), MENU_Y(8.0f), MENU_X(157.0f), MENU_Y(138.0f)), CRGBA(255, 255, 255, FadeIn(255)));
 	}
 
 	if (m_bShowMouse) {
@@ -2693,11 +2693,6 @@ CMenuManager::DrawPlayerSetupScreen()
 int
 CMenuManager::FadeIn(int alpha)
 {
-	if (m_nCurrScreen == MENUPAGE_LOADING_IN_PROGRESS ||
-		m_nCurrScreen == MENUPAGE_SAVING_IN_PROGRESS ||
-		m_nCurrScreen == MENUPAGE_DELETING)
-		return alpha;
-
 	return Min(m_nMenuFadeAlpha, alpha);
 }
 
@@ -3242,7 +3237,7 @@ CMenuManager::Process(void)
 		ProcessFileActions();
 		DMAudio.Service();
 
-		// TODO(Miami): What are the functions in here?
+		// Game calls some texture pool cleanup functions in here
 	}
 
 	SwitchMenuOnAndOff();

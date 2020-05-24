@@ -1,11 +1,9 @@
-#include "stream.h"
+#include "common.h"
 
 #ifdef AUDIO_OAL
-#include "common.h"
+#include "stream.h"
 #include "sampman.h"
 
-#include <sndfile.h>
-#include <mpg123.h>
 #ifdef _WIN32
 typedef long ssize_t;
 #pragma comment( lib, "libsndfile-1.lib" )
@@ -13,6 +11,8 @@ typedef long ssize_t;
 #else
 #include "crossplatform.h"
 #endif
+#include <sndfile.h>
+#include <mpg123.h>
 
 class CSndFile : public IDecoder
 {

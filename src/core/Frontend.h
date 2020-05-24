@@ -538,7 +538,7 @@ public:
 	int32 m_nPrevScreen;
 	int32 m_nCurrSaveSlot;
 	int32 m_LastScreenSwitch;
-	uint32 m_nMenuFadeAlpha;
+	int32 m_nMenuFadeAlpha;
 	int32 bOptionHighlightTransitionBlend;
 	bool bMenuChangeOngoing;
 	int32 MouseButtonJustClicked;

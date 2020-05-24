@@ -3478,7 +3478,7 @@ cAudioManager::ProcessPedOneShots(cPedParams *params)
 				else
 					noReflection = true;
 				break;
-			case WEAPONTYPE_AK47:
+			case WEAPONTYPE_RUGER:
 				m_sQueueSample.m_nSampleIndex = SFX_AK47_LEFT;
 				m_sQueueSample.m_nBankIndex = SAMPLEBANK_MAIN;
 				m_sQueueSample.m_nCounter = iSound++;
@@ -3497,7 +3497,7 @@ cAudioManager::ProcessPedOneShots(cPedParams *params)
 				m_sQueueSample.m_bIs2D = false;
 				m_sQueueSample.m_bReleasingSoundFlag = true;
 				break;
-			case WEAPONTYPE_M16:
+			case WEAPONTYPE_M4:
 				m_sQueueSample.m_nSampleIndex = SFX_M16_LEFT;
 				m_sQueueSample.m_nBankIndex = SAMPLEBANK_MAIN;
 				m_sQueueSample.m_nCounter = iSound++;
@@ -3604,11 +3604,11 @@ cAudioManager::ProcessPedOneShots(cPedParams *params)
 				m_sQueueSample.m_nSampleIndex = SFX_AK47_RELOAD;
 				m_sQueueSample.m_nFrequency = 30290;
 				break;
-			case WEAPONTYPE_AK47:
+			case WEAPONTYPE_RUGER:
 				m_sQueueSample.m_nSampleIndex = SFX_AK47_RELOAD;
 				m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(SFX_AK47_RELOAD);
 				break;
-			case WEAPONTYPE_M16:
+			case WEAPONTYPE_M4:
 				m_sQueueSample.m_nSampleIndex = SFX_M16_RELOAD;
 				m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(SFX_M16_RELOAD);
 				break;

@@ -82,6 +82,7 @@ public:
 	void ProcessAnimGroups(void);
 	void ProcessPlayerWeapon(CPad*);
 	void PlayerControlZelda(CPad*);
+	bool DoesPlayerWantNewWeapon(eWeaponType, bool);
 
 	static void SetupPlayerPed(int32);
 	static void DeactivatePlayerPed(int32);

@@ -1,3 +1,4 @@
+#include "common.h"
 #include "oal_utils.h"
 
 #ifdef AUDIO_OAL

@@ -51,6 +51,9 @@ workspace "reVC"
 			"win-x86-RW33_d3d8-mss",
 			"win-x86-librw_d3d9-mss",
 			"win-x86-librw_gl3_glfw-mss",
+			"win-x86-RW33_d3d8-oal",
+			"win-x86-librw_d3d9-oal",
+			"win-x86-librw_gl3_glfw-oal",
 		}
 
 	filter { "system:linux" }
@@ -184,11 +187,17 @@ project "reVC"
 	includedirs { "src/extras" }
 	includedirs { "eax" }
 
-	includedirs { "milessdk/include" }
 	includedirs { "eax" }
-
-	libdirs { "milessdk/lib" }
 	
+	filter "platforms:*mss"
+		defines { "AUDIO_MSS" }
+		includedirs { "milessdk/include" }
+		libdirs { "milessdk/lib" }
+		
+	filter "platforms:*oal"
+		defines { "AUDIO_OAL" }
+
+	filter {}
 	if(os.getenv("GTA_VC_RE_DIR")) then
 		setpaths("$(GTA_VC_RE_DIR)/", "%(cfg.buildtarget.name)", "")
 	end
@@ -200,8 +209,15 @@ project "reVC"
 		characterset ("MBCS")
 		targetextension ".exe"
 
-	filter "platforms:linux*"
-		defines { "OPENAL" }
+	filter "platforms:win*oal"
+		includedirs { "openal-soft/include" }
+		includedirs { "libsndfile/include" }
+		includedirs { "mpg123/include" }
+		libdirs { "openal-soft/libs/Win32" }
+		libdirs { "libsndfile/lib" }
+		libdirs { "mpg123/lib" }
+
+	filter "platforms:linux*oal"
 		links { "openal", "mpg123", "sndfile", "pthread" }
 
 	filter "platforms:*RW33*"

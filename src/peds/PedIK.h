@@ -51,7 +51,7 @@ public:
 	bool PointGunInDirection(float targetYaw, float targetPitch);
 	bool PointGunInDirectionUsingArm(float targetYaw, float targetPitch);
 	bool PointGunAtPosition(CVector const& position);
-	void GetComponentPosition(RwV3d *pos, uint32 node);
+	void GetComponentPosition(RwV3d &pos, uint32 node);
 	void RotateTorso(AnimBlendFrameData* animBlend, LimbOrientation* limb, bool changeRoll);
 	void ExtractYawAndPitchLocal(RwMatrix *mat, float *yaw, float *pitch);
 	void ExtractYawAndPitchLocalSkinned(AnimBlendFrameData *node, float *yaw, float *pitch);

@@ -584,7 +584,7 @@ void _psPrintCpuInfo()
  *****************************************************************************
  */
 RwBool
-psInitialise(void)
+psInitialize(void)
 {
 	PsGlobal.lastMousePos.x = PsGlobal.lastMousePos.y = 0.0f;
 
@@ -1535,7 +1535,7 @@ RwBool _psSetVideoMode(RwInt32 subSystem, RwInt32 videoMode)
 	
 	useDefault = TRUE;
 	
-	if ( RsEventHandler(rsRWINITIALISE, PSGLOBAL(window)) == rsEVENTERROR )
+	if ( RsEventHandler(rsRWINITIALIZE, PSGLOBAL(window)) == rsEVENTERROR )
 		return FALSE;
 	
 	RwInitialised = TRUE;
@@ -1904,7 +1904,7 @@ WinMain(HINSTANCE instance,
 	 * Initialize the platform independent data.
 	 * This will in turn initialize the platform specific data...
 	 */
-	if( RsEventHandler(rsINITIALISE, nil) == rsEVENTERROR )
+	if( RsEventHandler(rsINITIALIZE, nil) == rsEVENTERROR )
 	{
 		return FALSE;
 	}
@@ -1970,7 +1970,7 @@ WinMain(HINSTANCE instance,
 	/* 
 	 * Initialize the 3D (RenderWare) components of the app...
 	 */
-	if( rsEVENTERROR == RsEventHandler(rsRWINITIALISE, PSGLOBAL(window)) )
+	if( rsEVENTERROR == RsEventHandler(rsRWINITIALIZE, PSGLOBAL(window)) )
 	{
 		DestroyWindow(PSGLOBAL(window));
 

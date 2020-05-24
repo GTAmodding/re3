@@ -61,10 +61,10 @@ enum RsEvent
 	_rs_18,
 	_rs_19,
 	_rs_20,
-	rsRWINITIALISE,
+	rsRWINITIALIZE,
 	rsRWTERMINATE,
 	rsSELECTDEVICE,
-	rsINITIALISE,
+	rsINITIALIZE,
 	rsTERMINATE,
 	rsIDLE,
 	rsFRONTENDIDLE,
@@ -241,19 +241,19 @@ extern RsEventStatus RsEventHandler(RsEvent event, void *param);
 extern RsEventStatus RsKeyboardEventHandler(RsEvent event, void *param);
 extern RsEventStatus RsPadEventHandler(RsEvent event, void *param);
 
-extern RwBool                   
-RsInitialise(void);
+extern RwBool
+RsInitialize(void);
 
-extern RwBool                   
+extern RwBool
 RsRegisterImageLoader(void);
 
-extern RwBool                   
-RsRwInitialise(void *param);
+extern RwBool
+RsRwInitialize(void *param);
 
-extern RwBool                   
+extern RwBool
 RsSelectDevice(void);
 
-extern RwBool                   
+extern RwBool
 RsInputDeviceAttach(RsInputDeviceType inputDevice,
 					RsInputEventHandler inputEventHandler);
 

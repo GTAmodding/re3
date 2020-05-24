@@ -246,8 +246,8 @@ RsEventHandler(RsEvent event, void *param)
 				result = (rsEVENTPROCESSED);
 				break;
 
-			case rsRWINITIALISE:
-				result = (RsRwInitialise(param) ?
+			case rsRWINITIALIZE:
+				result = (RsRwInitialize(param) ?
 						  rsEVENTPROCESSED : rsEVENTERROR);
 				break;
 
@@ -256,9 +256,9 @@ RsEventHandler(RsEvent event, void *param)
 				result = (rsEVENTPROCESSED);
 				break;
 
-			case rsINITIALISE:
+			case rsINITIALIZE:
 				result =
-					(RsInitialise()? rsEVENTPROCESSED : rsEVENTERROR);
+					(RsInitialize()? rsEVENTPROCESSED : rsEVENTERROR);
 				break;
 
 			default:
@@ -294,7 +294,7 @@ RsRwTerminate(void)
  *****************************************************************************
  */
 RwBool
-RsRwInitialise(void *displayID)
+RsRwInitialize(void *displayID)
 {
 	RwEngineOpenParams  openParams;
 
@@ -383,14 +383,14 @@ RsTerminate(void)
  *****************************************************************************
  */
 RwBool
-RsInitialise(void)
+RsInitialize(void)
 {
 	/*
 	 * Initialize Platform independent data...
 	 */
 	RwBool              result;
 
-	RsGlobal.appName = RWSTRING("GTA3");
+	RsGlobal.appName = RWSTRING("GTA: Vice City");
 	RsGlobal.maximumWidth = DEFAULT_SCREEN_WIDTH;
 	RsGlobal.maximumHeight = DEFAULT_SCREEN_HEIGHT;
 	RsGlobal.width = DEFAULT_SCREEN_WIDTH;
@@ -415,7 +415,7 @@ RsInitialise(void)
 	RsGlobal.pad.inputEventHandler = nil;
 	RsGlobal.pad.used = FALSE;
 
-	result = psInitialise();
+	result = psInitialize();
 
 	return result;
 }

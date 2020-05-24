@@ -12,6 +12,7 @@
 // Yeah...
 int32 CWeaponInfo::ms_aMaxAmmoForWeapon[WEAPONTYPE_TOTALWEAPONS] = {
 	-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+	-1, -1, -1, -1, -1, -1, -1, -1, -1
 };
 
 CWeaponInfo CWeaponInfo::ms_apWeaponInfos[WEAPONTYPE_TOTALWEAPONS];
@@ -32,21 +33,29 @@ static char ms_aWeaponNames[][32] = {
 	"Chainsaw",
 	"Grenade",
 	"DetonateGrenade",
+	"TearGas",
 	"Molotov",
 	"Rocket",
 	"Colt45",
+	"Python",
 	"Shotgun",
+	"Spas12Shotgun",
+	"StubbyShotgun",
 	"Tec9",
 	"Uzi",
 	"SilencedIngram",
 	"Mp5",
-	"M16",
-	"AK47",
+	"m4",
+	"Ruger",
 	"SniperRifle",
+	"LaserScope",
 	"RocketLauncher",
 	"FlameThrower",
+	"M60",
+	"Minigun",
 	"Detonator",
 	"HeliCannon",
+	"Camera",
 };
 
 CWeaponInfo*
@@ -223,9 +232,7 @@ CWeaponInfo::LoadWeaponData(void)
 
 		ms_apWeaponInfos[weaponType].m_nWeaponSlot = weaponSlot;
 
-		// TODO(Miami): Enable once weapons are done
-		if (animLoopEnd < 98.0f && weaponType != WEAPONTYPE_FLAMETHROWER && weaponType != WEAPONTYPE_SHOTGUN
-			/*&& weaponType != 20 && weaponType != 21*/)
+		if (animLoopEnd < 98.0f && weaponType != WEAPONTYPE_FLAMETHROWER && !CWeapon::IsShotgun(weaponType))
 			ms_apWeaponInfos[weaponType].m_nFiringRate = ((ms_apWeaponInfos[weaponType].m_fAnimLoopEnd - ms_apWeaponInfos[weaponType].m_fAnimLoopStart) * 900.0f);
 
 		if (weaponType == WEAPONTYPE_DETONATOR || weaponType == WEAPONTYPE_HELICANNON)
@@ -263,6 +270,7 @@ CWeaponInfo::FindWeaponFireType(char *name)
 	if (strcmp(name, "INSTANT_HIT") == 0) return WEAPON_FIRE_INSTANT_HIT;
 	if (strcmp(name, "PROJECTILE") == 0) return WEAPON_FIRE_PROJECTILE;
 	if (strcmp(name, "AREA_EFFECT") == 0) return WEAPON_FIRE_AREA_EFFECT;
+	if (strcmp(name, "CAMERA") == 0) return WEAPON_FIRE_CAMERA;
 	Error("Unknown weapon fire type, WeaponInfo.cpp");
 	return WEAPON_FIRE_INSTANT_HIT;
 }

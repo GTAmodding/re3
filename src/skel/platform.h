@@ -15,7 +15,7 @@ extern RwUInt32 psTimer(void);
 extern double psTimer(void);
 #endif
 
-extern RwBool psInitialise(void);
+extern RwBool psInitialize(void);
 extern void   psTerminate(void);
 
 extern void psCameraShowRaster(RwCamera *camera);

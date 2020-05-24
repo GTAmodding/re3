@@ -172,9 +172,8 @@ void CHud::Draw()
 			if (playerPed) {
 				if (playerPed->m_nPedState != PED_ENTER_CAR && playerPed->m_nPedState != PED_CARJACK) {
 
-					// TODO(Miami): Uncomment
-					if (WeaponType >= WEAPONTYPE_COLT45 && WeaponType <= WEAPONTYPE_AK47
-						/*|| WeaponType == WEAPONTYPE_M60 || || WeaponType == WEAPONTYPE_MINIGUN */
+					if (WeaponType >= WEAPONTYPE_COLT45 && WeaponType <= WEAPONTYPE_RUGER
+						|| WeaponType == WEAPONTYPE_M60 || WeaponType == WEAPONTYPE_MINIGUN
 						|| WeaponType == WEAPONTYPE_FLAMETHROWER) {
 						DrawCrossHairPC = 1;
 					}
@@ -198,8 +197,7 @@ void CHud::Draw()
 #ifdef ASPECT_RATIO_SCALE
 				f3rdY -= SCREEN_SCALE_Y(2.0f);
 #endif
-				// TODO(Miami): M60
-				if (playerPed && (WeaponType == WEAPONTYPE_M16 || WeaponType == WEAPONTYPE_AK47/* || WeaponType == WEAPONTYPE_M60*/)) {
+				if (playerPed && (WeaponType == WEAPONTYPE_M4 || WeaponType == WEAPONTYPE_RUGER || WeaponType == WEAPONTYPE_M60)) {
 					rect.left = f3rdX - SCREEN_SCALE_X(32.0f * 0.6f);
 					rect.top = f3rdY - SCREEN_SCALE_Y(32.0f  * 0.6f);
 					rect.right = f3rdX + SCREEN_SCALE_X(32.0f * 0.6f);
@@ -314,9 +312,7 @@ void CHud::Draw()
 			MONEY_COLOR.a = alpha;
 			CFont::SetColor(MONEY_COLOR);
 
-			// TODO(Miami): m_nHudMode
-			//if (CMenuManager.m_nHudMode)
-			{
+			if (FrontEndMenuManager.m_PrefsShowHud) {
 				CFont::PrintString(SCREEN_SCALE_FROM_RIGHT(110.0f), SCREEN_SCALE_Y(43.0f), sPrint);
 			}
 		}
@@ -505,20 +501,21 @@ void CHud::Draw()
 			AsciiToUnicode("]", sPrintIcon);
 
 			for (int i = 0; i < 6; i++) {
-				if (playerPed->m_pWanted->m_nWantedLevel > i
-					&& (CTimer::GetTimeInMilliseconds() > playerPed->m_pWanted->m_nLastWantedLevelChange
-						+ 2000 || CTimer::GetFrameCounter() & 4)) {
+				if (FrontEndMenuManager.m_PrefsShowHud) {
+					if (playerPed->m_pWanted->m_nWantedLevel > i
+						&& (CTimer::GetTimeInMilliseconds() > playerPed->m_pWanted->m_nLastWantedLevelChange
+							+ 2000 || CTimer::GetFrameCounter() & 4)) {
 
-					WANTED_COLOR.a = alpha;
-					CFont::SetColor(WANTED_COLOR);
-					CFont::PrintString(SCREEN_SCALE_FROM_RIGHT(110.0f + 23.0f * i), SCREEN_SCALE_Y(87.0f), sPrintIcon);
+						WANTED_COLOR.a = alpha;
+						CFont::SetColor(WANTED_COLOR);
+						CFont::PrintString(SCREEN_SCALE_FROM_RIGHT(110.0f + 23.0f * i), SCREEN_SCALE_Y(87.0f), sPrintIcon);
 
-					// TODO(Miami): There is one more condition in here
-				}
-				else if (playerPed->m_pWanted->m_nWantedLevel <= i) {
-					NOTWANTED_COLOR.a = alpha;
-					CFont::SetColor(NOTWANTED_COLOR);
-					CFont::PrintString(SCREEN_SCALE_FROM_RIGHT(110.0f + 23.0f * i), SCREEN_SCALE_Y(87.0f), sPrintIcon);
+						// TODO(Miami): There is one more condition in here
+					} else if (playerPed->m_pWanted->m_nWantedLevel <= i) {
+						NOTWANTED_COLOR.a = alpha;
+						CFont::SetColor(NOTWANTED_COLOR);
+						CFont::PrintString(SCREEN_SCALE_FROM_RIGHT(110.0f + 23.0f * i), SCREEN_SCALE_Y(87.0f), sPrintIcon);
+					}
 				}
 			}
 

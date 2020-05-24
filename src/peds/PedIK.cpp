@@ -7,7 +7,7 @@
 #include "General.h"
 #include "RwHelper.h"
 
-//--MIAMI: file almost done (only some special weapon cases left)
+//--MIAMI: file done
 
 LimbMovementInfo CPedIK::ms_torsoInfo = { DEGTORAD(50.0f), DEGTORAD(-50.0f), DEGTORAD(8.0f), DEGTORAD(45.0f), DEGTORAD(-45.0f), DEGTORAD(5.0f) };
 LimbMovementInfo CPedIK::ms_headInfo = { DEGTORAD(90.0f), DEGTORAD(-90.0f), DEGTORAD(15.0f), DEGTORAD(45.0f), DEGTORAD(-45.0f), DEGTORAD(8.0f) };
@@ -57,9 +57,9 @@ CPedIK::RotateTorso(AnimBlendFrameData *node, LimbOrientation *limb, bool change
 }
 
 void
-CPedIK::GetComponentPosition(RwV3d *pos, uint32 node)
+CPedIK::GetComponentPosition(RwV3d &pos, uint32 node)
 {
-	*pos = GetComponentMatrix(m_ped, node)->pos;
+	pos = GetComponentMatrix(m_ped, node)->pos;
 }
 
 LimbMoveStatus
@@ -292,13 +292,20 @@ CPedIK::PointGunInDirectionUsingArm(float targetYaw, float targetPitch)
 bool
 CPedIK::PointGunAtPosition(CVector const& position)
 {
-	// TODO(MIAMI): special cases for some weapons
+	CVector startPoint;
+	if (m_ped->GetWeapon()->m_eWeaponType == WEAPONTYPE_SPAS12_SHOTGUN || m_ped->GetWeapon()->m_eWeaponType == WEAPONTYPE_STUBBY_SHOTGUN)
+		startPoint = m_ped->GetPosition();
+	else {
+		RwV3d armPos;
+		GetComponentPosition(armPos, PED_UPPERARMR);
+		startPoint.x = m_ped->GetPosition().x;
+		startPoint.y = m_ped->GetPosition().y;
+		startPoint.z = armPos.z;
+	}
 
-	RwV3d armPos;
-	GetComponentPosition(&armPos, PED_UPPERARMR);
 	return PointGunInDirection(
-		CGeneral::GetRadianAngleBetweenPoints(position.x, position.y, m_ped->GetPosition().x, m_ped->GetPosition().y),
-		CGeneral::GetRadianAngleBetweenPoints(position.z, Distance2D(m_ped->GetPosition(), position.x, position.y), armPos.z, 0.0f));
+		CGeneral::GetRadianAngleBetweenPoints(position.x, position.y, startPoint.x, startPoint.y),
+		CGeneral::GetRadianAngleBetweenPoints(position.z, Distance2D(m_ped->GetPosition(), position.x, position.y), startPoint.z, 0.0f));
 }
 
 bool

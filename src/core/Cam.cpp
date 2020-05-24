@@ -2429,7 +2429,7 @@ CCam::Process_Rocket(const CVector &CameraTarget, float, float, float)
 		ResetStatics = false;
 	}
 
-	((CPed*)CamTargetEntity)->m_pedIK.GetComponentPosition(&HeadPos, PED_HEAD);
+	((CPed*)CamTargetEntity)->m_pedIK.GetComponentPosition(HeadPos, PED_HEAD);
 	Source = HeadPos;
 	Source.z += 0.1f;
 	Source.x -= 0.19f*Cos(m_fInitialPlayerOrientation);
@@ -2568,7 +2568,7 @@ CCam::Process_M16_1stPerson(const CVector &CameraTarget, float, float, float)
 	HeadPos.x = 0.0f;
 	HeadPos.y = 0.0f;
 	HeadPos.z = 0.0f;
-	((CPed*)CamTargetEntity)->m_pedIK.GetComponentPosition(&HeadPos, PED_HEAD);
+	((CPed*)CamTargetEntity)->m_pedIK.GetComponentPosition(HeadPos, PED_HEAD);
 	Source = HeadPos;
 	Source.z += 0.1f;
 	Source.x -= 0.19f * Cos(m_fInitialPlayerOrientation);
@@ -2657,7 +2657,7 @@ CCam::Process_1stPerson(const CVector &CameraTarget, float TargetOrientation, fl
 			ResetStatics = false;
 		}
 
-		((CPed*)CamTargetEntity)->m_pedIK.GetComponentPosition(&HeadPos, PED_HEAD);
+		((CPed*)CamTargetEntity)->m_pedIK.GetComponentPosition(HeadPos, PED_HEAD);
 		Source = HeadPos;
 		Source.z += 0.1f;
 		Source.x -= 0.19f*Cos(m_fInitialPlayerOrientation);
@@ -2925,7 +2925,7 @@ CCam::Process_Sniper(const CVector &CameraTarget, float TargetOrientation, float
 		ResetStatics = false;
 	}
 
-	((CPed*)CamTargetEntity)->m_pedIK.GetComponentPosition(&HeadPos, PED_HEAD);
+	((CPed*)CamTargetEntity)->m_pedIK.GetComponentPosition(HeadPos, PED_HEAD);
 	Source = HeadPos;
 	Source.z += 0.1f;
 	Source.x -= 0.19f*Cos(m_fInitialPlayerOrientation);

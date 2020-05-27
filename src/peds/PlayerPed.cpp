@@ -680,7 +680,7 @@ CPlayerPed::ProcessWeaponSwitch(CPad *padUsed)
 	
 spentAmmoCheck:
 	if (CWeaponInfo::GetWeaponInfo(GetWeapon()->m_eWeaponType)->m_eWeaponFire != WEAPON_FIRE_MELEE
-		/*&& (!padUsed->GetWeapon() || GetWeapon()->m_eWeaponType != WEAPONTYPE_MINIGUN) */) {
+		&& (!padUsed->GetWeapon() || GetWeapon()->m_eWeaponType != WEAPONTYPE_MINIGUN)) {
 		if (GetWeapon()->m_nAmmoTotal <= 0) {
 			if (TheCamera.PlayerWeaponMode.Mode != CCam::MODE_M16_1STPERSON
 				&& TheCamera.PlayerWeaponMode.Mode != CCam::MODE_SNIPER
@@ -1019,8 +1019,8 @@ CPlayerPed::ProcessAnimGroups(void)
 				if (GetWeapon()->m_eWeaponType == WEAPONTYPE_ROCKETLAUNCHER)
 					groupToSet = ASSOCGRP_ROCKETLEFT;
 				else if (GetWeapon()->m_eWeaponType == WEAPONTYPE_CHAINSAW ||
-					GetWeapon()->m_eWeaponType == WEAPONTYPE_FLAMETHROWER
-					/* || GetWeapon()->m_eWeaponType == WEAPONTYPE_MINIGUN*/ )
+					GetWeapon()->m_eWeaponType == WEAPONTYPE_FLAMETHROWER ||
+					GetWeapon()->m_eWeaponType == WEAPONTYPE_MINIGUN)
 					groupToSet = ASSOCGRP_CHAINSAWLEFT;
 				else
 					groupToSet = ASSOCGRP_PLAYERLEFT;
@@ -1028,8 +1028,8 @@ CPlayerPed::ProcessAnimGroups(void)
 				if (GetWeapon()->m_eWeaponType == WEAPONTYPE_ROCKETLAUNCHER)
 					groupToSet = ASSOCGRP_ROCKETRIGHT;
 				else if (GetWeapon()->m_eWeaponType == WEAPONTYPE_CHAINSAW ||
-					GetWeapon()->m_eWeaponType == WEAPONTYPE_FLAMETHROWER
-					/* || GetWeapon()->m_eWeaponType == WEAPONTYPE_MINIGUN*/)
+					GetWeapon()->m_eWeaponType == WEAPONTYPE_FLAMETHROWER ||
+					GetWeapon()->m_eWeaponType == WEAPONTYPE_MINIGUN)
 					groupToSet = ASSOCGRP_CHAINSAWRIGHT;
 				else
 					groupToSet = ASSOCGRP_PLAYERRIGHT;
@@ -1038,8 +1038,8 @@ CPlayerPed::ProcessAnimGroups(void)
 			if (GetWeapon()->m_eWeaponType == WEAPONTYPE_ROCKETLAUNCHER)
 				groupToSet = ASSOCGRP_ROCKETBACK;
 			else if (GetWeapon()->m_eWeaponType == WEAPONTYPE_CHAINSAW ||
-				GetWeapon()->m_eWeaponType == WEAPONTYPE_FLAMETHROWER
-				/* || GetWeapon()->m_eWeaponType == WEAPONTYPE_MINIGUN*/)
+				GetWeapon()->m_eWeaponType == WEAPONTYPE_FLAMETHROWER ||
+				GetWeapon()->m_eWeaponType == WEAPONTYPE_MINIGUN)
 				groupToSet = ASSOCGRP_CHAINSAWBACK;
 			else
 				groupToSet = ASSOCGRP_PLAYERBACK;
@@ -1052,16 +1052,15 @@ CPlayerPed::ProcessAnimGroups(void)
 				 || GetWeapon()->m_eWeaponType == WEAPONTYPE_MACHETE)
 				groupToSet = ASSOCGRP_PLAYERBBBAT;
 			else if (GetWeapon()->m_eWeaponType == WEAPONTYPE_CHAINSAW ||
-				GetWeapon()->m_eWeaponType == WEAPONTYPE_FLAMETHROWER
-				/* || GetWeapon()->m_eWeaponType == WEAPONTYPE_MINIGUN*/)
+				GetWeapon()->m_eWeaponType == WEAPONTYPE_FLAMETHROWER ||
+				GetWeapon()->m_eWeaponType == WEAPONTYPE_MINIGUN)
 				groupToSet = ASSOCGRP_PLAYERCHAINSAW;
 			else if (GetWeapon()->m_eWeaponType != WEAPONTYPE_COLT45 && GetWeapon()->m_eWeaponType != WEAPONTYPE_UZI
-				// I hope this was inlined...
-				/*
-				&& GetWeapon()->m_eWeaponType != WEAPONTYPE_PYTHON*/ && GetWeapon()->m_eWeaponType != WEAPONTYPE_TEC9
+				// I hope this is a inlined function...
+				&& GetWeapon()->m_eWeaponType != WEAPONTYPE_PYTHON && GetWeapon()->m_eWeaponType != WEAPONTYPE_TEC9
 				&& GetWeapon()->m_eWeaponType != WEAPONTYPE_SILENCED_INGRAM && GetWeapon()->m_eWeaponType != WEAPONTYPE_MP5
 				&& GetWeapon()->m_eWeaponType != WEAPONTYPE_GOLFCLUB && GetWeapon()->m_eWeaponType != WEAPONTYPE_KATANA
-				/* && GetWeapon()->m_eWeaponType != WEAPONTYPE_CAMERA */) {
+				&& GetWeapon()->m_eWeaponType != WEAPONTYPE_CAMERA) {
 				if (!GetWeapon()->IsType2Handed()) {
 					groupToSet = ASSOCGRP_PLAYER;
 				} else {
@@ -1093,7 +1092,7 @@ CPlayerPed::ProcessPlayerWeapon(CPad *padUsed)
 		if (GetWeapon()->m_eWeaponType == WEAPONTYPE_ROCKETLAUNCHER ||
 			GetWeapon()->m_eWeaponType == WEAPONTYPE_SNIPERRIFLE || GetWeapon()->m_eWeaponType == WEAPONTYPE_M4 ||
 			GetWeapon()->m_eWeaponType == WEAPONTYPE_RUGER) {
-			if (padUsed->TargetJustDown() || TheCamera.m_bJustJumpedOutOf1stPersonBecauseOfTarget) {
+			if (padUsed->TargetJustDown()/* || TheCamera.m_bAllow1rstPersonWeaponsCamera */) { // TODO(Miami): Cam
 				SetStoredState();
 				m_nPedState = PED_SNIPER_MODE;
 #ifdef FREE_CAM
@@ -1240,7 +1239,7 @@ CPlayerPed::ProcessPlayerWeapon(CPad *padUsed)
 #else
 		else if (weaponInfo->m_bCanAim && !CCamera::m_bUseMouse3rdPerson) {
 #endif
-			if (padUsed->TargetJustDown())
+			if (padUsed->TargetJustDown()/* || TheCamera.m_bAllow1rstPersonWeaponsCamera */) // TODO(Miami): Cam
 				FindWeaponLockOnTarget();
 		}
 	} else if (m_pPointGunAt) {
@@ -1253,7 +1252,7 @@ CPlayerPed::ProcessPlayerWeapon(CPad *padUsed)
 #else
 		CVector markPos;
 		if (m_pPointGunAt->IsPed()) {
-			((CPed*)m_pPointGunAt)->m_pedIK.GetComponentPosition((RwV3d)markPos, PED_MID);
+			((CPed*)m_pPointGunAt)->m_pedIK.GetComponentPosition(*(RwV3d *)&markPos, PED_MID);
 		} else {
 			markPos = m_pPointGunAt->GetPosition();
 		}

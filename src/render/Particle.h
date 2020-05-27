@@ -15,25 +15,24 @@ public:
 
 	CVector   m_vecPosition;
 	CVector   m_vecVelocity;
-	CVector   m_vecScreenPosition;
-	uint32     m_nTimeWhenWillBeDestroyed;
-	uint32     m_nTimeWhenColorWillBeChanged;
+	uint32    m_nTimeWhenWillBeDestroyed;
+	uint32    m_nTimeWhenColorWillBeChanged;
 	float     m_fZGround;
 	CVector   m_vecParticleMovementOffset;
 	int16     m_nCurrentZRotation;
-	uint16     m_nZRotationTimer;
+	uint16    m_nZRotationTimer;
 	float     m_fCurrentZRadius;
-	uint16     m_nZRadiusTimer;
-	float     m_fSize;
-	float     m_fExpansionRate;
-	uint16     m_nFadeToBlackTimer;
-	uint16     m_nFadeAlphaTimer;
+	uint16    m_nZRadiusTimer;
 	uint8     m_nColorIntensity;
 	uint8     m_nAlpha;
-	uint16    m_nCurrentFrame;
+	float     m_fSize;
+	float     m_fExpansionRate;
+	int16     m_nFadeToBlackTimer;
+	int16     m_nFadeAlphaTimer;
 	int16     m_nAnimationSpeedTimer;
 	int16     m_nRotationStep;
 	int16     m_nRotation;
+	uint8     m_nCurrentFrame;
 	RwRGBA    m_Color;
 	CParticle *m_pNext;
 	
@@ -60,8 +59,11 @@ public:
 	static void Initialise();
 	static void Shutdown();
 	
-	static CParticle *AddParticle(tParticleType type, CVector const &vecPos, CVector const &vecDir, CEntity *pEntity = nil, float fSize = 0.0f, int32 nRotationSpeed = 0, int32 nRotation = 0, int32 nCurFrame = 0, int32 nLifeSpan = 0);
-	static CParticle *AddParticle(tParticleType type, CVector const &vecPos, CVector const &vecDir, CEntity *pEntity, float fSize, RwRGBA const &color, int32 nRotationSpeed = 0, int32 nRotation = 0, int32 nCurFrame = 0, int32 nLifeSpan = 0);
+	static void AddParticlesAlongLine(tParticleType type, CVector const &vecStart, CVector const &vecEnd, CVector const &vecDir, float fPower, CEntity *pEntity = nil, float fSize = 0.0f,                     int32 nRotationSpeed = 0, int32 nRotation = 0, int32 nCurFrame = 0, int32 nLifeSpan = 0);	
+	static void AddParticlesAlongLine(tParticleType type, CVector const &vecStart, CVector const &vecEnd, CVector const &vecDir, float fPower, CEntity *pEntity,       float fSize, RwRGBA const&color,        int32 nRotationSpeed = 0, int32 nRotation = 0, int32 nCurFrame = 0, int32 nLifeSpan = 0);
+
+	static CParticle *AddParticle(tParticleType type, CVector const &vecPos, CVector const &vecDir, CEntity *pEntity = nil, float fSize = 0.0f,               int32 nRotationSpeed = 0, int32 nRotation = 0, int32 nCurFrame = 0, int32 nLifeSpan = 0);
+	static CParticle *AddParticle(tParticleType type, CVector const &vecPos, CVector const &vecDir, CEntity *pEntity,       float fSize, RwRGBA const &color, int32 nRotationSpeed = 0, int32 nRotation = 0, int32 nCurFrame = 0, int32 nLifeSpan = 0);
 
 	static void Update();
 	static void Render();
@@ -89,6 +91,10 @@ public:
 
 	static void AddJetExplosion(CVector const &vecPos, float fPower, float fSize);
 	static void AddYardieDoorSmoke(CVector const &vecPos, CMatrix const &matMatrix);
+	static void CalWindDir(CVector *vecDirIn, CVector *vecDirOut);
+	
+	static void HandleShipsAtHorizonStuff();
+	static void HandleShootableBirdsStuff(CEntity *entity, CVector const&camPos);
 };
 
-VALIDATE_SIZE(CParticle, 0x68);
+VALIDATE_SIZE(CParticle, 0x58);

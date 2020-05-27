@@ -22,19 +22,18 @@
 
 #define DISTANCE_TO_SWITCH_DISTANCE_GOTO 20.0f
 
-//--MIAMI: done
+//--MIAMI: file done
+
 float CCarAI::FindSwitchDistanceClose(CVehicle* pVehicle)
 {
 	return pVehicle->AutoPilot.m_nSwitchDistance;
 }
 
-//--MIAMI: done
 float CCarAI::FindSwitchDistanceFarNormalVehicle(CVehicle* pVehicle)
 {
 	return FindSwitchDistanceClose(pVehicle) + 5.0f;
 }
 
-//--MIAMI: done
 float CCarAI::FindSwitchDistanceFar(CVehicle* pVehicle)
 {
 	if (pVehicle->bIsLawEnforcer)
@@ -42,7 +41,6 @@ float CCarAI::FindSwitchDistanceFar(CVehicle* pVehicle)
 	return FindSwitchDistanceFarNormalVehicle(pVehicle);
 }
 
-//--MIAMI: done
 void CCarAI::BackToCruisingIfNoWantedLevel(CVehicle* pVehicle)
 {
 	if (FindPlayerPed()->m_pWanted->m_bIgnoredByEveryone || pVehicle->bIsLawEnforcer &&
@@ -56,7 +54,6 @@ void CCarAI::BackToCruisingIfNoWantedLevel(CVehicle* pVehicle)
 	}
 }
 
-//--MIAMI: done
 void CCarAI::UpdateCarAI(CVehicle* pVehicle)
 {
 	if (pVehicle->bIsLawEnforcer){
@@ -350,6 +347,7 @@ void CCarAI::UpdateCarAI(CVehicle* pVehicle)
 			if (!FindPlayerVehicle() || DotProduct2D(CVector2D(diff.x / distance, diff.y / distance), FindPlayerSpeed()) > 0.05f)
 				pVehicle->AutoPilot.m_nCarMission = MISSION_BLOCKPLAYER_CLOSE;
 			BackToCruisingIfNoWantedLevel(pVehicle);
+			break;
 		}
 		default:
 			if (pVehicle->bIsLawEnforcer && FindPlayerPed()->m_pWanted->m_nWantedLevel > 0 && !CCullZones::NoPolice()){
@@ -506,13 +504,11 @@ void CCarAI::UpdateCarAI(CVehicle* pVehicle)
 	}
 }
 
-//--MIAMI: done
 void CCarAI::CarHasReasonToStop(CVehicle* pVehicle)
 {
 	pVehicle->AutoPilot.m_nAntiReverseTimer = CTimer::GetTimeInMilliseconds();
 }
 
-//--MIAMI: done
 float CCarAI::GetCarToGoToCoors(CVehicle* pVehicle, CVector* pTarget)
 {
 	if (pVehicle->AutoPilot.m_nCarMission != MISSION_GOTOCOORDS && pVehicle->AutoPilot.m_nCarMission != MISSION_GOTOCOORDS_STRAIGHT){
@@ -530,7 +526,6 @@ float CCarAI::GetCarToGoToCoors(CVehicle* pVehicle, CVector* pTarget)
 	return (pVehicle->GetPosition() - *pTarget).Magnitude2D();
 }
 
-//--MIAMI: done
 float CCarAI::GetCarToParkAtCoors(CVehicle* pVehicle, CVector* pTarget)
 {
 	GetCarToGoToCoors(pVehicle, pTarget);
@@ -539,7 +534,6 @@ float CCarAI::GetCarToParkAtCoors(CVehicle* pVehicle, CVector* pTarget)
 	return (pVehicle->GetPosition() - *pTarget).Magnitude2D();
 }
 
-//--MIAMI: TODO: MI_VICECHEE
 void CCarAI::AddPoliceCarOccupants(CVehicle* pVehicle)
 {
 	if (pVehicle->bOccupantsHaveBeenGenerated)
@@ -576,21 +570,18 @@ void CCarAI::AddPoliceCarOccupants(CVehicle* pVehicle)
 	}
 }
 
-//--MIAMI: done
 void CCarAI::AddAmbulanceOccupants(CVehicle* pVehicle)
 {
 	pVehicle->SetUpDriver();
 	pVehicle->SetupPassenger(1);
 }
 
-//--MIAMI: done
 void CCarAI::AddFiretruckOccupants(CVehicle* pVehicle)
 {
 	pVehicle->SetUpDriver();
 	pVehicle->SetupPassenger(0);
 }
 
-//--MIAMI: done
 void CCarAI::TellOccupantsToLeaveCar(CVehicle* pVehicle)
 {
 	if (pVehicle->pDriver){
@@ -608,7 +599,6 @@ void CCarAI::TellOccupantsToLeaveCar(CVehicle* pVehicle)
 	}
 }
 
-//--MIAMI: done
 void CCarAI::TellOccupantsToFleeCar(CVehicle* pVehicle)
 {
 	if (pVehicle->pDriver && !pVehicle->pDriver->IsPlayer()) {
@@ -626,7 +616,6 @@ void CCarAI::TellOccupantsToFleeCar(CVehicle* pVehicle)
 	}
 }
 
-//--MIAMI: done
 void CCarAI::TellCarToRamOtherCar(CVehicle* pVehicle, CVehicle* pTarget)
 {
 	pVehicle->AutoPilot.m_pTargetCar = pTarget;
@@ -636,7 +625,6 @@ void CCarAI::TellCarToRamOtherCar(CVehicle* pVehicle, CVehicle* pTarget)
 	pVehicle->AutoPilot.m_nCruiseSpeed = Max(6, pVehicle->AutoPilot.m_nCruiseSpeed);
 }
 
-//--MIAMI: done
 void CCarAI::TellCarToBlockOtherCar(CVehicle* pVehicle, CVehicle* pTarget)
 {
 	pVehicle->AutoPilot.m_pTargetCar = pTarget;
@@ -646,7 +634,6 @@ void CCarAI::TellCarToBlockOtherCar(CVehicle* pVehicle, CVehicle* pTarget)
 	pVehicle->AutoPilot.m_nCruiseSpeed = Max(6, pVehicle->AutoPilot.m_nCruiseSpeed);
 }
 
-//--MIAMI: done
 eCarMission CCarAI::FindPoliceCarMissionForWantedLevel()
 {
 	switch (CWorld::Players[CWorld::PlayerInFocus].m_pPed->m_pWanted->m_nWantedLevel){
@@ -661,7 +648,6 @@ eCarMission CCarAI::FindPoliceCarMissionForWantedLevel()
 	}
 }
 
-//--MIAMI: done
 eCarMission CCarAI::FindPoliceBoatMissionForWantedLevel()
 {
 	switch (CWorld::Players[CWorld::PlayerInFocus].m_pPed->m_pWanted->m_nWantedLevel) {
@@ -676,7 +662,6 @@ eCarMission CCarAI::FindPoliceBoatMissionForWantedLevel()
 	}
 }
 
-//--MIAMI: done
 int32 CCarAI::FindPoliceCarSpeedForWantedLevel(CVehicle* pVehicle)
 {
 	switch (CWorld::Players[CWorld::PlayerInFocus].m_pPed->m_pWanted->m_nWantedLevel) {
@@ -691,7 +676,6 @@ int32 CCarAI::FindPoliceCarSpeedForWantedLevel(CVehicle* pVehicle)
 	}
 }
 
-//--MIAMI: done
 void CCarAI::MellowOutChaseSpeed(CVehicle* pVehicle)
 {
 	if (CWorld::Players[CWorld::PlayerInFocus].m_pPed->m_pWanted->m_nWantedLevel == 1){
@@ -736,7 +720,6 @@ void CCarAI::MellowOutChaseSpeed(CVehicle* pVehicle)
 	}
 }
 
-//--MIAMI: done
 void CCarAI::MellowOutChaseSpeedBoat(CVehicle* pVehicle)
 {
 	switch (CWorld::Players[CWorld::PlayerInFocus].m_pPed->m_pWanted->m_nWantedLevel) {
@@ -750,7 +733,6 @@ void CCarAI::MellowOutChaseSpeedBoat(CVehicle* pVehicle)
 	}
 }
 
-//--MIAMI: done
 void CCarAI::MakeWayForCarWithSiren(CVehicle *pVehicle)
 {
 	float flatSpeed = pVehicle->GetMoveSpeed().Magnitude2D();

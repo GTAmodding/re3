@@ -817,7 +817,7 @@ CWeapon::FireInstantHit(CEntity *shooter, CVector *fireSource)
 			CPed *threatAttack = (CPed*)shooterPed->m_pPointGunAt;
 			if ( threatAttack->IsPed() )
 			{
-				threatAttack->m_pedIK.GetComponentPosition((RwV3d)target, PED_MID);
+				threatAttack->m_pedIK.GetComponentPosition(*(RwV3d *)&target, PED_MID);
 				threatAttack->ReactToPointGun(shooter);
 			}
 			else
@@ -1271,7 +1271,7 @@ CWeapon::DoBulletImpact(CEntity *shooter, CEntity *victim,
 				}
 				case ENTITY_TYPE_VEHICLE:
 				{
-					((CVehicle *)victim)->InflictDamage(shooter, m_eWeaponType, info->m_nDamage);
+					((CVehicle *)victim)->InflictDamage(shooter, m_eWeaponType, info->m_nDamage, point->point);
 
 					for ( int32 i = 0; i < 16; i++ )
 						CParticle::AddParticle(PARTICLE_SPARK, point->point, point->normal*0.05f);
@@ -1483,7 +1483,7 @@ CWeapon::FireShotgun(CEntity *shooter, CVector *fireSource)
 				{
 					CVector pos;
 					if (shooterPed->m_pPointGunAt->IsPed()) {
-						((CPed*)shooterPed->m_pPointGunAt)->m_pedIK.GetComponentPosition((RwV3d)pos, PED_MID);
+						((CPed*)shooterPed->m_pPointGunAt)->m_pedIK.GetComponentPosition(*(RwV3d *)&pos, PED_MID);
 					} else {
 						pos = ((CPed*)shooterPed->m_pPointGunAt)->GetPosition();
 					}
@@ -1647,8 +1647,8 @@ CWeapon::FireShotgun(CEntity *shooter, CVector *fireSource)
 				{
 					case ENTITY_TYPE_VEHICLE:
 					{
-						if (point.pieceB >= SURFACE_STREET_LIGHT && point.pieceB <= SURFACE_METAL_FENCE) {
-							((CVehicle*)victim)->BurstTyre(point.pieceB); // TODO(Miami): New parameter: ,true);
+						if (point.pieceB >= SURFACE_LAMP_POST && point.pieceB <= SURFACE_METAL_CHAIN_FENCE) {
+							((CVehicle*)victim)->BurstTyre(point.pieceB, true);
 
 							for (int32 i = 0; i < 4; i++)
 								CParticle::AddParticle(PARTICLE_BULLETHIT_SMOKE, point.point, point.normal * 0.05f);

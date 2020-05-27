@@ -66,7 +66,7 @@
 CPed *gapTempPedList[50];
 uint16 gnNumTempPedList;
 
-CColPoint aTempPedColPts[MAX_COLLISION_POINTS];
+static CColPoint aTempPedColPts[MAX_COLLISION_POINTS];
 
 // TODO(Miami)
 #define AUDIO_NOT_READY
@@ -673,6 +673,7 @@ CPed::CPed(uint32 pedType) : m_pedIK(this)
 	m_nPedMoney = random % 25;
 	if (m_nPedMoney == 23)
 		m_nPedMoney = 400;
+	m_nExtendedRangeTimer = 0;
 	m_bleedCounter = 0;
 #ifdef PED_SKIN
 	m_pWeaponModel = nil;
@@ -2412,7 +2413,7 @@ particleProduceFootDust(CPed *ped, CVector const &pos, float size, int times)
 	switch (ped->m_nSurfaceTouched)
 	{
 		case SURFACE_TARMAC:
-		case SURFACE_DIRT:
+		case SURFACE_GRAVEL:
 		case SURFACE_PAVEMENT:
 		case SURFACE_SAND:
 			for (int i = 0; i < times; ++i) {
@@ -2565,7 +2566,7 @@ CPed::PlayFootSteps(void)
 		}
 	}
 
-	if (m_nSurfaceTouched == SURFACE_PUDDLE) {
+	if (m_nSurfaceTouched == SURFACE_WATER) {
 		float pedSpeed = CVector2D(m_vecMoveSpeed).Magnitude();
 		if (pedSpeed > 0.03f && CTimer::GetFrameCounter() % 2 == 0 && pedSpeed > 0.13f) {
 #ifdef PC_PARTICLE
@@ -2964,7 +2965,7 @@ CPed::CanPedDriveOff(void)
 bool
 CPed::CanPedJumpThis(CEntity *unused, CVector *damageNormal = nil)
 {
-	if (m_nSurfaceTouched == SURFACE_PUDDLE)
+	if (m_nSurfaceTouched == SURFACE_WATER)
 		return true;
 
 	CVector pos = GetPosition();
@@ -4557,7 +4558,8 @@ CPed::InflictDamage(CEntity *damagedBy, eWeaponType method, float damage, ePedPi
 					m_pMyVehicle->AutoPilot.m_nTempAction = TEMPACT_HANDBRAKESTRAIGHT;
 					m_pMyVehicle->AutoPilot.m_nTimeTempAction = CTimer::GetTimeInMilliseconds() + 2000;
 				}
-				if (m_pMyVehicle->CanPedExitCar()) {
+// TODO(MIAMI): argument
+				if (m_pMyVehicle->CanPedExitCar(false)) {
 					SetObjective(OBJECTIVE_LEAVE_CAR_AND_DIE, m_pMyVehicle);
 				} else {
 					m_fHealth = 0.0f;
@@ -5304,8 +5306,8 @@ CPed::SetAttack(CEntity *victim)
 		aimPos += GetUp() * 0.35f;
 		CEntity *obstacle = CWorld::TestSphereAgainstWorld(aimPos, 0.2f, nil, true, false, false, true, false, false);
 		if (obstacle) {
-			if(gaTempSphereColPoints[0].surfaceB != SURFACE_SCAFFOLD && gaTempSphereColPoints[0].surfaceB != SURFACE_METAL_FENCE &&
-				gaTempSphereColPoints[0].surfaceB != SURFACE_WOOD_BOX && gaTempSphereColPoints[0].surfaceB != SURFACE_METAL_POLE) {
+			if(gaTempSphereColPoints[0].surfaceB != SURFACE_TRANSPARENT_CLOTH && gaTempSphereColPoints[0].surfaceB != SURFACE_METAL_CHAIN_FENCE &&
+				gaTempSphereColPoints[0].surfaceB != SURFACE_WOOD_BENCH && gaTempSphereColPoints[0].surfaceB != SURFACE_SCAFFOLD_POLE) {
 				if (!IsPlayer()) {
 					bObstacleShowedUpDuringKillObjective = true;
 					m_shootTimer = 0;
@@ -9712,7 +9714,7 @@ CPed::MoveHeadToLook(void)
 		}
 
 		if (m_pLookTarget->IsPed()) {
-			((CPed*)m_pLookTarget)->m_pedIK.GetComponentPosition((RwV3d)lookPos, PED_MID);
+			((CPed*)m_pLookTarget)->m_pedIK.GetComponentPosition(*(RwV3d *)&lookPos, PED_MID);
 		} else {
 			lookPos = m_pLookTarget->GetPosition();
 		}
@@ -11645,7 +11647,7 @@ CPed::SetJump(void)
 #ifdef VC_PED_PORTS
 		m_nPedState != PED_JUMP && !RpAnimBlendClumpGetAssociation(GetClump(), ANIM_JUMP_LAUNCH) &&
 #endif
-		(m_nSurfaceTouched != SURFACE_STONE || DotProduct(GetForward(), m_vecDamageNormal) >= 0.0f)) {
+		(m_nSurfaceTouched != SURFACE_STEEP_CLIFF || DotProduct(GetForward(), m_vecDamageNormal) >= 0.0f)) {
 		SetStoredState();
 		m_nPedState = PED_JUMP;
 		CAnimBlendAssociation *jumpAssoc = CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ANIM_JUMP_LAUNCH, 8.0f);
@@ -12803,7 +12805,7 @@ CPed::PedSetOutCarCB(CAnimBlendAssociation *animAssoc, void *arg)
 }
 
 // --MIAMI: Done, but enumarate weapon slots
-inline void
+void
 CPed::ReplaceWeaponWhenExitingVehicle(void)
 {
 	eWeaponType weaponType = GetWeapon()->m_eWeaponType;
@@ -12820,7 +12822,7 @@ CPed::ReplaceWeaponWhenExitingVehicle(void)
 }
 
 // --MIAMI: Done
-inline void
+void
 CPed::RemoveWeaponWhenEnteringVehicle(void)
 {
 	if (IsPlayer() && HasWeaponSlot(5) && GetWeapon(5).m_nAmmoTotal > 0 && ((CPlayerPed*)this)->GetPlayerInfoForThisPlayerPed()->m_bDriveByAllowed) {
@@ -13371,7 +13373,8 @@ CPed::ProcessObjective(void)
 						} else {
 							bool targetHasVeh = m_pedInObjective->bInVehicle;
 							if (!targetHasVeh
-								|| targetHasVeh && m_pedInObjective->m_pMyVehicle->CanPedExitCar()) {
+// TODO(MIAMI): argument
+								|| targetHasVeh && m_pedInObjective->m_pMyVehicle->CanPedExitCar(false)) {
 								m_pMyVehicle->AutoPilot.m_nCruiseSpeed = 0;
 								m_pMyVehicle->AutoPilot.m_nCarMission = MISSION_NONE;
 								SetObjective(OBJECTIVE_LEAVE_VEHICLE, m_pMyVehicle);
@@ -13674,7 +13677,7 @@ CPed::ProcessObjective(void)
 						CVector target;
 						CVector ourHead = GetMatrix() * CVector(0.5f, 0.0f, 0.6f);
 						if (m_pedInObjective->IsPed())
-							m_pedInObjective->m_pedIK.GetComponentPosition((RwV3d)target, PED_MID);
+							m_pedInObjective->m_pedIK.GetComponentPosition(*(RwV3d *)&target, PED_MID);
 						else
 							target = m_pedInObjective->GetPosition();
 
@@ -15426,13 +15429,13 @@ CPed::ProcessEntityCollision(CEntity *collidingEnt, CColPoint *collidingPoints)
 				}
 				float minDist = 1.0f;
 				belowTorsoCollided = CCollision::ProcessVerticalLine(ourLine, collidingEnt->GetMatrix(), *hisCol,
-					intersectionPoint, minDist, false, &m_collPoly);
+					intersectionPoint, minDist, false, false, &m_collPoly);
 
 				if (collidedWithBoat && bWasStanding && !belowTorsoCollided) {
 					ourLine.p0.z = ourLine.p1.z;
 					ourLine.p1.z = ourLine.p1.z + gravityEffect;
 					belowTorsoCollided = CCollision::ProcessVerticalLine(ourLine, collidingEnt->GetMatrix(), *hisCol,
-						intersectionPoint, minDist, false, &m_collPoly);
+						intersectionPoint, minDist, false, false, &m_collPoly);
 				}
 				if (belowTorsoCollided) {
 #ifndef VC_PED_PORTS
@@ -15470,7 +15473,7 @@ CPed::ProcessEntityCollision(CEntity *collidingEnt, CColPoint *collidingPoints)
 							GetMatrix().GetPosition().z = FEET_OFFSET + intersectionPoint.point.z;
 #endif
 							m_nSurfaceTouched = intersectionPoint.surfaceB;
-							if (m_nSurfaceTouched == SURFACE_STONE) {
+							if (m_nSurfaceTouched == SURFACE_STEEP_CLIFF) {
 								bHitSteepSlope = true;
 								m_vecDamageNormal = intersectionPoint.normal;
 							}
@@ -15556,7 +15559,7 @@ CPed::ProcessEntityCollision(CEntity *collidingEnt, CColPoint *collidingPoints)
 #endif
 				sphereNormal.Normalise();
 				collidingPoints[sphere].normal = sphereNormal;
-				if (collidingPoints[sphere].surfaceB == SURFACE_STONE)
+				if (collidingPoints[sphere].surfaceB == SURFACE_STEEP_CLIFF)
 					bHitSteepSlope = true;
 			}
 		}
@@ -15764,17 +15767,18 @@ CPed::SetEnterCar(CVehicle *car, uint32 unused)
 void
 CPed::SetRadioStation(void)
 {
+	// TODO: this should be gone
 	static const uint8 radiosPerRadioCategories[10][4] = {
-		{JAH_RADIO, RISE_FM, GAME_FM, MSX_FM},
-		{HEAD_RADIO, DOUBLE_CLEF, LIPS_106, FLASHBACK},
-		{RISE_FM, GAME_FM, MSX_FM, FLASHBACK},
-		{HEAD_RADIO, RISE_FM, LIPS_106, MSX_FM},
-		{HEAD_RADIO, RISE_FM, MSX_FM, FLASHBACK},
-		{JAH_RADIO, RISE_FM, LIPS_106, FLASHBACK},
-		{HEAD_RADIO, RISE_FM, LIPS_106, FLASHBACK},
-		{HEAD_RADIO, JAH_RADIO, LIPS_106, FLASHBACK},
-		{HEAD_RADIO, DOUBLE_CLEF, LIPS_106, FLASHBACK},
-		{CHATTERBOX, HEAD_RADIO, LIPS_106, GAME_FM}
+		{KCHAT, FEVER, VCPR, RADIO_ESPANTOSO},
+		{WILDSTYLE, FLASH_FM, V_ROCK, EMOTION},
+		{FEVER, VCPR, RADIO_ESPANTOSO, EMOTION},
+		{WILDSTYLE, FEVER, V_ROCK, RADIO_ESPANTOSO},
+		{WILDSTYLE, FEVER, RADIO_ESPANTOSO, EMOTION},
+		{KCHAT, FEVER, V_ROCK, EMOTION},
+		{WILDSTYLE, FEVER, V_ROCK, EMOTION},
+		{WILDSTYLE, KCHAT, V_ROCK, EMOTION},
+		{WILDSTYLE, FLASH_FM, V_ROCK, EMOTION},
+		{WAVE, WILDSTYLE, V_ROCK, VCPR}
 	};
 	uint8 orderInCat = 0; // BUG: this wasn't initialized
 
@@ -16150,7 +16154,8 @@ CPed::SetExitCar(CVehicle *veh, uint32 wantedDoorNode)
 	uint32 optedDoorNode = wantedDoorNode;
 	bool teleportNeeded = false;
 	bool isLow = !!veh->bLowVehicle;
-	if (!veh->CanPedExitCar()) {
+// TODO(MIAMI): argument
+	if (!veh->CanPedExitCar(false)) {
 		if (veh->pDriver && !veh->pDriver->IsPlayer()) {
 			veh->AutoPilot.m_nCruiseSpeed = 0;
 			veh->AutoPilot.m_nCarMission = MISSION_NONE;
@@ -17426,7 +17431,7 @@ CPed::UpdatePosition(void)
 		velocityChange = m_moved + velocityOfSurface - m_vecMoveSpeed;
 		m_fRotationCur += curSurface->m_vecTurnSpeed.z * CTimer::GetTimeStep();
 		m_fRotationDest += curSurface->m_vecTurnSpeed.z * CTimer::GetTimeStep();
-	} else if (m_nSurfaceTouched != SURFACE_STONE || m_vecDamageNormal.x == 0.0f && m_vecDamageNormal.y == 0.0f) {
+	} else if (m_nSurfaceTouched != SURFACE_STEEP_CLIFF || m_vecDamageNormal.x == 0.0f && m_vecDamageNormal.y == 0.0f) {
 		velocityChange = m_moved - m_vecMoveSpeed;
 	} else {
 		// Ped got damaged by steep slope

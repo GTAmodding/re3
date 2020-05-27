@@ -28,6 +28,7 @@ RwImVertexIndex StreakIndexList[12];
 RwIm3DVertex TraceVertices[6];
 RwImVertexIndex TraceIndexList[12];
 
+bool CSpecialFX::bSnapShotActive;
 
 void
 CSpecialFX::Init(void)

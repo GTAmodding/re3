@@ -1449,7 +1449,8 @@ CStreaming::StreamVehiclesAndPeds(void)
 		timeBeforeNextLoad--;
 	else if(ms_numVehiclesLoaded <= desiredNumVehiclesLoaded){
 		CZoneInfo zone;
-		CTheZones::GetZoneInfoForTimeOfDay(&FindPlayerCoors(), &zone);
+		CVector coors = FindPlayerCoors();
+		CTheZones::GetZoneInfoForTimeOfDay(&coors, &zone);
 		int32 maxReq = -1;
 		int32 mostRequestedRating = 0;
 		for(i = 0; i < CCarCtrl::TOTAL_CUSTOM_CLASSES; i++){

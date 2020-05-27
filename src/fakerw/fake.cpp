@@ -152,7 +152,7 @@ RwReal       RwCameraGetNearClipPlane(const RwCamera *camera) { return camera->n
 RwReal       RwCameraGetFarClipPlane(const RwCamera *camera) { return camera->farPlane; }
 RwCamera    *RwCameraSetFogDistance(RwCamera *camera, RwReal fogDistance) { camera->fogPlane = fogDistance; return camera; }
 RwReal       RwCameraGetFogDistance(const RwCamera *camera) { return camera->fogPlane; }
-RwCamera    *RwCameraGetCurrentCamera(void);
+RwCamera    *RwCameraGetCurrentCamera(void) { return rw::engine->currentCamera; }
 RwCameraProjection RwCameraGetProjection(const RwCamera *camera);
 const RwV2d *RwCameraGetViewWindow(const RwCamera *camera) { return &camera->viewWindow; }
 RwMatrix    *RwCameraGetViewMatrix(RwCamera *camera) { return &camera->viewMatrix; }
@@ -615,8 +615,8 @@ RpGeometry  *RpGeometryCreateSpace(RwReal radius);
 RpMorphTarget  *RpMorphTargetSetBoundingSphere(RpMorphTarget *morphTarget, const RwSphere *boundingSphere) { morphTarget->boundingSphere = *boundingSphere; return morphTarget; }
 RwSphere  *RpMorphTargetGetBoundingSphere(RpMorphTarget *morphTarget) { return &morphTarget->boundingSphere; }
 const RpMorphTarget  *RpMorphTargetCalcBoundingSphere(const RpMorphTarget *morphTarget, RwSphere *boundingSphere) { *boundingSphere = morphTarget->calculateBoundingSphere(); return morphTarget; }
-RwInt32 RpGeometryAddMorphTargets(RpGeometry *geometry, RwInt32 mtcount);
-RwInt32 RpGeometryAddMorphTarget(RpGeometry *geometry);
+RwInt32 RpGeometryAddMorphTargets(RpGeometry *geometry, RwInt32 mtcount) { RwInt32 n = geometry->numMorphTargets; geometry->addMorphTargets(mtcount); return n; }
+RwInt32 RpGeometryAddMorphTarget(RpGeometry *geometry) { return RpGeometryAddMorphTargets(geometry, 1); }
 RpGeometry  *RpGeometryRemoveMorphTarget(RpGeometry *geometry, RwInt32 morphTarget);
 RwInt32 RpGeometryGetNumMorphTargets(const RpGeometry *geometry);
 RpMorphTarget  *RpGeometryGetMorphTarget(const RpGeometry *geometry, RwInt32 morphTarget) { return &geometry->morphTargets[morphTarget]; }

@@ -447,7 +447,7 @@ public:
 	uint32 bIsDrowning : 1;
 	uint32 bDrownsInWater : 1;
 	//uint32 b156_4
-	//uint32 b156_8
+	uint32 b156_8 : 1;
 	uint32 bIsPlayerFriend : 1;
 #ifdef VC_PED_PORTS
 	uint32 bHeadStuckInCollision : 1;
@@ -523,6 +523,7 @@ public:
 	CPathNode *m_pNextPathNode;
 	float m_fHealth;
 	float m_fArmour;
+	uint32 m_nExtendedRangeTimer;
 	int16 m_routeLastPoint;
 	uint16 m_routeStartPoint;
 	int16 m_routePointsPassed;
@@ -863,6 +864,7 @@ public:
 	static void PedSetDraggedOutCarPositionCB(CAnimBlendAssociation *assoc, void *arg);
 
 	bool IsPlayer(void);
+	bool IsFemale(void) { return m_nPedType == PEDTYPE_CIVFEMALE || m_nPedType == PEDTYPE_PROSTITUTE; }
 	bool UseGroundColModel(void);
 	bool CanSetPedState(void);
 	bool IsPedInControl(void);

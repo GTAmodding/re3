@@ -15,6 +15,6 @@ public:
 	static bool InOrOut[NUMROADBLOCKS];
 
 	static void Init(void);
-	static void GenerateRoadBlockCopsForCar(CVehicle* pVehicle, int32 roadBlockType, int16 roadBlockNode);
+	static void GenerateRoadBlockCopsForCar(CVehicle* pVehicle, int32 roadBlockType);
 	static void GenerateRoadBlocks(void);
 };

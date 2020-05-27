@@ -509,18 +509,18 @@ CCoronas::DoSunAndMoon(void)
 {
 	// yeah, moon is done somewhere else....
 
-	CVector sunCoors = CTimeCycle::GetSunPosition();
+	CVector sunCoors = CTimeCycle::GetSunDirection();
 	sunCoors *= 150.0f;
 	sunCoors += TheCamera.GetPosition();
 
-	if(CTimeCycle::GetSunPosition().z > -0.2f){
+	if(CTimeCycle::GetSunDirection().z > -0.2f){
 		float size = ((CGeneral::GetRandomNumber()&0xFF) * 0.005f + 10.0f) * CTimeCycle::GetSunSize();
 		RegisterCorona(SUN_CORE,
 			CTimeCycle::GetSunCoreRed(), CTimeCycle::GetSunCoreGreen(), CTimeCycle::GetSunCoreBlue(),
 			255, sunCoors, size,
 			999999.88f, TYPE_STAR, FLARE_NONE, REFLECTION_OFF, LOSCHECK_OFF, STREAK_OFF, 0.0f);
 
-		if(CTimeCycle::GetSunPosition().z > 0.0f)
+		if(CTimeCycle::GetSunDirection().z > 0.0f)
 			RegisterCorona(SUN_CORONA,
 				CTimeCycle::GetSunCoronaRed(), CTimeCycle::GetSunCoronaGreen(), CTimeCycle::GetSunCoronaBlue(),
 				255, sunCoors, 25.0f * CTimeCycle::GetSunSize(),

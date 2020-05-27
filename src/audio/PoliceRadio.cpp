@@ -24,8 +24,6 @@ struct tPoliceRadioZone {
 };
 
 tPoliceRadioZone ZoneSfx[NUMAUDIOZONES];
-char SubZo2Label[8];
-char SubZo3Label[8];
 
 int32 g_nMissionAudioSfx = TOTAL_AUDIO_SAMPLES;
 int8 g_nMissionAudioPlayingStatus = 2;
@@ -42,48 +40,22 @@ cAudioManager::InitialisePoliceRadioZones()
 	strcpy(ZoneSfx[i].m_aName, name); \
 	ZoneSfx[i].m_nSampleIndex = sample;
 
-	SETZONESFX(0, "HOSPI_2", SFX_POLICE_RADIO_ROCKFORD);
-	SETZONESFX(1, "CONSTRU", SFX_POLICE_RADIO_FORT_STAUNTON);
-	SETZONESFX(2, "STADIUM", SFX_POLICE_RADIO_ASPATRIA);
-	SETZONESFX(3, "YAKUSA", SFX_POLICE_RADIO_TORRINGTON);
-	SETZONESFX(4, "SHOPING", SFX_POLICE_RADIO_BEDFORD_POINT);
-	SETZONESFX(5, "COM_EAS", SFX_POLICE_RADIO_NEWPORT);
-	SETZONESFX(6, "PARK", SFX_POLICE_RADIO_BELLEVILLE_PARK);
-	SETZONESFX(7, "UNIVERS", SFX_POLICE_RADIO_LIBERTY_CAMPUS);
-	SETZONESFX(8, "BIG_DAM", SFX_POLICE_RADIO_COCHRANE_DAM);
-	SETZONESFX(9, "SUB_IND", SFX_POLICE_RADIO_PIKE_CREEK);
-	SETZONESFX(10, "SWANKS", SFX_POLICE_RADIO_CEDAR_GROVE);
-	SETZONESFX(11, "PROJECT", SFX_POLICE_RADIO_WICHITA_GARDENS);
-	SETZONESFX(12, "AIRPORT", SFX_POLICE_RADIO_FRANCIS_INTERNATIONAL_AIRPORT);
-	SETZONESFX(13, "PORT_W", SFX_POLICE_RADIO_CALLAHAN_POINT);
-	/*
-	SETZONESFX(14, "PORT_S", SFX_POLICE_RADIO_ATLANTIC_QUAYS);
-	SETZONESFX(15, "PORT_E", SFX_POLICE_RADIO_PORTLAND_HARBOUR);
-	SETZONESFX(16, "PORT_I", SFX_POLICE_RADIO_TRENTON);
-	SETZONESFX(17, "CHINA", SFX_POLICE_RADIO_CHINATOWN);
-	SETZONESFX(18, "REDLIGH", SFX_POLICE_RADIO_RED_LIGHT_DISTRICT);
-	SETZONESFX(19, "TOWERS", SFX_POLICE_RADIO_HEPBURN_HEIGHTS);
-	SETZONESFX(20, "LITTLEI", SFX_POLICE_RADIO_SAINT_MARKS);
-	SETZONESFX(21, "HARWOOD", SFX_POLICE_RADIO_HARWOOD);
-	SETZONESFX(22, "EASTBAY", SFX_POLICE_RADIO_PORTLAND_BEACH);
-	SETZONESFX(23, "S_VIEW", SFX_POLICE_RADIO_PORTLAND_STRAIGHTS);
-	SETZONESFX(24, "CITYZON", SFX_POLICE_RADIO_LIBERTY_CITY);
-	SETZONESFX(25, "IND_ZON", SFX_POLICE_RADIO_PORTLAND);
-	SETZONESFX(26, "COM_ZON", SFX_POLICE_RADIO_STAUNTON_ISLAND);
-	SETZONESFX(27, "SUB_ZON", SFX_POLICE_RADIO_SHORESIDE_VALE);
-	SETZONESFX(28, "SUB_ZO2", SFX_POLICE_RADIO_SHORESIDE_VALE);
-	SETZONESFX(29, "SUB_ZO3", SFX_POLICE_RADIO_SHORESIDE_VALE);
-	SETZONESFX(30, "A", SFX_POLICE_RADIO_ROCKFORD);
-	SETZONESFX(31, "A", SFX_POLICE_RADIO_ROCKFORD);
-	SETZONESFX(32, "A", SFX_POLICE_RADIO_ROCKFORD);
-	SETZONESFX(33, "A", SFX_POLICE_RADIO_ROCKFORD);
-	SETZONESFX(34, "A", SFX_POLICE_RADIO_ROCKFORD);
-	*/
+	SETZONESFX(0, "VICE_C", SFX_POLICE_RADIO_VICE_CITY);
+	SETZONESFX(1, "IND_ZON", SFX_POLICE_RADIO_VICE_CITY_BEACH);
+	SETZONESFX(2, "COM_ZON", SFX_POLICE_RADIO_VICE_CITY_MAINLAND);
+	SETZONESFX(3, "BEACH1", SFX_POLICE_RADIO_OCEAN_BEACH);
+	SETZONESFX(4, "BEACH2", SFX_POLICE_RADIO_WASHINGTON_BEACH);
+	SETZONESFX(5, "BEACH3", SFX_POLICE_RADIO_VICE_POINT);
+	SETZONESFX(6, "GOLFC", SFX_POLICE_RADIO_LEAF_LINKS);
+	SETZONESFX(7, "STARI", SFX_POLICE_RADIO_STRAFISH_ISLAND);
+	SETZONESFX(8, "DOCKS", SFX_POLICE_RADIO_VICE_PORT);
+	SETZONESFX(9, "HAVANA", SFX_POLICE_RADIO_LITTLE_HAVANA);
+	SETZONESFX(10, "HAITI", SFX_POLICE_RADIO_LITTLE_HAITI);
+	SETZONESFX(11, "PORNI", SFX_POLICE_RADIO_PRAWN_ISLAND);
+	SETZONESFX(12, "DTOWN", SFX_POLICE_RADIO_DOWNTOWN);
+	SETZONESFX(13, "A_PORT", SFX_POLICE_RADIO_ESCOBAR_INTERNATIONAL);
 
 #undef SETZONESFX
-
-	strcpy(SubZo2Label, "SUB_ZO2");
-	strcpy(SubZo3Label, "SUB_ZO3");
 }
 
 void
@@ -246,7 +218,7 @@ cAudioManager::ServicePoliceRadioChannel(int32 wantedLevel)
 			if (!wantedLevel) {
 				if (gSpecialSuspectLastSeenReport) {
 					gSpecialSuspectLastSeenReport = 0;
-				} else if (((sample >= SFX_POLICE_RADIO_MESSAGE_NOISE_1) && (sample <= SFX_POLICE_RADIO_MESSAGE_NOISE_3)) || sample == TOTAL_AUDIO_SAMPLES) {
+				} else if (sample == SFX_POLICE_RADIO_MESSAGE_NOISE_1 || sample == TOTAL_AUDIO_SAMPLES) {
 					bChannelOpen = false;
 					processed = true;
 				}
@@ -257,8 +229,6 @@ cAudioManager::ServicePoliceRadioChannel(int32 wantedLevel)
 				SampleManager.InitialiseChannel(policeChannel, sample, 0);
 				switch (sample) {
 				case SFX_POLICE_RADIO_MESSAGE_NOISE_1:
-				case SFX_POLICE_RADIO_MESSAGE_NOISE_2:
-				case SFX_POLICE_RADIO_MESSAGE_NOISE_3:
 					freq = m_anRandomTable[4] % 2000 + 10025;
 					bChannelOpen = bChannelOpen == false;
 					break;
@@ -313,7 +283,7 @@ cAudioManager::SetupCrimeReport()
 				sampleIndex = ZoneSfx[j].m_nSampleIndex;
 				m_sPoliceRadioQueue.Add(m_anRandomTable[4] % 3 + SFX_POLICE_RADIO_MESSAGE_NOISE_1);
 				m_sPoliceRadioQueue.Add(m_anRandomTable[0] % 3 + SFX_WEVE_GOT);
-				m_sPoliceRadioQueue.Add(m_anRandomTable[1] % 2 + SFX_A_10_1);
+				m_sPoliceRadioQueue.Add(SFX_A_10);
 				switch (m_sPoliceRadioQueue.crimes[i].type) {
 				case CRIME_PED_BURNED: m_sPoliceRadioQueue.crimes[i].type = CRIME_HIT_PED; break;
 				case CRIME_COP_BURNED: m_sPoliceRadioQueue.crimes[i].type = CRIME_HIT_COP; break;
@@ -323,37 +293,31 @@ cAudioManager::SetupCrimeReport()
 				}
 				m_sPoliceRadioQueue.Add(m_sPoliceRadioQueue.crimes[i].type + SFX_CRIME_1 - 1);
 				m_sPoliceRadioQueue.Add(SFX_IN);
-				if (sampleIndex == SFX_POLICE_RADIO_SHORESIDE_VALE &&
-					(strcmp(zone->name, SubZo2Label) == 0 || strcmp(zone->name, SubZo3Label) == 0)) {
+				rangeX = zone->maxx - zone->minx;
+				rangeY = zone->maxy - zone->miny;
+				halfX = 0.5f * rangeX + zone->minx;
+				halfY = 0.5f * rangeY + zone->miny;
+				quarterX = 0.25f * rangeX;
+				quarterY = 0.25f * rangeY;
+
+				if (m_sPoliceRadioQueue.crimes[i].position.y > halfY + quarterY) {
 					m_sPoliceRadioQueue.Add(SFX_NORTH);
-					m_sPoliceRadioQueue.Add(SFX_EAST);
-				} else {
-					rangeX = zone->maxx - zone->minx;
-					rangeY = zone->maxy - zone->miny;
-					halfX = 0.5f * rangeX + zone->minx;
-					halfY = 0.5f * rangeY + zone->miny;
-					quarterX = 0.25f * rangeX;
-					quarterY = 0.25f * rangeY;
-
-					if (m_sPoliceRadioQueue.crimes[i].position.y > halfY + quarterY) {
-						m_sPoliceRadioQueue.Add(SFX_NORTH);
-						processed = true;
-					} else if (m_sPoliceRadioQueue.crimes[i].position.y < halfY - quarterY) {
-						m_sPoliceRadioQueue.Add(SFX_SOUTH);
-						processed = true;
-					}
-
-					if (m_sPoliceRadioQueue.crimes[i].position.x > halfX + quarterX)
-						m_sPoliceRadioQueue.Add(SFX_EAST);
-					else if (m_sPoliceRadioQueue.crimes[i].position.x < halfX - quarterX)
-						m_sPoliceRadioQueue.Add(SFX_WEST);
-					else if (!processed)
-						m_sPoliceRadioQueue.Add(SFX_CENTRAL);
-
-					m_sPoliceRadioQueue.Add(sampleIndex);
-					m_sPoliceRadioQueue.Add(m_anRandomTable[2] % 3 + SFX_POLICE_RADIO_MESSAGE_NOISE_1);
-					m_sPoliceRadioQueue.Add(TOTAL_AUDIO_SAMPLES);
+					processed = true;
+				} else if (m_sPoliceRadioQueue.crimes[i].position.y < halfY - quarterY) {
+					m_sPoliceRadioQueue.Add(SFX_SOUTH);
+					processed = true;
 				}
+
+				if (m_sPoliceRadioQueue.crimes[i].position.x > halfX + quarterX)
+					m_sPoliceRadioQueue.Add(SFX_EAST);
+				else if (m_sPoliceRadioQueue.crimes[i].position.x < halfX - quarterX)
+					m_sPoliceRadioQueue.Add(SFX_WEST);
+				else if (!processed)
+					m_sPoliceRadioQueue.Add(SFX_CENTRAL);
+
+				m_sPoliceRadioQueue.Add(sampleIndex);
+				m_sPoliceRadioQueue.Add(m_anRandomTable[2] % 3 + SFX_POLICE_RADIO_MESSAGE_NOISE_1);
+				m_sPoliceRadioQueue.Add(TOTAL_AUDIO_SAMPLES);
 				break;
 			}
 		}
@@ -559,7 +523,7 @@ cAudioManager::SetupSuspectLastSeenReport()
 	//					main_color = SFX_POLICE_RADIO_BLACK;
 #endif
 					case MI_IDAHO:
-					case MI_STALLION: sample = SFX_POLICE_RADIO_CONVERTIBLE; break;
+	//				case MI_STALLION: sample = SFX_POLICE_RADIO_CONVERTIBLE; break;
 #ifdef FIX_BUGS
 	//				case MI_YAKUZA:
 	//					color_pre_modifier = TOTAL_AUDIO_SAMPLES;
@@ -578,7 +542,7 @@ cAudioManager::SetupSuspectLastSeenReport()
 #endif
 					case MI_PEREN:
 					case MI_SENTINEL:
-					case MI_FBICAR: sample = SFX_POLICE_RADIO_SALOON; break;
+	//				case MI_FBICAR: sample = SFX_POLICE_RADIO_SALOON; break;
 					case MI_PATRIOT:
 					case MI_BOBCAT: sample = SFX_POLICE_RADIO_PICKUP; break;
 					case MI_FIRETRUCK: sample = SFX_POLICE_RADIO_FIRE_TRUCK; break;
@@ -588,7 +552,7 @@ cAudioManager::SetupSuspectLastSeenReport()
 #endif
 					case MI_TRASH:
 					case MI_BARRACKS: sample = SFX_POLICE_RADIO_TRUCK; break;
-					case MI_STRETCH: sample = SFX_POLICE_RADIO_LIMO; break;
+	//				case MI_STRETCH: sample = SFX_POLICE_RADIO_LIMO; break;
 					case MI_MANANA:
 					case MI_ESPERANT: sample = SFX_POLICE_RADIO_2_DOOR; break;
 #ifdef FIX_BUGS
@@ -631,12 +595,12 @@ cAudioManager::SetupSuspectLastSeenReport()
 						main_color = TOTAL_AUDIO_SAMPLES;
 						color_post_modifier = TOTAL_AUDIO_SAMPLES;
 						break;
-					case MI_TRAIN:
-						sample = SFX_POLICE_RADIO_SUBWAY_CAR;
-						main_color = TOTAL_AUDIO_SAMPLES;
-						color_post_modifier = TOTAL_AUDIO_SAMPLES;
+	//				case MI_TRAIN:
+	//					sample = SFX_POLICE_RADIO_SUBWAY_CAR;
+	//					main_color = TOTAL_AUDIO_SAMPLES;
+	//					color_post_modifier = TOTAL_AUDIO_SAMPLES;
 
-						break;
+	//					break;
 					default:
 						debug("\n *** UNKNOWN CAR MODEL INDEX %d *** ", veh->GetModelIndex());
 						return;
@@ -645,14 +609,7 @@ cAudioManager::SetupSuspectLastSeenReport()
 					m_sPoliceRadioQueue.Add(SFX_POLICE_RADIO_SUSPECT);
 					if (m_anRandomTable[3] % 2) 
 						m_sPoliceRadioQueue.Add(SFX_POLICE_RADIO_LAST_SEEN);
-#ifdef FIX_BUGS
-					if (main_color == SFX_POLICE_RADIO_ORANGE && color_pre_modifier == TOTAL_AUDIO_SAMPLES)
-#else
-					if (main_color == SFX_POLICE_RADIO_ORANGE)
-#endif
-						m_sPoliceRadioQueue.Add(SFX_POLICE_RADIO_IN_AN);
-					else
-						m_sPoliceRadioQueue.Add(SFX_POLICE_RADIO_IN_A);
+					m_sPoliceRadioQueue.Add(SFX_POLICE_RADIO_IN_A);
 					if (color_pre_modifier != TOTAL_AUDIO_SAMPLES)
 						m_sPoliceRadioQueue.Add(color_pre_modifier);
 					if (main_color != TOTAL_AUDIO_SAMPLES)
@@ -731,34 +688,27 @@ cAudioManager::PlaySuspectLastSeen(float x, float y, float z)
 					m_sPoliceRadioQueue.Add(SFX_POLICE_RADIO_SUSPECT);
 					m_sPoliceRadioQueue.Add(SFX_POLICE_RADIO_LAST_SEEN);
 					m_sPoliceRadioQueue.Add(SFX_IN);
-					if (sample == SFX_POLICE_RADIO_SHORESIDE_VALE &&
-						(strcmp(zone->name, SubZo2Label) == 0 ||
-							strcmp(zone->name, SubZo3Label) == 0)) {
+					rangeX = zone->maxx - zone->minx;
+					rangeY = zone->maxy - zone->miny;
+					halfX = 0.5f * rangeX + zone->minx;
+					halfY = 0.5f * rangeY + zone->miny;
+					quarterX = 0.25f * rangeX;
+					quarterY = 0.25f * rangeY;
+
+					if (vec.y > halfY + quarterY) {
 						m_sPoliceRadioQueue.Add(SFX_NORTH);
-						m_sPoliceRadioQueue.Add(SFX_EAST);
-					} else {
-						rangeX = zone->maxx - zone->minx;
-						rangeY = zone->maxy - zone->miny;
-						halfX = 0.5f * rangeX + zone->minx;
-						halfY = 0.5f * rangeY + zone->miny;
-						quarterX = 0.25f * rangeX;
-						quarterY = 0.25f * rangeY;
-
-						if (vec.y > halfY + quarterY) {
-							m_sPoliceRadioQueue.Add(SFX_NORTH);
-							processed = true;
-						} else if (vec.y < halfY - quarterY) {
-							m_sPoliceRadioQueue.Add(SFX_SOUTH);
-							processed = true;
-						}
-
-						if (vec.x > halfX + quarterX)
-							m_sPoliceRadioQueue.Add(SFX_EAST);
-						else if (vec.x < halfX - quarterX)
-							m_sPoliceRadioQueue.Add(SFX_WEST);
-						else if (!processed)
-							m_sPoliceRadioQueue.Add(SFX_CENTRAL);
+						processed = true;
+					} else if (vec.y < halfY - quarterY) {
+						m_sPoliceRadioQueue.Add(SFX_SOUTH);
+						processed = true;
 					}
+
+					if (vec.x > halfX + quarterX)
+						m_sPoliceRadioQueue.Add(SFX_EAST);
+					else if (vec.x < halfX - quarterX)
+						m_sPoliceRadioQueue.Add(SFX_WEST);
+					else if (!processed)
+						m_sPoliceRadioQueue.Add(SFX_CENTRAL);
 					m_sPoliceRadioQueue.Add(sample);
 					m_sPoliceRadioQueue.Add(m_anRandomTable[2] % 3 + SFX_POLICE_RADIO_MESSAGE_NOISE_1);
 					m_sPoliceRadioQueue.Add(TOTAL_AUDIO_SAMPLES);

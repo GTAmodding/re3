@@ -108,7 +108,7 @@ const C2dEffect* CPedAttractorManager::GetEffectForIceCreamVan(CVehicle* pVehicl
 CVehicle* CPedAttractorManager::GetIceCreamVanForEffect(C2dEffect* pEffect)
 {
 	if (vVehicleToEffect.empty())
-		return false;
+		return nil;
 	for (std::vector<CVehicleToEffect>::const_iterator assoc = vVehicleToEffect.cbegin(); assoc != vVehicleToEffect.cend(); ++assoc) {
 		if (assoc->HasThisEffect(pEffect))
 			return assoc->GetVehicle();
@@ -625,7 +625,7 @@ CPedAttractor* CPedAttractorManager::RegisterPed(CPed* pPed, C2dEffect* pEffect,
 		ComputeEffectPos(pAttractor->GetEffect(), matrix, vEffectPos);
 		if (pAttractor->GetEffect() == pEffect && vEffectPos == pAttractor->GetEffectPos()) {
 			if (!IsApproachable(pEffect, matrix, pAttractor->ComputeFreeSlot(), pPed))
-				return false;
+				return nil;
 			pRegisteredAttractor = pAttractor;
 			break;
 		}

@@ -51,6 +51,7 @@ public:
 	int32 field_268;
 	int32 field_272;
 	uint32 m_nHavocLevel;
+	float m_fMediaAttention;
 	bool m_bInfiniteSprint;
 	bool m_bFastReload;
 	bool m_bFireproof;

@@ -910,7 +910,7 @@ CEntity::ProcessLightsForEntity(void)
 				camDir *= 2.0f/dist;
 				glareDir += camDir;
 				glareDir.Normalise();
-				float camAngle = -DotProduct(glareDir, CTimeCycle::GetSunPosition());
+				float camAngle = -DotProduct(glareDir, CTimeCycle::GetSunDirection());
 				if(camAngle > 0.0f){
 					float intens = Sqrt(camAngle) * CWeather::SunGlare;
 					pos += camDir;

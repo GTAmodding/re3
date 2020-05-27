@@ -1028,12 +1028,6 @@ DebugMenuProcess(void)
 
 }
 
-#ifdef LIBRW
-#define CURRENTCAM (rw::engine->currentCamera)
-#else
-#define CURRENTCAM ((RwCamera*)RWSRCGLOBAL(curCamera))
-#endif
-
 void
 DebugMenuRender(void)
 {
@@ -1048,7 +1042,7 @@ DebugMenuRender(void)
 	RwRenderStateSet(rwRENDERSTATEFOGENABLE, 0);
 	RwRenderStateSet(rwRENDERSTATECULLMODE, (void*)rwCULLMODECULLNONE);
 
-	RwCamera *cam = CURRENTCAM;
+	RwCamera *cam = RwCameraGetCurrentCamera();
 	screenWidth = RwRasterGetWidth(RwCameraGetRaster(cam));
 	screenHeight = RwRasterGetHeight(RwCameraGetRaster(cam));
 
@@ -1080,7 +1074,7 @@ drawArrow(RwRect r, int direction, int style)
 	static RwImVertexIndex indices[] = { 0, 1, 2, 2, 1, 3 };
 	static RwIm2DVertex arrowVerts[4];
 
-	RwCamera *cam = CURRENTCAM;
+	RwCamera *cam = RwCameraGetCurrentCamera();
 	float recipz = 1.0f/RwCameraGetNearClipPlane(cam);
 
 	int width = RwRasterGetWidth(arrow);
@@ -1183,7 +1177,7 @@ drawMouse(void)
 	static RwIm2DVertex vertices[4];
 	RwIm2DVertex *vert;
 	RwCamera *cam;
-	cam = CURRENTCAM;
+	cam = RwCameraGetCurrentCamera();
 	float x = mouseX;
 	float y = mouseY;
 	float w = RwRasterGetWidth(cursor);

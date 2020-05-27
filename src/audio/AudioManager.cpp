@@ -39,8 +39,8 @@ cAudioManager::cAudioManager()
 	}
 	m_nAudioEntitiesTotal = 0;
 	m_FrameCounter = 0;
-	m_bFifthFrameFlag = 0;
-	m_bTimerJustReset = 0;
+	m_bFifthFrameFlag = false;
+	m_bTimerJustReset = false;
 	m_nTimer = 0;
 }
 

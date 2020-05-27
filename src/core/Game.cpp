@@ -64,6 +64,7 @@
 #include "Script.h"
 #include "Shadows.h"
 #include "Skidmarks.h"
+#include "SetPieces.h"
 #include "SpecialFX.h"
 #include "Sprite2d.h"
 #include "Stats.h"
@@ -275,6 +276,7 @@ bool CGame::Initialise(const char* datFile)
 	CCullZones::Init();
 	COcclusion::Init();
 	CCollision::Init();
+	CSetPieces::Init();
 	CTheZones::Init();
 	CUserDisplay::Init();
 	CMessages::Init();
@@ -529,6 +531,7 @@ void CGame::ShutDownForRestart(void)
 	CRadar::RemoveRadarSections();
 	FrontEndMenuManager.UnloadTextures();
 	CParticleObject::RemoveAllParticleObjects();
+	CSetPieces::Init();
 	CPedType::Shutdown();
 	CSpecialFX::Shutdown();
 	TidyUpMemory(true, false);
@@ -541,7 +544,14 @@ void CGame::InitialiseWhenRestarting(void)
 	
 	CTimer::Initialise();
 	CSprite2d::SetRecipNearClip();
-	
+
+	if (b_FoundRecentSavedGameWantToLoad || FrontEndMenuManager.m_bWantToLoad)
+	{
+		LoadSplash("splash1");
+		if (FrontEndMenuManager.m_bWantToLoad)
+			FrontEndMenuManager.MessageScreen("FELD_WR", true);
+	}
+
 	b_FoundRecentSavedGameWantToLoad = false;
 	
 	TheCamera.Init();
@@ -622,6 +632,7 @@ void CGame::Process(void)
 		CAntennas::Update();
 		CGlass::Update();
 		CSceneEdit::Update();
+		CSetPieces::Update();
 		CEventList::Update();
 		CParticle::Update();
 		gFireManager.Update();
@@ -667,14 +678,8 @@ void CGame::Process(void)
 void
 CGame::InitAfterFocusLoss()
 {
-	/*
-	byte_869656 = byte_86969D;
-	result = cDMAudio::SetCurrent3DProvider(byte_86969D);
-	if ( !bGameStarted && !bMenuVisible )
-		byte_869642 = 1;
-	*/
-
-	//cDMAudio::SetCurrent3DProvider( ? ? ? );
+	FrontEndMenuManager.m_nPrefsAudio3DProviderIndex = FrontEndMenuManager.m_lastWorking3DAudioProvider;
+	DMAudio.SetCurrent3DProvider(FrontEndMenuManager.m_lastWorking3DAudioProvider);
 
 	if (!FrontEndMenuManager.m_bGameNotLoaded && !FrontEndMenuManager.m_bMenuActive)
 		FrontEndMenuManager.m_bStartUpFrontEndRequested = true;

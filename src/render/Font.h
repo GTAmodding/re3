@@ -68,8 +68,8 @@ class CFont
 	static int16 Size[MAX_FONTS][193];
 #endif
 	static int16 NewLine;
-	static CSprite2d Sprite[MAX_FONTS];
 public:
+	static CSprite2d Sprite[MAX_FONTS];
 	static CFontDetails Details;
 
 	static void Initialise(void);

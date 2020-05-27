@@ -4,6 +4,9 @@
 #include "Text.h"
 #include "World.h"
 
+//TODO
+int32 CStats::SeagullsKilled;
+
 int32 CStats::DaysPassed;
 int32 CStats::HeadsPopped;
 int32 CStats::CommercialPassed;

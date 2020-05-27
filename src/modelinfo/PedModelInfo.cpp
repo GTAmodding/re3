@@ -96,7 +96,7 @@ CPedModelInfo::CreateHitColModelSkinned(RpClump *clump)
 		center.x = pos.x + m_pColNodeInfos[i].x;
 		center.y = pos.y + 0.0f;
 		center.z = pos.z + m_pColNodeInfos[i].z;
-		spheres[i].Set(m_pColNodeInfos[i].radius, center, SURFACE_FLESH, m_pColNodeInfos[i].pieceType);
+		spheres[i].Set(m_pColNodeInfos[i].radius, center, SURFACE_PED, m_pColNodeInfos[i].pieceType);
 	}
 	RwMatrixDestroy(invmat);
 	RwMatrixDestroy(mat);

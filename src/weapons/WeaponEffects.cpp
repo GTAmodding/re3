@@ -36,7 +36,7 @@ CWeaponEffects::Init(void)
 	int32 slot = CTxdStore::FindTxdSlot("particle");
 	CTxdStore::SetCurrentTxd(slot);
 	
-	gpCrossHairTex    = RwTextureRead("crosshair", nil);
+	gpCrossHairTex    = RwTextureRead("target256", "target256m");
 	gpCrossHairRaster = RwTextureGetRaster(gpCrossHairTex);
 	
 	CTxdStore::PopCurrentTxd();

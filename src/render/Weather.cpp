@@ -18,6 +18,7 @@
 #include "Vehicle.h"
 #include "World.h"
 #include "ZoneCull.h"
+#include "SpecialFX.h"
 
 int32 CWeather::SoundHandle = -1;
 
@@ -271,9 +272,10 @@ void CWeather::Update(void)
 		SunGlare += InterpolationValue;
 
 	if (SunGlare > 0.0f) {
-		SunGlare *= Min(1.0f, 7.0 * CTimeCycle::GetSunPosition().z);
+		SunGlare *= Min(1.0f, 7.0 * CTimeCycle::GetSunDirection().z);
 		SunGlare = clamp(SunGlare, 0.0f, 1.0f);
-		// TODO(MIAMI): if (CSpecialFX::bSnapShotActive)...
+		if (!CSpecialFX::bSnapShotActive)
+			SunGlare *= (1.0f - (CGeneral::GetRandomNumber()&0x1F)*0.007f);
 	}
 
 	Wind = InterpolationValue * Windiness[NewWeatherType] + (1.0f - InterpolationValue) * Windiness[OldWeatherType];
@@ -565,7 +567,7 @@ void CWeather::RenderRainStreaks(void)
 		RwRenderStateSet(rwRENDERSTATESRCBLEND, (void*)rwBLENDONE);
 		RwRenderStateSet(rwRENDERSTATEDESTBLEND, (void*)rwBLENDONE);
 		RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)TRUE);
-		RwRenderStateSet(rwRENDERSTATETEXTURERASTER, RwTextureGetRaster(gpRainDropTex[3]));
+		RwRenderStateSet(rwRENDERSTATETEXTURERASTER, RwTextureGetRaster(gpRainDropTex));
 		if (RwIm3DTransform(TempBufferRenderVertices, TempBufferVerticesStored, nil, 1))
 		{
 			RwIm3DRenderIndexedPrimitive(rwPRIMTYPETRILIST, TempBufferRenderIndexList, TempBufferIndicesStored);

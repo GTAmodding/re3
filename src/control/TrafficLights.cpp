@@ -108,6 +108,7 @@ CTrafficLights::DisplayActualLight(CEntity *ent)
 	CBrightLights::RegisterOne(pos1, ent->GetUp(), ent->GetRight(), CVector(0.0f, 0.0f, 0.0f), id + BRIGHTLIGHT_TRAFFIC_GREEN);
 	CBrightLights::RegisterOne(pos2, ent->GetUp(), -ent->GetRight(), CVector(0.0f, 0.0f, 0.0f), id + BRIGHTLIGHT_TRAFFIC_GREEN);
 
+/*
 	static const float top = -0.127f;
 	static const float bot = -0.539f;
 	static const float mid = bot + (top-bot)/3.0f;
@@ -131,6 +132,7 @@ CTrafficLights::DisplayActualLight(CEntity *ent)
 			1.0f, 0.5f,  0.0f, 0.5f,  1.0f, 1.0f,  0.0f, 1.0f,
 			SHINYTEXT_WALK, 255, 255, 255, 60.0f);
 	}
+*/
 }
 
 void

@@ -29,6 +29,7 @@
 #include "Radar.h"
 #include "Restart.h"
 #include "Script.h"
+#include "SetPieces.h"
 #include "Stats.h"
 #include "Streaming.h"
 #include "Timer.h"
@@ -206,6 +207,7 @@ GenericSave(int file)
 	WriteSaveDataBlock(cAudioScriptObject::SaveAllAudioScriptObjects);
 	WriteSaveDataBlock(CWorld::Players[CWorld::PlayerInFocus].SavePlayerInfo);
 	WriteSaveDataBlock(CStats::SaveStats);
+	WriteSaveDataBlock(CSetPieces::Save);
 	WriteSaveDataBlock(CStreaming::MemoryCardSave);
 	WriteSaveDataBlock(CPedType::Save);
 
@@ -336,6 +338,8 @@ GenericLoad()
 	ReadDataFromBlock("Loading Player Info \n", CWorld::Players[CWorld::PlayerInFocus].LoadPlayerInfo);
 	LoadSaveDataBlock();
 	ReadDataFromBlock("Loading Stats \n", CStats::LoadStats);
+	LoadSaveDataBlock();
+	ReadDataFromBlock("Loading Set Pieces \n", CSetPieces::Load);
 	LoadSaveDataBlock();
 	ReadDataFromBlock("Loading Streaming Stuff \n", CStreaming::MemoryCardLoad);
 	LoadSaveDataBlock();

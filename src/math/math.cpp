@@ -5,19 +5,6 @@
 // TODO: move more stuff into here
 
 void
-CVector2D::Normalise(void)
-{
-	float sq = MagnitudeSqr();
-	assert(sq != 0.0f);	// just be safe here
-	//if(sq > 0.0f){
-		float invsqrt = RecipSqrt(sq);
-		x *= invsqrt;
-		y *= invsqrt;
-	//}else
-	//	x = 1.0f;
-}
-
-void
 CMatrix::SetRotate(float xAngle, float yAngle, float zAngle)
 {
 	float cX = Cos(xAngle);

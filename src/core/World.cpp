@@ -33,22 +33,24 @@
 
 CColPoint gaTempSphereColPoints[MAX_COLLISION_POINTS];
 
-CPtrList CWorld::ms_bigBuildingsList[4];// = (CPtrList*)0x6FAB60;
-CPtrList CWorld::ms_listMovingEntityPtrs;// = *(CPtrList*)0x8F433C;
-CSector CWorld::ms_aSectors[NUMSECTORS_Y][NUMSECTORS_X];// = (CSector (*)[NUMSECTORS_Y])0x665608;
-uint16 CWorld::ms_nCurrentScanCode;// = *(uint16*)0x95CC64;
+CPtrList CWorld::ms_bigBuildingsList[4];
+CPtrList CWorld::ms_listMovingEntityPtrs;
+CSector CWorld::ms_aSectors[NUMSECTORS_Y][NUMSECTORS_X];
+uint16 CWorld::ms_nCurrentScanCode;
 
-uint8 CWorld::PlayerInFocus;// = *(uint8 *)0x95CD61;
+uint8 CWorld::PlayerInFocus;
 CPlayerInfo CWorld::Players[NUMPLAYERS];
-bool CWorld::bNoMoreCollisionTorque;// = *(bool*)0x95CDCC;
-CEntity *CWorld::pIgnoreEntity;//	= *(CEntity**)0x8F6494;
-bool CWorld::bIncludeDeadPeds;// = *(bool*)0x95CD8F;
-bool CWorld::bSecondShift;// = *(bool*)0x95CD54;
-bool CWorld::bForceProcessControl;// = *(bool*)0x95CD6C;
-bool CWorld::bProcessCutsceneOnly;// = *(bool*)0x95CD8B;
+bool CWorld::bNoMoreCollisionTorque;
+CEntity *CWorld::pIgnoreEntity;
+bool CWorld::bIncludeDeadPeds;
+bool CWorld::bSecondShift;
+bool CWorld::bForceProcessControl;
+bool CWorld::bProcessCutsceneOnly;
 
-bool CWorld::bDoingCarCollisions;// = *(bool*)0x95CD8C;
-bool CWorld::bIncludeCarTyres;// = *(bool*)0x95CDAA;
+bool CWorld::bDoingCarCollisions;
+bool CWorld::bIncludeCarTyres;
+
+CColPoint CWorld::m_aTempColPts[MAX_COLLISION_POINTS];
 
 void
 CWorld::Initialise()
@@ -165,7 +167,7 @@ CWorld::CameraToIgnoreThisObject(CEntity *ent)
 bool
 CWorld::ProcessLineOfSight(const CVector &point1, const CVector &point2, CColPoint &point, CEntity *&entity,
                            bool checkBuildings, bool checkVehicles, bool checkPeds, bool checkObjects,
-                           bool checkDummies, bool ignoreSeeThrough, bool ignoreSomeObjects)
+                           bool checkDummies, bool ignoreSeeThrough, bool ignoreSomeObjects, bool ignoreShootThrough)
 {
 	int x, xstart, xend;
 	int y, ystart, yend;
@@ -184,7 +186,7 @@ CWorld::ProcessLineOfSight(const CVector &point1, const CVector &point2, CColPoi
 
 #define LOSARGS                                                                                                        \
 	CColLine(point1, point2), point, dist, entity, checkBuildings, checkVehicles, checkPeds, checkObjects,         \
-	    checkDummies, ignoreSeeThrough, ignoreSomeObjects
+	    checkDummies, ignoreSeeThrough, ignoreSomeObjects, ignoreShootThrough
 
 	if(xstart == xend && ystart == yend) {
 		// Only one sector
@@ -266,7 +268,7 @@ CWorld::ProcessLineOfSight(const CVector &point1, const CVector &point2, CColPoi
 bool
 CWorld::ProcessLineOfSightSector(CSector &sector, const CColLine &line, CColPoint &point, float &dist, CEntity *&entity,
                                  bool checkBuildings, bool checkVehicles, bool checkPeds, bool checkObjects,
-                                 bool checkDummies, bool ignoreSeeThrough, bool ignoreSomeObjects)
+                                 bool checkDummies, bool ignoreSeeThrough, bool ignoreSomeObjects, bool ignoreShootThrough)
 {
 	float mindist = dist;
 	bool deadPeds = !!bIncludeDeadPeds;
@@ -274,39 +276,39 @@ CWorld::ProcessLineOfSightSector(CSector &sector, const CColLine &line, CColPoin
 
 	if(checkBuildings) {
 		ProcessLineOfSightSectorList(sector.m_lists[ENTITYLIST_BUILDINGS], line, point, mindist, entity,
-		                             ignoreSeeThrough);
+		                             ignoreSeeThrough, false, ignoreShootThrough);
 		ProcessLineOfSightSectorList(sector.m_lists[ENTITYLIST_BUILDINGS_OVERLAP], line, point, mindist, entity,
-		                             ignoreSeeThrough);
+		                             ignoreSeeThrough, false, ignoreShootThrough);
 	}
 
 	if(checkVehicles) {
 		ProcessLineOfSightSectorList(sector.m_lists[ENTITYLIST_VEHICLES], line, point, mindist, entity,
-		                             ignoreSeeThrough);
+		                             ignoreSeeThrough, false, ignoreShootThrough);
 		ProcessLineOfSightSectorList(sector.m_lists[ENTITYLIST_VEHICLES_OVERLAP], line, point, mindist, entity,
-		                             ignoreSeeThrough);
+		                             ignoreSeeThrough, false, ignoreShootThrough);
 	}
 
 	if(checkPeds) {
 		if(deadPeds) bIncludeDeadPeds = true;
 		ProcessLineOfSightSectorList(sector.m_lists[ENTITYLIST_PEDS], line, point, mindist, entity,
-		                             ignoreSeeThrough);
+		                             ignoreSeeThrough, false, ignoreShootThrough);
 		ProcessLineOfSightSectorList(sector.m_lists[ENTITYLIST_PEDS_OVERLAP], line, point, mindist, entity,
-		                             ignoreSeeThrough);
+		                             ignoreSeeThrough, false, ignoreShootThrough);
 		bIncludeDeadPeds = false;
 	}
 
 	if(checkObjects) {
 		ProcessLineOfSightSectorList(sector.m_lists[ENTITYLIST_OBJECTS], line, point, mindist, entity,
-		                             ignoreSeeThrough, ignoreSomeObjects);
+		                             ignoreSeeThrough, ignoreSomeObjects, ignoreShootThrough);
 		ProcessLineOfSightSectorList(sector.m_lists[ENTITYLIST_OBJECTS_OVERLAP], line, point, mindist, entity,
-		                             ignoreSeeThrough, ignoreSomeObjects);
+		                             ignoreSeeThrough, ignoreSomeObjects, ignoreShootThrough);
 	}
 
 	if(checkDummies) {
 		ProcessLineOfSightSectorList(sector.m_lists[ENTITYLIST_DUMMIES], line, point, mindist, entity,
-		                             ignoreSeeThrough);
+		                             ignoreSeeThrough, false, ignoreShootThrough);
 		ProcessLineOfSightSectorList(sector.m_lists[ENTITYLIST_DUMMIES_OVERLAP], line, point, mindist, entity,
-		                             ignoreSeeThrough);
+		                             ignoreSeeThrough, false, ignoreShootThrough);
 	}
 
 	bIncludeDeadPeds = deadPeds;
@@ -320,7 +322,7 @@ CWorld::ProcessLineOfSightSector(CSector &sector, const CColLine &line, CColPoin
 
 bool
 CWorld::ProcessLineOfSightSectorList(CPtrList &list, const CColLine &line, CColPoint &point, float &dist,
-                                     CEntity *&entity, bool ignoreSeeThrough, bool ignoreSomeObjects)
+                                     CEntity *&entity, bool ignoreSeeThrough, bool ignoreSomeObjects, bool ignoreShootThrough)
 {
 	bool deadPeds = false;
 	float mindist = dist;
@@ -347,7 +349,7 @@ CWorld::ProcessLineOfSightSectorList(CPtrList &list, const CColLine &line, CColP
 				colmodel = CModelInfo::GetModelInfo(e->GetModelIndex())->GetColModel();
 
 			if(colmodel && CCollision::ProcessLineOfSight(line, e->GetMatrix(), *colmodel, point, dist,
-			                                              ignoreSeeThrough))
+			                                              ignoreSeeThrough, ignoreShootThrough))
 				entity = e;
 		}
 	}
@@ -436,7 +438,7 @@ CWorld::ProcessVerticalLineSectorList(CPtrList &list, const CColLine &line, CCol
 
 			colmodel = CModelInfo::GetModelInfo(e->GetModelIndex())->GetColModel();
 			if(CCollision::ProcessVerticalLine(line, e->GetMatrix(), *colmodel, point, dist,
-			                                   ignoreSeeThrough, poly))
+			                                   ignoreSeeThrough, false, poly))
 				entity = e;
 		}
 	}
@@ -637,7 +639,7 @@ CWorld::GetIsLineOfSightSectorListClear(CPtrList &list, const CColLine &line, bo
 
 				colmodel = CModelInfo::GetModelInfo(e->GetModelIndex())->GetColModel();
 
-				if(CCollision::TestLineOfSight(line, e->GetMatrix(), *colmodel, ignoreSeeThrough))
+				if(CCollision::TestLineOfSight(line, e->GetMatrix(), *colmodel, ignoreSeeThrough, false))
 					return false;
 			}
 		}

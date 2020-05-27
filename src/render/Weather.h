@@ -63,4 +63,4 @@ struct tRainStreak
 	uint32 timer;
 };
 
-extern RwTexture* gpRainDropTex[4];
+extern RwTexture* gpRainDropTex;

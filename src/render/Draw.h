@@ -38,12 +38,10 @@ public:
 	static void SetFOV(float fov);
 	static float GetFOV(void) { return ms_fFOV; }
 
-	static float FindAspectRatio(void);
+	static float CalculateAspectRatio(void);
 #ifdef ASPECT_RATIO_SCALE
 	static float ConvertFOV(float fov);
+#endif
 	static float GetAspectRatio(void) { return ms_fAspectRatio; }
 	static void SetAspectRatio(float ratio) { ms_fAspectRatio = ratio; }
-#else
-	static float GetAspectRatio(void) { return FindAspectRatio(); }
-#endif
 };

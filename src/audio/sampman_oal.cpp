@@ -174,10 +174,10 @@ add_providers()
 			}
 			
 			if ( alGetEnumValue("AL_EFFECT_EAXREVERB") != 0
-				|| pDeviceList->IsExtensionSupported(i, "EAX2.0")
-				|| pDeviceList->IsExtensionSupported(i, "EAX3.0") 
-				|| pDeviceList->IsExtensionSupported(i, "EAX4.0")
-				|| pDeviceList->IsExtensionSupported(i, "EAX5.0") )
+				|| pDeviceList->IsExtensionSupported(i, ADEXT_EAX2)
+				|| pDeviceList->IsExtensionSupported(i, ADEXT_EAX3) 
+				|| pDeviceList->IsExtensionSupported(i, ADEXT_EAX4)
+				|| pDeviceList->IsExtensionSupported(i, ADEXT_EAX5) )
 			{
 				if ( n < MAXPROVIDERS )
 				{
@@ -833,7 +833,7 @@ cSampleManager::LoadPedComment(uint32 nComment)
 			
 			case MUSICMODE_FRONTEND:
 			{
-				if ( MusicManager.GetCurrentTrack() == STREAMED_SOUND_GAME_COMPLETED )
+				if ( MusicManager.GetCurrentTrack() == STREAMED_SOUND_CUTSCENE_FINALE)
 					return false;
 
 				break;
@@ -1057,10 +1057,8 @@ cSampleManager::SetChannelEmittingVolume(uint32 nChannel, uint32 nVolume)
 	
 	nChannelVolume[nChannel] = vol;
 	
-	// reduce channel volume when JB.MP3 or S4_BDBD.MP3 playing
 	if (   MusicManager.GetMusicMode()    == MUSICMODE_CUTSCENE
-		&& MusicManager.GetCurrentTrack() != STREAMED_SOUND_NEWS_INTRO
-		&& MusicManager.GetCurrentTrack() != STREAMED_SOUND_CUTSCENE_SAL4_BDBD )
+		&& MusicManager.GetCurrentTrack() != STREAMED_SOUND_CUTSCENE_FINALE )
 	{
 		nChannelVolume[nChannel] = vol / 4;
 	}
@@ -1099,10 +1097,8 @@ cSampleManager::SetChannelVolume(uint32 nChannel, uint32 nVolume)
 		
 		nChannelVolume[nChannel] = vol;
 		
-		// reduce the volume for JB.MP3 and S4_BDBD.MP3
 		if (   MusicManager.GetMusicMode()    == MUSICMODE_CUTSCENE
-			&& MusicManager.GetCurrentTrack() != STREAMED_SOUND_NEWS_INTRO
-			&& MusicManager.GetCurrentTrack() != STREAMED_SOUND_CUTSCENE_SAL4_BDBD )
+			&& MusicManager.GetCurrentTrack() != STREAMED_SOUND_CUTSCENE_FINALE )
 		{
 			nChannelVolume[nChannel] = vol / 4;
 		}

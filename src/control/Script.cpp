@@ -59,6 +59,7 @@
 #include "RpAnimBlend.h"
 #include "Rubbish.h"
 #include "SimpleModelInfo.h"
+#include "SetPieces.h"
 #include "Shadows.h"
 #include "SpecialFX.h"
 #include "Sprite.h"
@@ -6319,7 +6320,7 @@ int8 CRunningScript::ProcessCommands700To799(int32 command)
 		}
 		CCranes::ActivateCrane(infX, supX, infY, supY,
 			*(float*)&ScriptParams[6], *(float*)&ScriptParams[7], *(float*)&ScriptParams[8],
-			DEGTORAD(*(float*)&ScriptParams[8]), true, false,
+			DEGTORAD(*(float*)&ScriptParams[9]), true, false,
 			*(float*)&ScriptParams[0], *(float*)&ScriptParams[1]);
 		return 0;
 	}
@@ -7297,7 +7298,7 @@ int8 CRunningScript::ProcessCommands800To899(int32 command)
 	case COMMAND_WARP_CHAR_FROM_CAR_TO_COORD:
 	{
 		CollectParameters(&m_nIp, 4);
-		CPed* pPed = CPools::GetPedPool()->GetAt(ScriptParams[0]);
+		CPed *pPed = CPools::GetPedPool()->GetAt(ScriptParams[0]);
 		assert(pPed);
 		CVector pos = *(CVector*)&ScriptParams[1];
 		if (pos.z <= MAP_Z_LOW_LIMIT)
@@ -9570,7 +9571,7 @@ int8 CRunningScript::ProcessCommands1100To1199(int32 command)
 	case COMMAND_LOAD_END_OF_GAME_TUNE:
 		DMAudio.ChangeMusicMode(MUSICMODE_CUTSCENE);
 		printf("Start preload end of game audio\n");
-		DMAudio.PreloadCutSceneMusic(STREAMED_SOUND_GAME_COMPLETED);
+		DMAudio.PreloadCutSceneMusic(STREAMED_SOUND_CUTSCENE_FINALE);
 		printf("End preload end of game audio\n");
 		return 0;
 	/*
@@ -10654,7 +10655,7 @@ int8 CRunningScript::ProcessCommands1200To1299(int32 command)
 		CVector pos = *(CVector*)&ScriptParams[0];
 		if (pos.z <= MAP_Z_LOW_LIMIT)
 			pos.z = CWorld::FindGroundZForCoord(pos.x, pos.y);
-		CCoronas::RegisterCorona((uint32)this + m_nIp, ScriptParams[6], ScriptParams[7], ScriptParams[8], 255, pos, *(float*)&ScriptParams[3],
+		CCoronas::RegisterCorona((uintptr)this + m_nIp, ScriptParams[6], ScriptParams[7], ScriptParams[8], 255, pos, *(float*)&ScriptParams[3],
 			150.0f, ScriptParams[4], ScriptParams[5], 1, 0, 0, 0.0f, false, 0.2f);
 		return 0;
 	}
@@ -10900,7 +10901,10 @@ int8 CRunningScript::ProcessCommands1200To1299(int32 command)
 	case COMMAND_ADD_SET_PIECE:
 	{
 		CollectParameters(&m_nIp, 13);
-		debug("ADD_SET_PIECE not implemented, skipping\n");
+		CSetPieces::AddOne(ScriptParams[0],
+			*(CVector2D*)&ScriptParams[1], *(CVector2D*)&ScriptParams[3],
+			*(CVector2D*)&ScriptParams[5], *(CVector2D*)&ScriptParams[7],
+			*(CVector2D*)&ScriptParams[9], *(CVector2D*)&ScriptParams[11]);
 		return 0;
 	}
 	case COMMAND_SET_EXTRA_COLOURS:
@@ -10939,10 +10943,10 @@ int8 CRunningScript::ProcessCommands1200To1299(int32 command)
 				ScriptParams[1] = 0;
 			else if (ScriptParams[1] == 3)
 				ScriptParams[1] = 1;
-			pVehicle->BurstTyre(ScriptParams[1]); // TODO(MIAMI): second param is true
+			pVehicle->BurstTyre(ScriptParams[1], true);
 		}
 		else {
-			pVehicle->BurstTyre(ScriptParams[1]); // TODO(MIAMI): second param is true
+			pVehicle->BurstTyre(ScriptParams[1], true);
 		}
 		return 0;
 	}
@@ -11360,7 +11364,7 @@ int8 CRunningScript::ProcessCommands1300To1399(int32 command)
 	case COMMAND_CLEAR_CHAR_FOLLOW_PATH:
 	{
 		CollectParameters(&m_nIp, 2);
-		CPed* pPed = CWorld::Players[ScriptParams[0]].m_pPed;
+		CPed* pPed = CPools::GetPedPool()->GetAt(ScriptParams[0]);
 		assert(pPed);
 		if (pPed->GetPedState() == PED_FOLLOW_PATH) {
 			pPed->RestorePreviousState();
@@ -11371,7 +11375,7 @@ int8 CRunningScript::ProcessCommands1300To1399(int32 command)
 	case COMMAND_SET_CHAR_CAN_BE_SHOT_IN_VEHICLE:
 	{
 		CollectParameters(&m_nIp, 2);
-		CPed* pPed = CWorld::Players[ScriptParams[0]].m_pPed;
+		CPed* pPed = CPools::GetPedPool()->GetAt(ScriptParams[0]);
 		assert(pPed);
 		pPed->bCanBeShotInVehicle = ScriptParams[1];
 		return 0;

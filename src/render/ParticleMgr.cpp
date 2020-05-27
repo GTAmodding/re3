@@ -216,6 +216,18 @@ void cParticleSystemMgr::LoadParticleData()
 					case CFG_PARAM_TRAIL_LENGTH_MULTIPLIER:
 						entry->m_fTrailLengthMultiplier = atof(value);
 						break;
+						
+					case CFG_PARAM_STRETCH_VALUE_X:
+						entry->m_vecTextureStretch.x = atof(value);
+						break;
+
+					case CFG_PARAM_STRETCH_VALUE_Y:
+						entry->m_vecTextureStretch.y = atof(value);
+						break;
+
+					case CFG_PARAM_WIND_FACTOR:
+						entry->m_fWindFactor = atof(value);
+						break;
 
 					case CFG_PARAM_PARTICLE_CREATE_RANGE:
 						entry->m_fCreateRange = SQR(atof(value));

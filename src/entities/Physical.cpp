@@ -951,7 +951,7 @@ CPhysical::ApplyCollisionAlt(CEntity *B, CColPoint &colpoint, float &impulse, CV
 			   Abs(m_vecMoveSpeed.z) < minspeed*2.0f)
 				impulse = -0.8f * normalSpeed * mass;
 			else if(IsVehicle() && ((CVehicle*)this)->IsBoat() &&
-			   colpoint.surfaceB == SURFACE_WOOD_PLANK && colpoint.normal.z < 0.5f)
+			   colpoint.surfaceB == SURFACE_WOOD_SOLID && colpoint.normal.z < 0.5f)
 				impulse = -(2.0f * m_fElasticity + 1.0f) * normalSpeed * mass;
 			else
 				impulse = -(m_fElasticity + 1.0f) * normalSpeed * mass;
@@ -1146,7 +1146,7 @@ CPhysical::ApplyFriction(float adhesiveLimit, CColPoint &colpoint)
 			ApplyFrictionTurnForce(frictionDir*fImpulse, pointpos);
 
 			if(fOtherSpeed > 0.1f &&
-			   colpoint.surfaceB != SURFACE_GRASS && colpoint.surfaceB != SURFACE_DIRTTRACK &&
+			   colpoint.surfaceB != SURFACE_GRASS && colpoint.surfaceB != SURFACE_MUD_DRY &&
 			   CSurfaceTable::GetAdhesionGroup(colpoint.surfaceA) == ADHESIVE_HARD){
 				CVector v = frictionDir * fOtherSpeed * 0.25f;
 				for(int i = 0; i < 4; i++)
@@ -1642,7 +1642,7 @@ CPhysical::ProcessCollisionSectorList(CPtrList *lists)
 						if(impulseA > maxImpulseA) maxImpulseA = impulseA;
 
 						if(A->IsVehicle()){
-							if(!(((CVehicle*)A)->IsBoat() && aColPoints[i].surfaceB == SURFACE_WOOD_PLANK) &&
+							if(!(((CVehicle*)A)->IsBoat() && aColPoints[i].surfaceB == SURFACE_WOOD_SOLID) &&
 							   impulseA > A->m_fDamageImpulse)
 								A->SetDamagedPieceRecord(aColPoints[i].pieceA, impulseA, B, aColPoints[i].normal);
 
@@ -1679,7 +1679,7 @@ CPhysical::ProcessCollisionSectorList(CPtrList *lists)
 						float adhesion = CSurfaceTable::GetAdhesiveLimit(aColPoints[i]) / numCollisions;
 
 						if(A->IsVehicle()){
-							if(((CVehicle*)A)->IsBoat() && aColPoints[i].surfaceB == SURFACE_WOOD_PLANK)
+							if(((CVehicle*)A)->IsBoat() && aColPoints[i].surfaceB == SURFACE_WOOD_SOLID)
 								adhesion = 0.0f;
 							else if(impulseA > A->m_fDamageImpulse)
 								A->SetDamagedPieceRecord(aColPoints[i].pieceA, impulseA, B, aColPoints[i].normal);

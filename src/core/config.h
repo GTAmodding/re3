@@ -135,6 +135,8 @@ enum Config {
 	NUM_CRANES = 8,
 
 	NUM_EXPLOSIONS = 48,
+
+	NUM_SETPIECES = 96
 };
 
 // We'll use this once we're ready to become independent of the game
@@ -204,7 +206,7 @@ enum Config {
 #endif
 
 // Particle
-//#define PC_PARTICLE
+#define PC_PARTICLE
 //#define PS2_ALTERNATIVE_CARSPLASH // unused on PS2
 
 // Pad

@@ -11,9 +11,7 @@ public:
 	float Magnitude(void) const { return Sqrt(x*x + y*y); }
 	float MagnitudeSqr(void) const { return x*x + y*y; }
 
-	void Normalise(void);
-
-	void NormaliseSafe(void) {
+	void Normalise(void) {
 		float sq = MagnitudeSqr();
 		if(sq > 0.0f){
 			float invsqrt = RecipSqrt(sq);

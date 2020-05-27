@@ -558,60 +558,8 @@ CHeli::ProcessControl(void)
 void
 CHeli::PreRender(void)
 {
-	float angle;
-	uint8 i;
-	CColPoint point;
-	CEntity *entity;
-	uint8 r, g, b;
-	float testLowZ = FindPlayerCoors().z - 10.0f;
 	float radius = (GetPosition().z - FindPlayerCoors().z - 10.0f - 1.0f) * 0.3f + 10.0f;
-	int frm = CTimer::GetFrameCounter() & 7;
-
-	i = 0;
-	for(angle = 0.0f; angle < TWOPI; angle += TWOPI/32){
-		CVector pos(radius*Cos(angle), radius*Sin(angle), 0.0f);
-		CVector dir = pos*0.01f;
-		pos += GetPosition();
-
-		if(CWorld::ProcessVerticalLine(pos, testLowZ, point, entity, true, false, false, false, true, false, nil))
-			m_fHeliDustZ[frm] = point.point.z;
-		else
-			m_fHeliDustZ[frm] = -101.0f;
-
-		switch(point.surfaceB){
-		default:
-		case SURFACE_TARMAC:
-			r = 10;
-			g = 10;
-			b = 10;
-			break;
-		case SURFACE_GRASS:
-			r = 10;
-			g = 6;
-			b = 3;
-			break;
-		case SURFACE_DIRT:
-			r = 10;
-			g = 8;
-			b = 7;
-			break;
-		case SURFACE_DIRTTRACK:
-			r = 10;
-			g = 6;
-			b = 3;
-			break;
-		}
-		RwRGBA col = { r, g, b, 32 };
-#ifdef FIX_BUGS
-		pos.z = m_fHeliDustZ[frm];
-#else
-		// What the hell is the point of this?
-		pos.z = m_fHeliDustZ[(i - (i&3))/4];	// advance every 4 iterations, why not just /4?
-#endif
-		if(pos.z > -200.0f && GetPosition().z - pos.z < 20.0f)
-			CParticle::AddParticle(PARTICLE_HELI_DUST, pos, dir, nil, 0.0f, col);
-		i++;
-	}
+	HeliDustGenerate(this, radius, FindPlayerCoors().z, Max(16.0f - 4.0f*CTimer::GetTimeStep(), 2.0f));
 }
 
 void

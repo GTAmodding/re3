@@ -433,10 +433,10 @@ struct CMenuScreen
 
 struct MenuTrapezoid
 {
-	float topRight_x;
-	float topRight_y;
 	float topLeft_x;
 	float topLeft_y;
+	float topRight_x;
+	float topRight_y;
 	float bottomLeft_x;
 	float bottomLeft_y;
 	float bottomRight_x;
@@ -459,15 +459,48 @@ struct MenuTrapezoid
 	float mult_bottomRight_y;
 
 	MenuTrapezoid(float x1, float y1, float x2, float y2, float x3, float y3, float x4, float y4) {
-		topRight_x = x1;
-		topRight_y = y1;
-		topLeft_x = x2;
-		topLeft_y = y2;
+		topLeft_x = x1;
+		topLeft_y = y1;
+		topRight_x = x2;
+		topRight_y = y2;
 		bottomLeft_x = x3;
 		bottomLeft_y = y3;
 		bottomRight_x = x4;
 		bottomRight_y = y4;
 	};
+
+	void SaveCurrentCoors() {
+		old_topLeft_x = topLeft_x;
+		old_topLeft_y = topLeft_y;
+		old_topRight_x = topRight_x;
+		old_topRight_y = topRight_y;
+		old_bottomLeft_x = bottomLeft_x;
+		old_bottomLeft_y = bottomLeft_y;
+		old_bottomRight_x = bottomRight_x;
+		old_bottomRight_y = bottomRight_y;
+	}
+
+	void Translate(int delta) {
+		bottomRight_x = delta * mult_bottomRight_x + old_bottomRight_x;
+		bottomRight_y = delta * mult_bottomRight_y + old_bottomRight_y;
+		bottomLeft_x = delta * mult_bottomLeft_x + old_bottomLeft_x;
+		bottomLeft_y = delta * mult_bottomLeft_y + old_bottomLeft_y;
+		topRight_x = delta * mult_topRight_x + old_topRight_x;
+		topRight_y = delta * mult_topRight_y + old_topRight_y;
+		topLeft_x = delta * mult_topLeft_x + old_topLeft_x;
+		topLeft_y = delta * mult_topLeft_y + old_topLeft_y;
+	}
+
+	void UpdateMultipliers() {
+		mult_bottomRight_x = (bottomRight_x - old_bottomRight_x) / 255.0f;
+		mult_bottomRight_y = (bottomRight_y - old_bottomRight_y) / 255.0f;
+		mult_bottomLeft_x = (bottomLeft_x - old_bottomLeft_x) / 255.0f;
+		mult_bottomLeft_y = (bottomLeft_y - old_bottomLeft_y) / 255.0f;
+		mult_topRight_x = (topRight_x - old_topRight_x) / 255.0f;
+		mult_topRight_y = (topRight_y - old_topRight_y) / 255.0f;
+		mult_topLeft_x = (topLeft_x - old_topLeft_x) / 255.0f;
+		mult_topLeft_y = (topLeft_y - old_topLeft_y) / 255.0f;
+	}
 };
 
 class CMenuManager
@@ -523,7 +556,7 @@ public:
 	int32 m_nMouseTempPosX;
 	int32 m_nMouseTempPosY;
 	bool m_bGameNotLoaded;
-	int8 m_3DProviderOnLastSaveLoad;
+	int8 m_lastWorking3DAudioProvider;
 	bool m_bFrontEnd_ReloadObrTxtGxt;
 	int32 *pEditString;
 	uint8 field_74[4];
@@ -625,7 +658,7 @@ public:
 	void DrawControllerScreenExtraText(int, int, int);
 	void DrawControllerSetupScreen();
 	void DrawFrontEnd();
-	void DrawBackground();
+	void DrawBackground(bool transitionCall);
 	void DrawPlayerSetupScreen();
 	int FadeIn(int alpha);
 	void FilterOutColorMarkersFromString(wchar*, CRGBA &);
@@ -656,6 +689,7 @@ public:
 	void WaitForUserCD();
 	int GetNumOptionsCntrlConfigScreens();
 	int ConstructStatLine(int);
+	void SwitchToNewScreen(int8);
 
 	// New (not in function or inlined in the game)
 	void ThingsToDoBeforeLeavingPage();

@@ -414,8 +414,9 @@ CCollision::TestSphereTriangle(const CColSphere &sphere,
 	return dist < sphere.radius;
 }
 
+//--MIAMI: TODO
 bool
-CCollision::TestLineOfSight(const CColLine &line, const CMatrix &matrix, CColModel &model, bool ignoreSeeThrough)
+CCollision::TestLineOfSight(const CColLine &line, const CMatrix &matrix, CColModel &model, bool ignoreSeeThrough, bool ignoreShootThrough)
 {
 	static CMatrix matTransform;
 	int i;
@@ -429,18 +430,18 @@ CCollision::TestLineOfSight(const CColLine &line, const CMatrix &matrix, CColMod
 		return false;
 
 	for(i = 0; i < model.numSpheres; i++)
-		if(!ignoreSeeThrough || model.spheres[i].surface != SURFACE_GLASS && model.spheres[i].surface != SURFACE_SCAFFOLD)
+		if(!ignoreSeeThrough || model.spheres[i].surface != SURFACE_GLASS && model.spheres[i].surface != SURFACE_TRANSPARENT_CLOTH)
 			if(TestLineSphere(newline, model.spheres[i]))
 				return true;
 
 	for(i = 0; i < model.numBoxes; i++)
-		if(!ignoreSeeThrough || model.boxes[i].surface != SURFACE_GLASS && model.boxes[i].surface != SURFACE_SCAFFOLD)
+		if(!ignoreSeeThrough || model.boxes[i].surface != SURFACE_GLASS && model.boxes[i].surface != SURFACE_TRANSPARENT_CLOTH)
 			if(TestLineBox(newline, model.boxes[i]))
 				return true;
 
 	CalculateTrianglePlanes(&model);
 	for(i = 0; i < model.numTriangles; i++)
-		if(!ignoreSeeThrough || model.triangles[i].surface != SURFACE_GLASS && model.triangles[i].surface != SURFACE_SCAFFOLD)
+		if(!ignoreSeeThrough || model.triangles[i].surface != SURFACE_GLASS && model.triangles[i].surface != SURFACE_TRANSPARENT_CLOTH)
 			if(TestLineTriangle(newline, model.vertices, model.triangles[i], model.trianglePlanes[i]))
 				return true;
 
@@ -1042,10 +1043,11 @@ CCollision::ProcessSphereTriangle(const CColSphere &sphere,
 	return true;
 }
 
+//--MIAMI: TODO
 bool
 CCollision::ProcessLineOfSight(const CColLine &line,
 	const CMatrix &matrix, CColModel &model,
-	CColPoint &point, float &mindist, bool ignoreSeeThrough)
+	CColPoint &point, float &mindist, bool ignoreSeeThrough, bool ignoreShootThrough)
 {
 	static CMatrix matTransform;
 	int i;
@@ -1060,16 +1062,16 @@ CCollision::ProcessLineOfSight(const CColLine &line,
 
 	float coldist = mindist;
 	for(i = 0; i < model.numSpheres; i++)
-		if(!ignoreSeeThrough || model.spheres[i].surface != SURFACE_GLASS && model.spheres[i].surface != SURFACE_SCAFFOLD)
+		if(!ignoreSeeThrough || model.spheres[i].surface != SURFACE_GLASS && model.spheres[i].surface != SURFACE_TRANSPARENT_CLOTH)
 			ProcessLineSphere(newline, model.spheres[i], point, coldist);
 
 	for(i = 0; i < model.numBoxes; i++)
-		if(!ignoreSeeThrough || model.boxes[i].surface != SURFACE_GLASS && model.boxes[i].surface != SURFACE_SCAFFOLD)
+		if(!ignoreSeeThrough || model.boxes[i].surface != SURFACE_GLASS && model.boxes[i].surface != SURFACE_TRANSPARENT_CLOTH)
 			ProcessLineBox(newline, model.boxes[i], point, coldist);
 
 	CalculateTrianglePlanes(&model);
 	for(i = 0; i < model.numTriangles; i++)
-		if(!ignoreSeeThrough || model.triangles[i].surface != SURFACE_GLASS && model.triangles[i].surface != SURFACE_SCAFFOLD)
+		if(!ignoreSeeThrough || model.triangles[i].surface != SURFACE_GLASS && model.triangles[i].surface != SURFACE_TRANSPARENT_CLOTH)
 			ProcessLineTriangle(newline, model.vertices, model.triangles[i], model.trianglePlanes[i], point, coldist);
 
 	if(coldist < mindist){
@@ -1081,10 +1083,11 @@ CCollision::ProcessLineOfSight(const CColLine &line,
 	return false;
 }
 
+//--MIAMI: TODO
 bool
 CCollision::ProcessVerticalLine(const CColLine &line,
 	const CMatrix &matrix, CColModel &model,
-	CColPoint &point, float &mindist, bool ignoreSeeThrough, CStoredCollPoly *poly)
+	CColPoint &point, float &mindist, bool ignoreSeeThrough, bool ignoreShootThrough, CStoredCollPoly *poly)
 {
 	static CStoredCollPoly TempStoredPoly;
 	int i;
@@ -1100,17 +1103,17 @@ CCollision::ProcessVerticalLine(const CColLine &line,
 
 	float coldist = mindist;
 	for(i = 0; i < model.numSpheres; i++)
-		if(!ignoreSeeThrough || model.spheres[i].surface != SURFACE_GLASS && model.spheres[i].surface != SURFACE_SCAFFOLD)
+		if(!ignoreSeeThrough || model.spheres[i].surface != SURFACE_GLASS && model.spheres[i].surface != SURFACE_TRANSPARENT_CLOTH)
 			ProcessLineSphere(newline, model.spheres[i], point, coldist);
 
 	for(i = 0; i < model.numBoxes; i++)
-		if(!ignoreSeeThrough || model.boxes[i].surface != SURFACE_GLASS && model.boxes[i].surface != SURFACE_SCAFFOLD)
+		if(!ignoreSeeThrough || model.boxes[i].surface != SURFACE_GLASS && model.boxes[i].surface != SURFACE_TRANSPARENT_CLOTH)
 			ProcessLineBox(newline, model.boxes[i], point, coldist);
 
 	CalculateTrianglePlanes(&model);
 	TempStoredPoly.valid = false;
 	for(i = 0; i < model.numTriangles; i++)
-		if(!ignoreSeeThrough || model.triangles[i].surface != SURFACE_GLASS && model.triangles[i].surface != SURFACE_SCAFFOLD)
+		if(!ignoreSeeThrough || model.triangles[i].surface != SURFACE_GLASS && model.triangles[i].surface != SURFACE_TRANSPARENT_CLOTH)
 			ProcessVerticalLineTriangle(newline, model.vertices, model.triangles[i], model.trianglePlanes[i], point, coldist, &TempStoredPoly);
 
 	if(coldist < mindist){
@@ -1639,15 +1642,15 @@ CCollision::DrawColModel_Coloured(const CMatrix &mat, const CColModel &colModel,
 			b *= f;
 		}
 
-		if(s == SURFACE_SCAFFOLD || s == SURFACE_METAL_FENCE ||
-		   s == SURFACE_BOLLARD || s == SURFACE_METAL_POLE)
+		if(s == SURFACE_TRANSPARENT_CLOTH || s == SURFACE_METAL_CHAIN_FENCE ||
+		   s == SURFACE_TRANSPARENT_STONE || s == SURFACE_SCAFFOLD_POLE)
 			if(CTimer::GetFrameCounter() & 1){
 				r = 0;
 				g = 0;
 				b = 0;
 			}
 
-		if(s > SURFACE_GATE){
+		if(s > SURFACE_METAL_GATE){
 			r = CGeneral::GetRandomNumber();
 			g = CGeneral::GetRandomNumber();
 			b = CGeneral::GetRandomNumber();
@@ -1720,8 +1723,8 @@ CCollision::DrawColModel_Coloured(const CMatrix &mat, const CColModel &colModel,
 			b *= f;
 		}
 
-		if(s == SURFACE_SCAFFOLD || s == SURFACE_METAL_FENCE ||
-		   s == SURFACE_BOLLARD || s == SURFACE_METAL_POLE)
+		if(s == SURFACE_TRANSPARENT_CLOTH || s == SURFACE_METAL_CHAIN_FENCE ||
+		   s == SURFACE_TRANSPARENT_STONE || s == SURFACE_SCAFFOLD_POLE)
 			if(CTimer::GetFrameCounter() & 1){
 				r = 0;
 				g = 0;

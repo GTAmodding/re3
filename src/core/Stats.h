@@ -9,6 +9,9 @@ public:
 		TOTAL_FASTEST_TIMES = 16,
 		TOTAL_HIGHEST_SCORES = 16
 	};
+	//TODO
+	static int32 SeagullsKilled;
+	
 	static int32 DaysPassed;
 	static int32 HeadsPopped;
 	static int32 CommercialPassed;

@@ -14,11 +14,24 @@
 #include "Lights.h"
 #include "PointLights.h"
 #include "Renderer.h"
+#include "VisibilityPlugins.h"
 #include "DMAudio.h"
 #include "Radar.h"
 #include "Fire.h"
 #include "Darkel.h"
 #include "Streaming.h"
+#include "Camera.h"
+#include "Stats.h"
+#include "Garages.h"
+#include "Wanted.h"
+#include "SurfaceTable.h"
+#include "Particle.h"
+#include "WaterLevel.h"
+#include "Timecycle.h"
+#include "Weather.h"
+#include "Coronas.h"
+
+//--MIAMI: done
 
 bool CVehicle::bWheelsOnlyCheat;
 bool CVehicle::bAllDodosCheat;
@@ -53,8 +66,8 @@ CVehicle::CVehicle(uint8 CreatedBy)
 {
 	int i;
 
-	m_nCurrentGear = 0;
-	m_fChangeGearTime = 0;
+	m_nCurrentGear = 1;
+	m_fChangeGearTime = 0.0f;
 	m_fSteerRatio = 0.0f;
 	m_type = ENTITY_TYPE_VEHICLE;
 	VehicleCreatedBy = CreatedBy;
@@ -106,10 +119,23 @@ CVehicle::CVehicle(uint8 CreatedBy)
 	m_nCarHornDelay = 0;
 	bPartOfConvoy = false;
 	bHeliMinimumTilt = false;
+	bAudioChangingGear = false;
 	bIsDrowning = false;
 	bTyresDontBurst = false;
 	bCreatedAsPoliceVehicle = false;
+	bRestingOnPhysical = false;
 	bParking = false;
+	bCanPark = CGeneral::GetRandomNumberInRange(0.0f, 1.0f) < 0.0f;	// BUG? this makes no sense
+	bIsVan = false;
+	bIsBus = false;
+	bIsBig = false;
+	bLowVehicle = false;
+
+	m_bombType = CARBOMB_NONE;
+	bDriverLastFrame = false;
+	m_pBombRigger = nil;
+
+	m_nSetPieceExtendedRangeTime = 0;
 	m_nAlarmState = 0;
 	m_nDoorLock = CARLOCK_UNLOCKED;
 	m_nLastWeaponDamage = -1;
@@ -117,7 +143,26 @@ CVehicle::CVehicle(uint8 CreatedBy)
 	m_audioEntityId = DMAudio.CreateEntity(AUDIOTYPE_PHYSICAL, this);
 	if(m_audioEntityId >= 0)
 		DMAudio.SetEntityStatus(m_audioEntityId, true);
-	m_nRadioStation = CGeneral::GetRandomNumber() % USERTRACK;
+	//m_nRadioStation = CGeneral::GetRandomNumber() % USERTRACK;
+	switch(GetModelIndex()){
+	case MI_HUNTER:
+	case MI_ANGEL:
+	case MI_FREEWAY:
+		m_nRadioStation = V_ROCK;
+		break;
+	case MI_RCBARON:
+	case MI_RCBANDIT:
+	case MI_RCRAIDER:
+	case MI_RCGOBLIN:
+	case MI_TOPFUN:
+	case MI_CADDY:
+	case MI_BAGGAGE:
+		m_nRadioStation = RADIO_OFF;
+		break;
+	default:
+		m_nRadioStation = CGeneral::GetRandomNumber() % USERTRACK;
+		break;
+	}
 	m_pCurGroundEntity = nil;
 	m_bRainAudioCounter = 0;
 	m_bRainSamplesCounter = 0;
@@ -130,9 +175,6 @@ CVehicle::CVehicle(uint8 CreatedBy)
 	AutoPilot.m_bStayInCurrentLevel = false;
 	AutoPilot.m_bIgnorePathfinding = false;
 	AutoPilot.m_nSwitchDistance = 20;
-
-// TODO(MIAMI)
-	bRestingOnPhysical = false;
 }
 
 CVehicle::~CVehicle()
@@ -197,57 +239,30 @@ CVehicle::RemoveLighting(bool reset)
 	CRenderer::RemoveVehiclePedLights(this, reset);
 }
 
+bool
+CVehicle::IsClearToDriveAway(void)
+{
+	CColPoint point;
+	float length = GetColModel()->boundingBox.GetSize().y;
+	CEntity *ent = nil;
+	CVector front = GetForward() * (length*0.5f + 3.0f);
+	return !CWorld::ProcessLineOfSight(GetPosition() + front, GetPosition(),
+			point, ent, true, true, false, false, false, true, true) ||
+		ent == this;
+}
+
 float
 CVehicle::GetHeightAboveRoad(void)
 {
 	return -1.0f * GetColModel()->boundingBox.min.z;
 }
 
-const float fRCPropFallOff = 3.0f;
-const float fRCAeroThrust = 0.003f;
-const float fRCSideSlipMult = 0.1f;
-const float fRCRudderMult = 0.2f;
-const float fRCYawMult = -0.01f;
-const float fRCRollMult = 0.02f;
-const float fRCRollStabilise = -0.08f;
-const float fRCPitchMult = 0.005f;
-const float fRCTailMult = 0.3f;
-const float fRCFormLiftMult = 0.02f;
-const float fRCAttackLiftMult = 0.25f;
-const CVector vecRCAeroResistance(0.998f, 0.998f, 0.9f);
-
-const float fSeaPropFallOff = 2.3f;
-const float fSeaThrust = 0.002f;
-const float fSeaSideSlipMult = 0.1f;
-const float fSeaRudderMult = 0.01f;
-const float fSeaYawMult = -0.0003f;
-const float fSeaRollMult = 0.0015f;
-const float fSeaRollStabilise = -0.01f;
-const float fSeaPitchMult = 0.0002f;
-const float fSeaTailMult = 0.01f;
-const float fSeaFormLiftMult = 0.012f;
-const float fSeaAttackLiftMult = 0.1f;
-const CVector vecSeaAeroResistance(0.995f, 0.995f, 0.85f);
-
-const float fSpeedResistanceY = 500.0f;
-const float fSpeedResistanceZ = 500.0f;
-
-const CVector vecHeliMoveRes(0.995f, 0.995f, 0.99f);
-const CVector vecRCHeliMoveRes(0.99f, 0.99f, 0.99f);
-const float fThrustVar = 0.3f;
-const float fRotorFallOff = 0.75f;
-const float fStabiliseVar = 0.015f;
-const float fPitchBrake = 10.0f;
-const float fPitchVar = 0.006f;
-const float fRollVar = 0.006f;
-const float fYawVar = -0.001f;
-const CVector vecHeliResistance(0.81f, 0.85f, 0.99f);
-const CVector vecRCHeliResistance(0.92f, 0.92f, 0.998f);
-const float fSpinSpeedRes = 20.0f;
-
 void
 CVehicle::FlyingControl(eFlightModel flightModel)
 {
+	if(pFlyingHandling == nil)
+		return;
+
 	switch(flightModel){
 	case FLIGHT_MODEL_DODO:
 	{
@@ -288,6 +303,8 @@ CVehicle::FlyingControl(eFlightModel flightModel)
 
 
 		m_vecTurnSpeed.y *= Pow(0.9f, CTimer::GetTimeStep());
+
+
 		moveSpeed = m_vecMoveSpeed.MagnitudeSqr();
 		if(moveSpeed > SQR(1.5f))
 			m_vecMoveSpeed *= 1.5f/Sqrt(moveSpeed);
@@ -295,178 +312,427 @@ CVehicle::FlyingControl(eFlightModel flightModel)
 		float turnSpeed = m_vecTurnSpeed.MagnitudeSqr();
 		if(turnSpeed > SQR(0.2f))
 			m_vecTurnSpeed *= 0.2f/Sqrt(turnSpeed);
-	}
 		break;
+	}
 
 	case FLIGHT_MODEL_RCPLANE:
 	case FLIGHT_MODEL_SEAPLANE:
+	case FLIGHT_MODEL_PLANE_UNUSED:
+	case FLIGHT_MODEL_PLANE:
 	{
+		float fSteerLR = CPad::GetPad(0)->GetSteeringLeftRight() / 128.0f;
+		float fSteerUD = -CPad::GetPad(0)->GetSteeringUpDown() / 128.0f;
+		float fGunUD = Abs(CPad::GetPad(0)->GetCarGunUpDown());
+		if(fGunUD > 1.0f)
+			fSteerUD = -CPad::GetPad(0)->GetCarGunUpDown() / 128.0f;
+
+		float fSteerAngle = Atan2(fSteerUD, fSteerLR);
+		float fSteerMult = 1.0f;
+		if(fSteerAngle > -PI/4.0f && fSteerAngle <= PI/4.0f)
+			fSteerMult = 1.0f/Cos(fSteerAngle);
+		else if(fSteerAngle > PI/4.0f && fSteerAngle <= PI*3.0f/4.0f)
+			fSteerMult = 1.0f/Cos(fSteerAngle - HALFPI);
+		else if(fSteerAngle > PI*3.0f/4.0f)
+			fSteerMult = 1.0f/Cos(fSteerAngle - PI);
+		else if(fSteerAngle <= -PI*3.0f/4.0f)
+			fSteerMult = 1.0f/Cos(fSteerAngle + PI);
+		else if(fSteerAngle > -PI*3.0f/4.0f && fSteerAngle < -PI/4.0f)
+			fSteerMult = 1.0f/Cos(fSteerAngle + HALFPI);
+
+		fSteerLR *= fSteerMult;
+		fSteerUD *= -fSteerMult;
+
 		// thrust
 		float fForwSpeed = DotProduct(GetMoveSpeed(), GetForward());
 		CVector vecWidthForward = GetColModel()->boundingBox.min.y * GetForward();
 		float fThrust = (CPad::GetPad(0)->GetAccelerate() - CPad::GetPad(0)->GetBrake()) / 255.0f;
-		if (fForwSpeed > 0.1f || (flightModel == FLIGHT_MODEL_RCPLANE && fForwSpeed > 0.02f))
-			fThrust += 1.0f;
-		else if (fForwSpeed > 0.0f && fThrust < 0.0f)
-			fThrust = 0.0f;
-		float fThrustImpulse;
-		if (flightModel == FLIGHT_MODEL_RCPLANE)
-			fThrustImpulse = (fThrust - fRCPropFallOff * fForwSpeed) * fRCAeroThrust;
+		float fThrustAccel;
+		if(fForwSpeed > 0.0f || fThrust > 0.0f)
+			fThrustAccel = (fThrust - pFlyingHandling->fThrustFallOff * fForwSpeed) * pFlyingHandling->fThrust;
 		else
-			fThrustImpulse = (fThrust - fSeaPropFallOff * fForwSpeed) * fSeaThrust;
-		ApplyMoveForce(fThrustImpulse * GetForward() * m_fMass * CTimer::GetTimeStep());
+			fThrustAccel = Min(fThrust - 8.0f * pFlyingHandling->fThrustFallOff * fForwSpeed, 0.0f) * pFlyingHandling->fThrust;
+		if(flightModel == FLIGHT_MODEL_PLANE_UNUSED)
+			fThrustAccel *= 0.3f;
+		else if(flightModel == FLIGHT_MODEL_PLANE)
+			fThrustAccel *= 0.1f;
+		ApplyMoveForce(fThrustAccel * GetForward() * m_fMass * CTimer::GetTimeStep());
 
 		// left/right
 		float fSideSpeed = -DotProduct(GetMoveSpeed(), GetRight());
-		float fSteerLR = CPad::GetPad(0)->GetSteeringLeftRight() / 128.0f;
-		float fSideSlipImpulse;
-		if (flightModel == FLIGHT_MODEL_RCPLANE)
-			fSideSlipImpulse = Abs(fSideSpeed) * fSideSpeed * fRCSideSlipMult;
-		else
-			fSideSlipImpulse = Abs(fSideSpeed) * fSideSpeed * fSeaSideSlipMult;
-		ApplyMoveForce(m_fMass * GetRight() * fSideSlipImpulse * CTimer::GetTimeStep());
+		float fSideSlipAccel = pFlyingHandling->fSideSlip * fSideSpeed * Abs(fSideSpeed);
+		ApplyMoveForce(m_fMass * GetRight() * fSideSlipAccel * CTimer::GetTimeStep());
 
-		float fYaw = -DotProduct(CrossProduct(m_vecTurnSpeed + m_vecTurnFriction, vecWidthForward) + m_vecMoveSpeed + m_vecMoveFriction, GetRight());
-		float fYawImpulse;
-		if (flightModel == FLIGHT_MODEL_RCPLANE)
-			fYawImpulse = fRCRudderMult * fYaw * Abs(fYaw) + fRCYawMult * fSteerLR * fForwSpeed;
-		else
-			fYawImpulse = fSeaRudderMult * fYaw * Abs(fYaw) + fSeaYawMult * fSteerLR * fForwSpeed;
-		ApplyTurnForce(fYawImpulse * GetRight() * m_fTurnMass * CTimer::GetTimeStep(), vecWidthForward);
+		float fYaw = -DotProduct(GetSpeed(vecWidthForward), GetRight());
+		float fYawAccel = pFlyingHandling->fYawStab * fYaw * Abs(fYaw) + pFlyingHandling->fYaw * fSteerLR * fForwSpeed;
+		ApplyTurnForce(fYawAccel * GetRight() * m_fTurnMass * CTimer::GetTimeStep(), vecWidthForward);
 
-		float fRollImpulse;
+		float fRollAccel;
 		if (flightModel == FLIGHT_MODEL_RCPLANE) {
 			float fDirectionMultiplier = CPad::GetPad(0)->GetLookRight();
 			if (CPad::GetPad(0)->GetLookLeft())
 				fDirectionMultiplier = -1;
-			fRollImpulse = (0.5f * fDirectionMultiplier + fSteerLR) * fRCRollMult;
+			fRollAccel = (0.5f * fDirectionMultiplier + fSteerLR) * pFlyingHandling->fRoll;
 		}
 		else
-			fRollImpulse = fSteerLR * fSeaRollMult;
-		ApplyTurnForce(GetRight() * fRollImpulse * fForwSpeed * m_fTurnMass * CTimer::GetTimeStep(), GetUp());
+			fRollAccel = fSteerLR * pFlyingHandling->fRoll;
+		ApplyTurnForce(GetRight() * fRollAccel * fForwSpeed * m_fTurnMass * CTimer::GetTimeStep(), GetUp());
 
 		CVector vecFRight = CrossProduct(GetForward(), CVector(0.0f, 0.0f, 1.0f));
 		CVector vecStabilise = (GetUp().z > 0.0f) ? vecFRight : -vecFRight;
 		float fStabiliseDirection = (GetRight().z > 0.0f) ? -1.0f : 1.0f;
-		float fStabiliseImpulse;
-		if (flightModel == FLIGHT_MODEL_RCPLANE)
-			fStabiliseImpulse = fRCRollStabilise * fStabiliseDirection * (1.0f - DotProduct(GetRight(), vecStabilise)) * (1.0f - Abs(GetForward().z));
-		else
-			fStabiliseImpulse = fSeaRollStabilise * fStabiliseDirection * (1.0f - DotProduct(GetRight(), vecStabilise)) * (1.0f - Abs(GetForward().z));
-		ApplyTurnForce(fStabiliseImpulse * m_fTurnMass * GetRight(), GetUp()); // no CTimer::GetTimeStep(), is it right? VC doesn't have it too
+		float fStabiliseSpeed = pFlyingHandling->fRollStab * fStabiliseDirection * (1.0f - DotProduct(GetRight(), vecStabilise)) * (1.0f - Abs(GetForward().z));
+		ApplyTurnForce(fStabiliseSpeed * m_fTurnMass * GetRight(), GetUp()); // no CTimer::GetTimeStep(), is it right?
 
 		// up/down
-		float fTail = -DotProduct(CrossProduct(m_vecTurnSpeed + m_vecTurnFriction, vecWidthForward) + m_vecMoveSpeed + m_vecMoveFriction, GetUp());
-		float fSteerUD = -CPad::GetPad(0)->GetSteeringUpDown() / 128.0f;
-		float fPitchImpulse;
-		if (flightModel == FLIGHT_MODEL_RCPLANE)
-			fPitchImpulse = fRCTailMult * fTail * Abs(fTail) + fRCPitchMult * fSteerUD * fForwSpeed;
-		else
-			fPitchImpulse = fSeaTailMult * fTail * Abs(fTail) + fSeaPitchMult * fSteerUD * fForwSpeed;
-		ApplyTurnForce(fPitchImpulse * m_fTurnMass * GetUp() * CTimer::GetTimeStep(), vecWidthForward);
+		float fTail = -DotProduct(GetSpeed(vecWidthForward), GetUp());
+		float fPitchAccel = pFlyingHandling->fPitchStab * fTail * Abs(fTail) + pFlyingHandling->fPitch * fSteerUD * fForwSpeed;
+		ApplyTurnForce(fPitchAccel * m_fTurnMass * GetUp() * CTimer::GetTimeStep(), vecWidthForward);
 
 		float fLift = -DotProduct(GetMoveSpeed(), GetUp()) / Max(0.01f, GetMoveSpeed().Magnitude());
-		float fLiftImpluse;
-		if (flightModel == FLIGHT_MODEL_RCPLANE)
-			fLiftImpluse = (fRCAttackLiftMult * fLift + fRCFormLiftMult) * fForwSpeed * fForwSpeed;
-		else
-			fLiftImpluse = (fSeaAttackLiftMult * fLift + fSeaFormLiftMult) * fForwSpeed * fForwSpeed;
-		float fLiftForce = fLiftImpluse * m_fMass * CTimer::GetTimeStep();
-		if (GRAVITY * CTimer::GetTimeStep() * m_fMass < fLiftImpluse) {
+		float fLiftAccel = (pFlyingHandling->fAttackLift * fLift + pFlyingHandling->fFormLift) * fForwSpeed * fForwSpeed;
+		float fLiftImpulse = fLiftAccel * m_fMass * CTimer::GetTimeStep();
+		if (GRAVITY * CTimer::GetTimeStep() * m_fMass < fLiftImpulse) {
 			if (flightModel == FLIGHT_MODEL_RCPLANE && GetPosition().z > 50.0f)
-				fLiftForce = CTimer::GetTimeStep() * 0.0072 * m_fMass;
+				fLiftImpulse = CTimer::GetTimeStep() * 0.9f*GRAVITY * m_fMass;
 			else if (flightModel == FLIGHT_MODEL_SEAPLANE && GetPosition().z > 80.0f)
-				fLiftForce = CTimer::GetTimeStep() * 0.0072 * m_fMass;
+				fLiftImpulse = CTimer::GetTimeStep() * 0.9f*GRAVITY * m_fMass;
 		}
-		ApplyMoveForce(fLiftForce * GetUp());
+		ApplyMoveForce(fLiftImpulse * GetUp());
+
 		CVector vecResistance;
-		if (flightModel == FLIGHT_MODEL_RCPLANE)
-			vecResistance = vecRCAeroResistance;
-		else
-			vecResistance = vecSeaAeroResistance;
+		vecResistance = pFlyingHandling->vecTurnRes;
 		float rX = Pow(vecResistance.x, CTimer::GetTimeStep());
 		float rY = Pow(vecResistance.y, CTimer::GetTimeStep());
 		float rZ = Pow(vecResistance.z, CTimer::GetTimeStep());
 		CVector vecTurnSpeed = Multiply3x3(m_vecTurnSpeed, GetMatrix());
 		vecTurnSpeed.x *= rX;
-		float fResistance = vecTurnSpeed.y * (1.0f / (fSpeedResistanceY * SQR(vecTurnSpeed.y) + 1.0f)) * rY - vecTurnSpeed.y;
+		float fResistance = vecTurnSpeed.y * (1.0f / (pFlyingHandling->vecSpeedRes.y * SQR(vecTurnSpeed.y) + 1.0f)) * rY - vecTurnSpeed.y;
 		vecTurnSpeed.z *= rZ;
 		m_vecTurnSpeed = Multiply3x3(GetMatrix(), vecTurnSpeed);
 		ApplyTurnForce(-GetUp() * fResistance * m_fTurnMass, GetRight() + Multiply3x3(GetMatrix(), m_vecCentreOfMass));
+
+
+		float fMoveSpeed = m_vecMoveSpeed.MagnitudeSqr();
+		if(fMoveSpeed > SQR(1.5f))
+			m_vecMoveSpeed *= 1.5f/Sqrt(fMoveSpeed);
+
+		float fTurnSpeed = m_vecTurnSpeed.MagnitudeSqr();
+		if(fTurnSpeed > SQR(0.2f))
+			m_vecTurnSpeed *= 0.2f/Sqrt(fTurnSpeed);
 		break;
 	}
+	case FLIGHT_MODEL_RCHELI:
 	case FLIGHT_MODEL_HELI:
 	{
-		CVector vecMoveResistance;
-		if (GetModelIndex() == MI_SPARROW)
-			vecMoveResistance = vecHeliMoveRes;
-		else
-			vecMoveResistance = vecRCHeliMoveRes;
-		float rmX = Pow(vecMoveResistance.x, CTimer::GetTimeStep());
-		float rmY = Pow(vecMoveResistance.y, CTimer::GetTimeStep());
-		float rmZ = Pow(vecMoveResistance.z, CTimer::GetTimeStep());
-		m_vecMoveSpeed.x *= rmX;
-		m_vecMoveSpeed.y *= rmY;
-		m_vecMoveSpeed.z *= rmZ;
+		float rm = Pow(pFlyingHandling->fMoveRes, CTimer::GetTimeStep());
+		m_vecMoveSpeed *= rm;
 		if (GetStatus() != STATUS_PLAYER && GetStatus() != STATUS_PLAYER_REMOTE)
 			return;
-		float fThrust;
-		if (bCheat5)
-			fThrust = CPad::GetPad(0)->GetSteeringUpDown() * fThrustVar / 128.0f + 0.95f;
-		else
-			fThrust = fThrustVar * (CPad::GetPad(0)->GetAccelerate() - 2 * CPad::GetPad(0)->GetBrake()) / 255.0f + 0.95f;
-		fThrust -= fRotorFallOff * DotProduct(m_vecMoveSpeed, GetUp());
-#ifdef GTA3_1_1_PATCH
-		if (fThrust > 0.9f && GetPosition().z > 80.0f)
-			fThrust = 0.9f;
-#endif
+		float fUpSpeed = DotProduct(m_vecMoveSpeed, GetUp());
+		float fThrust = (CPad::GetPad(0)->GetAccelerate() - CPad::GetPad(0)->GetBrake()) / 255.0f;
+		if(fThrust < 0.0f)
+			fThrust *= 2.0f;
+		if(flightModel == FLIGHT_MODEL_RCHELI){
+			fThrust = pFlyingHandling->fThrust * fThrust + 0.45f;
+			ApplyMoveForce(GRAVITY * CVector(0.0f, 0.0f, 0.5f) * m_fMass * CTimer::GetTimeStep());
+		}else
+			fThrust = pFlyingHandling->fThrust * fThrust + 0.95f;
+		fThrust -= pFlyingHandling->fThrustFallOff * fUpSpeed;
+		if(flightModel == FLIGHT_MODEL_RCHELI && GetPosition().z > 40.0f)
+			fThrust *= 10.0f/(GetPosition().z - 30.0f);
+		else if(GetPosition().z > 80.0f)
+			fThrust *= 10.0f/(GetPosition().z - 70.0f);
 		ApplyMoveForce(GRAVITY * GetUp() * fThrust * m_fMass * CTimer::GetTimeStep());
 
-		if (GetUp().z > 0.0f)
-			ApplyTurnForce(-CVector(GetUp().x, GetUp().y, 0.0f) * fStabiliseVar * m_fTurnMass * CTimer::GetTimeStep(), GetUp());
+		if (GetUp().z > 0.0f){
+			float upRight = clamp(GetRight().z, -pFlyingHandling->fFormLift, pFlyingHandling->fFormLift);
+			float upImpulseRight = -upRight * pFlyingHandling->fAttackLift * m_fTurnMass * CTimer::GetTimeStep();
+			ApplyTurnForce(upImpulseRight * GetUp(), GetRight());
+
+			float upFwd = clamp(GetForward().z, -pFlyingHandling->fFormLift, pFlyingHandling->fFormLift);
+			float upImpulseFwd = -upFwd * pFlyingHandling->fAttackLift * m_fTurnMass * CTimer::GetTimeStep();
+			ApplyTurnForce(upImpulseFwd * GetUp(), GetForward());
+		}else{
+			float upRight = GetRight().z < 0.0f ? -pFlyingHandling->fFormLift : pFlyingHandling->fFormLift;
+			float upImpulseRight = -upRight * pFlyingHandling->fAttackLift * m_fTurnMass * CTimer::GetTimeStep();
+			ApplyTurnForce(upImpulseRight * GetUp(), GetRight());
+
+			float upFwd = GetForward().z < 0.0f ? -pFlyingHandling->fFormLift : pFlyingHandling->fFormLift;
+			float upImpulseFwd = -upFwd * pFlyingHandling->fAttackLift * m_fTurnMass * CTimer::GetTimeStep();
+			ApplyTurnForce(upImpulseFwd * GetUp(), GetForward());
+		}
 
 		float fRoll, fPitch, fYaw;
 		if (bCheat5) {
-			fPitch = CPad::GetPad(0)->GetCarGunUpDown() / 128.0f;
-			fRoll = -CPad::GetPad(0)->GetSteeringLeftRight() / 128.0f;
-			fYaw = CPad::GetPad(0)->GetCarGunLeftRight() / 128.0f;
-		}
-		else {
 			fPitch = CPad::GetPad(0)->GetSteeringUpDown() / 128.0f;
+			fRoll = CPad::GetPad(0)->GetLookLeft();
+			if (CPad::GetPad(0)->GetLookRight())
+				fRoll = -1.0f;
+			fYaw = CPad::GetPad(0)->GetSteeringLeftRight() / 128.0f;
+		} else {
+			fPitch = CPad::GetPad(0)->GetSteeringUpDown() / 128.0f;
+			fRoll = -CPad::GetPad(0)->GetSteeringLeftRight() / 128.0f;
 			fYaw = CPad::GetPad(0)->GetLookRight();
 			if (CPad::GetPad(0)->GetLookLeft())
 				fYaw = -1.0f;
-			fRoll = -CPad::GetPad(0)->GetSteeringLeftRight() / 128.0f;
+			if(Abs(CPad::GetPad(0)->GetCarGunLeftRight()) > 1.0f)
+				fYaw = CPad::GetPad(0)->GetCarGunLeftRight() / 128.0f;
 		}
+		if(Abs(CPad::GetPad(0)->GetCarGunUpDown()) > 1.0f)
+			fPitch = -CPad::GetPad(0)->GetCarGunUpDown() / 128.0f;
 		if (CPad::GetPad(0)->GetHorn()) {
 			fYaw = 0.0f;
-			fPitch = clamp(10.0f * DotProduct(m_vecMoveSpeed, GetUp()), -200.0f, 1.3f);
-			fRoll = clamp(10.0f * DotProduct(m_vecMoveSpeed, GetRight()), -200.0f, 1.3f);
+			fPitch = clamp(pFlyingHandling->fPitchStab * DotProduct(m_vecMoveSpeed, GetForward()), -200.0f, 1.3f);
+			fRoll = clamp(pFlyingHandling->fRollStab * DotProduct(m_vecMoveSpeed, GetRight()), -200.0f, 1.3f);
 		}
-		ApplyTurnForce(fPitch * GetUp() * fPitchVar * m_fTurnMass * CTimer::GetTimeStep(), GetForward());
-		ApplyTurnForce(fRoll * GetUp() * fRollVar * m_fTurnMass * CTimer::GetTimeStep(), GetRight());
-		ApplyTurnForce(fYaw * GetForward() * fYawVar * m_fTurnMass * CTimer::GetTimeStep(), GetRight());
+		ApplyTurnForce(fPitch * GetUp() * pFlyingHandling->fPitch * m_fTurnMass * CTimer::GetTimeStep(), GetForward());
+		ApplyTurnForce(fRoll * GetUp() * pFlyingHandling->fRoll * m_fTurnMass * CTimer::GetTimeStep(), GetRight());
 
-		CVector vecResistance;
-		if (GetModelIndex() == MI_SPARROW)
-			vecResistance = vecHeliResistance;
-		else
-			vecResistance = vecRCHeliResistance;
-		float rX = Pow(vecResistance.x, CTimer::GetTimeStep());
-		float rY = Pow(vecResistance.y, CTimer::GetTimeStep());
-		float rZ = Pow(vecResistance.z, CTimer::GetTimeStep());
+		float fSideSpeed = -DotProduct(GetMoveSpeed(), GetRight());
+		float fSideSlipAccel = pFlyingHandling->fSideSlip * fSideSpeed * Abs(fSideSpeed);
+		ApplyMoveForce(m_fMass * GetRight() * fSideSlipAccel * CTimer::GetTimeStep());
+		float fYawAccel = pFlyingHandling->fYawStab * fSideSpeed * Abs(fSideSpeed) + pFlyingHandling->fYaw * fYaw;
+		ApplyTurnForce(fYawAccel * GetRight() * m_fTurnMass * CTimer::GetTimeStep(), -GetForward());
+
+		ApplyTurnForce(fYaw * GetForward() * pFlyingHandling->fYaw * m_fTurnMass * CTimer::GetTimeStep(), GetRight());
+
+		float rX = Pow(pFlyingHandling->vecTurnRes.x, CTimer::GetTimeStep());
+		float rY = Pow(pFlyingHandling->vecTurnRes.y, CTimer::GetTimeStep());
+		float rZ = Pow(pFlyingHandling->vecTurnRes.z, CTimer::GetTimeStep());
 		CVector vecTurnSpeed = Multiply3x3(m_vecTurnSpeed, GetMatrix());
-		float fResistanceMultiplier = Pow(1.0f / (fSpinSpeedRes * SQR(vecTurnSpeed.z) + 1.0f), CTimer::GetTimeStep());
+		float fResistanceMultiplier = Pow(1.0f / (pFlyingHandling->vecSpeedRes.z * SQR(vecTurnSpeed.z) + 1.0f) * rZ, CTimer::GetTimeStep());
 		float fResistance = vecTurnSpeed.z * fResistanceMultiplier - vecTurnSpeed.z;
 		vecTurnSpeed.x *= rX;
 		vecTurnSpeed.y *= rY;
-		vecTurnSpeed.z *= rZ;
+		vecTurnSpeed.z *= fResistanceMultiplier;
 		m_vecTurnSpeed = Multiply3x3(GetMatrix(), vecTurnSpeed);
 		ApplyTurnForce(-GetRight() * fResistance * m_fTurnMass, GetForward() + Multiply3x3(GetMatrix(), m_vecCentreOfMass));
 		break;
 	}
 	}
 }
+
+static CColModel rotorColModel;
+static CColSphere rotorColSphere;
+float ROTOR_SEMI_THICKNESS = 0.05f;
+float ROTOR_TURN_SPEED = 0.2f;
+float ROTOR_DISGUARD_MULT = 0.3f;
+float ROTOR_COL_ELASTICITY = 1.0f;
+float ROTOR_COL_TURNMULT = -0.001f;
+float ROTOR_DEFAULT_DAMAGE = 100.0f;
+
+bool
+CVehicle::DoBladeCollision(CVector pos, CMatrix &matrix, int16 rotorType, float radius, float damageMult)
+{
+	CVector max(radius, radius, radius);
+	CVector min(-radius, -radius, -radius);
+
+	switch(rotorType){
+	case ROTOR_TOP:
+	case ROTOR_BOTTOM:
+		min.z = -ROTOR_SEMI_THICKNESS;
+		max.z = ROTOR_SEMI_THICKNESS;
+		break;
+	case ROTOR_FRONT:
+	case ROTOR_BACK:
+		min.y = -ROTOR_SEMI_THICKNESS;
+		max.y = ROTOR_SEMI_THICKNESS;
+		break;
+	case ROTOR_RIGHT:
+	case ROTOR_LEFT:
+		min.x = -ROTOR_SEMI_THICKNESS;
+		max.x = ROTOR_SEMI_THICKNESS;
+		break;
+	}
+
+	min += pos;
+	max += pos;
+	rotorColModel.boundingBox.Set(min, max);
+	rotorColModel.boundingSphere.Set(radius, pos);
+	rotorColSphere.Set(radius, pos, 0, 0);
+	rotorColModel.spheres = &rotorColSphere;
+	rotorColModel.numSpheres = 1;
+
+	pos = matrix * pos;
+	bool hadCollision;
+	int minX = CWorld::GetSectorIndexX(pos.x - radius);
+	if(minX <= 0) minX = 0;
+
+	int minY = CWorld::GetSectorIndexY(pos.y - radius);
+	if(minY <= 0) minY = 0;
+
+	int maxX = CWorld::GetSectorIndexX(pos.x + radius);
+#ifdef FIX_BUGS
+	if(maxX >= NUMSECTORS_X) maxX = NUMSECTORS_X - 1;
+#else
+	if(maxX >= NUMSECTORS_X) maxX = NUMSECTORS_X;
+#endif
+
+	int maxY = CWorld::GetSectorIndexY(pos.y + radius);
+#ifdef FIX_BUGS
+	if(maxY >= NUMSECTORS_Y) maxY = NUMSECTORS_Y - 1;
+#else
+	if(maxY >= NUMSECTORS_Y) maxY = NUMSECTORS_Y;
+#endif
+
+	CWorld::AdvanceCurrentScanCode();
+	for(int curY = minY; curY <= maxY; curY++) {
+		for(int curX = minX; curX <= maxX; curX++) {
+			CSector *sector = CWorld::GetSector(curX, curY);
+			if(BladeColSectorList(sector->m_lists[ENTITYLIST_BUILDINGS], rotorColModel, matrix, rotorType, damageMult))
+				hadCollision = true;
+			if(BladeColSectorList(sector->m_lists[ENTITYLIST_BUILDINGS_OVERLAP], rotorColModel, matrix, rotorType, damageMult))
+				hadCollision = true;
+			if(BladeColSectorList(sector->m_lists[ENTITYLIST_VEHICLES], rotorColModel, matrix, rotorType, damageMult))
+				hadCollision = true;
+			if(BladeColSectorList(sector->m_lists[ENTITYLIST_VEHICLES_OVERLAP], rotorColModel, matrix, rotorType, damageMult))
+				hadCollision = true;
+			if(BladeColSectorList(sector->m_lists[ENTITYLIST_PEDS], rotorColModel, matrix, rotorType, 0.0f))
+				hadCollision = true;
+			if(BladeColSectorList(sector->m_lists[ENTITYLIST_PEDS_OVERLAP], rotorColModel, matrix, rotorType, 0.0f))
+				hadCollision = true;
+			if(BladeColSectorList(sector->m_lists[ENTITYLIST_OBJECTS], rotorColModel, matrix, rotorType, damageMult))
+				hadCollision = true;
+			if(BladeColSectorList(sector->m_lists[ENTITYLIST_OBJECTS_OVERLAP], rotorColModel, matrix, rotorType, damageMult))
+				hadCollision = true;
+		}
+	}
+	rotorColModel.spheres = nil;
+	rotorColModel.numSpheres = 0;
+
+	return hadCollision;
+}
+
+bool
+CVehicle::BladeColSectorList(CPtrList &list, CColModel &rotorColModel, CMatrix &matrix, int16 rotorType, float damageMult)
+{
+	int i;
+	CVector axis;
+	CVector turnSpeed(0.0f, 0.0f, 0.0f);
+	switch(rotorType){
+	case ROTOR_TOP:
+		turnSpeed.z = -ROTOR_TURN_SPEED;
+		axis = -matrix.GetUp();
+		break;
+	case ROTOR_BOTTOM:
+		turnSpeed.z = ROTOR_TURN_SPEED;
+		axis = matrix.GetUp();
+		break;
+
+	case ROTOR_FRONT:
+		turnSpeed.y = -ROTOR_TURN_SPEED;
+		axis = -matrix.GetForward();
+		break;
+	case ROTOR_BACK:
+		turnSpeed.y = ROTOR_TURN_SPEED;
+		axis = matrix.GetForward();
+		break;
+
+	case ROTOR_RIGHT:
+		turnSpeed.x = -ROTOR_TURN_SPEED;
+		axis = -matrix.GetRight();
+		break;
+	case ROTOR_LEFT:
+		turnSpeed.x = ROTOR_TURN_SPEED;
+		axis = matrix.GetRight();
+		break;
+	}
+	turnSpeed = Multiply3x3(matrix, turnSpeed);
+	CVector center = rotorColModel.boundingSphere.center;
+	center = matrix*center;
+
+	for(CPtrNode *node = list.first; node; node = node->next) {
+		CEntity *entity = (CEntity *)node->item;
+		if(entity == (CEntity*)this ||
+		   !entity->bUsesCollision ||
+		   entity->m_scanCode == CWorld::GetCurrentScanCode())
+			continue;
+
+		entity->m_scanCode = CWorld::GetCurrentScanCode();
+
+		int numCollisions;
+		CColModel *entityCol;
+		if(entity->IsPed())
+			entityCol = ((CPedModelInfo*)CModelInfo::GetModelInfo(entity->GetModelIndex()))->AnimatePedColModelSkinned(entity->GetClump());
+		else
+			entityCol = CModelInfo::GetModelInfo(entity->GetModelIndex())->GetColModel();
+		if(entityCol)
+			numCollisions = CCollision::ProcessColModels(matrix, rotorColModel, entity->GetMatrix(), *entityCol,
+				CWorld::m_aTempColPts, nil, nil);
+		else
+			numCollisions = 0;
+
+		if(numCollisions > 0 && entity->IsPed()){
+			CPed *ped = (CPed*)entity;
+			CVector2D dirToRotor = GetPosition() - entity->GetPosition();
+			dirToRotor.Normalise();
+			int localDir = ped->GetLocalDirection(dirToRotor);
+			if(ped->m_attachedTo == nil){
+				ped->bIsStanding = false;
+				ped->ApplyMoveForce(-5.0f*dirToRotor.x, -5.0f*dirToRotor.y, 5.0f);
+			}
+			ped->InflictDamage(this, WEAPONTYPE_RUNOVERBYCAR, 1000.0f, PEDPIECE_TORSO, localDir);
+
+			if(CGame::nastyGame && ped->GetIsOnScreen()){
+				for(i = 0; i < 16; i++)
+					CParticle::AddParticle(PARTICLE_BLOOD_SMALL, ped->GetPosition(), CVector(dirToRotor.x, dirToRotor.y, 1.0f) * 0.01f);
+				CParticle::AddParticle(PARTICLE_TEST, ped->GetPosition(), CVector(0.0f, 0.0f, 0.02f), nil, 0.1f);
+				CParticle::AddParticle(PARTICLE_TEST, ped->GetPosition()+CVector(0.0f, 0.0f, 0.2f), CVector(0.0f, 0.0f, -0.01f), nil, 0.1f);
+			}
+		}else if(numCollisions > 0 && entity->GetModelIndex() != MI_MISSILE){
+			float impulse = 0.0f;
+			bool hadCollision = false;
+			float savedElasticity = m_fElasticity;
+			m_fElasticity = ROTOR_COL_ELASTICITY;
+
+			for(i = 0; i < numCollisions; i++){
+				CVector colpos = CWorld::m_aTempColPts[i].point;
+				CVector localColpos = colpos - center;
+				float axisDir = DotProduct(axis, localColpos);
+				float colDir = DotProduct(CWorld::m_aTempColPts[i].normal, localColpos);
+				if(2.0f*ROTOR_SEMI_THICKNESS < Abs(axisDir) &&
+				   ROTOR_DISGUARD_MULT*Abs(colDir) < Abs(axisDir))
+					continue;
+
+				colpos -= axisDir*axis;	// get rid of axis component
+
+				CVector tangentSpeed = CrossProduct(turnSpeed, colpos - center);
+
+				// Particles
+				for(int j = 0; j < 4; j++){
+					CParticle::AddParticle(PARTICLE_SPARK_SMALL, colpos, (tangentSpeed+m_vecMoveSpeed)/2.0f);
+					CParticle::AddParticle(PARTICLE_SPARK, colpos, 0.1f*CWorld::m_aTempColPts[i].normal);
+				}
+
+				// Apply Collision
+				if(IsCar()){
+					CAutomobile *heli = (CAutomobile*)this;
+					if(heli->m_fRotorSpeed > 0.15f){
+						ApplyCollision(CWorld::m_aTempColPts[i], impulse);
+						ApplyTurnForce(m_fTurnMass*ROTOR_COL_TURNMULT*tangentSpeed, colpos - center);
+						heli->m_fRotorSpeed = 0.15f;
+					}else if(heli->m_fRotorSpeed < 0.075f && heli->m_fRotorSpeed > 0.0f)
+						heli->m_fRotorSpeed *= -1.0f;
+				}
+
+				float damageImpulse = damageMult * Max(impulse, ROTOR_DEFAULT_DAMAGE*m_fMass/3000.0f);
+				if(damageImpulse > m_fDamageImpulse)
+					SetDamagedPieceRecord(0, damageImpulse, entity, CWorld::m_aTempColPts[i].normal);
+
+				hadCollision = true;
+			}
+
+			if(hadCollision && !entity->IsPed())
+				DMAudio.ReportCollision(this, entity, SURFACE_CAR_PANEL, SURFACE_TARMAC, 50.0f, 0.09f);
+			m_fElasticity = savedElasticity;
+		}
+	}
+	return false;
+}
+
+
+float fBurstSpeedMax = 0.3f;
+float fBurstTyreMod = 0.13f;
 
 void
 CVehicle::ProcessWheel(CVector &wheelFwd, CVector &wheelRight, CVector &wheelContactSpeed, CVector &wheelContactPoint,
@@ -476,6 +742,10 @@ CVehicle::ProcessWheel(CVector &wheelFwd, CVector &wheelRight, CVector &wheelCon
 	static bool bAlreadySkidding = false;	// this is never reset
 	static bool bBraking;
 	static bool bDriving;
+
+#ifdef FIX_BUGS
+	bAlreadySkidding = false;
+#endif
 
 	// how much force we want to apply in these axes
 	float fwd = 0.0f;
@@ -508,8 +778,8 @@ CVehicle::ProcessWheel(CVector &wheelFwd, CVector &wheelRight, CVector &wheelCon
 #endif
 
 		if(wheelStatus == WHEEL_STATUS_BURST){
-			float fwdspeed = Min(contactSpeedFwd, 0.3f);
-			right += fwdspeed * CGeneral::GetRandomNumberInRange(-0.1f, 0.1f);
+			float fwdspeed = Min(contactSpeedFwd, fBurstSpeedMax);
+			right += fwdspeed * CGeneral::GetRandomNumberInRange(-fBurstTyreMod, fBurstTyreMod);
 		}
 	}
 
@@ -534,7 +804,11 @@ CVehicle::ProcessWheel(CVector &wheelFwd, CVector &wheelRight, CVector &wheelCon
 
 		if(!bBraking){
 			if(m_fGasPedal < 0.01f){
-				if(GetModelIndex() == MI_RCBANDIT)
+				if(IsBike())
+					brake = 0.6f * mod_HandlingManager.fWheelFriction / (pHandling->fMass + 200.0f);
+				else if(pHandling->fMass < 500.0f)
+					brake = mod_HandlingManager.fWheelFriction / m_fMass;
+				else if(GetModelIndex() == MI_RCBANDIT)
 					brake = 0.2f * mod_HandlingManager.fWheelFriction / m_fMass;
 				else
 					brake = mod_HandlingManager.fWheelFriction / m_fMass;
@@ -558,7 +832,8 @@ CVehicle::ProcessWheel(CVector &wheelFwd, CVector &wheelRight, CVector &wheelCon
 		}
 	}
 
-	if(sq(adhesion) < sq(right) + sq(fwd)){
+	float speedSq = sq(right) + sq(fwd);
+	if(sq(adhesion) < speedSq){
 		if(*wheelState != WHEEL_STATE_FIXED){
 			if(bDriving && contactSpeedFwd < 0.2f)
 				*wheelState = WHEEL_STATE_SPINNING;
@@ -566,22 +841,205 @@ CVehicle::ProcessWheel(CVector &wheelFwd, CVector &wheelRight, CVector &wheelCon
 				*wheelState = WHEEL_STATE_SKIDDING;
 		}
 
-		float l = Sqrt(sq(right) + sq(fwd));
+		float l = Sqrt(speedSq);
 		float tractionLoss = bAlreadySkidding ? 1.0f : pHandling->fTractionLoss;
 		right *= adhesion * tractionLoss / l;
 		fwd *= adhesion * tractionLoss / l;
 	}
 
 	if(fwd != 0.0f || right != 0.0f){
+		CVector totalSpeed = fwd*wheelFwd + right*wheelRight;
+
+		CVector turnDirection = totalSpeed;
+		bool separateTurnForce = false;	// BUG: not initialized on PC
+		if(pHandling->fSuspensionAntidiveMultiplier > 0.0f){
+			if(bBraking){
+				separateTurnForce = true;
+				turnDirection = totalSpeed - pHandling->fSuspensionAntidiveMultiplier*fwd*wheelFwd;
+			}else if(bDriving){
+				separateTurnForce = true;
+				turnDirection = totalSpeed - 0.5f*pHandling->fSuspensionAntidiveMultiplier*fwd*wheelFwd;
+			}
+		}
+
+		CVector direction = totalSpeed;
+
+		float speed = totalSpeed.Magnitude();
+		float turnSpeed;
+		if(separateTurnForce)
+			turnSpeed = turnDirection.Magnitude();
+		else
+			turnSpeed = speed;
+		direction.Normalise();
+		if(separateTurnForce)
+			turnDirection.Normalise();
+		else
+			turnDirection = direction;
+
+		float impulse = speed*m_fMass;
+		float turnImpulse = turnSpeed*GetMass(wheelContactPoint, turnDirection);
+
+		ApplyMoveForce(impulse * direction);
+		ApplyTurnForce(turnImpulse * direction, wheelContactPoint);
+	}
+}
+
+float fBurstBikeSpeedMax = 0.12f;
+float fBurstBikeTyreMod = 0.05f;
+float fTweakBikeWheelTurnForce = 2.0f;
+
+void
+CVehicle::ProcessBikeWheel(CVector &wheelFwd, CVector &wheelRight, CVector &wheelContactSpeed, CVector &wheelContactPoint,
+	int32 wheelsOnGround, float thrust, float brake, float adhesion, float unk, int8 wheelId, float *wheelSpeed, tWheelState *wheelState, eBikeWheelSpecial special, uint16 wheelStatus)
+{
+	// BUG: using statics here is probably a bad idea
+	static bool bAlreadySkidding = false;	// this is never reset
+	static bool bBraking;
+	static bool bDriving;
+	static bool bReversing;
+
+#ifdef FIX_BUGS
+	bAlreadySkidding = false;
+#endif
+
+	// how much force we want to apply in these axes
+	float fwd = 0.0f;
+	float right = 0.0f;
+
+	bBraking = brake != 0.0f;
+	if(bBraking)
+		thrust = 0.0f;
+	bDriving = thrust != 0.0f;
+	bReversing = thrust < 0.0f;
+
+	float contactSpeedFwd = DotProduct(wheelContactSpeed, wheelFwd);
+	float contactSpeedRight;
+
+	if(*wheelState != WHEEL_STATE_NORMAL)
+		bAlreadySkidding = true;
+	*wheelState = WHEEL_STATE_NORMAL;
+
+	adhesion *= CTimer::GetTimeStep();
+	if(bAlreadySkidding)
+		adhesion *= pHandling->fTractionLoss;
+
+	if(special == BIKE_WHEEL_2 || special == BIKE_WHEEL_3)
+		contactSpeedRight = 0.0f;
+	else
+		contactSpeedRight = DotProduct(wheelContactSpeed, wheelRight);
+
+	// moving sideways
+	if(contactSpeedRight != 0.0f){
+		// exert opposing force
+		right = -contactSpeedRight/wheelsOnGround;
+#ifdef FIX_BUGS
+		// contactSpeedRight is independent of framerate but right has timestep as a factor
+		// so we probably have to fix this
+		right *= CTimer::GetTimeStepFix();
+#endif
+
+		if(wheelStatus == WHEEL_STATUS_BURST){
+			float fwdspeed = Min(contactSpeedFwd, fBurstBikeSpeedMax);
+			right += fwdspeed * CGeneral::GetRandomNumberInRange(-fBurstBikeTyreMod, fBurstBikeTyreMod);
+		}
+	}
+
+	if(bDriving){
+		fwd = thrust;
+
+		// limit sideways force (why?)
+		if(right > 0.0f){
+			if(right > adhesion)
+				right = adhesion;
+		}else{
+			if(right < -adhesion)
+				right = -adhesion;
+		}
+	}else if(contactSpeedFwd != 0.0f){
+		fwd = -contactSpeedFwd/wheelsOnGround;
+#ifdef FIX_BUGS
+		// contactSpeedFwd is independent of framerate but fwd has timestep as a factor
+		// so we probably have to fix this
+		fwd *= CTimer::GetTimeStepFix();
+#endif
+
+		if(!bBraking){
+			if(m_fGasPedal < 0.01f){
+				if(IsBike())
+					brake = 0.6f * mod_HandlingManager.fWheelFriction / (pHandling->fMass + 200.0f);
+				else if(pHandling->fMass < 500.0f)
+					brake = mod_HandlingManager.fWheelFriction / m_fMass;
+				else if(GetModelIndex() == MI_RCBANDIT)
+					brake = 0.2f * mod_HandlingManager.fWheelFriction / m_fMass;
+				else
+					brake = mod_HandlingManager.fWheelFriction / m_fMass;
+#ifdef FIX_BUGS
+				brake *= CTimer::GetTimeStepFix();
+#endif
+			}
+		}
+
+		if(brake > adhesion){
+			if(Abs(contactSpeedFwd) > 0.005f)
+				*wheelState = WHEEL_STATE_FIXED;
+		}else {
+			if(fwd > 0.0f){
+				if(fwd > brake)
+					fwd = brake;
+			}else{
+				if(fwd < -brake)
+					fwd = -brake;
+			}
+		}
+	}
+
+	float speedSq = sq(right) + sq(fwd);
+	if(sq(adhesion) < speedSq){
+		if(*wheelState != WHEEL_STATE_FIXED){
+			if(bDriving && contactSpeedFwd < 0.2f)
+				*wheelState = WHEEL_STATE_SPINNING;
+			else
+				*wheelState = WHEEL_STATE_SKIDDING;
+		}
+
+		float l = Sqrt(speedSq);
+		float tractionLoss = bAlreadySkidding ? 1.0f : pHandling->fTractionLoss;
+		right *= adhesion * tractionLoss / l;
+		fwd *= adhesion * tractionLoss / l;
+
+		if(unk < 1.0f)
+			right *= unk;
+	}else if(unk < 1.0f){
+		if(!bAlreadySkidding)
+			unk *= pHandling->fTractionLoss;
+		if(sq(adhesion*unk) < speedSq){
+			float l = Sqrt(speedSq);
+			right *= adhesion * unk / l;
+		}
+	}
+
+	if(fwd != 0.0f || right != 0.0f){
 		CVector direction = fwd*wheelFwd + right*wheelRight;
+
 		float speed = direction.Magnitude();
 		direction.Normalise();
 
 		float impulse = speed*m_fMass;
 		float turnImpulse = speed*GetMass(wheelContactPoint, direction);
+		CVector vTurnImpulse = turnImpulse * direction;
+		float turnRight = DotProduct(vTurnImpulse, GetRight());
 
 		ApplyMoveForce(impulse * direction);
-		ApplyTurnForce(turnImpulse * direction, wheelContactPoint);
+
+		float contactRight = DotProduct(wheelContactPoint, GetRight());
+		float contactFwd = DotProduct(wheelContactPoint, GetForward());
+
+		if(wheelId != CARWHEEL_REAR_LEFT ||
+		   !bBraking && !bReversing)
+			ApplyTurnForce((vTurnImpulse - turnRight*GetRight()) * fTweakBikeWheelTurnForce,
+				wheelContactPoint - contactRight*GetRight());
+
+		ApplyTurnForce(turnRight*GetRight(), contactFwd*GetForward());
 	}
 }
 
@@ -603,40 +1061,81 @@ CVehicle::ProcessWheelRotation(tWheelState state, const CVector &fwd, const CVec
 	return angularVelocity * CTimer::GetTimeStep();
 }
 
+int
+CVehicle::FindTyreNearestPoint(float x, float y)
+{
+	CVector pos = CVector(x - GetPosition().x, y - GetPosition().y, 0.0f);
+	float fwd = DotProduct(GetForward(), pos);
+	float right = DotProduct(GetRight(), pos);
+
+	int piece;
+	if(IsBike()){
+		piece = fwd > 0.0f ? CAR_PIECE_WHEEL_LF : CAR_PIECE_WHEEL_LR;
+	}else{
+		piece = fwd > 0.0f ?
+			right > 0.0f ? CAR_PIECE_WHEEL_RF : CAR_PIECE_WHEEL_LF :
+			right > 0.0f ? CAR_PIECE_WHEEL_RR : CAR_PIECE_WHEEL_LR;
+	}
+	return piece - CAR_PIECE_WHEEL_LF;
+}
+
 void
-CVehicle::InflictDamage(CEntity* damagedBy, eWeaponType weaponType, float damage)
+CVehicle::InflictDamage(CEntity *damagedBy, eWeaponType weaponType, float damage, CVector pos)
 {
 	if (!bCanBeDamaged)
 		return;
-	if (bOnlyDamagedByPlayer && (damagedBy != FindPlayerPed() && damagedBy != FindPlayerVehicle()))
+	if(GetStatus() == STATUS_PLAYER && CStats::GetPercentageProgress() >= 100.0f)
+		damage *= 0.5f;
+	if (GetStatus() != STATUS_PLAYER && bOnlyDamagedByPlayer && (damagedBy != FindPlayerPed() && damagedBy != FindPlayerVehicle()))
 		return;
+
+	if(damage > 10.0f && (damagedBy == FindPlayerPed() || damagedBy == FindPlayerVehicle()) && GetStatus() != STATUS_WRECKED){
+		CWorld::Players[CWorld::PlayerInFocus].m_nHavocLevel += 2;
+		CWorld::Players[CWorld::PlayerInFocus].m_fMediaAttention += 1.0f;
+		CStats::PropertyDestroyed += CGeneral::GetRandomNumberInRange(5, 25);
+	}
+
 	bool bFrightensDriver = false;
 	switch (weaponType) {
 	case WEAPONTYPE_UNARMED:
+	case WEAPONTYPE_BRASSKNUCKLE:
+	case WEAPONTYPE_SCREWDRIVER:
+	case WEAPONTYPE_GOLFCLUB:
+	case WEAPONTYPE_NIGHTSTICK:
+	case WEAPONTYPE_KNIFE:
 	case WEAPONTYPE_BASEBALLBAT:
+	case WEAPONTYPE_HAMMER:
+	case WEAPONTYPE_CLEAVER:
+	case WEAPONTYPE_MACHETE:
+	case WEAPONTYPE_KATANA:
+	case WEAPONTYPE_CHAINSAW:
 		if (bMeleeProof)
 			return;
 		break;
 	case WEAPONTYPE_COLT45:
-	case WEAPONTYPE_UZI:
-	case WEAPONTYPE_TEC9:
-	case WEAPONTYPE_SILENCED_INGRAM:
-	case WEAPONTYPE_MP5:
+	case WEAPONTYPE_PYTHON:
 	case WEAPONTYPE_SHOTGUN:
 	case WEAPONTYPE_SPAS12_SHOTGUN:
 	case WEAPONTYPE_STUBBY_SHOTGUN:
-	case WEAPONTYPE_RUGER:
+	case WEAPONTYPE_TEC9:
+	case WEAPONTYPE_UZI:
+	case WEAPONTYPE_SILENCED_INGRAM:
+	case WEAPONTYPE_MP5:
 	case WEAPONTYPE_M4:
+	case WEAPONTYPE_RUGER:
 	case WEAPONTYPE_SNIPERRIFLE:
+	case WEAPONTYPE_LASERSCOPE:
+	case WEAPONTYPE_M60:
+	case WEAPONTYPE_MINIGUN:
 	case WEAPONTYPE_HELICANNON:
 	case WEAPONTYPE_UZI_DRIVEBY:
 		if (bBulletProof)
 			return;
 		bFrightensDriver = true;
 		break;
-	case WEAPONTYPE_ROCKETLAUNCHER:
-	case WEAPONTYPE_MOLOTOV:
 	case WEAPONTYPE_GRENADE:
+	case WEAPONTYPE_MOLOTOV:
+	case WEAPONTYPE_ROCKET:
 	case WEAPONTYPE_EXPLOSION:
 		if (bExplosionProof)
 			return;
@@ -653,6 +1152,52 @@ CVehicle::InflictDamage(CEntity* damagedBy, eWeaponType weaponType, float damage
 	default:
 		break;
 	}
+
+	if(bFrightensDriver && GetStatus() == STATUS_PLAYER && m_fHealth < 250.0f)
+		return;
+
+	// Pop tires
+	if(damagedBy && damagedBy->IsPed() && (IsCar() || IsBike())){
+		int accuracy = 0;
+		switch(weaponType){
+		case WEAPONTYPE_COLT45:
+			accuracy = 10;
+			break;
+		case WEAPONTYPE_PYTHON:
+			if(!((CPed*)damagedBy)->IsPlayer())
+				accuracy = 64;
+			break;
+		case WEAPONTYPE_SHOTGUN:
+		case WEAPONTYPE_STUBBY_SHOTGUN:
+		case WEAPONTYPE_M60:
+		case WEAPONTYPE_HELICANNON:
+			accuracy = 25;
+			break;
+		case WEAPONTYPE_TEC9:
+		case WEAPONTYPE_UZI:
+		case WEAPONTYPE_SILENCED_INGRAM:
+		case WEAPONTYPE_MP5:
+		case WEAPONTYPE_UZI_DRIVEBY:
+			accuracy = 15;
+			break;
+		case WEAPONTYPE_M4:
+		case WEAPONTYPE_RUGER:
+			if(!((CPed*)damagedBy)->IsPlayer())
+				accuracy = 15;
+			break;
+		}
+
+		if(((CPed*)damagedBy)->IsPlayer() && (CCamera::m_bUseMouse3rdPerson || TheCamera.Using1stPersonWeaponMode()))
+			accuracy = 0;
+
+		if(accuracy != 0 && !bTyresDontBurst && (CGeneral::GetRandomNumber()&0x7F) < accuracy){
+			if(IsBike())
+				BurstTyre(FindTyreNearestPoint(pos.x, pos.y) + CAR_PIECE_WHEEL_LF, false);
+			else if(GetVehicleAppearance() == VEHICLE_APPEARANCE_CAR)
+				BurstTyre(FindTyreNearestPoint(pos.x, pos.y) + CAR_PIECE_WHEEL_LF, true);
+		}
+	}
+
 	if (m_fHealth > 0.0f) {
 		if (VehicleCreatedBy == RANDOM_VEHICLE && pDriver &&
 			(GetStatus() == STATUS_SIMPLE || GetStatus() == STATUS_PHYSICS) &&
@@ -665,24 +1210,41 @@ CVehicle::InflictDamage(CEntity* damagedBy, eWeaponType weaponType, float damage
 			}
 		}
 		m_nLastWeaponDamage = weaponType;
+		m_pLastDamageEntity = damagedBy;
 		float oldHealth = m_fHealth;
 		if (m_fHealth > damage) {
 			m_fHealth -= damage;
-			if (VehicleCreatedBy == RANDOM_VEHICLE &&
-				(m_fHealth < DAMAGE_HEALTH_TO_FLEE_ALWAYS ||
-					bFrightensDriver && m_randomSeed > DAMAGE_FLEE_ON_FOOT_PROBABILITY_VALUE)) {
+			if (VehicleCreatedBy == RANDOM_VEHICLE && !IsBoat()){
 				switch (GetStatus()) {
 				case STATUS_SIMPLE:
 				case STATUS_PHYSICS:
-					if (pDriver) {
-						SetStatus(STATUS_ABANDONED);
-						pDriver->bFleeAfterExitingCar = true;
-						pDriver->SetObjective(OBJECTIVE_LEAVE_VEHICLE, this);
-					}
-					for (int i = 0; i < m_nNumMaxPassengers; i++) {
-						if (pPassengers[i]) {
-							pPassengers[i]->bFleeAfterExitingCar = true;
-							pPassengers[i]->SetObjective(OBJECTIVE_LEAVE_VEHICLE, this);
+					if(AutoPilot.m_nDrivingStyle == DRIVINGSTYLE_PLOUGH_THROUGH ||
+					   CGeneral::GetRandomNumberInRange(0.0f, 1.0f) > 0.5f && AutoPilot.m_nCarMission == MISSION_CRUISE){
+						// Drive away like a maniac
+						if(pDriver && pDriver->m_objective != OBJECTIVE_LEAVE_VEHICLE){
+							if(AutoPilot.m_nDrivingStyle != DRIVINGSTYLE_PLOUGH_THROUGH)
+								AutoPilot.m_nCruiseSpeed *= 1.5f;
+							AutoPilot.m_nDrivingStyle = DRIVINGSTYLE_PLOUGH_THROUGH;
+						}
+					}else{
+						// Leave vehicle
+						if (pDriver && pDriver->CharCreatedBy != MISSION_CHAR) {
+							SetStatus(STATUS_ABANDONED);
+							pDriver->bFleeAfterExitingCar = true;
+							pDriver->SetObjective(OBJECTIVE_LEAVE_VEHICLE, this);
+							pDriver->Say(SOUND_PED_FLEE_SPRINT);
+						}
+						int time = 200;
+						for (int i = 0; i < m_nNumMaxPassengers; i++) {
+							if (pPassengers[i] &&
+							    pPassengers[i]->m_objective != OBJECTIVE_LEAVE_VEHICLE &&
+							    pPassengers[i]->CharCreatedBy != MISSION_CHAR) {
+								pPassengers[i]->bFleeAfterExitingCar = true;
+								pPassengers[i]->SetObjective(OBJECTIVE_LEAVE_VEHICLE, this);
+								pPassengers[i]->m_objectiveTimer = CTimer::GetTimeInMilliseconds() + time;
+								pPassengers[i]->Say(SOUND_PED_FLEE_SPRINT);
+								time += 200;
+							}
 						}
 					}
 					break;
@@ -690,7 +1252,7 @@ CVehicle::InflictDamage(CEntity* damagedBy, eWeaponType weaponType, float damage
 					break;
 				}
 			}
-			if (oldHealth > DAMAGE_HEALTH_TO_CATCH_FIRE && m_fHealth < DAMAGE_HEALTH_TO_CATCH_FIRE) {
+			if (oldHealth >= DAMAGE_HEALTH_TO_CATCH_FIRE && m_fHealth < DAMAGE_HEALTH_TO_CATCH_FIRE) {
 				if (IsCar()) {
 					CAutomobile* pThisCar = (CAutomobile*)this;
 					pThisCar->Damage.SetEngineStatus(ENGINE_STATUS_ON_FIRE);
@@ -724,11 +1286,13 @@ CVehicle::InflictDamage(CEntity* damagedBy, eWeaponType weaponType, float damage
 void
 CVehicle::DoFixedMachineGuns(void)
 {
-	if(CPad::GetPad(0)->GetCarGunFired() && !bGunSwitchedOff){
-		FireFixedMachineGuns();
-	}else{
-		if(CTimer::GetTimeInMilliseconds() > m_nGunFiringTime + 1400)
-			m_nAmmoInClip = 20;
+	if(TheCamera.Cams[TheCamera.ActiveCam].DirectionWasLooking == LOOKING_FORWARD){
+		if(CPad::GetPad(0)->GetCarGunFired() && !bGunSwitchedOff){
+			FireFixedMachineGuns();
+		}else{
+			if(CTimer::GetTimeInMilliseconds() > m_nGunFiringTime + 1400)
+				m_nAmmoInClip = 20;
+		}
 	}
 }
 
@@ -777,9 +1341,43 @@ CVehicle::FireFixedMachineGuns(void)
 }
 
 void
+CVehicle::ActivateBomb(void)
+{
+	if(m_bombType == CARBOMB_TIMED){
+		m_bombType = CARBOMB_TIMEDACTIVE;
+		m_nBombTimer = 7000;
+		m_pBlowUpEntity = FindPlayerPed();
+		CGarages::TriggerMessage("GA_12", -1, 3000, -1);
+		DMAudio.PlayOneShot(m_audioEntityId, SOUND_BOMB_TIMED_ACTIVATED, 1.0f);
+	}else if(m_bombType == CARBOMB_ONIGNITION){
+		m_bombType = CARBOMB_ONIGNITIONACTIVE;
+		CGarages::TriggerMessage("GA_12", -1, 3000, -1);
+		DMAudio.PlayOneShot(m_audioEntityId, SOUND_BOMB_ONIGNITION_ACTIVATED, 1.0f);
+	}
+}
+
+void
+CVehicle::ActivateBombWhenEntered(void)
+{
+	if(pDriver){
+		if(!bDriverLastFrame && m_bombType == CARBOMB_ONIGNITIONACTIVE){
+			// If someone enters the car and there is a bomb, detonate
+			m_nBombTimer = 1000;
+			m_pBlowUpEntity = m_pBombRigger;
+			if(m_pBlowUpEntity)
+				m_pBlowUpEntity->RegisterReference((CEntity**)&m_pBlowUpEntity);
+			DMAudio.PlayOneShot(m_audioEntityId, SOUND_BOMB_TICK, 1.0f);
+		}
+		bDriverLastFrame = true;
+	}else
+		bDriverLastFrame = false;
+}
+
+void
 CVehicle::ExtinguishCarFire(void)
 {
-	m_fHealth = Max(m_fHealth, 300.0f);
+	if(GetStatus() != STATUS_WRECKED)
+		m_fHealth = Max(m_fHealth, 300.0f);
 	if(m_pCarFire)
 		m_pCarFire->Extinguish();
 	if(IsCar()){
@@ -850,6 +1448,69 @@ CVehicle::ShufflePassengersToMakeSpace(void)
 }
 
 void
+CVehicle::MakeNonDraggedPedsLeaveVehicle(CPed *ped1, CPed *ped2, CPlayerPed *&player, CCopPed *&cop)
+{
+	int i;
+	player = nil;
+	cop = nil;
+
+	if(ped1->IsPlayer() && ped2->m_nPedType == PEDTYPE_COP &&
+	   ((CPlayerPed*)ped1)->m_pWanted->m_nWantedLevel > 0 &&
+	   ped2->m_pedInObjective == ped1){
+		player = (CPlayerPed*)ped1;
+		cop = (CCopPed*)ped2;
+		return;
+	}
+
+	bool ped1IsDriver = ped1 == pDriver;
+
+	// Just what the hell is this weird code?
+	CPed *peds[9];
+	CPed *peds2[9];
+	int numPeds = 0;
+	int numPeds2 = 0;
+	for(i = 0; i < m_nNumMaxPassengers; i++){
+		CPed *p = pPassengers[i];
+		if(p && p != ped1 && !p->bStayInCarOnJack){
+			peds[numPeds++] = p;
+			// uhh what?
+			if(i < 1 && !ped1IsDriver)
+				continue;
+			peds2[numPeds2++] = p;
+		}
+	}
+
+	// So we're copying this array for no reason...
+	CPed *peds3[9];
+	int numPeds3 = 0;
+	for(i = 0; i < numPeds; i++){
+		if(peds[i]->IsPlayer() && ped2->m_nPedType == PEDTYPE_COP &&
+		   ((CPlayerPed*)peds[i])->m_pWanted->m_nWantedLevel > 0 &&
+		   ped2->m_pedInObjective == peds[i]){
+			player = (CPlayerPed*)peds[i];
+			cop = (CCopPed*)ped2;
+			return;
+		}
+		peds3[numPeds3++] = peds[i];
+	}
+
+	int time = 1800;
+	for(i = 0; i < numPeds3; i++){
+		peds3[i]->m_leaveCarTimer = CTimer::GetTimeInMilliseconds() + time;
+		peds3[i]->SetObjective(OBJECTIVE_LEAVE_VEHICLE, this);
+		time += CGeneral::GetRandomNumberInRange(300.0f, 600.0f);
+	}
+
+	if(IsCar() && numPeds2 > 0 && CGeneral::GetRandomTrueFalse())
+		for(i = 0; i < numPeds2; i++)
+			if(peds2[i]->IsFemale() || CGeneral::GetRandomTrueFalse()){
+				peds2[i]->m_leaveCarTimer = CTimer::GetTimeInMilliseconds() + 10000;
+				peds2[i]->b156_8 = true;
+				peds2[i]->bFleeAfterExitingCar = true;
+			}
+}
+
+void
 CVehicle::ProcessDelayedExplosion(void)
 {
 	if(m_nBombTimer == 0)
@@ -868,8 +1529,6 @@ CVehicle::ProcessDelayedExplosion(void)
 	if (m_nBombTimer != 0)
 		return;
 
-	if(FindPlayerVehicle() != this && m_pBlowUpEntity == FindPlayerPed())
-		CWorld::Players[CWorld::PlayerInFocus].AwardMoneyForExplosion(this);
 	BlowUpCar(m_pBlowUpEntity);
 }
 
@@ -877,12 +1536,13 @@ bool
 CVehicle::IsLawEnforcementVehicle(void)
 {
 	switch(GetModelIndex()){
-	case MI_FBICAR:
 	case MI_POLICE:
 	case MI_ENFORCER:
 	case MI_PREDATOR:
 	case MI_RHINO:
 	case MI_BARRACKS:
+	case MI_FBIRANCH:
+	case MI_VICECHEE:
 		return true;
 	default:
 		return false;
@@ -900,6 +1560,8 @@ CVehicle::UsesSiren(uint32 id)
 	case MI_POLICE:
 	case MI_ENFORCER:
 	case MI_PREDATOR:
+	case MI_FBIRANCH:
+	case MI_VICECHEE:
 		return true;
 	default:
 		return false;
@@ -988,7 +1650,8 @@ CVehicle::CanPedOpenLocks(CPed *ped)
 {
 	if(m_nDoorLock == CARLOCK_LOCKED ||
 	   m_nDoorLock == CARLOCK_LOCKED_INITIALLY ||
-	   m_nDoorLock == CARLOCK_LOCKED_PLAYER_INSIDE)
+	   m_nDoorLock == CARLOCK_LOCKED_PLAYER_INSIDE ||
+	   m_nDoorLock == CARLOCK_SKIP_SHUT_DOORS)
 		return false;
 	if(ped->IsPlayer() && m_nDoorLock == CARLOCK_LOCKOUT_PLAYER_ONLY)
 		return false;
@@ -996,11 +1659,18 @@ CVehicle::CanPedOpenLocks(CPed *ped)
 }
 
 bool
+CVehicle::CanDoorsBeDamaged(void)
+{
+	return m_nDoorLock == CARLOCK_NOT_USED ||
+		m_nDoorLock == CARLOCK_UNLOCKED ||
+		m_nDoorLock == CARLOCK_SKIP_SHUT_DOORS;
+}
+
+bool
 CVehicle::CanPedEnterCar(void)
 {
-	CVector up = GetUp();
 	// can't enter when car is on side
-	if(up.z > 0.1f || up.z < -0.1f){
+	if(IsBike() || GetUp().z > 0.1f ||  GetUp().z < -0.1f){
 		// also when car is moving too fast
 		if(m_vecMoveSpeed.MagnitudeSqr() > sq(0.2f))
 			return false;
@@ -1012,16 +1682,14 @@ CVehicle::CanPedEnterCar(void)
 }
 
 bool
-CVehicle::CanPedExitCar(void)
+CVehicle::CanPedExitCar(bool jumpExit)
 {
 	CVector up = GetUp();
 	if(up.z > 0.1f || up.z < -0.1f){
-#ifdef VC_PED_PORTS
 		if (IsBoat())
 			return true;
-#endif
 		// can't exit when car is moving too fast
-		if(m_vecMoveSpeed.MagnitudeSqr() > 0.005f)
+		if(m_vecMoveSpeed.MagnitudeSqr() > 0.005f && !jumpExit)
 			return false;
 		// if car is slow enough, check turn speed
 		if(Abs(m_vecTurnSpeed.x) > 0.01f ||
@@ -1042,6 +1710,14 @@ CVehicle::CanPedExitCar(void)
 			return false;
 		return true;
 	}
+}
+
+bool
+CVehicle::CanPedJumpOffBike(void)
+{
+	if(pPassengers[0])
+		return false;
+	return m_vecMoveSpeed.MagnitudeSqr() < 0.07f ? false : true;
 }
 
 void
@@ -1081,15 +1757,31 @@ CVehicle::SetUpDriver(void)
 CPed*
 CVehicle::SetupPassenger(int n)
 {
+	int i;
+
 	if(pPassengers[n])
 		return pPassengers[n];
 
-	pPassengers[n] = CPopulation::AddPedInCar(this, false);
-	pPassengers[n]->m_pMyVehicle = this;
-	pPassengers[n]->m_pMyVehicle->RegisterReference((CEntity**)&pPassengers[n]->m_pMyVehicle);
-	pPassengers[n]->bInVehicle = true;
-	pPassengers[n]->SetPedState(PED_DRIVING);
-	if(bIsBus)
+	if((IsTaxi() || IsLimo()) && n == 0)
+		pPassengers[0] = nil;
+	else{
+		CPed *passenger = CPopulation::AddPedInCar(this, false);
+		pPassengers[n] = passenger;
+		passenger->m_pMyVehicle = this;
+		passenger->m_pMyVehicle->RegisterReference((CEntity**)&pPassengers[n]->m_pMyVehicle);
+		passenger->bInVehicle = true;
+		passenger->SetPedState(PED_DRIVING);
+
+		if(passenger->m_nPedType == PEDTYPE_CIVMALE || passenger->m_nPedType == PEDTYPE_CIVFEMALE)
+			for(i = 0; i < n; i++)
+				if(pPassengers[i] && pPassengers[n] &&
+				   (pPassengers[i]->m_nPedType == PEDTYPE_CIVMALE || pPassengers[i]->m_nPedType == PEDTYPE_CIVFEMALE) &&
+				   passenger->GetModelIndex() == pPassengers[i]->GetModelIndex()){
+					pPassengers[n] = nil;
+					CPopulation::RemovePed(passenger);
+				}
+	}
+	if(bIsBus && pPassengers[n])
 		pPassengers[n]->bRenderPedInCar = false;
 	++m_nNumPassengers;
 	return pPassengers[n];
@@ -1102,24 +1794,42 @@ CVehicle::SetDriver(CPed *driver)
 	pDriver->RegisterReference((CEntity**)&pDriver);
 
 	if(bFreebies && driver == FindPlayerPed()){
-		if(GetModelIndex() == MI_AMBULAN)
-			FindPlayerPed()->m_fHealth = Min(FindPlayerPed()->m_fHealth + 20.0f, CWorld::Players[0].m_nMaxHealth);
-		else if(GetModelIndex() == MI_TAXI)
-			CWorld::Players[CWorld::PlayerInFocus].m_nMoney += 25;
-		else if (GetModelIndex() == MI_POLICE) {
-			CStreaming::RequestModel(WEAPONTYPE_SHOTGUN, STREAMFLAGS_DONT_REMOVE);
-			driver->GiveWeapon(WEAPONTYPE_SHOTGUN, 5);
-		} else if (GetModelIndex() == MI_ENFORCER)
-			driver->m_fArmour = Max(driver->m_fArmour, CWorld::Players[0].m_nMaxArmour);
-		else if(GetModelIndex() == MI_CABBIE || GetModelIndex() == MI_ZEBRA)	// TODO(MIAMI): check zebra
-			CWorld::Players[CWorld::PlayerInFocus].m_nMoney += 25;
 		bFreebies = false;
+		switch(GetModelIndex()){
+		case MI_AMBULAN:
+			FindPlayerPed()->m_fHealth = Max(FindPlayerPed()->m_fHealth, Min(FindPlayerPed()->m_fHealth + 20.0f, CWorld::Players[0].m_nMaxHealth));
+			break;
+
+		case MI_TAXI:
+		case MI_CABBIE:
+		case MI_ZEBRA:
+		case MI_KAUFMAN:
+			CWorld::Players[CWorld::PlayerInFocus].m_nMoney += 12;
+			break;
+
+		case MI_POLICE:
+			CStreaming::RequestModel(MI_SHOTGUN, STREAMFLAGS_DONT_REMOVE);
+			bFreebies = true;
+			break;
+
+		case MI_ENFORCER:
+			driver->m_fArmour = Max(driver->m_fArmour, CWorld::Players[0].m_nMaxArmour);
+			break;
+
+		case MI_CADDY:
+			if(!(driver->IsPlayer() && ((CPlayerPed*)driver)->DoesPlayerWantNewWeapon(WEAPONTYPE_GOLFCLUB, true)))
+				CStreaming::RequestModel(MI_GOLFCLUB, STREAMFLAGS_DONT_REMOVE);
+			break;
+		}
 	}
 
-	ApplyTurnForce(0.0f, 0.0f, -0.2f*driver->m_fMass,
-		driver->GetPosition().x - GetPosition().x,
-		driver->GetPosition().y - GetPosition().y,
-		0.0f);
+	if(IsBike())
+		ApplyMoveForce(-0.2f*driver->m_fMass * GetUp());
+	else
+		ApplyTurnForce(0.0f, 0.0f, -0.2f*driver->m_fMass,
+			driver->GetPosition().x - GetPosition().x,
+			driver->GetPosition().y - GetPosition().y,
+			0.0f);
 }
 
 bool
@@ -1127,10 +1837,13 @@ CVehicle::AddPassenger(CPed *passenger)
 {
 	int i;
 
-	ApplyTurnForce(0.0f, 0.0f, -0.2f*passenger->m_fMass,
-		passenger->GetPosition().x - GetPosition().x,
-		passenger->GetPosition().y - GetPosition().y,
-		0.0f);
+	if(IsBike())
+		ApplyTurnForce(-0.2f*passenger->m_fMass * GetUp(), -0.1f*GetForward());
+	else
+		ApplyTurnForce(0.0f, 0.0f, -0.2f*passenger->m_fMass,
+			passenger->GetPosition().x - GetPosition().x,
+			passenger->GetPosition().y - GetPosition().y,
+			0.0f);
 
 	for(i = 0; i < m_nNumMaxPassengers; i++)
 		if(pPassengers[i] == nil){
@@ -1147,10 +1860,13 @@ CVehicle::AddPassenger(CPed *passenger, uint8 n)
 	if(bIsBus)
 		return AddPassenger(passenger);
 
-	ApplyTurnForce(0.0f, 0.0f, -0.2f*passenger->m_fMass,
-		passenger->GetPosition().x - GetPosition().x,
-		passenger->GetPosition().y - GetPosition().y,
-		0.0f);
+	if(IsBike())
+		ApplyTurnForce(-0.2f*passenger->m_fMass * GetUp(), -0.1f*GetForward());
+	else
+		ApplyTurnForce(0.0f, 0.0f, -0.2f*passenger->m_fMass,
+			passenger->GetPosition().x - GetPosition().x,
+			passenger->GetPosition().y - GetPosition().y,
+			0.0f);
 
 	if(n < m_nNumMaxPassengers && pPassengers[n] == nil){
 		pPassengers[n] = passenger;
@@ -1164,6 +1880,22 @@ void
 CVehicle::RemoveDriver(void)
 {
 	SetStatus(STATUS_ABANDONED);
+	if(pDriver == FindPlayerPed()){
+		if(GetModelIndex() == MI_POLICE && CStreaming::HasModelLoaded(MI_SHOTGUN)){
+			if(bFreebies){
+				if(((CPlayerPed*)pDriver)->DoesPlayerWantNewWeapon(WEAPONTYPE_SHOTGUN, true))
+					pDriver->GiveWeapon(WEAPONTYPE_SHOTGUN, 5, true);
+				else
+					pDriver->GrantAmmo(WEAPONTYPE_SHOTGUN, 5);
+				bFreebies = false;
+			}
+			CStreaming::SetModelIsDeletable(MI_SHOTGUN);
+		}else if(GetModelIndex() == MI_CADDY && CStreaming::HasModelLoaded(MI_GOLFCLUB)){
+			if(((CPlayerPed*)pDriver)->DoesPlayerWantNewWeapon(WEAPONTYPE_GOLFCLUB, true))
+				pDriver->GiveWeapon(WEAPONTYPE_GOLFCLUB, 1, true);
+			CStreaming::SetModelIsDeletable(MI_GOLFCLUB);
+		}
+	}
 	pDriver = nil;
 }
 
@@ -1189,6 +1921,57 @@ CVehicle::RemovePassenger(CPed *p)
 	}
 }
 
+bool
+CVehicle::IsDriver(CPed *ped)
+{
+	if(ped == nil)
+		return false;
+	return ped == pDriver;
+}
+
+bool
+CVehicle::IsDriver(int32 model)
+{
+	return pDriver && pDriver->GetModelIndex() == model;
+}
+
+bool
+CVehicle::IsPassenger(CPed *ped)
+{
+	int i;
+	if(ped == nil)
+		return false;
+	for(i = 0; i < 8; i++)
+		if(pPassengers[i] == ped)
+			return true;
+	return false;
+}
+
+bool
+CVehicle::IsPassenger(int32 model)
+{
+	int i;
+	for(i = 0; i < 8; i++)
+		if(pPassengers[i] && pPassengers[i]->GetModelIndex() == model)
+			return true;
+	return false;
+}
+
+void
+CVehicle::UpdatePassengerList(void)
+{
+	int i;
+	bool hasPassenger = false;
+	if(m_nNumPassengers)
+		for(i = 0; i < 8; i++)
+			if(pPassengers[i]){
+				hasPassenger = true;
+				break;
+			}
+	if(!hasPassenger)
+		m_nNumPassengers = 0;
+}
+
 void
 CVehicle::ProcessCarAlarm(void)
 {
@@ -1198,9 +1981,10 @@ CVehicle::ProcessCarAlarm(void)
 		return;
 
 	step = CTimer::GetTimeStepInMilliseconds();
-	if((uint16)m_nAlarmState < step)
+	if((uint16)m_nAlarmState < step){
 		m_nAlarmState = 0;
-	else
+		m_nCarHornTimer = 0;
+	}else
 		m_nAlarmState -= step;
 }
 
@@ -1226,6 +2010,261 @@ CVehicle::IsSphereTouchingVehicle(float sx, float sy, float sz, float radius)
 		return false;
 
 	return true;
+}
+
+RpMaterial*
+SetCompAlphaCB(RpMaterial *material, void *data)
+{
+	uint32 alpha = (uint32)(uintptr)data;
+	RwRGBA *col = (RwRGBA*)RpMaterialGetColor(material);	// get rid of const
+	col->alpha = alpha;
+	return material;
+}
+
+void
+CVehicle::SetComponentAtomicAlpha(RpAtomic *atomic, int32 alpha)
+{
+	RpGeometry *geo = RpAtomicGetGeometry(atomic);
+	RpGeometrySetFlags(geo, RpGeometryGetFlags(geo) | rpGEOMETRYMODULATEMATERIALCOLOR);
+	RpGeometryForAllMaterials(geo, SetCompAlphaCB, (void*)alpha);
+}
+
+void
+CVehicle::UpdateClumpAlpha(void)
+{
+	int clumpAlpha = CVisibilityPlugins::GetClumpAlpha((RpClump*)m_rwObject);
+	if(bFadeOut){
+		clumpAlpha -= 8;
+		if(clumpAlpha < 0)
+			clumpAlpha = 0;
+	}else if(clumpAlpha < 255){
+		clumpAlpha += 16;
+		if(clumpAlpha > 255)
+			clumpAlpha = 255;
+	}
+	CVisibilityPlugins::SetClumpAlpha((RpClump*)m_rwObject, clumpAlpha);
+}
+
+void
+CVehicle::HeliDustGenerate(CEntity *heli, float radius, float ground, int rnd)
+{
+	int i;
+	float angle;
+	CColPoint point;
+	CEntity *entity;
+	uint8 r, g, b;
+
+	if(heli == nil)
+		return;
+
+	uint8 surface = SURFACE_TARMAC;
+	int frm = CTimer::GetFrameCounter() & 7;
+	float testLowZ = ground - 10.0f;
+	float dustSize = 0.0f;
+	float baseSize = 1.0f;
+	float offset = 1.0f;	// when heli is tilted
+	float particleZ = -101.0f;
+	int n = 0;
+
+	if(heli->GetModelIndex() == MI_RCGOBLIN || heli->GetModelIndex() == MI_RCRAIDER){
+		radius = 3.0f;
+		dustSize = 0.04f;
+		baseSize = 0.07f;
+		offset = 0.3f;
+	}
+
+	CVector heliPos = heli->GetPosition();
+
+	if(heli->IsVehicle() && ((CVehicle*)heli)->IsCar()){
+		heliPos.x -= (heliPos.z - ground)*heli->GetUp().x*offset*0.5f;
+		heliPos.y -= (heliPos.z - ground)*heli->GetUp().y*offset*0.5f;
+	}
+
+	float steamSize = 0.25f * radius * baseSize;
+	float splashSize = 0.3f * radius * baseSize;
+
+	i = 0;
+	for(i = 0; i < 32+rnd; i++){
+		angle = i * TWOPI/32.0f;
+		CVector pos(radius*Cos(angle), radius*Sin(angle), 0.0f);
+		CVector dir = CVector(pos.x, pos.y, 1.0f)*0.01f;
+		pos += heliPos;
+
+		if(i < 32 && i == 4*frm){
+			if(CWorld::ProcessVerticalLine(pos, testLowZ, point, entity, true, false, false, false, true, false, nil)){
+				n = rnd;
+				particleZ = point.point.z;
+				surface = point.surfaceB;
+			}else
+				n = 0;
+
+			float waterLevel = 0.0f;
+			if(CWaterLevel::GetWaterLevel(pos, &waterLevel, false) && waterLevel > particleZ){
+				surface = SURFACE_WATER;
+				n = rnd;
+				particleZ = waterLevel;
+			}
+		}
+
+		if(n){
+			pos.z = particleZ;
+			if(surface == SURFACE_WATER){
+				float red = (0.3*CTimeCycle::GetDirectionalRed() + CTimeCycle::GetAmbientRed_Obj())*255.0f/4.0f;
+				float green = (0.3*CTimeCycle::GetDirectionalGreen() + CTimeCycle::GetAmbientGreen_Obj())*255.0f/4.0f;
+				float blue = (0.3*CTimeCycle::GetDirectionalBlue() + CTimeCycle::GetAmbientBlue_Obj())*255.0f/4.0f;
+				r = clamp(red, 0.0f, 255.0f);
+				g = clamp(green, 0.0f, 255.0f);
+				b = clamp(blue, 0.0f, 255.0f);
+				RwRGBA col1 = { r, g, b, CGeneral::GetRandomNumberInRange(8, 32) };
+				RwRGBA col2 = { 255, 255, 255, 32 };
+
+				if(n&1)
+					CParticle::AddParticle(PARTICLE_STEAM_NY_SLOWMOTION, pos, dir, nil, steamSize, col2);
+				else
+					CParticle::AddParticle(PARTICLE_CAR_SPLASH, pos, dir, nil, splashSize, col1,
+						CGeneral::GetRandomNumberInRange(0.0f, 10.0f),
+						CGeneral::GetRandomNumberInRange(0.0f, 90.0f), 1);
+			}else{
+				switch(surface){
+				default:
+				case SURFACE_TARMAC:
+					r = 10;
+					g = 10;
+					b = 10;
+					break;
+				case SURFACE_GRASS:
+					r = 10;
+					g = 10;
+					b = 3;
+					break;
+				case SURFACE_GRAVEL:
+					r = 10;
+					g = 8;
+					b = 7;
+					break;
+				case SURFACE_MUD_DRY:
+					r = 10;
+					g = 6;
+					b = 3;
+					break;
+				case SURFACE_SAND:
+				case SURFACE_SAND_BEACH:
+					r = 10;
+					g = 10;
+					b = 7;
+					break;
+				}
+				RwRGBA col = { r, g, b, 32 };
+				if(heliPos.z - pos.z < 20.0f)
+					CParticle::AddParticle(PARTICLE_HELI_DUST, pos, dir, nil, dustSize, col);
+			}
+
+			n--;
+		}
+	}
+}
+
+#define GLARE_MIN_DIST (13.0f)
+#define GLARE_FULL_DIST (30.0f)
+#define GLARE_MIN_ANGLE (0.99f)
+#define GLARE_FULL_ANGLE (0.995f)
+
+void
+CVehicle::DoSunGlare(void)
+{
+	if(bRenderScorched || GetPosition().z < 0.0f ||
+	   GetVehicleAppearance() != VEHICLE_APPEARANCE_CAR || CWeather::SunGlare <= 0.0f)
+		return;
+
+	CVector camDir = TheCamera.GetPosition() - GetPosition();
+	float dist = camDir.Magnitude();
+	camDir *= 2.0f/dist;
+	CVector glareVec = camDir + CTimeCycle::GetSunDirection();
+	CVector localGlareVec;
+	localGlareVec.x = DotProduct(glareVec, GetRight());
+	localGlareVec.y = DotProduct(glareVec, GetForward());
+	localGlareVec.z = 0.0;
+	localGlareVec.Normalise();
+
+	CVector2D fwd2D = GetForward();
+	fwd2D.Normalise();
+	CVector2D camDir2D = camDir;
+	camDir2D.Normalise();
+	float fwdness = Abs(DotProduct2D(fwd2D, camDir2D));
+
+	// check angle
+	float strength;
+	if(fwdness > GLARE_FULL_ANGLE)
+		strength = 1.0f;
+	else if(fwdness > GLARE_MIN_ANGLE)
+		strength = (fwdness - GLARE_MIN_ANGLE)/(GLARE_FULL_ANGLE-GLARE_MIN_ANGLE);
+	else
+		return;
+	// check distance
+	if(dist > GLARE_FULL_DIST){
+		// no max distance
+	}else if(dist > GLARE_MIN_DIST)
+		strength *= (dist - GLARE_MIN_DIST)/(GLARE_FULL_DIST - GLARE_MIN_DIST);
+	else
+		return;
+
+	float intens = 0.8f * strength * CWeather::SunGlare;
+	int r = intens * (CTimeCycle::GetSunCoreRed() + 2*255)/3.0f;
+	int g = intens * (CTimeCycle::GetSunCoreGreen() + 2*255)/3.0f;
+	int b = intens * (CTimeCycle::GetSunCoreBlue() + 2*255)/3.0f;
+
+	CColModel *colmodel = GetColModel();
+	CCollision::CalculateTrianglePlanes(colmodel);
+
+	int i;
+	for(i = 0; i < colmodel->numTriangles-2; i += 2){
+		int a1 = colmodel->triangles[i].a;
+		int b1 = colmodel->triangles[i].b;
+		int c1 = colmodel->triangles[i].c;
+		int a2 = colmodel->triangles[i+1].a;
+		int b2 = colmodel->triangles[i+1].b;
+		int c2 = colmodel->triangles[i+1].c;
+		CVector vert1 = colmodel->vertices[a1];
+		CVector vert4;
+		// Need an upward surface
+		if(vert1.z <= 0.0f)
+			continue;
+
+		// trying to find a quad here
+		int numTri2Verts = 0;
+		if(a2 != a1 && a2 != b1 && a2 != c1){
+			// a2 is not in tri1
+			numTri2Verts++;
+			vert4 = colmodel->vertices[a2];
+		}
+		if(b2 != a1 && b2 != b1 && b2 != c1){
+			// b2 is not in tri1
+			numTri2Verts++;
+			vert4 = colmodel->vertices[b2];
+		}
+		if(c2 != a1 && c2 != b1 && c2 != c1){
+			// c2 is not in tri1
+			numTri2Verts++;
+			vert4 = colmodel->vertices[c2];
+		}
+		// Need exactly one vertex from tri2 for a quad with tri1
+		if(numTri2Verts != 1)
+			continue;
+
+		CVector mid = (vert1 + colmodel->vertices[b1] + colmodel->vertices[c1] + vert4)/4.0f;
+		float dy = mid.y - vert1.y;
+		float dx = mid.x - vert1.x;
+		float dist = 1.4f * Min(Abs(dx), Abs(dy));
+		if(dist > 0.6f){
+			CVector pos = GetMatrix() * (dist * localGlareVec + mid) + camDir;
+			CCoronas::RegisterCorona((uintptr)this + 27 + i,
+				r, g, b, 255,
+				pos, 0.9f*CWeather::SunGlare, 90.0f,
+				CCoronas::TYPE_STAR, CCoronas::FLARE_NONE,
+				CCoronas::REFLECTION_OFF, CCoronas::LOSCHECK_OFF,
+				CCoronas::STREAK_OFF, 0.0f);
+		}
+	}
 }
 
 void
@@ -1371,20 +2410,19 @@ CVehicle::Load(uint8*& buf)
 #endif
 
 eVehicleAppearance
-//--MIAMI: TODO, implement VC version, appearance != type
-// This would work for cars, boats and bikes but not for planes and helis
 CVehicle::GetVehicleAppearance(void)
 {
-	if (IsCar())
+	uint32 flags = pHandling->Flags & 0xF0000;
+	if (flags == 0)
 		return VEHICLE_APPEARANCE_CAR;
-	if (IsBoat())
-		return VEHICLE_APPEARANCE_BOAT;
-	if (IsBike())
+	if (flags == HANDLING_IS_BIKE)
 		return VEHICLE_APPEARANCE_BIKE;
-	if (IsPlane())
-		return VEHICLE_APPEARANCE_PLANE;
-	if (IsHeli())
+	if (flags == HANDLING_IS_HELI)
 		return VEHICLE_APPEARANCE_HELI;
+	if (flags == HANDLING_IS_PLANE)
+		return VEHICLE_APPEARANCE_PLANE;
+	if (flags == HANDLING_IS_BOAT)
+		return VEHICLE_APPEARANCE_BOAT;
 	return VEHICLE_APPEARANCE_NONE;
 }
 

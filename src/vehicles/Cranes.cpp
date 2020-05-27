@@ -246,8 +246,11 @@ void CCrane::Update(void)
 					Abs(m_pVehiclePickedUp->GetMoveSpeed().x) > CAR_MOVING_SPEED_THRESHOLD ||
 					Abs(m_pVehiclePickedUp->GetMoveSpeed().y) > CAR_MOVING_SPEED_THRESHOLD ||
 					Abs(m_pVehiclePickedUp->GetMoveSpeed().z) > CAR_MOVING_SPEED_THRESHOLD ||
-					FindPlayerPed()->GetPedState() == PED_ENTER_CAR && // TODO: fix carjack bug
-					FindPlayerPed()->m_pSeekTarget == m_pVehiclePickedUp) {
+					(FindPlayerPed()->GetPedState() == PED_ENTER_CAR
+#ifdef FIX_BUGS
+					|| FindPlayerPed()->GetPedState() == PED_CARJACK
+#endif
+					) && FindPlayerPed()->m_pSeekTarget == m_pVehiclePickedUp) {
 					m_pVehiclePickedUp = nil;
 					m_nCraneState = IDLE;
 				}
@@ -398,7 +401,7 @@ bool CCrane::RotateCarriedCarProperly()
 	float fDeltaThisFrame = CAR_ROTATION_SPEED * CTimer::GetTimeStep();
 	if (Abs(fAngleDelta) <= fDeltaThisFrame) // no rotation is actually applied?
 		return true;
-	m_pVehiclePickedUp->GetMatrix().RotateZ(Abs(fDeltaThisFrame));
+	m_pVehiclePickedUp->GetMatrix().RotateZ(fAngleDelta < 0 ? -fDeltaThisFrame : fDeltaThisFrame);
 	return false;
 }
 

@@ -91,7 +91,9 @@ public:
 		MODE_M16_1STPERSON_RUNABOUT,
 		MODE_FIGHT_CAM_RUNABOUT,
 		MODE_EDITOR,
-		MODE_HELICANNON_1STPERSON, // vice city leftover
+		MODE_HELICANNON_1STPERSON,
+		MODE_45,
+		MODE_CAMERA,
 	};
 
 	bool    bBelowMinDist; //used for follow ped mode
@@ -625,6 +627,7 @@ public:
 	void UpdateAimingCoors(CVector const &coors);
 	void Find3rdPersonCamTargetVector(float dist, CVector pos, CVector &source, CVector &target);
 	float Find3rdPersonQuickAimPitch(void);
+	bool Using1stPersonWeaponMode(void);
 
 	// Physical camera
 	void SetRwCamera(RwCamera *cam);

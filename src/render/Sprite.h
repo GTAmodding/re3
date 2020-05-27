@@ -7,6 +7,9 @@ class CSprite
 	static float m_fRecipNearClipPlane;
 	static int32 m_bFlushSpriteBufferSwitchZTest;
 public:
+	static float GetNearScreenZ(void) { return m_f2DNearScreenZ; }
+	static float GetFarScreenZ(void) { return m_f2DFarScreenZ; }
+
 	static float CalcHorizonCoors(void);
 	static bool CalcScreenCoors(const RwV3d &in, RwV3d *out, float *outw, float *outh, bool farclip);
 	static void InitSpriteBuffer(void);

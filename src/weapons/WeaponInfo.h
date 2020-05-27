@@ -1,5 +1,6 @@
 #pragma once
 
+#include "AnimManager.h"
 #include "AnimationId.h"
 #include "WeaponType.h"
 

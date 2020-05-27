@@ -264,10 +264,63 @@ set_new_provider(S32 index)
 	return false;
 }
 
+U32 RadioHandlers[9];
+
+U32 WINAPI vfs_open_callback(char const* Filename, U32* FileHandle)
+{
+	*FileHandle = (U32)fopen(Filename, "rb");
+
+	// couldn't they just use stricmp once? and strlen? this is very inefficient
+	if ((strcmp(Filename + strlen(Filename) - 4, ".adf") == 0) || (strcmp(Filename + strlen(Filename) - 4, ".ADF") == 0)) {
+		for (int i = 0; i < ARRAY_SIZE(RadioHandlers); i++) {
+			if (RadioHandlers[i] == NULL) {
+				RadioHandlers[i] = *FileHandle;
+				break;
+			}
+		}
+		strcpy((char*)Filename + strlen(Filename) - 4, ".mp3");
+	}
+	return *FileHandle;
+}
+
+void WINAPI vfs_close_callback(U32 FileHandle)
+{
+	for (int i = 0; i < ARRAY_SIZE(RadioHandlers); i++) {
+		if (RadioHandlers[i] == FileHandle) {
+			RadioHandlers[i] = NULL;
+			break;
+		}
+	}
+	fclose((FILE*)FileHandle);
+}
+
+S32 WINAPI vfs_seek_callback(U32 FileHandle, S32 Offset, U32 Type)
+{
+	fseek((FILE*)FileHandle, Offset, Type);
+	return ftell((FILE*)FileHandle);
+}
+
+U32 WINAPI vfs_read_callback(U32 FileHandle, void* Buffer, U32 Bytes)
+{
+	fread(Buffer, Bytes, 1, (FILE*)FileHandle);
+	uint8* _Buffer = (uint8*)Buffer;
+
+	for (int i = 0; i < ARRAY_SIZE(RadioHandlers); i++) {
+		if (FileHandle == RadioHandlers[i]) {
+			for (U32 k = 0; k < Bytes; k++)
+				_Buffer[k] ^= 0x22;
+			break;
+		}
+	}
+	return Bytes;
+}
+
 cSampleManager::cSampleManager(void) : 
 	m_nNumberOfProviders(0)
 {
 	;
+
+	AIL_set_file_callbacks(vfs_open_callback, vfs_close_callback, vfs_seek_callback, vfs_read_callback);
 }
 
 cSampleManager::~cSampleManager(void)
@@ -1500,7 +1553,7 @@ cSampleManager::LoadPedComment(uint32 nComment)
 			
 			case MUSICMODE_FRONTEND:
 			{
-				if ( MusicManager.GetCurrentTrack() == STREAMED_SOUND_GAME_COMPLETED )
+				if ( MusicManager.GetCurrentTrack() == STREAMED_SOUND_CUTSCENE_FINALE )
 					return false;
 
 				break;
@@ -1739,8 +1792,7 @@ cSampleManager::SetChannelEmittingVolume(uint32 nChannel, uint32 nVolume)
 	
 	// increase the volume for JB.MP3 and S4_BDBD.MP3
 	if (   MusicManager.GetMusicMode()    == MUSICMODE_CUTSCENE
-		&& MusicManager.GetCurrentTrack() != STREAMED_SOUND_NEWS_INTRO
-		&& MusicManager.GetCurrentTrack() != STREAMED_SOUND_CUTSCENE_SAL4_BDBD )
+		&& MusicManager.GetCurrentTrack() != STREAMED_SOUND_CUTSCENE_FINALE )
 	{
 		nChannelVolume[nChannel] >>= 2;
 	}
@@ -1778,8 +1830,7 @@ cSampleManager::SetChannelVolume(uint32 nChannel, uint32 nVolume)
 			
 			// increase the volume for JB.MP3 and S4_BDBD.MP3
 			if (   MusicManager.GetMusicMode()    == MUSICMODE_CUTSCENE
-				&& MusicManager.GetCurrentTrack() != STREAMED_SOUND_NEWS_INTRO
-				&& MusicManager.GetCurrentTrack() != STREAMED_SOUND_CUTSCENE_SAL4_BDBD )
+				&& MusicManager.GetCurrentTrack() != STREAMED_SOUND_CUTSCENE_FINALE )
 			{
 				nChannelVolume[nChannel] >>= 2;
 			}

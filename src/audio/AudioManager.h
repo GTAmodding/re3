@@ -253,7 +253,7 @@ public:
 	float GetCollisionRatio(float a, float b, float c, float d) const;
 	float GetDistanceSquared(const CVector &v) const;
 	int32 GetJumboTaxiFreq() const;
-	bool GetMissionAudioLoadingStatus() const;
+	uint8 GetMissionAudioLoadingStatus() const;
 	int8 GetMissionScriptPoliceAudioPlayingStatus() const;
 	uint8 GetNum3DProvidersAvailable() const;
 	int32 GetPedCommentSfx(CPed *ped, int32 sound);
@@ -288,18 +288,17 @@ public:
 	/// processX - main logic of adding new sounds
 	void ProcessActiveQueues();
 	bool ProcessAirBrakes(cVehicleParams *params);
-	void ProcessAirportScriptObject(uint8 sound);
 	bool ProcessBoatEngine(cVehicleParams *params);
 	bool ProcessBoatMovingOverWater(cVehicleParams *params);
+#ifdef GTA_BRIDGE
 	void ProcessBridge();
 	void ProcessBridgeMotor();
 	void ProcessBridgeOneShots();
 	void ProcessBridgeWarning();
+#endif
 	bool ProcessCarBombTick(cVehicleParams *params);
 	void ProcessCesna(cVehicleParams *params);
-	void ProcessCinemaScriptObject(uint8 sound);
-	void ProcessCrane();
-	void ProcessDocksScriptObject(uint8 sound);
+	//void ProcessCrane();
 	bool ProcessEngineDamage(cVehicleParams *params);
 	void ProcessEntity(int32 sound);
 	void ProcessExplosions(int32 explosion);
@@ -308,7 +307,6 @@ public:
 	void ProcessFrontEnd();
 	void ProcessGarages();
 	bool ProcessHelicopter(cVehicleParams *params);
-	void ProcessHomeScriptObject(uint8 sound);
 	void ProcessJumbo(cVehicleParams *);
 	void ProcessJumboAccel(CPlane *plane);
 	void ProcessJumboDecel(CPlane *plane);
@@ -316,7 +314,6 @@ public:
 	void ProcessJumboLanding(CPlane *plane);
 	void ProcessJumboTakeOff(CPlane *plane);
 	void ProcessJumboTaxi();
-	void ProcessLaunderetteScriptObject(uint8 sound);
 	void ProcessLoopingScriptObject(uint8 sound);
 	void ProcessMissionAudio();
 	void ProcessModelCarEngine(cVehicleParams *params);
@@ -326,17 +323,15 @@ public:
 	void ProcessPhysical(int32 id);
 	void ProcessPlane(cVehicleParams *params);
 	void ProcessPlayersVehicleEngine(cVehicleParams *params, CAutomobile *automobile);
-	void ProcessPoliceCellBeatingScriptObject(uint8 sound);
-	void ProcessPornCinema(uint8 sound);
 	void ProcessProjectiles();
 	void ProcessRainOnVehicle(cVehicleParams *params);
 	void ProcessReverb() const;
 	bool ProcessReverseGear(cVehicleParams *params);
-	void ProcessSawMillScriptObject(uint8 sound);
 	void ProcessScriptObject(int32 id);
-	void ProcessShopScriptObject(uint8 sound);
 	void ProcessSpecial();
+#ifdef GTA_TRAIN
 	bool ProcessTrainNoise(cVehicleParams *params);
+#endif
 	void ProcessVehicle(CVehicle *vehicle);
 	bool ProcessVehicleDoors(cVehicleParams *params);
 	void ProcessVehicleEngine(cVehicleParams *params);
@@ -349,7 +344,6 @@ public:
 	void ProcessWaterCannon(int32);
 	void ProcessWeather(int32 id);
 	bool ProcessWetRoadNoise(cVehicleParams *params);
-	void ProcessWorkShopScriptObject(uint8 sound);
 
 	int32 RandomDisplacement(uint32 seed) const;
 	void ReacquireDigitalHandle() const;

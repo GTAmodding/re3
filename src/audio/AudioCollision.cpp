@@ -70,36 +70,36 @@ cAudioManager::GetCollisionOneShotRatio(int32 a, float b) const
 	case SURFACE_DEFAULT:
 	case SURFACE_TARMAC:
 	case SURFACE_PAVEMENT:
-	case SURFACE_STONE:
-	case SURFACE_BOLLARD: result = GetCollisionRatio(b, 10.f, 60.f, 50.f); break;
+	case SURFACE_STEEP_CLIFF:
+	case SURFACE_TRANSPARENT_STONE: result = GetCollisionRatio(b, 10.f, 60.f, 50.f); break;
 	case SURFACE_GRASS:
-	case SURFACE_LOOSE30: result = GetCollisionRatio(b, 0.f, 2.f, 2.f); break;
-	case SURFACE_DIRT: result = GetCollisionRatio(b, 0.f, 2.f, 2.f); break;
-	case SURFACE_DIRTTRACK: result = GetCollisionRatio(b, 0.f, 2.f, 2.f); break;
-	case SURFACE_METAL6: result = GetCollisionRatio(b, 6.f, 50.f, 44.f); break;
+	case SURFACE_CARDBOARDBOX: result = GetCollisionRatio(b, 0.f, 2.f, 2.f); break;
+	case SURFACE_GRAVEL: result = GetCollisionRatio(b, 0.f, 2.f, 2.f); break;
+	case SURFACE_MUD_DRY: result = GetCollisionRatio(b, 0.f, 2.f, 2.f); break;
+	case SURFACE_CAR: result = GetCollisionRatio(b, 6.f, 50.f, 44.f); break;
 	case SURFACE_GLASS: result = GetCollisionRatio(b, 0.1f, 10.f, 9.9f); break;
-	case SURFACE_SCAFFOLD:
-	case SURFACE_STEEL: result = GetCollisionRatio(b, 30.f, 130.f, 100.f); break;
-	case SURFACE_METAL_DOOR: result = GetCollisionRatio(b, 20.f, 100.f, 80.f); break;
-	case SURFACE_BILLBOARD: result = GetCollisionRatio(b, 0.f, 4.f, 4.f); break;
-	case SURFACE_METAL_POLE:
-	case SURFACE_GATE: result = GetCollisionRatio(b, 1.f, 10.f, 9.f); break;
-	case SURFACE_STREET_LIGHT: result = GetCollisionRatio(b, 1.f, 10.f, 9.f); break;
-	case SURFACE_METAL14: result = GetCollisionRatio(b, 1.f, 15.f, 14.f); break;
-	case SURFACE_METAL15: result = GetCollisionRatio(b, 8.f, 50.f, 42.f); break;
-	case SURFACE_METAL_FENCE: result = GetCollisionRatio(b, 0.1f, 10.f, 9.9f); break;
-	case SURFACE_FLESH: result = GetCollisionRatio(b, 0.f, 20.f, 20.f); break;
+	case SURFACE_TRANSPARENT_CLOTH:
+	case SURFACE_THICK_METAL_PLATE: result = GetCollisionRatio(b, 30.f, 130.f, 100.f); break;
+	case SURFACE_GARAGE_DOOR: result = GetCollisionRatio(b, 20.f, 100.f, 80.f); break;
+	case SURFACE_CAR_PANEL: result = GetCollisionRatio(b, 0.f, 4.f, 4.f); break;
+	case SURFACE_SCAFFOLD_POLE:
+	case SURFACE_METAL_GATE: result = GetCollisionRatio(b, 1.f, 10.f, 9.f); break;
+	case SURFACE_LAMP_POST: result = GetCollisionRatio(b, 1.f, 10.f, 9.f); break;
+	case SURFACE_FIRE_HYDRANT: result = GetCollisionRatio(b, 1.f, 15.f, 14.f); break;
+	case SURFACE_GIRDER: result = GetCollisionRatio(b, 8.f, 50.f, 42.f); break;
+	case SURFACE_METAL_CHAIN_FENCE: result = GetCollisionRatio(b, 0.1f, 10.f, 9.9f); break;
+	case SURFACE_PED: result = GetCollisionRatio(b, 0.f, 20.f, 20.f); break;
 	case SURFACE_SAND: result = GetCollisionRatio(b, 0.f, 10.f, 10.f); break;
-	case SURFACE_PUDDLE: result = GetCollisionRatio(b, 0.f, 10.f, 10.f); break;
-	case SURFACE_WOOD: result = GetCollisionRatio(b, 1.f, 4.f, 3.f); break;
-	case SURFACE_WOOD_BOX: result = GetCollisionRatio(b, 0.1f, 5.f, 4.9f); break;
-	case SURFACE_WOOD_PLANK: result = GetCollisionRatio(b, 0.1f, 40.f, 39.9f); break;
-	case SURFACE_TIRE:
-	case SURFACE_RUBBER29: result = GetCollisionRatio(b, 0.f, 10.f, 10.f); break;
-	case SURFACE_HARD24: result = GetCollisionRatio(b, 0.1f, 4.f, 3.9f); break;
+	case SURFACE_WATER: result = GetCollisionRatio(b, 0.f, 10.f, 10.f); break;
+	case SURFACE_WOOD_CRATES: result = GetCollisionRatio(b, 1.f, 4.f, 3.f); break;
+	case SURFACE_WOOD_BENCH: result = GetCollisionRatio(b, 0.1f, 5.f, 4.9f); break;
+	case SURFACE_WOOD_SOLID: result = GetCollisionRatio(b, 0.1f, 40.f, 39.9f); break;
+	case SURFACE_RUBBER:
+	case SURFACE_WHEELBASE: result = GetCollisionRatio(b, 0.f, 10.f, 10.f); break;
+	case SURFACE_PLASTIC: result = GetCollisionRatio(b, 0.1f, 4.f, 3.9f); break;
 	case SURFACE_HEDGE: result = GetCollisionRatio(b, 0.f, 0.5f, 0.5f); break;
-	case SURFACE_METAL27: result = GetCollisionRatio(b, 4.f, 40.f, 36.f); break;
-	case SURFACE_METAL28: result = GetCollisionRatio(b, 0.f, 5.f, 5.f); break;
+	case SURFACE_CONTAINER: result = GetCollisionRatio(b, 4.f, 40.f, 36.f); break;
+	case SURFACE_NEWS_VENDOR: result = GetCollisionRatio(b, 0.f, 5.f, 5.f); break;
 	default: result = 0.f; break;
 	}
 
@@ -130,18 +130,18 @@ cAudioManager::SetLoopingCollisionRequestedSfxFreqAndGetVol(const cAudioCollisio
 		m_sQueueSample.m_nSampleIndex = SFX_RAIN;
 		m_sQueueSample.m_nFrequency = 13000.f * ratio + 35000;
 		vol = 50.f * ratio;
-	} else if(surface1 == SURFACE_PUDDLE || surface2 == SURFACE_PUDDLE) {
+	} else if(surface1 == SURFACE_WATER || surface2 == SURFACE_WATER) {
 		ratio = GetCollisionRatio(audioCollision.m_fIntensity2, 0.0001f, 0.09f, 0.0899f);
 		m_sQueueSample.m_nSampleIndex = SFX_BOAT_WATER_LOOP;
 		m_sQueueSample.m_nFrequency = 6050.f * ratio + 16000;
 		vol = 30.f * ratio;
-	} else if(surface1 == SURFACE_DIRT || surface2 == SURFACE_DIRT || surface1 == SURFACE_DIRTTRACK ||
-		surface2 == SURFACE_DIRTTRACK || surface1 == SURFACE_SAND || surface2 == SURFACE_SAND) {
+	} else if(surface1 == SURFACE_GRAVEL || surface2 == SURFACE_GRAVEL || surface1 == SURFACE_MUD_DRY ||
+		surface2 == SURFACE_MUD_DRY || surface1 == SURFACE_SAND || surface2 == SURFACE_SAND) {
 		ratio = GetCollisionRatio(audioCollision.m_fIntensity2, 0.0001f, 0.09f, 0.0899f);
 		m_sQueueSample.m_nSampleIndex = SFX_GRAVEL_SKID;
 		m_sQueueSample.m_nFrequency = 6000.f * ratio + 10000;
 		vol = 50.f * ratio;
-	} else if(surface1 == SURFACE_FLESH || surface2 == SURFACE_FLESH) {
+	} else if(surface1 == SURFACE_PED || surface2 == SURFACE_PED) {
 		return 0;
 	} else {
 		ratio = GetCollisionRatio(audioCollision.m_fIntensity2, 0.0001f, 0.09f, 0.0899f);
@@ -240,9 +240,9 @@ cAudioManager::SetUpOneShotCollisionSound(const cAudioCollision &col)
 			s2 = col.m_bSurface2;
 		}
 		ratio = GetCollisionOneShotRatio(s1, col.m_fIntensity1);
-		if(s1 == SURFACE_METAL6 && s2 == SURFACE_FLESH) ratio /= 4.0f;
-		if(s1 == SURFACE_METAL6 && ratio < 0.6f) {
-			s1 = SURFACE_BILLBOARD;
+		if(s1 == SURFACE_CAR && s2 == SURFACE_PED) ratio /= 4.0f;
+		if(s1 == SURFACE_CAR && ratio < 0.6f) {
+			s1 = SURFACE_CAR_PANEL;
 			ratio = Min(1.f, 2.f * ratio);
 		}
 		emittingVol = 40.f * ratio;
@@ -290,13 +290,13 @@ cAudioManager::SetUpOneShotCollisionSound(const cAudioCollision &col)
 				}
 				switch(s1) {
 				case SURFACE_GLASS: m_sQueueSample.m_nFrequency = 13500; break;
-				case SURFACE_METAL15: m_sQueueSample.m_nFrequency = 8819; break;
-				case SURFACE_PUDDLE:
+				case SURFACE_GIRDER: m_sQueueSample.m_nFrequency = 8819; break;
+				case SURFACE_WATER:
 					m_sQueueSample.m_nFrequency =
 					    2 * SampleManager.GetSampleBaseFrequency(m_sQueueSample.m_nSampleIndex);
 					break;
-				case SURFACE_TIRE: m_sQueueSample.m_nFrequency = 6000; break;
-				case SURFACE_HARD24: m_sQueueSample.m_nFrequency = 8000; break;
+				case SURFACE_RUBBER: m_sQueueSample.m_nFrequency = 6000; break;
+				case SURFACE_PLASTIC: m_sQueueSample.m_nFrequency = 8000; break;
 				default:
 					m_sQueueSample.m_nFrequency =
 					    SampleManager.GetSampleBaseFrequency(m_sQueueSample.m_nSampleIndex);

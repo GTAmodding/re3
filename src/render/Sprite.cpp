@@ -22,8 +22,8 @@ CSprite::CalcHorizonCoors(void)
 bool 
 CSprite::CalcScreenCoors(const RwV3d &in, RwV3d *out, float *outw, float *outh, bool farclip)
 {
-	CVector viewvec = TheCamera.m_viewMatrix * *(CVector*)&in;
-	*out = *(RwV3d*)&viewvec;
+	CVector viewvec = TheCamera.m_viewMatrix * in;
+	*out = viewvec;
 	if(out->z <= CDraw::GetNearClipZ() + 1.0f) return false;
 	if(out->z >= CDraw::GetFarClipZ() && farclip) return false;
 	float recip = 1.0f/out->z;

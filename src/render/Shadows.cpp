@@ -643,12 +643,12 @@ CShadows::StoreShadowForPole(CEntity *pPole, float fOffsetX, float fOffsetY, flo
 		PolePos.y += fOffsetX * pPole->GetRight().y + fOffsetY * pPole->GetForward().y;
 		PolePos.z += fOffsetZ;
 
-		PolePos.x += -CTimeCycle::GetSunPosition().x * (fPoleHeight / 2);
-		PolePos.y += -CTimeCycle::GetSunPosition().y * (fPoleHeight / 2);
+		PolePos.x += -CTimeCycle::GetSunDirection().x * (fPoleHeight / 2);
+		PolePos.y += -CTimeCycle::GetSunDirection().y * (fPoleHeight / 2);
 
 		StoreStaticShadow((uintptr)pPole + nID + _TODOCONST(51), SHADOWTYPE_DARK, gpPostShadowTex, &PolePos,
-				-CTimeCycle::GetSunPosition().x * (fPoleHeight / 2),
-				-CTimeCycle::GetSunPosition().y * (fPoleHeight / 2),
+				-CTimeCycle::GetSunDirection().x * (fPoleHeight / 2),
+				-CTimeCycle::GetSunDirection().y * (fPoleHeight / 2),
 				CTimeCycle::GetShadowSideX()    * fPoleWidth,
 				CTimeCycle::GetShadowSideY()    * fPoleWidth,
 				2 * (int32)((pPole->GetUp().z - 0.5f) * CTimeCycle::GetShadowStrength() * 2.0f) / 3,

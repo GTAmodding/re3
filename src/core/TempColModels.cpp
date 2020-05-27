@@ -66,7 +66,7 @@ CTempColModels::Initialise(void)
 #else
 	for (i = 0; i < ARRAY_SIZE(s_aPedGSpheres); i++) {
 #endif
-		s_aPedSpheres[i].surface = SURFACE_FLESH;
+		s_aPedSpheres[i].surface = SURFACE_PED;
 		s_aPedSpheres[i].piece = 0;
 	}
 
@@ -85,7 +85,7 @@ CTempColModels::Initialise(void)
 	s_aPed2Spheres[2].center = CVector(0.0f, -0.35f, -0.9f);
 
 	for (i = 0; i < ARRAY_SIZE(s_aPed2Spheres); i++) {
-		s_aPed2Spheres[i].surface = SURFACE_FLESH;
+		s_aPed2Spheres[i].surface = SURFACE_PED;
 		s_aPed2Spheres[i].piece = 0;
 	}
 
@@ -106,10 +106,10 @@ CTempColModels::Initialise(void)
 	s_aPedGSpheres[2].center = CVector(0.0f, 0.25f, -0.9f);
 	s_aPedGSpheres[3].center = CVector(0.0f, 0.65f, -0.9f);
 
-	s_aPedGSpheres[0].surface = SURFACE_FLESH;
-	s_aPedGSpheres[1].surface = SURFACE_FLESH;
-	s_aPedGSpheres[2].surface = SURFACE_FLESH;
-	s_aPedGSpheres[3].surface = SURFACE_FLESH;
+	s_aPedGSpheres[0].surface = SURFACE_PED;
+	s_aPedGSpheres[1].surface = SURFACE_PED;
+	s_aPedGSpheres[2].surface = SURFACE_PED;
+	s_aPedGSpheres[3].surface = SURFACE_PED;
 	s_aPedGSpheres[0].piece = 4;
 	s_aPedGSpheres[1].piece = 1;
 	s_aPedGSpheres[2].piece = 0;
@@ -131,7 +131,7 @@ CTempColModels::Initialise(void)
 	s_aDoorSpheres[2].center = CVector(0.0f, -0.6f, 0.25f);
 
 	for (i = 0; i < ARRAY_SIZE(s_aDoorSpheres); i++) {
-		s_aDoorSpheres[i].surface = SURFACE_BILLBOARD;
+		s_aDoorSpheres[i].surface = SURFACE_CAR_PANEL;
 		s_aDoorSpheres[i].piece = 0;
 	}
 
@@ -151,7 +151,7 @@ CTempColModels::Initialise(void)
 	s_aBumperSpheres[3].center = CVector(-0.85f, -0.05f, 0.0f);
 
 	for (i = 0; i < ARRAY_SIZE(s_aBumperSpheres); i++) {
-		s_aBumperSpheres[i].surface = SURFACE_BILLBOARD;
+		s_aBumperSpheres[i].surface = SURFACE_CAR_PANEL;
 		s_aBumperSpheres[i].piece = 0;
 	}
 
@@ -171,7 +171,7 @@ CTempColModels::Initialise(void)
 	s_aPanelSpheres[3].center = CVector(-0.15f, 0.45f, 0.0f);
 
 	for (i = 0; i < ARRAY_SIZE(s_aPanelSpheres); i++) {
-		s_aPanelSpheres[i].surface = SURFACE_BILLBOARD;
+		s_aPanelSpheres[i].surface = SURFACE_CAR_PANEL;
 		s_aPanelSpheres[i].piece = 0;
 	}
 
@@ -191,7 +191,7 @@ CTempColModels::Initialise(void)
 	s_aBonnetSpheres[3].center = CVector(0.4f, 0.9f, 0.0f);
 
 	for (i = 0; i < ARRAY_SIZE(s_aBonnetSpheres); i++) {
-		s_aBonnetSpheres[i].surface = SURFACE_BILLBOARD;
+		s_aBonnetSpheres[i].surface = SURFACE_CAR_PANEL;
 		s_aBonnetSpheres[i].piece = 0;
 	}
 
@@ -211,7 +211,7 @@ CTempColModels::Initialise(void)
 	s_aBootSpheres[3].center = CVector(0.4f, -0.6f, 0.0f);
 
 	for (i = 0; i < ARRAY_SIZE(s_aBootSpheres); i++) {
-		s_aBootSpheres[i].surface = SURFACE_BILLBOARD;
+		s_aBootSpheres[i].surface = SURFACE_CAR_PANEL;
 		s_aBootSpheres[i].piece = 0;
 	}
 
@@ -233,7 +233,7 @@ CTempColModels::Initialise(void)
 #else
 	for (i = 0; i < ARRAY_SIZE(s_aBootSpheres); i++) {
 #endif
-		s_aWheelSpheres[i].surface = SURFACE_RUBBER29;
+		s_aWheelSpheres[i].surface = SURFACE_WHEELBASE;
 		s_aWheelSpheres[i].piece = 0;
 	}
 
@@ -255,7 +255,7 @@ CTempColModels::Initialise(void)
 #else
 	for (i = 0; i < ARRAY_SIZE(s_aBootSpheres); i++) {
 #endif
-		s_aBodyPartSpheres1[i].surface = SURFACE_FLESH;
+		s_aBodyPartSpheres1[i].surface = SURFACE_PED;
 		s_aBodyPartSpheres1[i].piece = 0;
 	}
 
@@ -277,7 +277,7 @@ CTempColModels::Initialise(void)
 #else
 	for (i = 0; i < ARRAY_SIZE(s_aBootSpheres); i++) {
 #endif
-		s_aBodyPartSpheres2[i].surface = SURFACE_FLESH;
+		s_aBodyPartSpheres2[i].surface = SURFACE_PED;
 		s_aBodyPartSpheres2[i].piece = 0;
 	}
 

@@ -59,7 +59,8 @@ static char ms_aWeaponNames[][32] = {
 };
 
 CWeaponInfo*
-CWeaponInfo::GetWeaponInfo(eWeaponType weaponType) {
+CWeaponInfo::GetWeaponInfo(eWeaponType weaponType)
+{
 	return &CWeaponInfo::ms_apWeaponInfos[weaponType];
 }
 

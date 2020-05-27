@@ -257,7 +257,7 @@ CCopPed::ArrestPlayer(void)
 				CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ANIM_ARREST_GUN, 4.0f);
 
 			CVector suspMidPos;
-			suspect->m_pedIK.GetComponentPosition((RwV3d)suspMidPos, PED_MID);
+			suspect->m_pedIK.GetComponentPosition(*(RwV3d *)&suspMidPos, PED_MID);
 			m_fRotationDest = CGeneral::GetRadianAngleBetweenPoints(suspMidPos.x, suspMidPos.y,
 				GetPosition().x, GetPosition().y);
 

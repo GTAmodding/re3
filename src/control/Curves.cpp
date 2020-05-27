@@ -2,6 +2,8 @@
 
 #include "Curves.h"
 
+//--MIAMI: file done
+
 float CCurves::CalcSpeedScaleFactor(CVector* pPoint1, CVector* pPoint2, float dir1X, float dir1Y, float dir2X, float dir2Y)
 {
 	CVector2D dir1(dir1X, dir1Y);

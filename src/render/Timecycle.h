@@ -180,7 +180,7 @@ public:
 
 	static void Initialise(void);
 	static void Update(void);
-	static CVector &GetSunPosition(void) { return m_VectorToSun[m_CurrentStoredValue]; }
+	static CVector &GetSunDirection(void) { return m_VectorToSun[m_CurrentStoredValue]; }
 	static float GetShadowFrontX(void) { return m_fShadowFrontX[m_CurrentStoredValue]; }
 	static float GetShadowFrontY(void) { return m_fShadowFrontY[m_CurrentStoredValue]; }
 	static float GetShadowSideX(void) { return m_fShadowSideX[m_CurrentStoredValue]; }

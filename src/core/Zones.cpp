@@ -725,17 +725,17 @@ CTheZones::LoadAllZones(uint8 *buffer, uint32 size)
 	for(i = 0; i < ARRAY_SIZE(NavigationZoneArray); i++){
 		NavigationZoneArray[i] = ReadSaveBuf<CZone>(buffer);
 
-		NavigationZoneArray[i].child = GetPointerForZoneIndex((int32)NavigationZoneArray[i].child);
-		NavigationZoneArray[i].parent = GetPointerForZoneIndex((int32)NavigationZoneArray[i].parent);
-		NavigationZoneArray[i].next = GetPointerForZoneIndex((int32)NavigationZoneArray[i].next);
+		NavigationZoneArray[i].child = GetPointerForZoneIndex((uintptr)NavigationZoneArray[i].child);
+		NavigationZoneArray[i].parent = GetPointerForZoneIndex((uintptr)NavigationZoneArray[i].parent);
+		NavigationZoneArray[i].next = GetPointerForZoneIndex((uintptr)NavigationZoneArray[i].next);
 	}
 
 	for(i = 0; i < ARRAY_SIZE(InfoZoneArray); i++){
 		InfoZoneArray[i] = ReadSaveBuf<CZone>(buffer);
 
-		InfoZoneArray[i].child = GetPointerForZoneIndex((int32)InfoZoneArray[i].child);
-		InfoZoneArray[i].parent = GetPointerForZoneIndex((int32)InfoZoneArray[i].parent);
-		InfoZoneArray[i].next = GetPointerForZoneIndex((int32)InfoZoneArray[i].next);
+		InfoZoneArray[i].child = GetPointerForZoneIndex((uintptr)InfoZoneArray[i].child);
+		InfoZoneArray[i].parent = GetPointerForZoneIndex((uintptr)InfoZoneArray[i].parent);
+		InfoZoneArray[i].next = GetPointerForZoneIndex((uintptr)InfoZoneArray[i].next);
 	}
 
 	for(i = 0; i < ARRAY_SIZE(ZoneInfoArray); i++)

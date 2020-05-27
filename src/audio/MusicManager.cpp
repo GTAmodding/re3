@@ -117,7 +117,7 @@ cMusicManager::DisplayRadioStationName()
 
 				while(gRetuneCounter) {
 					if(pRetune == RADIO_OFF) {
-						pRetune = HEAD_RADIO;
+						pRetune = WILDSTYLE;
 					} else if(pRetune < USERTRACK) {
 						pRetune = pRetune + 1;
 					}
@@ -131,20 +131,20 @@ cMusicManager::DisplayRadioStationName()
 		wchar *string = nil;
 
 		switch(pRetune) {
-		case HEAD_RADIO: string = TheText.Get("FEA_FM0"); break;
-		case DOUBLE_CLEF: string = TheText.Get("FEA_FM1"); break;
-		case JAH_RADIO: string = TheText.Get("FEA_FM2"); break;
-		case RISE_FM: string = TheText.Get("FEA_FM3"); break;
-		case LIPS_106: string = TheText.Get("FEA_FM4"); break;
-		case GAME_FM: string = TheText.Get("FEA_FM5"); break;
-		case MSX_FM: string = TheText.Get("FEA_FM6"); break;
-		case FLASHBACK: string = TheText.Get("FEA_FM7"); break;
-		case CHATTERBOX: string = TheText.Get("FEA_FM8"); break;
+		case WILDSTYLE: string = TheText.Get("FEA_FM0"); break;
+		case FLASH_FM: string = TheText.Get("FEA_FM1"); break;
+		case KCHAT: string = TheText.Get("FEA_FM2"); break;
+		case FEVER: string = TheText.Get("FEA_FM3"); break;
+		case V_ROCK: string = TheText.Get("FEA_FM4"); break;
+		case VCPR: string = TheText.Get("FEA_FM5"); break;
+		case RADIO_ESPANTOSO: string = TheText.Get("FEA_FM6"); break;
+		case EMOTION: string = TheText.Get("FEA_FM7"); break;
+		case WAVE: string = TheText.Get("FEA_FM8"); break;
 		case USERTRACK: string = TheText.Get("FEA_FM9"); break;
 		default: return;
 		};
 
-		if(pRetune > CHATTERBOX && !SampleManager.IsMP3RadioChannelAvailable()) { return; }
+		if(pRetune > WAVE && !SampleManager.IsMP3RadioChannelAvailable()) { return; }
 
 		if(string && pCurrentStation != string ||
 		   m_nCurrentStreamedSound == STREAMED_SOUND_RADIO_MP3_PLAYER &&
@@ -223,7 +223,7 @@ cMusicManager::Initialise()
 		m_bDoTrackService = false;
 		m_bIgnoreTimeDelay = false;
 		m_bRadioSetByScript = false;
-		m_nRadioStation = HEAD_RADIO;
+		m_nRadioStation = WILDSTYLE;
 		m_nRadioPosition = -1;
 		m_nRadioInCar = NO_STREAMED_SOUND;
 		gNumRetunePresses = 0;
@@ -297,7 +297,7 @@ cMusicManager::ChangeMusicMode(uint8 mode)
 uint8
 cMusicManager::GetRadioInCar(void)
 {
-	if (!m_bIsInitialised) return HEAD_RADIO;
+	if (!m_bIsInitialised) return WILDSTYLE;
 	if (PlayerInCar()) {
 		CVehicle *veh = FindPlayerVehicle();
 		if (veh != nil){
@@ -404,9 +404,6 @@ cMusicManager::ServiceFrontEndMode()
 				case STREAMED_SOUND_MISSION_COMPLETED:
 					if (!AudioManager.m_nUserPause)
 						ChangeMusicMode(MUSICMODE_GAME);
-					break;
-				case STREAMED_SOUND_GAME_COMPLETED:
-					ChangeMusicMode(MUSICMODE_GAME);
 					break;
 				default:
 					break;
@@ -626,14 +623,14 @@ cMusicManager::StopFrontEndTrack()
 }
 
 void
-cMusicManager::PlayAnnouncement(uint8 announcement)
+cMusicManager::PlayAnnouncement(uint32 announcement)
 {
 	if (IsInitialised() && !m_bDisabled && !m_bAnnouncementInProgress)
 		m_nAnnouncement = announcement;
 }
 
 void
-cMusicManager::PlayFrontEndTrack(uint8 track, uint8 bPlayInFrontend)
+cMusicManager::PlayFrontEndTrack(uint32 track, uint8 bPlayInFrontend)
 {
 	if (IsInitialised() && !m_bDisabled && track < TOTAL_STREAMED_SOUNDS) {
 		if (m_nMusicMode == MUSICMODE_GAME) {
@@ -668,7 +665,7 @@ cMusicManager::PlayFrontEndTrack(uint8 track, uint8 bPlayInFrontend)
 }
 
 void
-cMusicManager::PreloadCutSceneMusic(uint8 track)
+cMusicManager::PreloadCutSceneMusic(uint32 track)
 {
 	if (IsInitialised() && !m_bDisabled && track < TOTAL_STREAMED_SOUNDS && m_nMusicMode == MUSICMODE_CUTSCENE) {
 		AudioManager.ResetPoliceRadio();
@@ -848,7 +845,7 @@ cMusicManager::ServiceAnnouncement()
 	return false;
 }
 
-uint8
+uint32
 cMusicManager::GetCarTuning()
 {
 	CVehicle *veh = FindPlayerVehicle();
@@ -859,12 +856,12 @@ cMusicManager::GetCarTuning()
 	return veh->m_nRadioStation;
 }
 
-uint8
+uint32
 cMusicManager::GetNextCarTuning()
 {
 	CVehicle *veh = FindPlayerVehicle();
 	if (veh == nil) return RADIO_OFF;
-	if (UsesPoliceRadio(veh)) return POLICE_RADIO;
+	if (UsesPoliceRadio(veh)) return STREAMED_SOUND_RADIO_POLICE;
 	if (gNumRetunePresses != 0) {
 		if (SampleManager.IsMP3RadioChannelAvailable()) {
 			if (veh->m_nRadioStation == RADIO_OFF)
@@ -877,7 +874,7 @@ cMusicManager::GetNextCarTuning()
 		} else if (gNumRetunePresses + veh->m_nRadioStation >= USERTRACK) {
 			while (gNumRetunePresses) {
 				if (veh->m_nRadioStation == RADIO_OFF)
-					veh->m_nRadioStation = HEAD_RADIO;
+					veh->m_nRadioStation = WILDSTYLE;
 				else if (veh->m_nRadioStation < USERTRACK)
 					++veh->m_nRadioStation;
 

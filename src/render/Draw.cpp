@@ -19,24 +19,23 @@ uint8 CDraw::FadeGreen;
 uint8 CDraw::FadeBlue;
 
 float
-CDraw::FindAspectRatio(void)
+CDraw::CalculateAspectRatio(void)
 {
-#ifndef ASPECT_RATIO_SCALE
-	if(FrontEndMenuManager.m_PrefsUseWideScreen)	
-		return 16.0f/9.0f;
-	else
-		return 4.0f/3.0f;
+	if (FrontEndMenuManager.m_PrefsUseWideScreen) {
+		if (TheCamera.m_WideScreenOn)
+			CDraw::ms_fAspectRatio = 5.f / 3.f; // It's used on theatrical showings according to Wiki
+		else
+#ifdef ASPECT_RATIO_SCALE
+			CDraw::ms_fAspectRatio = FrontEndMenuManager.m_PrefsUseWideScreen == AR_AUTO ? SCREEN_WIDTH / SCREEN_HEIGHT : 16.f / 9.f;
 #else
-	switch (FrontEndMenuManager.m_PrefsUseWideScreen) {
-	case AR_AUTO:
-		return SCREEN_WIDTH / SCREEN_HEIGHT;
-	default:
-	case AR_4_3:
-		return 4.0f / 3.0f;
-	case AR_16_9:
-		return 16.0f / 9.0f;
-	};
+			CDraw::ms_fAspectRatio = 16.f / 9.f;
 #endif
+	} else if (TheCamera.m_WideScreenOn) {
+		CDraw::ms_fAspectRatio = 5.f/4.f;
+	} else {
+		CDraw::ms_fAspectRatio = 4.f/3.f;
+	}
+	return CDraw::ms_fAspectRatio;
 }
 
 #ifdef ASPECT_RATIO_SCALE

@@ -137,9 +137,10 @@ DoRWStuffStartOfFrame(int16 TopRed, int16 TopGreen, int16 TopBlue, int16 BottomR
 	CRGBA TopColor(TopRed, TopGreen, TopBlue, Alpha);
 	CRGBA BottomColor(BottomRed, BottomGreen, BottomBlue, Alpha);
 
+	CDraw::CalculateAspectRatio();
 	CameraSize(Scene.camera, nil, SCREEN_VIEWWINDOW, SCREEN_ASPECT_RATIO);
 	CVisibilityPlugins::SetRenderWareCamera(Scene.camera);
-	RwCameraClear(Scene.camera, &gColourTop, rwCAMERACLEARZ);
+	RwCameraClear(Scene.camera, &TopColor.rwRGBA, rwCAMERACLEARZ);
 
 	if(!RsCameraBeginUpdate(Scene.camera))
 		return false;
@@ -155,6 +156,7 @@ DoRWStuffStartOfFrame(int16 TopRed, int16 TopGreen, int16 TopBlue, int16 BottomR
 bool
 DoRWStuffStartOfFrame_Horizon(int16 TopRed, int16 TopGreen, int16 TopBlue, int16 BottomRed, int16 BottomGreen, int16 BottomBlue, int16 Alpha)
 {
+	CDraw::CalculateAspectRatio();
 	CameraSize(Scene.camera, nil, SCREEN_VIEWWINDOW, SCREEN_ASPECT_RATIO);
 	CVisibilityPlugins::SetRenderWareCamera(Scene.camera);
 	RwCameraClear(Scene.camera, &gColourTop, rwCAMERACLEARZ);
@@ -948,15 +950,12 @@ Render2dStuffAfterFade(void)
 
 	CHud::DrawAfterFade();
 	CFont::DrawFonts();
+	CCredits::Render();
 }
 
 void
 Idle(void *arg)
 {
-#ifdef ASPECT_RATIO_SCALE
-	CDraw::SetAspectRatio(CDraw::FindAspectRatio());
-#endif
-
 	CTimer::Update();
 
 #ifdef TIMEBARS
@@ -1062,6 +1061,7 @@ Idle(void *arg)
 		tbEndTimer("Render2dStuff");
 #endif
 	}else{
+		CDraw::CalculateAspectRatio();
 #ifdef ASPECT_RATIO_SCALE
 		CameraSize(Scene.camera, nil, SCREEN_VIEWWINDOW, SCREEN_ASPECT_RATIO);
 #else
@@ -1090,7 +1090,7 @@ Idle(void *arg)
 #ifdef TIMEBARS
 	tbEndTimer("Render2dStuff-Fade");
 #endif
-	CCredits::Render();
+	// CCredits::Render(); // They added it to function above and also forgot it here
 
 #ifdef TIMEBARS
 	tbDisplay();
@@ -1105,10 +1105,7 @@ Idle(void *arg)
 void
 FrontendIdle(void)
 {
-#ifdef ASPECT_RATIO_SCALE
-	CDraw::SetAspectRatio(CDraw::FindAspectRatio());
-#endif
-
+	CDraw::CalculateAspectRatio();
 	CTimer::Update();
 	CSprite2d::SetRecipNearClip(); // this should be on InitialiseRenderWare according to PS2 asm. seems like a bug fix
 	CSprite2d::InitPerFrame();
@@ -1119,11 +1116,7 @@ FrontendIdle(void)
 	if(RsGlobal.quit)
 		return;
 
-#ifdef ASPECT_RATIO_SCALE
 	CameraSize(Scene.camera, nil, SCREEN_VIEWWINDOW, SCREEN_ASPECT_RATIO);
-#else
-	CameraSize(Scene.camera, nil, SCREEN_VIEWWINDOW, DEFAULT_ASPECT_RATIO);
-#endif
 	CVisibilityPlugins::SetRenderWareCamera(Scene.camera);
 	RwCameraClear(Scene.camera, &gColourTop, rwCAMERACLEARZ);
 	if(!RsCameraBeginUpdate(Scene.camera))
@@ -1133,7 +1126,7 @@ FrontendIdle(void)
 	RenderMenus();
 	DoFade();
 	Render2dStuffAfterFade();
-//	CFont::DrawFonts(); // redundant
+	CFont::DrawFonts();
 	DoRWStuffEndOfFrame();
 }
 
@@ -1239,9 +1232,8 @@ TheModelViewer(void)
 #if (defined(GTA_PS2) || defined(GTA_XBOX))
 	//TODO
 #else
-#ifdef ASPECT_RATIO_SCALE
-	CDraw::SetAspectRatio(CDraw::FindAspectRatio());
-#endif
+
+	CDraw::CalculateAspectRatio();
 	CAnimViewer::Update();
 	CTimer::Update();
 	SetLightsWithTimeOfDayColour(Scene.world);

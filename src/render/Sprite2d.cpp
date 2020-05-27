@@ -4,11 +4,11 @@
 #include "Draw.h"
 #include "Camera.h"
 #include "Sprite2d.h"
+#include "Font.h"
 
 RwIm2DVertex CSprite2d::maVertices[8];
 float CSprite2d::RecipNearClip;
 int32 CSprite2d::mCurrentBank;
-RwTexture *CSprite2d::mpBankTextures[10];
 int32 CSprite2d::mCurrentSprite[10];
 int32 CSprite2d::mBankStart[10];
 RwIm2DVertex CSprite2d::maBankVertices[500];
@@ -16,7 +16,7 @@ RwIm2DVertex CSprite2d::maBankVertices[500];
 void
 CSprite2d::SetRecipNearClip(void)
 {
-	RecipNearClip = 1.0f / RwCameraGetNearClipPlane(Scene.camera);
+	// Used but empty in VC, instead they set in InitPerFrame. Isn't that great?
 }
 
 void
@@ -24,17 +24,15 @@ CSprite2d::InitPerFrame(void)
 {
 	int i;
 
+	RecipNearClip = 1.0f / RwCameraGetNearClipPlane(Scene.camera);
 	mCurrentBank = 0;
 	for(i = 0; i < 10; i++)
 		mCurrentSprite[i] = 0;
-	for(i = 0; i < 10; i++)
-		mpBankTextures[i] = nil;
 }
 
 int32
 CSprite2d::GetBank(int32 n, RwTexture *tex)
 {
-	mpBankTextures[mCurrentBank] = tex;
 	mCurrentSprite[mCurrentBank] = 0;
 	mBankStart[mCurrentBank+1] = mBankStart[mCurrentBank] + n;
 	return mCurrentBank++;
@@ -59,13 +57,14 @@ CSprite2d::DrawBank(int32 bank)
 {
 	if(mCurrentSprite[bank] == 0)
 		return;
-	RwRenderStateSet(rwRENDERSTATETEXTURERASTER,
-		mpBankTextures[bank] ? RwTextureGetRaster(mpBankTextures[bank]) : nil);
+
+	// This is hacked III function to make it work with VC frontend.
+	CFont::Sprite[bank].SetRenderState();
 	RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)TRUE);
 	RwRenderStateSet(rwRENDERSTATETEXTUREFILTER, (void*)rwFILTERLINEAR);
 	RwIm2DRenderPrimitive(rwPRIMTYPETRILIST, &maBankVertices[6*mBankStart[bank]], 6*mCurrentSprite[bank]);
 	mCurrentSprite[bank] = 0;
-	RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)FALSE);
+	//RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)FALSE);
 }
 
 

@@ -1781,7 +1781,14 @@ CVehicle* CStoredCar::RestoreCar()
 	CStreaming::RequestModel(m_nModelIndex, STREAMFLAGS_DEPENDENCY);
 	if (!CStreaming::HasModelLoaded(m_nModelIndex))
 		return nil;
-	CVehicleModelInfo::SetComponentsToUse(m_nVariationA, m_nVariationB);
+#ifdef FIX_BUGS
+	CVehicleModelInfo* pModelInfo = (CVehicleModelInfo*)CModelInfo::GetModelInfo(m_nModelIndex);
+	assert(pModelInfo);
+	if (pModelInfo->m_numComps != 0)
+#endif
+	{
+		CVehicleModelInfo::SetComponentsToUse(m_nVariationA, m_nVariationB);
+	}
 	CVehicle* pVehicle;
 	if (CModelInfo::IsBoatModel(m_nModelIndex))
 		pVehicle = new CBoat(m_nModelIndex, RANDOM_VEHICLE);
@@ -2119,12 +2126,8 @@ void CGarages::SetAllDoorsBackToOriginalHeight()
 // TODO(MIAMI)
 void CGarages::Save(uint8 * buf, uint32 * size)
 {
-#ifdef FIX_GARAGE_SIZE
-	INITSAVEBUF
-	*size = (6 * sizeof(uint32) + TOTAL_COLLECTCARS_GARAGES * sizeof(*CarTypesCollected) + sizeof(uint32) + 3 * NUM_GARAGE_STORED_CARS * sizeof(CStoredCar) + NUM_GARAGES * sizeof(CGarage));
-#else
-	* size = 5484;
-#endif
+INITSAVEBUF
+	*size = (6 * sizeof(uint32) + TOTAL_COLLECTCARS_GARAGES * sizeof(*CarTypesCollected) + sizeof(uint32) + TOTAL_HIDEOUT_GARAGES * NUM_GARAGE_STORED_CARS * sizeof(CStoredCar) + NUM_GARAGES * sizeof(CGarage));
 	CloseHideOutGaragesBeforeSave();
 	WriteSaveBuf(buf, NumGarages);
 	WriteSaveBuf(buf, (uint32)BombsAreFree);
@@ -2142,9 +2145,7 @@ void CGarages::Save(uint8 * buf, uint32 * size)
 	}
 	for (int i = 0; i < NUM_GARAGES; i++)
 		WriteSaveBuf(buf, aGarages[i]);
-#ifdef FIX_GARAGE_SIZE
-	VALIDATESAVEBUF(*size);
-#endif
+VALIDATESAVEBUF(*size);
 }
 
 const CStoredCar &CStoredCar::operator=(const CStoredCar & other)
@@ -2169,12 +2170,8 @@ const CStoredCar &CStoredCar::operator=(const CStoredCar & other)
 //TODO(MIAMI)
 void CGarages::Load(uint8* buf, uint32 size)
 {
-#ifdef FIX_GARAGE_SIZE
-	INITSAVEBUF
-	assert(size == (6 * sizeof(uint32) + TOTAL_COLLECTCARS_GARAGES * sizeof(*CarTypesCollected) + sizeof(uint32) + 3 * NUM_GARAGE_STORED_CARS * sizeof(CStoredCar) + NUM_GARAGES * sizeof(CGarage));
-#else
-	assert(size == 5484);
-#endif
+INITSAVEBUF
+	assert(size == (6 * sizeof(uint32) + TOTAL_COLLECTCARS_GARAGES * sizeof(*CarTypesCollected) + sizeof(uint32) + TOTAL_HIDEOUT_GARAGES * NUM_GARAGE_STORED_CARS * sizeof(CStoredCar) + NUM_GARAGES * sizeof(CGarage)));
 	CloseHideOutGaragesBeforeSave();
 	NumGarages = ReadSaveBuf<uint32>(buf);
 	BombsAreFree = ReadSaveBuf<uint32>(buf);
@@ -2203,9 +2200,7 @@ void CGarages::Load(uint8* buf, uint32 size)
 		else
 			aGarages[i].UpdateDoorsHeight();
 	}
-#ifdef FIX_GARAGE_SIZE
-	VALIDATESAVEBUF(size);
-#endif
+VALIDATESAVEBUF(size);
 
 	MessageEndTime = 0;
 	bCamShouldBeOutisde = false;

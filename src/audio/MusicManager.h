@@ -18,12 +18,12 @@ public:
 	bool m_bIsInitialised;
 	bool m_bDisabled;
 	uint8 m_nMusicMode;
-	uint8 m_nCurrentStreamedSound;
-	uint8 m_nPreviousStreamedSound;
+	uint32 m_nCurrentStreamedSound;
+	uint32 m_nPreviousStreamedSound;
 	bool m_bFrontendTrackFinished;
 	bool m_bPlayInFrontend;
 	bool m_bSetNextStation;
-	uint8 m_nAnnouncement;
+	uint32 m_nAnnouncement;
 	bool m_bPreviousPlayerInCar;
 	bool m_bPlayerInCar;
 	bool m_bAnnouncementInProgress;
@@ -36,9 +36,9 @@ public:
 	bool m_bIgnoreTimeDelay;
 	bool m_bDontServiceAmbienceTrack;
 	bool m_bRadioSetByScript;
-	uint8 m_nRadioStation;
+	uint32 m_nRadioStation;
 	int32 m_nRadioPosition;
-	uint8 m_nRadioInCar;
+	uint32 m_nRadioInCar;
 
 public:
 	cMusicManager();
@@ -55,9 +55,9 @@ public:
 	bool PlayerInCar();
 	void DisplayRadioStationName();
 
-	void PlayAnnouncement(uint8);
-	void PlayFrontEndTrack(uint8, uint8);
-	void PreloadCutSceneMusic(uint8);
+	void PlayAnnouncement(uint32);
+	void PlayFrontEndTrack(uint32, uint8);
+	void PreloadCutSceneMusic(uint32);
 	void PlayPreloadedCutSceneMusic(void);
 	void StopCutSceneMusic(void);
 	uint8 GetRadioInCar(void);
@@ -79,8 +79,8 @@ public:
 	void ComputeAmbienceVol(uint8 reset, uint8& outVolume);
 	bool ServiceAnnouncement();
 
-	uint8 GetCarTuning();
-	uint8 GetNextCarTuning();
+	uint32 GetCarTuning();
+	uint32 GetNextCarTuning();
 	bool ChangeRadioChannel();
 };
 

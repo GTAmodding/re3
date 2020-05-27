@@ -81,10 +81,17 @@ public:
 
 class CMP3File : public IDecoder
 {
+protected:
 	mpg123_handle *m_pMH;
 	bool m_bOpened;
 	uint32 m_nRate;
 	uint32 m_nChannels;
+	
+	CMP3File() :
+		m_pMH(nil),
+		m_bOpened(false),
+		m_nRate(0),
+		m_nChannels(0) {}
 public:
 	CMP3File(const char *path) :
 		m_pMH(nil),
@@ -171,6 +178,51 @@ public:
 	}
 };
 
+class CADFFile : public CMP3File
+{
+	static ssize_t r_read(void* fh, void* buf, size_t size)
+	{
+		size_t bytesRead = fread(buf, 1, size, (FILE*)fh);
+		uint8* _buf = (uint8*)buf;
+		for (int i = 0; i < size; i++)
+			_buf[i] ^= 0x22;
+		return bytesRead;
+	}
+	static off_t r_seek(void* fh, off_t pos, int seekType)
+	{
+		fseek((FILE*)fh, pos, seekType);
+		return ftell((FILE*)fh);
+	}
+	static void r_close(void* fh)
+	{
+		fclose((FILE*)fh);
+	}
+public:
+	CADFFile(const char* path)
+	{
+		m_pMH = mpg123_new(nil, nil);
+		if (m_pMH)
+		{
+			long rate = 0;
+			int channels = 0;
+			int encoding = 0;
+
+			FILE* f = fopen(path, "rb");
+
+			m_bOpened = mpg123_replace_reader_handle(m_pMH, r_read, r_seek, r_close) == MPG123_OK
+				&& mpg123_open_handle(m_pMH, f) == MPG123_OK &&  mpg123_getformat(m_pMH, &rate, &channels, &encoding) == MPG123_OK;
+			m_nRate = rate;
+			m_nChannels = channels;
+
+			if (IsOpened())
+			{
+				mpg123_format_none(m_pMH);
+				mpg123_format(m_pMH, rate, channels, encoding);
+			}
+		}
+	}
+};
+
 void CStream::Initialise()
 {
 	mpg123_init();
@@ -217,6 +269,8 @@ CStream::CStream(char *filename, ALuint &source, ALuint (&buffers)[NUM_STREAMBUF
 		m_pSoundFile = new CMP3File(m_aFilename);
 	else if (!strcasecmp(&m_aFilename[strlen(m_aFilename) - strlen(".wav")], ".wav"))
 		m_pSoundFile = new CSndFile(m_aFilename);
+	else if (!strcasecmp(&m_aFilename[strlen(m_aFilename) - strlen(".adf")], ".adf"))
+		m_pSoundFile = new CADFFile(m_aFilename);
 	else 
 		m_pSoundFile = nil;
 	ASSERT(m_pSoundFile != nil);

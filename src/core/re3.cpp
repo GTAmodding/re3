@@ -27,6 +27,8 @@
 #include "Radar.h"
 #include "debugmenu.h"
 #include "Frontend.h"
+#include "WaterLevel.h"
+#include "timebars.h"
 
 #ifndef _WIN32
 #include "assert.h"
@@ -364,6 +366,7 @@ DebugMenuPopulate(void)
 		DebugMenuAddVarBool8("Render", "Don't render Peds", &gbDontRenderPeds, nil);
 		DebugMenuAddVarBool8("Render", "Don't render Vehicles", &gbDontRenderVehicles, nil);
 		DebugMenuAddVarBool8("Render", "Don't render Objects", &gbDontRenderObjects, nil);
+		DebugMenuAddVarBool8("Render", "Don't render Water", &gbDontRenderWater, nil);
 
 		DebugMenuAddVarBool8("Debug", "Edit on", &CSceneEdit::m_bEditOn, nil);
 #ifdef MENU_MAP
@@ -389,6 +392,8 @@ DebugMenuPopulate(void)
 
 		DebugMenuAddCmd("Debug", "Start Credits", CCredits::Start);
 		DebugMenuAddCmd("Debug", "Stop Credits", CCredits::Stop);
+		DebugMenuAddVarBool8("Debug", "Show DebugStuffInRelease", &gbDebugStuffInRelease, nil);
+		DebugMenuAddVarBool8("Debug", "Hide Timebars", &gbHideTimeBars, nil);
 
 		extern bool PrintDebugCode;
 		extern int16 DebugCamMode;

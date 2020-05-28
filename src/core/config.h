@@ -186,7 +186,7 @@ enum Config {
 #	define NO_CDCHECK
 #	define CHATTYSPLASH	// print what the game is loading
 #	define DEBUGMENU
-//#	define TIMEBARS		// print debug timers
+#	define TIMEBARS		// print debug timers
 #endif
 
 #define FIX_BUGS		// fixes bugs that we've came across during reversing, TODO: use this more

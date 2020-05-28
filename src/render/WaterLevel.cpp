@@ -36,6 +36,8 @@ RpAtomic *CWaterLevel::ms_pWavyAtomic;
 RpGeometry *CWaterLevel::apGeomArray[8];
 int16 CWaterLevel::nGeomUsed;
 
+bool gbDontRenderWater;
+
 //RwTexture *gpWaterTex;
 //RwRaster *gpWaterRaster;
 
@@ -332,6 +334,12 @@ SectorRadius(float fSize)
 void
 CWaterLevel::RenderWater()
 {
+
+#ifndef MASTER
+	if (gbDontRenderWater)
+		return;
+#endif
+
 	bool bUseCamEndX   = false;
 	bool bUseCamStartY = false;
 	

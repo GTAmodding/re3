@@ -11,8 +11,6 @@
 // enables frame time output
 #define FRAMETIME
 
-bool gbHideTimeBars;
-
 struct sTimeBar
 {
 	char name[20];
@@ -78,9 +76,6 @@ float Diag_GetFPS()
 
 void tbDisplay()
 {
-	if (gbHideTimeBars)
-		return;
-
 	char temp[200];
 	wchar wtemp[200];
 

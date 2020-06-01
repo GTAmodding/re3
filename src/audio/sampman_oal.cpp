@@ -1168,7 +1168,7 @@ cSampleManager::StopChannel(uint32 nChannel)
 }
 
 void
-cSampleManager::PreloadStreamedFile(uint8 nFile, uint8 nStream)
+cSampleManager::PreloadStreamedFile(uint32 nFile, uint8 nStream)
 {
 	char filename[256];
 	
@@ -1226,7 +1226,7 @@ cSampleManager::StartPreloadedStreamedFile(uint8 nStream)
 }
 
 bool
-cSampleManager::StartStreamedFile(uint8 nFile, uint32 nPos, uint8 nStream)
+cSampleManager::StartStreamedFile(uint32 nFile, uint32 nPos, uint8 nStream)
 {
 	char filename[256];
 	
@@ -1317,8 +1317,12 @@ cSampleManager::SetStreamedVolumeAndPan(uint8 nVolume, uint8 nPan, uint8 nEffect
 	
 	if ( stream )
 	{
-		if ( nEffectFlag )
-			stream->SetVolume(m_nEffectsFadeVolume*nVolume*m_nEffectsVolume >> 14);
+		if ( nEffectFlag ) {
+			if ( nStream == 1 ) // TODO(MIAMI): || nStream == 2 when we have second mission channel?
+				stream->SetVolume(128*nVolume*m_nEffectsVolume >> 14);
+			else
+				stream->SetVolume(m_nEffectsFadeVolume*nVolume*m_nEffectsVolume >> 14);
+		}
 		else
 			stream->SetVolume(m_nMusicFadeVolume*nVolume*m_nMusicVolume >> 14);
 		

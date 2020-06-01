@@ -16,8 +16,6 @@ enum{
 	MAX_CAR_MODELS_IN_ARRAY = 25,
 };
 
-#define LANE_WIDTH 5.0f
-
 #ifdef FIX_BUGS
 #define FIX_PATHFIND_BUG
 #endif

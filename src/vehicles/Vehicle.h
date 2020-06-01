@@ -276,7 +276,7 @@ public:
 	virtual void BlowUpCar(CEntity *ent) {}
 	virtual bool SetUpWheelColModel(CColModel *colModel) { return false; }
 	virtual void BurstTyre(uint8 tyre, bool applyForces) {}
-	virtual bool IsRoomForPedToLeaveCar(uint32 component, CVector *forcedDoorPos) { return false;}
+	virtual bool IsRoomForPedToLeaveCar(uint32 component, CVector *forcedDoorPos) { return false; }
 	virtual bool IsClearToDriveAway(void);
 	virtual float GetHeightAboveRoad(void);
 	virtual void PlayCarHorn(void) {}
@@ -317,6 +317,7 @@ public:
 	bool CanDoorsBeDamaged(void);
 	bool CanPedEnterCar(void);
 	bool CanPedExitCar(bool jumpExit);
+	bool CanPedJumpOutCar(void);
 	bool CanPedJumpOffBike(void);
 	// do these two actually return something?
 	CPed *SetUpDriver(void);
@@ -340,6 +341,7 @@ public:
 	void FireFixedMachineGuns(void);
 	void ActivateBomb(void);
 	void ActivateBombWhenEntered(void);
+	void KillPedsInVehicle(void);
 
 	void SetComponentAtomicAlpha(RpAtomic *atomic, int32 alpha);
 	void UpdateClumpAlpha(void);
@@ -347,11 +349,12 @@ public:
 	static void HeliDustGenerate(CEntity *heli, float radius, float ground, int rnd);
 	void DoSunGlare(void);
 
-	bool IsAlarmOn(void) { return m_nAlarmState != 0 && m_nAlarmState != -1; }
+	bool IsAlarmOn(void) { return m_nAlarmState != 0 && m_nAlarmState != -1 && GetStatus() != STATUS_WRECKED; }
 	CVehicleModelInfo* GetModelInfo() { return (CVehicleModelInfo*)CModelInfo::GetModelInfo(GetModelIndex()); }
 	bool IsTaxi(void) { return GetModelIndex() == MI_TAXI || GetModelIndex() == MI_CABBIE || GetModelIndex() == MI_ZEBRA || GetModelIndex() == MI_KAUFMAN; }
 	bool IsLimo(void) { return GetModelIndex() == MI_STRETCH || GetModelIndex() == MI_LOVEFIST; }
 	bool IsRealHeli(void) { return !!(pHandling->Flags & HANDLING_IS_HELI); }
+	bool IsRealPlane(void) { return !!(pHandling->Flags & HANDLING_IS_PLANE); }
 
 	static bool bWheelsOnlyCheat;
 	static bool bAllDodosCheat;
@@ -361,6 +364,8 @@ public:
 #ifdef ALT_DODO_CHEAT
 	static bool bAltDodoCheat;
 #endif
+	static bool bHoverCheat;
+	static bool bAllTaxisHaveNitro;
 	static bool m_bDisableMouseSteering;
 	static bool bDisableRemoteDetonation;
 	static bool bDisableRemoteDetonationOnContact;

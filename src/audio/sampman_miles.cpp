@@ -2030,7 +2030,7 @@ cSampleManager::StopChannel(uint32 nChannel)
 }
 
 void
-cSampleManager::PreloadStreamedFile(uint8 nFile, uint8 nStream)
+cSampleManager::PreloadStreamedFile(uint32 nFile, uint8 nStream)
 {
 	if ( m_bInitialised  )
 	{
@@ -2081,7 +2081,7 @@ cSampleManager::StartPreloadedStreamedFile(uint8 nStream)
 }
 
 bool
-cSampleManager::StartStreamedFile(uint8 nFile, uint32 nPos, uint8 nStream)
+cSampleManager::StartStreamedFile(uint32 nFile, uint32 nPos, uint8 nStream)
 {
 	uint32 position = nPos;
 	char filename[MAX_PATH];
@@ -2287,7 +2287,12 @@ cSampleManager::SetStreamedVolumeAndPan(uint8 nVolume, uint8 nPan, uint8 nEffect
 		if ( mp3Stream[nStream] )
 		{
 			if ( nEffectFlag )
-				AIL_set_stream_volume(mp3Stream[nStream], m_nEffectsFadeVolume*vol*m_nEffectsVolume >> 14);
+			{
+				if ( nStream == 1 ) // TODO(MIAMI): || nStream == 2 when we have second mission channel?
+					AIL_set_stream_volume(mp3Stream[nStream], 128*vol*m_nEffectsVolume >> 14);
+				else
+					AIL_set_stream_volume(mp3Stream[nStream], m_nEffectsFadeVolume*vol*m_nEffectsVolume >> 14);
+			}
 			else
 				AIL_set_stream_volume(mp3Stream[nStream], m_nMusicFadeVolume*vol*m_nMusicVolume >> 14);
 			

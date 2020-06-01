@@ -10,6 +10,7 @@ enum {
 	PLAYERCONTROL_DISABLED_20 = 32, // used on CPlayerInfo::MakePlayerSafe
 	PLAYERCONTROL_DISABLED_40 = 64, // used on phone calls
 	PLAYERCONTROL_DISABLED_80 = 128,// used on cutscenes
+	PLAYERCONTROL_SHORTCUT_TAXI = 256,
 };
 
 class CControllerState
@@ -29,9 +30,7 @@ public:
 	float GetRightStickX(void) { return RightStickX/32767.0f; };
 	float GetRightStickY(void) { return RightStickY/32767.0f; };
 
-#ifdef DETECT_PAD_INPUT_SWITCH
-	bool IsAnyButtonPressed();
-#endif
+	bool CheckForInput();
 	void Clear(void);
 };
 VALIDATE_SIZE(CControllerState, 0x2A);
@@ -152,10 +151,10 @@ public:
 	int16 Phase;
 	int16 Mode;
 	int16 ShakeDur;
+	uint16 DisablePlayerControls;
 	uint8 ShakeFreq;
 	bool bHornHistory[HORNHISTORY_SIZE];
 	uint8 iCurrHornHistory;
-	uint8 DisablePlayerControls;
 	int8 bApplyBrakes;
 	char CheatString[12];
 	int32 LastTimeTouched;
@@ -260,6 +259,7 @@ public:
 	static void ResetCheats(void);
 	static char *EditString(char *pStr, int32 nSize);
 	static int32 *EditCodesForControls(int32 *pRsKeys, int32 nSize);
+	uint32 InputHowLongAgo(void);
 
 #ifdef XINPUT
 	void AffectFromXinput(uint32 pad);
@@ -450,9 +450,9 @@ public:
 	int16 GetRightStickY(void)    { return NewState.RightStickY; }
 
 	bool ArePlayerControlsDisabled(void) { return DisablePlayerControls != PLAYERCONTROL_ENABLED; }
-	void SetDisablePlayerControls(uint8 who) { DisablePlayerControls |= who; }
-	void SetEnablePlayerControls(uint8 who) { DisablePlayerControls &= ~who; }
-	bool IsPlayerControlsDisabledBy(uint8 who) { return DisablePlayerControls & who; }
+	void SetDisablePlayerControls(uint16 who) { DisablePlayerControls |= who; }
+	void SetEnablePlayerControls(uint16 who) { DisablePlayerControls &= ~who; }
+	bool IsPlayerControlsDisabledBy(uint16 who) { return DisablePlayerControls & who; }
 };
 
 VALIDATE_SIZE(CPad, 0xFC);

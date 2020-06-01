@@ -29,14 +29,14 @@
 #define STREAMFILE(str) (((rw::StreamFile*)(str))->file)
 #define HIERNODEINFO(hier) ((hier)->nodeInfo)
 #define HIERNODEID(hier, i) ((hier)->nodeInfo[i].id)
-#define HANIMFRAMES(anim) ((anim)->keyframes)
+#define HANIMFRAME(anim, i) ((RwUInt8*)(anim)->keyframes + (i)*(anim)->interpInfo->animKeyFrameSize)
 #else
 #define RWHALFPIXEL	// always d3d
 #define STREAMPOS(str) ((str)->Type.memory.position)
 #define STREAMFILE(str) ((str)->Type.file.fpFile)
 #define HIERNODEINFO(hier) ((hier)->pNodeInfo)
 #define HIERNODEID(hier, i) ((hier)->pNodeInfo[i].nodeID)
-#define HANIMFRAMES(anim) ((anim)->pFrames)
+#define HANIMFRAME(anim, i) ((RwUInt8*)(anim)->pFrames + (i)*(anim)->interpInfo->keyFrameSize)
 #endif
 
 #ifdef RWHALFPIXEL

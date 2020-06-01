@@ -60,6 +60,7 @@
 #include "Streaming.h"
 #include "PedAttractor.h"
 #include "Debug.h"
+#include "GameLogic.h"
 
 #define CAN_SEE_ENTITY_ANGLE_THRESHOLD	DEGTORAD(60.0f)
 
@@ -3664,7 +3665,7 @@ CPed::Chat(void)
 		} else
 			Say(SOUND_PED_CHAT);
 
-	} else if (!RpAnimBlendClumpGetFirstAssociation(GetClump(), ASSOC_FLAG_XPRESS)) {
+	} else if (!RpAnimBlendClumpGetFirstAssociation(GetClump(), ASSOC_IDLE)) {
 
 		if (CGeneral::GetRandomNumber() < 20) {
 			CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ANIM_XPRESS_SCRATCH, 4.0f);
@@ -6608,7 +6609,12 @@ CPed::RemoveWeaponAnims(int unused, float animDelta)
 		weaponAssoc->blendDelta = animDelta;
 		weaponAssoc->flags |= ASSOC_DELETEFADEDOUT;
 	}
-	weaponAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_WEAPON_CROUCHFIRE);
+	weaponAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_WEAPON_FIRE_2ND);
+	if (weaponAssoc) {
+		weaponAssoc->blendDelta = animDelta;
+		weaponAssoc->flags |= ASSOC_DELETEFADEDOUT;
+	}
+	weaponAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_WEAPON_FIRE_3RD);
 	if (weaponAssoc) {
 		weaponAssoc->blendDelta = animDelta;
 		weaponAssoc->flags |= ASSOC_DELETEFADEDOUT;
@@ -6619,11 +6625,6 @@ CPed::RemoveWeaponAnims(int unused, float animDelta)
 		weaponAssoc->flags |= ASSOC_DELETEFADEDOUT;
 	}
 	weaponAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_WEAPON_CROUCHRELOAD);
-	if (weaponAssoc) {
-		weaponAssoc->blendDelta = animDelta;
-		weaponAssoc->flags |= ASSOC_DELETEFADEDOUT;
-	}
-	weaponAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_WEAPON_SPECIAL);
 	if (weaponAssoc) {
 		weaponAssoc->flags |= ASSOC_DELETEFADEDOUT;
 		if (weaponAssoc->flags & ASSOC_PARTIAL)
@@ -8661,6 +8662,7 @@ CPed::HaveReachedNextPointOnRoute(float distToCountReached)
 	return true;
 }
 
+// --MIAMI: Done
 void
 CPed::Idle(void)
 {
@@ -8682,39 +8684,9 @@ CPed::Idle(void)
 		}
 	}
 
-	CAnimBlendAssociation *armedIdleAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_IDLE_ARMED);
-	CAnimBlendAssociation *unarmedIdleAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_IDLE_STANCE);
-	int waitTime;
+	if (m_nMoveState != PEDMOVE_STILL && !IsPlayer())
+		SetMoveState(PEDMOVE_STILL);
 
-	if (m_nMoveState == PEDMOVE_STILL) {
-
-		eWeaponType curWeapon = GetWeapon()->m_eWeaponType;
-		if (!armedIdleAssoc ||
-			CTimer::GetTimeInMilliseconds() <= m_nWaitTimer && curWeapon != WEAPONTYPE_UNARMED && curWeapon != WEAPONTYPE_MOLOTOV && curWeapon != WEAPONTYPE_GRENADE) {
-
-			if ((!GetWeapon()->IsType2Handed() || curWeapon == WEAPONTYPE_SHOTGUN) && curWeapon != WEAPONTYPE_BASEBALLBAT
-				|| !unarmedIdleAssoc || unarmedIdleAssoc->blendAmount <= 0.95f || m_nWaitState != WAITSTATE_FALSE || CTimer::GetTimeInMilliseconds() <= m_nWaitTimer) {
-
-				m_moved = CVector2D(0.0f, 0.0f);
-				return;
-			}
-			CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ANIM_IDLE_ARMED, 3.0f);
-			waitTime = CGeneral::GetRandomNumberInRange(4000, 7500);
-		} else {
-			armedIdleAssoc->blendDelta = -2.0f;
-			armedIdleAssoc->flags |= ASSOC_DELETEFADEDOUT;
-			waitTime = CGeneral::GetRandomNumberInRange(3000, 8500);
-		}
-		m_nWaitTimer = CTimer::GetTimeInMilliseconds() + waitTime;
-	} else {
-		if (armedIdleAssoc) {
-			armedIdleAssoc->blendDelta = -8.0f;
-			armedIdleAssoc->flags |= ASSOC_DELETEFADEDOUT;
-			m_nWaitTimer = 0;
-		}
-		if (!IsPlayer())
-			SetMoveState(PEDMOVE_STILL);
-	}
 	m_moved = CVector2D(0.0f, 0.0f);
 }
 
@@ -16228,6 +16200,12 @@ CPed::SetExitCar(CVehicle *veh, uint32 wantedDoorNode)
 		return;
 	}
 	if (!someoneExitsFromOurExitDoor || m_nPedType == PEDTYPE_COP && veh->bIsBus) {
+#if defined GTAVC_JP_PATCH || defined FIX_BUGS
+		if (veh->pDriver == this && !IsPlayer() && veh == CGameLogic::pShortCutTaxi) {
+			m_objective = OBJECTIVE_NONE;
+			return;
+		}
+#endif
 		// Again, unused...
 		// CVector exitPos = GetPositionToOpenCarDoor(veh, optedDoorNode);
 		bool thereIsRoom = veh->IsRoomForPedToLeaveCar(optedDoorNode, nil);
@@ -16623,6 +16601,8 @@ CPed::ScanForThreats(void)
 	
 	CPed *shooter = nil;
 	if ((fearFlags & PED_FLAG_GUN) && (shooter = CheckForGunShots()) && (m_nPedType != shooter->m_nPedType || m_nPedType == PEDTYPE_CIVMALE || m_nPedType == PEDTYPE_CIVFEMALE)) {
+//TODO(MIAMI): just a quick fix for heli weapons
+if(shooter->IsPed()){
 		if (!IsGangMember()) {
 			m_threatEntity = shooter;
 			m_threatEntity->RegisterReference((CEntity **) &m_threatEntity);
@@ -16634,6 +16614,7 @@ CPed::ScanForThreats(void)
 			m_threatEntity->RegisterReference((CEntity **) &m_threatEntity);
 			return CPedType::GetFlag(shooter->m_nPedType);
 		}
+}
 	}
 
 	CPed *deadPed = nil;
@@ -17851,10 +17832,11 @@ CPed::SetObjective(eObjective newObj, CVector dest)
 	}
 }
 
+// --MIAMI: Done
 void
 CPed::SetMoveAnim(void)
 {
-	if (m_nStoredMoveState == m_nMoveState || !IsPedInControl())
+	if (m_nStoredMoveState == m_nMoveState || !IsPedInControl() || m_attachedTo)
 		return;
 
 	if (m_nMoveState == PEDMOVE_NONE) {
@@ -17870,12 +17852,14 @@ CPed::SetMoveAnim(void)
 
 	CAnimBlendAssociation *animAssoc = RpAnimBlendClumpGetFirstAssociation(GetClump(), ASSOC_BLOCK);
 	if (!animAssoc) {
-		CAnimBlendAssociation *fightIdleAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_FIGHT_IDLE);
-		animAssoc = fightIdleAssoc;
-		if (fightIdleAssoc && m_nPedState == PED_FIGHT)
+		animAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_FIGHT_IDLE);
+		if (!animAssoc)
+			animAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_WEAPON_CROUCHRELOAD);
+
+		if (animAssoc && m_nPedState == PED_FIGHT)
 			return;
 
-		if (fightIdleAssoc) {
+		if (animAssoc) {
 			CAnimBlendAssociation *idleAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_IDLE_STANCE);
 			if (!idleAssoc || idleAssoc->blendDelta <= 0.0f) {
 				animAssoc->flags |= ASSOC_DELETEFADEDOUT;
@@ -18000,8 +17984,9 @@ CPed::SetEnterCar_AllClear(CVehicle *car, uint32 doorNode, uint32 doorFlag)
 
 		PedSetInCarCB(nil, this);
 		bVehExitWillBeInstant = true;
-		if (IsPlayer())
-			CWaterLevel::AllocateBoatWakeArray();
+		// TODO(Miami):
+		//if (IsPlayer())
+		//	CWaterLevel::AllocateBoatWakeArray();
 	} else {
 		if (zDiff > 4.4f) {
 			if (m_vehEnterType == CAR_DOOR_RF || m_vehEnterType == CAR_DOOR_RR)
@@ -18437,8 +18422,10 @@ CPed::SetExitBoat(CVehicle *boat)
 	SetMoveState(PEDMOVE_STILL);
 	m_vecMoveSpeed = boat->m_vecMoveSpeed;
 #endif
+	
+	// TODO(Miami):
 	// Not there in VC.
-	CWaterLevel::FreeBoatWakeArray();
+	//CWaterLevel::FreeBoatWakeArray();
 }
 
 void
@@ -18661,6 +18648,35 @@ bool
 CPed::CanBeDamagedByThisGangMember(CPed* who)
 {
 	return m_gangFlags & (1 << (uint8)(who->m_nPedType - PEDTYPE_GANG1));
+}
+
+void
+CPed::Undress(const char* name)
+{
+	int mi = GetModelIndex();
+	CAnimBlendAssociation* pAnim = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_PHONE_OUT);
+	//if (pAnim)
+	//	FinishTalkingOnMobileCB(pAnim, this); // TODO(MIAMI)
+	DeleteRwObject();
+	if (m_nPedType == PEDTYPE_PLAYER1)
+		mi = MI_PLAYER;
+	CStreaming::RequestSpecialModel(mi, name, STREAMFLAGS_DEPENDENCY | STREAMFLAGS_SCRIPTOWNED);
+	CWorld::Remove(this);
+}
+
+void
+CPed::Dress(void)
+{
+	int mi = GetModelIndex();
+	m_modelIndex = -1;
+	SetModelIndex(mi);
+	m_nPedState = PED_IDLE;
+	m_nLastPedState = PED_NONE;
+	m_objective = OBJECTIVE_NONE;
+	m_prevObjective = OBJECTIVE_NONE;
+	m_nWaitState = WAITSTATE_FALSE;
+	CWorld::Add(this);
+	m_headingRate = m_pedStats->m_headingChangeRate;
 }
 
 bool

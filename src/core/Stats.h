@@ -71,6 +71,7 @@ public:
 	static int32 NoMoreHurricanes;
 	static float FashionBudget;
 	static int32 SafeHouseVisits;
+	static int32 TyresPopped;
 
 public:
 	static void Init(void);

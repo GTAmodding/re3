@@ -25,6 +25,7 @@ public:
 	CWeapon() {
 		m_bAddRotOffset = false;
 	}
+	CWeapon(eWeaponType type, int32 ammo);
 	
 	CWeaponInfo *GetInfo();
 

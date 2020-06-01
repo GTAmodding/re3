@@ -27,12 +27,12 @@
 
 float fShapeLength = 0.4f;
 float fShapeTime = 0.05f;
-float fRangeMult = 0.75f; //0.6f; // 0.75f gta 3
+float fRangeMult = 0.6f;
 float fTimeMult;
 
-float MAX_WAKE_LENGTH = 50.0f;
-float MIN_WAKE_INTERVAL = 1.0f;
-float WAKE_LIFETIME = 400.0f;
+float CBoat::MAX_WAKE_LENGTH = 50.0f;
+float CBoat::MIN_WAKE_INTERVAL = 2.0f;
+float CBoat::WAKE_LIFETIME = 150.0f;
 
 CBoat *CBoat::apFrameWakeGeneratingBoats[4];
 

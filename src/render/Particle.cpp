@@ -5,6 +5,7 @@
 #include "TxdStore.h"
 #include "Sprite.h"
 #include "Camera.h"
+#include "Clock.h"
 #include "Collision.h"
 #include "World.h"
 #include "Shadows.h"
@@ -1133,6 +1134,25 @@ void CParticle::Update()
 	float fFricDeccel99 = pow(0.99f, CTimer::GetTimeStep());
 	
 	CParticleObject::UpdateAll();
+	
+	// ejaculation at 23:00, 23:15, 23:30, 23:45 
+	if ( CClock::ms_nGameClockHours == 23 &&
+		(	   CClock::ms_nGameClockMinutes == 0 
+			|| CClock::ms_nGameClockMinutes == 15 
+			|| CClock::ms_nGameClockMinutes == 30
+			|| CClock::ms_nGameClockMinutes == 45 ) )
+	{
+		AddParticle(PARTICLE_CAR_SPLASH,
+					CVector(557.03f, -4.0f, 151.46f),
+					CVector(0.0f, 0.0f, 2.5f),
+					NULL,
+					2.0f,
+					CRGBA(255, 255, 255, 255),
+					0,
+					0,
+					1,
+					1000);
+	}
 
 	for ( int32 i = 0; i < MAX_PARTICLES; i++ )
 	{

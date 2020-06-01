@@ -10,6 +10,8 @@ enum eZoneAttribs
 	ATTRZONE_NOTCULLZONE		= 0x20,
 	ATTRZONE_DOINEEDCOLLISION	= 0x40,
 	ATTRZONE_SUBWAYVISIBLE		= 0x80,
+	
+	ATTRZONE_WATERFUDGE		    = 0x400,
 };
 
 struct CAttributeZone
@@ -53,6 +55,7 @@ public:
 	static bool DoINeedToLoadCollision(void) { return (CurrentFlags_Player & ATTRZONE_DOINEEDCOLLISION) != 0; }
 	static bool PlayerNoRain(void) { return (CurrentFlags_Player & ATTRZONE_NORAIN) != 0; }
 	static bool CamNoRain(void) { return (CurrentFlags_Camera & ATTRZONE_NORAIN) != 0; }
+	static bool WaterFudge(void) { return (CurrentFlags_Camera & ATTRZONE_WATERFUDGE) != 0; }
 	static int32 GetWantedLevelDrop(void) { return CurrentWantedLevelDrop_Player; }
 
 	//--MIAMI: TODO

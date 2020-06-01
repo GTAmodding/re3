@@ -1,6 +1,6 @@
 #include "common.h"
 
-
+#include "GameLogic.h"
 #include "Hud.h"
 #include "PlayerPed.h"
 #include "Replay.h"
@@ -99,7 +99,7 @@ void
 CCurrentVehicle::Display()
 {
 	wchar *text = nil;
-	if (m_pCurrentVehicle != nil)
+	if (m_pCurrentVehicle != nil && m_pCurrentVehicle != CGameLogic::pShortCutTaxi)
 		text = TheText.Get(((CVehicleModelInfo*)CModelInfo::GetModelInfo(m_pCurrentVehicle->GetModelIndex()))->m_gameName);
 	CHud::SetVehicleName(text);
 }

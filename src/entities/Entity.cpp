@@ -81,7 +81,7 @@ CEntity::CEntity(void)
 	m_flagE2 = false;
 	bOffscreen = false;
 	bIsStaticWaitingForCollision = false;
-	m_flagE10 = false;
+	bDontStream = false;
 	bUnderwater = false;
 	bHasPreRenderEffects = false;
 
@@ -1083,7 +1083,7 @@ CEntity::SaveEntityFlags(uint8*& buf)
 	if (m_flagE2) tmp |= BIT(9);
 	if (bOffscreen) tmp |= BIT(10);
 	if (bIsStaticWaitingForCollision) tmp |= BIT(11);
-	if (m_flagE10) tmp |= BIT(12);
+	if (bDontStream) tmp |= BIT(12);
 	if (bUnderwater) tmp |= BIT(13);
 	if (bHasPreRenderEffects) tmp |= BIT(14);
 
@@ -1139,7 +1139,7 @@ CEntity::LoadEntityFlags(uint8*& buf)
 	m_flagE2 = !!(tmp & BIT(9));
 	bOffscreen = !!(tmp & BIT(10));
 	bIsStaticWaitingForCollision = !!(tmp & BIT(11));
-	m_flagE10 = !!(tmp & BIT(12));
+	bDontStream = !!(tmp & BIT(12));
 	bUnderwater = !!(tmp & BIT(13));
 	bHasPreRenderEffects = !!(tmp & BIT(14));
 }

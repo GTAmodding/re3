@@ -33,7 +33,7 @@ C_PcSave::DeleteSlot(int32 slot)
 	return true;
 }
 
-bool
+int8
 C_PcSave::SaveSlot(int32 slot)
 {
 	MakeValidSaveName(slot);
@@ -45,10 +45,10 @@ C_PcSave::SaveSlot(int32 slot)
 		if (GenericSave(file)) {
 			if (!!CFileMgr::CloseFile(file))
 				nErrorCode = SAVESTATUS_ERR_SAVE_CLOSE;
-			return true;
+			return 0;
 		}
 
-		return false;
+		return 2;
 	}
 	PcSaveHelper.nErrorCode = SAVESTATUS_ERR_SAVE_CREATE;
 	return false;

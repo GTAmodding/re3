@@ -45,6 +45,10 @@ public:
 	CVector2D m_avec2dWakePoints[32];
 	float m_afWakePointLifeTime[32];
 
+	static float MAX_WAKE_LENGTH;
+	static float MIN_WAKE_INTERVAL;
+	static float WAKE_LIFETIME;
+
 	CBoat(int, uint8);
 
 	virtual void SetModelIndex(uint32 id);
@@ -76,7 +80,3 @@ public:
 	static const uint32 nSaveStructSize;
 
 };
-
-extern float MAX_WAKE_LENGTH;
-extern float MIN_WAKE_INTERVAL;
-extern float WAKE_LIFETIME;

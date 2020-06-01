@@ -15,6 +15,7 @@
 #include "DamageManager.h"
 #include "Ped.h"
 #include "Fire.h"
+#include "GameLogic.h"
 
 CFireManager gFireManager;
 
@@ -59,6 +60,12 @@ CFire::ProcessFire(void)
 				Extinguish();
 				return;
 			}
+#if defined GTAVC_JP_PATCH && !defined FIX_BUGS
+			if (m_pEntity == CGameLogic::pShortCutTaxi && CGameLogic::ShortCutState == CGameLogic::SHORTCUT_TRANSITION) {
+				Extinguish();
+				return;
+			}
+#endif
 			if (ped->m_nMoveState != PEDMOVE_RUN)
 				m_vecPos.z -= 1.0f;
 			if (ped->bInVehicle && ped->m_pMyVehicle) {
@@ -84,6 +91,12 @@ CFire::ProcessFire(void)
 				Extinguish();
 				return;
 			}
+#ifdef FIX_BUGS
+			if (m_pEntity == CGameLogic::pShortCutTaxi && CGameLogic::ShortCutState == CGameLogic::SHORTCUT_TRANSITION) {
+				Extinguish();
+				return;
+			}
+#endif
 			if (!m_bIsScriptFire) {
 				fDamageVehicle = 1.2f * CTimer::GetTimeStep();
 				veh->InflictDamage((CVehicle *)m_pSource, WEAPONTYPE_FLAMETHROWER, fDamageVehicle);

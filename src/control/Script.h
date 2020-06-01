@@ -520,3 +520,7 @@ private:
 	
 	static bool ThisIsAValidRandomCop(int32 mi, bool cop, bool swat, bool fbi, bool army, bool miami);
 };
+
+#ifdef USE_DEBUG_SCRIPT_LOADER
+extern int scriptToLoad;
+#endif

@@ -40,7 +40,8 @@ public:
 	static void ResetExplosionActiveCounter(uint8 id);
 	static uint8 GetExplosionType(uint8 id);
 	static CVector *GetExplosionPosition(uint8 id);
-	static bool AddExplosion(CEntity *explodingEntity, CEntity *culprit, eExplosionType type, const CVector &pos, uint32 lifetime);
+// TODO(MIAMI): that new parameter
+	static bool AddExplosion(CEntity *explodingEntity, CEntity *culprit, eExplosionType type, const CVector &pos, uint32 lifetime, bool unk = true);
 	static void Update();
 	static bool TestForExplosionInArea(eExplosionType type, float x1, float x2, float y1, float y2, float z1, float z2);
 	static void RemoveAllExplosionsInArea(CVector pos, float radius);

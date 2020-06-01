@@ -86,7 +86,7 @@ CExplosion::GetExplosionPosition(uint8 id)
 }
 
 bool
-CExplosion::AddExplosion(CEntity *explodingEntity, CEntity *culprit, eExplosionType type, const CVector &pos, uint32 lifetime)
+CExplosion::AddExplosion(CEntity *explodingEntity, CEntity *culprit, eExplosionType type, const CVector &pos, uint32 lifetime, bool unk)
 {
 	CVector pPosn;
 	CVector posGround;

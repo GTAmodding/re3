@@ -916,6 +916,8 @@ public:
 
 	void SetNewAttraction(CPedAttractor* pAttractor, const CVector& pos, float, float, int);
 	void ClearWaitState(void);
+	void Undress(const char*);
+	void Dress(void);
 
 	bool HasWeaponSlot(uint8 slot) { return m_weapons[slot].m_eWeaponType != WEAPONTYPE_UNARMED; }
 	CWeapon& GetWeapon(uint8 slot) { return m_weapons[slot]; }

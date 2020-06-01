@@ -97,4 +97,6 @@ public:
 	static void HandleShootableBirdsStuff(CEntity *entity, CVector const&camPos);
 };
 
+extern bool clearWaterDrop;
+
 VALIDATE_SIZE(CParticle, 0x58);

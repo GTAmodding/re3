@@ -41,7 +41,7 @@ enum Config {
 	NUMANIMBLOCKS = 35,
 	NUMANIMATIONS = 450,
 
-	NUMTEMPOBJECTS = 30,
+	NUMTEMPOBJECTS = 40,
 
 	// Path data
 	NUM_PATHNODES = 9650,
@@ -115,6 +115,7 @@ enum Config {
 	NUMSHOTINFOS = 100,
 
 	NUMROADBLOCKS = 300,
+	NUM_SCRIPT_ROADBLOCKS = 16,
 
 	NUMVISIBLEENTITIES = 2000,
 	NUMINVISIBLEENTITIES = 150,
@@ -136,7 +137,8 @@ enum Config {
 
 	NUM_EXPLOSIONS = 48,
 
-	NUM_SETPIECES = 96
+	NUM_SETPIECES = 96,
+	NUM_SHORTCUT_START_POINTS = 16
 };
 
 // We'll use this once we're ready to become independent of the game
@@ -166,6 +168,7 @@ enum Config {
 #elif defined GTA_PC
 #	define GTA3_1_1_PATCH
 //#	define GTA3_STEAM_PATCH
+//# define GTAVC_JP_PATCH
 #	ifdef GTA_PS2_STUFF
 #		define USE_PS2_RAND
 #		define RANDOMSPLASH	// use random splash as on PS2
@@ -195,19 +198,28 @@ enum Config {
 #endif
 
 #define FIX_BUGS		// fixes bugs that we've came across during reversing, TODO: use this more
-#define TOGGLEABLE_BETA_FEATURES // toggleable from debug menu. not too many things
 //#define MORE_LANGUAGES		// Add more translations to the game
+#define COMPATIBLE_SAVES // this allows changing structs while keeping saves compatible
+#define FIX_HIGH_FPS_BUGS_ON_FRONTEND
+
+// Just debug menu entries
+#ifdef DEBUGMENU
+#define TOGGLEABLE_BETA_FEATURES // not too many things
+#define RELOADABLES			// some debug menu options to reload TXD files
+#endif
+
+// Rendering/display
+#define ASPECT_RATIO_SCALE	// Not just makes everything scale with aspect ratio, also adds support for all aspect ratios
 #define DEFAULT_NATIVE_RESOLUTION	// Set default video mode to your native resolution (fixes Windows 10 launch)
 #define USE_TXD_CDIMAGE		// generate and load textures from txd.img
 #define IMPROVED_VIDEOMODE	// save and load videomode parameters instead of a magic number
 //#define USE_TEXTURE_POOL
-#ifdef DEBUGMENU
-#define RELOADABLES			// some debug menu options to reload TXD files
-#endif
 
-// Particle
+// Water & Particle
 #define PC_PARTICLE
 //#define PS2_ALTERNATIVE_CARSPLASH // unused on PS2
+// #define PC_WATER
+#define WATER_CHEATS
 
 // Pad
 #if !defined(RW_GL3) && defined(_WIN32)
@@ -220,7 +232,6 @@ enum Config {
 #define REGISTER_START_BUTTON
 
 // Hud, frontend and radar
-#define ASPECT_RATIO_SCALE	// Not just makes everything scale with aspect ratio, also adds support for all aspect ratios
 #define TRIANGULAR_BLIPS	// height indicating triangular radar blips, as in VC
 // #define PS2_LIKE_MENU	// An effort to recreate PS2 menu, cycling through tabs, different bg etc.
 #define MENU_MAP			// VC-like menu map. Make sure you have new menu.txd
@@ -229,13 +240,13 @@ enum Config {
 // #define CIRCLE_BACK_BUTTON
 #define HUD_ENHANCEMENTS	// Adjusts some aspects to make the HUD look/behave a little bit better.
 #define BETA_SLIDING_TEXT
+#define LEGACY_MENU_OPTIONS
+#define MUCH_SHORTER_OUTRO_SCREEN
 
 // Script
 #define USE_DEBUG_SCRIPT_LOADER	// makes game load main_freeroam.scm by default
 #define USE_MEASUREMENTS_IN_METERS // makes game use meters instead of feet in script
 #define USE_PRECISE_MEASUREMENT_CONVERTION // makes game convert feet to meeters more precisely
-
-#define COMPATIBLE_SAVES // this allows changing structs while keeping saves compatible
 
 // Replay
 //#define DONT_FIX_REPLAY_BUGS // keeps various bugs in CReplay, some of which are fairly cool!

@@ -67,6 +67,7 @@ float CStats::AutoPaintingBudget;
 int32 CStats::NoMoreHurricanes;
 float CStats::FashionBudget;
 int32 CStats::SafeHouseVisits;
+int32 CStats::TyresPopped;
 
 void CStats::Init()
 {

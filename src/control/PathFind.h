@@ -5,6 +5,8 @@
 class CVehicle;
 class CPtrList;
 
+#define LANE_WIDTH 5.0f
+
 enum
 {
 	NodeTypeExtern = 1,
@@ -85,6 +87,8 @@ struct CPathNode
 	float GetX(void) { return x/8.0f; }
 	float GetY(void) { return y/8.0f; }
 	float GetZ(void) { return z/8.0f; }
+	bool HasDivider(void) { return width != 0; }
+	float GetDividerWidth(void) { return width/(2*8.0f); }
 	CPathNode *GetPrev(void);
 	CPathNode *GetNext(void);
 	void SetPrev(CPathNode *node);
@@ -120,7 +124,7 @@ struct CCarPathLink
 	float GetY(void) { return y/8.0f; }
 	float GetDirX(void) { return dirX/100.0f; }
 	float GetDirY(void) { return dirY/100.0f; }
-	float GetLaneOffset(void) { return width/80.0f; }
+	float GetLaneOffset(void) { return width/(2*8.0f*LANE_WIDTH); }
 
 	float OneWayLaneOffset()
 	{

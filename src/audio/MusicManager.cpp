@@ -302,14 +302,14 @@ cMusicManager::GetRadioInCar(void)
 		CVehicle *veh = FindPlayerVehicle();
 		if (veh != nil){
 			if (UsesPoliceRadio(veh)) {
-				if (m_nRadioInCar == NO_STREAMED_SOUND || CReplay::IsPlayingBack() && AudioManager.m_nUserPause)
+				if (m_nRadioInCar == NO_STREAMED_SOUND || (CReplay::IsPlayingBack() && AudioManager.m_nUserPause == 0))
 					return POLICE_RADIO;
 				return m_nRadioInCar;
 			} else return veh->m_nRadioStation;
 		}
 	}
 
-	if (m_nRadioInCar == NO_STREAMED_SOUND || CReplay::IsPlayingBack() && AudioManager.m_nUserPause)
+	if (m_nRadioInCar == NO_STREAMED_SOUND || (CReplay::IsPlayingBack() && AudioManager.m_nUserPause == 0))
 		return RADIO_OFF;
 	return m_nRadioInCar;
 }

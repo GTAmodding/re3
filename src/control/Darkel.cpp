@@ -13,6 +13,7 @@
 #include "Font.h"
 #include "Text.h"
 #include "Vehicle.h"
+#include "GameLogic.h"
 
 #define FRENZY_ANY_PED -1
 #define FRENZY_ANY_CAR -2
@@ -246,6 +247,8 @@ CDarkel::ResetOnPlayerDeath()
 void
 CDarkel::StartFrenzy(eWeaponType weaponType, int32 time, uint16 kill, int32 modelId0, wchar *text, int32 modelId2, int32 modelId3, int32 modelId4, bool standardSound, bool needHeadShot)
 {
+	CGameLogic::ClearShortCut();
+	CGameLogic::RemoveShortCutDropOffPointForMission();
 	eWeaponType fixedWeapon;
 	if (weaponType == WEAPONTYPE_UZI_DRIVEBY)
 		fixedWeapon = WEAPONTYPE_UZI;

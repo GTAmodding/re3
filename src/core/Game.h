@@ -62,6 +62,7 @@ public:
 	static void InitAfterFocusLoss(void);
 
 	static bool IsInInterior(void) { return currArea != AREA_MAIN_MAP; }
+	static bool CanSeeWaterFromCurrArea(void);
 	static bool CanSeeOutSideFromCurrArea(void);
 	
 	// NB: these do something on PS2

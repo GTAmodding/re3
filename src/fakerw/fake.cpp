@@ -790,6 +790,12 @@ RpMaterial *RpMatFXMaterialSetEnvMapFrame( RpMaterial *material, RwFrame *frame 
 	mfx->setEnvFrame(frame);
 	return material;
 }
+RpMaterial *RpMatFXMaterialSetEnvMapFrameBufferAlpha( RpMaterial *material, RwBool useFrameBufferAlpha )
+{
+	MatFX *mfx = MatFX::get(material);
+	mfx->setEnvFBAlpha(useFrameBufferAlpha);
+	return material;
+}
 RpMaterial *RpMatFXMaterialSetEnvMapCoefficient( RpMaterial *material, RwReal coef )
 {
 	MatFX *mfx = MatFX::get(material);

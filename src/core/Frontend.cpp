@@ -182,25 +182,25 @@ ScaleAndCenterX(float x)
 #endif
 
 #define PREPARE_MENU_HEADER \
-	CFont::SetColor(CRGBA(HEADER_COLOR.r, HEADER_COLOR.g, HEADER_COLOR.b, FadeIn(255))); \
 	CFont::SetRightJustifyOn(); \
+	CFont::SetFontStyle(FONT_LOCALE(FONT_HEADING)); \
 	CFont::SetScale(MENU_X(MENUHEADER_WIDTH), MENU_Y(MENUHEADER_HEIGHT)); \
-	CFont::SetFontStyle(FONT_LOCALE(FONT_HEADING));
+	CFont::SetDropShadowPosition(0);
 
-#define ProcessSlider(value, increaseAction, decreaseAction, hoverStartX, hoverEndX) \
+#define ProcessSlider(value, y, increaseAction, decreaseAction, hoverStartX, hoverEndX) \
 	do { \
-		lastActiveBarX = DisplaySlider(MENU_X_RIGHT_ALIGNED(MENUSLIDER_X + columnWidth), MENU_Y(bitAboveNextItemY), MENU_Y(smallestSliderBar), MENU_Y(usableLineHeight), MENU_X(MENUSLIDER_UNK), value); \
+		lastActiveBarX = DisplaySlider(MENU_X_LEFT_ALIGNED(MENUSLIDER_X), MENU_Y(y), MENU_Y(MENUSLIDER_SMALLEST_BAR), MENU_Y(MENUSLIDER_BIGGEST_BAR), MENU_X(MENUSLIDER_UNK), value, MENU_X(3.0f)); \
 		if (i != m_nCurrOption || !itemsAreSelectable) \
 			break; \
 		 \
-		if (CheckHover(hoverStartX, lastActiveBarX - MENU_X(10.0f), MENU_Y(nextYToUse), MENU_Y(28.0f + nextYToUse))) \
+		if (CheckHover(hoverStartX, lastActiveBarX - MENU_X(3.0f), MENU_Y(y), MENU_Y(MENUSLIDER_BIGGEST_BAR + y))) \
 			m_nHoverOption = decreaseAction; \
 		 \
-		if (!CheckHover(MENU_X(10.0f) + lastActiveBarX, hoverEndX, MENU_Y(nextYToUse), MENU_Y(28.0f + nextYToUse))) \
+		if (!CheckHover(MENU_X(3.0f) + lastActiveBarX, hoverEndX, MENU_Y(y), MENU_Y(MENUSLIDER_BIGGEST_BAR + y))) \
 			break; \
 		 \
 		m_nHoverOption = increaseAction; \
-		if (m_nMousePosX < MENU_X_RIGHT_ALIGNED(MENUSLIDER_X + columnWidth)) \
+		if (m_nMousePosX < MENU_X_LEFT_ALIGNED(MENUSLIDER_X)) \
 			m_nHoverOption = HOVEROPTION_NOT_HOVERING; \
 	} while(0)
 
@@ -262,9 +262,8 @@ CMenuManager::SwitchToNewScreen(int8 screen)
 	ThingsToDoBeforeLeavingPage();
 
 	if (screen == -2) {
-		int oldScreen = !m_bGameNotLoaded ? aScreens[m_nCurrScreen].m_PreviousPage[1] : aScreens[m_nCurrScreen].m_PreviousPage[0];
-		int oldOption = !m_bGameNotLoaded ? aScreens[m_nCurrScreen].m_ParentEntry[1] :
-			(m_nCurrScreen == MENUPAGE_NEW_GAME ? 0 : (m_nCurrScreen == MENUPAGE_OPTIONS ? 1 : (m_nCurrScreen == MENUPAGE_EXIT ? 2 : aScreens[m_nCurrScreen].m_ParentEntry[0])));
+		int oldScreen = aScreens[m_nCurrScreen].m_PreviousPage;
+		int oldOption = (m_nCurrScreen == MENUPAGE_NEW_GAME ? 0 : (m_nCurrScreen == MENUPAGE_OPTIONS ? 1 : (m_nCurrScreen == MENUPAGE_EXIT ? 2 : aScreens[m_nCurrScreen].m_ParentEntry)));
 
 		m_nCurrOption = oldOption;
 		m_nCurrScreen = oldScreen;
@@ -279,8 +278,8 @@ CMenuManager::SwitchToNewScreen(int8 screen)
 	if (m_nCurrScreen == MENUPAGE_CHOOSE_SAVE_SLOT)
 		m_nCurrOption = 8;
 	m_nMenuFadeAlpha = 0;
-	bOptionHighlightTransitionBlend = 0;
-	m_LastScreenSwitch = CTimer::GetTimeInMilliseconds();
+	m_nOptionHighlightTransitionBlend = 0;
+	m_LastScreenSwitch = CTimer::GetTimeInMillisecondsPauseMode();
 }
 #endif
 
@@ -467,7 +466,7 @@ CMenuManager::Initialise(void)
 	m_menuTransitionProgress = -50;
 	m_nMenuFadeAlpha = 0;
 	m_nCurrOption = 0;
-	bOptionHighlightTransitionBlend = 0;
+	m_nOptionHighlightTransitionBlend = 0;
 	CentreMousePointer();
 	m_bShowMouse = true;
 	m_fMapSize = 162.0f;
@@ -667,25 +666,15 @@ void
 CMenuManager::DisplayHelperText()
 {
 	// there was a unused static bool
-	static uint32 LastFlash = 0;
+	static PauseModeTime LastFlash = 0;
 	int32 alpha;
 
 	if (m_nHelperTextMsgId != 0 && m_nHelperTextMsgId != 1) {
-
-		// FIX: High fps bug
-#ifndef FIX_BUGS
 		if (CTimer::GetTimeInMillisecondsPauseMode() - LastFlash > 10) {
 			LastFlash = CTimer::GetTimeInMillisecondsPauseMode();
 			m_nHelperTextAlpha -= 2;
 		}
-#else
-		static float fadeAlpha = 0.0f; // To keep it precisely
-		if (m_nHelperTextAlpha >= 255 && fadeAlpha < 250) fadeAlpha = m_nHelperTextAlpha;
 
-		// -2 per every 33 ms (1000.f/30.f - original frame limiter fps)
-		fadeAlpha -= (frameTime / 33.0f) * 2.0f;
-		m_nHelperTextAlpha = fadeAlpha;
-#endif
 		if (m_nHelperTextAlpha < 1)
 			ResetHelperText();
 
@@ -729,17 +718,17 @@ CMenuManager::DisplayHelperText()
 	CFont::SetRightJustifyOff();
 }
 
+// --MIAMI: Done
 int
-CMenuManager::DisplaySlider(float x, float y, float mostLeftBarSize, float mostRightBarSize, float rectSize, float progress) 
+CMenuManager::DisplaySlider(float x, float y, float mostLeftBarSize, float mostRightBarSize, float rectSize, float progress, float spacing) 
 {
 	CRGBA color;
 	float maxBarHeight;
 
 	int lastActiveBarX = 0;
 	float curBarX = 0.0f;
-	float spacing = SCREEN_SCALE_X(4.0f); // TODO: find actual numbers used in the game
 	for (int i = 0; i < 16; i++) {
-		curBarX = i * rectSize/32.0f + x;
+		curBarX = i * rectSize/16.0f + x;
 
 		if (i / 16.0f + 1 / 32.0f < progress) {
 			color = CRGBA(SLIDERON_COLOR.r, SLIDERON_COLOR.g, SLIDERON_COLOR.b, FadeIn(255));
@@ -761,6 +750,7 @@ CMenuManager::DisplaySlider(float x, float y, float mostLeftBarSize, float mostR
 	return lastActiveBarX;
 }
 
+// TODO(Miami)
 void
 CMenuManager::DoSettingsBeforeStartingAGame()
 {
@@ -768,9 +758,10 @@ CMenuManager::DoSettingsBeforeStartingAGame()
 	if (m_PrefsVsyncDisp != m_PrefsVsync)
 		m_PrefsVsync = m_PrefsVsyncDisp;
 
+	DMAudio.DestroyAllGameCreatedEntities();
 	DMAudio.Service();
-	m_bWantToRestart = true;
 	m_bShutDownFrontEndRequested = true;
+	m_bWantToRestart = true;
 	DMAudio.SetEffectsFadeVol(0);
 	DMAudio.SetMusicFadeVol(0);
 	SwitchMenuOnAndOff();
@@ -778,18 +769,39 @@ CMenuManager::DoSettingsBeforeStartingAGame()
 }
 
 void
-CMenuManager::DrawStandardMenus()
+CMenuManager::DrawStandardMenus(bool drawCurrScreen)
 {
+	float nextYToUse = 0.0f; // III leftover, set but unused in VC
+#ifdef PS2_LIKE_MENU
+	bool itemsAreSelectable = !bottomBarActive;
+#else
+	bool itemsAreSelectable = true;
+#endif
 	CFont::SetBackgroundOff();
 	CFont::SetPropOn();
 	CFont::SetCentreOff();
 	CFont::SetJustifyOn();
-	CFont::SetBackGroundOnlyTextOn();
+	CFont::SetBackGroundOnlyTextOff();
 
-	CFont::SetWrapx(MENU_X_RIGHT_ALIGNED(MENU_X_MARGIN));
-	CFont::SetRightJustifyWrap(SCREEN_SCALE_X(MENUACTION_WIDTH));
+	CFont::SetWrapx(MENU_X_RIGHT_ALIGNED(MENU_UNK_X_MARGIN));
+	CFont::SetRightJustifyWrap(SCREEN_SCALE_X(MENU_UNK_WIDTH));
+	CFont::SetCentreSize(SCREEN_WIDTH);
 
 	switch (m_nCurrScreen) {
+		case MENUPAGE_CHOOSE_LOAD_SLOT:
+		case MENUPAGE_CHOOSE_DELETE_SLOT:
+		case MENUPAGE_CHOOSE_SAVE_SLOT:
+			CSprite2d::Draw2DPolygon(MENU_X_LEFT_ALIGNED(38.0f), MENU_Y(85.0f),
+				MENU_X_LEFT_ALIGNED(615.0f), MENU_Y(75.0f),
+				MENU_X_LEFT_ALIGNED(30.0f), MENU_Y(320.0f), 
+				MENU_X_LEFT_ALIGNED(605.0f), MENU_Y(330.0f), CRGBA(49, 101, 148, FadeIn(130)));
+			break;
+		/*
+		// TODO(Miami)
+		case MENUPAGE_SOUND_SETTINGS:
+			PrintSoundSettings();
+			break;
+		*/
 		case MENUPAGE_STATS:
 			PrintStats();
 			break;
@@ -798,9 +810,6 @@ CMenuManager::DrawStandardMenus()
 			break;
 	}
 
-	// Header height isn't accounted, we will add that later.
-	float nextYToUse = 40.0f;
-
 	// Page name
 	if (aScreens[m_nCurrScreen].m_ScreenName[0] != '\0') {
 
@@ -808,21 +817,23 @@ CMenuManager::DrawStandardMenus()
 		CFont::SetColor(CRGBA(30, 30, 30, FadeIn(255)));
 		CFont::PrintString(SCREEN_SCALE_FROM_RIGHT(MENUHEADER_POS_X + 7.f), SCREEN_SCALE_Y(MENUHEADER_POS_Y + 7.f), TheText.Get(aScreens[m_nCurrScreen].m_ScreenName));
 
-		PREPARE_MENU_HEADER
+		CFont::SetColor(CRGBA(HEADER_COLOR.r, HEADER_COLOR.g, HEADER_COLOR.b, FadeIn(255)));
 		CFont::PrintString(SCREEN_SCALE_FROM_RIGHT(MENUHEADER_POS_X), SCREEN_SCALE_Y(MENUHEADER_POS_Y), TheText.Get(aScreens[m_nCurrScreen].m_ScreenName));
-
-		// Weird place to put that.
-		nextYToUse += 24.0f + 10.0f;
 	}
-
-	CFont::SetFontStyle(FONT_LOCALE(FONT_BANK));
-	CFont::SetScale(MENU_X(MENUACTION_SCALE_MULT * MENU_TEXT_SIZE_X), MENU_Y(MENUACTION_SCALE_MULT * MENU_TEXT_SIZE_Y));
-	CFont::SetRightJustifyOff();
-	CFont::SetColor(CRGBA(LABEL_COLOR.r, LABEL_COLOR.g, LABEL_COLOR.b, FadeIn(255)));
 
 	// Label
 	wchar *str;
 	if (aScreens[m_nCurrScreen].m_aEntries[0].m_Action == MENUACTION_LABEL) {
+		CFont::SetWrapx(MENU_X_RIGHT_ALIGNED(MENULABEL_X_MARGIN));
+		CFont::SetRightJustifyWrap(SCREEN_SCALE_X(MENULABEL_WIDTH));
+		CFont::SetFontStyle(FONT_LOCALE(FONT_BANK));
+		CFont::SetScale(MENU_X(BIGTEXT2_X_SCALE), MENU_Y(BIGTEXT2_Y_SCALE));
+		CFont::SetRightJustifyOff();
+
+		CFont::SetDropShadowPosition(2);
+		CFont::SetDropColor(CRGBA(0, 0, 0, FadeIn(255)));
+		CFont::SetColor(CRGBA(LABEL_COLOR.r, LABEL_COLOR.g, LABEL_COLOR.b, FadeIn(255)));
+
 		switch (m_nCurrScreen) {
 		case MENUPAGE_LOAD_SLOT_CONFIRM:
 			if (m_bGameNotLoaded)
@@ -830,8 +841,13 @@ CMenuManager::DrawStandardMenus()
 			else
 				str = TheText.Get(aScreens[m_nCurrScreen].m_aEntries[0].m_EntryName);
 			break;
+		case MENUPAGE_DELETE_SLOT_CONFIRM:
+			str = TheText.Get(aScreens[MENUPAGE_DELETE_SLOT_CONFIRM].m_aEntries[0].m_EntryName);
+			break;
 		case MENUPAGE_SAVE_OVERWRITE_CONFIRM:
-			if (Slots[m_nCurrSaveSlot + 1] == SLOT_EMPTY)
+			if (Slots[m_nCurrSaveSlot + 1] == SLOT_OK)
+				str = TheText.Get("FESZ_QO");
+			else if (Slots[m_nCurrSaveSlot + 1] == SLOT_CORRUPTED)
 				str = TheText.Get("FESZ_QZ");
 			else
 				str = TheText.Get(aScreens[m_nCurrScreen].m_aEntries[0].m_EntryName);
@@ -847,120 +863,18 @@ CMenuManager::DrawStandardMenus()
 			break;
 		}
 
-#ifdef FIX_BUGS
-		// Label is wrapped from right by StretchX(40)px, but wrapped from left by 40px. And this is only place R* didn't use StretchX in here.
-		CFont::PrintString(MENU_X_LEFT_ALIGNED(MENU_X_MARGIN), MENU_Y(MENUACTION_POS_Y), str);
-#else
-		CFont::PrintString(MENU_X_MARGIN, MENUACTION_POS_Y, str);
-#endif
+		CFont::PrintString(MENU_X_LEFT_ALIGNED(100.0f), MENU_Y(97.0f), str);
+		CFont::SetWrapx(MENU_X_RIGHT_ALIGNED(MENU_UNK_X_MARGIN));
+		CFont::SetRightJustifyWrap(SCREEN_SCALE_X(MENU_UNK_WIDTH));
 	}
 
-	CFont::SetCentreSize(SCREEN_WIDTH);
+	if (m_nCurrScreen == MENUPAGE_KEYBOARD_CONTROLS) {
+		if (m_bWaitingForNewKeyBind)
+			itemsAreSelectable = false;
 
-#ifdef PS2_LIKE_MENU
-	bool itemsAreSelectable = !bottomBarActive;
-#else
-	bool itemsAreSelectable = true;
-#endif
-	int lineHeight;
-	int headerHeight;
-	int columnWidth;
-	switch (m_nCurrScreen) {
-		case MENUPAGE_STATS:
-		case MENUPAGE_BRIEFS:
-			columnWidth = 320;
-			headerHeight = 240;
-			lineHeight = 24;
-			CFont::SetFontStyle(FONT_LOCALE(FONT_HEADING));
-			CFont::SetScale(MENU_X(MENU_TEXT_SIZE_X = BIGTEXT_X_SCALE), MENU_Y(MENU_TEXT_SIZE_Y = BIGTEXT_Y_SCALE));
-			CFont::SetCentreOn();
-			break;
-		case MENUPAGE_SOUND_SETTINGS:
-		case MENUPAGE_GRAPHICS_SETTINGS:
-		case MENUPAGE_MULTIPLAYER_CREATE:
-		case MENUPAGE_SKIN_SELECT_OLD:
-		case MENUPAGE_CONTROLLER_PC_OLD1:
-		case MENUPAGE_CONTROLLER_PC_OLD2:
-		case MENUPAGE_CONTROLLER_PC_OLD3:
-		case MENUPAGE_CONTROLLER_PC_OLD4:
-		case MENUPAGE_CONTROLLER_DEBUG:
-		case MENUPAGE_MOUSE_CONTROLS:
-			columnWidth = 50;
-			headerHeight = 0;
-			lineHeight = 20;
-			CFont::SetFontStyle(FONT_LOCALE(FONT_HEADING));
-			CFont::SetScale(MENU_X(MENU_TEXT_SIZE_X = MEDIUMTEXT_X_SCALE), MENU_Y(MENU_TEXT_SIZE_Y = MEDIUMTEXT_Y_SCALE));
-			CFont::SetRightJustifyOff();
-			break;
-		case MENUPAGE_CHOOSE_LOAD_SLOT:
-		case MENUPAGE_CHOOSE_DELETE_SLOT:
-		case MENUPAGE_CHOOSE_SAVE_SLOT:
-			columnWidth = 120;
-			headerHeight = 38;
-			lineHeight = 20;
-			CFont::SetFontStyle(FONT_LOCALE(FONT_BANK));
-			CFont::SetScale(MENU_X(MENU_TEXT_SIZE_X = SMALLTEXT_X_SCALE), MENU_Y(MENU_TEXT_SIZE_Y = SMALLTEXT_Y_SCALE));
-			CFont::SetRightJustifyOff();
-			break;
-		case MENUPAGE_NEW_GAME_RELOAD:
-		case MENUPAGE_LOAD_SLOT_CONFIRM:
-		case MENUPAGE_DELETE_SLOT_CONFIRM:
-		case MENUPAGE_SAVE_OVERWRITE_CONFIRM:
-		case MENUPAGE_EXIT:
-			columnWidth = 320;
-			headerHeight = 60;
-			lineHeight = 24;
-			CFont::SetFontStyle(FONT_LOCALE(FONT_HEADING));
-			CFont::SetScale(MENU_X(MENU_TEXT_SIZE_X = BIGTEXT_X_SCALE), MENU_Y(MENU_TEXT_SIZE_Y = BIGTEXT_Y_SCALE));
-			CFont::SetCentreOn();
-			break;
-		case MENUPAGE_START_MENU:
-			columnWidth = 320;
-			headerHeight = 110;
-			lineHeight = 24;
-			CFont::SetFontStyle(FONT_LOCALE(FONT_HEADING));
-			CFont::SetScale(MENU_X(MENU_TEXT_SIZE_X = BIGTEXT_X_SCALE), MENU_Y(MENU_TEXT_SIZE_Y = BIGTEXT_Y_SCALE));
-			CFont::SetCentreOn();
-			break;
-		case MENUPAGE_PAUSE_MENU:
-			columnWidth = 320;
-			headerHeight = 117;
-			lineHeight = 24;
-			CFont::SetFontStyle(FONT_LOCALE(FONT_HEADING));
-			CFont::SetScale(MENU_X(MENU_TEXT_SIZE_X = BIGTEXT_X_SCALE), MENU_Y(MENU_TEXT_SIZE_Y = BIGTEXT_Y_SCALE));
-			CFont::SetCentreOn();
-			break;
-		default:
-			columnWidth = 320;
-			headerHeight = 40;
-			lineHeight = 24;
-			CFont::SetFontStyle(FONT_LOCALE(FONT_HEADING));
-			CFont::SetScale(MENU_X(MENU_TEXT_SIZE_X = BIGTEXT_X_SCALE), MENU_Y(MENU_TEXT_SIZE_Y = BIGTEXT_Y_SCALE));
-			CFont::SetCentreOn();
-			break;
+		DrawControllerScreenExtraText(-8.0f, MENU_X_LEFT_ALIGNED(350), MENU_DEFAULT_LINE_HEIGHT);
 	}
 
-#ifdef PS2_LIKE_MENU
-	CFont::SetFontStyle(FONT_LOCALE(FONT_BANK));
-#endif
-
-	switch (m_nCurrScreen) {
-		case MENUPAGE_CONTROLLER_PC_OLD1:
-		case MENUPAGE_CONTROLLER_PC_OLD2:
-		case MENUPAGE_CONTROLLER_PC_OLD3:
-		case MENUPAGE_CONTROLLER_PC_OLD4:
-		case MENUPAGE_CONTROLLER_DEBUG:
-			if (m_bWaitingForNewKeyBind)
-				itemsAreSelectable = false;
-
-			DrawControllerScreenExtraText(nextYToUse - 8.0f, MENU_X_LEFT_ALIGNED(350), lineHeight);
-			break;
-		default:
-			break;
-	}
-
-	float usableLineHeight = lineHeight * 0.9f; // also height of biggest bar in slider
-	float smallestSliderBar = lineHeight * 0.25f; // TODO: find actual number
 	bool foundTheHoveringItem = false;
 	wchar unicodeTemp[64];
 	char asciiTemp[32];
@@ -971,6 +885,9 @@ CMenuManager::DrawStandardMenus()
 		wchar *backTx = TheText.Get("FEDS_TB");
 		CFont::SetDropShadowPosition(1);
 		CFont::SetDropColor(CRGBA(0, 0, 0, 255));
+		CFont::SetScale(MENU_X(BIGTEXT_X_SCALE), MENU_Y(BIGTEXT_Y_SCALE));
+		CFont::SetRightJustifyOff();
+		CFont::SetCentreOn();
 		CFont::PrintString(MENU_X(60.0f), SCREEN_SCALE_FROM_BOTTOM(120.0f), backTx);
 		CFont::SetDropShadowPosition(0);
 		if (!CheckHover(MENU_X(30.0f), MENU_X(30.0f) + CFont::GetStringWidth(backTx), SCREEN_SCALE_FROM_BOTTOM(125.0f), SCREEN_SCALE_FROM_BOTTOM(105.0f))) {
@@ -984,358 +901,480 @@ CMenuManager::DrawStandardMenus()
 	}
 #endif
 
-	for (int i = 0; i < NUM_MENUROWS; ++i) {
-		if (aScreens[m_nCurrScreen].m_aEntries[i].m_Action != MENUACTION_LABEL && aScreens[m_nCurrScreen].m_aEntries[i].m_EntryName[0] != '\0') {
-			wchar *rightText = nil;
-			wchar *leftText;
+	bool weHaveLabel = aScreens[m_nCurrScreen].m_aEntries[0].m_Action == MENUACTION_LABEL;
+	uint8 section = 0; // 0: highlight trapezoid  1: texts
 
+	while (section < 2) {
+
+		for (int i = 0; i < NUM_MENUROWS; ++i) {
+			wchar* rightText = nil;
+			wchar* leftText;
 			if (aScreens[m_nCurrScreen].m_aEntries[i].m_SaveSlot >= SAVESLOT_1 && aScreens[m_nCurrScreen].m_aEntries[i].m_SaveSlot <= SAVESLOT_8) {
-				CFont::SetRightJustifyOff();
-				leftText = GetNameOfSavedGame(i - 1);
-
-				if (Slots[i] != SLOT_EMPTY)
-					rightText = GetSavedGameDateAndTime(i - 1);
-
-				if (leftText[0] == '\0') {
-					sprintf(gString, "FEM_SL%d", i);
-					leftText = TheText.Get(gString);
-				}
+				CFont::SetColor(CRGBA(0, 0, 0, FadeIn(255)));
+				CFont::SetFontStyle(FONT_LOCALE(FONT_BANK));
+				CFont::SetScale(MENU_X(MEDIUMTEXT_X_SCALE), MENU_Y(MEDIUMTEXT_Y_SCALE));
+				CFont::SetDropShadowPosition(0);
 			} else {
-				leftText = TheText.Get(aScreens[m_nCurrScreen].m_aEntries[i].m_EntryName);
+				CFont::SetFontStyle(FONT_LOCALE(FONT_HEADING));
+				CFont::SetScale(MENU_X(BIGTEXT_X_SCALE), MENU_Y(BIGTEXT_Y_SCALE));
+				CFont::SetDropShadowPosition(2);
+				CFont::SetDropColor(CRGBA(0, 0, 0, FadeIn(255)));
+				CFont::SetColor(CRGBA(MENUOPTION_COLOR.r, MENUOPTION_COLOR.g, MENUOPTION_COLOR.b, FadeIn(255)));
 			}
-
-			switch (aScreens[m_nCurrScreen].m_aEntries[i].m_Action) {
-			case MENUACTION_CHANGEMENU:
-				break;
-			case MENUACTION_CTRLVIBRATION:
-				if (m_PrefsUseVibration)
-					rightText = TheText.Get("FEM_ON");
-				else
-					rightText = TheText.Get("FEM_OFF");
-				break;
-			case MENUACTION_CTRLCONFIG:
-				switch (CPad::GetPad(0)->Mode) {
-				case 0:
-					rightText = TheText.Get("FEC_CF1");
-					break;
-				case 1:
-					rightText = TheText.Get("FEC_CF2");
-					break;
-				case 2:
-					rightText = TheText.Get("FEC_CF3");
-					break;
-				case 3:
-					rightText = TheText.Get("FEC_CF4");
-					break;
-				}
-				break;
-			case MENUACTION_FRAMESYNC:
-				rightText = TheText.Get(m_PrefsVsyncDisp ? "FEM_ON" : "FEM_OFF");
-				break;
-			case MENUACTION_FRAMELIMIT:
-				rightText = TheText.Get(m_PrefsFrameLimiter ? "FEM_ON" : "FEM_OFF");
-				break;
-			case MENUACTION_TRAILS:
-				rightText = TheText.Get(CMBlur::BlurOn ? "FEM_ON" : "FEM_OFF");
-				break;
-			case MENUACTION_SUBTITLES:
-				rightText = TheText.Get(m_PrefsShowSubtitles ? "FEM_ON" : "FEM_OFF");
-				break;
-			case MENUACTION_WIDESCREEN:
-#ifndef ASPECT_RATIO_SCALE
-				rightText = TheText.Get(m_PrefsUseWideScreen ? "FEM_ON" : "FEM_OFF");
-#else
-				switch (m_PrefsUseWideScreen) {
-				case AR_AUTO:
-					sprintf(asciiTemp, "AUTO");
-					break;
-				case AR_4_3:
-					sprintf(asciiTemp, "4:3");
-					break;
-				case AR_16_9:
-					sprintf(asciiTemp, "16:9");
-					break;
-				}
-
-				AsciiToUnicode(asciiTemp, unicodeTemp);
-				rightText = unicodeTemp;
-#endif
-				break;
-			case MENUACTION_RADIO:
-				if (m_PrefsRadioStation > USERTRACK)
-					break;
-
-				sprintf(gString, "FEA_FM%d", m_PrefsRadioStation);
-				rightText = TheText.Get(gString);
-				break;
-			case MENUACTION_SETDBGFLAG:
-				rightText = TheText.Get(CTheScripts::IsDebugOn() ? "FEM_ON" : "FEM_OFF");
-				break;
-			case MENUACTION_SWITCHBIGWHITEDEBUGLIGHT:
-				rightText = TheText.Get(gbBigWhiteDebugLightSwitchedOn ? "FEM_ON" : "FEM_OFF");
-				break;
-			case MENUACTION_PEDROADGROUPS:
-				// REMOVED(MIAMI)
-				break;
-			case MENUACTION_CARROADGROUPS:
-				// REMOVED(MIAMI)
-				break;
-			case MENUACTION_COLLISIONPOLYS:
-				rightText = TheText.Get(gbShowCollisionPolys ? "FEM_ON" : "FEM_OFF");
-				break;
-			case MENUACTION_SHOWCULL:
-				// REMOVED(MIAMI)
-				break;
-			case MENUACTION_SHOWHEADBOB:
-				rightText = TheText.Get(TheCamera.m_bHeadBob ? "FEM_ON" : "FEM_OFF");
-				break;
-			case MENUACTION_INVVERT:
-				rightText = TheText.Get(MousePointerStateHelper.bInvertVertically ? "FEM_OFF" : "FEM_ON");
-				break;
-			case MENUACTION_SCREENRES:
-				AsciiToUnicode(_psGetVideoModeList()[m_nDisplayVideoMode], unicodeTemp);
-				rightText = unicodeTemp;
-				break;
-#ifdef IMPROVED_VIDEOMODE
-			case MENUACTION_SCREENMODE:
-				if (m_nSelectedScreenMode == 0)
-					sprintf(asciiTemp, "FULLSCREEN");
-				else
-					sprintf(asciiTemp, "WINDOWED");
-
-				AsciiToUnicode(asciiTemp, unicodeTemp);
-				rightText = unicodeTemp;
-				break;
-#endif
-			case MENUACTION_AUDIOHW:
-				if (m_nPrefsAudio3DProviderIndex == INVALID_AUDIO_PROVIDER)
-					rightText = TheText.Get("FEA_NAH");
-				else {
-					char *provider = DMAudio.Get3DProviderName(m_nPrefsAudio3DProviderIndex);
-
-					if (!strcmp(strupr(provider), "DIRECTSOUND3D HARDWARE SUPPORT")) {
-						strcpy(provider, "DSOUND3D HARDWARE SUPPORT");
-					} else if (!strcmp(strupr(provider), "DIRECTSOUND3D SOFTWARE EMULATION")) {
-						strcpy(provider, "DSOUND3D SOFTWARE EMULATION");
-					}
-					AsciiToUnicode(provider, unicodeTemp);
-					rightText = unicodeTemp;
-				}
-				break;
-			case MENUACTION_SPEAKERCONF: {
-				if (m_nPrefsAudio3DProviderIndex == INVALID_AUDIO_PROVIDER)
-					rightText = TheText.Get("FEA_NAH");
-				else {
-					switch (m_PrefsSpeakers) {
-					case 0:
-						rightText = TheText.Get("FEA_2SP");
-						break;
-					case 1:
-						rightText = TheText.Get("FEA_EAR");
-						break;
-					case 2:
-						rightText = TheText.Get("FEA_4SP");
-						break;
-					}
-				}
-				break;
+			if (aScreens[m_nCurrScreen].m_aEntries[i].m_Align == MENUALIGN_LEFT) {
+				CFont::SetCentreOff();
+				CFont::SetRightJustifyOff();
+			} else if (aScreens[m_nCurrScreen].m_aEntries[i].m_Align == MENUALIGN_RIGHT) {
+				CFont::SetCentreOff();
+				CFont::SetRightJustifyOn();
+			} else {
+				CFont::SetRightJustifyOff();
+				CFont::SetCentreOn();
 			}
-			case MENUACTION_CTRLMETHOD: {
-				switch (m_ControlMethod) {
-				case 0:
-					leftText = TheText.Get("FET_STI");
-					break;
-				case 1:
-					leftText = TheText.Get("FET_CTI");
-					break;
-				}
-				break;
-			}
-			case MENUACTION_DYNAMICACOUSTIC:
-				rightText = TheText.Get(m_PrefsDMA ? "FEM_ON" : "FEM_OFF");
-				break;
-			case MENUACTION_MOUSESTEER:
-				rightText = TheText.Get(CVehicle::m_bDisableMouseSteering ? "FEM_OFF" : "FEM_ON");
-				break;
-			}
-
-			float nextItemY = headerHeight + nextYToUse;
-			float bitAboveNextItemY = nextItemY - 2.0f;
-			int nextYToCheck = bitAboveNextItemY;
-			
-			if (!foundTheHoveringItem) {
-				for (int rowToCheck = aScreens[m_nCurrScreen].m_aEntries[0].m_Action == MENUACTION_LABEL; rowToCheck < NUM_MENUROWS; ++rowToCheck) {
-					if(aScreens[m_nCurrScreen].m_aEntries[rowToCheck].m_Action == MENUACTION_NOTHING)
-						break;
-
-					int extraOffset = 0;
-					if (aScreens[m_nCurrScreen].m_aEntries[rowToCheck].m_Action == MENUACTION_RADIO)
-						extraOffset = MENURADIO_ICON_SCALE;
-
-					// There were many unused codes in here to calculate how much space will texts gonna take.
-
-					// FIX: nextYToCheck already starts with Y - 2, let's sync it with green bar bounds.
-#ifdef FIX_BUGS
-					if (m_nMousePosY > MENU_Y(nextYToCheck) &&
-#else
-					if (m_nMousePosY > MENU_Y(nextYToCheck - 2) &&
-#endif
-						m_nMousePosY < MENU_Y((nextYToCheck + 2) + usableLineHeight)) {
-
-						static int oldOption = -99;
-						static int oldScreen = m_nCurrScreen;
-
-						m_nPrevOption = rowToCheck;
-						if (m_nMouseOldPosX != m_nMousePosX || m_nMouseOldPosY != m_nMousePosY) {
-							m_nCurrOption = rowToCheck;
-							m_bShowMouse = true;
-						}
-						if (oldOption != m_nCurrOption) {
-							if (oldScreen == m_nCurrScreen && m_bShowMouse)
-								DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_DENIED, 0);
-
-							oldOption = m_nCurrOption;
-							oldScreen = m_nCurrScreen;
-						}
-						if (oldScreen == m_nPrevScreen)
-							oldScreen = m_nCurrScreen;
-
-						m_nHoverOption = HOVEROPTION_RANDOM_ITEM;
-						foundTheHoveringItem = true;
-						break;
-					}
-					m_nHoverOption = HOVEROPTION_NOT_HOVERING;
-					nextYToCheck += extraOffset + lineHeight;
+			if (!aScreens[m_nCurrScreen].m_aEntries[i].m_X && !aScreens[m_nCurrScreen].m_aEntries[i].m_Y) {
+				if (i == 0 || (i == 1 && weHaveLabel)) {
+					aScreens[m_nCurrScreen].m_aEntries[i].m_X = MENU_DEFAULT_CONTENT_X;
+					aScreens[m_nCurrScreen].m_aEntries[i].m_Y = MENU_DEFAULT_CONTENT_Y;
+					
+				} else {
+					aScreens[m_nCurrScreen].m_aEntries[i].m_X = aScreens[m_nCurrScreen].m_aEntries[i-1].m_X;
+					aScreens[m_nCurrScreen].m_aEntries[i].m_Y = aScreens[m_nCurrScreen].m_aEntries[i-1].m_Y + MENU_DEFAULT_LINE_HEIGHT;
 				}
 			}
 
-			// Green bar behind selected option
-			if (i == m_nCurrOption && itemsAreSelectable) {
-				// We keep stretching, because we also stretch background image and we want that bar to be aligned with borders of background
-				CSprite2d::DrawRect(CRect(StretchX(10.0f), MENU_Y(bitAboveNextItemY),
-											SCREEN_STRETCH_FROM_RIGHT(11.0f), MENU_Y(usableLineHeight + nextItemY)),
-											CRGBA(SELECTIONBORDER_COLOR.r, SELECTIONBORDER_COLOR.g, SELECTIONBORDER_COLOR.b, FadeIn(255)));
-			}
+			if (aScreens[m_nCurrScreen].m_aEntries[i].m_Action != MENUACTION_LABEL && aScreens[m_nCurrScreen].m_aEntries[i].m_EntryName[0] != '\0') {
 
-			CFont::SetColor(CRGBA(0, 0, 0, FadeIn(90)));
-
-			// Button and it's shadow
-			for(int textLayer = 0; textLayer < 2; textLayer++) {
-				if (!CFont::Details.centre)
+				if (aScreens[m_nCurrScreen].m_aEntries[i].m_SaveSlot >= SAVESLOT_1 && aScreens[m_nCurrScreen].m_aEntries[i].m_SaveSlot <= SAVESLOT_8) {
 					CFont::SetRightJustifyOff();
 
-				float itemY = MENU_Y(textLayer + nextItemY);
-				float itemX = MENU_X_LEFT_ALIGNED(textLayer + columnWidth);
-				CFont::PrintString(itemX, itemY, leftText);
-				if (rightText) {
-					if (!CFont::Details.centre)
-						CFont::SetRightJustifyOn();
-					
-					if(!strcmp(aScreens[m_nCurrScreen].m_aEntries[i].m_EntryName, "FED_RES") 
-						&& !m_bGameNotLoaded && textLayer == 1) {
+					leftText = nil;
+					if (Slots[i] == SLOT_OK) {
+						leftText = GetNameOfSavedGame(i);
+						rightText = GetSavedGameDateAndTime(i);
+					}
+
+					if (!leftText || leftText[0] == '\0') {
+						sprintf(gString, "FEM_SL%d", i + 1);
+						leftText = TheText.Get(gString);
+					}
+				} else {
+					leftText = TheText.Get(aScreens[m_nCurrScreen].m_aEntries[i].m_EntryName);
+				}
+
+				if (m_nPrefsAudio3DProviderIndex == INVALID_AUDIO_PROVIDER) {
+					if (strncmp(aScreens[m_nCurrScreen].m_aEntries[i].m_EntryName, "FEO_AUD", 8) == 0) {
 						CFont::SetColor(CRGBA(DARKMENUOPTION_COLOR.r, DARKMENUOPTION_COLOR.g, DARKMENUOPTION_COLOR.b, FadeIn(255)));
 					}
-					CFont::PrintString(MENU_X_RIGHT_ALIGNED(columnWidth - textLayer), itemY, rightText);
 				}
-				if (i == m_nCurrOption && itemsAreSelectable){
-					CFont::SetColor(CRGBA(MENUOPTION_COLOR.r, MENUOPTION_COLOR.g, MENUOPTION_COLOR.b, FadeIn(255)));
-				} else {
-					CFont::SetColor(CRGBA(SELECTEDMENUOPTION_COLOR.r, SELECTEDMENUOPTION_COLOR.g, SELECTEDMENUOPTION_COLOR.b, FadeIn(255)));
-				}
-			}
 
-			if (m_nPrefsAudio3DProviderIndex == DMAudio.GetCurrent3DProviderIndex()) {
-				if(!strcmp(aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_EntryName, "FEA_3DH") && m_nHelperTextMsgId == 1)
-					ResetHelperText();
-			}
-			if (m_nDisplayVideoMode == m_nPrefsVideoMode) {
-				if (!strcmp(aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_EntryName, "FED_RES") && m_nHelperTextMsgId == 1)
-					ResetHelperText();
-			}
-			if (m_nPrefsAudio3DProviderIndex != DMAudio.GetCurrent3DProviderIndex()) {
-				if (!strcmp(aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_EntryName, "FEA_3DH"))
-					SetHelperText(1);
-			}
-			if (m_nDisplayVideoMode != m_nPrefsVideoMode) {
-				if (!strcmp(aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_EntryName, "FED_RES"))
-					SetHelperText(1);
-			}
-			if (m_nPrefsAudio3DProviderIndex != DMAudio.GetCurrent3DProviderIndex()) {
-				if (strcmp(aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_EntryName, "FEA_3DH") != 0
-					&& m_nCurrScreen == MENUPAGE_SOUND_SETTINGS && m_nPrefsAudio3DProviderIndex != INVALID_AUDIO_PROVIDER) {
+				switch (aScreens[m_nCurrScreen].m_aEntries[i].m_Action) {
+#ifdef LEGACY_MENU_OPTIONS
+				case MENUACTION_CTRLVIBRATION:
+					if (m_PrefsUseVibration)
+						rightText = TheText.Get("FEM_ON");
+					else
+						rightText = TheText.Get("FEM_OFF");
+					break;
+				case MENUACTION_CTRLCONFIG:
+					switch (CPad::GetPad(0)->Mode) {
+					case 0:
+						rightText = TheText.Get("FEC_CF1");
+						break;
+					case 1:
+						rightText = TheText.Get("FEC_CF2");
+						break;
+					case 2:
+						rightText = TheText.Get("FEC_CF3");
+						break;
+					case 3:
+						rightText = TheText.Get("FEC_CF4");
+						break;
+					}
+					break;
+#endif
+				case MENUACTION_FRAMESYNC:
+					rightText = TheText.Get(m_PrefsVsyncDisp ? "FEM_ON" : "FEM_OFF");
+					break;
+				case MENUACTION_FRAMELIMIT:
+					rightText = TheText.Get(m_PrefsFrameLimiter ? "FEM_ON" : "FEM_OFF");
+					break;
+				case MENUACTION_TRAILS:
+					rightText = TheText.Get(CMBlur::BlurOn ? "FEM_ON" : "FEM_OFF");
+					break;
+				case MENUACTION_SUBTITLES:
+					rightText = TheText.Get(m_PrefsShowSubtitles ? "FEM_ON" : "FEM_OFF");
+					break;
+				case MENUACTION_WIDESCREEN:
+#ifndef ASPECT_RATIO_SCALE
+					rightText = TheText.Get(m_PrefsUseWideScreen ? "FEM_ON" : "FEM_OFF");
+#else
+					switch (m_PrefsUseWideScreen) {
+					case AR_AUTO:
+						sprintf(asciiTemp, "AUTO");
+						break;
+					case AR_4_3:
+						sprintf(asciiTemp, "4:3");
+						break;
+					case AR_16_9:
+						sprintf(asciiTemp, "16:9");
+						break;
+					}
 
-					m_nPrefsAudio3DProviderIndex = DMAudio.GetCurrent3DProviderIndex();
-					SetHelperText(3);
-				}
-			}
-			if (m_nDisplayVideoMode != m_nPrefsVideoMode) {
-				if (strcmp(aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_EntryName, "FED_RES") != 0
-					&& m_nCurrScreen == MENUPAGE_GRAPHICS_SETTINGS) {
-					m_nDisplayVideoMode = m_nPrefsVideoMode;
-					SetHelperText(3);
-				}
-			}
+					AsciiToUnicode(asciiTemp, unicodeTemp);
+					rightText = unicodeTemp;
+#endif
+					break;
+
+				case MENUACTION_MUSICVOLUME:
+				case MENUACTION_SFXVOLUME:
+					if (m_nPrefsAudio3DProviderIndex == INVALID_AUDIO_PROVIDER)
+						rightText = TheText.Get("FEA_NAH");
+
+					break;
+				case MENUACTION_RADIO:
+					if (m_PrefsRadioStation > USERTRACK)
+						break;
+
+					sprintf(gString, "FEA_FM%d", m_PrefsRadioStation);
+					rightText = TheText.Get(gString);
+					break;
+				case MENUACTION_LEGENDS:
+					rightText = TheText.Get(m_PrefsShowLegends ? "FEM_ON" : "FEM_OFF");
+					break;
+				case MENUACTION_RADARMODE:
+					switch (m_PrefsRadarMode) {
+						case 0:
+							rightText = TheText.Get("FED_RDM");
+							break;
+						case 1:
+							rightText = TheText.Get("FED_RDB");
+							break;
+						case 2:
+							rightText = TheText.Get("FEM_OFF");
+							break;
+					}
+					break;
+				case MENUACTION_HUD:
+					rightText = TheText.Get(m_PrefsShowHud ? "FEM_ON" : "FEM_OFF");
+#ifdef LEGACY_MENU_OPTIONS
+				case MENUACTION_SETDBGFLAG:
+					rightText = TheText.Get(CTheScripts::IsDebugOn() ? "FEM_ON" : "FEM_OFF");
+					break;
+				case MENUACTION_SWITCHBIGWHITEDEBUGLIGHT:
+					rightText = TheText.Get(gbBigWhiteDebugLightSwitchedOn ? "FEM_ON" : "FEM_OFF");
+					break;
+				case MENUACTION_COLLISIONPOLYS:
+					rightText = TheText.Get(gbShowCollisionPolys ? "FEM_ON" : "FEM_OFF");
+					break;
+#endif
+				case MENUACTION_SHOWHEADBOB:
+					rightText = TheText.Get(TheCamera.m_bHeadBob ? "FEM_ON" : "FEM_OFF");
+					break;
+				case MENUACTION_INVVERT:
+					rightText = TheText.Get(MousePointerStateHelper.bInvertVertically ? "FEM_OFF" : "FEM_ON");
+					break;
+				case MENUACTION_SCREENRES:
+					AsciiToUnicode(_psGetVideoModeList()[m_nDisplayVideoMode], unicodeTemp);
+					rightText = unicodeTemp;
+
+					if (!m_bGameNotLoaded) {
+						CFont::SetColor(CRGBA(DARKMENUOPTION_COLOR.r, DARKMENUOPTION_COLOR.g, DARKMENUOPTION_COLOR.b, FadeIn(255)));
+					}
+					break;
 #ifdef IMPROVED_VIDEOMODE
-			if (m_nSelectedScreenMode != m_nPrefsWindowed) {
-				if (strcmp(aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_EntryName, "SCRFOR") != 0
-					&& m_nCurrScreen == MENUPAGE_GRAPHICS_SETTINGS) {
-					m_nSelectedScreenMode = m_nPrefsWindowed;
+				case MENUACTION_SCREENMODE:
+					if (m_nSelectedScreenMode == 0)
+						sprintf(asciiTemp, "FULLSCREEN");
+					else
+						sprintf(asciiTemp, "WINDOWED");
+
+					AsciiToUnicode(asciiTemp, unicodeTemp);
+					rightText = unicodeTemp;
+					break;
+#endif
+				case MENUACTION_AUDIOHW:
+					if (m_nPrefsAudio3DProviderIndex == INVALID_AUDIO_PROVIDER)
+						rightText = TheText.Get("FEA_NAH");
+					else if (m_nPrefsAudio3DProviderIndex == -1)
+						rightText = TheText.Get("FEA_ADP");
+					else {
+						char* provider = DMAudio.Get3DProviderName(m_nPrefsAudio3DProviderIndex);
+
+						if (!strcmp(strupr(provider), "DIRECTSOUND3D HARDWARE SUPPORT")) {
+							strcpy(provider, "DSOUND3D HARDWARE SUPPORT");
+						}
+						else if (!strcmp(strupr(provider), "DIRECTSOUND3D SOFTWARE EMULATION")) {
+							strcpy(provider, "DSOUND3D SOFTWARE EMULATION");
+						}
+						AsciiToUnicode(provider, unicodeTemp);
+						rightText = unicodeTemp;
+					}
+					break;
+				case MENUACTION_SPEAKERCONF: {
+					if (m_nPrefsAudio3DProviderIndex == INVALID_AUDIO_PROVIDER)
+						rightText = TheText.Get("FEA_NAH");
+					else {
+						switch (m_PrefsSpeakers) {
+						case 0:
+							rightText = TheText.Get("FEA_2SP");
+							break;
+						case 1:
+							rightText = TheText.Get("FEA_EAR");
+							break;
+						case 2:
+							rightText = TheText.Get("FEA_4SP");
+							break;
+						}
+					}
+					break;
 				}
-			}
+				case MENUACTION_CTRLMETHOD: {
+					switch (m_ControlMethod) {
+					case CONTROL_STANDARD:
+						leftText = TheText.Get("FET_STI");
+						break;
+					case CONTROL_CLASSIC:
+						leftText = TheText.Get("FET_CTI");
+						break;
+					}
+					break;
+				}
+				case MENUACTION_DYNAMICACOUSTIC:
+					rightText = TheText.Get(m_PrefsDMA ? "FEM_ON" : "FEM_OFF");
+					break;
+				case MENUACTION_MOUSESTEER:
+					rightText = TheText.Get(CVehicle::m_bDisableMouseSteering ? "FEM_OFF" : "FEM_ON");
+					if (m_ControlMethod == CONTROL_CLASSIC) {
+						CFont::SetColor(CRGBA(DARKMENUOPTION_COLOR.r, DARKMENUOPTION_COLOR.g, DARKMENUOPTION_COLOR.b, FadeIn(255)));
+					}
+					break;
+				case MENUACTION_MP3VOLUMEBOOST:
+					if (!DMAudio.IsMP3RadioChannelAvailable()) {
+						rightText = TheText.Get("FEA_NM3");
+					}
+					break;
+				}
+
+				// Highlight trapezoid
+				if (drawCurrScreen && i == m_nCurrOption && itemsAreSelectable && section == 0) {
+
+					int leftXMax, rightXMin;
+					CFont::SetScale(MENU_X(BIGTEXT_X_SCALE), MENU_Y(BIGTEXT_Y_SCALE));
+					wchar *curOptionName = TheText.Get(aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_EntryName);
+					float curOptionWidth = CFont::GetStringWidth(curOptionName, true);
+
+					if (CFont::Details.centre) {
+						leftXMax = Max(0, aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_X - curOptionWidth / 2.f);
+						rightXMin = Min(SCREEN_WIDTH, curOptionWidth / 2.f + aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_X);
+					} else if (!CFont::Details.rightJustify) {
+						leftXMax = aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_X;
+						rightXMin = Min(SCREEN_WIDTH, curOptionWidth + aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_X);
+					} else {
+						leftXMax = Max(0, aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_X - curOptionWidth);
+						rightXMin = aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_X;
+					}
+					CFont::SetScale(MENU_X(BIGTEXT_X_SCALE), MENU_Y(BIGTEXT_Y_SCALE));
+
+					int action = aScreens[m_nCurrScreen].m_aEntries[i].m_Action;
+					int saveSlot = aScreens[m_nCurrScreen].m_aEntries[i].m_SaveSlot;
+					if (rightText || action == MENUACTION_DRAWDIST || action == MENUACTION_BRIGHTNESS || action == MENUACTION_MUSICVOLUME ||
+						action == MENUACTION_SFXVOLUME || action == MENUACTION_MP3VOLUMEBOOST || action == MENUACTION_MOUSESENS ||
+						saveSlot >= SAVESLOT_1 && saveSlot <= SAVESLOT_8) {
+						rightXMin = 600;
+						leftXMax = 40;
+					}
+
+					int y = aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_Y;
+					int topYMax = y;
+					uint32 bottomYMin = y + 22;
+					int transition = m_nOptionHighlightTransitionBlend;
+
+					// Actually bottomRight and bottomLeft should be exchanged here(although this is original code).
+					// So this shows us either R* didn't use same struct for menu BG and highlight, or they just kept fields as x1,y1 etc. Yikes.
+
+					if (transition == 0) {
+						if (m_menuTransitionProgress == 255 && m_nMenuFadeAlpha == 255 && !bMenuChangeOngoing) {
+							CSprite2d::Draw2DPolygon(MENU_X_LEFT_ALIGNED(menuOptionHighlight.topLeft_x), MENU_Y(menuOptionHighlight.topLeft_y),
+								MENU_X_LEFT_ALIGNED(menuOptionHighlight.topRight_x), MENU_Y(menuOptionHighlight.topRight_y),
+								MENU_X_LEFT_ALIGNED(menuOptionHighlight.bottomRight_x), MENU_Y(menuOptionHighlight.bottomRight_y),
+								MENU_X_LEFT_ALIGNED(menuOptionHighlight.bottomLeft_x), MENU_Y(menuOptionHighlight.bottomLeft_y), SELECTIONBORDER_COLOR);
+						}
+						menuOptionHighlight.SaveCurrentCoors();
+						menuOptionHighlight.topLeft_x = leftXMax - 5 - CGeneral::GetRandomNumber() % 10;
+						menuOptionHighlight.topLeft_y = topYMax - CGeneral::GetRandomNumber() % 7;
+						menuOptionHighlight.topRight_x = rightXMin + 5 + CGeneral::GetRandomNumber() % 10;
+						menuOptionHighlight.topRight_y = topYMax - CGeneral::GetRandomNumber() % 7;
+						menuOptionHighlight.bottomLeft_x = rightXMin + 5 + CGeneral::GetRandomNumber() % 10;
+						menuOptionHighlight.bottomLeft_y = bottomYMin + CGeneral::GetRandomNumber() % 7;
+						menuOptionHighlight.bottomRight_x = leftXMax - 5 - CGeneral::GetRandomNumber() % 10;
+						menuOptionHighlight.bottomRight_y = bottomYMin + CGeneral::GetRandomNumber() % 7;
+						menuOptionHighlight.UpdateMultipliers();
+						menuOptionHighlight.Translate(m_nOptionHighlightTransitionBlend);
+					} else if (transition < 255) {
+						menuOptionHighlight.Translate(m_nOptionHighlightTransitionBlend);
+						if (m_menuTransitionProgress == 255 && m_nMenuFadeAlpha == 255 && !bMenuChangeOngoing) {
+							CSprite2d::Draw2DPolygon(MENU_X_LEFT_ALIGNED(menuOptionHighlight.topLeft_x), MENU_Y(menuOptionHighlight.topLeft_y),
+								MENU_X_LEFT_ALIGNED(menuOptionHighlight.topRight_x), MENU_Y(menuOptionHighlight.topRight_y),
+								MENU_X_LEFT_ALIGNED(menuOptionHighlight.bottomRight_x), MENU_Y(menuOptionHighlight.bottomRight_y),
+								MENU_X_LEFT_ALIGNED(menuOptionHighlight.bottomLeft_x), MENU_Y(menuOptionHighlight.bottomLeft_y), SELECTIONBORDER_COLOR);
+						}
+					} else {
+						m_nOptionHighlightTransitionBlend = 255;
+						menuOptionHighlight.Translate(m_nOptionHighlightTransitionBlend);
+						if (m_menuTransitionProgress == 255 && m_nMenuFadeAlpha == 255 && !bMenuChangeOngoing) {
+							CSprite2d::Draw2DPolygon(MENU_X_LEFT_ALIGNED(menuOptionHighlight.topLeft_x), MENU_Y(menuOptionHighlight.topLeft_y),
+								MENU_X_LEFT_ALIGNED(menuOptionHighlight.topRight_x), MENU_Y(menuOptionHighlight.topRight_y),
+								MENU_X_LEFT_ALIGNED(menuOptionHighlight.bottomRight_x), MENU_Y(menuOptionHighlight.bottomRight_y),
+								MENU_X_LEFT_ALIGNED(menuOptionHighlight.bottomLeft_x), MENU_Y(menuOptionHighlight.bottomLeft_y), SELECTIONBORDER_COLOR);
+						}
+					}
+
+					static PauseModeTime lastBlendChange = 0;
+					if (m_nOptionHighlightTransitionBlend <= 255) {
+						static uint32 blendChangeCounter = 0;
+						if (CTimer::GetTimeInMillisecondsPauseMode() - lastBlendChange > 20
+#ifndef FIX_HIGH_FPS_BUGS_ON_FRONTEND // Dirty dirty hack
+							|| blendChangeCounter > 20
+#endif
+							) {
+							m_nOptionHighlightTransitionBlend += 50;
+							lastBlendChange = CTimer::GetTimeInMillisecondsPauseMode();
+							blendChangeCounter = 0;
+						}
+						++blendChangeCounter;
+					}
+				}
+
+				if (section != 0) {
+
+					if (leftText) {
+						CFont::PrintString(MENU_X_LEFT_ALIGNED(aScreens[m_nCurrScreen].m_aEntries[i].m_X), MENU_Y(aScreens[m_nCurrScreen].m_aEntries[i].m_Y), leftText);
+					}
+
+					if (rightText) {
+						CFont::SetCentreOff();
+						CFont::SetRightJustifyOn();
+						if (aScreens[m_nCurrScreen].m_aEntries[i].m_SaveSlot >= SAVESLOT_1 && aScreens[m_nCurrScreen].m_aEntries[i].m_SaveSlot <= SAVESLOT_8) {
+							CFont::SetFontStyle(FONT_LOCALE(FONT_BANK));
+							CFont::SetScale(MENU_X(MEDIUMTEXT_X_SCALE), MENU_Y(MEDIUMTEXT_Y_SCALE));
+						} else {
+							CFont::SetFontStyle(FONT_LOCALE(FONT_HEADING));
+							CFont::SetScale(MENU_X(BIGTEXT_X_SCALE), MENU_Y(BIGTEXT_Y_SCALE));
+						}
+						CFont::PrintString(MENU_X_LEFT_ALIGNED(600.0f), MENU_Y(aScreens[m_nCurrScreen].m_aEntries[i].m_Y), rightText);
+					}
+
+					if (m_nPrefsAudio3DProviderIndex == DMAudio.GetCurrent3DProviderIndex()) {
+						if (!strcmp(aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_EntryName, "FEA_3DH") && m_nHelperTextMsgId == 1)
+							ResetHelperText();
+					}
+					if (m_nDisplayVideoMode == m_nPrefsVideoMode) {
+						if (!strcmp(aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_EntryName, "FED_RES") && m_nHelperTextMsgId == 1)
+							ResetHelperText();
+					}
+					if (m_nPrefsAudio3DProviderIndex != DMAudio.GetCurrent3DProviderIndex()) {
+						if (!strcmp(aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_EntryName, "FEA_3DH"))
+							SetHelperText(1);
+					}
+					if (m_nDisplayVideoMode != m_nPrefsVideoMode) {
+						if (!strcmp(aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_EntryName, "FED_RES"))
+							SetHelperText(1);
+					}
+					if (m_nPrefsAudio3DProviderIndex != DMAudio.GetCurrent3DProviderIndex()) {
+						if (strcmp(aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_EntryName, "FEA_3DH") != 0
+							&& m_nCurrScreen == MENUPAGE_SOUND_SETTINGS && m_nPrefsAudio3DProviderIndex != INVALID_AUDIO_PROVIDER) {
+
+							m_nPrefsAudio3DProviderIndex = DMAudio.GetCurrent3DProviderIndex();
+							SetHelperText(3);
+						}
+					}
+					if (m_nDisplayVideoMode != m_nPrefsVideoMode) {
+						if (strcmp(aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_EntryName, "FED_RES") != 0
+							&& m_nCurrScreen == MENUPAGE_GRAPHICS_SETTINGS) {
+							m_nDisplayVideoMode = m_nPrefsVideoMode;
+							SetHelperText(3);
+						}
+					}
+#ifdef IMPROVED_VIDEOMODE
+					if (m_nSelectedScreenMode != m_nPrefsWindowed) {
+						if (strcmp(aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_EntryName, "SCRFOR") != 0
+							&& m_nCurrScreen == MENUPAGE_GRAPHICS_SETTINGS) {
+							m_nSelectedScreenMode = m_nPrefsWindowed;
+						}
+					}
 #endif
 
-			// Sliders
-			int lastActiveBarX;
-			switch (aScreens[m_nCurrScreen].m_aEntries[i].m_Action) {
-				case MENUACTION_BRIGHTNESS:
-					ProcessSlider(m_PrefsBrightness / 512.0f, HOVEROPTION_INCREASE_BRIGHTNESS, HOVEROPTION_DECREASE_BRIGHTNESS, MENU_X_LEFT_ALIGNED(170.0f), SCREEN_WIDTH);
-					break;
-				case MENUACTION_DRAWDIST:
-					ProcessSlider((m_PrefsLOD - 0.8f) * 1.0f, HOVEROPTION_INCREASE_DRAWDIST, HOVEROPTION_DECREASE_DRAWDIST, MENU_X_LEFT_ALIGNED(170.0f), SCREEN_WIDTH);
-					break;
-				case MENUACTION_MUSICVOLUME:
-					ProcessSlider(m_PrefsMusicVolume / 128.0f, HOVEROPTION_INCREASE_MUSICVOLUME, HOVEROPTION_DECREASE_MUSICVOLUME, MENU_X_LEFT_ALIGNED(170.0f), SCREEN_WIDTH);
-					break;
-				case MENUACTION_SFXVOLUME:
-					ProcessSlider(m_PrefsSfxVolume / 128.0f, HOVEROPTION_INCREASE_SFXVOLUME, HOVEROPTION_DECREASE_SFXVOLUME, MENU_X_LEFT_ALIGNED(170.0f), SCREEN_WIDTH);
-					break;
-				case MENUACTION_MOUSESENS:
-					ProcessSlider(TheCamera.m_fMouseAccelHorzntl * 200.0f, HOVEROPTION_INCREASE_MOUSESENS, HOVEROPTION_DECREASE_MOUSESENS, MENU_X_LEFT_ALIGNED(200.0f), SCREEN_WIDTH);
-					break;
-			}
+					// Sliders
+					int lastActiveBarX;
+					switch (aScreens[m_nCurrScreen].m_aEntries[i].m_Action) {
+					case MENUACTION_BRIGHTNESS:
+						ProcessSlider(m_PrefsBrightness / 384.0f, 70.0f, HOVEROPTION_INCREASE_BRIGHTNESS, HOVEROPTION_DECREASE_BRIGHTNESS, MENU_X_LEFT_ALIGNED(170.0f), SCREEN_WIDTH);
+						break;
+					case MENUACTION_DRAWDIST:
+						ProcessSlider((m_PrefsLOD - 0.925f) / 0.875f, 99.0f, HOVEROPTION_INCREASE_DRAWDIST, HOVEROPTION_DECREASE_DRAWDIST, MENU_X_LEFT_ALIGNED(170.0f), SCREEN_WIDTH);
+						break;
+					case MENUACTION_MUSICVOLUME:
+						if(m_nPrefsAudio3DProviderIndex != INVALID_AUDIO_PROVIDER)
+							ProcessSlider(m_PrefsMusicVolume / 64.0f, 70.0f, HOVEROPTION_INCREASE_MUSICVOLUME, HOVEROPTION_DECREASE_MUSICVOLUME, MENU_X_LEFT_ALIGNED(170.0f), SCREEN_WIDTH);
+						break;
+					case MENUACTION_SFXVOLUME:
+						if (m_nPrefsAudio3DProviderIndex != INVALID_AUDIO_PROVIDER)
+							ProcessSlider(m_PrefsSfxVolume / 64.0f, 99.0f, HOVEROPTION_INCREASE_SFXVOLUME, HOVEROPTION_DECREASE_SFXVOLUME, MENU_X_LEFT_ALIGNED(170.0f), SCREEN_WIDTH);
+						break;
+					case MENUACTION_MOUSESENS:
+						ProcessSlider(TheCamera.m_fMouseAccelHorzntl * 200.0f, 170.0f, HOVEROPTION_INCREASE_MOUSESENS, HOVEROPTION_DECREASE_MOUSESENS, MENU_X_LEFT_ALIGNED(200.0f), SCREEN_WIDTH);
+						break;
+					}
 
-			// 60.0 is silly
-			nextYToUse += lineHeight * CFont::GetNumberLines(MENU_X_LEFT_ALIGNED(60.0f), MENU_Y(nextYToUse), leftText);
+					nextYToUse = MENU_Y(150.f); // TODO(Miami): Temp
 
-			// Radio icons
-			if (aScreens[m_nCurrScreen].m_aEntries[i].m_Action == MENUACTION_RADIO) {
-				ProcessRadioIcon(m_aFrontEndSprites[MENUSPRITE_WILDSTYLE], MENU_X_LEFT_ALIGNED(30.0f), MENU_Y(nextYToUse), 0, HOVEROPTION_RADIO_0);
-				ProcessRadioIcon(m_aFrontEndSprites[MENUSPRITE_FLASH], MENU_X_LEFT_ALIGNED(90.0f), MENU_Y(nextYToUse), 1, HOVEROPTION_RADIO_1);
-				ProcessRadioIcon(m_aFrontEndSprites[MENUSPRITE_KCHAT], MENU_X_LEFT_ALIGNED(150.0f), MENU_Y(nextYToUse), 2, HOVEROPTION_RADIO_2);
-				ProcessRadioIcon(m_aFrontEndSprites[MENUSPRITE_FEVER], MENU_X_LEFT_ALIGNED(210.0f), MENU_Y(nextYToUse), 3, HOVEROPTION_RADIO_3);
-				ProcessRadioIcon(m_aFrontEndSprites[MENUSPRITE_VROCK], MENU_X_LEFT_ALIGNED(270.0f), MENU_Y(nextYToUse), 4, HOVEROPTION_RADIO_4);
-				ProcessRadioIcon(m_aFrontEndSprites[MENUSPRITE_VCPR], MENU_X_LEFT_ALIGNED(320.0f), MENU_Y(nextYToUse), 5, HOVEROPTION_RADIO_5);
-				ProcessRadioIcon(m_aFrontEndSprites[MENUSPRITE_ESPANTOSO], MENU_X_LEFT_ALIGNED(360.0f), MENU_Y(nextYToUse), 6, HOVEROPTION_RADIO_6);
-				ProcessRadioIcon(m_aFrontEndSprites[MENUSPRITE_EMOTION], MENU_X_LEFT_ALIGNED(420.0f), MENU_Y(nextYToUse), 7, HOVEROPTION_RADIO_7);
-				ProcessRadioIcon(m_aFrontEndSprites[MENUSPRITE_WAVE], MENU_X_LEFT_ALIGNED(480.0f), MENU_Y(nextYToUse), 8, HOVEROPTION_RADIO_8);
+					nextYToUse += MENU_DEFAULT_LINE_HEIGHT * CFont::GetNumberLines(MENU_X_LEFT_ALIGNED(60.0f), MENU_Y(nextYToUse), leftText);
 
-				if (DMAudio.IsMP3RadioChannelAvailable())
-					ProcessRadioIcon(m_aFrontEndSprites[MENUSPRITE_MP3], MENU_X_LEFT_ALIGNED(540.0f), MENU_Y(nextYToUse), 9, HOVEROPTION_RADIO_9);
+					// TODO(Miami): Remove here after audio page is done
+					// Radio icons
+					if (aScreens[m_nCurrScreen].m_aEntries[i].m_Action == MENUACTION_RADIO) {
+						ProcessRadioIcon(m_aFrontEndSprites[MENUSPRITE_WILDSTYLE], MENU_X_LEFT_ALIGNED(30.0f), MENU_Y(nextYToUse), 0, HOVEROPTION_RADIO_0);
+						ProcessRadioIcon(m_aFrontEndSprites[MENUSPRITE_FLASH], MENU_X_LEFT_ALIGNED(90.0f), MENU_Y(nextYToUse), 1, HOVEROPTION_RADIO_1);
+						ProcessRadioIcon(m_aFrontEndSprites[MENUSPRITE_KCHAT], MENU_X_LEFT_ALIGNED(150.0f), MENU_Y(nextYToUse), 2, HOVEROPTION_RADIO_2);
+						ProcessRadioIcon(m_aFrontEndSprites[MENUSPRITE_FEVER], MENU_X_LEFT_ALIGNED(210.0f), MENU_Y(nextYToUse), 3, HOVEROPTION_RADIO_3);
+						ProcessRadioIcon(m_aFrontEndSprites[MENUSPRITE_VROCK], MENU_X_LEFT_ALIGNED(270.0f), MENU_Y(nextYToUse), 4, HOVEROPTION_RADIO_4);
+						ProcessRadioIcon(m_aFrontEndSprites[MENUSPRITE_VCPR], MENU_X_LEFT_ALIGNED(320.0f), MENU_Y(nextYToUse), 5, HOVEROPTION_RADIO_5);
+						ProcessRadioIcon(m_aFrontEndSprites[MENUSPRITE_ESPANTOSO], MENU_X_LEFT_ALIGNED(360.0f), MENU_Y(nextYToUse), 6, HOVEROPTION_RADIO_6);
+						ProcessRadioIcon(m_aFrontEndSprites[MENUSPRITE_EMOTION], MENU_X_LEFT_ALIGNED(420.0f), MENU_Y(nextYToUse), 7, HOVEROPTION_RADIO_7);
+						ProcessRadioIcon(m_aFrontEndSprites[MENUSPRITE_WAVE], MENU_X_LEFT_ALIGNED(480.0f), MENU_Y(nextYToUse), 8, HOVEROPTION_RADIO_8);
 
-				nextYToUse += 70.0f;
+						if (DMAudio.IsMP3RadioChannelAvailable())
+							ProcessRadioIcon(m_aFrontEndSprites[MENUSPRITE_MP3], MENU_X_LEFT_ALIGNED(540.0f), MENU_Y(nextYToUse), 9, HOVEROPTION_RADIO_9);
+
+						nextYToUse += 70.0f;
+					}
+				}
 			}
 		}
+		section++;
 	}
 
+	// TODO(Miami)
+	/*
 	switch (m_nCurrScreen) {
-	case MENUPAGE_CONTROLLER_SETTINGS:
-	case MENUPAGE_SOUND_SETTINGS:
-	case MENUPAGE_GRAPHICS_SETTINGS:
-	case MENUPAGE_SKIN_SELECT:
-	case MENUPAGE_CONTROLLER_PC:
-	case MENUPAGE_MOUSE_CONTROLS:
-		DisplayHelperText();
-		break;
+		case MENUPAGE_STATS:
+		case MENUPAGE_CONTROLLER_PC:
+		case MENUPAGE_SOUND_SETTINGS:
+		case MENUPAGE_GRAPHICS_SETTINGS:
+		case MENUPAGE_MOUSE_CONTROLS:
+			DisplayHelperText(nil);
+			break;
+		case MENUPAGE_OPTIONS:
+			if (m_nPrefsAudio3DProviderIndex == INVALID_AUDIO_PROVIDER && aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_Action == MENUACTION_LOADRADIO)
+				DisplayHelperText("FEA_NAH");
+			break;
+	}
+	*/
+
+	if (m_nCurrScreen == MENUPAGE_DELETING_IN_PROGRESS) {
+		SmallMessageScreen("FEDL_WR");
+	} else if (m_nCurrScreen == MENUPAGE_SAVING_IN_PROGRESS) {
+		SmallMessageScreen("FESZ_WR");
 	}
 }
 
@@ -1344,12 +1383,14 @@ CMenuManager::GetNumOptionsCntrlConfigScreens(void)
 {
 	int number = 0;
 	switch (m_nCurrScreen) {
+#ifdef LEGACY_MENU_OPTIONS
 		case MENUPAGE_CONTROLLER_PC_OLD3:
 			number = 2;
 			break;
 		case MENUPAGE_CONTROLLER_DEBUG:
 			number = 4;
 			break;
+#endif
 		case MENUPAGE_KEYBOARD_CONTROLS:
 			switch (m_ControlMethod) {
 				case CONTROL_STANDARD:
@@ -1657,7 +1698,7 @@ CMenuManager::DrawControllerBound(int32 yStart, int32 xStart, int32 unused, int8
 						CFont::PrintString(nextX, nextY, seperator);
 						nextX += CFont::GetStringWidth(seperator, true) + bindingMargin;
 					}
-					static uint32 lastWaitingTextFlash = 0;
+					static PauseModeTime lastWaitingTextFlash = 0;
 					if (CTimer::GetTimeInMillisecondsPauseMode() - lastWaitingTextFlash > 150) {
 						showWaitingText = !showWaitingText;
 						lastWaitingTextFlash = CTimer::GetTimeInMillisecondsPauseMode();
@@ -1742,7 +1783,7 @@ CMenuManager::DrawControllerScreenExtraText(int yStart, int xStart, int lineHeig
 				CFont::PrintString(nextX, MENU_Y(yStart), TheText.Get("FEC_IBT"));
 				nextX = CFont::GetStringWidth(TheText.Get("FEC_IBT"), true) + spacing + nextX;
 			}
-			static uint32 lastStateChange = 0;
+			static PauseModeTime lastStateChange = 0;
 			if (CTimer::GetTimeInMillisecondsPauseMode() - lastStateChange > 150) {
 				waitingTextVisible = !waitingTextVisible;
 				lastStateChange = CTimer::GetTimeInMillisecondsPauseMode();
@@ -1786,8 +1827,8 @@ CMenuManager::DrawControllerSetupScreen()
 	CFont::SetJustifyOn();
 	CFont::SetRightJustifyOff();
 	CFont::SetBackGroundOnlyTextOn();
-	CFont::SetWrapx(MENU_X_RIGHT_ALIGNED(MENU_X_MARGIN));
-	CFont::SetRightJustifyWrap(SCREEN_SCALE_X(MENUACTION_WIDTH));
+	CFont::SetWrapx(MENU_X_RIGHT_ALIGNED(MENU_UNK_X_MARGIN));
+	CFont::SetRightJustifyWrap(SCREEN_SCALE_X(MENU_UNK_WIDTH));
 
 	PREPARE_MENU_HEADER
 
@@ -2356,41 +2397,32 @@ CMenuManager::DrawBackground(bool transitionCall)
 
 		menuBg.UpdateMultipliers();
 		if (m_menuTransitionProgress == 255)
-			bOptionHighlightTransitionBlend = 0;
+			m_nOptionHighlightTransitionBlend = 0;
 	}
 
-	// Congrats R*, instead of solving the bug you just hacked your million dolar product.
-#if 0
-
-	// This is how I fixed it in III, but I can't apply it here because "forceFadeInCounter > 30" gives it a unique effect.
-	static float fadeAlpha = 0.0f;
-	if (m_nMenuFadeAlpha == 0 && fadeAlpha > 1.0f) fadeAlpha = 0.0f;
-
-	// +20 per every 33 ms (1000.f/30.f - original frame limiter fps)
-	fadeAlpha += (frameTime) * 20.f / 33.f;
-	m_nMenuFadeAlpha = clamp(fadeAlpha, 0, 255);
-	m_menuTransitionProgress = clamp(fadeAlpha, 0, 255);
-#else
-	static uint32 LastFade = 0;
+	static PauseModeTime LastFade = 0;
 	static uint8 forceFadeInCounter = 0;
 
 	if (m_nMenuFadeAlpha >= 255) {
 		if (m_nMenuFadeAlpha > 255)
 			m_nMenuFadeAlpha = 255;
 	} else {
-		if (CTimer::GetTimeInMillisecondsPauseMode() - LastFade > 30 || forceFadeInCounter > 30) {
+		if (CTimer::GetTimeInMillisecondsPauseMode() - LastFade > 30
+#ifndef FIX_HIGH_FPS_BUGS_ON_FRONTEND // Dirty dirty hack
+			|| forceFadeInCounter > 30
+#endif
+			) {
 			m_nMenuFadeAlpha += 20;
 			m_menuTransitionProgress = Min(m_menuTransitionProgress + 20, 255);
 			LastFade = CTimer::GetTimeInMillisecondsPauseMode();
 		}
 		forceFadeInCounter++;
 	}
-#endif
 
 	if (!transitionCall && m_menuTransitionProgress == 255) {
-		float oldAlpha = m_nMenuFadeAlpha;
-		if (oldAlpha < 255) {
-			int oldScreen = m_nCurrScreen;
+		int actualAlpha = m_nMenuFadeAlpha;
+		if (actualAlpha < 255) {
+			int actualScreen = m_nCurrScreen;
 			SetFrontEndRenderStates();
 			m_nCurrScreen = m_nPrevScreen;
 			m_nMenuFadeAlpha = 255 - m_nMenuFadeAlpha;
@@ -2401,15 +2433,15 @@ CMenuManager::DrawBackground(bool transitionCall)
 				case MENUPAGE_KEYBOARD_CONTROLS:
 					CMenuManager::DrawControllerSetupScreen();
 					break;
-				/* case MENUPAGE_OUTRO:
+				case MENUPAGE_OUTRO:
 					CMenuManager::DrawQuitGameScreen();
-					break; */ // TODO(Miami)
+					break;
 				default:
-					CMenuManager::DrawStandardMenus();
+					CMenuManager::DrawStandardMenus(false);
 					break;
 			}
-			m_nCurrScreen = oldScreen;
-			m_nMenuFadeAlpha = oldAlpha;
+			m_nCurrScreen = actualScreen;
+			m_nMenuFadeAlpha = actualAlpha;
 		}
 	}
 
@@ -2420,24 +2452,38 @@ CMenuManager::DrawBackground(bool transitionCall)
 		case MENUPAGE_KEYBOARD_CONTROLS:
 			DrawControllerSetupScreen();
 			break;
-		/* case MENUPAGE_OUTRO:
+		case MENUPAGE_OUTRO:
 			CMenuManager::DrawQuitGameScreen();
-			break; */ // TODO(Miami)
+			break;
 		default:
-			DrawStandardMenus();
+			DrawStandardMenus(true);
 			break;
 	}
 
 	CFont::DrawFonts();
 	SetFrontEndRenderStates();
 
-//	TODO(Miami)
-//	if (m_nCurrScreen != MENUPAGE_OUTRO)
+	if (m_nCurrScreen != MENUPAGE_OUTRO)
 		if (m_menuTransitionProgress == 255) {
 			m_aFrontEndSprites[MENUSPRITE_VCLOGO].Draw(CRect(MENU_X(27.0f), MENU_Y(8.0f), MENU_X(157.0f), MENU_Y(138.0f)), CRGBA(255, 255, 255, 255));
 		} else {
 			m_aFrontEndSprites[MENUSPRITE_VCLOGO].Draw(CRect(MENU_X(27.0f), MENU_Y(8.0f), MENU_X(157.0f), MENU_Y(138.0f)), CRGBA(255, 255, 255, FadeIn(255)));
 		}
+
+	if (m_ShowEmptyBindingError) {
+		static PauseModeTime lastBindingError = CTimer::GetTimeInMillisecondsPauseMode();
+		static bool bindingErrorShown = false;
+		if (bindingErrorShown) {
+			lastBindingError = CTimer::GetTimeInMillisecondsPauseMode();
+			bindingErrorShown = false;
+		}
+		SmallMessageScreen("FEC_ERI");
+		CFont::DrawFonts();
+		if (CTimer::GetTimeInMillisecondsPauseMode() - lastBindingError > 4000) {
+			m_ShowEmptyBindingError = false;
+			bindingErrorShown = true;
+		}
+	}
 
 	if (m_bShowMouse) {
 		CRect mouse(0.0f, 0.0f, MENU_X(40.0f), MENU_Y(40.0f));
@@ -2461,8 +2507,8 @@ CMenuManager::DrawPlayerSetupScreen()
 	CFont::SetJustifyOn();
 	CFont::SetRightJustifyOff();
 	CFont::SetBackGroundOnlyTextOn();
-	CFont::SetWrapx(MENU_X_RIGHT_ALIGNED(MENU_X_MARGIN));
-	CFont::SetRightJustifyWrap(SCREEN_SCALE_X(MENUACTION_WIDTH));
+	CFont::SetWrapx(MENU_X_RIGHT_ALIGNED(MENU_UNK_X_MARGIN));
+	CFont::SetRightJustifyWrap(SCREEN_SCALE_X(MENU_UNK_WIDTH));
 
 	PREPARE_MENU_HEADER
 
@@ -2901,12 +2947,14 @@ CMenuManager::GetStartOptionsCntrlConfigScreens()
 {
 	int number = 0;
 	switch (m_nCurrScreen) {
+#ifdef LEGACY_MENU_OPTIONS
 		case MENUPAGE_CONTROLLER_PC_OLD3:
 			number = 34;
 			break;
 		case MENUPAGE_CONTROLLER_DEBUG:
 			number = 35;
 			break;
+#endif
 		case MENUPAGE_KEYBOARD_CONTROLS:
 			number = 0;
 			break;
@@ -3202,7 +3250,7 @@ CMenuManager::SaveSettings()
 }
 
 void
-CMenuManager::MessageScreen(const char *text)
+CMenuManager::MessageScreen(const char *text, bool blackBg)
 {
 	CSprite2d *splash = LoadSplash(nil);
 	if (!DoRWStuffStartOfFrame(0, 0, 0, 0, 0, 0, 255))
@@ -3212,25 +3260,32 @@ CMenuManager::MessageScreen(const char *text)
 	CSprite2d::InitPerFrame();
 	CFont::InitPerFrame();
 	DefinedState();
+	// CRGBA unused(255, 255, 255, 255);
+	if (blackBg) {
+		CSprite2d::DrawRect(CRect(0, SCREEN_HEIGHT, SCREEN_WIDTH, 0), CRGBA(0, 0, 0, 255));
+	}
 
-	RwRenderStateSet(rwRENDERSTATETEXTUREADDRESS, (void*)rwTEXTUREADDRESSCLAMP);
-	splash->Draw(CRect(0.0f, 0.0f, SCREEN_WIDTH, SCREEN_HEIGHT), CRGBA(255, 255, 255, 255));
+	m_nMenuFadeAlpha = 255;
+	SmallMessageScreen(text);
+	CFont::DrawFonts();
+	DoRWStuffEndOfFrame();
+}
 
+// TODO(Miami)
+void
+CMenuManager::SmallMessageScreen(const char* text)
+{
 	CFont::SetBackgroundOff();
 	CFont::SetPropOn();
 	CFont::SetJustifyOn();
 	CFont::SetBackGroundOnlyTextOn();
-	CFont::SetWrapx(SCREEN_SCALE_FROM_RIGHT(170.0f));
-	CFont::SetRightJustifyWrap(SCREEN_SCALE_FROM_RIGHT(170.0f));
-	CSprite2d::DrawRect(CRect(SCREEN_SCALE_X(120.0f), SCREEN_SCALE_Y(150.0f), SCREEN_SCALE_FROM_RIGHT(120.0f), SCREEN_SCALE_FROM_BOTTOM(220.0f)), CRGBA(50, 50, 50, 210));
+	CSprite2d::DrawRect(CRect(SCREEN_SCALE_X(95.0f), SCREEN_SCALE_FROM_BOTTOM(165.0f), SCREEN_SCALE_FROM_RIGHT(95.0f), SCREEN_SCALE_Y(115.0f)), CRGBA(50, 50, 50, FadeIn(210)));
 	CFont::SetFontStyle(FONT_LOCALE(FONT_BANK));
-	CFont::SetCentreSize(SCREEN_SCALE_X(380.0f));
+	CFont::SetCentreSize(SCREEN_SCALE_X(430.0f));
 	CFont::SetCentreOn();
-	CFont::SetColor(CRGBA(255, 217, 106, 255));
+	CFont::SetColor(CRGBA(255, 217, 106, FadeIn(255)));
 	CFont::SetScale(SCREEN_SCALE_X(SMALLTEXT_X_SCALE), SCREEN_SCALE_Y(SMALLTEXT_Y_SCALE));
 	CFont::PrintString(SCREEN_SCALE_X(320.0f), SCREEN_SCALE_Y(170.0f), TheText.Get(text));
-	CFont::DrawFonts();
-	DoRWStuffEndOfFrame();
 }
 
 void
@@ -3297,7 +3352,7 @@ CMenuManager::PrintStats()
 	// Scroll stats with mouse
 #ifdef SCROLLABLE_STATS_PAGE
 	static float scrollY = 0;
-	static uint32 lastChange = m_LastScreenSwitch;
+	static PauseModeTime lastChange = m_LastScreenSwitch;
 	if (CPad::GetPad(0)->GetLeftMouse()) {
 		scrollY += (m_nMouseOldPosY - m_nMousePosY);
 		lastChange = CTimer::GetTimeInMillisecondsPauseMode();
@@ -3395,12 +3450,12 @@ CMenuManager::Process(void)
 	SwitchMenuOnAndOff();
 }
 
+// TODO(Miami)
 void
 CMenuManager::ProcessButtonPresses(void)
 {
-	// TODO(Miami)
-	// if (m_nCurrScreen == MENUPAGE_OUTRO)
-	//	return;
+	if (m_nCurrScreen == MENUPAGE_OUTRO)
+		return;
 
 	if (m_bWaitingForNewKeyBind) {
 		if (m_bStartWaitingForKeyBind)
@@ -3470,8 +3525,71 @@ CMenuManager::ProcessButtonPresses(void)
 	bool assumeIncrease = false;
 #endif
 
+#ifdef USE_DEBUG_SCRIPT_LOADER
+	if (m_nCurrScreen == MENUPAGE_START_MENU || m_nCurrScreen == MENUPAGE_NEW_GAME || m_nCurrScreen == MENUPAGE_NEW_GAME_RELOAD) {
+#ifdef RW_GL3
+		if (glfwGetKey(PSGLOBAL(window), GLFW_KEY_R) == GLFW_PRESS) {
+			scriptToLoad = 1;
+			DoSettingsBeforeStartingAGame();
+			return;
+		}
+#elif defined _WIN32
+		if (GetAsyncKeyState('R') & 0x8000) {
+			scriptToLoad = 1;
+			DoSettingsBeforeStartingAGame();
+			return;
+		}
+#endif
+	}
+#endif
+
 	if (!m_bShowMouse && (m_nMouseOldPosX != m_nMousePosX || m_nMouseOldPosY != m_nMousePosY)) {
 		m_bShowMouse = true;
+	}
+
+	static int oldOption = -99;
+	oldOption = m_nCurrOption;
+	for (int rowToCheck = 0; rowToCheck < NUM_MENUROWS; ++rowToCheck) {
+		if (aScreens[m_nCurrScreen].m_aEntries[rowToCheck].m_Action == MENUACTION_NOTHING || 
+			aScreens[m_nCurrScreen].m_aEntries[rowToCheck].m_Action == MENUACTION_LABEL)
+			continue;
+
+		int extraOffset = 0;
+		if (aScreens[m_nCurrScreen].m_aEntries[rowToCheck].m_Action == MENUACTION_RADIO)
+			extraOffset = MENURADIO_ICON_SCALE;
+
+		if (m_nMousePosY > MENU_Y(aScreens[m_nCurrScreen].m_aEntries[rowToCheck].m_Y) &&
+			m_nMousePosY < MENU_Y(aScreens[m_nCurrScreen].m_aEntries[rowToCheck].m_Y + MENU_DEFAULT_LINE_HEIGHT)) {
+			static int oldScreen = m_nCurrScreen;
+
+			m_nPrevOption = rowToCheck;
+			if (m_nMouseOldPosX != m_nMousePosX || m_nMouseOldPosY != m_nMousePosY) {
+				m_nCurrOption = rowToCheck;
+				m_bShowMouse = true;
+			}
+
+			int action = aScreens[m_nCurrScreen].m_aEntries[rowToCheck].m_Action;
+			if (action != MENUACTION_BRIGHTNESS && action != MENUACTION_DRAWDIST && action != MENUACTION_MUSICVOLUME
+				&& action != MENUACTION_SFXVOLUME && action != MENUACTION_MOUSESENS && action != MENUACTION_MP3VOLUMEBOOST)
+				m_nHoverOption = HOVEROPTION_RANDOM_ITEM;
+
+			break;
+		}
+		if (m_bShowMouse && m_nMenuFadeAlpha == 255) {
+			m_nPrevOption = oldOption;
+			m_nCurrOption = oldOption;
+		}
+	}
+
+	if (m_bShowMouse) {
+		if (oldOption != m_nCurrOption) {
+			if (aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_Action == MENUACTION_LABEL) {
+				++m_nCurrOption;
+				++m_nPrevOption;
+			}
+			m_nOptionHighlightTransitionBlend = 0;
+			DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_DENIED, 0);
+		}
 	}
 
 	m_nMouseOldPosX = m_nMousePosX;
@@ -3484,8 +3602,7 @@ CMenuManager::ProcessButtonPresses(void)
 	if (m_nMousePosY < 0) m_nMousePosY = 0;
 	if (m_nMousePosY > SCREEN_HEIGHT) m_nMousePosY = SCREEN_HEIGHT;
 
-	if (m_nCurrScreen == MENUPAGE_MULTIPLAYER_FIND_GAME || m_nCurrScreen == MENUPAGE_SKIN_SELECT
-		|| m_nCurrScreen == MENUPAGE_KEYBOARD_CONTROLS) {
+	if (m_nCurrScreen == MENUPAGE_SKIN_SELECT || m_nCurrScreen == MENUPAGE_KEYBOARD_CONTROLS) {
 
 		if (m_nCurrScreen == MENUPAGE_SKIN_SELECT) {
 			m_nTotalListRow = m_nSkinsTotal;
@@ -3496,12 +3613,10 @@ CMenuManager::ProcessButtonPresses(void)
 				m_nSelectedListRow = m_nTotalListRow - 1;
 		}
 
-#ifndef TIDY_UP_PBP
 		if (CPad::GetPad(0)->GetEnterJustDown() || CPad::GetPad(0)->GetCrossJustDown()) {
 			m_bShowMouse = 0;
 			optionSelected = true;
 		}
-#endif
 		if (CPad::GetPad(0)->GetBackspaceJustDown() && m_nCurrScreen == MENUPAGE_KEYBOARD_CONTROLS && !field_159) {
 			if (m_nCurrExLayer == HOVEROPTION_LIST) {
 				m_nHoverOption = HOVEROPTION_NOT_HOVERING;
@@ -3514,7 +3629,7 @@ CMenuManager::ProcessButtonPresses(void)
 			field_159 = false;
 		}
 
-		static uint32 lastTimeClickedScrollButton = 0;
+		static PauseModeTime lastTimeClickedScrollButton = 0;
 
 		if (CTimer::GetTimeInMillisecondsPauseMode() - lastTimeClickedScrollButton >= 200) {
 			m_bPressedPgUpOnList = false;
@@ -3638,12 +3753,10 @@ CMenuManager::ProcessButtonPresses(void)
 			}
 		}
 
-#ifndef TIDY_UP_PBP
 		if (CPad::GetPad(0)->GetEscapeJustDown() || CPad::GetPad(0)->GetBackJustDown()) {
 			m_bShowMouse = false;
 			goBack = true;
 		}
-#endif
 
 		if (CPad::GetPad(0)->GetLeftMouseJustDown()) {
 			switch (m_nHoverOption) {
@@ -3714,7 +3827,6 @@ CMenuManager::ProcessButtonPresses(void)
 			}
 		}
 	} else if (isPlainTextScreen(m_nCurrScreen)) {
-#ifndef TIDY_UP_PBP
 		if (CPad::GetPad(0)->GetEnterJustDown() || CPad::GetPad(0)->GetCrossJustDown() || CPad::GetPad(0)->GetLeftMouseJustDown()) {
 			optionSelected = true;
 		}
@@ -3723,19 +3835,19 @@ CMenuManager::ProcessButtonPresses(void)
 				goBack = true;
 			}
 		}
-#endif
 	} else {
 		if (CPad::GetPad(0)->GetDownJustDown() || CPad::GetPad(0)->GetAnaloguePadDown() || CPad::GetPad(0)->GetDPadDownJustDown()) {
 			m_bShowMouse = false;
 			DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_DENIED, 0);
 			goDown = true;
+			m_nOptionHighlightTransitionBlend = 0;
 		} else if (CPad::GetPad(0)->GetUpJustDown() || CPad::GetPad(0)->GetAnaloguePadUp() || CPad::GetPad(0)->GetDPadUpJustDown()) {
 			m_bShowMouse = false;
 			DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_DENIED, 0);
 			goUp = true;
+			m_nOptionHighlightTransitionBlend = 0;
 		}
 
-#ifndef TIDY_UP_PBP
 		if ((m_nCurrOption == 0) && (m_nCurrScreen == MENUPAGE_PAUSE_MENU)) {
 			if (CPad::GetPad(0)->GetEnterJustUp() || CPad::GetPad(0)->GetCrossJustUp()) {
 				m_bShowMouse = false;
@@ -3747,7 +3859,6 @@ CMenuManager::ProcessButtonPresses(void)
 				optionSelected = true;
 			}
 		}
-#endif
 
 		if (CPad::GetPad(0)->GetLeftMouseJustUp()) {
 #ifndef TIDY_UP_PBP
@@ -3951,7 +4062,7 @@ CMenuManager::ProcessButtonPresses(void)
 				TheCamera.m_fMouseAccelVertical = TheCamera.m_fMouseAccelHorzntl;
 				SaveSettings();
 				break;
-				}
+			}
 #else
 			switch (m_nHoverOption) {
 				case HOVEROPTION_INCREASE_BRIGHTNESS:
@@ -3970,7 +4081,7 @@ CMenuManager::ProcessButtonPresses(void)
 					break;
 			}
 #endif
-			}
+		}
 
 		if (CPad::GetPad(0)->GetLeftMouseJustUp() || CPad::GetPad(0)->GetLeftJustUp() || CPad::GetPad(0)->GetRightJustUp()
 			|| CPad::GetPad(0)->GetDPadLeftJustUp() || CPad::GetPad(0)->GetDPadRightJustUp()
@@ -3985,7 +4096,6 @@ CMenuManager::ProcessButtonPresses(void)
 				DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_SUCCESS, 0);
 
 		}
-#ifndef TIDY_UP_PBP
 		if (CPad::GetPad(0)->GetBackJustDown()) {
 			if (m_nCurrScreen != MENUPAGE_START_MENU && m_nCurrScreen != MENUPAGE_PAUSE_MENU) {
 				m_bShowMouse = false;
@@ -4003,42 +4113,8 @@ CMenuManager::ProcessButtonPresses(void)
 		if (((goDown) || (goUp)) || (optionSelected)) {
 			goBack = false;
 		}
-#endif
-		}
-
-	// Centralized enter/back (except some conditions)
-#ifdef TIDY_UP_PBP
-	if (aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_Action != MENUACTION_RESUME) {
-		if (CPad::GetPad(0)->GetEnterJustDown() || CPad::GetPad(0)->GetCrossJustDown() ||
-			(isPlainTextScreen(m_nCurrScreen) && CPad::GetPad(0)->GetLeftMouseJustDown())) {
-
-			if (!isPlainTextScreen(m_nCurrScreen))
-				m_bShowMouse = false;
-
-			optionSelected = true;
-		}
-	} else {
-		if (CPad::GetPad(0)->GetEnterJustUp() || CPad::GetPad(0)->GetCrossJustUp()) {
-			m_bShowMouse = false;
-			optionSelected = true;
-		}
 	}
 
-	if (!goDown && !goUp && !optionSelected) {
-		if (m_nCurrScreen != MENUPAGE_START_MENU) {
-			if (isPlainTextScreen(m_nCurrScreen)) {
-				if (CPad::GetPad(0)->GetEscapeJustDown() || CPad::GetPad(0)->GetBackJustUp()) {
-					goBack = true;
-				}
-			} else {
-				if (CPad::GetPad(0)->GetEscapeJustDown() || (m_nCurrScreen != MENUPAGE_PAUSE_MENU && CPad::GetPad(0)->GetBackJustDown())) {
-					m_bShowMouse = false;
-					goBack = true;
-				}
-			}
-		}
-	}
-#endif
 
 #ifdef PS2_LIKE_MENU
 	if (CPad::GetPad(0)->GetLeftMouseJustDown() && hoveredBottomBarOption != -1) {
@@ -4079,13 +4155,13 @@ CMenuManager::ProcessButtonPresses(void)
 	}
 #endif
 
-	if (goDown && (m_nCurrScreen != MENUPAGE_MULTIPLAYER_FIND_GAME)) {
+	if (goDown) {
 		m_nCurrOption++;
 		if (m_nCurrOption == NUM_MENUROWS || (aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_Action == MENUACTION_NOTHING)) {
 			m_nCurrOption = 0;
 		}
 	}
-	if (goUp && (m_nCurrScreen != MENUPAGE_MULTIPLAYER_FIND_GAME)) {
+	if (goUp) {
 		if (m_nCurrOption == (aScreens[m_nCurrScreen].m_aEntries[0].m_Action == MENUACTION_LABEL)) {
 			while (m_nCurrOption != NUM_MENUROWS - 1
 				&& aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption + 1].m_Action != MENUACTION_NOTHING) {
@@ -4098,7 +4174,8 @@ CMenuManager::ProcessButtonPresses(void)
 
 	if (optionSelected) {
 		int option = aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_Action;
-		if ((option == MENUACTION_CHANGEMENU) || (option == MENUACTION_POPULATESLOTS_CHANGEMENU)) {
+		if (option == MENUACTION_CHANGEMENU || option == MENUACTION_POPULATESLOTS_CHANGEMENU || option == MENUACTION_GOBACK
+			|| option == MENUACTION_YES || option == MENUACTION_NO) {
 			if (strncmp(aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_EntryName, "FEDS_TB", 8) != 0 &&
 				strncmp(aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_EntryName, "FESZ_CA", 8) != 0) {
 
@@ -4129,8 +4206,9 @@ CMenuManager::ProcessButtonPresses(void)
 			}
 		} else if (option != MENUACTION_CHANGEMENU && option != MENUACTION_BRIGHTNESS && option != MENUACTION_DRAWDIST
 			&& option != MENUACTION_MUSICVOLUME && option != MENUACTION_SFXVOLUME
-			&& option != MENUACTION_CHECKSAVE && option != MENUACTION_UNK24
-			&& option != MENUACTION_MOUSESENS && option != MENUACTION_SCREENRES) {
+			&& option != MENUACTION_CHECKSAVE && option != MENUACTION_MOUSESENS
+			&& option != MENUACTION_YES && option != MENUACTION_NO
+			&& option != MENUACTION_SCREENRES) {
 
 			DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_SUCCESS, 0);
 		}
@@ -4176,7 +4254,7 @@ CMenuManager::ProcessButtonPresses(void)
 			} else {
 				SwitchToNewScreen(-2);
 			}
-		} else if (m_nCurrScreen != MENUPAGE_MULTIPLAYER_FIND_GAME) {
+		} else {
 			option = aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_Action;
 			switch (option) {
 				case MENUACTION_RADIO:
@@ -4251,46 +4329,22 @@ CMenuManager::ProcessButtonPresses(void)
 
 					// fall through
 				case MENUACTION_CHANGEMENU:
+				case MENUACTION_YES:
+				case MENUACTION_NO:
 				{
-					bool changeMenu = true;
-					int saveSlot = aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_SaveSlot;
-
-					// This should be unused.
-					if (saveSlot >= 2 && saveSlot <= 9) {
-						m_nCurrSaveSlot = saveSlot - 2;
-						switch (m_nCurrScreen) {
-						case MENUPAGE_CHOOSE_LOAD_SLOT:
-							if (Slots[m_nCurrSaveSlot + 1] != SLOT_EMPTY)
-								changeMenu = false;
-
-							break;
-						case MENUPAGE_CHOOSE_DELETE_SLOT:
-							if (Slots[m_nCurrSaveSlot + 1] == SLOT_EMPTY)
-								changeMenu = false;
-
-							break;
-						}
-					}
-					if (changeMenu) {
-						if (strncmp(aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_EntryName, "FEDS_TB", 8) == 0) {
-#ifndef TIDY_UP_PBP
-							RequestFrontEndShutDown();
-#else
-							goBack = true;
-							break;
-#endif
-						} else {
+					// TODO(Miami): TEMP
 #ifdef MENU_MAP
-							if (aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_TargetMenu == MENUPAGE_MAP) {
-								bMapLoaded = false;
-							}
+					if (aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_TargetMenu == MENUPAGE_MAP) {
+						bMapLoaded = false;
+					}
 
 #endif
-							SwitchToNewScreen(0);
-						}
-					}
+					SwitchToNewScreen(0);
 					break;
 				}
+				case MENUACTION_GOBACK:
+					goBack = true;
+					break;
 				case MENUACTION_CHECKSAVE:
 				{
 					int saveSlot = aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_SaveSlot;
@@ -4298,7 +4352,11 @@ CMenuManager::ProcessButtonPresses(void)
 					if (saveSlot >= 2 && saveSlot <= 9) {
 						m_nCurrSaveSlot = saveSlot - 2;
 						if (Slots[m_nCurrSaveSlot + 1] != SLOT_EMPTY && Slots[m_nCurrSaveSlot + 1] != SLOT_CORRUPTED) {
-							SwitchToNewScreen(0);
+							if (m_nCurrScreen == MENUPAGE_CHOOSE_LOAD_SLOT) {
+								SwitchToNewScreen(MENUPAGE_LOAD_SLOT_CONFIRM);
+							} else if (m_nCurrScreen == MENUPAGE_CHOOSE_DELETE_SLOT) {
+								SwitchToNewScreen(MENUPAGE_DELETE_SLOT_CONFIRM);
+							}
 						}
 					}
 					break;
@@ -4309,14 +4367,6 @@ CMenuManager::ProcessButtonPresses(void)
 				case MENUACTION_RELOADIDE:
 					CFileLoader::ReloadObjectTypes("GTA3.IDE");
 					break;
-				case MENUACTION_RELOADIPL:
-					CGame::ReloadIPLs();
-					break;
-				case MENUACTION_SHOWCULL:
-					// REMOVED(MIAMI)
-					break;
-				case MENUACTION_MEMCARDSAVECONFIRM:
-					return;
 				case MENUACTION_RESUME_FROM_SAVEZONE:
 					RequestFrontEndShutDown();
 					break;
@@ -4334,17 +4384,13 @@ CMenuManager::ProcessButtonPresses(void)
 					break;
 				case MENUACTION_CANCELGAME:
 					DMAudio.Service();
-					RsEventHandler(rsQUITAPP, nil);
+					SwitchToNewScreen(MENUPAGE_OUTRO);
 					break;
 				case MENUACTION_RESUME:
-#ifndef TIDY_UP_PBP
 					if (m_PrefsVsyncDisp != m_PrefsVsync) {
 						m_PrefsVsync = m_PrefsVsyncDisp;
 					}
 					RequestFrontEndShutDown();
-#else
-					goBack = true;
-#endif
 					break;
 				case MENUACTION_DONTCANCEL:
 					SwitchToNewScreen(-2);
@@ -4359,7 +4405,7 @@ CMenuManager::ProcessButtonPresses(void)
 						CentreMousePointer();
 						m_bShowMouse = true;
 						// m_nCurrOption = 5; // Why?
-						bOptionHighlightTransitionBlend = 0;
+						m_nOptionHighlightTransitionBlend = 0;
 						SaveSettings();
 					}
 					break;
@@ -4442,7 +4488,7 @@ CMenuManager::ProcessButtonPresses(void)
 						CMBlur::BlurOn = true;
 #endif
 						SaveSettings();
-					} else if ((m_nCurrScreen != MENUPAGE_SKIN_SELECT_OLD) && (m_nCurrScreen == MENUPAGE_CONTROLLER_PC)) {
+					} else if (m_nCurrScreen == MENUPAGE_CONTROLLER_PC) {
 						ControlsManager.MakeControllerActionsBlank();
 						ControlsManager.InitDefaultControlConfiguration();
 						ControlsManager.InitDefaultControlConfigMouse(MousePointerStateHelper.GetMouseSetUp());
@@ -4488,6 +4534,21 @@ CMenuManager::ProcessButtonPresses(void)
 					DMAudio.PlayFrontEndTrack(m_PrefsRadioStation, 1);
 					OutputDebugString("STARTED PLAYING FRONTEND AUDIO TRACK");
 					break;
+				case MENUACTION_SAVEGAME:
+				{
+					int saveSlot = aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_SaveSlot;
+
+					if (saveSlot >= 2 && saveSlot <= 9) {
+						m_nCurrSaveSlot = m_nCurrOption;
+						SwitchToNewScreen(MENUPAGE_SAVE_OVERWRITE_CONFIRM);
+					}
+					break;
+				}
+				case MENUACTION_KEYBOARDCTRLS:
+					SwitchToNewScreen(MENUPAGE_KEYBOARD_CONTROLS);
+					m_nSelectedListRow = 0;
+					m_nCurrExLayer = HOVEROPTION_LIST;
+					break;
 			}
 		}
 		ProcessOnOffMenuOptions();
@@ -4528,7 +4589,7 @@ CMenuManager::ProcessButtonPresses(void)
 		}
 #endif
 
-		int oldScreen = !m_bGameNotLoaded ? aScreens[m_nCurrScreen].m_PreviousPage[1] : aScreens[m_nCurrScreen].m_PreviousPage[0];
+		int oldScreen = aScreens[m_nCurrScreen].m_PreviousPage;
 
 		if (oldScreen != -1) {
 			ThingsToDoBeforeLeavingPage();
@@ -4563,13 +4624,13 @@ CMenuManager::ProcessButtonPresses(void)
 	bool increase = false;
 #endif
 	if (CPad::GetPad(0)->GetLeft() || CPad::GetPad(0)->GetPedWalkLeftRight() < 0 || CPad::GetPad(0)->GetDPadLeft()) {
-		static uint32 lastSliderDecrease = 0;
+		static PauseModeTime lastSliderDecrease = 0;
 		if (CTimer::GetTimeInMillisecondsPauseMode() - lastSliderDecrease > 150) {
 			CheckSliderMovement(-1);
 			lastSliderDecrease = CTimer::GetTimeInMillisecondsPauseMode();
 		}
 	} else if (CPad::GetPad(0)->GetRight() || CPad::GetPad(0)->GetPedWalkLeftRight() > 0 || CPad::GetPad(0)->GetDPadRight()) {
-		static uint32 lastSliderIncrease = 0;
+		static PauseModeTime lastSliderIncrease = 0;
 		if (CTimer::GetTimeInMillisecondsPauseMode() - lastSliderIncrease > 150) {
 			CheckSliderMovement(1);
 			lastSliderIncrease = CTimer::GetTimeInMillisecondsPauseMode();
@@ -4629,11 +4690,11 @@ CMenuManager::ProcessButtonPresses(void)
 				if (changeValueBy > 0) {
 					m_PrefsUseWideScreen++;
 					if (m_PrefsUseWideScreen > 2)
-						m_PrefsUseWideScreen = 2;
+						m_PrefsUseWideScreen = 0;
 				} else {
 					m_PrefsUseWideScreen--;
 					if (m_PrefsUseWideScreen < 0)
-						m_PrefsUseWideScreen = 0;
+						m_PrefsUseWideScreen = 2;
 				}
 				DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_SUCCESS, 0);
 				SaveSettings();
@@ -4754,14 +4815,6 @@ CMenuManager::ProcessOnOffMenuOptions()
 		gbBigWhiteDebugLightSwitchedOn = !gbBigWhiteDebugLightSwitchedOn;
 		DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_SUCCESS, 0);
 		break;
-	case MENUACTION_PEDROADGROUPS:
-		// REMOVED(MIAMI)
-		DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_SUCCESS, 0);
-		break;
-	case MENUACTION_CARROADGROUPS:
-		// REMOVED(MIAMI)
-		DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_SUCCESS, 0);
-		break;
 	case MENUACTION_COLLISIONPOLYS:
 		gbShowCollisionPolys = !gbShowCollisionPolys;
 		DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_SUCCESS, 0);
@@ -4817,32 +4870,6 @@ CMenuManager::ResetHelperText()
 }
 
 void
-CMenuManager::SaveLoadFileError_SetUpErrorScreen()
-{
-	switch (PcSaveHelper.nErrorCode) {
-		case SAVESTATUS_ERR_SAVE_CREATE:
-		case SAVESTATUS_ERR_SAVE_WRITE:
-		case SAVESTATUS_ERR_SAVE_CLOSE:
-			SwitchToNewScreen(MENUPAGE_SAVE_FAILED);
-			break;
-		case SAVESTATUS_ERR_LOAD_OPEN:
-		case SAVESTATUS_ERR_LOAD_READ:
-		case SAVESTATUS_ERR_LOAD_CLOSE:
-			SwitchToNewScreen(MENUPAGE_LOAD_FAILED);
-			break;
-		case SAVESTATUS_ERR_DATA_INVALID:
-			SwitchToNewScreen(MENUPAGE_LOAD_FAILED_2);
-			break;
-		case SAVESTATUS_DELETEFAILED8:
-		case SAVESTATUS_DELETEFAILED9:
-		case SAVESTATUS_DELETEFAILED10:
-			SwitchToNewScreen(MENUPAGE_DELETE_FAILED);
-			break;
-		default: break;
-	}
-}
-
-void
 CMenuManager::SetHelperText(int text)
 {
 	m_nHelperTextMsgId = text;
@@ -4871,34 +4898,65 @@ float CMenuManager::StretchY(float y)
 void
 CMenuManager::ProcessFileActions()
 {
-	if (m_nCurrScreen == MENUPAGE_DELETING) {
-		bool SlotPopulated = false;
+	switch (m_nCurrScreen) {
+		case MENUPAGE_LOADING_IN_PROGRESS:
+			if (CheckSlotDataValid(m_nCurrSaveSlot)) {
+#ifdef USE_DEBUG_SCRIPT_LOADER
+				scriptToLoad = 0;
+#endif
+				if (!m_bGameNotLoaded)
+					MessageScreen("FELD_WR", true);
 
-		if (PcSaveHelper.DeleteSlot(m_nCurrSaveSlot)) {
-			PcSaveHelper.PopulateSlotInfo();
-			SlotPopulated = true;
-		}
+				DoSettingsBeforeStartingAGame();
+				m_bWantToLoad = true;
+			} else
+				SwitchToNewScreen(MENUPAGE_NEW_GAME);
 
-		if (SlotPopulated)
-			SwitchToNewScreen(MENUPAGE_DELETE_SUCCESS);
-		else
-			SaveLoadFileError_SetUpErrorScreen();
-	}
-	if (m_nCurrScreen == MENUPAGE_SAVING_IN_PROGRESS) {
-		int8 SaveSlot = PcSaveHelper.SaveSlot(m_nCurrSaveSlot);
-		PcSaveHelper.PopulateSlotInfo();
-		if (SaveSlot)
-			SwitchToNewScreen(MENUPAGE_SAVE_SUCCESSFUL);
-		else
-			SaveLoadFileError_SetUpErrorScreen();
-	}
-	if (m_nCurrScreen == MENUPAGE_LOADING_IN_PROGRESS) {
-		if (CheckSlotDataValid(m_nCurrSaveSlot)) {
-			DoSettingsBeforeStartingAGame();
-			m_bWantToLoad = true;
+			break;
+		case MENUPAGE_DELETING_IN_PROGRESS:
+		{
+			static bool waitedForScreen = false;
+
+			if (waitedForScreen) {
+				bool SlotPopulated = false;
+				if (PcSaveHelper.DeleteSlot(m_nCurrSaveSlot)) {
+					PcSaveHelper.PopulateSlotInfo();
+					SlotPopulated = true;
+				}
+
+				if (SlotPopulated) {
+					SwitchToNewScreen(MENUPAGE_DELETE_SUCCESSFUL);
+				} else {
+					SwitchToNewScreen(MENUPAGE_SAVE_CUSTOM_WARNING);
+					strncpy(aScreens[m_nCurrScreen].m_ScreenName, "FES_DEL", 8);
+					strncpy(aScreens[m_nCurrScreen].m_aEntries[0].m_EntryName, "FES_DEE", 8);
+				}
+				waitedForScreen = false;
+			} else if (m_nMenuFadeAlpha >= 255)
+				waitedForScreen = true;
+
+			break;
 		}
-		else
-			SaveLoadFileError_SetUpErrorScreen();
+		case MENUPAGE_SAVING_IN_PROGRESS:
+		{
+			static bool waitedForScreen = false;
+
+			if (waitedForScreen) {
+				int8 SaveSlot = PcSaveHelper.SaveSlot(m_nCurrSaveSlot);
+				PcSaveHelper.PopulateSlotInfo();
+				if (SaveSlot) {
+					SwitchToNewScreen(MENUPAGE_SAVE_CUSTOM_WARNING);
+					strncpy(aScreens[m_nCurrScreen].m_ScreenName, "FET_SG", 8);
+					strncpy(aScreens[m_nCurrScreen].m_aEntries[0].m_EntryName, "FES_CMP", 8);
+				} else
+					SwitchToNewScreen(MENUPAGE_SAVE_SUCCESSFUL);
+
+				waitedForScreen = false;
+			} else if (m_nMenuFadeAlpha >= 255)
+				waitedForScreen = true;
+
+			break;
+		}
 	}
 }
 
@@ -4910,7 +4968,7 @@ CMenuManager::SwitchMenuOnAndOff()
 
 		// Reminder: You need REGISTER_START_BUTTON defined to make it work.
 		if ((CPad::GetPad(0)->GetStartJustDown() || CPad::GetPad(0)->GetEscapeJustDown())
-			&& (!m_bMenuActive || m_nCurrScreen == MENUPAGE_PAUSE_MENU || m_nCurrScreen == MENUPAGE_CHOOSE_SAVE_SLOT/* || m_nCurrScreen == 20 */) // TODO(Miami): What is screen 20?
+			&& (!m_bMenuActive || m_nCurrScreen == MENUPAGE_PAUSE_MENU || m_nCurrScreen == MENUPAGE_CHOOSE_SAVE_SLOT || m_nCurrScreen == MENUPAGE_SAVE_CHEAT_WARNING)
 			|| m_bShutDownFrontEndRequested || m_bStartUpFrontEndRequested) {
 
 			if (m_nCurrScreen != MENUPAGE_LOADING_IN_PROGRESS) {
@@ -4928,10 +4986,10 @@ CMenuManager::SwitchMenuOnAndOff()
 				m_bMenuActive = !m_bMenuActive;
 
 			if (m_bMenuActive) {
+				// TODO(Miami): DxInput??
+
 				Initialise();
 				LoadAllTextures();
-
-				// TODO(Miami): DxInput??
 			} else {
 				if (CMBlur::BlurOn)
 					CMBlur::MotionBlurOpen(Scene.camera);
@@ -4991,8 +5049,10 @@ CMenuManager::SwitchMenuOnAndOff()
 
 		Initialise();
 		LoadAllTextures();
+
+		// TODO(Miami): Cheat warning
 		m_nCurrScreen = MENUPAGE_CHOOSE_SAVE_SLOT;
-		m_nCurrOption = 0;
+		m_nCurrOption = 8;
 	}
 
 	m_bStartUpFrontEndRequested = false;
@@ -5049,12 +5109,49 @@ CMenuManager::WaitForUserCD()
 
 	HandleExit();
 	CPad::UpdatePads();
-	MessageScreen("NO_PCCD");
+	MessageScreen("NO_PCCD", true);
 
 	if (CPad::GetPad(0)->GetEscapeJustDown()) {
 		m_bQuitGameNoCD = true;
 		RsEventHandler(rsQUITAPP, nil);
 	}
+}
+
+void
+CMenuManager::DrawQuitGameScreen(void)
+{
+	static int32 exitSignalTimer = 0;
+#ifndef MUCH_SHORTER_OUTRO_SCREEN
+	static PauseModeTime lastTickIncrease = 0;
+	if (m_nMenuFadeAlpha == 255 && CTimer::GetTimeInMillisecondsPauseMode() - lastTickIncrease > 10) {
+		exitSignalTimer++;
+		lastTickIncrease = CTimer::GetTimeInMillisecondsPauseMode();
+	}
+#else
+	static PauseModeTime sincePress = 0;
+	sincePress += frameTime;
+	if (sincePress > 500)
+		exitSignalTimer = 150;
+#endif
+	static CSprite2d *splash = nil;
+
+	if (splash == nil)
+		splash = LoadSplash("OUTRO");
+
+	m_aFrontEndSprites[MENUSPRITE_VCLOGO].Draw(CRect(MENU_X(28.0f), MENU_Y(8.0f), MENU_X(157.0f), MENU_Y(138.0f)), CRGBA(255, 255, 255, -(m_nMenuFadeAlpha + 1)));
+
+	// Or we can see menu background from sides
+#ifdef ASPECT_RATIO_SCALE
+	CSprite2d::DrawRect(CRect(0, 0, MENU_X_LEFT_ALIGNED(0.f), SCREEN_HEIGHT), CRGBA(0, 0, 0, m_nMenuFadeAlpha));
+	CSprite2d::DrawRect(CRect(MENU_X_RIGHT_ALIGNED(0.f), 0, SCREEN_WIDTH, SCREEN_HEIGHT), CRGBA(0, 0, 0, m_nMenuFadeAlpha));
+#endif
+
+	splash->Draw(CRect(MENU_X_LEFT_ALIGNED(0.f), 0, MENU_X_RIGHT_ALIGNED(0.f), SCREEN_HEIGHT), CRGBA(255, 255, 255, m_nMenuFadeAlpha));
+	if (m_nMenuFadeAlpha == 255 && exitSignalTimer == 150)
+		RsEventHandler(rsQUITAPP, nil);
+
+	m_bShowMouse = false;
+	m_AllowNavigation = false;
 }
 
 #ifdef MENU_MAP

@@ -32,7 +32,7 @@ public:
 	C_PcSave() : nErrorCode(SAVESTATUS_SUCCESSFUL) {}
 	void PopulateSlotInfo();
 	bool DeleteSlot(int32 slot);
-	bool SaveSlot(int32 slot);
+	int8 SaveSlot(int32 slot);
 	bool PcClassSaveRoutine(int32 a2, uint8 *data, uint32 size);
 	static void SetSaveDirectory(const char *path);
 };

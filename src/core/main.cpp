@@ -821,7 +821,7 @@ RenderScene(void)
 	CRenderer::RenderBoats();
 	CRenderer::RenderFadingInUnderwaterEntities();
 	RwRenderStateSet(rwRENDERSTATECULLMODE, (void*)rwCULLMODECULLNONE);
-	// CWaterLevel::RenderTransparentWater();
+	CWaterLevel::RenderTransparentWater();
 	CRenderer::RenderFadingInEntities();
 	RwRenderStateSet(rwRENDERSTATECULLMODE, (void*)rwCULLMODECULLNONE);
 	CWeather::RenderRainStreaks();
@@ -1008,6 +1008,9 @@ Idle(void *arg)
 #endif
 #ifdef TIMEBARS
 		tbStartTimer(0, "CnstrRenderList");
+#endif
+#ifdef PC_WATER
+		CWaterLevel::PreCalcWaterGeometry();
 #endif
 		CRenderer::ConstructRenderList();
 #ifdef TIMEBARS

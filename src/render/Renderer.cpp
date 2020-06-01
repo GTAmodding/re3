@@ -269,10 +269,8 @@ CRenderer::RenderBoats(void)
 	for(node = gSortedVehiclesAndPeds.tail.prev;
 	    node != &gSortedVehiclesAndPeds.head;
 	    node = node->prev){
-		// only boats in this list
 		CVehicle *v = (CVehicle*)node->item.ent;
-		if(v->IsBoat())
-			RenderOneNonRoad(v);
+		RenderOneNonRoad(v);
 	}
 }
 
@@ -394,7 +392,7 @@ CRenderer::SetupEntityVisibility(CEntity *ent)
 			}
 			return VIS_VISIBLE;
 		}
-		if(ent->m_flagE10){
+		if(ent->bDontStream){
 			if(ent->m_rwObject == nil || !ent->bIsVisible)
 				return VIS_INVISIBLE;
 			if(!ent->GetIsOnScreen() || ent->IsEntityOccluded())

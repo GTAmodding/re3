@@ -146,6 +146,8 @@ CPlayerInfo::Clear(void)
 	m_bDriveByAllowed = true;
 	m_nPreviousTimeRewardedForExplosion = 0;
 	m_nExplosionsSinceLastReward = 0;
+	m_nCurrentBustedAudio = 1;
+	m_nBustedAudioStatus = BUSTEDAUDIO_NONE;
 }
 
 void

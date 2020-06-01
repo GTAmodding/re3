@@ -308,7 +308,7 @@ CCam::Process(void)
 	}
 
 	if(Mode == MODE_SNIPER || Mode == MODE_ROCKETLAUNCHER || Mode == MODE_M16_1STPERSON ||
-	   Mode == MODE_1STPERSON || Mode == MODE_HELICANNON_1STPERSON || GetWeaponFirstPersonOn())
+	   Mode == MODE_1STPERSON || Mode == MODE_HELICANNON_1STPERSON || Mode == MODE_CAMERA || GetWeaponFirstPersonOn())
 		ClipIfPedInFrontOfPlayer();
 }
 
@@ -3778,7 +3778,7 @@ CCam::Process_Debug(const CVector&, float, float, float)
 		if(FindPlayerVehicle())
 			FindPlayerVehicle()->Teleport(Source);
 		else
-			CWorld::Players[CWorld::PlayerInFocus].m_pPed->SetPosition(Source);	
+			CWorld::Players[CWorld::PlayerInFocus].m_pPed->SetPosition(Source);
 	}
 
 	// stay inside sectors
@@ -3845,8 +3845,7 @@ CCam::Process_Debug(const CVector&, float, float, float)
 		if(FindPlayerVehicle())
 			FindPlayerVehicle()->Teleport(Source);
 		else
-			CWorld::Players[CWorld::PlayerInFocus].m_pPed->GetPosition() = Source;
-			
+			CWorld::Players[CWorld::PlayerInFocus].m_pPed->SetPosition(Source);
 	}
 
 	// stay inside sectors

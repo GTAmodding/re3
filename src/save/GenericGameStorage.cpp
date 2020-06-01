@@ -84,6 +84,7 @@ do {\
 
 #define WriteSaveDataBlock(save_func)\
 do {\
+	size = 0;\
 	buf = work_buff;\
 	reserved = 0;\
 	MakeSpaceForSizeInBufferPointer(presize, buf, postsize);\
@@ -192,6 +193,7 @@ GenericSave(int file)
 	// Save the rest
 	WriteSaveDataBlock(CPools::SavePedPool);
 	WriteSaveDataBlock(CGarages::Save);
+	WriteSaveDataBlock(CGameLogic::Save);
 	WriteSaveDataBlock(CPools::SaveVehiclePool);
 	WriteSaveDataBlock(CPools::SaveObjectPool);
 	WriteSaveDataBlock(ThePaths.Save);
@@ -305,6 +307,8 @@ GenericLoad()
 	ReadDataFromBlock("Loading PedPool \n", CPools::LoadPedPool);
 	LoadSaveDataBlock();
 	ReadDataFromBlock("Loading Garages \n", CGarages::Load);
+	LoadSaveDataBlock();
+	ReadDataFromBlock("Loading GameLogic \n", CGameLogic::Load);
 	LoadSaveDataBlock();
 	ReadDataFromBlock("Loading Vehicles \n", CPools::LoadVehiclePool);
 	LoadSaveDataBlock();

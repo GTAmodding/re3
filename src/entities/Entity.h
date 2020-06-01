@@ -87,7 +87,7 @@ public:
 	uint32 m_flagE2 : 1;
 	uint32 bOffscreen : 1;               // offscreen flag. This can only be trusted when it is set to true
 	uint32 bIsStaticWaitingForCollision : 1; // this is used by script created entities - they are static until the collision is loaded below them
-	uint32 m_flagE10 : 1;	// probably bDontStream
+	uint32 bDontStream : 1;              // tell the streaming not to stream me
 	uint32 bUnderwater : 1;              // this object is underwater change drawing order
 	uint32 bHasPreRenderEffects : 1; // Object has a prerender effects attached to it
 

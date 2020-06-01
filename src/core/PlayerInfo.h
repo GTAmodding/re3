@@ -10,6 +10,13 @@ enum eWastedBustedState
 	WBSTATE_FAILED_CRITICAL_MISSION,
 };
 
+enum eBustedAudioState : uint8
+{
+	BUSTEDAUDIO_NONE,
+	BUSTEDAUDIO_LOADING,
+	BUSTEDAUDIO_DONE
+};
+
 class CEntity;
 class CPed;
 class CVehicle;
@@ -42,6 +49,7 @@ public:
 	uint32 m_nTimeLastHealthLoss;
 	uint32 m_nTimeLastArmourLoss;
 	uint32 m_nTimeTankShotGun;
+	int32 m_nTimeNotFullyOnGround;
 	int32 m_nUpsideDownCounter;
 	int32 field_248;
 	int16 m_nTrafficMultiplier;
@@ -60,6 +68,8 @@ public:
 	bool m_bGetOutOfJailFree;
 	bool m_bGetOutOfHospitalFree;
 	bool m_bDriveByAllowed;
+	eBustedAudioState m_nBustedAudioStatus;
+	int16 m_nCurrentBustedAudio;
 	char m_aSkinName[32];
 	RwTexture *m_pSkinTexture;
 

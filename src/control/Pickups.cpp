@@ -841,6 +841,7 @@ CPickups::RenderPickUpText()
 				if (aMessages[i].m_weaponType == WEAPONTYPE_TOTALWEAPONS) { // unreachable code?
 					// what is this??
 					sprintf(gString, "%d/%d", CWorld::Players[CWorld::PlayerInFocus].m_nCollectedPackages, 2903);
+					strToPrint = nil;
 				} else {
 					if (aMessages[i].m_bOutOfStock)
 						strToPrint = TheText.Get("STOCK");
@@ -972,6 +973,8 @@ CPickups::RenderPickUpText()
 				break;
 			}
 		}
+		if (strToPrint == nil)
+			continue;
 		CFont::SetPropOn();
 		CFont::SetBackgroundOff();
 

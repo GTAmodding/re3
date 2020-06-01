@@ -83,6 +83,7 @@ public:
 	void ProcessPlayerWeapon(CPad*);
 	void PlayerControlZelda(CPad*);
 	bool DoesPlayerWantNewWeapon(eWeaponType, bool);
+	void PlayIdleAnimations(CPad*);
 
 	static void SetupPlayerPed(int32);
 	static void DeactivatePlayerPed(int32);

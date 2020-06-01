@@ -156,7 +156,7 @@ CTempColModels::Initialise(void)
 	}
 
 	ms_colModelBumper1.boundingSphere.Set(2.2f, CVector(0.0f, -0.6f, 0.0f));
-	ms_colModelBumper1.boundingBox.Set(CVector(-1.2f, -0.3f, -0.2f), CVector(1.2f, 0.3f, -0.2f));
+	ms_colModelBumper1.boundingBox.Set(CVector(-1.2f, -0.3f, -0.2f), CVector(1.2f, 0.3f, 0.2f));
 
 	SET_COLMODEL_SPHERES(ms_colModelBumper1, s_aBumperSpheres);
 

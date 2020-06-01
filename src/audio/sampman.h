@@ -126,10 +126,10 @@ public:
 	void  StartChannel            (uint32 nChannel);
 	void  StopChannel             (uint32 nChannel);
 	
-	void  PreloadStreamedFile                                     (uint8 nFile, uint8 nStream);
+	void  PreloadStreamedFile                                    (uint32 nFile, uint8 nStream);
 	void  PauseStream                                        (uint8 nPauseFlag, uint8 nStream);
 	void  StartPreloadedStreamedFile                                           (uint8 nStream);
-	bool  StartStreamedFile                          (uint8 nFile, uint32 nPos, uint8 nStream);
+	bool  StartStreamedFile                         (uint32 nFile, uint32 nPos, uint8 nStream);
 	void  StopStreamedFile                                                     (uint8 nStream);
 	int32 GetStreamedFilePosition                                              (uint8 nStream);
 	void  SetStreamedVolumeAndPan(uint8 nVolume, uint8 nPan, uint8 nEffectFlag, uint8 nStream);

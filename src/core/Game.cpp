@@ -306,7 +306,7 @@ bool CGame::Initialise(const char* datFile)
 	CWorld::Players[0].LoadPlayerSkin();
 	TestModelIndices();
 	LoadingScreen("Loading the Game", "Setup water", nil);
-	CWaterLevel::Initialise("DATA\\WATER.DAT");
+	WaterLevelInitialise("DATA\\WATER.DAT");
 	TheConsole.Init();
 	CDraw::SetFOV(120.0f);
 	CDraw::ms_fLODDistance = 500.0f;
@@ -492,22 +492,7 @@ void CGame::ReInitGameObjectVariables(void)
 
 void CGame::ReloadIPLs(void)
 {
-	CTimer::Stop();
-	CWorld::RemoveStaticObjects();
-	ThePaths.Init();
-	CCullZones::Init();
-	CFileLoader::ReloadPaths("GTA3.IDE");
-	CFileLoader::LoadScene("INDUST.IPL");
-	CFileLoader::LoadScene("COMMER.IPL");
-	CFileLoader::LoadScene("SUBURBAN.IPL");
-	CFileLoader::LoadScene("CULL.IPL");
-	ThePaths.PreparePathData();
-	CTrafficLights::ScanForLightsOnMap();
-	CRoadBlocks::Init();
-	CCranes::InitCranes();
-	CGarages::Init();
-	CRenderer::SortBIGBuildings();
-	CTimer::Update();
+	// Empty and unused
 }
 
 void CGame::ShutDownForRestart(void)
@@ -523,6 +508,7 @@ void CGame::ShutDownForRestart(void)
 	CTheScripts::UndoBuildingSwaps();
 	CTheScripts::UndoEntityInvisibilitySettings();
 	CWorld::ClearForRestart();
+	CGameLogic::ClearShortCut();
 	CTimer::Shutdown();
 	CStreaming::FlushRequestList();
 	CStreaming::DeleteAllRwObjects();
@@ -577,7 +563,7 @@ void CGame::InitialiseWhenRestarting(void)
 			for ( int32 i = 0; i < 50; i++ )
 			{
 				HandleExit();
-				FrontEndMenuManager.MessageScreen("FED_LFL"); // Loading save game has failed. The game will restart now. 
+				FrontEndMenuManager.MessageScreen("FED_LFL", true); // Loading save game has failed. The game will restart now. 
 			}
 			
 			ShutDownForRestart();
@@ -683,6 +669,13 @@ CGame::InitAfterFocusLoss()
 
 	if (!FrontEndMenuManager.m_bGameNotLoaded && !FrontEndMenuManager.m_bMenuActive)
 		FrontEndMenuManager.m_bStartUpFrontEndRequested = true;
+}
+
+bool
+CGame::CanSeeWaterFromCurrArea(void)
+{
+	return currArea == AREA_MAIN_MAP || currArea == AREA_MANSION
+		|| currArea == AREA_HOTEL;
 }
 
 bool

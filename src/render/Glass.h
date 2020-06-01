@@ -1,6 +1,7 @@
 #pragma once
 
 class CEntity;
+class CVehicle;
 
 class CFallingGlassPane : public CMatrix
 {
@@ -49,4 +50,7 @@ public:
 	static void WindowRespondsToSoftCollision(CEntity *entity, float amount);
 	static void WasGlassHitByBullet(CEntity *entity, CVector point);
 	static void WindowRespondsToExplosion(CEntity *entity, CVector point);
+
+//TODO(MIAMI)
+	static void CarWindscreenShatters(CVehicle *vehicle, bool unk) {}
 };

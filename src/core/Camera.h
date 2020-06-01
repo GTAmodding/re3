@@ -85,6 +85,7 @@ public:
 		MODE_SPECIAL_FIXED_FOR_SYPHON,
 		MODE_FIGHT_CAM,
 		MODE_TOP_DOWN_PED,
+		MODE_LIGHTHOUSE,
 		MODE_SNIPER_RUNABOUT,
 		MODE_ROCKETLAUNCHER_RUNABOUT,
 		MODE_1STPERSON_RUNABOUT,
@@ -92,7 +93,6 @@ public:
 		MODE_FIGHT_CAM_RUNABOUT,
 		MODE_EDITOR,
 		MODE_HELICANNON_1STPERSON,
-		MODE_45,
 		MODE_CAMERA,
 	};
 
@@ -382,6 +382,7 @@ public:
 	bool m_WideScreenOn;
 	bool m_1rstPersonRunCloseToAWall;
 	bool m_bHeadBob;
+	bool m_bVehicleSuspenHigh;
 	bool m_bFailedCullZoneTestPreviously;
 
 	bool m_FadeTargetIsSplashScreen;

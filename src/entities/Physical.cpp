@@ -478,7 +478,9 @@ CPhysical::ApplySpringCollisionAlt(float springConst, CVector &springDir, CVecto
 		if(DotProduct(springDir, forceDir) > 0.0f)
 			forceDir *= -1.0f;
 		float step = Min(CTimer::GetTimeStep(), 3.0f);
-		float impulse = -GRAVITY*m_fMass*step * springConst * compression * bias*2.0f;
+		float impulse = GRAVITY*m_fMass*step * springConst * compression * bias*2.0f;
+		if(bIsHeavy)
+			impulse *= 0.75f;
 		ApplyMoveForce(forceDir*impulse);
 		ApplyTurnForce(forceDir*impulse, point);
 	}

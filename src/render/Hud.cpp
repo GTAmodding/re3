@@ -160,8 +160,7 @@ void CHud::Draw()
 		eWeaponType WeaponType = playerPed->GetWeapon()->m_eWeaponType;
 		int32 Mode = TheCamera.Cams[TheCamera.ActiveCam].Mode;
 
-		// TODO(Miami): New cam mode
-		if ((Mode == CCam::MODE_SNIPER || Mode == CCam::MODE_ROCKETLAUNCHER || Mode == CCam::MODE_M16_1STPERSON || Mode == CCam::MODE_HELICANNON_1STPERSON/* || Mode == 46*/)
+		if ((Mode == CCam::MODE_SNIPER || Mode == CCam::MODE_ROCKETLAUNCHER || Mode == CCam::MODE_M16_1STPERSON || Mode == CCam::MODE_HELICANNON_1STPERSON || Mode == CCam::MODE_CAMERA)
 			&& playerPed && !playerPed->GetWeapon()->IsTypeMelee())
 			DrawCrossHair = true;
 

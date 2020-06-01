@@ -113,6 +113,18 @@ CWeapon::UpdateWeapons(void)
 	CBulletInfo::Update();
 }
 
+//--MIAMI: done
+CWeapon::CWeapon(eWeaponType type, int32 ammo)
+{
+	m_eWeaponType = type;
+	m_eWeaponState = WEAPONSTATE_READY;
+	m_nAmmoTotal = Min(ammo, 99999);
+	m_nAmmoInClip = 0;
+	Reload();
+	m_nTimer = 0;
+	m_bAddRotOffset = false;
+}
+
 // --MIAMI: Done
 void
 CWeapon::Initialise(eWeaponType type, int32 ammo)
@@ -1965,6 +1977,7 @@ CWeapon::FireM16_1stPerson(CEntity *shooter)
 
 	if (!( mode == CCam::MODE_M16_1STPERSON
 		|| mode == CCam::MODE_SNIPER
+		|| mode == CCam::MODE_CAMERA
 		|| mode == CCam::MODE_ROCKETLAUNCHER
 		|| mode == CCam::MODE_M16_1STPERSON_RUNABOUT
 		|| mode == CCam::MODE_SNIPER_RUNABOUT

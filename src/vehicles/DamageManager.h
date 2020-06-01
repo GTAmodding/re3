@@ -86,7 +86,7 @@ public:
 	uint8 m_doorStatus[6];
 	uint32 m_lightStatus;
 	uint32 m_panelStatus;
-	uint32 field_24;
+	uint8 field_18;
 
 	CDamageManager(void);
 

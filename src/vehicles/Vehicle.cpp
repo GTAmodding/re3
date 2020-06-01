@@ -41,6 +41,8 @@ bool CVehicle::bCheat5;
 #ifdef ALT_DODO_CHEAT
 bool CVehicle::bAltDodoCheat;
 #endif
+bool CVehicle::bHoverCheat;
+bool CVehicle::bAllTaxisHaveNitro;
 bool CVehicle::m_bDisableMouseSteering = true;
 bool CVehicle::bDisableRemoteDetonation;
 bool CVehicle::bDisableRemoteDetonationOnContact;
@@ -125,7 +127,7 @@ CVehicle::CVehicle(uint8 CreatedBy)
 	bCreatedAsPoliceVehicle = false;
 	bRestingOnPhysical = false;
 	bParking = false;
-	bCanPark = CGeneral::GetRandomNumberInRange(0.0f, 1.0f) < 0.0f;	// BUG? this makes no sense
+	bCanPark = CGeneral::GetRandomNumberInRange(0.0f, 1.0f) < 0.0f;	// never true. probably doesn't work very well
 	bIsVan = false;
 	bIsBus = false;
 	bIsBig = false;
@@ -344,7 +346,7 @@ CVehicle::FlyingControl(eFlightModel flightModel)
 
 		// thrust
 		float fForwSpeed = DotProduct(GetMoveSpeed(), GetForward());
-		CVector vecWidthForward = GetColModel()->boundingBox.min.y * GetForward();
+		CVector vecTail = GetColModel()->boundingBox.min.y * GetForward();
 		float fThrust = (CPad::GetPad(0)->GetAccelerate() - CPad::GetPad(0)->GetBrake()) / 255.0f;
 		float fThrustAccel;
 		if(fForwSpeed > 0.0f || fThrust > 0.0f)
@@ -362,9 +364,9 @@ CVehicle::FlyingControl(eFlightModel flightModel)
 		float fSideSlipAccel = pFlyingHandling->fSideSlip * fSideSpeed * Abs(fSideSpeed);
 		ApplyMoveForce(m_fMass * GetRight() * fSideSlipAccel * CTimer::GetTimeStep());
 
-		float fYaw = -DotProduct(GetSpeed(vecWidthForward), GetRight());
+		float fYaw = -DotProduct(GetSpeed(vecTail), GetRight());
 		float fYawAccel = pFlyingHandling->fYawStab * fYaw * Abs(fYaw) + pFlyingHandling->fYaw * fSteerLR * fForwSpeed;
-		ApplyTurnForce(fYawAccel * GetRight() * m_fTurnMass * CTimer::GetTimeStep(), vecWidthForward);
+		ApplyTurnForce(fYawAccel * GetRight() * m_fTurnMass * CTimer::GetTimeStep(), vecTail);
 
 		float fRollAccel;
 		if (flightModel == FLIGHT_MODEL_RCPLANE) {
@@ -384,9 +386,9 @@ CVehicle::FlyingControl(eFlightModel flightModel)
 		ApplyTurnForce(fStabiliseSpeed * m_fTurnMass * GetRight(), GetUp()); // no CTimer::GetTimeStep(), is it right?
 
 		// up/down
-		float fTail = -DotProduct(GetSpeed(vecWidthForward), GetUp());
+		float fTail = -DotProduct(GetSpeed(vecTail), GetUp());
 		float fPitchAccel = pFlyingHandling->fPitchStab * fTail * Abs(fTail) + pFlyingHandling->fPitch * fSteerUD * fForwSpeed;
-		ApplyTurnForce(fPitchAccel * m_fTurnMass * GetUp() * CTimer::GetTimeStep(), vecWidthForward);
+		ApplyTurnForce(fPitchAccel * m_fTurnMass * GetUp() * CTimer::GetTimeStep(), vecTail);
 
 		float fLift = -DotProduct(GetMoveSpeed(), GetUp()) / Max(0.01f, GetMoveSpeed().Magnitude());
 		float fLiftAccel = (pFlyingHandling->fAttackLift * fLift + pFlyingHandling->fFormLift) * fForwSpeed * fForwSpeed;
@@ -554,7 +556,7 @@ CVehicle::DoBladeCollision(CVector pos, CMatrix &matrix, int16 rotorType, float 
 	rotorColModel.numSpheres = 1;
 
 	pos = matrix * pos;
-	bool hadCollision;
+	bool hadCollision = false;
 	int minX = CWorld::GetSectorIndexX(pos.x - radius);
 	if(minX <= 0) minX = 0;
 
@@ -655,7 +657,7 @@ CVehicle::BladeColSectorList(CPtrList &list, CColModel &rotorColModel, CMatrix &
 		if(entity->IsPed())
 			entityCol = ((CPedModelInfo*)CModelInfo::GetModelInfo(entity->GetModelIndex()))->AnimatePedColModelSkinned(entity->GetClump());
 		else
-			entityCol = CModelInfo::GetModelInfo(entity->GetModelIndex())->GetColModel();
+			entityCol = entity->GetColModel();
 		if(entityCol)
 			numCollisions = CCollision::ProcessColModels(matrix, rotorColModel, entity->GetMatrix(), *entityCol,
 				CWorld::m_aTempColPts, nil, nil);
@@ -690,10 +692,12 @@ CVehicle::BladeColSectorList(CPtrList &list, CColModel &rotorColModel, CMatrix &
 				CVector localColpos = colpos - center;
 				float axisDir = DotProduct(axis, localColpos);
 				float colDir = DotProduct(CWorld::m_aTempColPts[i].normal, localColpos);
+
 				if(2.0f*ROTOR_SEMI_THICKNESS < Abs(axisDir) &&
 				   ROTOR_DISGUARD_MULT*Abs(colDir) < Abs(axisDir))
 					continue;
 
+				hadCollision = true;
 				colpos -= axisDir*axis;	// get rid of axis component
 
 				CVector tangentSpeed = CrossProduct(turnSpeed, colpos - center);
@@ -707,19 +711,18 @@ CVehicle::BladeColSectorList(CPtrList &list, CColModel &rotorColModel, CMatrix &
 				// Apply Collision
 				if(IsCar()){
 					CAutomobile *heli = (CAutomobile*)this;
-					if(heli->m_fRotorSpeed > 0.15f){
+					if(heli->m_aWheelSpeed[1] > 0.15f){
 						ApplyCollision(CWorld::m_aTempColPts[i], impulse);
 						ApplyTurnForce(m_fTurnMass*ROTOR_COL_TURNMULT*tangentSpeed, colpos - center);
-						heli->m_fRotorSpeed = 0.15f;
-					}else if(heli->m_fRotorSpeed < 0.075f && heli->m_fRotorSpeed > 0.0f)
-						heli->m_fRotorSpeed *= -1.0f;
+						heli->m_aWheelSpeed[1] = 0.15f;
+					}else if(heli->m_aWheelSpeed[1] < 0.075f && heli->m_aWheelSpeed[1] > 0.0f)
+						heli->m_aWheelSpeed[1] *= -1.0f;
 				}
 
 				float damageImpulse = damageMult * Max(impulse, ROTOR_DEFAULT_DAMAGE*m_fMass/3000.0f);
 				if(damageImpulse > m_fDamageImpulse)
 					SetDamagedPieceRecord(0, damageImpulse, entity, CWorld::m_aTempColPts[i].normal);
 
-				hadCollision = true;
 			}
 
 			if(hadCollision && !entity->IsPed())
@@ -1395,7 +1398,7 @@ CVehicle::ShufflePassengersToMakeSpace(void)
 		return false;
 	if (pPassengers[1] &&
 		!(m_nGettingInFlags & CAR_DOOR_FLAG_LR) &&
-		IsRoomForPedToLeaveCar(COMPONENT_DOOR_REAR_LEFT, nil)) {
+		IsRoomForPedToLeaveCar(CAR_DOOR_LR, nil)) {
 		if (!pPassengers[2] && !(m_nGettingInFlags & CAR_DOOR_FLAG_RR)) {
 			pPassengers[2] = pPassengers[1];
 			pPassengers[1] = nil;
@@ -1412,7 +1415,7 @@ CVehicle::ShufflePassengersToMakeSpace(void)
 	}
 	if (pPassengers[2] &&
 		!(m_nGettingInFlags & CAR_DOOR_FLAG_RR) &&
-		IsRoomForPedToLeaveCar(COMPONENT_DOOR_REAR_RIGHT, nil)) {
+		IsRoomForPedToLeaveCar(CAR_DOOR_RR, nil)) {
 		if (!pPassengers[1] && !(m_nGettingInFlags & CAR_DOOR_FLAG_LR)) {
 			pPassengers[1] = pPassengers[2];
 			pPassengers[2] = nil;
@@ -1429,7 +1432,7 @@ CVehicle::ShufflePassengersToMakeSpace(void)
 	}
 	if (pPassengers[0] &&
 		!(m_nGettingInFlags & CAR_DOOR_FLAG_RF) &&
-		IsRoomForPedToLeaveCar(COMPONENT_DOOR_FRONT_RIGHT, nil)) {
+		IsRoomForPedToLeaveCar(CAR_DOOR_RF, nil)) {
 		if (!pPassengers[1] && !(m_nGettingInFlags & CAR_DOOR_FLAG_LR)) {
 			pPassengers[1] = pPassengers[0];
 			pPassengers[0] = nil;
@@ -1581,9 +1584,8 @@ CVehicle::CarHasRoof(void)
 {
 	if((pHandling->Flags & HANDLING_HAS_NO_ROOF) == 0)
 		return true;
-	if(m_aExtras[0] && m_aExtras[1])
-		return false;
-	return true;
+	// component 0 is assumed to be a roof
+	return m_aExtras[0] == 0 || m_aExtras[1] == 0;
 }
 
 bool
@@ -1710,6 +1712,15 @@ CVehicle::CanPedExitCar(bool jumpExit)
 			return false;
 		return true;
 	}
+}
+
+bool
+CVehicle::CanPedJumpOutCar(void)
+{
+	if(GetUp().z < 0.3f)
+		return false;
+	float speed = m_vecMoveSpeed.MagnitudeSqr();
+	return speed < 0.1f || speed > 0.5f ? false : true;
 }
 
 bool
@@ -1977,7 +1988,7 @@ CVehicle::ProcessCarAlarm(void)
 {
 	uint32 step;
 
-	if(m_nAlarmState == 0 || m_nAlarmState == -1)
+	if(!IsAlarmOn())
 		return;
 
 	step = CTimer::GetTimeStepInMilliseconds();
@@ -2263,6 +2274,32 @@ CVehicle::DoSunGlare(void)
 				CCoronas::TYPE_STAR, CCoronas::FLARE_NONE,
 				CCoronas::REFLECTION_OFF, CCoronas::LOSCHECK_OFF,
 				CCoronas::STREAK_OFF, 0.0f);
+		}
+	}
+}
+
+void
+CVehicle::KillPedsInVehicle(void)
+{
+	int i;
+	if(pDriver){
+		CDarkel::RegisterKillByPlayer(pDriver, WEAPONTYPE_EXPLOSION);
+		if(pDriver->GetPedState() == PED_DRIVING){
+			pDriver->SetDead();
+			if(!pDriver->IsPlayer())
+				pDriver->FlagToDestroyWhenNextProcessed();
+		}else
+			pDriver->SetDie(ANIM_KO_SHOT_FRONT1, 4.0f, 0.0f);
+	}
+	for(i = 0; i < m_nNumMaxPassengers; i++){
+		if(pPassengers[i]){
+			CDarkel::RegisterKillByPlayer(pPassengers[i], WEAPONTYPE_EXPLOSION);
+			if(pPassengers[i]->GetPedState() == PED_DRIVING){
+				pPassengers[i]->SetDead();
+				if(!pPassengers[i]->IsPlayer())
+					pPassengers[i]->FlagToDestroyWhenNextProcessed();
+			}else
+				pPassengers[i]->SetDie(ANIM_KO_SHOT_FRONT1, 4.0f, 0.0f);
 		}
 	}
 }

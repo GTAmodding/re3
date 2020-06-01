@@ -47,6 +47,12 @@ CMatrix::RotateX(float x)
 }
 
 void
+CMatrix::RotateY(float y)
+{
+	Rotate(0.0f, y, 0.0f);
+}
+
+void
 CMatrix::RotateZ(float z)
 {
 	Rotate(0.0f, 0.0f, z);

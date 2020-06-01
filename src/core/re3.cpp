@@ -335,15 +335,18 @@ DebugMenuPopulate(void)
 		DebugMenuAddCmd("Spawn", "Spawn Stinger", [](){ SpawnCar(MI_STINGER); });
 		DebugMenuAddCmd("Spawn", "Spawn Infernus", [](){ SpawnCar(MI_INFERNUS); });
 		DebugMenuAddCmd("Spawn", "Spawn Cheetah", [](){ SpawnCar(MI_CHEETAH); });
+		DebugMenuAddCmd("Spawn", "Spawn Phoenix", [](){ SpawnCar(MI_PHEONIX); });
+		DebugMenuAddCmd("Spawn", "Spawn Banshee", [](){ SpawnCar(MI_BANSHEE); });
 		DebugMenuAddCmd("Spawn", "Spawn Esperanto", [](){ SpawnCar(MI_ESPERANT); });
 		DebugMenuAddCmd("Spawn", "Spawn Stallion", [](){ SpawnCar(MI_STALLION); });
+		DebugMenuAddCmd("Spawn", "Spawn Admiral", [](){ SpawnCar(MI_ADMIRAL); });
 		DebugMenuAddCmd("Spawn", "Spawn Washington", [](){ SpawnCar(MI_WASHING); });
 		DebugMenuAddCmd("Spawn", "Spawn Taxi", [](){ SpawnCar(MI_TAXI); });
 		DebugMenuAddCmd("Spawn", "Spawn Police", [](){ SpawnCar(MI_POLICE); });
 		DebugMenuAddCmd("Spawn", "Spawn Enforcer", [](){ SpawnCar(MI_ENFORCER); });
-		DebugMenuAddCmd("Spawn", "Spawn Banshee", [](){ SpawnCar(MI_BANSHEE); });
 		DebugMenuAddCmd("Spawn", "Spawn Cuban", [](){ SpawnCar(MI_CUBAN); });
 		DebugMenuAddCmd("Spawn", "Spawn Voodoo", [](){ SpawnCar(MI_VOODOO); });
+		DebugMenuAddCmd("Spawn", "Spawn BF injection", [](){ SpawnCar(MI_BFINJECT); });
 		DebugMenuAddCmd("Spawn", "Spawn Maverick", [](){ SpawnCar(MI_MAVERICK); });
 		DebugMenuAddCmd("Spawn", "Spawn VCN Maverick", [](){ SpawnCar(MI_VCNMAV); });
 		DebugMenuAddCmd("Spawn", "Spawn Sparrow", [](){ SpawnCar(MI_SPARROW); });
@@ -383,25 +386,13 @@ DebugMenuPopulate(void)
 		DebugMenuAddCmd("Debug", "Toggle Comedy Controls", ToggleComedy);
 		DebugMenuAddCmd("Debug", "Place Car on Road", PlaceOnRoad);
 
-		DebugMenuAddVarBool8("Debug", "Catalina Heli On", &CHeli::CatalinaHeliOn, nil);
-		DebugMenuAddCmd("Debug", "Catalina Fly By", CHeli::StartCatalinaFlyBy);
-		DebugMenuAddCmd("Debug", "Catalina Take Off", CHeli::CatalinaTakeOff);
-		DebugMenuAddCmd("Debug", "Catalina Fly Away", CHeli::MakeCatalinaHeliFlyAway);
 		DebugMenuAddVarBool8("Debug", "Script Heli On", &CHeli::ScriptHeliOn, nil);
-
-#ifdef TOGGLEABLE_BETA_FEATURES
-		DebugMenuAddVarBool8("Debug", "Toggle popping heads on headshot", &CPed::bPopHeadsOnHeadshot, nil);
-		DebugMenuAddVarBool8("Debug", "Toggle peds running to phones to report crimes", &CPed::bMakePedsRunToPhonesToReportCrimes, nil);
-#endif
 
 		DebugMenuAddCmd("Debug", "Start Credits", CCredits::Start);
 		DebugMenuAddCmd("Debug", "Stop Credits", CCredits::Stop);
 
 #ifdef RELOADABLES
 		DebugMenuAddCmd("Reload", "HUD.TXD", CHud::ReloadTXD);
-		DebugMenuAddCmd("Reload", "FONTS.TXD", NULL);
-		DebugMenuAddCmd("Reload", "FRONTEN1.TXD", NULL);
-		DebugMenuAddCmd("Reload", "FRONTEN2.TXD", NULL);
 #endif
 
 		extern bool PrintDebugCode;

@@ -17,6 +17,7 @@
 #include "Darkel.h"
 #include "CarCtrl.h"
 #include "MBlur.h"
+#include "Streaming.h"
 
 #define PAD_MOVE_TO_GAME_WORLD_MOVE 60.0f
 
@@ -26,6 +27,8 @@ const uint32 CPlayerPed::nSaveStructSize =
 #else
 	sizeof(CPlayerPed);
 #endif
+
+int32 idleAnimBlockIndex;
 
 CPlayerPed::~CPlayerPed()
 {
@@ -79,7 +82,7 @@ CPlayerPed::CPlayerPed(void) : CPed(PEDTYPE_PLAYER1)
 	m_nCheckPlayersIndex = 0;
 	m_nPadUpPressedInMilliseconds = 0;
 	m_nPadDownPressedInMilliseconds = 0;
-	// TODO(Miami): Idle anim block index
+	idleAnimBlockIndex = CAnimManager::GetAnimationBlockIndex("playidles");
 }
 
 void CPlayerPed::ClearWeaponTarget()
@@ -113,11 +116,7 @@ void
 CPlayerPed::MakeObjectTargettable(int32 handle)
 {
 	for (int i = 0; i < ARRAY_SIZE(m_nTargettableObjects); i++) {
-		if (
-#ifdef FIX_BUGS
-			m_nTargettableObjects[i] == -1 ||
-#endif
-			CPools::GetObjectPool()->GetAt(m_nTargettableObjects[i]) == nil) {
+		if (CPools::GetObjectPool()->GetAt(m_nTargettableObjects[i]) == nil) {
 			m_nTargettableObjects[i] = handle;
 			return;
 		}
@@ -633,7 +632,7 @@ CPlayerPed::PlayerControlSniper(CPad *padUsed)
 	GetWeapon()->Update(m_audioEntityId, nil);
 }
 
-// --MIAMI: Made compatible with slots, but still TODO
+// --MIAMI: Done except commented thing
 // I think R* also used goto in here.
 void
 CPlayerPed::ProcessWeaponSwitch(CPad *padUsed)
@@ -641,6 +640,7 @@ CPlayerPed::ProcessWeaponSwitch(CPad *padUsed)
 	if (CDarkel::FrenzyOnGoing() || m_attachedTo)
 		goto switchDetectDone;
 
+	// TODO(Miami): byte_A10B57
 	if (!m_pPointGunAt && /* !byte_A10B57 && */ GetWeapon()->m_eWeaponType != WEAPONTYPE_DETONATOR) {
 		if (padUsed->CycleWeaponRightJustDown()) {
 
@@ -649,7 +649,8 @@ CPlayerPed::ProcessWeaponSwitch(CPad *padUsed)
 				&& TheCamera.PlayerWeaponMode.Mode != CCam::MODE_SNIPER
 				&& TheCamera.PlayerWeaponMode.Mode != CCam::MODE_SNIPER_RUNABOUT
 				&& TheCamera.PlayerWeaponMode.Mode != CCam::MODE_ROCKETLAUNCHER
-				&& TheCamera.PlayerWeaponMode.Mode != CCam::MODE_ROCKETLAUNCHER_RUNABOUT) {
+				&& TheCamera.PlayerWeaponMode.Mode != CCam::MODE_ROCKETLAUNCHER_RUNABOUT
+				&& TheCamera.PlayerWeaponMode.Mode != CCam::MODE_CAMERA) {
 
 				for (m_nSelectedWepSlot = m_currentWeapon + 1; m_nSelectedWepSlot < TOTAL_WEAPON_SLOTS; ++m_nSelectedWepSlot) {
 					if (HasWeaponSlot(m_nSelectedWepSlot) && GetWeapon(m_nSelectedWepSlot).HasWeaponAmmoToBeUsed()) {
@@ -661,7 +662,8 @@ CPlayerPed::ProcessWeaponSwitch(CPad *padUsed)
 		} else if (padUsed->CycleWeaponLeftJustDown()) {
 			if (TheCamera.PlayerWeaponMode.Mode != CCam::MODE_M16_1STPERSON
 				&& TheCamera.PlayerWeaponMode.Mode != CCam::MODE_SNIPER
-				&& TheCamera.PlayerWeaponMode.Mode != CCam::MODE_ROCKETLAUNCHER) {
+				&& TheCamera.PlayerWeaponMode.Mode != CCam::MODE_ROCKETLAUNCHER
+				&& TheCamera.PlayerWeaponMode.Mode != CCam::MODE_CAMERA) {
 
 				for (m_nSelectedWepSlot = m_currentWeapon - 1; ; --m_nSelectedWepSlot) {
 					if (m_nSelectedWepSlot < 0)
@@ -682,31 +684,31 @@ spentAmmoCheck:
 	if (CWeaponInfo::GetWeaponInfo(GetWeapon()->m_eWeaponType)->m_eWeaponFire != WEAPON_FIRE_MELEE
 		&& (!padUsed->GetWeapon() || GetWeapon()->m_eWeaponType != WEAPONTYPE_MINIGUN)) {
 		if (GetWeapon()->m_nAmmoTotal <= 0) {
-			if (TheCamera.PlayerWeaponMode.Mode != CCam::MODE_M16_1STPERSON
-				&& TheCamera.PlayerWeaponMode.Mode != CCam::MODE_SNIPER
-				&& TheCamera.PlayerWeaponMode.Mode != CCam::MODE_ROCKETLAUNCHER) {
+			if (TheCamera.PlayerWeaponMode.Mode == CCam::MODE_M16_1STPERSON
+				|| TheCamera.PlayerWeaponMode.Mode == CCam::MODE_SNIPER
+				|| TheCamera.PlayerWeaponMode.Mode == CCam::MODE_ROCKETLAUNCHER)
+				return;
 
-				if (GetWeapon()->m_eWeaponType != WEAPONTYPE_DETONATOR
-					|| GetWeapon(2).m_eWeaponType != WEAPONTYPE_DETONATOR_GRENADE)
-					m_nSelectedWepSlot = m_currentWeapon - 1;
-				else
-					m_nSelectedWepSlot = 2;
+			if (GetWeapon()->m_eWeaponType != WEAPONTYPE_DETONATOR
+				|| GetWeapon(2).m_eWeaponType != WEAPONTYPE_DETONATOR_GRENADE)
+				m_nSelectedWepSlot = m_currentWeapon - 1;
+			else
+				m_nSelectedWepSlot = 2;
 
-				for (; m_nSelectedWepSlot >= 0; --m_nSelectedWepSlot) {
+			for (; m_nSelectedWepSlot >= 0; --m_nSelectedWepSlot) {
 
-					// BUG: m_nSelectedWepSlot and GetWeapon(..) takes slot in VC but they compared them against weapon types in whole condition! jeez
+				// BUG: m_nSelectedWepSlot and GetWeapon(..) takes slot in VC but they compared them against weapon types in whole condition! jeez
 #ifdef FIX_BUGS
-					if (m_nSelectedWepSlot == 1 || GetWeapon(m_nSelectedWepSlot).m_nAmmoTotal > 0 && m_nSelectedWepSlot != 2) {
+				if (m_nSelectedWepSlot == 1 || GetWeapon(m_nSelectedWepSlot).m_nAmmoTotal > 0 && m_nSelectedWepSlot != 2) {
 #else
-					if (m_nSelectedWepSlot == WEAPONTYPE_BASEBALLBAT && GetWeapon(WEAPONTYPE_BASEBALLBAT).m_eWeaponType == WEAPONTYPE_BASEBALLBAT
-						|| GetWeapon(m_nSelectedWepSlot).m_nAmmoTotal > 0
-						&& m_nSelectedWepSlot != WEAPONTYPE_MOLOTOV && m_nSelectedWepSlot != WEAPONTYPE_GRENADE && m_nSelectedWepSlot != WEAPONTYPE_TEARGAS) {
+				if (m_nSelectedWepSlot == WEAPONTYPE_BASEBALLBAT && GetWeapon(WEAPONTYPE_BASEBALLBAT).m_eWeaponType == WEAPONTYPE_BASEBALLBAT
+					|| GetWeapon(m_nSelectedWepSlot).m_nAmmoTotal > 0
+					&& m_nSelectedWepSlot != WEAPONTYPE_MOLOTOV && m_nSelectedWepSlot != WEAPONTYPE_GRENADE && m_nSelectedWepSlot != WEAPONTYPE_TEARGAS) {
 #endif
-						goto switchDetectDone;
-					}
+					goto switchDetectDone;
 				}
-				m_nSelectedWepSlot = 0;
 			}
+			m_nSelectedWepSlot = 0;
 		}
 	}
 
@@ -1005,7 +1007,7 @@ CPlayerPed::FindWeaponLockOnTarget(void)
 	return true;
 }
 
-// --MIAMI: Done, but uncomment new weapon types when weapons got ported
+// --MIAMI: Done
 void
 CPlayerPed::ProcessAnimGroups(void)
 {
@@ -1337,6 +1339,7 @@ CPlayerPed::PlayerControlZelda(CPad *padUsed)
 			SetJump();
 		}
 	}
+	PlayIdleAnimations(padUsed);
 }
 
 void
@@ -1628,6 +1631,74 @@ CPlayerPed::DoesPlayerWantNewWeapon(eWeaponType weapon, bool onlyIfSlotIsEmpty)
 
 	// Check if he's using that slot right now.
 	return m_nPedState != PED_ATTACK && m_nPedState != PED_AIM_GUN || slot != m_currentWeapon;
+}
+
+// TODO(Miami): This only works on gamepad cam! This isn't fair
+void
+CPlayerPed::PlayIdleAnimations(CPad *padUsed)
+{
+	CAnimBlendAssociation* assoc;
+
+	if (TheCamera.m_WideScreenOn || bIsDucking)
+		return;
+
+	struct animAndGroup {
+		AnimationId animId;
+		AssocGroupId groupId;
+	};
+
+	const animAndGroup idleAnims[] = {
+		{ANIM_IDLE_STRETCH, ASSOCGRP_PLAYER_IDLE},
+		{ANIM_IDLE_TIME, ASSOCGRP_PLAYER_IDLE},
+		{ANIM_IDLE_SHOULDER, ASSOCGRP_PLAYER_IDLE},
+		{ANIM_IDLE_STRETCH_LEG, ASSOCGRP_PLAYER_IDLE},
+		{ANIM_XPRESS_SCRATCH, ASSOCGRP_STD},
+	};
+
+	static int32 lastTime = 0;
+	static int32 lastAnim = -1;
+
+	bool hasIdleAnim = false;
+	CAnimBlock *idleAnimBlock = CAnimManager::GetAnimationBlock(idleAnimBlockIndex);
+	uint32 sinceLastInput = padUsed->InputHowLongAgo();
+	if (sinceLastInput <= 30000) {
+		if (idleAnimBlock->isLoaded) {
+			for (assoc = RpAnimBlendClumpGetFirstAssociation(GetClump()); assoc; assoc = RpAnimBlendGetNextAssociation(assoc)) {
+				if (assoc->flags & ASSOC_IDLE) {
+					hasIdleAnim = true;
+					assoc->blendDelta = -8.0f;
+				}
+			}
+			if (!hasIdleAnim)
+				CStreaming::RemoveAnim(idleAnimBlockIndex);
+		} else {
+			lastTime = 0;
+		}
+	} else {
+		CStreaming::RequestAnim(idleAnimBlockIndex, STREAMFLAGS_DONT_REMOVE);
+		if (idleAnimBlock->isLoaded) {
+			for(CAnimBlendAssociation *assoc = RpAnimBlendClumpGetFirstAssociation(GetClump()); assoc; assoc = RpAnimBlendGetNextAssociation(assoc)) {
+				int firstIdle = idleAnimBlock->firstIndex;
+				int index = assoc->hierarchy - CAnimManager::GetAnimation(0);
+				if (index >= firstIdle && index < firstIdle + idleAnimBlock->numAnims) {
+					hasIdleAnim = true;
+					break;
+				}
+			}
+
+			if (!hasIdleAnim && !bIsLooking && !bIsRestoringLook && sinceLastInput - lastTime > 25000) {
+				int anim;
+				do
+					anim = CGeneral::GetRandomNumberInRange(0, ARRAY_SIZE(idleAnims));
+				while (lastAnim == anim);
+
+				assoc = CAnimManager::BlendAnimation(GetClump(), idleAnims[anim].groupId, idleAnims[anim].animId, 8.0f);
+				assoc->flags |= ASSOC_IDLE;
+				lastAnim = anim;
+				lastTime = sinceLastInput;
+			}
+		}
+	}
 }
 
 #ifdef COMPATIBLE_SAVES

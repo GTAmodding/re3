@@ -23,4 +23,7 @@ public:
 	static void Init(void);
 	static void AddOne(float x, float y, float z, float width, float length, float height, float angle);
 	static void ProcessBeforeRendering(void);
+	
+	//TODO:
+	static bool IsAABoxOccluded(CVector pos, float, float, float) { return false; }
 };

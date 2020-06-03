@@ -165,7 +165,9 @@ CustomFrontendOptionsPopulate(void)
 #endif
 
 #ifdef DEBUGMENU
-void WeaponCheat();
+void WeaponCheat1();
+void WeaponCheat2();
+void WeaponCheat3();
 void HealthCheat();
 void VehicleCheat(bool something, int model);
 void BlowUpCarsCheat();
@@ -397,7 +399,9 @@ DebugMenuPopulate(void)
 		DebugMenuAddVar("Time & Weather", "Wind", (float*)&CWeather::Wind, nil, 0.1f, 0.0f, 1.0f);
 		DebugMenuAddVar("Time & Weather", "Time scale", (float*)&CTimer::GetTimeScale(), nil, 0.1f, 0.0f, 10.0f);
 
-		DebugMenuAddCmd("Cheats", "Weapons", WeaponCheat);
+		DebugMenuAddCmd("Cheats", "Weapon set 1", WeaponCheat1);
+		DebugMenuAddCmd("Cheats", "Weapon set 2", WeaponCheat2);
+		DebugMenuAddCmd("Cheats", "Weapon set 3", WeaponCheat3);
 		DebugMenuAddCmd("Cheats", "Money", MoneyCheat);
 		DebugMenuAddCmd("Cheats", "Health", HealthCheat);
 		DebugMenuAddCmd("Cheats", "Wanted level up", WantedLevelUpCheat);

@@ -98,7 +98,13 @@ void CBulletInfo::Update(void)
 			if (pHitEntity->IsPed()) {
 				CPed* pPed = (CPed*)pHitEntity;
 				if (!pPed->DyingOrDead() && pPed != pBullet->m_pSource) {
-					if (pPed->DoesLOSBulletHitPed(point)) {
+					if (
+#ifndef FIX_BUGS //	headshots issue
+						pPed->DoesLOSBulletHitPed(point)
+#else
+						true
+#endif
+					) {
 						if (pPed->IsPedInControl() && !pPed->bIsDucking) {
 							pPed->ClearAttackByRemovingAnim();
 							CAnimBlendAssociation* pAnim = CAnimManager::AddAnimation(pPed->GetClump(), ASSOCGRP_STD, ANIM_SHOT_FRONT_PARTIAL);

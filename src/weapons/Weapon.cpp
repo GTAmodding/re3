@@ -876,7 +876,13 @@ CWeapon::DoBulletImpact(CEntity *shooter, CEntity *victim,
 			CPed *victimPed = (CPed *)victim;
 			if ( !victimPed->OnGround() && victim != shooter )
 			{
-				if ( victimPed->DoesLOSBulletHitPed(*point) )
+				if (
+#ifndef FIX_BUGS //	headshots issue
+						victimPed->DoesLOSBulletHitPed(*point)
+#else
+						true
+#endif
+				)
 				{
 					CVector pos = victimPed->GetPosition();
 
@@ -1214,7 +1220,13 @@ CWeapon::FireShotgun(CEntity *shooter, CVector *fireSource)
 			if ( victim->IsPed() )
 			{
 				CPed *victimPed = (CPed *)victim;
-				if ( !victimPed->OnGround() && victim != shooter && victimPed->DoesLOSBulletHitPed(point) )
+				if ( !victimPed->OnGround() && victim != shooter &&
+#ifndef FIX_BUGS //	headshots issue
+						victimPed->DoesLOSBulletHitPed(point)
+#else
+						true
+#endif
+				  )
 				{
 					bool cantStandup = true;
 

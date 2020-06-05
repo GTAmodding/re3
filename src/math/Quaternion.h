@@ -60,6 +60,7 @@ public:
 	}
 
 	void Slerp(const CQuaternion &q1, const CQuaternion &q2, float theta, float invSin, float t);
+	void Set(RwV3d *axis, float angle);
 	void Get(RwMatrix *matrix);
 };
 

@@ -88,8 +88,6 @@
 #include "Occlusion.h"
 #include "debugmenu.h"
 
-
-
 eLevelName CGame::currLevel;
 int32 CGame::currArea;
 bool CGame::bDemoMode = true;
@@ -237,6 +235,9 @@ bool CGame::InitialiseOnceAfterRW(void)
 	DMAudio.SetMusicFadeVol(127);
 	CWorld::Players[0].SetPlayerSkin(FrontEndMenuManager.m_PrefsSkinFile);
 
+#ifdef CUSTOM_FRONTEND_OPTIONS
+	CustomFrontendOptionsPopulate();
+#endif
 	return true;
 }
 

@@ -31,15 +31,6 @@ enum eCarNodes
 	NUM_CAR_NODES,
 };
 
-enum eCarPositions
-{
-	CAR_POS_HEADLIGHTS,
-	CAR_POS_TAILLIGHTS,
-	CAR_POS_FRONTSEAT,
-	CAR_POS_BACKSEAT,
-	CAR_POS_EXHAUST
-};
-
 // These are used for all the wheel arrays
 // DON'T confuse with VEHWHEEL, which are vehicle components
 enum {
@@ -47,16 +38,6 @@ enum {
 	CARWHEEL_REAR_LEFT,
 	CARWHEEL_FRONT_RIGHT,
 	CARWHEEL_REAR_RIGHT
-};
-
-enum eBombType
-{
-	CARBOMB_NONE,
-	CARBOMB_TIMED,
-	CARBOMB_ONIGNITION,
-	CARBOMB_REMOTE,
-	CARBOMB_TIMEDACTIVE,
-	CARBOMB_ONIGNITIONACTIVE,
 };
 
 enum {

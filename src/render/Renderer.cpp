@@ -7,6 +7,7 @@
 #include "Ped.h"
 #include "Vehicle.h"
 #include "Heli.h"
+#include "Bike.h"
 #include "Object.h"
 #include "PathFind.h"
 #include "Collision.h"
@@ -21,7 +22,7 @@
 #include "Occlusion.h"
 #include "Renderer.h"
 
-//--MIAMI: file almost done, just one bike flag left
+//--MIAMI: file done
 
 bool gbShowCollisionPolys;
 bool gbShowCollisionLines;
@@ -356,8 +357,7 @@ CRenderer::SetupEntityVisibility(CEntity *ent)
 		if(mi->GetModelType() != MITYPE_SIMPLE && mi->GetModelType() != MITYPE_WEAPON){
 			if(FindPlayerVehicle() == ent &&
 			   TheCamera.Cams[TheCamera.ActiveCam].Mode == CCam::MODE_1STPERSON &&
-//TODO(MIAMI): that bike flag
-			   (!FindPlayerVehicle()->IsBike() || true)){
+			   !(FindPlayerVehicle()->IsBike() && ((CBike*)FindPlayerVehicle())->m_bike_flag80)){
 				// Player's vehicle in first person mode
 				CVehicle *veh = (CVehicle*)ent;
 				int model = veh->GetModelIndex();

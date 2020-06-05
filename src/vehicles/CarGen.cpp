@@ -3,6 +3,7 @@
 #include "CarGen.h"
 
 #include "Automobile.h"
+#include "Bike.h"
 #include "Boat.h"
 #include "Camera.h"
 #include "CarCtrl.h"
@@ -88,7 +89,7 @@ void CCarGenerator::DoInternalProcessing()
 		pBoat->SetOrientation(0.0f, 0.0f, DEGTORAD(m_fAngle));
 		pBoat->SetStatus(STATUS_ABANDONED);
 		pBoat->m_nDoorLock = CARLOCK_UNLOCKED;
-	}else{ // TODO(MIAMI): bikes
+	}else{
 		bool groundFound = false;
 		CVector pos = m_vecPos;
 		if (pos.z > -100.0f){
@@ -105,16 +106,23 @@ void CCarGenerator::DoInternalProcessing()
 			debug("CCarGenerator::DoInternalProcessing - can't find ground z for new car x = %f y = %f \n", m_vecPos.x, m_vecPos.y);
 			return;
 		}
-		CAutomobile* pCar = new CAutomobile(mi, PARKED_VEHICLE);
-		pVehicle = pCar;
-		pCar->bIsStatic = false;
-		pCar->bEngineOn = false;
-		pos.z += pCar->GetDistanceFromCentreOfMassToBaseOfModel();
-		pCar->SetPosition(pos);
-		pCar->SetOrientation(0.0f, 0.0f, DEGTORAD(m_fAngle));
-		pCar->SetStatus(STATUS_ABANDONED);
-		pCar->bLightsOn = false;
-		pCar->m_nDoorLock = CARLOCK_UNLOCKED;
+		if (CModelInfo::IsBikeModel(mi)) {
+			CBike* pBike = new CBike(mi, PARKED_VEHICLE);
+			pBike->bIsStanding = true;
+			pVehicle = pBike;
+		}
+		else {
+			CAutomobile* pCar = new CAutomobile(mi, PARKED_VEHICLE);
+			pVehicle = pCar;
+		}
+		pVehicle->bIsStatic = false;
+		pVehicle->bEngineOn = false;
+		pos.z += pVehicle->GetDistanceFromCentreOfMassToBaseOfModel();
+		pVehicle->SetPosition(pos);
+		pVehicle->SetOrientation(0.0f, 0.0f, DEGTORAD(m_fAngle));
+		pVehicle->SetStatus(STATUS_ABANDONED);
+		pVehicle->bLightsOn = false;
+		pVehicle->m_nDoorLock = CARLOCK_UNLOCKED;
 
 	}
 	CWorld::Add(pVehicle);

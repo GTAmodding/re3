@@ -171,6 +171,17 @@ CQuaternion::Slerp(const CQuaternion &q1, const CQuaternion &q2, float theta, fl
 }
 
 void
+CQuaternion::Set(RwV3d *axis, float angle)
+{
+	float halfCos = Cos(angle*0.5f);
+	float halfSin = Sin(angle*0.5f);
+	x = axis->x*halfSin;
+	y = axis->y*halfSin;
+	z = axis->z*halfSin;
+	w = halfCos;
+}
+
+void
 CQuaternion::Get(RwMatrix *matrix)
 {
 	float x2 = x+x;

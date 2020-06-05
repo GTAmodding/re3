@@ -30,7 +30,7 @@ enum eEntityStatus : uint8
 	STATUS_PLANE,
 	STATUS_PLAYER_REMOTE,
 	STATUS_PLAYER_DISABLED,
-	STATUS_12,	// TODO: what is this? used in CPhysical::ApplyAirResistance
+	STATUS_GHOST
 };
 
 class CEntity : public CPlaceable

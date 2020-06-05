@@ -63,39 +63,110 @@ bool CPad::IsAffectedByController = false;
 _TODO("gbFastTime");
 extern bool gbFastTime;
 
-void WeaponCheat()
+void WeaponCheat1()
 {
 	CHud::SetHelpMessage(TheText.Get("CHEAT2"), true);
 
-	CStreaming::RequestModel(MI_GRENADE, STREAMFLAGS_DONT_REMOVE);
-	CStreaming::RequestModel(MI_BOMB, STREAMFLAGS_DONT_REMOVE);
-	CStreaming::RequestModel(MI_RUGER, STREAMFLAGS_DONT_REMOVE);
+	CStreaming::RequestModel(MI_BRASS_KNUCKLES, STREAMFLAGS_DONT_REMOVE);
 	CStreaming::RequestModel(MI_BASEBALL_BAT, STREAMFLAGS_DONT_REMOVE);
+	CStreaming::RequestModel(MI_MOLOTOV, STREAMFLAGS_DONT_REMOVE);
 	CStreaming::RequestModel(MI_COLT45, STREAMFLAGS_DONT_REMOVE);
-	CStreaming::RequestModel(MI_ROCKETLAUNCHER, STREAMFLAGS_DONT_REMOVE);
-	CStreaming::RequestModel(MI_SPAS12_SHOTGUN, STREAMFLAGS_DONT_REMOVE);
+	CStreaming::RequestModel(MI_SHOTGUN, STREAMFLAGS_DONT_REMOVE);
+	CStreaming::RequestModel(MI_TEC9, STREAMFLAGS_DONT_REMOVE);
+	CStreaming::RequestModel(MI_RUGER, STREAMFLAGS_DONT_REMOVE);
 	CStreaming::RequestModel(MI_SNIPERRIFLE, STREAMFLAGS_DONT_REMOVE);
-	CStreaming::RequestModel(MI_MP5, STREAMFLAGS_DONT_REMOVE);
+	CStreaming::RequestModel(MI_FLAMETHROWER, STREAMFLAGS_DONT_REMOVE);
 	CStreaming::LoadAllRequestedModels(false);
 
-	FindPlayerPed()->GiveWeapon(WEAPONTYPE_BASEBALLBAT, 0);
+	FindPlayerPed()->GiveWeapon(WEAPONTYPE_BRASSKNUCKLE, 1);
+	FindPlayerPed()->GiveWeapon(WEAPONTYPE_BASEBALLBAT, 1);
+	FindPlayerPed()->GiveWeapon(WEAPONTYPE_MOLOTOV, 10);
 	FindPlayerPed()->GiveWeapon(WEAPONTYPE_COLT45, 100);
-	FindPlayerPed()->GiveWeapon(WEAPONTYPE_MP5, 100);
-	FindPlayerPed()->GiveWeapon(WEAPONTYPE_SPAS12_SHOTGUN, 20);
-	FindPlayerPed()->GiveWeapon(WEAPONTYPE_RUGER, 200);
-	FindPlayerPed()->GiveWeapon(WEAPONTYPE_SNIPERRIFLE, 5);
-	FindPlayerPed()->GiveWeapon(WEAPONTYPE_ROCKETLAUNCHER, 5);
-	FindPlayerPed()->GiveWeapon(WEAPONTYPE_DETONATOR_GRENADE, 5);
+	FindPlayerPed()->GiveWeapon(WEAPONTYPE_SHOTGUN, 50);
+	FindPlayerPed()->GiveWeapon(WEAPONTYPE_TEC9, 150);
+	FindPlayerPed()->GiveWeapon(WEAPONTYPE_RUGER, 120);
+	FindPlayerPed()->GiveWeapon(WEAPONTYPE_SNIPERRIFLE, 25);
+	FindPlayerPed()->GiveWeapon(WEAPONTYPE_FLAMETHROWER, 200);
 
+	CStreaming::SetModelIsDeletable(MI_BRASS_KNUCKLES);
+	CStreaming::SetModelIsDeletable(MI_BASEBALL_BAT);
+	CStreaming::SetModelIsDeletable(MI_MOLOTOV);
+	CStreaming::SetModelIsDeletable(MI_COLT45);
+	CStreaming::SetModelIsDeletable(MI_SHOTGUN);
+	CStreaming::SetModelIsDeletable(MI_TEC9);
+	CStreaming::SetModelIsDeletable(MI_RUGER);
+	CStreaming::SetModelIsDeletable(MI_SNIPERRIFLE);
+	CStreaming::SetModelIsDeletable(MI_FLAMETHROWER);
+}
+
+void WeaponCheat2()
+{
+	CHud::SetHelpMessage(TheText.Get("CHEAT2"), true);
+
+	CStreaming::RequestModel(MI_KATANA, STREAMFLAGS_DONT_REMOVE);
+	CStreaming::RequestModel(MI_GRENADE, STREAMFLAGS_DONT_REMOVE);
+	CStreaming::RequestModel(MI_BOMB, STREAMFLAGS_DONT_REMOVE);
+	CStreaming::RequestModel(MI_PYTHON, STREAMFLAGS_DONT_REMOVE);
+	CStreaming::RequestModel(MI_STUBBY_SHOTGUN, STREAMFLAGS_DONT_REMOVE);
+	CStreaming::RequestModel(MI_SILENCEDINGRAM, STREAMFLAGS_DONT_REMOVE);
+	CStreaming::RequestModel(MI_M4, STREAMFLAGS_DONT_REMOVE);
+	CStreaming::RequestModel(MI_LASERSCOPE, STREAMFLAGS_DONT_REMOVE);
+	CStreaming::RequestModel(MI_ROCKETLAUNCHER, STREAMFLAGS_DONT_REMOVE);
+	CStreaming::LoadAllRequestedModels(false);
+
+	FindPlayerPed()->GiveWeapon(WEAPONTYPE_KATANA, 0);
+	FindPlayerPed()->GiveWeapon(WEAPONTYPE_DETONATOR_GRENADE, 10);
+	FindPlayerPed()->GiveWeapon(WEAPONTYPE_PYTHON, 40);
+	FindPlayerPed()->GiveWeapon(WEAPONTYPE_STUBBY_SHOTGUN, 25);
+	FindPlayerPed()->GiveWeapon(WEAPONTYPE_SILENCED_INGRAM, 100);
+	FindPlayerPed()->GiveWeapon(WEAPONTYPE_M4, 150);
+	FindPlayerPed()->GiveWeapon(WEAPONTYPE_LASERSCOPE, 21);
+	FindPlayerPed()->GiveWeapon(WEAPONTYPE_ROCKETLAUNCHER, 5);
+
+	CStreaming::SetModelIsDeletable(MI_KATANA);
 	CStreaming::SetModelIsDeletable(MI_GRENADE);
 	CStreaming::SetModelIsDeletable(MI_BOMB);
-	CStreaming::SetModelIsDeletable(MI_RUGER);
-	CStreaming::SetModelIsDeletable(MI_BASEBALL_BAT);
-	CStreaming::SetModelIsDeletable(MI_COLT45);
+	CStreaming::SetModelIsDeletable(MI_PYTHON);
+	CStreaming::SetModelIsDeletable(MI_STUBBY_SHOTGUN);
+	CStreaming::SetModelIsDeletable(MI_SILENCEDINGRAM);
+	CStreaming::SetModelIsDeletable(MI_M4);
+	CStreaming::SetModelIsDeletable(MI_LASERSCOPE);
 	CStreaming::SetModelIsDeletable(MI_ROCKETLAUNCHER);
+}
+
+void WeaponCheat3()
+{
+	CHud::SetHelpMessage(TheText.Get("CHEAT2"), true);
+
+	CStreaming::RequestModel(MI_CHAINSAW, STREAMFLAGS_DONT_REMOVE);
+	CStreaming::RequestModel(MI_GRENADE, STREAMFLAGS_DONT_REMOVE);
+	CStreaming::RequestModel(MI_PYTHON, STREAMFLAGS_DONT_REMOVE);
+	CStreaming::RequestModel(MI_SPAS12_SHOTGUN, STREAMFLAGS_DONT_REMOVE);
+	CStreaming::RequestModel(MI_MP5, STREAMFLAGS_DONT_REMOVE);
+	CStreaming::RequestModel(MI_M4, STREAMFLAGS_DONT_REMOVE);
+	CStreaming::RequestModel(MI_LASERSCOPE, STREAMFLAGS_DONT_REMOVE);
+	CStreaming::RequestModel(MI_MINIGUN, STREAMFLAGS_DONT_REMOVE);
+	CStreaming::RequestModel(MI_MINIGUN2, STREAMFLAGS_DONT_REMOVE);
+	CStreaming::LoadAllRequestedModels(false);
+
+	FindPlayerPed()->GiveWeapon(WEAPONTYPE_CHAINSAW, 0);
+	FindPlayerPed()->GiveWeapon(WEAPONTYPE_GRENADE, 10);
+	FindPlayerPed()->GiveWeapon(WEAPONTYPE_PYTHON, 40);
+	FindPlayerPed()->GiveWeapon(WEAPONTYPE_SPAS12_SHOTGUN, 30);
+	FindPlayerPed()->GiveWeapon(WEAPONTYPE_MP5, 100);
+	FindPlayerPed()->GiveWeapon(WEAPONTYPE_M4, 150);
+	FindPlayerPed()->GiveWeapon(WEAPONTYPE_LASERSCOPE, 21);
+	FindPlayerPed()->GiveWeapon(WEAPONTYPE_MINIGUN, 500);
+
+	CStreaming::SetModelIsDeletable(MI_CHAINSAW);
+	CStreaming::SetModelIsDeletable(MI_GRENADE);
+	CStreaming::SetModelIsDeletable(MI_PYTHON);
 	CStreaming::SetModelIsDeletable(MI_SPAS12_SHOTGUN);
-	CStreaming::SetModelIsDeletable(MI_SNIPERRIFLE);
 	CStreaming::SetModelIsDeletable(MI_MP5);
+	CStreaming::SetModelIsDeletable(MI_M4);
+	CStreaming::SetModelIsDeletable(MI_LASERSCOPE);
+	CStreaming::SetModelIsDeletable(MI_MINIGUN);
+	CStreaming::SetModelIsDeletable(MI_MINIGUN2);
 }
 
 void HealthCheat()
@@ -250,6 +321,12 @@ void CloudyWeatherCheat()
 {
 	CHud::SetHelpMessage(TheText.Get("CHEAT7"), true);
 	CWeather::ForceWeatherNow(WEATHER_CLOUDY);
+}
+
+void StormyWeatherCheat()
+{
+	CHud::SetHelpMessage(TheText.Get("CHEAT7"), true);
+	CWeather::ForceWeatherNow(WEATHER_HURRICANE);
 }
 
 void RainyWeatherCheat()
@@ -809,7 +886,7 @@ void CPad::AddToCheatString(char c)
 #define _CHEATCMP(str)  strncmp(str, CheatString, sizeof(str)-1)
 	// "4414LDRULDRU"	-	R2 R2 L1 R2 LEFT DOWN RIGHT UP LEFT DOWN RIGHT UP
 	if ( !_CHEATCMP("URDLURDL4144") )
-		WeaponCheat();
+		WeaponCheat1();
 
 	// "4411LDRULDRU"	-	R2 R2 L1 L1 LEFT DOWN RIGHT UP LEFT DOWN RIGHT UP
 	else if ( !_CHEATCMP("URDLURDL1144") )
@@ -902,155 +979,190 @@ void CPad::AddToCheatString(char c)
 }
 #endif
 
+int Cheat_strncmp(char* sourceStr, char* origCheatStr)
+{
+	char cheatCodeVals[] = { 3,5,7,1,13,27,3,7,1,11,13,8,7,32,13,6,28,19,10,3,3,5,7,1,13,27,3,7 };
+
+	for (int32 i = 0; i < strlen(origCheatStr); i++) {
+		if ((sourceStr[i] != origCheatStr[i] - cheatCodeVals[i]) || i >= ARRAY_SIZE(cheatCodeVals)) {
+			return 1;
+		}
+	}
+	return 0;
+}
+
 void CPad::AddToPCCheatString(char c)
 {
-	for ( int32 i = ARRAY_SIZE(KeyBoardCheatString) - 2; i >= 0; i-- )
+	for (int32 i = ARRAY_SIZE(KeyBoardCheatString) - 2; i >= 0; i--)
 		KeyBoardCheatString[i + 1] = KeyBoardCheatString[i];
-	
+
 	KeyBoardCheatString[0] = c;
-	
-	#define _CHEATCMP(str) strncmp(str, KeyBoardCheatString, sizeof(str)-1)
-	
-	// "GUNSGUNSGUNS"
-	if ( !_CHEATCMP("SNUGSNUGSNUG") )
-		WeaponCheat();
 
-	// "IFIWEREARICHMAN"
-	if ( !_CHEATCMP("NAMHCIRAEREWIFI") )
-		MoneyCheat();
-	
-	// "GESUNDHEIT"
-	if ( !_CHEATCMP("TIEHDNUSEG") )
+#define _CHEATCMP(str) strncmp(str, KeyBoardCheatString, sizeof(str)-1)
+
+	// "THUGSTOOLS"
+	if (!Cheat_strncmp(KeyBoardCheatString, "VQVPanJ\\I_")) {
+		KeyBoardCheatString[0] = ' ';
+		WeaponCheat1();
+	}
+	// "PROFESSIONALTOOLS"
+	else if (!Cheat_strncmp(KeyBoardCheatString, "VQVPagDUPT`[Lf\\Xl")) {
+		KeyBoardCheatString[0] = ' ';
+		WeaponCheat2();
+	}
+	// "NUTTERTOOLS"
+	else if (!Cheat_strncmp(KeyBoardCheatString, "VQVPamH[U`[")) {
+		KeyBoardCheatString[0] = ' ';
+		WeaponCheat3();
+	}
+	// "PRECIOUSPROTECTION"
+	else if (!Cheat_strncmp(KeyBoardCheatString, "QTPUP`WVS[`]ViPKnc")) {
+		KeyBoardCheatString[0] = ' ';
+		ArmourCheat();
+	}
+	// "ASPIRINE"
+	else if (!Cheat_strncmp(KeyBoardCheatString, "HSPSVkVH")) {
+		KeyBoardCheatString[0] = ' ';
 		HealthCheat();
-	
-	// "MOREPOLICEPLEASE"
-	if ( !_CHEATCMP("ESAELPECILOPEROM") )
+	}
+	// "YOUWONTTAKEMEALIVE"
+	else if (!Cheat_strncmp(KeyBoardCheatString, "H[PMN`PLLLa\\Uod[kl")) {
+		KeyBoardCheatString[0] = ' ';
 		WantedLevelUpCheat();
-	
-	// "NOPOLICEPLEASE"
-	if ( !_CHEATCMP("ESAELPECILOPON") )
+	}
+	// "LEAVEMEALONE"
+	else if (!Cheat_strncmp(KeyBoardCheatString, "HSVMN`PLWLRT")) {
+		KeyBoardCheatString[0] = ' ';
 		WantedLevelDownCheat();
+	}
+	// "APLEASANTDAY"
+	else if (!Cheat_strncmp(KeyBoardCheatString, "\\FKU[\\VHFW]I")) {
+		KeyBoardCheatString[0] = ' ';
+		CloudyWeatherCheat();
+	}
+	// "ALOVELYDAY"
+	else if (!Cheat_strncmp(KeyBoardCheatString, "\\FKZY`YVML")) {
+		KeyBoardCheatString[0] = ' ';
+		SunnyWeatherCheat();
+	}
+	// "ABITDRIEG"
 
+	// "CATSANDDOGS"
+	else if (!Cheat_strncmp(KeyBoardCheatString, "VLVEQiDZULP")) {
+		KeyBoardCheatString[0] = ' ';
+		StormyWeatherCheat();
+	}
+	// "CANTSEEATHING"
+	else if (!Cheat_strncmp(KeyBoardCheatString, "JSPIa\\HLT_[IJ")) {
+		KeyBoardCheatString[0] = ' ';
+		FoggyWeatherCheat();
+	}
 	// "PANZER"
-	if ( !_CHEATCMP("REZNAP") )
+	else if (!Cheat_strncmp(KeyBoardCheatString, "UJaONk")) {
+		KeyBoardCheatString[0] = ' ';
 		VehicleCheat(true, MI_RHINO);
+	}
+	// "LIFEISPASSINGMEBY"
 
+	// "BIGBANG"
+	else if (!Cheat_strncmp(KeyBoardCheatString, "JSHCTdE")) {
+		KeyBoardCheatString[0] = ' ';
+		BlowUpCarsCheat();
+	}
+	// "STILLLIKEDRESSINGUP"
+	else if (!Cheat_strncmp(KeyBoardCheatString, "SZNOVnVLSORSPlYReg]")) {
+		KeyBoardCheatString[0] = ' ';
+		ChangePlayerCheat();
+	}
+	// "FIGHTFIGHTFIGHT"
+	else if (!Cheat_strncmp(KeyBoardCheatString, "WMNJSoKNJQaPNiS")) {
+		KeyBoardCheatString[0] = ' ';
+		MayhemCheat();
+	}
+	// "NOBODYLIKESME"
+	else if (!Cheat_strncmp(KeyBoardCheatString, "HRZFXdO`EZOWU")) {
+		KeyBoardCheatString[0] = ' ';
+		EverybodyAttacksPlayerCheat();
+	}
+	// "OURGODGIVENRIGHTTOBEARARMS"
+	else if (!Cheat_strncmp(KeyBoardCheatString, "VRYB_\\HIP_aPNi_TaiSJGTNSbj")) {
+		KeyBoardCheatString[0] = ' ';
+		WeaponsForAllCheat();
+	}
 	// "TRAVELINSTYLE"
-	if ( !_CHEATCMP("ELYTSNILEVART") )
+	if (!_CHEATCMP("ELYTSNILEVART"))
 		VehicleCheat(true, MI_BLOODRA);
 
 	// "GETTHEREQUICKLY"
-	if ( !_CHEATCMP("YLKCIUQEREHTTEG") )
+	if (!_CHEATCMP("YLKCIUQEREHTTEG"))
 		VehicleCheat(true, MI_BLOODRB);
 
 	// "GETTHEREFAST"
-	if ( !_CHEATCMP("TSAFEREHTTEG") )
+	if (!_CHEATCMP("TSAFEREHTTEG"))
 		VehicleCheat(true, MI_SABRETUR);
 
 	// "GETTHEREVERYFASTINDEED"
-	if ( !_CHEATCMP("DEEDNITSAFYREVEREHTTEG") )
+	if (!_CHEATCMP("DEEDNITSAFYREVEREHTTEG"))
 		VehicleCheat(true, MI_HOTRINA);
 
 	// "GETTHEREAMAZINGLYFAST"
-	if ( !_CHEATCMP("TSAFYLGNIZAMAEREHTTEG") )
+	if (!_CHEATCMP("TSAFYLGNIZAMAEREHTTEG"))
 		VehicleCheat(true, MI_HOTRINB);
 
 	// "THELASTRIDE"
-	if ( !_CHEATCMP("EDIRTSALEHT") )
+	if (!_CHEATCMP("EDIRTSALEHT"))
 		VehicleCheat(true, MI_ROMERO);
 
 	// "ROCKANDROLLCAR"
-	if ( !_CHEATCMP("RACLLORDNAKCOR") )
+	if (!_CHEATCMP("RACLLORDNAKCOR"))
 		VehicleCheat(true, MI_LOVEFIST);
 
 	// "RUBBISHCAR"
-	if ( !_CHEATCMP("RACHSIBBUR") )
+	if (!_CHEATCMP("RACHSIBBUR"))
 		VehicleCheat(true, MI_TRASH);
 
 	// "BETTERTHANWALKING"
-	if ( !_CHEATCMP("GNIKLAWNAHTRETTEB") )
+	if (!_CHEATCMP("GNIKLAWNAHTRETTEB"))
 		VehicleCheat(true, MI_CADDY);
-	
-	// "BANGBANGBANG"
-	if ( !_CHEATCMP("GNABGNABGNAB") )
-		BlowUpCarsCheat();
-	
-	// "ILIKEDRESSINGUP"
-	if ( !_CHEATCMP("PUGNISSERDEKILI") )
-		ChangePlayerCheat();
-	
-	// "ITSALLGOINGMAAAD"
-	if ( !_CHEATCMP("DAAAMGNIOGLLASTI") )
-		MayhemCheat();
-	
-	// "NOBODYLIKESME"
-	if ( !_CHEATCMP("EMSEKILYDOBON") )
-		EverybodyAttacksPlayerCheat();
-	
-	// "WEAPONSFORALL"
-	if ( !_CHEATCMP("LLAROFSNOPAEW") )
-		WeaponsForAllCheat();
-	
+
 	// "TIMEFLIESWHENYOU"
-	if ( !_CHEATCMP("UOYNEHWSEILFEMIT") )
+	if (!_CHEATCMP("UOYNEHWSEILFEMIT"))
 		FastTimeCheat();
-	
+
 	// "BOOOOORING"
-	if ( !_CHEATCMP("GNIROOOOOB") )
+	if (!_CHEATCMP("GNIROOOOOB"))
 		SlowTimeCheat();
-	
-#ifndef GTA3_1_1_PATCH
-	// "TURTOISE"
-	if ( !_CHEATCMP("ESIOTRUT") )
-		ArmourCheat();
-#else	
-	// "TORTOISE"
-	if ( !_CHEATCMP("ESIOTROT") )
-		ArmourCheat();
-#endif
-	
-	// "SKINCANCERFORME"
-	if ( !_CHEATCMP("EMROFRECNACNIKS") )
-		SunnyWeatherCheat();
-	
-	// "ILIKESCOTLAND"
-	if ( !_CHEATCMP("DNALTOCSEKILI") )
-		CloudyWeatherCheat();
-	
+
 	// "ILOVESCOTLAND"
-	if ( !_CHEATCMP("DNALTOCSEVOLI") )
+	if (!_CHEATCMP("DNALTOCSEVOLI"))
 		RainyWeatherCheat();
-	
-	// "PEASOUP"
-	if ( !_CHEATCMP("PUOSAEP") )
-		FoggyWeatherCheat();
-	
+
 	// "MADWEATHER"
-	if ( !_CHEATCMP("REHTAEWDAM") )
+	if (!_CHEATCMP("REHTAEWDAM"))
 		FastWeatherCheat();
-	
+
 	// "ANICESETOFWHEELS"
-	if ( !_CHEATCMP("SLEEHWFOTESECINA") )
+	if (!_CHEATCMP("SLEEHWFOTESECINA"))
 		OnlyRenderWheelsCheat();
-	
+
 	// "CHITTYCHITTYBB"
-	if ( !_CHEATCMP("BBYTTIHCYTTIHC") )
+	if (!_CHEATCMP("BBYTTIHCYTTIHC"))
 		ChittyChittyBangBangCheat();
-	
+
 	// "CORNERSLIKEMAD"
-	if ( !_CHEATCMP("DAMEKILSRENROC") )
+	if (!_CHEATCMP("DAMEKILSRENROC"))
 		StrongGripCheat();
-	
+
 	// "NASTYLIMBSCHEAT"
-	if ( !_CHEATCMP("TAEHCSBMILYTSAN") )
+	if (!_CHEATCMP("TAEHCSBMILYTSAN"))
 		NastyLimbsCheat();
 
 	// "IWANTITPAINTEDBLACK"
-	if ( !_CHEATCMP("KCALBDETNIAPTITNAWI") )
+	if (!_CHEATCMP("KCALBDETNIAPTITNAWI"))
 		BlackCarsCheat();
 
 	// "AHAIRDRESSERSCAR"
-	if ( !_CHEATCMP("RACSRESSERDRIAHA") )
+	if (!_CHEATCMP("RACSRESSERDRIAHA"))
 		PinkCarsCheat();
 
 #ifdef KANGAROO_CHEAT
@@ -1081,7 +1193,7 @@ void CPad::AddToPCCheatString(char c)
 	// SEABEDCHEAT
 	if (!_CHEATCMP("TAEHCDEBAESON"))
 		NoSeaBedCheat();
-	
+
 	// WATERLAYERSCHEAT
 	if (!_CHEATCMP("TAEHCSREYALRETAW"))
 		RenderWaterLayersCheat();
@@ -1091,7 +1203,7 @@ void CPad::AddToPCCheatString(char c)
 	if (!_CHEATCMP("SYAWAES"))
 		BackToTheFuture();
 
-	#undef _CHEATCMP
+#undef _CHEATCMP
 }
 
 #ifdef XINPUT

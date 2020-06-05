@@ -308,7 +308,7 @@ CEmergencyPed::MedicAI(void)
 					m_nLastPedState = PED_CPR;
 					SetLookFlag(m_pRevivedPed, 0);
 					SetLookTimer(500);
-					Say(SOUND_PED_HEALING);
+					//Say(SOUND_PED_HEALING);
 					if (m_pAttendedAccident->m_nMedicsPerformingCPR) {
 						SetIdle();
 						m_nEmergencyPedState = EMERGENCY_PED_STAND_STILL;

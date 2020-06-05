@@ -1747,7 +1747,7 @@ void CapturePad(RwInt32 padID)
 
 void joysChangeCB(int jid, int event)
 {
-	if (event == GLFW_CONNECTED)
+	if (event == GLFW_CONNECTED && !IsThisJoystickBlacklisted(jid))
 	{
 		if (PSGLOBAL(joy1id) == -1)
 			PSGLOBAL(joy1id) = jid;

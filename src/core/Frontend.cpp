@@ -319,7 +319,7 @@ CMenuManager::PageUpList(bool playSoundOnSuccess)
 	if (m_nTotalListRow > MAX_VISIBLE_LIST_ROW) {
 		if (m_nFirstVisibleRowOnList > 0) {
 			if(playSoundOnSuccess)
-				DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_DENIED, 0);
+				DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_COMPLETED, 0);
 
 			m_nFirstVisibleRowOnList = Max(0, m_nFirstVisibleRowOnList - MAX_VISIBLE_LIST_ROW);
 			m_nSelectedListRow = Min(m_nSelectedListRow, m_nFirstVisibleRowOnList + MAX_VISIBLE_LIST_ROW - 1);
@@ -337,7 +337,7 @@ CMenuManager::PageDownList(bool playSoundOnSuccess)
 	if (m_nTotalListRow > MAX_VISIBLE_LIST_ROW) {
 		if (m_nFirstVisibleRowOnList < m_nTotalListRow - MAX_VISIBLE_LIST_ROW) {
 			if(playSoundOnSuccess)
-				DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_DENIED, 0);
+				DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_COMPLETED, 0);
 
 			m_nFirstVisibleRowOnList = Min(m_nFirstVisibleRowOnList + MAX_VISIBLE_LIST_ROW, m_nTotalListRow - MAX_VISIBLE_LIST_ROW);
 			m_nSelectedListRow = Max(m_nSelectedListRow, m_nFirstVisibleRowOnList);
@@ -1297,13 +1297,14 @@ CMenuManager::DrawStandardMenus(bool drawCurrScreen)
 					}
 #ifdef IMPROVED_VIDEOMODE
 					if (m_nSelectedScreenMode != m_nPrefsWindowed) {
-						if (strcmp(aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_EntryName, "SCRFOR") != 0
+						if (strcmp(aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_EntryName, "FED_POS") != 0
 							&& m_nCurrScreen == MENUPAGE_GRAPHICS_SETTINGS) {
 							m_nSelectedScreenMode = m_nPrefsWindowed;
 						}
 					}
 #endif
 
+					// TODO(Miami): check
 					// Sliders
 					int lastActiveBarX;
 					switch (aScreens[m_nCurrScreen].m_aEntries[i].m_Action) {
@@ -1935,7 +1936,7 @@ CMenuManager::DrawControllerSetupScreen()
 			float curOptY = i * rowHeight + yStart;
 			if (m_nMousePosY > MENU_Y(curOptY) && m_nMousePosY < MENU_Y(rowHeight + curOptY)) {
 					if (m_nPrevOption != i && m_nCurrExLayer == HOVEROPTION_LIST)
-						DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_DENIED, 0);
+						DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_COMPLETED, 0);
 
 					m_nPrevOption = i;
 					if (m_nMouseOldPosX != m_nMousePosX || m_nMouseOldPosY != m_nMousePosY) {
@@ -1949,7 +1950,7 @@ CMenuManager::DrawControllerSetupScreen()
 						if (m_nMousePosX > MENU_X_LEFT_ALIGNED(0.0f) && m_nMousePosX < MENU_X_LEFT_ALIGNED(370.0f)) {
 #endif
 							if (m_nSelectedContSetupColumn != CONTSETUP_PED_COLUMN && m_nCurrExLayer == HOVEROPTION_LIST)
-								DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_DENIED, 0);
+								DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_COMPLETED, 0);
 
 							m_nSelectedContSetupColumn = CONTSETUP_PED_COLUMN;
 #ifdef FIX_BUGS
@@ -1958,7 +1959,7 @@ CMenuManager::DrawControllerSetupScreen()
 						} else if (m_nMousePosX > MENU_X_LEFT_ALIGNED(370.0f) && m_nMousePosX < SCREEN_WIDTH) {
 #endif
 							if (m_nSelectedContSetupColumn != CONTSETUP_VEHICLE_COLUMN && m_nCurrExLayer == HOVEROPTION_LIST)
-								DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_DENIED, 0);
+								DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_COMPLETED, 0);
 
 							m_nSelectedContSetupColumn = CONTSETUP_VEHICLE_COLUMN;
 						}
@@ -2653,7 +2654,7 @@ CMenuManager::DrawPlayerSetupScreen()
 								SaveSettings();
 							}
 						} else {
-							DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_DENIED, 0);
+							DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_COMPLETED, 0);
 							m_nCurrExLayer = HOVEROPTION_LIST;
 							m_nSelectedListRow = rowIdx;
 							m_nHoverOption = HOVEROPTION_NOT_HOVERING;
@@ -2809,7 +2810,7 @@ CMenuManager::DrawPlayerSetupScreen()
 			&& m_nMousePosY < SCREEN_SCALE_FROM_BOTTOM(PLAYERSETUP_LIST_BOTTOM - 26))
 			|| m_nCurrExLayer == HOVEROPTION_BACK) {
 			if (m_nHoverOption != HOVEROPTION_BACK)
-				DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_DENIED, 0);
+				DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_COMPLETED, 0);
 
 			m_nHoverOption = HOVEROPTION_BACK;
 
@@ -2820,7 +2821,7 @@ CMenuManager::DrawPlayerSetupScreen()
 			&& m_nMousePosY < SCREEN_SCALE_FROM_BOTTOM(PLAYERSETUP_LIST_BOTTOM - 26))
 			|| m_nCurrExLayer == HOVEROPTION_USESKIN) {
 			if (m_nHoverOption != HOVEROPTION_USESKIN)
-				DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_DENIED, 0);
+				DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_COMPLETED, 0);
 
 			m_nHoverOption = HOVEROPTION_USESKIN;
 
@@ -3588,7 +3589,7 @@ CMenuManager::ProcessButtonPresses(void)
 				++m_nPrevOption;
 			}
 			m_nOptionHighlightTransitionBlend = 0;
-			DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_DENIED, 0);
+			DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_COMPLETED, 0);
 		}
 	}
 
@@ -3641,7 +3642,7 @@ CMenuManager::ProcessButtonPresses(void)
 		}
 
 		if (CPad::GetPad(0)->GetTabJustDown()) {
-			DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_DENIED, 0);
+			DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_COMPLETED, 0);
 			m_bShowMouse = false;
 			switch (m_nCurrExLayer) {
 				case HOVEROPTION_BACK:
@@ -3677,7 +3678,7 @@ CMenuManager::ProcessButtonPresses(void)
 			if (!m_bPressedUpOnList) {
 				m_bPressedUpOnList = true;
 				lastTimeClickedScrollButton = CTimer::GetTimeInMillisecondsPauseMode();
-				DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_DENIED, 0);
+				DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_COMPLETED, 0);
 				ScrollUpListByOne();
 			}
 		} else {
@@ -3699,7 +3700,7 @@ CMenuManager::ProcessButtonPresses(void)
 			if (!m_bPressedDownOnList) {
 				m_bPressedDownOnList = true;
 				lastTimeClickedScrollButton = CTimer::GetTimeInMillisecondsPauseMode();
-				DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_DENIED, 0);
+				DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_COMPLETED, 0);
 				ScrollDownListByOne();
 			}
 		} else {
@@ -3715,7 +3716,7 @@ CMenuManager::ProcessButtonPresses(void)
 					m_bPressedPgUpOnList = true;
 					lastTimeClickedScrollButton = CTimer::GetTimeInMillisecondsPauseMode();
 					m_bShowMouse = false;
-					DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_DENIED, 0);
+					DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_COMPLETED, 0);
 					PageUpList(false);
 				}
 			}
@@ -3727,14 +3728,14 @@ CMenuManager::ProcessButtonPresses(void)
 					m_bPressedPgDnOnList = true;
 					lastTimeClickedScrollButton = CTimer::GetTimeInMillisecondsPauseMode();
 					m_bShowMouse = false;
-					DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_DENIED, 0);
+					DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_COMPLETED, 0);
 					PageDownList(false);
 				}
 			}
 			if (CPad::GetPad(0)->GetHome()) {
 				m_nCurrExLayer = HOVEROPTION_LIST;
 				m_bShowMouse = false;
-				DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_DENIED, 0);
+				DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_COMPLETED, 0);
 				if (m_nTotalListRow >= MAX_VISIBLE_LIST_ROW) {
 					m_nFirstVisibleRowOnList = 0;
 				}
@@ -3744,7 +3745,7 @@ CMenuManager::ProcessButtonPresses(void)
 			if (CPad::GetPad(0)->GetEnd()) {
 				m_nCurrExLayer = HOVEROPTION_LIST;
 				m_bShowMouse = false;
-				DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_DENIED, 0);
+				DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_COMPLETED, 0);
 				if (m_nTotalListRow >= MAX_VISIBLE_LIST_ROW) {
 					m_nFirstVisibleRowOnList = m_nTotalListRow - MAX_VISIBLE_LIST_ROW;
 				}
@@ -3838,12 +3839,12 @@ CMenuManager::ProcessButtonPresses(void)
 	} else {
 		if (CPad::GetPad(0)->GetDownJustDown() || CPad::GetPad(0)->GetAnaloguePadDown() || CPad::GetPad(0)->GetDPadDownJustDown()) {
 			m_bShowMouse = false;
-			DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_DENIED, 0);
+			DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_COMPLETED, 0);
 			goDown = true;
 			m_nOptionHighlightTransitionBlend = 0;
 		} else if (CPad::GetPad(0)->GetUpJustDown() || CPad::GetPad(0)->GetAnaloguePadUp() || CPad::GetPad(0)->GetDPadUpJustDown()) {
 			m_bShowMouse = false;
-			DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_DENIED, 0);
+			DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_COMPLETED, 0);
 			goUp = true;
 			m_nOptionHighlightTransitionBlend = 0;
 		}
@@ -4118,14 +4119,14 @@ CMenuManager::ProcessButtonPresses(void)
 
 #ifdef PS2_LIKE_MENU
 	if (CPad::GetPad(0)->GetLeftMouseJustDown() && hoveredBottomBarOption != -1) {
-		DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_DENIED, 0);
+		DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_COMPLETED, 0);
 		bottomBarActive = false;
 		curBottomBarOption = hoveredBottomBarOption;
 		ChangeScreen(bbNames[curBottomBarOption].screenId, 0, true, false);
 		return;
 	} else if (bottomBarActive) {
 		if (CPad::GetPad(0)->GetEnterJustDown() || CPad::GetPad(0)->GetCrossJustDown()) {
-			DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_DENIED, 0);
+			DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_COMPLETED, 0);
 			bottomBarActive = false;
 
 			// If there's a menu change with fade ongoing, finish it now
@@ -4135,7 +4136,7 @@ CMenuManager::ProcessButtonPresses(void)
 		} else if (CPad::GetPad(0)->GetLeftJustDown() || CPad::GetPad(0)->GetAnaloguePadLeft() || CPad::GetPad(0)->GetDPadLeftJustDown()
 			|| CPad::GetPad(0)->GetUpJustDown() || CPad::GetPad(0)->GetAnaloguePadUp() || CPad::GetPad(0)->GetDPadUpJustDown()) {
 			m_bShowMouse = false;
-			DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_DENIED, 0);
+			DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_COMPLETED, 0);
 			if (curBottomBarOption > 0)
 				curBottomBarOption--;
 			ChangeScreen(bbNames[curBottomBarOption].screenId, 0, true, true);
@@ -4143,7 +4144,7 @@ CMenuManager::ProcessButtonPresses(void)
 		} else if (CPad::GetPad(0)->GetRightJustDown() || CPad::GetPad(0)->GetAnaloguePadRight() || CPad::GetPad(0)->GetDPadRightJustDown()
 			|| CPad::GetPad(0)->GetDownJustDown() || CPad::GetPad(0)->GetAnaloguePadDown() || CPad::GetPad(0)->GetDPadDownJustDown()) {
 			m_bShowMouse = false;
-			DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_DENIED, 0);
+			DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_COMPLETED, 0);
 			if (curBottomBarOption < bbTabCount-1)
 				curBottomBarOption++;
 			ChangeScreen(bbNames[curBottomBarOption].screenId, 0, true, true);
@@ -4703,7 +4704,7 @@ CMenuManager::ProcessButtonPresses(void)
 			case MENUACTION_SCREENRES:
 				if (m_bGameNotLoaded) {
 					RwChar** videoMods = _psGetVideoModeList();
-					DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_DENIED, 0);
+					DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_COMPLETED, 0);
 					if (changeValueBy > 0) {
 						do {
 							++m_nDisplayVideoMode;
@@ -4723,7 +4724,7 @@ CMenuManager::ProcessButtonPresses(void)
 				break;
 #ifdef IMPROVED_VIDEOMODE
 			case MENUACTION_SCREENMODE:
-				DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_DENIED, 0);
+				DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_COMPLETED, 0);
 				m_nSelectedScreenMode = !m_nSelectedScreenMode;
 				break;
 #endif
@@ -4732,7 +4733,7 @@ CMenuManager::ProcessButtonPresses(void)
 					m_nPrefsAudio3DProviderIndex += changeValueBy;
 					m_nPrefsAudio3DProviderIndex = clamp(m_nPrefsAudio3DProviderIndex, 0, DMAudio.GetNum3DProvidersAvailable() - 1);
 				}
-				DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_DENIED, 0);
+				DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_COMPLETED, 0);
 				break;
 			case MENUACTION_SPEAKERCONF:
 				if (m_nPrefsAudio3DProviderIndex != INVALID_AUDIO_PROVIDER) {
@@ -4757,7 +4758,7 @@ CMenuManager::ProcessButtonPresses(void)
 			} else {
 				m_nSelectedContSetupColumn = CONTSETUP_VEHICLE_COLUMN;
 			}
-			DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_DENIED, 0);
+			DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_COMPLETED, 0);
 		}
 	}
 }

@@ -379,6 +379,9 @@ private:
 	friend class CHud;
 	friend void CMissionCleanup::Process();
 	friend class CColStore;
+#ifdef FIX_BUGS
+	friend void RetryMission(int, int);
+#endif
 };
 
 
@@ -491,6 +494,10 @@ private:
 	void LocateObjectCommand(int32, uint32*);
 	void ObjectInAreaCheckCommand(int32, uint32*);
 
+#ifdef MISSION_REPLAY
+	bool CanAllowMissionReplay();
+#endif
+
 	float LimitAngleOnCircle(float angle) { return angle < 0.0f ? angle + 360.0f : angle; }
 
 	bool ThisIsAValidRandomPed(uint32 pedtype, int civ, int gang, int criminal) {
@@ -520,6 +527,21 @@ private:
 	
 	static bool ThisIsAValidRandomCop(int32 mi, bool cop, bool swat, bool fbi, bool army, bool miami);
 };
+
+#ifdef USE_DEBUG_SCRIPT_LOADER
+extern int scriptToLoad;
+#endif
+#ifdef MISSION_REPLAY
+extern int AllowMissionReplay;
+extern uint32 WaitForMissionActivate;
+extern uint32 WaitForSave;
+extern uint32 MissionStartTime;
+extern int missionRetryScriptIndex;
+extern bool doingMissionRetry;
+
+uint32 AddExtraDeathDelay();
+void RetryMission(int, int);
+#endif
 
 #ifdef USE_DEBUG_SCRIPT_LOADER
 extern int scriptToLoad;

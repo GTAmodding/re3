@@ -16,6 +16,7 @@
 #include "Boat.h"
 #include "Heli.h"
 #include "Automobile.h"
+#include "Bike.h"
 #include "Ped.h"
 #include "Particle.h"
 #include "Console.h"
@@ -27,6 +28,9 @@
 #include "Radar.h"
 #include "debugmenu.h"
 #include "Frontend.h"
+#include "Text.h"
+#include "WaterLevel.h"
+#include "main.h"
 
 #ifndef _WIN32
 #include "assert.h"
@@ -66,8 +70,104 @@ mysrand(unsigned int seed)
 	myrand_seed = seed;
 }
 
+#ifdef CUSTOM_FRONTEND_OPTIONS
+#include "frontendoption.h"
+#include "platform.h"
+
+void ReloadFrontendOptions(void)
+{
+	RemoveCustomFrontendOptions();
+	CustomFrontendOptionsPopulate();
+}
+
+#ifdef MORE_LANGUAGES
+void LangPolSelect(int8 action)
+{
+	if (action == FEOPTION_ACTION_SELECT) {
+		FrontEndMenuManager.m_PrefsLanguage = LANGUAGE_POLISH;
+		FrontEndMenuManager.m_bFrontEnd_ReloadObrTxtGxt = true;
+		FrontEndMenuManager.InitialiseChangedLanguageSettings();
+		FrontEndMenuManager.SaveSettings();
+	}
+}
+
+void LangRusSelect(int8 action)
+{
+	if (action == FEOPTION_ACTION_SELECT) {
+		FrontEndMenuManager.m_PrefsLanguage = LANGUAGE_RUSSIAN;
+		FrontEndMenuManager.m_bFrontEnd_ReloadObrTxtGxt = true;
+		FrontEndMenuManager.InitialiseChangedLanguageSettings();
+		FrontEndMenuManager.SaveSettings();
+	}
+}
+
+void LangJapSelect(int8 action)
+{
+	if (action == FEOPTION_ACTION_SELECT) {
+		FrontEndMenuManager.m_PrefsLanguage = LANGUAGE_JAPANESE;
+		FrontEndMenuManager.m_bFrontEnd_ReloadObrTxtGxt = true;
+		FrontEndMenuManager.InitialiseChangedLanguageSettings();
+		FrontEndMenuManager.SaveSettings();
+	}
+}
+#endif
+
+#ifdef IMPROVED_VIDEOMODE
+void ScreenModeChange(int8 displayedValue)
+{
+	if (displayedValue != FrontEndMenuManager.m_nPrefsWindowed) {
+		FrontEndMenuManager.m_nPrefsWindowed = displayedValue;
+		_psSelectScreenVM(FrontEndMenuManager.m_nPrefsVideoMode); // apply same resolution
+		FrontEndMenuManager.SetHelperText(0);
+		FrontEndMenuManager.SaveSettings();
+	}
+}
+#endif
+
+#ifdef FREE_CAM
+void ToggleFreeCam(int8 action)
+{
+	if (action == FEOPTION_ACTION_SELECT) {
+		TheCamera.bFreeCam = !TheCamera.bFreeCam;
+		FrontEndMenuManager.SaveSettings();
+	}
+}
+#endif
+
+// Reloaded on language change, so you can use hardcoded wchar* and TheText.Get with peace of mind
+void
+CustomFrontendOptionsPopulate(void)
+{
+#ifdef MORE_LANGUAGES
+	FrontendOptionSetPosition(MENUPAGE_LANGUAGE_SETTINGS);
+	FrontendOptionAddDynamic(TheText.Get("FEL_POL"), nil, LangPolSelect, nil);
+	FrontendOptionAddDynamic(TheText.Get("FEL_RUS"), nil, LangRusSelect, nil);
+	FrontendOptionAddDynamic(TheText.Get("FEL_JAP"), nil, LangJapSelect, nil);
+#endif
+
+#ifdef IMPROVED_VIDEOMODE
+	static const wchar *screenModes[] = { (wchar*)L"FULLSCREEN", (wchar*)L"WINDOWED" };
+	FrontendOptionSetPosition(MENUPAGE_GRAPHICS_SETTINGS, 8);
+	FrontendOptionAddSelect(TheText.Get("SCRFOR"), screenModes, 2, (int8*)&FrontEndMenuManager.m_nPrefsWindowed, true, ScreenModeChange, nil);
+#endif
+
+#ifdef MENU_MAP
+	FrontendOptionSetPosition(MENUPAGE_PAUSE_MENU, 2);
+	FrontendOptionAddRedirect(TheText.Get("FEG_MAP"), MENUPAGE_MAP);
+#endif
+
+#ifdef FREE_CAM
+	static const wchar *text = (wchar*)L"TOGGLE FREE CAM";
+	FrontendOptionSetPosition(MENUPAGE_CONTROLLER_PC, 1);
+	FrontendOptionAddDynamic(text, nil, ToggleFreeCam, nil);
+#endif
+}
+#endif
+
 #ifdef DEBUGMENU
-void WeaponCheat();
+void WeaponCheat1();
+void WeaponCheat2();
+void WeaponCheat3();
 void HealthCheat();
 void VehicleCheat(bool something, int model);
 void BlowUpCarsCheat();
@@ -112,6 +212,8 @@ SpawnCar(int id)
 		CVehicle *v;
 		if(CModelInfo::IsBoatModel(id))
 			v = new CBoat(id, RANDOM_VEHICLE);
+		if(CModelInfo::IsBikeModel(id))
+			v = new CBike(id, RANDOM_VEHICLE);
 		else
 			v = new CAutomobile(id, RANDOM_VEHICLE);
 
@@ -141,10 +243,12 @@ FixCar(void)
 	if(veh == nil)
 		return;
 	veh->m_fHealth = 1000.0f;
-	if(!veh->IsCar())
-		return;
-	((CAutomobile*)veh)->Damage.SetEngineStatus(0);
-	((CAutomobile*)veh)->Fix();
+	if(veh->IsCar()){
+		((CAutomobile*)veh)->Damage.SetEngineStatus(0);
+		((CAutomobile*)veh)->Fix();
+	}else if(veh->IsBike()){
+		((CBike*)veh)->Fix();
+	}
 }
 
 #ifdef MENU_MAP
@@ -295,7 +399,9 @@ DebugMenuPopulate(void)
 		DebugMenuAddVar("Time & Weather", "Wind", (float*)&CWeather::Wind, nil, 0.1f, 0.0f, 1.0f);
 		DebugMenuAddVar("Time & Weather", "Time scale", (float*)&CTimer::GetTimeScale(), nil, 0.1f, 0.0f, 10.0f);
 
-		DebugMenuAddCmd("Cheats", "Weapons", WeaponCheat);
+		DebugMenuAddCmd("Cheats", "Weapon set 1", WeaponCheat1);
+		DebugMenuAddCmd("Cheats", "Weapon set 2", WeaponCheat2);
+		DebugMenuAddCmd("Cheats", "Weapon set 3", WeaponCheat3);
 		DebugMenuAddCmd("Cheats", "Money", MoneyCheat);
 		DebugMenuAddCmd("Cheats", "Health", HealthCheat);
 		DebugMenuAddCmd("Cheats", "Wanted level up", WantedLevelUpCheat);
@@ -355,6 +461,9 @@ DebugMenuPopulate(void)
 		DebugMenuAddCmd("Spawn", "Spawn Rhino", [](){ SpawnCar(MI_RHINO); });
 		DebugMenuAddCmd("Spawn", "Spawn Firetruck", [](){ SpawnCar(MI_FIRETRUCK); });
 		DebugMenuAddCmd("Spawn", "Spawn Predator", [](){ SpawnCar(MI_PREDATOR); });
+		DebugMenuAddCmd("Spawn", "Spawn PCJ 600", [](){ SpawnCar(MI_PCJ600); });
+		DebugMenuAddCmd("Spawn", "Spawn Faggio", [](){ SpawnCar(MI_FAGGIO); });
+		DebugMenuAddCmd("Spawn", "Spawn Freeway", [](){ SpawnCar(MI_FREEWAY); });
 
 		DebugMenuAddVarBool8("Render", "Draw hud", &CHud::m_Wants_To_Draw_Hud, nil);
 		DebugMenuAddVarBool8("Render", "Backface Culling", &gBackfaceCulling, nil);
@@ -374,6 +483,7 @@ DebugMenuPopulate(void)
 		DebugMenuAddVarBool8("Render", "Don't render Peds", &gbDontRenderPeds, nil);
 		DebugMenuAddVarBool8("Render", "Don't render Vehicles", &gbDontRenderVehicles, nil);
 		DebugMenuAddVarBool8("Render", "Don't render Objects", &gbDontRenderObjects, nil);
+		DebugMenuAddVarBool8("Render", "Don't Render Water", &gbDontRenderWater, nil);
 
 		DebugMenuAddVarBool8("Debug", "Edit on", &CSceneEdit::m_bEditOn, nil);
 #ifdef MENU_MAP
@@ -388,11 +498,18 @@ DebugMenuPopulate(void)
 
 		DebugMenuAddVarBool8("Debug", "Script Heli On", &CHeli::ScriptHeliOn, nil);
 
+#ifdef CUSTOM_FRONTEND_OPTIONS
+		DebugMenuAddCmd("Debug", "Reload custom frontend options", ReloadFrontendOptions);
+#endif
 		DebugMenuAddCmd("Debug", "Start Credits", CCredits::Start);
 		DebugMenuAddCmd("Debug", "Stop Credits", CCredits::Stop);
 
 #ifdef RELOADABLES
 		DebugMenuAddCmd("Reload", "HUD.TXD", CHud::ReloadTXD);
+#endif
+		DebugMenuAddVarBool8("Debug", "Show DebugStuffInRelease", &gbDebugStuffInRelease, nil);
+#ifdef TIMEBARS
+		DebugMenuAddVarBool8("Debug", "Show Timebars", &gbShowTimebars, nil);
 #endif
 
 		extern bool PrintDebugCode;

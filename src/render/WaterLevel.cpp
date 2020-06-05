@@ -55,6 +55,8 @@ int32 CWaterLevel::m_nRenderWaterLayers;
 
 RpAtomic *CWaterLevel::ms_pWavyAtomic;
 RpAtomic *CWaterLevel::ms_pMaskAtomic;
+//"Custom" Don´t Render Water Toggle
+bool gbDontRenderWater;
 
 
 RwTexture *gpWaterTex;
@@ -591,6 +593,11 @@ SectorRadius(float fSize)
 void
 CWaterLevel::RenderWater()
 {
+//"Custom" Don´t Render Water Toggle
+#ifndef MASTER
+	if (gbDontRenderWater)
+		return;
+#endif
 	bool bUseCamEndX   = false;
 	bool bUseCamStartY = false;
 	

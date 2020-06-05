@@ -175,8 +175,7 @@ CAutomobile::CAutomobile(int32 id, uint8 CreatedBy)
 	for(i = 0; i < 4; i++){
 		m_aGroundPhysical[i] = nil;
 		m_aGroundOffset[i] = CVector(0.0f, 0.0f, 0.0f);
-		m_aSuspensionSpringRatio[i] = 1.0f;
-		m_aSuspensionSpringRatioPrev[i] = m_aSuspensionSpringRatio[i];
+		m_aSuspensionSpringRatioPrev[i] = m_aSuspensionSpringRatio[i] = 1.0f;
 		m_aWheelTimer[i] = 0.0f;
 		m_aWheelRotation[i] = 0.0f;
 		m_aWheelSpeed[i] = 0.0f;
@@ -256,6 +255,7 @@ void
 CAutomobile::ProcessControl(void)
 {
 	int i;
+	float wheelRot;
 	CColModel *colModel;
 
 	if(bUsingSpecialColModel)
@@ -423,7 +423,7 @@ CAutomobile::ProcessControl(void)
 					float slowdown;
 					CVector parallelSpeed = m_vecMoveSpeed - DotProduct(m_vecMoveSpeed, GetUp())*m_vecMoveSpeed;
 					float fSpeed = parallelSpeed.MagnitudeSqr();
-					if(fSpeed > 0.09f){
+					if(fSpeed > SQR(0.3f)){
 						fSpeed = Sqrt(fSpeed);
 						parallelSpeed *= 0.3f / fSpeed;
 						slowdown = SAND_SLOWDOWN * Max(1.0f - 2.0f*fSpeed, 0.2f);
@@ -462,11 +462,9 @@ CAutomobile::ProcessControl(void)
 
 		pHandling->Transmission.CalculateGearForSimpleCar(AutoPilot.m_fMaxTrafficSpeed/50.0f, m_nCurrentGear);
 
-		{
-		float wheelRot = ProcessWheelRotation(WHEEL_STATE_NORMAL, GetForward(), m_vecMoveSpeed, 0.35f);
+		wheelRot = ProcessWheelRotation(WHEEL_STATE_NORMAL, GetForward(), m_vecMoveSpeed, 0.35f);
 		for(i = 0; i < 4; i++)
 			m_aWheelRotation[i] += wheelRot;
-		}
 
 		PlayHornIfNecessary();
 		ReduceHornCounter();
@@ -501,7 +499,7 @@ CAutomobile::ProcessControl(void)
 		break;
 
 	case STATUS_ABANDONED:
-		if(m_vecMoveSpeed.MagnitudeSqr() < 0.01f)
+		if(m_vecMoveSpeed.MagnitudeSqr() < SQR(0.1f))
 			m_fBrakePedal = 0.2f;
 		else
 			m_fBrakePedal = 0.0f;
@@ -530,7 +528,7 @@ CAutomobile::ProcessControl(void)
 		break;
 
 	case STATUS_PLAYER_DISABLED:
-		if(m_vecMoveSpeed.MagnitudeSqr() < 0.01f ||
+		if(m_vecMoveSpeed.MagnitudeSqr() < SQR(0.1f) ||
 		   (pDriver && pDriver->IsPlayer() &&
 		    (pDriver->GetPedState() == PED_ARRESTED ||
 		     pDriver->GetPedState() == PED_DRAG_FROM_CAR ||
@@ -771,7 +769,7 @@ CAutomobile::ProcessControl(void)
 		for(i = 0; i < 4; i++){
 			if(m_aSuspensionSpringRatio[i] < 1.0f){
 				float bias = pHandling->fSuspensionBias;
-				if(i == 1 || i == 3)	// rear
+				if(i == CARWHEEL_REAR_LEFT || i == CARWHEEL_REAR_RIGHT)
 					bias = 1.0f - bias;
 
 				ApplySpringCollisionAlt(pHandling->fSuspensionForceLevel,
@@ -823,7 +821,6 @@ CAutomobile::ProcessControl(void)
 				m_aGroundPhysical[i] = nil;
 			}
 		}
-
 
 		bool gripCheat = true;
 		fwdSpeed = DotProduct(m_vecMoveSpeed, GetForward());
@@ -1063,6 +1060,7 @@ CAutomobile::ProcessControl(void)
 			}else if(m_doingBurnout && !mod_HandlingManager.HasFrontWheelDrive(pHandling->nIdentifier)){
 				rearBrake = 0.0f;
 				rearTraction = 0.0f;
+				// BUG: missing timestep
 				ApplyTurnForce(contactPoints[CARWHEEL_REAR_LEFT], -0.001f*m_fTurnMass*m_fSteerAngle*GetRight());
 			}else if(m_fTireTemperature > 1.0f){
 				rearTraction *= m_fTireTemperature;
@@ -1156,7 +1154,7 @@ CAutomobile::ProcessControl(void)
 		}
 
 		if(m_doingBurnout && !mod_HandlingManager.HasFrontWheelDrive(pHandling->nIdentifier) &&
-	           (m_aWheelState[CARWHEEL_REAR_LEFT] == WHEEL_STATE_SPINNING || m_aWheelState[CARWHEEL_REAR_RIGHT])){
+	           (m_aWheelState[CARWHEEL_REAR_LEFT] == WHEEL_STATE_SPINNING || m_aWheelState[CARWHEEL_REAR_RIGHT] == WHEEL_STATE_SPINNING)){
 			m_fTireTemperature += 0.001f*CTimer::GetTimeStep();
 			if(m_fTireTemperature > 3.0f)
 				m_fTireTemperature = 3.0f;
@@ -1376,14 +1374,14 @@ CAutomobile::ProcessControl(void)
 
 		// Flying
 
-		bool foo = false;
+		bool playRotorSound = false;
 		if(GetStatus() != STATUS_PLAYER && GetStatus() != STATUS_PLAYER_REMOTE && GetStatus() != STATUS_PHYSICS){
 			if(IsRealHeli()){
 				bEngineOn = false;
 				m_aWheelSpeed[1] = Max(m_aWheelSpeed[1]-0.0005f, 0.0f);
 				if(GetModelIndex() != MI_RCRAIDER && GetModelIndex() != MI_RCGOBLIN)
 					if(m_aWheelSpeed[1] < 0.154f && m_aWheelSpeed[1] > 0.0044f)
-						foo = true;
+						playRotorSound = true;
 			}
 		}else if((GetModelIndex() == MI_DODO || CVehicle::bAllDodosCheat) &&
 		         m_vecMoveSpeed.Magnitude() > 0.0f && CTimer::GetTimeStep() > 0.0f){
@@ -1448,8 +1446,7 @@ CAutomobile::ProcessControl(void)
 					gun.FireProjectile(this, &source, 0.0f);
 
 					CStats::RoundsFiredByPlayer++;
-//TODO(MIAMI):
-//					DMAudio.PlayOneShot(m_audioEntityId, 55, 0.0f);
+					DMAudio.PlayOneShot(m_audioEntityId, SOUND_WEAPON_SHOT_FIRED, 0.0f);
 					m_nGunFiringTime = CTimer::GetTimeInMilliseconds();
 				// Hunter gun
 				}else if(CPad::GetPad(0)->GetHandBrake() && CTimer::GetTimeInMilliseconds() > m_nGunFiringTime+60){
@@ -1459,8 +1456,7 @@ CAutomobile::ProcessControl(void)
 					gun.FireInstantHit(this, &source);
 					gun.AddGunshell(this, source, CVector2D(0.0f, 0.1f), 0.025f);
 					CStats::RoundsFiredByPlayer++;
-//TODO(MIAMI):
-//					DMAudio.PlayOneShot(m_audioEntityId, 55, 0.0f);
+					DMAudio.PlayOneShot(m_audioEntityId, SOUND_WEAPON_SHOT_FIRED, 0.0f);
 					m_nGunFiringTime = CTimer::GetTimeInMilliseconds();
 				}
 			}else if(GetModelIndex() == MI_SEASPAR && GetStatus() == STATUS_PLAYER){
@@ -1472,18 +1468,32 @@ CAutomobile::ProcessControl(void)
 					gun.FireInstantHit(this, &source);
 					gun.AddGunshell(this, source, CVector2D(0.0f, 0.1f), 0.025f);
 					CStats::RoundsFiredByPlayer++;
-//TODO(MIAMI):
-//					DMAudio.PlayOneShot(m_audioEntityId, 55, 0.0f);
+					DMAudio.PlayOneShot(m_audioEntityId, SOUND_WEAPON_SHOT_FIRED, 0.0f);
 					m_nGunFiringTime = CTimer::GetTimeInMilliseconds();
 				}
 			}
 
 			if(GetModelIndex() != MI_RCRAIDER && GetModelIndex() != MI_RCGOBLIN)
 				if(m_aWheelSpeed[1] < 0.154f && m_aWheelSpeed[1] > 0.0044f)
-					foo = true;
+					playRotorSound = true;
 		}
 
-//TODO(MIAMI): propeller stuff
+		// Play rotor sound
+		if(playRotorSound && m_aCarNodes[CAR_BONNET]){
+			CVector camDist = TheCamera.GetPosition() - GetPosition();
+			float distSq = camDist.MagnitudeSqr();
+			if(distSq < SQR(20.0f) && Abs(m_fPropellerRotation - m_aWheelRotation[1]) > DEGTORAD(30.0f)){
+				CMatrix mat;
+				mat.Attach(RwFrameGetMatrix(m_aCarNodes[CAR_BONNET]));
+				CVector blade = mat.GetRight();
+				blade = GetMatrix() * blade;
+				camDist /= Max(Sqrt(distSq), 0.01f);
+				if(Abs(DotProduct(camDist, blade)) > 0.95f){
+					DMAudio.PlayOneShot(m_audioEntityId, SOUND_31, 0.0f);
+					m_fPropellerRotation = m_aWheelRotation[1];
+				}
+			}
+		}
 	}
 
 
@@ -1536,10 +1546,8 @@ CAutomobile::ProcessControl(void)
 
 		// Blow up car after 5 seconds
 		m_fFireBlowUpTimer += CTimer::GetTimeStepInMilliseconds();
-		if(m_fFireBlowUpTimer > 5000.0f){
-			CWorld::Players[CWorld::PlayerInFocus].AwardMoneyForExplosion(this);
+		if(m_fFireBlowUpTimer > 5000.0f)
 			BlowUpCar(m_pSetOnFireEntity);
-		}
 	}else
 		m_fFireBlowUpTimer = 0.0f;
 
@@ -1563,8 +1571,10 @@ CAutomobile::ProcessControl(void)
 	for(i = 0; i < 4; i++){
 		float suspChange = m_aSuspensionSpringRatioPrev[i] - m_aSuspensionSpringRatio[i];
 		if(suspChange > 0.3f && !drivingInSand && speedsq > 0.04f){
-//TODO(MIAMI): depends on wheel status
-			DMAudio.PlayOneShot(m_audioEntityId, SOUND_CAR_JUMP, suspChange);
+			if(Damage.GetWheelStatus(i) == WHEEL_STATUS_BURST)
+				DMAudio.PlayOneShot(m_audioEntityId, SOUND_CAR_JUMP_2, suspChange);
+			else
+				DMAudio.PlayOneShot(m_audioEntityId, SOUND_CAR_JUMP, suspChange);
 			if(suspChange > suspShake)
 				suspShake = suspChange;
 		}
@@ -1583,7 +1593,7 @@ CAutomobile::ProcessControl(void)
 
 		if(this == FindPlayerVehicle())
 // BUG: this only observes one of the wheels
-			TheCamera.m_bVehicleSuspenHigh = suspChange > 0.05f;
+			TheCamera.m_bVehicleSuspenHigh = Abs(suspChange) > 0.05f;
 
 		m_aSuspensionSpringRatioPrev[i] = m_aSuspensionSpringRatio[i];
 		m_aSuspensionSpringRatio[i] = 1.0f;
@@ -3033,7 +3043,7 @@ CAutomobile::ProcessControlInputs(uint8 pad)
 
 	if(!CPad::GetPad(pad)->GetExitVehicle() ||
 	   pDriver && pDriver->m_pVehicleAnim && (pDriver->m_pVehicleAnim->animId == ANIM_CAR_ROLLOUT_LHS ||
-	                                          pDriver->m_pVehicleAnim->animId == ANIM_CAR_ROLLOUT_LHS2))
+	                                          pDriver->m_pVehicleAnim->animId == ANIM_CAR_ROLLOUT_RHS))
 		bIsHandbrakeOn = !!CPad::GetPad(pad)->GetHandBrake();
 	else
 		bIsHandbrakeOn = true;
@@ -3041,22 +3051,22 @@ CAutomobile::ProcessControlInputs(uint8 pad)
 	// Steer left/right
 	if(CCamera::m_bUseMouse3rdPerson && !CVehicle::m_bDisableMouseSteering){
 		if(CPad::GetPad(pad)->GetMouseX() != 0.0f){
-			m_fSteerRatio += fMouseSteerSens*CPad::GetPad(pad)->GetMouseX();
+			m_fSteerInput += fMouseSteerSens*CPad::GetPad(pad)->GetMouseX();
 			nLastControlInput = 2;
-			if(Abs(m_fSteerRatio) < fMouseCentreRange)
-				m_fSteerRatio *= Pow(fMouseCentreMult, CTimer::GetTimeStep());
+			if(Abs(m_fSteerInput) < fMouseCentreRange)
+				m_fSteerInput *= Pow(fMouseCentreMult, CTimer::GetTimeStep());
 		}else if(CPad::GetPad(pad)->GetSteeringLeftRight() || nLastControlInput != 2){
 			// mouse hasn't move, steer with pad like below
-			m_fSteerRatio += (-CPad::GetPad(pad)->GetSteeringLeftRight()/128.0f - m_fSteerRatio)*
+			m_fSteerInput += (-CPad::GetPad(pad)->GetSteeringLeftRight()/128.0f - m_fSteerInput)*
 				0.2f*CTimer::GetTimeStep();
 			nLastControlInput = 0;
 		}
 	}else{
-		m_fSteerRatio += (-CPad::GetPad(pad)->GetSteeringLeftRight()/128.0f - m_fSteerRatio)*
+		m_fSteerInput += (-CPad::GetPad(pad)->GetSteeringLeftRight()/128.0f - m_fSteerInput)*
 			0.2f*CTimer::GetTimeStep();
 		nLastControlInput = 0;
 	}
-	m_fSteerRatio = clamp(m_fSteerRatio, -1.0f, 1.0f);
+	m_fSteerInput = clamp(m_fSteerInput, -1.0f, 1.0f);
 
 	// Accelerate/Brake
 	float acceleration = (CPad::GetPad(pad)->GetAccelerate() - CPad::GetPad(pad)->GetBrake())/255.0f;
@@ -3113,10 +3123,10 @@ CAutomobile::ProcessControlInputs(uint8 pad)
 
 	// Actually turn wheels
 	static float fValue;	// why static?
-	if(m_fSteerRatio < 0.0f)
-		fValue = -sq(m_fSteerRatio);
+	if(m_fSteerInput < 0.0f)
+		fValue = -sq(m_fSteerInput);
 	else
-		fValue = sq(m_fSteerRatio);
+		fValue = sq(m_fSteerInput);
 	m_fSteerAngle = DEGTORAD(pHandling->fSteeringLock) * fValue;
 
 	if(bComedyControls){
@@ -3430,8 +3440,6 @@ CAutomobile::HydraulicControl(void)
 	if(m_hydraulicState < 20 && m_fVelocityChangeForAudio > 0.2f){
 		if(m_hydraulicState == 0){
 			m_hydraulicState = 20;
-			for(i = 0; i < 4; i++)
-				m_aWheelPosition[i] -= 0.06f;
 			DMAudio.PlayOneShot(m_audioEntityId, SOUND_CAR_HYDRAULIC_1, 0.0f);
 			setPrevRatio = true;
 		}else{
@@ -4198,12 +4206,12 @@ CAutomobile::VehicleDamage(float impulse, uint16 damagedPiece)
 			   pDriver &&
 			   m_pDamageEntity && m_pDamageEntity->IsVehicle() &&
 			   (this != FindPlayerVehicle() || ((CVehicle*)m_pDamageEntity)->VehicleCreatedBy == MISSION_VEHICLE) &&
+// TODO(MIAMI): enum
 			   ((CVehicle*)m_pDamageEntity)->pDriver){
-// TODO(MIAMI)
-//				if(GetVehicleAppearance() == VEHICLE_APPEARANCE_CAR)
-//					pDriver->Say(145);
-//				else
-//					pDriver->Say(144);
+				if(GetVehicleAppearance() == VEHICLE_APPEARANCE_CAR)
+					pDriver->Say(145);
+				else
+					pDriver->Say(144);
 			}
 
 			int oldHealth = m_fHealth;
@@ -4834,15 +4842,13 @@ CAutomobile::BurstTyre(uint8 wheel, bool applyForces)
 	case CAR_PIECE_WHEEL_LR: wheel = VEHWHEEL_REAR_LEFT; break;
 	case CAR_PIECE_WHEEL_RF: wheel = VEHWHEEL_FRONT_RIGHT; break;
 	case CAR_PIECE_WHEEL_RR: wheel = VEHWHEEL_REAR_RIGHT; break;
-	default: assert(0 && "invalid wheel");
 	}
 
 	int status = Damage.GetWheelStatus(wheel);
 	if(status == WHEEL_STATUS_OK){
 		Damage.SetWheelStatus(wheel, WHEEL_STATUS_BURST);
 		CStats::TyresPopped++;
-// TODO(MIAMI)
-//		DMAudio.PlayOneShot(m_audioEntityId, SOUND_15, 0.0f);
+		DMAudio.PlayOneShot(m_audioEntityId, SOUND_CAR_TYRE_POP, 0.0f);
 
 		if(GetStatus() == STATUS_SIMPLE){
 			SetStatus(STATUS_PHYSICS);
@@ -4850,8 +4856,8 @@ CAutomobile::BurstTyre(uint8 wheel, bool applyForces)
 		}
 
 		if(applyForces){
-			ApplyMoveForce(GetRight() * CGeneral::GetRandomNumberInRange(-0.3f, 0.3f));
-			ApplyTurnForce(GetRight() * CGeneral::GetRandomNumberInRange(-0.3f, 0.3f), GetForward());
+			ApplyMoveForce(GetRight() * m_fMass * CGeneral::GetRandomNumberInRange(-0.03f, 0.03f));
+			ApplyTurnForce(GetRight() * m_fTurnMass * CGeneral::GetRandomNumberInRange(-0.03f, 0.03f), GetForward());
 		}
 	}
 }
@@ -4867,10 +4873,10 @@ CAutomobile::IsRoomForPedToLeaveCar(uint32 component, CVector *doorOffset)
 	CVector seatPos;
 	switch(component){
 	case CAR_DOOR_RF:
-		seatPos = mi->m_positions[mi->m_vehicleType == VEHICLE_TYPE_BOAT ? BOAT_POS_FRONTSEAT : CAR_POS_FRONTSEAT];
+		seatPos = mi->GetFrontSeatPosn();
 		break;
 	case CAR_DOOR_LF:
-		seatPos = mi->m_positions[mi->m_vehicleType == VEHICLE_TYPE_BOAT ? BOAT_POS_FRONTSEAT : CAR_POS_FRONTSEAT];
+		seatPos = mi->GetFrontSeatPosn();
 		seatPos.x = -seatPos.x;
 		break;
 	case CAR_DOOR_RR:
@@ -4898,7 +4904,7 @@ CAutomobile::IsRoomForPedToLeaveCar(uint32 component, CVector *doorOffset)
 
 	CVector dist = doorPos - seatPos;
 
-	// Removing that makes this func. return false for van doors.
+	// Removing that makes thiProcessEntityCollisions func. return false for van doors.
 	doorPos.z += 0.5f;
 	float length = dist.Magnitude();
 	CVector pedPos = seatPos + dist*((length+0.6f)/length);
@@ -5414,8 +5420,7 @@ CAutomobile::SetPanelDamage(int32 component, ePanels panel, bool noFlyingCompone
 	if(m_aCarNodes[component] == nil)
 		return;
 	if(status == PANEL_STATUS_SMASHED1){
-// TODO(MIAMI)
-//		DMAudio.PlayOneShot(m_audioEntityId, SOUND_12, 0.0f);
+		DMAudio.PlayOneShot(m_audioEntityId, SOUND_CAR_WINDSHIELD_CRACK, 0.0f);
 		// show damaged part
 		SetComponentVisibility(m_aCarNodes[component], ATOMIC_FLAG_DAM);
 	}else if(status == PANEL_STATUS_MISSING){
@@ -5519,7 +5524,7 @@ CAutomobile::SetupModelNodes(void)
 	int i;
 	for(i = 0; i < NUM_CAR_NODES; i++)
 		m_aCarNodes[i] = nil;
-	CClumpModelInfo::FillFrameArray((RpClump*)m_rwObject, m_aCarNodes);
+	CClumpModelInfo::FillFrameArray(GetClump(), m_aCarNodes);
 }
 
 void

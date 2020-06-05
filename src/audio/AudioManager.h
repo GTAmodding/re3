@@ -339,7 +339,7 @@ public:
 	void ProcessVehicleOneShots(cVehicleParams *params);
 	bool ProcessVehicleReverseWarning(cVehicleParams *params);
 	bool ProcessVehicleRoadNoise(cVehicleParams *params);
-	void ProcessVehicleSirenOrAlarm(cVehicleParams *params);
+	bool ProcessVehicleSirenOrAlarm(cVehicleParams *params);
 	void ProcessVehicleSkidding(cVehicleParams *params);
 	void ProcessWaterCannon(int32);
 	void ProcessWeather(int32 id);

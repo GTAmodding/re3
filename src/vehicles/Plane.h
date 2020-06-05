@@ -9,13 +9,6 @@ enum ePlaneNodes
 	NUM_PLANE_NODES
 };
 
-enum ePlanePositions
-{
-	PLANE_POS_LIGHT_LEFT,
-	PLANE_POS_LIGHT_RIGHT,
-	PLANE_POS_LIGHT_TAIL,
-};
-
 struct CPlaneNode
 {
 	CVector p;	// position

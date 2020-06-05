@@ -204,7 +204,7 @@ CTrain::ProcessControl(void)
 			if(m_bTrainStopping){
 				m_nDoorTimer = CTimer::GetTimeInMilliseconds() + 1000;
 				m_nDoorState = TRAIN_DOOR_OPENING;
-				DMAudio.PlayOneShot(m_audioEntityId, SOUND_18, 0.0f);
+				DMAudio.PlayOneShot(m_audioEntityId, SOUND_TRAIN_DOOR_CLOSE, 0.0f);
 			}
 			break;
 
@@ -221,7 +221,7 @@ CTrain::ProcessControl(void)
 			if(!m_bTrainStopping){
 				m_nDoorTimer = CTimer::GetTimeInMilliseconds() + 1000;
 				m_nDoorState = TRAIN_DOOR_CLOSING;
-				DMAudio.PlayOneShot(m_audioEntityId, SOUND_19, 0.0f);
+				DMAudio.PlayOneShot(m_audioEntityId, SOUND_TRAIN_DOOR_OPEN, 0.0f);
 			}
 			break;
 

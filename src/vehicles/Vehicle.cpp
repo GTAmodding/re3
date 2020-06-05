@@ -5,6 +5,8 @@
 #include "Timer.h"
 #include "Pad.h"
 #include "Vehicle.h"
+#include "Bike.h"
+#include "Automobile.h"
 #include "Pools.h"
 #include "HandlingMgr.h"
 #include "CarCtrl.h"
@@ -70,7 +72,7 @@ CVehicle::CVehicle(uint8 CreatedBy)
 
 	m_nCurrentGear = 1;
 	m_fChangeGearTime = 0.0f;
-	m_fSteerRatio = 0.0f;
+	m_fSteerInput = 0.0f;
 	m_type = ENTITY_TYPE_VEHICLE;
 	VehicleCreatedBy = CreatedBy;
 	m_nRouteSeed = 0;
@@ -893,7 +895,7 @@ float fTweakBikeWheelTurnForce = 2.0f;
 
 void
 CVehicle::ProcessBikeWheel(CVector &wheelFwd, CVector &wheelRight, CVector &wheelContactSpeed, CVector &wheelContactPoint,
-	int32 wheelsOnGround, float thrust, float brake, float adhesion, float unk, int8 wheelId, float *wheelSpeed, tWheelState *wheelState, eBikeWheelSpecial special, uint16 wheelStatus)
+	int32 wheelsOnGround, float thrust, float brake, float adhesion, float destabTraction, int8 wheelId, float *wheelSpeed, tWheelState *wheelState, eBikeWheelSpecial special, uint16 wheelStatus)
 {
 	// BUG: using statics here is probably a bad idea
 	static bool bAlreadySkidding = false;	// this is never reset
@@ -926,7 +928,7 @@ CVehicle::ProcessBikeWheel(CVector &wheelFwd, CVector &wheelRight, CVector &whee
 	if(bAlreadySkidding)
 		adhesion *= pHandling->fTractionLoss;
 
-	if(special == BIKE_WHEEL_2 || special == BIKE_WHEEL_3)
+	if(special == BIKE_WHEELSPEC_2 || special == BIKE_WHEELSPEC_3)
 		contactSpeedRight = 0.0f;
 	else
 		contactSpeedRight = DotProduct(wheelContactSpeed, wheelRight);
@@ -1010,14 +1012,14 @@ CVehicle::ProcessBikeWheel(CVector &wheelFwd, CVector &wheelRight, CVector &whee
 		right *= adhesion * tractionLoss / l;
 		fwd *= adhesion * tractionLoss / l;
 
-		if(unk < 1.0f)
-			right *= unk;
-	}else if(unk < 1.0f){
+		if(destabTraction < 1.0f)
+			right *= destabTraction;
+	}else if(destabTraction < 1.0f){
 		if(!bAlreadySkidding)
-			unk *= pHandling->fTractionLoss;
-		if(sq(adhesion*unk) < speedSq){
+			destabTraction *= pHandling->fTractionLoss;
+		if(sq(adhesion*destabTraction) < speedSq){
 			float l = Sqrt(speedSq);
-			right *= adhesion * unk / l;
+			right *= adhesion * destabTraction / l;
 		}
 	}
 
@@ -1030,15 +1032,14 @@ CVehicle::ProcessBikeWheel(CVector &wheelFwd, CVector &wheelRight, CVector &whee
 		float impulse = speed*m_fMass;
 		float turnImpulse = speed*GetMass(wheelContactPoint, direction);
 		CVector vTurnImpulse = turnImpulse * direction;
-		float turnRight = DotProduct(vTurnImpulse, GetRight());
 
 		ApplyMoveForce(impulse * direction);
 
+		float turnRight = DotProduct(vTurnImpulse, GetRight());
 		float contactRight = DotProduct(wheelContactPoint, GetRight());
 		float contactFwd = DotProduct(wheelContactPoint, GetForward());
 
-		if(wheelId != CARWHEEL_REAR_LEFT ||
-		   !bBraking && !bReversing)
+		if(wheelId != BIKEWHEEL_REAR || !bBraking && !bReversing)
 			ApplyTurnForce((vTurnImpulse - turnRight*GetRight()) * fTweakBikeWheelTurnForce,
 				wheelContactPoint - contactRight*GetRight());
 
@@ -2289,7 +2290,7 @@ CVehicle::KillPedsInVehicle(void)
 			if(!pDriver->IsPlayer())
 				pDriver->FlagToDestroyWhenNextProcessed();
 		}else
-			pDriver->SetDie(ANIM_KO_SHOT_FRONT1, 4.0f, 0.0f);
+			pDriver->SetDie();
 	}
 	for(i = 0; i < m_nNumMaxPassengers; i++){
 		if(pPassengers[i]){
@@ -2299,7 +2300,7 @@ CVehicle::KillPedsInVehicle(void)
 				if(!pPassengers[i]->IsPlayer())
 					pPassengers[i]->FlagToDestroyWhenNextProcessed();
 			}else
-				pPassengers[i]->SetDie(ANIM_KO_SHOT_FRONT1, 4.0f, 0.0f);
+				pPassengers[i]->SetDie();
 		}
 	}
 }

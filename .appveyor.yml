@@ -40,13 +40,13 @@ deploy:
   api_key:
     secure: xWnYDfNWM87iPoBFbz6L1XAduxijJRWSpQLhMDOjznmzbMCsORtdx2tmWmFLTwf6
   subject: gtamodding
-  repo: re3
+  repo: revc
   package: "%configuration%_%platform%"
   version: "%APPVEYOR_BUILD_VERSION%"
   artifact: reVC
   publish: true
   on:
-    branch: master
+    branch: miami
     APPVEYOR_REPO_TAG: false
 
 cache:

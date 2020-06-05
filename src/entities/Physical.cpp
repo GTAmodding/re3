@@ -17,10 +17,11 @@
 #include "CarCtrl.h"
 #include "DMAudio.h"
 #include "Automobile.h"
+#include "Bike.h"
 #include "Pickups.h"
 #include "Physical.h"
 
-//--MIAMI: file done except one bike thing
+//--MIAMI: file done
 
 CPhysical::CPhysical(void)
 {
@@ -530,7 +531,7 @@ void
 CPhysical::ApplyAirResistance(void)
 {
 	if(m_fAirResistance > 0.1f){
-		if(GetStatus() != STATUS_12){ 
+		if(GetStatus() != STATUS_GHOST){ 
 			float f = Pow(m_fAirResistance, CTimer::GetTimeStep());
 			m_vecMoveSpeed *= f;
 			m_vecTurnSpeed *= f;
@@ -2173,7 +2174,11 @@ CPhysical::ProcessCollision(void)
 				car->m_aSuspensionSpringRatio[2] = 1.0f;
 				car->m_aSuspensionSpringRatio[3] = 1.0f;
 			}else if(veh->m_vehType == VEHICLE_TYPE_BIKE){
-				assert(0 && "TODO(MIAMI)");
+				CBike *bike = (CBike*)this;
+				bike->m_aSuspensionSpringRatio[0] = 1.0f;
+				bike->m_aSuspensionSpringRatio[1] = 1.0f;
+				bike->m_aSuspensionSpringRatio[2] = 1.0f;
+				bike->m_aSuspensionSpringRatio[3] = 1.0f;
 			}
 		}
 	}

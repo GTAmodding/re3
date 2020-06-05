@@ -88,6 +88,7 @@ enum eBeachToy
 };
 
 extern RwRaster* gpWaterRaster;
+extern bool gbDontRenderWater;
 
 class CEntity;
 

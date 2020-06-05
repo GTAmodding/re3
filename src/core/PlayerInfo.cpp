@@ -402,7 +402,7 @@ CPlayerInfo::Process(void)
 	else
 		enterOrExitVeh = CPad::GetPad(0)->GetExitVehicle();
 
-	if (enterOrExitVeh && m_pPed->m_nPedState != PED_SNIPER_MODE && m_pPed->m_nPedState != PED_ROCKET_ODE) {
+	if (enterOrExitVeh && m_pPed->m_nPedState != PED_SNIPER_MODE && m_pPed->m_nPedState != PED_ROCKET_MODE) {
 		if (m_pPed->bInVehicle) {
 			if (!m_pRemoteVehicle) {
 				CEntity *surfaceBelowVeh = m_pPed->m_pMyVehicle->m_pCurGroundEntity;

@@ -14,6 +14,9 @@ extern wchar gUString[256];
 extern wchar gUString2[256];
 extern bool gbPrintShite;
 extern bool gbModelViewer;
+#ifdef TIMEBARS
+extern bool gbShowTimebars;
+#endif
 
 class CSprite2d;
 

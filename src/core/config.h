@@ -194,7 +194,7 @@ enum Config {
 #	define NO_CDCHECK
 #	define CHATTYSPLASH	// print what the game is loading
 #	define DEBUGMENU
-//#	define TIMEBARS		// print debug timers
+#	define TIMEBARS		// print debug timers
 #endif
 
 #define FIX_BUGS		// fixes bugs that we've came across during reversing, TODO: use this more
@@ -202,6 +202,8 @@ enum Config {
 #define COMPATIBLE_SAVES // this allows changing structs while keeping saves compatible
 #define FIX_HIGH_FPS_BUGS_ON_FRONTEND
 
+// Rendering/display
+#define ASPECT_RATIO_SCALE	// Not just makes everything scale with aspect ratio, also adds support for all aspect ratios
 // Just debug menu entries
 #ifdef DEBUGMENU
 #define TOGGLEABLE_BETA_FEATURES // not too many things
@@ -240,13 +242,16 @@ enum Config {
 // #define CIRCLE_BACK_BUTTON
 #define HUD_ENHANCEMENTS	// Adjusts some aspects to make the HUD look/behave a little bit better.
 #define BETA_SLIDING_TEXT
+//#define CUSTOM_FRONTEND_OPTIONS
 #define LEGACY_MENU_OPTIONS
 #define MUCH_SHORTER_OUTRO_SCREEN
 
 // Script
-#define USE_DEBUG_SCRIPT_LOADER	// makes game load main_freeroam.scm by default
+#define USE_DEBUG_SCRIPT_LOADER	// Loads main.scm by default. Hold R for main_freeroam.scm and D for main_d.scm
 #define USE_MEASUREMENTS_IN_METERS // makes game use meters instead of feet in script
 #define USE_PRECISE_MEASUREMENT_CONVERTION // makes game convert feet to meeters more precisely
+//#define MISSION_REPLAY // mobile feature
+//#define SIMPLIER_MISSIONS // apply simplifications from mobile
 
 // Replay
 //#define DONT_FIX_REPLAY_BUGS // keeps various bugs in CReplay, some of which are fairly cool!

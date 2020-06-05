@@ -68,6 +68,7 @@ public:
 	bool HitsGround(CEntity *holder, CVector *fireSource, CEntity *aimingTo);
 	static void BlowUpExplosiveThings(CEntity *thing);
 	bool HasWeaponAmmoToBeUsed(void);
+	static void AddGunFlashBigGuns(CVector, CVector);
 	
 	static bool IsShotgun(int weapon) { return weapon == WEAPONTYPE_SHOTGUN || weapon == WEAPONTYPE_SPAS12_SHOTGUN || weapon == WEAPONTYPE_STUBBY_SHOTGUN; }
 

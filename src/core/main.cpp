@@ -73,6 +73,9 @@ float FramesPerSecond = 30.0f;
 
 bool gbPrintShite = false;
 bool gbModelViewer;
+#ifdef TIMEBARS
+bool gbShowTimebars;
+#endif
 
 int32 frameCount;
 
@@ -94,7 +97,6 @@ void TheGame(void);
 #ifdef DEBUGMENU
 void DebugMenuPopulate(void);
 #endif
-
 
 void
 ValidateVersion()
@@ -1095,8 +1097,10 @@ Idle(void *arg)
 #endif
 	// CCredits::Render(); // They added it to function above and also forgot it here
 
+
 #ifdef TIMEBARS
-	tbDisplay();
+	if (gbShowTimebars)
+		tbDisplay();
 #endif
 
 	DoRWStuffEndOfFrame();

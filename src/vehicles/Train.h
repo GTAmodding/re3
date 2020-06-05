@@ -24,15 +24,6 @@ enum eTrainNodes
 	NUM_TRAIN_NODES
 };
 
-enum eTrainPositions
-{
-	TRAIN_POS_LIGHT_FRONT,
-	TRAIN_POS_LIGHT_REAR,
-	TRAIN_POS_LEFT_ENTRY,
-	TRAIN_POS_MID_ENTRY,
-	TRAIN_POS_RIGHT_ENTRY
-};
-
 struct CTrainNode
 {
 	CVector p;	// position

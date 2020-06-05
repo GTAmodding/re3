@@ -22,6 +22,7 @@
 #include "DummyObject.h"
 #include "Script.h"
 #include "Shadows.h"
+#include "SurfaceTable.h"
 
 #define MIN_CREATION_DIST		40.0f // not for start of the game (look at the GeneratePedsAtStartOfGame)
 #define CREATION_RANGE			10.0f // added over the MIN_CREATION_DIST.
@@ -1077,7 +1078,7 @@ CPopulation::AddDeadPedInFrontOfCar(const CVector& pos, CVehicle* pCulprit)
 	if (!CModelInfo::GetModelInfo(MI_MALE01)->GetRwObject()) // strange way to check it
 		return nil;
 	CPed* pPed = CPopulation::AddPed(PEDTYPE_CIVMALE, MI_MALE01, pos); // TODO(MIAMI): 4th parameter
-	pPed->SetDie(ANIM_KO_SHOT_FRONT1, 4.0f, 0.0f);
+	pPed->SetDie();
 	pPed->m_nPedMoney = 0;
 	pPed->bDeadPedInFrontOfCar = true;
 	pPed->m_vehicleInAccident = pCulprit;
@@ -1100,4 +1101,16 @@ CPopulation::AddDeadPedInFrontOfCar(const CVector& pos, CVehicle* pCulprit)
 	}
 	CVisibilityPlugins::SetClumpAlpha(pPed->GetClump(), 0);
 	return pPed;
+}
+
+bool
+CPopulation::IsSkateable(CVector const& pos)
+{
+	CColPoint foundCol;
+	CEntity* foundEnt = nil;
+	CWorld::ProcessVerticalLine(pos + CVector(0.f, 0.f, 2.f), pos.z - 2.0f, foundCol, foundEnt, true, false, false, false, false, false, nil);
+	if (!foundEnt)
+		return false;
+
+	return foundCol.surfaceB == SURFACE_TARMAC || foundCol.surfaceB == SURFACE_PAVEMENT;
 }

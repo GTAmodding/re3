@@ -25,7 +25,8 @@
 #include "Stats.h"
 #include "TempColModels.h"
 #include "Timer.h"
-#include "Vehicle.h"
+#include "Automobile.h"
+#include "Boat.h"
 #include "WaterLevel.h"
 #include "WeaponInfo.h"
 #include "World.h"
@@ -823,9 +824,6 @@ CWeapon::FireInstantHit(CEntity *shooter, CVector *fireSource)
 			int32 accuracy   = shooterPed->m_wepAccuracy;
 			int32 inaccuracy = 100-accuracy;
 
-			if ( accuracy != 100 )
-				FindPlayerPed();	//what ?
-
 			CPed *threatAttack = (CPed*)shooterPed->m_pPointGunAt;
 			if ( threatAttack->IsPed() )
 			{
@@ -910,10 +908,19 @@ CWeapon::FireInstantHit(CEntity *shooter, CVector *fireSource)
 		}
 	}
 
-	if ( victim && shooter->IsPed() && victim == ((CPed*)shooter)->m_leader )
-		return false;
+	if (victim && shooter->IsPed())
+	{
+		if (victim == ((CPed*)shooter)->m_leader)
+			return false;
 
-	CEventList::RegisterEvent(EVENT_GUNSHOT, EVENT_ENTITY_PED, shooter, (CPed *)shooter, 1000);
+		if (victim->IsPed() && ((CPed*)shooter)->IsGangMember() && !((CPed*)victim)->CanBeDamagedByThisGangMember((CPed*)shooter))
+			return false;
+	}
+
+	if (shooter->IsPed())
+		CEventList::RegisterEvent(EVENT_GUNSHOT, EVENT_ENTITY_PED, shooter, (CPed*)shooter, 1000);
+	else if (shooter->IsVehicle() && ((CVehicle*)shooter)->pDriver)
+		CEventList::RegisterEvent(EVENT_GUNSHOT, EVENT_ENTITY_VEHICLE, shooter, ((CVehicle*)shooter)->pDriver, 1000);
 
 	if ( shooter == FindPlayerPed() )
 	{
@@ -934,59 +941,7 @@ CWeapon::FireInstantHit(CEntity *shooter, CVector *fireSource)
 
 			if ( info->m_nFiringRate >= 50 && !(++counter & 1) )
 			{
-				CPointLights::AddLight(CPointLights::LIGHT_POINT,
-					*fireSource, CVector(0.0f, 0.0f, 0.0f), 5.0f,
-					1.0f, 0.8f, 0.0f, CPointLights::FOG_NONE, false);
-
-				CVector gunflashPos = *fireSource;
-				CParticle::AddParticle(PARTICLE_GUNFLASH_NOANIM, gunflashPos, CVector(0.0f, 0.0f, 0.0f), nil, 0.08f);
-				gunflashPos += CVector(0.06f*ahead.x, 0.06f*ahead.y, 0.0f);
-				CParticle::AddParticle(PARTICLE_GUNFLASH_NOANIM, gunflashPos, CVector(0.0f, 0.0f, 0.0f), nil, 0.06f);
-				gunflashPos += CVector(0.06f*ahead.x, 0.06f*ahead.y, 0.0f);
-				CParticle::AddParticle(PARTICLE_GUNFLASH_NOANIM, gunflashPos, CVector(0.0f, 0.0f, 0.0f), nil, 0.06f);
-
-				gunflashPos = *fireSource;
-				gunflashPos += CVector(-0.1f*ahead.x, -0.1f*ahead.y, 0.0f);
-				gunflashPos.z += 0.04f;
-				CParticle::AddParticle(PARTICLE_GUNFLASH_NOANIM, gunflashPos, CVector(0.0f, 0.0f, 0.0f), nil, 0.04f);
-				gunflashPos.z += 0.04f;
-				CParticle::AddParticle(PARTICLE_GUNFLASH_NOANIM, gunflashPos, CVector(0.0f, 0.0f, 0.0f), nil, 0.02f);
-				gunflashPos.z += 0.03f;
-				CParticle::AddParticle(PARTICLE_GUNFLASH_NOANIM, gunflashPos, CVector(0.0f, 0.0f, 0.0f), nil, 0.02f);
-
-				gunflashPos = *fireSource;
-				gunflashPos += CVector(-0.1f*ahead.x, -0.1f*ahead.y, 0.0f);
-				gunflashPos.z -= 0.04f;
-				CParticle::AddParticle(PARTICLE_GUNFLASH_NOANIM, gunflashPos, CVector(0.0f, 0.0f, 0.0f), nil, 0.04f);
-				gunflashPos.z -= 0.04f;
-				CParticle::AddParticle(PARTICLE_GUNFLASH_NOANIM, gunflashPos, CVector(0.0f, 0.0f, 0.0f), nil, 0.02f);
-				gunflashPos.z -= 0.03f;
-				CParticle::AddParticle(PARTICLE_GUNFLASH_NOANIM, gunflashPos, CVector(0.0f, 0.0f, 0.0f), nil, 0.02f);
-
-				CVector offset = CrossProduct(CVector(ahead.x, ahead.y, 0.0f), CVector(0.0f, 0.0f, 5.0f));
-				offset.Normalise2D();
-
-				gunflashPos = *fireSource;
-				gunflashPos += CVector(-0.1f*ahead.x, -0.1f*ahead.y, 0.0f);
-				gunflashPos += CVector(0.06f*offset.x, 0.06f*offset.y, 0.0f);
-				CParticle::AddParticle(PARTICLE_GUNFLASH_NOANIM, gunflashPos, CVector(0.0f, 0.0f, 0.0f), nil, 0.04f);
-				gunflashPos += CVector(0.04f*offset.x, 0.04f*offset.y, 0.0f);
-				CParticle::AddParticle(PARTICLE_GUNFLASH_NOANIM, gunflashPos, CVector(0.0f, 0.0f, 0.0f), nil, 0.03f);
-				gunflashPos += CVector(0.03f*offset.x, 0.03f*offset.y, 0.0f);
-				CParticle::AddParticle(PARTICLE_GUNFLASH_NOANIM, gunflashPos, CVector(0.0f, 0.0f, 0.0f), nil, 0.02f);
-
-				gunflashPos = *fireSource;
-				gunflashPos += CVector(-0.1f*ahead.x, -0.1f*ahead.y, 0.0f);
-				gunflashPos -= CVector(0.06f*offset.x, 0.06f*offset.y, 0.0f);
-				CParticle::AddParticle(PARTICLE_GUNFLASH_NOANIM, gunflashPos, CVector(0.0f, 0.0f, 0.0f), nil, 0.04f);
-				gunflashPos -= CVector(0.04f*offset.x, 0.04f*offset.y, 0.0f);
-				CParticle::AddParticle(PARTICLE_GUNFLASH_NOANIM, gunflashPos, CVector(0.0f, 0.0f, 0.0f), nil, 0.03f);
-				gunflashPos -= CVector(0.03f*offset.x, 0.03f*offset.y, 0.0f);
-				CParticle::AddParticle(PARTICLE_GUNFLASH_NOANIM, gunflashPos, CVector(0.0f, 0.0f, 0.0f), nil, 0.02f);
-
-				CVector gunsmokePos = *fireSource;
-				float rnd = CGeneral::GetRandomNumberInRange(0.05f, 0.25f);
-				CParticle::AddParticle(PARTICLE_GUNSMOKE2, gunsmokePos, CVector(ahead.x*rnd, ahead.y*rnd, 0.0f));
+				AddGunFlashBigGuns(*fireSource, *fireSource + target);
 
 				CVector gunshellPos = *fireSource;
 				gunshellPos -= CVector(0.65f*ahead.x, 0.65f*ahead.y, 0.0f);
@@ -2056,31 +2011,29 @@ CWeapon::FireInstantHitFromCar(CVehicle *shooter, bool left)
 
 	CVehicleModelInfo *modelInfo = shooter->GetModelInfo();
 
-	#define FRONTSEATPOS() (&(shooter->IsBoat() ? modelInfo->m_positions[BOAT_POS_FRONTSEAT] : modelInfo->m_positions[CAR_POS_FRONTSEAT]))
-
 	CVector source, target;
 	if ( left )
 	{
 		source = shooter->GetMatrix() * CVector(-shooter->GetColModel()->boundingBox.max.x + -0.2f,
-												float(CGeneral::GetRandomNumber() & 255) * 0.001f + FRONTSEATPOS()->y,
-												FRONTSEATPOS()->z + 0.5f);
+												float(CGeneral::GetRandomNumber() & 255) * 0.001f + modelInfo->GetFrontSeatPosn().y,
+												modelInfo->GetFrontSeatPosn().z + 0.5f);
 		source += CTimer::GetTimeStep() * shooter->m_vecMoveSpeed;
 
 
 		target = shooter->GetMatrix() * CVector(-info->m_fRange,
-													FRONTSEATPOS()->y,
-													FRONTSEATPOS()->z + 0.5f);
+													modelInfo->GetFrontSeatPosn().y,
+													modelInfo->GetFrontSeatPosn().z + 0.5f);
 	}
 	else
 	{
 		source = shooter->GetMatrix() * CVector(shooter->GetColModel()->boundingBox.max.x + 0.2f,
-												float(CGeneral::GetRandomNumber() & 255) * 0.001f + FRONTSEATPOS()->y,
-												FRONTSEATPOS()->z + 0.5f);
+												float(CGeneral::GetRandomNumber() & 255) * 0.001f + modelInfo->GetFrontSeatPosn().y,
+												modelInfo->GetFrontSeatPosn().z + 0.5f);
 		source += CTimer::GetTimeStep() * shooter->m_vecMoveSpeed;
 
 		target = shooter->GetMatrix() * CVector(info->m_fRange,
-													FRONTSEATPOS()->y,
-													FRONTSEATPOS()->z + 0.5f);
+													modelInfo->GetFrontSeatPosn().y,
+													modelInfo->GetFrontSeatPosn().z + 0.5f);
 	}
 	#undef FRONTSEATPOS
 
@@ -2760,6 +2713,71 @@ bool
 CWeapon::ProcessLineOfSight(CVector const &point1, CVector const &point2, CColPoint &point, CEntity *&entity, eWeaponType type, CEntity *shooter, bool checkBuildings, bool checkVehicles, bool checkPeds, bool checkObjects, bool checkDummies, bool ignoreSeeThrough, bool ignoreSomeObjects)
 {
 	return CWorld::ProcessLineOfSight(point1, point2, point, entity, checkBuildings, checkVehicles, checkPeds, checkObjects, checkDummies, ignoreSeeThrough, ignoreSomeObjects);
+}
+
+void
+CWeapon::AddGunFlashBigGuns(CVector start, CVector end)
+{
+	CPointLights::AddLight(CPointLights::LIGHT_POINT,
+		start, CVector(0.0f, 0.0f, 0.0f), 5.0f,
+		1.0f, 0.8f, 0.0f, CPointLights::FOG_NONE, false);
+	CVector gunflashPos = start;
+
+	CVector shootVec = end - start;
+
+	// Wtf did you do there R*?
+	shootVec.Normalise();
+	CVector2D ahead = shootVec;
+	ahead.Normalise();
+
+	CParticle::AddParticle(PARTICLE_GUNFLASH_NOANIM, gunflashPos, CVector(0.0f, 0.0f, 0.0f), nil, 0.08f);
+	gunflashPos += CVector(0.06f * ahead.x, 0.06f * ahead.y, 0.0f);
+	CParticle::AddParticle(PARTICLE_GUNFLASH_NOANIM, gunflashPos, CVector(0.0f, 0.0f, 0.0f), nil, 0.06f);
+	gunflashPos += CVector(0.06f * ahead.x, 0.06f * ahead.y, 0.0f);
+	CParticle::AddParticle(PARTICLE_GUNFLASH_NOANIM, gunflashPos, CVector(0.0f, 0.0f, 0.0f), nil, 0.06f);
+
+	gunflashPos = start;
+	gunflashPos += CVector(-0.1f * ahead.x, -0.1f * ahead.y, 0.0f);
+	gunflashPos.z += 0.04f;
+	CParticle::AddParticle(PARTICLE_GUNFLASH_NOANIM, gunflashPos, CVector(0.0f, 0.0f, 0.0f), nil, 0.04f);
+	gunflashPos.z += 0.04f;
+	CParticle::AddParticle(PARTICLE_GUNFLASH_NOANIM, gunflashPos, CVector(0.0f, 0.0f, 0.0f), nil, 0.02f);
+	gunflashPos.z += 0.03f;
+	CParticle::AddParticle(PARTICLE_GUNFLASH_NOANIM, gunflashPos, CVector(0.0f, 0.0f, 0.0f), nil, 0.02f);
+
+	gunflashPos = start;
+	gunflashPos += CVector(-0.1f * ahead.x, -0.1f * ahead.y, 0.0f);
+	gunflashPos.z -= 0.04f;
+	CParticle::AddParticle(PARTICLE_GUNFLASH_NOANIM, gunflashPos, CVector(0.0f, 0.0f, 0.0f), nil, 0.04f);
+	gunflashPos.z -= 0.04f;
+	CParticle::AddParticle(PARTICLE_GUNFLASH_NOANIM, gunflashPos, CVector(0.0f, 0.0f, 0.0f), nil, 0.02f);
+	gunflashPos.z -= 0.03f;
+	CParticle::AddParticle(PARTICLE_GUNFLASH_NOANIM, gunflashPos, CVector(0.0f, 0.0f, 0.0f), nil, 0.02f);
+
+	CVector offset = CrossProduct(CVector(ahead.x, ahead.y, 0.0f), CVector(0.0f, 0.0f, 5.0f));
+	offset.Normalise2D();
+
+	gunflashPos = start;
+	gunflashPos += CVector(-0.1f * ahead.x, -0.1f * ahead.y, 0.0f);
+	gunflashPos += CVector(0.06f * offset.x, 0.06f * offset.y, 0.0f);
+	CParticle::AddParticle(PARTICLE_GUNFLASH_NOANIM, gunflashPos, CVector(0.0f, 0.0f, 0.0f), nil, 0.04f);
+	gunflashPos += CVector(0.04f * offset.x, 0.04f * offset.y, 0.0f);
+	CParticle::AddParticle(PARTICLE_GUNFLASH_NOANIM, gunflashPos, CVector(0.0f, 0.0f, 0.0f), nil, 0.03f);
+	gunflashPos += CVector(0.03f * offset.x, 0.03f * offset.y, 0.0f);
+	CParticle::AddParticle(PARTICLE_GUNFLASH_NOANIM, gunflashPos, CVector(0.0f, 0.0f, 0.0f), nil, 0.02f);
+
+	gunflashPos = start;
+	gunflashPos += CVector(-0.1f * ahead.x, -0.1f * ahead.y, 0.0f);
+	gunflashPos -= CVector(0.06f * offset.x, 0.06f * offset.y, 0.0f);
+	CParticle::AddParticle(PARTICLE_GUNFLASH_NOANIM, gunflashPos, CVector(0.0f, 0.0f, 0.0f), nil, 0.04f);
+	gunflashPos -= CVector(0.04f * offset.x, 0.04f * offset.y, 0.0f);
+	CParticle::AddParticle(PARTICLE_GUNFLASH_NOANIM, gunflashPos, CVector(0.0f, 0.0f, 0.0f), nil, 0.03f);
+	gunflashPos -= CVector(0.03f * offset.x, 0.03f * offset.y, 0.0f);
+	CParticle::AddParticle(PARTICLE_GUNFLASH_NOANIM, gunflashPos, CVector(0.0f, 0.0f, 0.0f), nil, 0.02f);
+
+	CVector gunsmokePos = start;
+	float rnd = CGeneral::GetRandomNumberInRange(0.05f, 0.25f);
+	CParticle::AddParticle(PARTICLE_GUNSMOKE2, gunsmokePos, CVector(ahead.x * rnd, ahead.y * rnd, 0.0f));
 }
 
 #ifdef COMPATIBLE_SAVES

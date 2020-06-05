@@ -101,7 +101,7 @@ CCopPed::SetArrestPlayer(CPed *player)
 {
 	if (!IsPedInControl() || !player)
 		return;
-
+	/*
 	switch (m_nCopType) {
 		case COP_FBI:
 			Say(SOUND_PED_ARREST_FBI);
@@ -112,7 +112,7 @@ CCopPed::SetArrestPlayer(CPed *player)
 		default:
 			Say(SOUND_PED_ARREST_COP);
 			break;
-	}
+	} */
 	if (player->EnteringCar()) {
 		if (CTimer::GetTimeInMilliseconds() > m_nPedStateTimer)
 			return;
@@ -605,6 +605,7 @@ CCopPed::ProcessControl(void)
 		if (IsPedInControl())
 			SetIdle();
 	}
+	/*
 	if (m_bIsInPursuit) {
 		if (player->m_nPedState != PED_ARRESTED && !player->DyingOrDead()) {
 			switch (m_nCopType) {
@@ -622,7 +623,7 @@ CCopPed::ProcessControl(void)
 					break;
 			}
 		}
-	}
+	} */
 
 	if (IsPedInControl()) {
 		CopAI();

@@ -23,7 +23,6 @@ CPathFind ThePaths;
 #define NUMDETACHED_PEDS 1214
 #define NUMTEMPEXTERNALNODES 4600
 
-
 CPathInfoForObject *InfoForTileCars;
 CPathInfoForObject *InfoForTilePeds;
 
@@ -1859,6 +1858,15 @@ CPathFind::DisplayPathData(void)
 				col, col);
 		}
 	}
+}
+
+CVector
+CPathFind::TakeWidthIntoAccountForWandering(CPathNode* nextNode, uint16 random)
+{
+	CVector pos = nextNode->GetPosition();
+	float newX = (nextNode->GetPedNodeWidth() * ((random % 16) - 7)) + pos.x;
+	float newY = (nextNode->GetPedNodeWidth() * (((random / 16) % 16) - 7)) + pos.y;
+	return CVector(newX, newY, pos.z);
 }
 
 CPathNode*

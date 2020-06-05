@@ -89,6 +89,7 @@ public:
 	static void ConvertAllObjectsToDummyObjects(void);
 	static bool TestRoomForDummyObject(CObject*);
 	static bool TestSafeForRealObject(CDummyObject*);
+	static bool IsSkateable(CVector const&);
 
 	static CPed* AddDeadPedInFrontOfCar(const CVector& pos, CVehicle* pCulprit);
 };

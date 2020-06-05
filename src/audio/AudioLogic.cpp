@@ -1639,27 +1639,31 @@ cAudioManager::UsesSirenSwitching(int32 model) const
 	}
 }
 
-void
+bool
 cAudioManager::ProcessVehicleSirenOrAlarm(cVehicleParams *params)
 {
 	const float SOUND_INTENSITY = 110.0f;
 
 	if (params->m_fDistance < SQR(SOUND_INTENSITY)) {
 		CVehicle *veh = params->m_pVehicle;
-		if (veh->m_bSirenOrAlarm == false && veh->m_nAlarmState <= 0)
-			return;
+		if (veh->m_bSirenOrAlarm == false && !veh->IsAlarmOn())
+			return true;
 
-#ifdef FIX_BUGS
-		if (params->m_pVehicle->GetStatus() == STATUS_WRECKED)
-			return;
-#endif
+		if (veh->IsAlarmOn()) {
+			if (CTimer::GetTimeInMilliseconds() > veh->m_bRainAudioCounter)
+				veh->m_bRainAudioCounter = CTimer::GetTimeInMilliseconds() + 750;
+
+			if (veh->m_bRainAudioCounter < CTimer::GetTimeInMilliseconds() + 375)
+				return true;
+		}
+
 		CalculateDistance(params->m_bDistanceCalculated, params->m_fDistance);
-		m_sQueueSample.m_nVolume = ComputeVolume(80, SOUND_INTENSITY, m_sQueueSample.m_fDistance);
+		m_sQueueSample.m_nVolume = ComputeVolume(veh->bIsDrowning ? 20 : 80, SOUND_INTENSITY, m_sQueueSample.m_fDistance);
 		if (m_sQueueSample.m_nVolume != 0) {
 			m_sQueueSample.m_nCounter = 5;
 			if (UsesSiren(params->m_nIndex)) {
 				if (params->m_pVehicle->GetStatus() == STATUS_ABANDONED)
-					return;
+					return true;
 				if (veh->m_nCarHornTimer && params->m_nIndex != FIRETRUK) {
 					m_sQueueSample.m_nSampleIndex = SFX_SIREN_FAST;
 					if (params->m_nIndex == FBICAR)
@@ -1689,8 +1693,11 @@ cAudioManager::ProcessVehicleSirenOrAlarm(cVehicleParams *params)
 			m_sQueueSample.m_bReverbFlag = true;
 			m_sQueueSample.m_bRequireReflection = false;
 			AddSampleToRequestedQueue();
-		}
-	}
+			return true;
+		} else
+			return true;
+	} else
+		return false;
 }
 
 bool
@@ -2144,8 +2151,8 @@ cAudioManager::ProcessVehicleOneShots(cVehicleParams *params)
 			maxDist = SQR(SOUND_INTENSITY);
 			break;
 		}*/
-		case SOUND_18:
-		case SOUND_19: {
+		case SOUND_TRAIN_DOOR_CLOSE:
+		case SOUND_TRAIN_DOOR_OPEN: {
 			const float SOUND_INTENSITY = 35.0f;
 			m_sQueueSample.m_nSampleIndex = SFX_AIR_BRAKES;
 			m_sQueueSample.m_nBankIndex = SAMPLEBANK_MAIN;
@@ -2235,7 +2242,7 @@ cAudioManager::ProcessVehicleOneShots(cVehicleParams *params)
 			break;
 		}
 		case SOUND_BOMB_TIMED_ACTIVATED:
-		case SOUND_55:
+		case SOUND_91:
 		case SOUND_BOMB_ONIGNITION_ACTIVATED:
 		case SOUND_BOMB_TICK: {
 			const float SOUND_INTENSITY = 50.0f;
@@ -2259,14 +2266,14 @@ cAudioManager::ProcessVehicleOneShots(cVehicleParams *params)
 			pedParams.m_fDistance = params->m_fDistance;
 			SetupPedComments(&pedParams, SOUND_PED_HELI_PLAYER_FOUND);
 			continue;
-		case SOUND_PED_BODYCAST_HIT:
+		/* case SOUND_PED_BODYCAST_HIT:
 			pedParams.m_pPed = nil;
 			pedParams.m_bDistanceCalculated = false;
 			pedParams.m_fDistance = 0.0f;
 			pedParams.m_bDistanceCalculated = params->m_bDistanceCalculated;
 			pedParams.m_fDistance = params->m_fDistance;
 			SetupPedComments(&pedParams, SOUND_PED_BODYCAST_HIT);
-			continue;
+			continue; */
 		case SOUND_WATER_FALL: {
 			const float SOUND_INTENSITY = 40.0f;
 			m_sQueueSample.m_nSampleIndex = SFX_SPLASH_1;
@@ -2499,7 +2506,7 @@ cAudioManager::ProcessBoatEngine(cVehicleParams *params)
 					m_sQueueSample.m_nSampleIndex = SFX_FISHING_BOAT_IDLE;
 					if (LastAccel > 20) {
 						oneShotVol = LastVol;
-						PlayOneShot(m_sQueueSample.m_nEntityIndex, SOUND_17, oneShotVol);
+						PlayOneShot(m_sQueueSample.m_nEntityIndex, SOUND_BOAT_SLOWDOWN, oneShotVol);
 					}
 				} else {
 					emittingVol = 105 * padAccelerate / 255 + 15;
@@ -3604,8 +3611,6 @@ cAudioManager::ProcessPedOneShots(cPedParams *params)
 			m_sQueueSample.m_bRequireReflection = true;
 			break;
 		case SOUND_WEAPON_AK47_BULLET_ECHO:
-		case SOUND_WEAPON_UZI_BULLET_ECHO:
-		case SOUND_WEAPON_M16_BULLET_ECHO:
 			m_sQueueSample.m_nSampleIndex = SFX_UZI_END_LEFT;
 			m_sQueueSample.m_nBankIndex = SAMPLEBANK_MAIN;
 			m_sQueueSample.m_nCounter = iSound++;
@@ -3781,11 +3786,11 @@ cAudioManager::SetupPedComments(cPedParams *params, uint32 sound)
 		CalculateDistance(params->m_bDistanceCalculated, params->m_fDistance);
 		if (sound != SOUND_PAGER) {
 			switch (sound) {
-			case SOUND_AMMUNATION_WELCOME_1:
+			/*case SOUND_AMMUNATION_WELCOME_1:
 			case SOUND_AMMUNATION_WELCOME_2:
 			case SOUND_AMMUNATION_WELCOME_3:
 				emittingVol = MAX_VOLUME;
-				break;
+				break; */
 			default:
 				if (CWorld::GetIsLineOfSightClear(TheCamera.GetPosition(), m_sQueueSample.m_vecPos, true, false, false, false, false, false))
 					emittingVol = MAX_VOLUME;
@@ -4664,10 +4669,6 @@ cAudioManager::ProcessFrontEnd()
 			m_sQueueSample.m_nSampleIndex = SFX_FE_HIGHLIGHT_LEFT;
 			stereo = true;
 			break;
-		case SOUND_FRONTEND_MENU_DENIED:
-			m_sQueueSample.m_nSampleIndex = SFX_FE_HIGHLIGHT_LEFT;
-			stereo = true;
-			break;
 		case SOUND_FRONTEND_MENU_SUCCESS:
 			m_sQueueSample.m_nSampleIndex = SFX_FE_SELECT_LEFT;
 			stereo = true;
@@ -4687,7 +4688,7 @@ cAudioManager::ProcessFrontEnd()
 		case SOUND_FRONTEND_RADIO_CHANGE:
 			m_sQueueSample.m_nSampleIndex = SFX_RADIO_CLICK;
 			break;
-		//case SOUND_A0:
+		//case SOUND_HUD_SOUND:
 		//	m_sQueueSample.m_nSampleIndex = SFX_INFO;
 		//	break;
 		default:

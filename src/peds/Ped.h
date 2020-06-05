@@ -9,6 +9,7 @@
 #include "Physical.h"
 #include "Weapon.h"
 #include "WeaponInfo.h"
+#include "AnimationId.h"
 
 #define FEET_OFFSET	1.04f
 #define CHECK_NEARBY_THINGS_MAX_DIST	15.0f
@@ -245,12 +246,14 @@ enum eObjective : uint32 {
 enum {
 	RANDOM_CHAR = 1,
 	MISSION_CHAR,
+	TODO_CHAR, // TODO(Miami)
 };
 
 enum PedLineUpPhase {
 	LINE_UP_TO_CAR_START,
 	LINE_UP_TO_CAR_END,
-	LINE_UP_TO_CAR_2 // Buggy. Used for cops arresting you from passenger door
+	LINE_UP_TO_CAR_2, // Buggy. Used for cops arresting you from passenger door
+	LINE_UP_TO_CAR_FALL
 };
 
 enum PedOnGroundState {
@@ -281,7 +284,7 @@ enum PedState
 	PED_PURSUE,
 	PED_FOLLOW_PATH,
 	PED_SNIPER_MODE,
-	PED_ROCKET_ODE,
+	PED_ROCKET_MODE,
 	PED_DUMMY,
 	PED_PAUSE,
 	PED_ATTACK,
@@ -301,12 +304,17 @@ enum PedState
 	PED_INVESTIGATE,
 	PED_STEP_AWAY,
 	PED_ON_FIRE,
+	PED_SUN_BATHE,
+	PED_FLASH,
+	PED_JOG,
+	PED_ANSWER_MOBILE,
 
 	PED_UNKNOWN,	// Same with IDLE, but also infects up to 5 peds with same pedType and WANDER_PATH, so they become stone too. HANG_OUT in Fire_Head's idb
 
 	PED_STATES_NO_AI,
 
-	// One of these states isn't on PS2 - start
+	PED_ABSEIL,
+	PED_SIT,
 	PED_JUMP,
 	PED_FALL,
 	PED_GETUP,
@@ -317,7 +325,6 @@ enum PedState
 	PED_ENTER_TRAIN,
 	PED_EXIT_TRAIN,
 	PED_ARREST_PLAYER,
-	// One of these states isn't on PS2 - end
 
 	PED_DRIVING,
 	PED_PASSENGER,
@@ -332,6 +339,7 @@ enum PedState
 	PED_EXIT_CAR,
 	PED_HANDS_UP,
 	PED_ARRESTED,
+	PED_DEPLOY_STINGER
 };
 
 enum eMoveState {
@@ -518,7 +526,6 @@ public:
 	uint16 m_nPathNodes;
 	int16 m_nCurPathNode;
 	int8 m_nPathDir;
-public:
 	CPathNode *m_pLastPathNode;
 	CPathNode *m_pNextPathNode;
 	float m_fHealth;
@@ -559,12 +566,13 @@ public:
 	float m_fleeFromPosY;
 	CEntity *m_fleeFrom;
 	uint32 m_fleeTimer;
+	CEntity* pThreatEx; // TODO(Miami): What is this?
 	CEntity* m_collidingEntityWhileFleeing;
 	uint32 m_collidingThingTimer;
 	CEntity *m_pCollidingEntity;
 	uint8 m_stateUnused;
 	uint32 m_timerUnused;
-	CVector2D *m_wanderRangeBounds;	// array with 2 CVector2D (actually unused CRange2D class) - unused
+	class CRange2D *m_wanderRangeBounds;
 	CWeapon m_weapons[TOTAL_WEAPON_SLOTS];
 	eWeaponType m_storedWeapon;
 	eWeaponType m_delayedWeapon;
@@ -649,7 +657,7 @@ public:
 	void SetLookFlag(CEntity *target, bool keepTryingToLook);
 	void SetLookFlag(float direction, bool keepTryingToLook);
 	void SetLookTimer(int time);
-	void SetDie(AnimationId anim, float arg1, float arg2);
+	void SetDie(AnimationId anim = ANIM_KO_SHOT_FRONT1, float arg1 = 4.0f, float arg2 = 0.0f);
 	void SetDead(void);
 	void ApplyHeadShot(eWeaponType weaponType, CVector pos, bool evenOnPlayer);
 	void RemoveBodyPart(PedNode nodeId, int8 direction);
@@ -825,6 +833,15 @@ public:
 	void RequestDelayedWeapon();
 	void AddInCarAnims(CVehicle* car, bool isDriver);
 	bool CanBeDamagedByThisGangMember(CPed*);
+	void AnswerMobile(void);
+	void BuyIceCream(void);
+	void CheckThreatValidity(void);
+	void ClearAnswerMobile(void);
+	void SetAnswerMobile(void);
+	void AttachPedToEntity(CEntity*, CVector, uint16, float, eWeaponType);
+	void DettachPedFromEntity();
+	void PedShuffle();
+	void DriveVehicle();
 
 	// Static methods
 	static CVector GetLocalPositionToOpenCarDoor(CVehicle *veh, uint32 component, float offset);
@@ -908,11 +925,7 @@ public:
 	void UpdatePosition(void);
 	CObject *SpawnFlyingComponent(int, int8);
 	void SetCarJack_AllClear(CVehicle*, uint32, uint32);
-#ifdef VC_PED_PORTS
 	bool CanPedJumpThis(CEntity*, CVector*);
-#else
-	bool CanPedJumpThis(CEntity*);
-#endif
 
 	void SetNewAttraction(CPedAttractor* pAttractor, const CVector& pos, float, float, int);
 	void ClearWaitState(void);
@@ -1053,8 +1066,21 @@ public:
 
 #ifndef MASTER
 	// Mobile things
+	void DebugDrawPedDestination(CPed *, int, int);
+	void DebugDrawPedDesiredHeading(CPed *, int, int);
+	void DebugDrawCollisionRadius(float, float, float, float, int);
+	void DebugDrawVisionRange(CVector, float);
+	void DebugDrawVisionSimple(CVector, float);
+	void DebugDrawLook();
+	void DebugDrawPedPsyche();
+	void DebugDrawDebugLines();
+
 	static void SwitchDebugDisplay(void);
+	static int GetDebugDisplay(void);
+
+	void DebugDrawLookAtPoints();
 	void DebugRenderOnePedText(void);
+	void DebugRenderClosePedText();
 #endif
 
 #ifdef COMPATIBLE_SAVES
@@ -1063,6 +1089,8 @@ public:
 #endif
 };
 
+void FinishTalkingOnMobileCB(CAnimBlendAssociation* assoc, void* arg);
+void StartTalkingOnMobileCB(CAnimBlendAssociation* assoc, void* arg);
 void FinishFuckUCB(CAnimBlendAssociation *assoc, void *arg);
 
 // TODO(Miami): Change those when Ped struct is done

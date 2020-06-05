@@ -920,16 +920,10 @@ void CHud::Draw()
 			rect.Translate(RADAR_LEFT, SCREEN_SCALE_FROM_BOTTOM(RADAR_BOTTOM + RADAR_HEIGHT));
 #endif
 
-			// shadow, might not be exactly accurate numbers
-			rect.Translate(0.f, 4.f);
 			rect.Grow(6.0f);
-			rect.top += 2.f;
-			rect.bottom -= 2.f;
+			rect.Translate(0.0f, 2.0f);
 			Sprites[HUD_RADARDISC].Draw(rect, CRGBA(0, 0, 0, 255));
-
-			rect.Translate(0.f, -4.f);
-			rect.top -= 2.f;
-			rect.bottom += 2.f;
+			rect.Translate(0.0f, -2.0f);
 			Sprites[HUD_RADARDISC].Draw(rect, RADARDISC_COLOR);
 			CRadar::DrawBlips();
 		}
@@ -1150,7 +1144,7 @@ void CHud::DrawAfterFade()
 				m_fHelpMessageTime = CMessages::GetWideStringLength(m_HelpMessage) * 0.05f + 3.0f;
 
 				if (TheCamera.m_ScreenReductionPercentage == 0.0f)
-					DMAudio.PlayFrontEndSound(SOUND_A0, 0);
+					DMAudio.PlayFrontEndSound(SOUND_HUD_SOUND, 0);
 				break;
 			case 1:
 			case 2:

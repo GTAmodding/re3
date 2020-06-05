@@ -34,6 +34,36 @@ enum eVehicleType {
 	NUM_VEHICLE_TYPES
 };
 
+enum eCarPositions
+{
+	CAR_POS_HEADLIGHTS,
+	CAR_POS_TAILLIGHTS,
+	CAR_POS_FRONTSEAT,
+	CAR_POS_BACKSEAT,
+	CAR_POS_EXHAUST
+};
+
+enum eBoatPositions
+{
+	BOAT_POS_FRONTSEAT
+};
+
+enum eTrainPositions
+{
+	TRAIN_POS_LIGHT_FRONT,
+	TRAIN_POS_LIGHT_REAR,
+	TRAIN_POS_LEFT_ENTRY,
+	TRAIN_POS_MID_ENTRY,
+	TRAIN_POS_RIGHT_ENTRY
+};
+
+enum ePlanePositions
+{
+	PLANE_POS_LIGHT_LEFT,
+	PLANE_POS_LIGHT_RIGHT,
+	PLANE_POS_LIGHT_TAIL,
+};
+
 enum {
 	NUM_VEHICLE_POSITIONS = 5
 };
@@ -107,6 +137,7 @@ public:
 	void SetVehicleComponentFlags(RwFrame *frame, uint32 flags);
 	void PreprocessHierarchy(void);
 	void GetWheelPosn(int32 n, CVector &pos);
+	CVector GetFrontSeatPosn(void) { return m_positions[m_vehicleType == VEHICLE_TYPE_BOAT ? BOAT_POS_FRONTSEAT : CAR_POS_FRONTSEAT]; };
 
 	int32 ChooseComponent(void);
 	int32 ChooseSecondComponent(void);

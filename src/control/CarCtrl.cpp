@@ -4,6 +4,7 @@
 
 #include "Accident.h"
 #include "Automobile.h"
+#include "Bike.h"
 #include "Camera.h"
 #include "CarAI.h"
 #include "CarGen.h"
@@ -345,7 +346,7 @@ CCarCtrl::GenerateOneRandomCar()
 	if (CModelInfo::IsBoatModel(carModel))
 		pVehicle = new CBoat(carModel, RANDOM_VEHICLE);
 	else if (CModelInfo::IsBikeModel(carModel))
-		return; // TODO(MIAMI): spawn bikes
+		pVehicle = new CBike(carModel, RANDOM_VEHICLE);
 	else
 		pVehicle = new CAutomobile(carModel, RANDOM_VEHICLE);
 	pVehicle->AutoPilot.m_nPrevRouteNode = 0;
@@ -2502,7 +2503,7 @@ void CCarCtrl::SteerAICarWithPhysics_OnlyMission(CVehicle* pVehicle, float* pSwe
 			pSwerve, pAccel, pBrake, pHandbrake);
 		return;
 	case MISSION_HELI_FLYTOCOORS:
-		//SteerAIHeliTowardsTargetCoors((CAutomobile*)pVehicle);
+		SteerAIHeliTowardsTargetCoors((CAutomobile*)pVehicle);
 		return;
 	case MISSION_ATTACKPLAYER:
 		SteerAIBoatWithPhysicsAttackingPlayer(pVehicle, pSwerve, pAccel, pBrake, pHandbrake);
@@ -2656,9 +2657,8 @@ void CCarCtrl::SteerAIHeliTowardsTargetCoors(CAutomobile* pHeli)
 		else
 			speed *= 0.2f;
 	}
-	CVector2D vecAdvanceThisFrame = vecToTarget;
-	vecAdvanceThisFrame.Normalise();
-	vecAdvanceThisFrame *= speed;
+	vecToTarget.Normalise();
+	CVector2D vecAdvanceThisFrame(vecToTarget * speed);
 	float resistance = Pow(0.997f, CTimer::GetTimeStep());
 	pHeli->m_vecMoveSpeed.x *= resistance;
 	pHeli->m_vecMoveSpeed.y *= resistance;
@@ -2673,9 +2673,55 @@ void CCarCtrl::SteerAIHeliTowardsTargetCoors(CAutomobile* pHeli)
 		pHeli->AddToMoveSpeed(vecAdvanceThisFrame);
 	else
 		pHeli->AddToMoveSpeed(vecSpeedChange * changeMultiplier);
-	pHeli->SetPosition(pHeli->GetPosition() + CVector(CTimer::GetTimeStep() * pHeli->m_vecMoveSpeed.x, CTimer::GetTimeStep() * pHeli->m_vecMoveSpeed.y, 0.0f));
-	assert(0);
-	// This is not finished yet. Heli fields in CAutomobile required
+	pHeli->SetPosition(pHeli->GetPosition() + CVector(CTimer::GetTimeStep() * pHeli->GetMoveSpeed().x, CTimer::GetTimeStep() * pHeli->GetMoveSpeed().y, 0.0f));
+	float ZTarget = pHeli->AutoPilot.m_vecDestinationCoors.z;
+	if (CTimer::GetTimeInMilliseconds() & 0x800) // switch every ~2 seconds
+		ZTarget += 2.0f;
+	float ZSpeedTarget = (ZTarget - pHeli->GetPosition().z) * 0.01f;
+	float ZSpeedChangeTarget = ZSpeedTarget - pHeli->GetMoveSpeed().z;
+	float ZSpeedChangeMax = 0.01f * CTimer::GetTimeStep();
+	if (!pHeli->bHeliDestroyed) {
+		if (Abs(ZSpeedChangeTarget) < ZSpeedChangeMax)
+			pHeli->SetMoveSpeed(pHeli->GetMoveSpeed().x, pHeli->GetMoveSpeed().y, ZSpeedTarget);
+		else if (ZSpeedChangeTarget < 0.0f)
+			pHeli->AddToMoveSpeed(0.0f, 0.0f, 1.5f * ZSpeedChangeMax);
+		else
+			pHeli->AddToMoveSpeed(0.0f, 0.0f, ZSpeedChangeMax);
+	}
+	pHeli->SetPosition(pHeli->GetPosition() + CVector(0.0f, 0.0f, CTimer::GetTimeStep() * pHeli->GetMoveSpeed().z));
+	pHeli->SetTurnSpeed(pHeli->GetTurnSpeed().x, pHeli->GetTurnSpeed().y, pHeli->GetTurnSpeed().z * Pow(0.99f, CTimer::GetTimeStep()));
+	float ZTurnSpeedTarget;
+	if (distanceToTarget < 8.0f && pHeli->m_fHeliOrientation < 0.0f)
+		ZTurnSpeedTarget = 0.0f;
+	else {
+		float fAngleTarget = CGeneral::GetATanOfXY(vecToTarget.x, vecToTarget.y) + PI;
+		if (pHeli->m_fHeliOrientation >= 0.0f)
+			fAngleTarget = pHeli->m_fHeliOrientation;
+		while (fAngleTarget < -PI)
+			fAngleTarget += TWOPI;
+		while (fAngleTarget > PI)
+			fAngleTarget -= TWOPI;
+		if (Abs(fAngleTarget) <= 0.4f)
+			ZTurnSpeedTarget = 0.0f;
+		else if (fAngleTarget < 0.0f)
+			ZTurnSpeedTarget = 0.03f;
+		else
+			ZTurnSpeedTarget = -0.03f;
+	}
+	float ZTurnSpeedChangeTarget = ZTurnSpeedTarget - pHeli->GetTurnSpeed().z;
+	pHeli->m_fOrientation += pHeli->GetTurnSpeed().z * CTimer::GetTimeStep();
+	CVector up;
+	if (pHeli->bHeliMinimumTilt)
+		up = CVector(0.5f * pHeli->GetMoveSpeed().x, 0.5f * pHeli->GetMoveSpeed().y, 1.0f);
+	else
+		up = CVector(3.0f * pHeli->GetMoveSpeed().x, 3.0f * pHeli->GetMoveSpeed().y, 1.0f);
+	up.Normalise();
+	CVector forward(Sin(pHeli->m_fOrientation), Cos(pHeli->m_fOrientation), 0.0f);
+	CVector right = CrossProduct(up, forward);
+	forward = CrossProduct(up, right);
+	pHeli->GetMatrix().GetRight() = right;
+	pHeli->GetMatrix().GetForward() = forward;
+	pHeli->GetMatrix().GetUp() = up;
 }
 
 void CCarCtrl::SteerAICarWithPhysicsFollowPath(CVehicle* pVehicle, float* pSwerve, float* pAccel, float* pBrake, bool* pHandbrake)

@@ -5,6 +5,7 @@
 #include "World.h"
 #include "Vehicle.h"
 #include "Automobile.h"
+#include "Boat.h"
 #include "Ped.h"
 #include "PlayerPed.h"
 #include "CopPed.h"
@@ -24,6 +25,7 @@
 #include "Debug.h"
 #include "Camera.h"
 #include "DMAudio.h"
+#include "Bike.h"
 
 bool PrintDebugCode = false;
 int16 DebugCamMode;
@@ -2718,7 +2720,7 @@ CCam::Process_1stPerson(const CVector &CameraTarget, float TargetOrientation, fl
 	}else{
 		assert(CamTargetEntity->IsVehicle());
 		CVehicleModelInfo *mi = (CVehicleModelInfo*)CModelInfo::GetModelInfo(CamTargetEntity->GetModelIndex());
-		CVector CamPos = mi->m_vehicleType == VEHICLE_TYPE_BOAT ? mi->m_positions[BOAT_POS_FRONTSEAT] : mi->m_positions[CAR_POS_FRONTSEAT];
+		CVector CamPos = mi->GetFrontSeatPosn();
 		CamPos.x = 0.0f;
 		CamPos.y += -0.08f;
 		CamPos.z += 0.62f;
@@ -4627,9 +4629,9 @@ CCam::Process_FollowCar_SA(const CVector& CameraTarget, float TargetOrientation,
 	uint8 camSetArrPos = 0;
 
 	// We may need those later
-	bool isPlane = car->GetModelIndex() == MI_DODO;
-	bool isHeli = false;
-	bool isBike = false;
+	bool isPlane = car->GetVehicleAppearance() == VEHICLE_APPEARANCE_PLANE;
+	bool isHeli = car->GetVehicleAppearance() == VEHICLE_APPEARANCE_HELI;
+	bool isBike = car->GetVehicleAppearance() == VEHICLE_APPEARANCE_BIKE || car->IsBike();
 	bool isCar = car->IsCar() && !isPlane && !isHeli && !isBike;
 
 	CPad* pad = CPad::GetPad(0);
@@ -4640,8 +4642,10 @@ CCam::Process_FollowCar_SA(const CVector& CameraTarget, float TargetOrientation,
 
 	if (car->GetModelIndex() == MI_FIRETRUCK) {
 		camSetArrPos = 7;
-	} else if (car->GetModelIndex() == MI_RCBANDIT) {
+	} else if (car->GetModelIndex() == MI_RCBANDIT || car->GetModelIndex() == MI_RCBARON) {
 		camSetArrPos = 5;
+	} else if (car->GetModelIndex() == MI_RCGOBLIN || car->GetModelIndex() == MI_RCRAIDER) {
+		camSetArrPos = 6;
 	} else if (car->IsBoat()) {
 		camSetArrPos = 4;
 	} else if (isBike) {
@@ -4698,6 +4702,14 @@ CCam::Process_FollowCar_SA(const CVector& CameraTarget, float TargetOrientation,
 
 	float newDistance = TheCamera.CarZoomValueSmooth + CARCAM_SET[camSetArrPos][1] + approxCarLength;
 
+	// Taken from VC CCam::Cam_On_A_String_Unobscured. If we don't this, we will end up seeing the world from the inside of RC Goblin/Raider.
+	// I couldn't find where SA does that. It's possible that they've increased the size of these veh.'s collision bounding box.
+	if (car->m_modelIndex == MI_RCRAIDER || car->m_modelIndex == MI_RCBANDIT) {
+		newDistance += 6.0f;
+	} else if (car->m_modelIndex == MI_RCBARON) {
+		newDistance += 9.5f;
+	}
+
 	float minDistForThisCar = approxCarLength * CARCAM_SET[camSetArrPos][3];
 
 	if (!isHeli || car->GetStatus() == STATUS_PLAYER_REMOTE) {
@@ -4711,6 +4723,9 @@ CCam::Process_FollowCar_SA(const CVector& CameraTarget, float TargetOrientation,
 		// 0.6f = fTestShiftHeliCamTarget
 		TargetCoors += 0.6f * car->GetUp() * colMaxZ;
 	}
+
+	if (car->m_modelIndex == MI_RCGOBLIN)
+		zoomModeAlphaOffset += 0.178997f;
 
 	float minDistForVehType = CARCAM_SET[camSetArrPos][4];
 
@@ -4726,6 +4741,7 @@ CCam::Process_FollowCar_SA(const CVector& CameraTarget, float TargetOrientation,
 	if (ResetStatics) {
 		FOV = DefaultFOV;
 
+		// TODO(Miami): Remove that when cam is done!
 		// GTA 3 has this in veh. camera
 		if (TheCamera.m_bIdleOn)
 			TheCamera.m_uiTimeWeEnteredIdle = CTimer::GetTimeInMilliseconds();
@@ -4762,10 +4778,12 @@ CCam::Process_FollowCar_SA(const CVector& CameraTarget, float TargetOrientation,
 		ResetStatics = false;
 		Rotating = false;
 		m_bCollisionChecksOn = true;
-		// TheCamera.m_bResetOldMatrix = 1;
+
+
+		// TODO(Miami): Uncomment that when cam is done!
 
 		// Garage exit cam is not working well in III...
-		// if (!TheCamera.m_bJustCameOutOfGarage) // && !sthForScript)
+		// if (!TheCamera.m_bJustCameOutOfGarage)
 		// {
 		Alpha = 0.0f;
 		Beta = car->GetForward().Heading() - HALFPI;
@@ -4787,7 +4805,7 @@ CCam::Process_FollowCar_SA(const CVector& CameraTarget, float TargetOrientation,
 		m_aTargetHistoryPosTwo = TargetCoors - newDistance * Front;
 
 		m_nCurrentHistoryPoints = 0;
-		if (!TheCamera.m_bJustCameOutOfGarage) // && !sthForScript)
+		if (!TheCamera.m_bJustCameOutOfGarage)
 			Alpha = -zoomModeAlphaOffset;
 	}
 
@@ -4839,9 +4857,9 @@ CCam::Process_FollowCar_SA(const CVector& CameraTarget, float TargetOrientation,
 	// This is also original LCS and SA bug, or some attempt to fix lag. We'll never know
 
 	// if (car->m_vecMoveSpeed.MagnitudeSqr() < sq(0.2f))
-		if (car->GetModelIndex() != MI_FIRETRUCK) {
-			// if (!isBike || GetMysteriousWheelRelatedThingBike(car) > 3)
-				// if (!isHeli && (!isPlane || car->GetWheelsOnGround())) {
+		if (car->GetModelIndex() != MI_FIRETRUCK)
+			if (!isBike || ((CBike*)car)->m_nWheelsOnGround > 3)
+				if (!isHeli && (!isPlane || ((CAutomobile*)car)->m_nWheelsOnGround)) {
 
 					CVector left = CrossProduct(car->GetForward(), CVector(0.0f, 0.0f, 1.0f));
 					left.Normalise();
@@ -4999,8 +5017,8 @@ CCam::Process_FollowCar_SA(const CVector& CameraTarget, float TargetOrientation,
 		Beta += TWOPI;
 
 	if ((camSetArrPos <= 1 || camSetArrPos == 7) && targetAlpha < Alpha && carPosChange >= newDistance) {
-		if (isCar && ((CAutomobile*)car)->m_nWheelsOnGround > 1)
-			// || isBike && GetMysteriousWheelRelatedThingBike(car) > 1)
+		if (isCar && ((CAutomobile*)car)->m_nWheelsOnGround > 1 ||
+			isBike && ((CBike*)car)->m_nWheelsOnGround > 1)
 			alphaSpeedFromStickY += (targetAlpha - Alpha) * 0.075f;
 	}
 
@@ -5150,19 +5168,13 @@ CCam::Process_FollowCar_SA(const CVector& CameraTarget, float TargetOrientation,
 	if (camSetArrPos == 5 && Source.z < 1.0f) // RC Bandit and Baron
 		Source.z = 1.0f;
 
-	// Obviously some specific place in LC
-	if (Source.x > 11.0f && Source.x < 91.0f) {
-		if (Source.y > -680.0f && Source.y < -600.0f && Source.z < 24.4f)
-			Source.z = 24.4f;
-	}
-
 	// CCam::FixSourceAboveWaterLevel
 	if (CameraTarget.z >= -2.0f) {
 		float level = -6000.0;
-		// +0.5f is needed for III
+
 		if (CWaterLevel::GetWaterLevelNoWaves(Source.x, Source.y, Source.z, &level)) {
-			if (Source.z < level + 0.5f)
-				Source.z = level + 0.5f;
+			if (Source.z < level)
+				Source.z = level;
 		}
 	}
 	Front = TargetCoors - Source;

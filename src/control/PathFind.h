@@ -62,7 +62,7 @@ struct CPathNode
 	int16 z;
 	int16 distance;		// in path search
 	int16 firstLink;
-	int8 width;
+	uint8 width;
 	int8 group;
 
 	uint8 numLinks : 4;
@@ -89,6 +89,7 @@ struct CPathNode
 	float GetZ(void) { return z/8.0f; }
 	bool HasDivider(void) { return width != 0; }
 	float GetDividerWidth(void) { return width/(2*8.0f); }
+	float GetPedNodeWidth(void) { return width*(31.f/(500.f * 8.f)); }
 	CPathNode *GetPrev(void);
 	CPathNode *GetNext(void);
 	void SetPrev(CPathNode *node);
@@ -252,6 +253,8 @@ public:
 	bool TestCoorsCloseness(CVector target, uint8 type, CVector start);
 	void Save(uint8 *buf, uint32 *size);
 	void Load(uint8 *buf, uint32 size);
+
+	static CVector TakeWidthIntoAccountForWandering(CPathNode*, uint16);
 
 	CPathNode *GetNode(int16 index);
 	int16 GetIndex(CPathNode *node);

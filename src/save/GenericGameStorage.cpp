@@ -43,6 +43,11 @@
 
 const uint32 SIZE_OF_ONE_GAME_IN_BYTES = 201729;
 
+#ifdef MISSION_REPLAY
+int8 IsQuickSave;
+const int PAUSE_SAVE_SLOT = SLOT_COUNT;
+#endif
+
 char DefaultPCSaveFileName[260];
 char ValidSaveName[260];
 char LoadFileName[256];
@@ -136,7 +141,12 @@ GenericSave(int file)
 	WriteDataToBufferPointer(buf, saveName);
 	GetLocalTime(&saveTime);
 	WriteDataToBufferPointer(buf, saveTime);
+#ifdef MISSION_REPLAY
+	int32 data = IsQuickSave << 24 | SIZE_OF_ONE_GAME_IN_BYTES;
+	WriteDataToBufferPointer(buf, data);
+#else
 	WriteDataToBufferPointer(buf, SIZE_OF_ONE_GAME_IN_BYTES);
+#endif
 	WriteDataToBufferPointer(buf, CGame::currLevel);
 	WriteDataToBufferPointer(buf, TheCamera.GetPosition().x);
 	WriteDataToBufferPointer(buf, TheCamera.GetPosition().y);
@@ -244,6 +254,9 @@ GenericLoad()
 	uint8 *buf;
 	int32 file;
 	uint32 size;
+#ifdef MISSION_REPLAY
+	int8 qs;
+#endif
 
 	int32 saveSize;
 	CPad *currPad;
@@ -258,6 +271,9 @@ GenericLoad()
 	ReadDataFromFile(file, work_buff, size);
 	buf = (work_buff + 0x40);
 	ReadDataFromBufferPointer(buf, saveSize);
+#ifdef MISSION_REPLAY // a hack to keep compatibility but get new data from save
+	qs = saveSize >> 24;
+#endif
 	ReadDataFromBufferPointer(buf, CGame::currLevel);
 	ReadDataFromBufferPointer(buf, TheCamera.GetMatrix().GetPosition().x);
 	ReadDataFromBufferPointer(buf, TheCamera.GetMatrix().GetPosition().y);
@@ -300,6 +316,11 @@ GenericLoad()
 	ReadDataFromBufferPointer(buf, TheCamera.PedZoomIndicator);
 #endif
 	assert(buf - work_buff == SIZE_OF_SIMPLEVARS);
+#ifdef MISSION_REPLAY
+	WaitForSave = 0;
+	if (FrontEndMenuManager.m_nCurrSaveSlot == PAUSE_SAVE_SLOT && qs == 3)
+		WaitForMissionActivate = CTimer::GetTimeInMilliseconds() + 2000;
+#endif
 	ReadDataFromBlock("Loading Scripts \n", CTheScripts::LoadAllScripts);
 
 	// Load the rest
@@ -566,3 +587,27 @@ align4bytes(int32 size)
 {
 	return (size + 3) & 0xFFFFFFFC;
 }
+
+#ifdef MISSION_REPLAY
+
+void DisplaySaveResult(int unk, char* name)
+{}
+
+bool SaveGameForPause(int type)
+{
+	if (AllowMissionReplay != 0 || type != 3 && WaitForSave > CTimer::GetTimeInMilliseconds())
+		return false;
+	WaitForSave = 0;
+	if (gGameState != GS_PLAYING_GAME || CTheScripts::IsPlayerOnAMission() || CStats::LastMissionPassedName[0] == '\0') {
+		DisplaySaveResult(3, CStats::LastMissionPassedName);
+		return false;
+	}
+	IsQuickSave = type;
+	MissionStartTime = 0;
+	int res = PcSaveHelper.SaveSlot(PAUSE_SAVE_SLOT);
+	PcSaveHelper.PopulateSlotInfo();
+	IsQuickSave = 0;
+	DisplaySaveResult(res, CStats::LastMissionPassedName);
+	return true;
+}
+#endif

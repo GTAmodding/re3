@@ -31,10 +31,14 @@ enum eCarLock {
 	CARLOCK_SKIP_SHUT_DOORS
 };
 
-
-enum
+enum eBombType
 {
-	BOAT_POS_FRONTSEAT
+	CARBOMB_NONE,
+	CARBOMB_TIMED,
+	CARBOMB_ONIGNITION,
+	CARBOMB_REMOTE,
+	CARBOMB_TIMEDACTIVE,
+	CARBOMB_ONIGNITIONACTIVE,
 };
 
 enum eDoors
@@ -124,11 +128,13 @@ enum eVehicleAppearance
 	VEHICLE_APPEARANCE_PLANE,
 };
 
-// TODO
+// TODO: what is this even?
 enum eBikeWheelSpecial
 {
-	BIKE_WHEEL_2 = 2,
-	BIKE_WHEEL_3,
+	BIKE_WHEELSPEC_0,	// both wheels on ground
+	BIKE_WHEELSPEC_1,	// rear wheel on ground
+	BIKE_WHEELSPEC_2,	// only front wheel on ground
+	BIKE_WHEELSPEC_3,	// can't happen
 };
 
 enum
@@ -242,7 +248,7 @@ public:
 	uint8 m_nCarHornDelay;
 	int8 m_comedyControlState;
 	CStoredCollPoly m_aCollPolys[2];     // poly which is under front/rear part of car
-	float m_fSteerRatio;
+	float m_fSteerInput;
 	eVehicleType m_vehType;
 
 	static void *operator new(size_t);
@@ -300,7 +306,7 @@ public:
 	void ProcessWheel(CVector &wheelFwd, CVector &wheelRight, CVector &wheelContactSpeed, CVector &wheelContactPoint,
 		int32 wheelsOnGround, float thrust, float brake, float adhesion, int8 wheelId, float *wheelSpeed, tWheelState *wheelState, uint16 wheelStatus);
 	void ProcessBikeWheel(CVector &wheelFwd, CVector &wheelRight, CVector &wheelContactSpeed, CVector &wheelContactPoint,
-		int32 wheelsOnGround, float thrust, float brake, float adhesion, float unk, int8 wheelId, float *wheelSpeed, tWheelState *wheelState, eBikeWheelSpecial special, uint16 wheelStatus);
+		int32 wheelsOnGround, float thrust, float brake, float adhesion, float destabTraction, int8 wheelId, float *wheelSpeed, tWheelState *wheelState, eBikeWheelSpecial special, uint16 wheelStatus);
 	void ExtinguishCarFire(void);
 	void ProcessDelayedExplosion(void);
 	float ProcessWheelRotation(tWheelState state, const CVector &fwd, const CVector &speed, float radius);

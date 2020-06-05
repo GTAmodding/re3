@@ -344,7 +344,7 @@ enum eCheckHover
 enum
 {
 #ifdef LEGACY_MENU_OPTIONS
-	NUM_MENUROWS = 13,
+	NUM_MENUROWS = 14,
 #else
 	NUM_MENUROWS = 12,
 #endif

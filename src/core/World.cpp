@@ -122,14 +122,14 @@ CWorld::ClearExcitingStuffFromArea(const CVector &pos, float radius, bool bRemov
 	for(int32 i = 0; i < pedPool->GetSize(); i++) {
 		CPed *pPed = pedPool->GetSlot(i);
 		if(pPed && !pPed->IsPlayer() && pPed->CanBeDeleted() &&
-		   CVector2D(pPed->GetPosition() - pos).MagnitudeSqr() < radius) {
+		   CVector2D(pPed->GetPosition() - pos).MagnitudeSqr() < SQR(radius)) {
 			CPopulation::RemovePed(pPed);
 		}
 	}
 	CVehiclePool *VehiclePool = CPools::GetVehiclePool();
 	for(int32 i = 0; i < VehiclePool->GetSize(); i++) {
 		CVehicle *pVehicle = VehiclePool->GetSlot(i);
-		if(pVehicle && CVector2D(pVehicle->GetPosition() - pos).MagnitudeSqr() < radius &&
+		if(pVehicle && CVector2D(pVehicle->GetPosition() - pos).MagnitudeSqr() < SQR(radius) &&
 		   !pVehicle->bIsLocked && pVehicle->CanBeDeleted()) {
 			if(pVehicle->pDriver) {
 				CPopulation::RemovePed(pVehicle->pDriver);

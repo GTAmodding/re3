@@ -4,6 +4,7 @@
 #include "ScriptCommands.h"
 
 #include "AnimBlendAssociation.h"
+#include "Bike.h"
 #include "Boat.h"
 #include "BulletInfo.h"
 #include "Camera.h"
@@ -29,6 +30,9 @@
 #include "GameLogic.h"
 #include "Garages.h"
 #include "General.h"
+#ifdef MISSION_REPLAY
+#include "GenericGameStorage.h"
+#endif
 #include "HandlingMgr.h"
 #include "Heli.h"
 #include "Hud.h"
@@ -129,6 +133,38 @@ uint32 CTheScripts::LastMissionPassedTime;
 uint16 CTheScripts::NumberOfExclusiveMissionScripts;
 bool CTheScripts::bPlayerHasMetDebbieHarry;
 bool CTheScripts::bPlayerIsInTheStatium;
+
+#ifdef MISSION_REPLAY
+
+static const char* nonMissionScripts[] = {
+	"copcar",
+	"ambulan",
+	"taxi",
+	"firetru",
+	"rampage",
+	"t4x4_1",
+	"t4x4_2",
+	"t4x4_3",
+	"rc1",
+	"rc2",
+	"rc3",
+	"rc4",
+	"hj",
+	"usj",
+	"mayhem"
+};
+
+int AllowMissionReplay;
+uint32 NextMissionDelay;
+uint32 MissionStartTime;
+uint32 WaitForMissionActivate;
+uint32 WaitForSave;
+float oldTargetX;
+float oldTargetY;
+int missionRetryScriptIndex;
+bool doingMissionRetry;
+
+#endif
 
 
 const uint32 CRunningScript::nSaveStructSize =
@@ -768,6 +804,41 @@ void CTheScripts::Process()
 		if (UseTextCommands == 1)
 			UseTextCommands = 0;
 	}
+
+#ifdef MISSION_REPLAY
+	static uint32 TimeToWaitTill;
+	switch (AllowMissionReplay) {
+	case 2:
+		AllowMissionReplay = 3;
+		TimeToWaitTill = CTimer::GetTimeInMilliseconds() + (AddExtraDeathDelay() > 1000 ? 4000 : 2500);
+		break;
+	case 3:
+		if (TimeToWaitTill < CTimer::GetTimeInMilliseconds())
+			AllowMissionReplay = 4;
+		break;
+	case 4:
+		AllowMissionReplay = 5;
+		RetryMission(0, 0);
+	case 6:
+		AllowMissionReplay = 7;
+		TimeToWaitTill = CTimer::GetTimeInMilliseconds() + 500;
+	case 7:
+		if (TimeToWaitTill < CTimer::GetTimeInMilliseconds()) {
+			AllowMissionReplay = 0;
+			return;
+		}
+		break;
+	}
+	if (WaitForMissionActivate) {
+		if (WaitForMissionActivate > CTimer::GetTimeInMilliseconds())
+			return;
+		WaitForMissionActivate = 0;
+		WaitForSave = CTimer::GetTimeInMilliseconds() + 3000;
+	}
+	if (WaitForSave && WaitForSave > CTimer::GetTimeInMilliseconds())
+		WaitForSave = 0;
+#endif
+
 	CRunningScript* script = pActiveScripts;
 	while (script != nil){
 		CRunningScript* next = script->GetNext();
@@ -1340,6 +1411,17 @@ int8 CRunningScript::ProcessCommands0To99(int32 command)
 		RemoveScriptFromList(&CTheScripts::pActiveScripts);
 		AddScriptToList(&CTheScripts::pIdleScripts);
 		m_bIsActive = false;
+#ifdef MISSION_REPLAY
+		if (m_bMissionFlag) {
+			CPlayerInfo* pPlayerInfo = &CWorld::Players[CWorld::PlayerInFocus];
+			if (pPlayerInfo->m_pPed->GetPedState() != PED_DEAD && pPlayerInfo->m_WBState == WBSTATE_PLAYING && !m_bDeatharrestExecuted)
+				SaveGameForPause(1);
+			oldTargetX = oldTargetY = 0.0f;
+			if (AllowMissionReplay == 1)
+				AllowMissionReplay = 2;
+			// I am fairly sure they forgot to set return value here
+		}
+#endif
 		return 1;
 	case COMMAND_START_NEW_SCRIPT:
 	{
@@ -2108,9 +2190,12 @@ int8 CRunningScript::ProcessCommands100To199(int32 command)
 		else {
 			CVehicle* car;
 
-			// TODO(MIAMI)
-			//if (!CModelInfo::IsBikeModel(ScriptParams[0]))
-			car = new CAutomobile(ScriptParams[0], MISSION_VEHICLE);
+			if (!CModelInfo::IsBikeModel(ScriptParams[0]))
+				car = new CAutomobile(ScriptParams[0], MISSION_VEHICLE);
+			else {
+				car = new CBike(ScriptParams[0], MISSION_VEHICLE);
+				((CBike*)(car))->bIsStanding = true;
+			}
 			CVector pos = *(CVector*)&ScriptParams[1];
 			if (pos.z <= MAP_Z_LOW_LIMIT)
 				pos.z = CWorld::FindGroundZForCoord(pos.x, pos.y);
@@ -2265,7 +2350,14 @@ int8 CRunningScript::ProcessCommands100To199(int32 command)
 		CollectParameters(&m_nIp, 2);
 		CVehicle* car = CPools::GetVehiclePool()->GetAt(ScriptParams[0]);
 		assert(car);
+#if defined MISSION_REPLAY && defined SIMPLIER_MISSIONS
+		car->AutoPilot.m_nCruiseSpeed = *(float*)&ScriptParams[1];
+		if (missionRetryScriptIndex == 40 && car->GetModelIndex() == MI_CHEETAH) // Turismo
+			car->AutoPilot.m_nCruiseSpeed = 8 * car->AutoPilot.m_nCruiseSpeed / 10;
+		car->AutoPilot.m_nCruiseSpeed = Min(car->AutoPilot.m_nCruiseSpeed, 60.0f * car->pHandling->Transmission.fUnkMaxVelocity);
+#else
 		car->AutoPilot.m_nCruiseSpeed = Min(*(float*)&ScriptParams[1], 60.0f * car->pHandling->Transmission.fUnkMaxVelocity);
+#endif
 		return 0;
 	}
 	case COMMAND_SET_CAR_DRIVING_STYLE:
@@ -2335,6 +2427,10 @@ int8 CRunningScript::ProcessCommands100To199(int32 command)
 	case COMMAND_PRINT_BIG:
 	{
 		wchar* key = CTheScripts::GetTextByKeyFromScript(&m_nIp);
+#ifdef MISSION_REPLAY
+		if (strcmp((char*)&CTheScripts::ScriptSpace[m_nIp], "M_FAIL") == 0 && CanAllowMissionReplay())
+			AllowMissionReplay = 1;
+#endif
 		CollectParameters(&m_nIp, 2);
 		CMessages::AddBigMessage(key, ScriptParams[0], ScriptParams[1] - 1);
 		return 0;
@@ -4861,7 +4957,7 @@ int8 CRunningScript::ProcessCommands500To599(int32 command)
 				pPed->FlagToDestroyWhenNextProcessed();
 		}
 		else {
-			pPed->SetDie(ANIM_KO_SHOT_FRONT1, 4.0f, 0.0f);
+			pPed->SetDie();
 		}
 		return 0;
 	}
@@ -7314,7 +7410,13 @@ int8 CRunningScript::ProcessCommands800To899(int32 command)
 				if (pPed->GetPedState() == PED_EXIT_CAR || pPed->GetPedState() == PED_DRAG_FROM_CAR) {
 					uint8 flags = 0;
 					if (pPed->m_pMyVehicle->IsBike()) {
-						//TODO(MIAMI)
+						if (pPed->m_vehEnterType == CAR_DOOR_LF ||
+							pPed->m_vehEnterType == CAR_DOOR_RF ||
+							pPed->m_vehEnterType == CAR_WINDSCREEN)
+							flags = CAR_DOOR_FLAG_LF | CAR_DOOR_FLAG_RF;
+						else if (pPed->m_vehEnterType == CAR_DOOR_LR ||
+							pPed->m_vehEnterType == CAR_DOOR_RR)
+							flags = CAR_DOOR_FLAG_LR | CAR_DOOR_FLAG_RR;
 					}
 					else {
 						switch (pPed->m_vehEnterType) {
@@ -7954,7 +8056,8 @@ int8 CRunningScript::ProcessCommands900To999(int32 command)
 		CVehicle* pVehicle = CPools::GetVehiclePool()->GetAt(ScriptParams[0]);
 		assert(pVehicle);
 		if (pVehicle->IsBike()) {
-			//TODO(MIAMI)
+			CBike* pBike = (CBike*)pVehicle;
+			pBike->bWaterTight = ScriptParams[1] != 0;
 		}
 		else if (pVehicle->IsCar()) {
 			CAutomobile* pCar = (CAutomobile*)pVehicle;
@@ -8450,8 +8553,12 @@ int8 CRunningScript::ProcessCommands900To999(int32 command)
 		if (model == -1)
 			return 0;
 		CVehicle* car;
-		//if (CModelInfo::IsBikeModel(model)) // TODO(MIAMI)
-		car = new CAutomobile(model, MISSION_VEHICLE);
+		if (CModelInfo::IsBikeModel(model)) {
+			car = new CBike(model, MISSION_VEHICLE);
+			((CBike*)(car))->bIsStanding = true;
+		}
+		else
+			car = new CAutomobile(model, MISSION_VEHICLE);
 		CVector pos = *(CVector*)&ScriptParams[0];
 		pos.z += car->GetDistanceFromCentreOfMassToBaseOfModel();
 		car->SetPosition(pos);
@@ -8778,6 +8885,10 @@ int8 CRunningScript::ProcessCommands1000To1099(int32 command)
 	case COMMAND_MAKE_PLAYER_SAFE_FOR_CUTSCENE:
 	{
 		CollectParameters(&m_nIp, 1);
+#ifdef MISSION_REPLAY
+		AllowMissionReplay = 0;
+		SaveGameForPause(3);
+#endif
 		CPlayerInfo* pPlayerInfo = &CWorld::Players[ScriptParams[0]];
 		CPad::GetPad(ScriptParams[0])->DisablePlayerControls |= PLAYERCONTROL_DISABLED_80;
 		pPlayerInfo->MakePlayerSafe(true);
@@ -9020,6 +9131,11 @@ int8 CRunningScript::ProcessCommands1000To1099(int32 command)
 		CollectParameters(&m_nIp, 1);
 		if (CTheScripts::NumberOfExclusiveMissionScripts > 0 && ScriptParams[0] <= UINT16_MAX - 2)
 			return 0;
+#ifdef MISSION_REPLAY
+		missionRetryScriptIndex = ScriptParams[0];
+		if (missionRetryScriptIndex == 19)
+			CStats::LastMissionPassedName[0] = '\0';
+#endif
 		CTimer::Suspend();
 		int offset = CTheScripts::MultiScriptArray[ScriptParams[0]];
 #ifdef USE_DEBUG_SCRIPT_LOADER
@@ -9147,8 +9263,7 @@ int8 CRunningScript::ProcessCommands1000To1099(int32 command)
 		if (pVehicle->m_vehType == VEHICLE_TYPE_CAR)
 			((CAutomobile*)pVehicle)->m_fTraction = fTraction;
 		else
-			// TODO(MIAMI)
-			//((CBike*)pVehicle)->m_fTraction = fTraction;
+			((CBike*)pVehicle)->m_fTraction = fTraction;
 		return 0;
 	}
 	case COMMAND_ARE_MEASUREMENTS_IN_METRES:
@@ -9812,13 +9927,21 @@ int8 CRunningScript::ProcessCommands1100To1199(int32 command)
 		StoreParameters(&m_nIp, 3);
 		return 0;
 	case COMMAND_ATTACH_CHAR_TO_CAR:
-		// TODO(MIAMI)
-		assert(0);
+	{
+		CollectParameters(&m_nIp, 8);
+		CPed *pPed = CPools::GetPedPool()->GetAt(ScriptParams[0]);
+		CVehicle *pVehicle = CPools::GetVehiclePool()->GetAt(ScriptParams[1]);
+		pPed->AttachPedToEntity(pVehicle, *(CVector*)&ScriptParams[2], ScriptParams[5], DEGTORAD(ScriptParams[6]), (eWeaponType)ScriptParams[7]);
 		return 0;
+	}
 	case COMMAND_DETACH_CHAR_FROM_CAR:
-		// TODO(MIAMI)
-		assert(0);
+	{
+		CollectParameters(&m_nIp, 1);
+		CPed *pPed = CPools::GetPedPool()->GetAt(ScriptParams[0]);
+		if (pPed && pPed->m_attachedTo)
+			pPed->DettachPedFromEntity();
 		return 0;
+	}
 	case COMMAND_SET_CAR_CHANGE_LANE: // for some reason changed in SA
 	{
 		CollectParameters(&m_nIp, 2);
@@ -10228,8 +10351,21 @@ int8 CRunningScript::ProcessCommands1100To1199(int32 command)
 		CVehicle* pVehicle = CPools::GetVehiclePool()->GetAt(ScriptParams[0]);
 		assert(pVehicle);
 		bool bIsBurst = false;
+		CBike* pBike = (CBike*)pVehicle;
 		if (pVehicle->m_vehType == VEHICLE_APPEARANCE_BIKE) {
-			assert("IS_CAR_TYPE_BURST not yet implemented for bikes");
+			if (ScriptParams[1] == 4) {
+				for (int i = 0; i < 2; i++) {
+					if (pBike->m_wheelStatus[i] == WHEEL_STATUS_BURST)
+						bIsBurst = true;
+				}
+			}
+			else {
+				if (ScriptParams[1] == 2)
+					ScriptParams[1] = 0;
+				if (ScriptParams[1] == 3)
+					ScriptParams[1] = 1;
+				bIsBurst = pBike->m_wheelStatus[ScriptParams[1]] == WHEEL_STATUS_BURST;
+			}
 		}
 		else {
 			CAutomobile* pCar = (CAutomobile*)pVehicle;
@@ -10863,14 +10999,15 @@ int8 CRunningScript::ProcessCommands1200To1299(int32 command)
 	{
 		CollectParameters(&m_nIp, 1);
 		CPed* pPed = CPools::GetPedPool()->GetAt(ScriptParams[0]);
-		assert(pPed);
-		debug("SET_CHAR_SHUFFLE_INTO_DRIVERS_SEAT is not implemented\n");
+		pPed->PedShuffle();
 		return 0;
 	}
 	case COMMAND_ATTACH_CHAR_TO_OBJECT:
 	{
 		CollectParameters(&m_nIp, 8);
-		debug("ATTACH_CHAR_TO_OBJECT is not implemented\n");
+		CPed* pPed = CPools::GetPedPool()->GetAt(ScriptParams[0]);
+		CObject* pObject = CPools::GetObjectPool()->GetAt(ScriptParams[1]);
+		pPed->AttachPedToEntity(pObject, *(CVector*)&ScriptParams[2], ScriptParams[5], DEGTORAD(ScriptParams[6]), (eWeaponType)ScriptParams[7]);
 		return 0;
 	}
 	case COMMAND_SET_CHAR_AS_PLAYER_FRIEND:
@@ -11208,7 +11345,11 @@ int8 CRunningScript::ProcessCommands1300To1399(int32 command)
 	case COMMAND_SET_CHAR_ANSWERING_MOBILE:
 	{
 		CollectParameters(&m_nIp, 2);
-		debug("SET_CHAR_ANSWERING_MOBILE not implemented\n"); // TODO(MIAMI)
+		CPed* pPed = CPools::GetPedPool()->GetAt(ScriptParams[0]);
+		if (ScriptParams[1])
+			pPed->SetAnswerMobile();
+		else
+			pPed->ClearAnswerMobile();
 		return 0;
 	}
 	case COMMAND_SET_PLAYER_DRUNKENNESS:
@@ -11887,7 +12028,7 @@ int8 CRunningScript::ProcessCommands1400To1499(int32 command)
 	case COMMAND_ADD_BIG_GUN_FLASH:
 	{
 		CollectParameters(&m_nIp, 6);
-		debug("ADD_BIG_GUN_FLASH not implemented\n"); // TODO(MIAMI)
+		CWeapon::AddGunFlashBigGuns(*(CVector*)&ScriptParams[0], *(CVector*)&ScriptParams[3]);
 		return 0;
 	}
 	case COMMAND_HAS_CHAR_BOUGHT_ICE_CREAM:
@@ -12781,8 +12922,8 @@ void CRunningScript::LocateCharCarCommand(int32 command, uint32* pIp)
 		case COMMAND_LOCATE_CHAR_ON_FOOT_CAR_3D:
 			result = !pPed->bInVehicle;
 			break;
-		case COMMAND_LOCATE_CHAR_IN_CAR_CHAR_2D:
-		case COMMAND_LOCATE_CHAR_IN_CAR_CHAR_3D:
+		case COMMAND_LOCATE_CHAR_IN_CAR_CAR_2D:
+		case COMMAND_LOCATE_CHAR_IN_CAR_CAR_3D:
 			result = pPed->bInVehicle;
 			break;
 		default:
@@ -13597,6 +13738,12 @@ void CRunningScript::DoDeatharrestCheck()
 	CPlayerInfo* pPlayer = &CWorld::Players[CWorld::PlayerInFocus];
 	if (!pPlayer->IsRestartingAfterDeath() && !pPlayer->IsRestartingAfterArrest() && !CTheScripts::UpsideDownCars.AreAnyCarsUpsideDown())
 		return;
+#ifdef MISSION_REPLAY
+	if (AllowMissionReplay != 0)
+		return;
+	if (CanAllowMissionReplay())
+		AllowMissionReplay = 1;
+#endif
 	assert(m_nStackPointer > 0);
 	while (m_nStackPointer > 1)
 		--m_nStackPointer;
@@ -14243,3 +14390,43 @@ void CRunningScript::Load(uint8*& buf)
 	prev = p;
 #endif
 }
+
+#ifdef MISSION_REPLAY
+
+bool CRunningScript::CanAllowMissionReplay()
+{
+	if (AllowMissionReplay)
+		return false;
+	if (CStats::LastMissionPassedName[0] == '\0')
+		return false;
+	for (int i = 0; i < ARRAY_SIZE(nonMissionScripts); i++) {
+		if (strcmp(m_abScriptName, nonMissionScripts[i]) == 0)
+			return false;
+	}
+	return true;
+}
+
+uint32 AddExtraDeathDelay()
+{
+	if (missionRetryScriptIndex == 63)
+		return 7000;
+	if (missionRetryScriptIndex == 64)
+		return 4000;
+	return 1000;
+}
+
+void RetryMission(int type, int unk)
+{
+	if (type == 0) {
+		doingMissionRetry = true;
+		FrontEndMenuManager.m_nCurrScreen = MENUPAGE_MISSION_RETRY;
+		FrontEndMenuManager.RequestFrontEndStartUp();
+	}
+	else if (type == 2) {
+		doingMissionRetry = false;
+		AllowMissionReplay = 6;
+		CTheScripts::MissionCleanup.Process();
+	}
+}
+
+#endif

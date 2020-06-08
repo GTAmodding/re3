@@ -1605,7 +1605,7 @@ void CReplay::Display()
 	CFont::SetScale(SCREEN_SCALE_X(1.5f), SCREEN_SCALE_Y(1.5f));
 	CFont::SetAlignment(ALIGN_LEFT);
 	CFont::SetColor(CRGBA(255, 255, 200, 200));
-	CFont::SetFontStyle(FONT_BANK);
+	CFont::SetFontStyle(FONT_STANDARD);
 	if (Mode == MODE_PLAYBACK)
 		CFont::PrintString(SCREEN_SCALE_X(63.5f), SCREEN_SCALE_Y(30.0f), TheText.Get("REPLAY"));
 }

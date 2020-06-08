@@ -30,7 +30,11 @@ public:
 			RwMatrixDestroy(m_attachment);
 	}
 	void Attach(RwMatrix *matrix, bool owner = false){
+#ifdef FIX_BUGS
+		if(m_attachment && m_hasRwMatrix)
+#else
 		if(m_hasRwMatrix && m_attachment)
+#endif
 			RwMatrixDestroy(m_attachment);
 		m_attachment = matrix;
 		m_hasRwMatrix = owner;

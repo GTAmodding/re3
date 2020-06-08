@@ -182,7 +182,7 @@ enum eWaitState {
 enum eObjective : uint32 {
 	OBJECTIVE_NONE,
 	OBJECTIVE_IDLE,
-	OBJ_2,
+	OBJECTIVE_IDLE_COP,
 	OBJECTIVE_FLEE_TILL_SAFE,
 	OBJECTIVE_GUARD_SPOT,
 	OBJECTIVE_GUARD_AREA,	// not implemented
@@ -193,9 +193,9 @@ enum eObjective : uint32 {
 	OBJECTIVE_FLEE_CHAR_ON_FOOT_TILL_SAFE,
 	OBJECTIVE_FLEE_CHAR_ON_FOOT_ALWAYS,
 	OBJECTIVE_GOTO_CHAR_ON_FOOT,
+	OBJECTIVE_GOTO_CHAR_ON_FOOT_WALKING,
+	OBJECTIVE_HASSLE_CHAR,
 	OBJECTIVE_FOLLOW_PED_IN_FORMATION,
-	OBJ_14,
-	OBJ_15,
 	OBJECTIVE_LEAVE_VEHICLE,
 	OBJECTIVE_ENTER_CAR_AS_PASSENGER,
 	OBJECTIVE_ENTER_CAR_AS_DRIVER,
@@ -206,8 +206,8 @@ enum eObjective : uint32 {
 	OBJECTIVE_GOTO_AREA_ANY_MEANS,
 	OBJECTIVE_GOTO_AREA_ON_FOOT,
 	OBJECTIVE_RUN_TO_AREA,
-	OBJECTIVE_26,	// not implemented
-	OBJECTIVE_27,	// not implemented
+	OBJECTIVE_GOTO_AREA_IN_CAR,	// not implemented
+	OBJECTIVE_FOLLOW_CAR_ON_FOOT_WITH_OFFSET,	// not implemented
 	OBJECTIVE_FIGHT_CHAR,
 	OBJECTIVE_SET_LEADER,
 	OBJECTIVE_FOLLOW_ROUTE,
@@ -216,22 +216,22 @@ enum eObjective : uint32 {
 	OBJECTIVE_CATCH_TRAIN,
 	OBJECTIVE_BUY_ICE_CREAM,
 	OBJECTIVE_STEAL_ANY_CAR,
-	OBJ_36,
+	OBJECTIVE_STEAL_ANY_MISSION_CAR,
 	OBJECTIVE_MUG_CHAR,
 	OBJECTIVE_LEAVE_CAR_AND_DIE,
 	OBJECTIVE_USE_SEAT_ATTRACTOR,
 	OBJECTIVE_USE_ATM_ATTRACTOR,
 	OBJECTIVE_FLEE_CAR,
-	OBJ_42,
+	OBJECTIVE_SUN_BATHE,
 	OBJECTIVE_USE_STOP_ATTRACTOR,
 	OBJECTIVE_USE_PIZZA_ATTRACTOR,
 	OBJECTIVE_USE_SHELTER_ATTRACTOR,
 	OBJECTIVE_AIM_GUN_AT_PED,
-	OBJ_47,
+	OBJECTIVE_WANDER,
 	OBJECTIVE_WAIT_FOR_RAIN_TO_END,
 	OBJECTIVE_SPRINT_TO_COORD,
-	OBJ_50,
-	OBJ_51,
+	OBJECTIVE_KILL_CHAR_ON_BOAT,
+	OBJECTIVE_SOLICIT_FOOT,
 	OBJECTIVE_WAIT_FOR_BUS,
 	OBJECTIVE_USE_ICECREAM_ATTRACTOR,
 	OBJECTIVE_PURCHASE_ICECREAM,
@@ -473,8 +473,8 @@ public:
 	uint32 bIgnoreThreatsBehindObjects : 1;
 
 	uint32 bNeverEverTargetThisPed : 1;
-	//uint32 b158_2
-	uint32 b158_4 : 1;
+	uint32 bCrouchWhenScared : 1;
+	uint32 bKnockedOffBike : 1;
 	//uint32 b158_8
 	//uint32 b158_10
 	uint32 bBoughtIceCream : 1;
@@ -616,7 +616,7 @@ public:
 	CEntity *m_attachedTo;
 	CVector m_vecAttachOffset;
 	uint16 m_attachType;
-	float m_attachRot;
+	float m_attachRotStep;
 	uint32 m_attachWepAmmo;
 	uint32 m_threatFlags;
 	uint32 m_threatCheck;
@@ -696,7 +696,6 @@ public:
 	void SetObjective(eObjective);
 	void SetObjective(eObjective, int16, int16);
 	void SetObjective(eObjective, CVector);
-	void SetObjective(eObjective, CVector, float);
 	void SetObjective(eObjective, float, const CVector&);
 	void ClearChat(void);
 	void InformMyGangOfAttack(CEntity*);
@@ -842,6 +841,7 @@ public:
 	void DettachPedFromEntity();
 	void PedShuffle();
 	void DriveVehicle();
+	void PositionAttachedPed();
 
 	// Static methods
 	static CVector GetLocalPositionToOpenCarDoor(CVehicle *veh, uint32 component, float offset);
@@ -1092,6 +1092,7 @@ public:
 void FinishTalkingOnMobileCB(CAnimBlendAssociation* assoc, void* arg);
 void StartTalkingOnMobileCB(CAnimBlendAssociation* assoc, void* arg);
 void FinishFuckUCB(CAnimBlendAssociation *assoc, void *arg);
+void PlayRandomAnimationsFromAnimBlock(CPed* ped, AssocGroupId animGroup, uint32 first, uint32 amount);
 
 // TODO(Miami): Change those when Ped struct is done
 #ifndef PED_SKIN

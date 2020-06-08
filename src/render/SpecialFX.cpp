@@ -1050,7 +1050,7 @@ CMoneyMessage::Render()
 			CFont::SetJustifyOff();
 			CFont::SetColor(CRGBA(m_Colour.r, m_Colour.g, m_Colour.b, (255.0f - 255.0f * fLifeTime) * m_fOpacity));
 			CFont::SetBackGroundOnlyTextOff();
-			CFont::SetFontStyle(FONT_BANK);
+			CFont::SetFontStyle(FONT_STANDARD);
 			CFont::PrintString(vecOut.x, vecOut.y, m_aText);
 		}
 	}

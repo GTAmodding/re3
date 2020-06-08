@@ -2517,7 +2517,7 @@ void CPad::PrintErrorMessage(void)
 		CFont::SetCentreOn();
 		CFont::SetPropOn();
 		CFont::SetColor(CRGBA(255, 255, 200, 200));
-		CFont::SetFontStyle(FONT_BANK);
+		CFont::SetFontStyle(FONT_STANDARD);
 		CFont::PrintString
 		(
 			SCREEN_WIDTH  / 2,
@@ -2534,7 +2534,7 @@ void CPad::PrintErrorMessage(void)
 		CFont::SetCentreOn();
 		CFont::SetPropOn();
 		CFont::SetColor(CRGBA(255, 255, 200, 200));
-		CFont::SetFontStyle(FONT_BANK);
+		CFont::SetFontStyle(FONT_STANDARD);
 		CFont::PrintString
 		(
 			SCREEN_WIDTH  / 2,

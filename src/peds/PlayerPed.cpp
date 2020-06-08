@@ -40,6 +40,9 @@ CPlayerPed::CPlayerPed(void) : CPed(PEDTYPE_PLAYER1)
 {
 	m_fMoveSpeed = 0.0f;
 	SetModelIndex(MI_PLAYER);
+#ifdef FIX_BUGS
+	m_fCurrentStamina = m_fMaxStamina = 150.0f;
+#endif
 	SetInitialState();
 
 	m_pWanted = new CWanted();
@@ -56,8 +59,9 @@ CPlayerPed::CPlayerPed(void) : CPed(PEDTYPE_PLAYER1)
 
 	m_pPointGunAt = nil;
 	SetPedState(PED_IDLE);
-	m_fMaxStamina = 150.0f;
-	m_fCurrentStamina = m_fMaxStamina;
+#ifndef FIX_BUGS
+	m_fCurrentStamina = m_fMaxStamina = 150.0f;
+#endif
 	m_fStaminaProgress = 0.0f;
 	m_nEvadeAmount = 0;
 	m_pEvadingFrom = nil;

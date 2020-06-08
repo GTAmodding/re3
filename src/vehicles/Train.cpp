@@ -13,6 +13,7 @@
 #include "DMAudio.h"
 #include "HandlingMgr.h"
 #include "Train.h"
+#include "AudioScriptObject.h"
 
 static CTrainNode* pTrackNodes;
 static int16 NumTrackNodes;
@@ -34,6 +35,8 @@ static float EngineTrackSpeed_S[4];
 
 CVector CTrain::aStationCoors[3];
 CVector CTrain::aStationCoors_S[4];
+
+static bool bTrainArrivalAnnounced[3] = {false, false, false};
 
 CTrain::CTrain(int32 id, uint8 CreatedBy)
  : CVehicle(CreatedBy)
@@ -61,6 +64,10 @@ CTrain::CTrain(int32 id, uint8 CreatedBy)
 
 	bUsesCollision = true;
 	SetStatus(STATUS_TRAIN_MOVING);
+
+#ifdef FIX_BUGS
+	m_isFarAway = true;
+#endif
 #else
 	assert(0 && "No trains in this game");
 #endif
@@ -643,9 +650,47 @@ CTrain::ReadAndInterpretTrackFile(Const char *filename, CTrainNode **nodes, int1
 }
 
 void
+PlayAnnouncement(uint8 sound, uint8 station)
+{
+	// this was gone in a PC version but inlined on PS2
+	cAudioScriptObject *obj = new cAudioScriptObject;
+	obj->AudioId = sound;
+	obj->Posn = CTrain::aStationCoors[station];
+	obj->AudioEntity = AEHANDLE_NONE;
+	DMAudio.CreateOneShotScriptObject(obj);
+}
+
+void
 ProcessTrainAnnouncements(void)
 {
-	// TODO but unused
+	for (int i = 0; i < 3; i++) {
+		for (int j = 0; j < 3; j++) {
+			if (!bTrainArrivalAnnounced[i]) {
+				float preDist = StationDist[i] - 100.0f;
+				if (preDist < 0.0f)
+					preDist += TotalLengthOfTrack;
+				if (EngineTrackPosition[j] > preDist && EngineTrackPosition[j] < StationDist[i]) {
+					bTrainArrivalAnnounced[i] = true;
+					PlayAnnouncement(SCRIPT_SOUND_TRAIN_ANNOUNCEMENT_1, i);
+					break;
+				}
+			} else {
+				float postDist = StationDist[i] + 10.0f;
+#ifdef FIX_BUGS
+				if (postDist > TotalLengthOfTrack)
+					postDist -= TotalLengthOfTrack;
+#else
+				if (postDist < 0.0f) // does this even make sense here?
+					postDist += TotalLengthOfTrack;
+#endif
+				if (EngineTrackPosition[j] > StationDist[i] && EngineTrackPosition[j] < postDist) {
+					bTrainArrivalAnnounced[i] = false;
+					PlayAnnouncement(SCRIPT_SOUND_TRAIN_ANNOUNCEMENT_2, i);
+					break;
+				}
+			}
+		}
+	}
 }
 
 void

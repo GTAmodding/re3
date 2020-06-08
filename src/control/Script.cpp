@@ -1531,7 +1531,7 @@ int8 CRunningScript::ProcessCommands0To99(int32 command)
 				CPed* pTestedPed = ped->m_nearPeds[i];
 				if (!pTestedPed || !IsPedPointerValid(pTestedPed))
 					continue;
-				if (pTestedPed->m_pedInObjective == ped && pTestedPed->m_objective == OBJ_15) {
+				if (pTestedPed->m_pedInObjective == ped && pTestedPed->m_objective == OBJECTIVE_FOLLOW_PED_IN_FORMATION) {
 					CVector vFollowerPos = pTestedPed->GetFormationPosition();
 					CTheScripts::ClearSpaceForMissionEntity(vFollowerPos, ped);
 					bool bFound = false;
@@ -1681,11 +1681,11 @@ int8 CRunningScript::ProcessCommands100To199(int32 command)
 		nScriptVar1 = GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
 		*nScriptVar1 *= *GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
 		return 0;
-	case COMMAND_MULT_INT_LVAR_BY_INT_VAR:
+	case COMMAND_MULT_INT_VAR_BY_INT_LVAR:
 		nScriptVar1 = GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
 		*nScriptVar1 *= *GetPointerToScriptVariable(&m_nIp, VAR_LOCAL);
 		return 0;
-	case COMMAND_MULT_INT_VAR_BY_INT_LVAR:
+	case COMMAND_MULT_INT_LVAR_BY_INT_VAR:
 		nScriptVar1 = GetPointerToScriptVariable(&m_nIp, VAR_LOCAL);
 		*nScriptVar1 *= *GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
 		return 0;
@@ -1697,11 +1697,11 @@ int8 CRunningScript::ProcessCommands100To199(int32 command)
 		fScriptVar1 = (float*)GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
 		*fScriptVar1 *= *(float*)GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
 		return 0;
-	case COMMAND_MULT_FLOAT_LVAR_BY_FLOAT_VAR:
+	case COMMAND_MULT_FLOAT_VAR_BY_FLOAT_LVAR:
 		fScriptVar1 = (float*)GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
 		*fScriptVar1 *= *(float*)GetPointerToScriptVariable(&m_nIp, VAR_LOCAL);
 		return 0;
-	case COMMAND_MULT_FLOAT_VAR_BY_FLOAT_LVAR:
+	case COMMAND_MULT_FLOAT_LVAR_BY_FLOAT_VAR:
 		fScriptVar1 = (float*)GetPointerToScriptVariable(&m_nIp, VAR_LOCAL);
 		*fScriptVar1 *= *(float*)GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
 		return 0;
@@ -1713,11 +1713,11 @@ int8 CRunningScript::ProcessCommands100To199(int32 command)
 		nScriptVar1 = GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
 		*nScriptVar1 /= *GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
 		return 0;
-	case COMMAND_DIV_INT_LVAR_BY_INT_VAR:
+	case COMMAND_DIV_INT_VAR_BY_INT_LVAR:
 		nScriptVar1 = GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
 		*nScriptVar1 /= *GetPointerToScriptVariable(&m_nIp, VAR_LOCAL);
 		return 0;
-	case COMMAND_DIV_INT_VAR_BY_INT_LVAR:
+	case COMMAND_DIV_INT_LVAR_BY_INT_VAR:
 		nScriptVar1 = GetPointerToScriptVariable(&m_nIp, VAR_LOCAL);
 		*nScriptVar1 /= *GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
 		return 0;
@@ -1729,11 +1729,11 @@ int8 CRunningScript::ProcessCommands100To199(int32 command)
 		fScriptVar1 = (float*)GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
 		*fScriptVar1 /= *(float*)GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
 		return 0;
-	case COMMAND_DIV_FLOAT_LVAR_BY_FLOAT_VAR:
+	case COMMAND_DIV_FLOAT_VAR_BY_FLOAT_LVAR:
 		fScriptVar1 = (float*)GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
 		*fScriptVar1 /= *(float*)GetPointerToScriptVariable(&m_nIp, VAR_LOCAL);
 		return 0;
-	case COMMAND_DIV_FLOAT_VAR_BY_FLOAT_LVAR:
+	case COMMAND_DIV_FLOAT_LVAR_BY_FLOAT_VAR:
 		fScriptVar1 = (float*)GetPointerToScriptVariable(&m_nIp, VAR_LOCAL);
 		*fScriptVar1 /= *(float*)GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
 		return 0;
@@ -1759,11 +1759,19 @@ int8 CRunningScript::ProcessCommands100To199(int32 command)
 		fScriptVar1 = (float*)GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
 		*fScriptVar1 += CTimer::GetTimeStep() * *(float*)GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
 		return 0;
+#ifdef FIX_BUGS
+	case COMMAND_ADD_TIMED_FLOAT_VAR_TO_FLOAT_LVAR:
+#else
 	case COMMAND_ADD_TIMED_FLOAT_LVAR_TO_FLOAT_VAR:
+#endif
 		fScriptVar1 = (float*)GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
 		*fScriptVar1 += CTimer::GetTimeStep() * *(float*)GetPointerToScriptVariable(&m_nIp, VAR_LOCAL);
 		return 0;
+#ifdef FIX_BUGS
+	case COMMAND_ADD_TIMED_FLOAT_LVAR_TO_FLOAT_VAR:
+#else
 	case COMMAND_ADD_TIMED_FLOAT_VAR_TO_FLOAT_LVAR:
+#endif
 		fScriptVar1 = (float*)GetPointerToScriptVariable(&m_nIp, VAR_LOCAL);
 		*fScriptVar1 += CTimer::GetTimeStep() * *(float*)GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
 		return 0;
@@ -1789,11 +1797,19 @@ int8 CRunningScript::ProcessCommands100To199(int32 command)
 		fScriptVar1 = (float*)GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
 		*fScriptVar1 -= CTimer::GetTimeStep() * *(float*)GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
 		return 0;
+#ifdef FIX_BUGS // in SA it was fixed by reversing their order in enum
+	case COMMAND_SUB_TIMED_FLOAT_VAR_FROM_FLOAT_LVAR:
+#else
 	case COMMAND_SUB_TIMED_FLOAT_LVAR_FROM_FLOAT_VAR:
+#endif
 		fScriptVar1 = (float*)GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
 		*fScriptVar1 -= CTimer::GetTimeStep() * *(float*)GetPointerToScriptVariable(&m_nIp, VAR_LOCAL);
 		return 0;
+#ifdef FIX_BUGS
+	case COMMAND_SUB_TIMED_FLOAT_LVAR_FROM_FLOAT_VAR:
+#else
 	case COMMAND_SUB_TIMED_FLOAT_VAR_FROM_FLOAT_LVAR:
+#endif
 		fScriptVar1 = (float*)GetPointerToScriptVariable(&m_nIp, VAR_LOCAL);
 		*fScriptVar1 -= CTimer::GetTimeStep() * *(float*)GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
 		return 0;
@@ -1807,13 +1823,13 @@ int8 CRunningScript::ProcessCommands100To199(int32 command)
 		*ptr = *GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
 		return 0;
 	}
-	case COMMAND_SET_LVAR_INT_TO_VAR_INT:
+	case COMMAND_SET_VAR_INT_TO_LVAR_INT:
 	{
 		int32* ptr = GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
 		*ptr = *GetPointerToScriptVariable(&m_nIp, VAR_LOCAL);
 		return 0;
 	}
-	case COMMAND_SET_VAR_INT_TO_LVAR_INT:
+	case COMMAND_SET_LVAR_INT_TO_VAR_INT:
 	{
 		int32* ptr = GetPointerToScriptVariable(&m_nIp, VAR_LOCAL);
 		*ptr = *GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
@@ -1831,13 +1847,13 @@ int8 CRunningScript::ProcessCommands100To199(int32 command)
 		*ptr = *(float*)GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
 		return 0;
 	}
-	case COMMAND_SET_LVAR_FLOAT_TO_VAR_FLOAT:
+	case COMMAND_SET_VAR_FLOAT_TO_LVAR_FLOAT:
 	{
 		float* ptr = (float*)GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
 		*ptr = *(float*)GetPointerToScriptVariable(&m_nIp, VAR_LOCAL);
 		return 0;
 	}
-	case COMMAND_SET_VAR_FLOAT_TO_LVAR_FLOAT:
+	case COMMAND_SET_LVAR_FLOAT_TO_VAR_FLOAT:
 	{
 		float* ptr = (float*)GetPointerToScriptVariable(&m_nIp, VAR_LOCAL);
 		*ptr = *(float*)GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
@@ -1855,13 +1871,13 @@ int8 CRunningScript::ProcessCommands100To199(int32 command)
 		*ptr = *(float*)GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
 		return 0;
 	}
-	case COMMAND_CSET_LVAR_INT_TO_VAR_FLOAT:
+	case COMMAND_CSET_VAR_INT_TO_LVAR_FLOAT:
 	{
 		int32* ptr = GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
 		*ptr = *(float*)GetPointerToScriptVariable(&m_nIp, VAR_LOCAL);
 		return 0;
 	}
-	case COMMAND_CSET_VAR_INT_TO_LVAR_FLOAT:
+	case COMMAND_CSET_LVAR_INT_TO_VAR_FLOAT:
 	{
 		int32* ptr = GetPointerToScriptVariable(&m_nIp, VAR_LOCAL);
 		*ptr = *(float*)GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
@@ -1879,13 +1895,13 @@ int8 CRunningScript::ProcessCommands100To199(int32 command)
 		*ptr = *GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
 		return 0;
 	}
-	case COMMAND_CSET_LVAR_FLOAT_TO_VAR_INT:
+	case COMMAND_CSET_VAR_FLOAT_TO_LVAR_INT:
 	{
 		float* ptr = (float*)GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
 		*ptr = *GetPointerToScriptVariable(&m_nIp, VAR_LOCAL);
 		return 0;
 	}
-	case COMMAND_CSET_VAR_FLOAT_TO_LVAR_INT:
+	case COMMAND_CSET_LVAR_FLOAT_TO_VAR_INT:
 	{
 		float* ptr = (float*)GetPointerToScriptVariable(&m_nIp, VAR_LOCAL);
 		*ptr = *GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
@@ -2252,7 +2268,7 @@ int8 CRunningScript::ProcessCommands100To199(int32 command)
 			car->AutoPilot.m_nCarMission = MISSION_GOTOCOORDS;
 		car->SetStatus(STATUS_PHYSICS);
 		car->bEngineOn = true;
-		car->AutoPilot.m_nCruiseSpeed = Max(car->AutoPilot.m_nCruiseSpeed, 6);
+		car->AutoPilot.m_nCruiseSpeed = Max(1, car->AutoPilot.m_nCruiseSpeed);
 		car->AutoPilot.m_nAntiReverseTimer = CTimer::GetTimeInMilliseconds();
 		return 0;
 	}
@@ -2264,7 +2280,7 @@ int8 CRunningScript::ProcessCommands100To199(int32 command)
 		CCarCtrl::JoinCarWithRoadSystem(car);
 		car->AutoPilot.m_nCarMission = MISSION_CRUISE;
 		car->bEngineOn = true;
-		car->AutoPilot.m_nCruiseSpeed = Max(car->AutoPilot.m_nCruiseSpeed, 6);
+		car->AutoPilot.m_nCruiseSpeed = Max(1, car->AutoPilot.m_nCruiseSpeed);
 		car->AutoPilot.m_nAntiReverseTimer = CTimer::GetTimeInMilliseconds();
 		return 0;
 	}
@@ -10678,7 +10694,7 @@ int8 CRunningScript::ProcessCommands1200To1299(int32 command)
 		CPed* pTargetPed = CPools::GetPedPool()->GetAt(ScriptParams[1]);
 		assert(pTargetPed);
 		pPed->bScriptObjectiveCompleted = false;
-		pPed->SetObjective(OBJECTIVE_FOLLOW_PED_IN_FORMATION, pPed);
+		pPed->SetObjective(OBJECTIVE_GOTO_CHAR_ON_FOOT_WALKING, pPed);
 		return 0;
 	}
 	//case COMMAND_IS_PICKUP_IN_ZONE:
@@ -10713,8 +10729,7 @@ int8 CRunningScript::ProcessCommands1200To1299(int32 command)
 		CPed* pTargetPed = CPools::GetPedPool()->GetAt(ScriptParams[1]);
 		assert(pTargetPed);
 		pPed->bScriptObjectiveCompleted = false;
-		debug("SET_CHAR_OBJ_AIM_GUN_AT_CHAR is not implemented\n");
-		//pPed->SetObjective(OBJECTIVE_AIM_GUN_AT_PED, pTargetPed); // TODO(MIAMI) -- when objective is implemented
+		pPed->SetObjective(OBJECTIVE_AIM_GUN_AT_PED, pTargetPed);
 		return 0;
 	}
 	case COMMAND_SWITCH_SECURITY_CAMERA:
@@ -10757,13 +10772,22 @@ int8 CRunningScript::ProcessCommands1200To1299(int32 command)
 	case COMMAND_SET_HELI_ORIENTATION:
 	{
 		CollectParameters(&m_nIp, 2);
-		debug("SET_HELI_ORIENTATION is not implemented\n"); // TODO(MIAMI);
+		CAutomobile* pHeli = (CAutomobile*)CPools::GetVehiclePool()->GetAt(ScriptParams[0]);
+		assert(pHeli && pHeli->IsCar() && pHeli->IsRealHeli());
+		float fAngle = DEGTORAD(*(float*)&ScriptParams[1] - 90.0f);
+		while (fAngle < 0.0f)
+			fAngle += TWOPI;
+		while (fAngle > TWOPI)
+			fAngle -= TWOPI;
+		pHeli->SetHeliOrientation(fAngle);
 		return 0;
 	}
 	case COMMAND_CLEAR_HELI_ORIENTATION:
 	{
 		CollectParameters(&m_nIp, 1);
-		debug("SET_HELI_ORIENTATION is not implemented\n"); // TODO(MIAMI);
+		CAutomobile* pHeli = (CAutomobile*)CPools::GetVehiclePool()->GetAt(ScriptParams[0]);
+		assert(pHeli && pHeli->IsCar() && pHeli->IsRealHeli());
+		pHeli->ClearHeliOrientation();
 		return 0;
 	}
 	case COMMAND_PLANE_GOTO_COORDS:
@@ -10864,9 +10888,10 @@ int8 CRunningScript::ProcessCommands1200To1299(int32 command)
 	case COMMAND_POP_CAR_BOOT:
 	{
 		CollectParameters(&m_nIp, 1);
-		CVehicle* pVehicle = CPools::GetVehiclePool()->GetAt(ScriptParams[0]);
-		assert(pVehicle);
-		debug("POP_CAR_BOOT is not implemented\n"); // TODO(MIAMI)
+		CollectParameters(&m_nIp, 1);
+		CAutomobile* pCar = (CAutomobile*)CPools::GetVehiclePool()->GetAt(ScriptParams[0]);
+		assert(pCar&& pCar->IsCar());
+		pCar->PopBoot();
 		return 0;
 	}
 	case COMMAND_SHUT_PLAYER_UP:
@@ -11122,14 +11147,13 @@ int8 CRunningScript::ProcessCommands1200To1299(int32 command)
 		pos.y = *(float*)&ScriptParams[2];
 		pos.z = CWorld::FindGroundZForCoord(pos.x, pos.y);
 		pPed->bScriptObjectiveCompleted = false;
-		debug("SET_CHAR_OBJ_SPRINT_TO_COORD is not implemented\n");
-		//pPed->SetObjective(OBJECTIVE_SPRINT_TO_COORD, pos); // TODO(MIAMI) -- when objective is implemented
+		pPed->SetObjective(OBJECTIVE_SPRINT_TO_COORD, pos);
 		return 0;
 	}
 	case COMMAND_CREATE_SWAT_ROPE:
 	{
 		CollectParameters(&m_nIp, 3);
-		debug("SET_CHAR_OBJ_SPRINT_TO_COORD is not implemented\n");
+		debug("CREATE_SWAT_ROPE is not implemented\n");
 		return 0;
 	}
 	//case COMMAND_SET_FIRST_PERSON_CONTROL_CAMERA:
@@ -11149,7 +11173,9 @@ int8 CRunningScript::ProcessCommands1200To1299(int32 command)
 	case COMMAND_CLOSE_ALL_CAR_DOORS:
 	{
 		CollectParameters(&m_nIp, 1);
-		debug("CLOSE_ALL_CAR_DOORS is not implemented\n"); // TODO(MIAMI)
+		CAutomobile* pCar = (CAutomobile*)CPools::GetVehiclePool()->GetAt(ScriptParams[0]);
+		assert(pCar&& pCar->IsCar());
+		pCar->CloseAllDoors();
 		return 0;
 	}
 	case COMMAND_GET_DISTANCE_BETWEEN_COORDS_2D:
@@ -11169,7 +11195,9 @@ int8 CRunningScript::ProcessCommands1200To1299(int32 command)
 	case COMMAND_POP_CAR_BOOT_USING_PHYSICS:
 	{
 		CollectParameters(&m_nIp, 1);
-		debug("POP_CAR_BOOT_USING_PHYSICS is not implemented\n"); // TODO(MIAMI)
+		CAutomobile* pCar = (CAutomobile*)CPools::GetVehiclePool()->GetAt(ScriptParams[0]);
+		assert(pCar && pCar->IsCar());
+		pCar->PopBootUsingPhysics();
 		return 0;
 	}
 	//case COMMAND_SET_FIRST_PERSON_WEAPON_CAMERA:
@@ -11713,7 +11741,9 @@ int8 CRunningScript::ProcessCommands1300To1399(int32 command)
 	case COMMAND_MAKE_HELI_COME_CRASHING_DOWN:
 	{
 		CollectParameters(&m_nIp, 1);
-		debug("MAKE_HELI_COME_CRASHING_DOWN is not implemented\n");
+		CAutomobile* pHeli = (CAutomobile*)CPools::GetVehiclePool()->GetAt(ScriptParams[0]);
+		assert(pHeli && pHeli->IsCar() && pHeli->IsRealHeli());
+		pHeli->bHeliDestroyed = true;
 		return 0;
 	}
 	case COMMAND_ADD_EXPLOSION_NO_SOUND:
@@ -11761,18 +11791,18 @@ int8 CRunningScript::ProcessCommands1300To1399(int32 command)
 	{
 		CollectParameters(&m_nIp, 2);
 		CPed* pPed = CPools::GetPedPool()->GetAt(ScriptParams[0]);
-		debug("SET_CHAR_CROUCH_WHEN_THREATENED not implemented, skipping\n");
+		assert(pPed);
+		pPed->bCrouchWhenScared = true;
 		return 0;
 	}
 	case COMMAND_IS_CHAR_IN_ANY_POLICE_VEHICLE:
 	{
 		CollectParameters(&m_nIp, 1);
-		static bool bShowed = false;
-		if (!bShowed) {
-			debug("IS_CHAR_IN_ANY_POLICE_VEHICLE not implemented, default to FALSE\n");
-			bShowed = true;
-		}
-		UpdateCompareFlag(false);
+		CPed* pPed = CPools::GetPedPool()->GetAt(ScriptParams[0]);
+		assert(pPed);
+		UpdateCompareFlag(pPed->bInVehicle && pPed->m_pMyVehicle &&
+			pPed->m_pMyVehicle->IsLawEnforcementVehicle() &&
+			pPed->m_pMyVehicle->GetModelIndex() != MI_PREDATOR);
 		return 0;
 	}
 	case COMMAND_DOES_CHAR_EXIST:
@@ -11803,7 +11833,7 @@ int8 CRunningScript::ProcessCommands1300To1399(int32 command)
 	case COMMAND_SET_ALL_TAXIS_HAVE_NITRO:
 	{
 		CollectParameters(&m_nIp, 1);
-		debug("SET_ALL_TAXIS_HAVE_NITRO is not implemented\n"); // TODO(MIAMI)
+		CVehicle::bAllTaxisHaveNitro = ScriptParams[0] != 0;
 		return 0;
 	}
 	case COMMAND_SET_CHAR_STOP_SHOOT_DONT_SEEK_ENTITY:
@@ -11856,8 +11886,10 @@ int8 CRunningScript::ProcessCommands1400To1499(int32 command)
 	case COMMAND_REGISTER_VIGILANTE_LEVEL:
 		CollectParameters(&m_nIp, 1);
 		debug("REGISTER_VIGILANTE_LEVEL not implemented\n"); // TODO(MIAMI)
+		return 0;
 	case COMMAND_CLEAR_ALL_CHAR_ANIMS:
 	{
+		CollectParameters(&m_nIp, 1);
 		CPed* pPed = CPools::GetPedPool()->GetAt(ScriptParams[0]);
 		assert(pPed);
 		if (!pPed->bInVehicle) {
@@ -11900,7 +11932,7 @@ int8 CRunningScript::ProcessCommands1400To1499(int32 command)
 	case COMMAND_PLAY_ANNOUNCEMENT:
 	{
 		CollectParameters(&m_nIp, 1);
-		debug("PLAY_ANNOUNCEMENT not implemented, skipping\n");
+		DMAudio.PlayRadioAnnouncement(ScriptParams[0] + STREAMED_SOUND_ANNOUNCE_BRIDGE_CLOSED);
 		return 0;
 	}
 	case COMMAND_SET_PLAYER_IS_IN_STADIUM:
@@ -11942,7 +11974,7 @@ int8 CRunningScript::ProcessCommands1400To1499(int32 command)
 		return 0;
 	case COMMAND_REGISTER_BEST_POSITION:
 		CollectParameters(&m_nIp, 2);
-		debug("REGISTER_BEST_POSITION not implemented\n");
+		CStats::RegisterBestPosition(ScriptParams[0], ScriptParams[1]);
 		return 0;
 	case COMMAND_IS_PLAYER_IN_INFO_ZONE:
 	{
@@ -14288,7 +14320,11 @@ void CTheScripts::UpdateObjectIndices()
 			if (!pModel)
 				continue;
 			strcpy(name, pModel->GetName());
+#ifdef FIX_BUGS
+			for (int k = 0; k < USED_OBJECT_NAME_LENGTH && name[k]; k++)
+#else
 			for (int k = 0; k < USED_OBJECT_NAME_LENGTH; k++)
+#endif
 				name[k] = toupper(name[k]);
 			if (strcmp(name, UsedObjectArray[i].name) == 0) {
 				found = true;

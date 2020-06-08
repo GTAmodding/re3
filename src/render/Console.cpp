@@ -63,7 +63,7 @@ CConsole::Display()
 	CFont::SetJustifyOn();
 	CFont::SetRightJustifyWrap(0.0f);
 	CFont::SetBackGroundOnlyTextOff();
-	CFont::SetFontStyle(FONT_BANK);
+	CFont::SetFontStyle(FONT_STANDARD);
 #ifndef FIX_BUGS
 	CFont::SetPropOff(); // not sure why this is here anyway
 #endif

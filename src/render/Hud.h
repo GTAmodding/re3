@@ -51,9 +51,8 @@ enum eSprites
 	NUM_HUD_SPRITES,
 };
 
-// TODO(Miami): Make those 0.7f - 1.25f once fonts have been ported
-#define HUD_TEXT_SCALE_X 0.8f
-#define HUD_TEXT_SCALE_Y 1.35f
+#define HUD_TEXT_SCALE_X 0.7f
+#define HUD_TEXT_SCALE_Y 1.25f
 
 class CHud
 {

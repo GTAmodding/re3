@@ -2064,6 +2064,10 @@ CWorld::Process(void)
 						movingPed->bInVehicle = false;
 						movingPed->QuitEnteringCar();
 					}
+				} else if (movingPed->m_attachedTo) {
+					movingPed->PositionAttachedPed();
+					movingPed->GetMatrix().UpdateRW();
+					movingPed->UpdateRwFrame();
 				}
 			}
 		}

@@ -6,8 +6,9 @@ class CStats
 {
 public:
 	enum {
-		TOTAL_FASTEST_TIMES = 16,
-		TOTAL_HIGHEST_SCORES = 16
+		TOTAL_FASTEST_TIMES = 23,
+		TOTAL_HIGHEST_SCORES = 5,
+		TOTAL_BEST_POSITIONS = 1
 	};
 	//TODO
 	static int32 SeagullsKilled;
@@ -65,6 +66,7 @@ public:
 	static int32 CarsCrushed;
 	static int32 FastestTimes[TOTAL_FASTEST_TIMES];
 	static int32 HighestScores[TOTAL_HIGHEST_SCORES];
+	static int32 BestPositions[TOTAL_BEST_POSITIONS];
 	static int32 PropertyDestroyed;
 	static int32 Sprayings;
 	static float AutoPaintingBudget;
@@ -77,6 +79,7 @@ public:
 	static void Init(void);
 	static void RegisterFastestTime(int32, int32);
 	static void RegisterHighestScore(int32, int32);
+	static void RegisterBestPosition(int32, int32);
 	static void RegisterElBurroTime(int32);
 	static void Register4x4OneTime(int32);
 	static void Register4x4TwoTime(int32);

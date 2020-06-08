@@ -159,6 +159,12 @@ enum
 
 	MI_TAXI_D = 28,	// HMOCA
 
+	MI_BMYBB = 47,
+	MI_WMOST = 52,
+	MI_WMYBE = 58,
+	MI_WFOBE,
+	MI_WMOBE,
+
 	MI_WFOGO = 63,
 	MI_WMOGO = 64,
 

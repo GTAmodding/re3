@@ -80,6 +80,9 @@ CVehicle::CVehicle(uint8 CreatedBy)
 	bIsLawEnforcer = false;
 	bIsAmbulanceOnDuty = false;
 	bIsFireTruckOnDuty = false;
+#ifdef FIX_BUGS
+	bIsHandbrakeOn = false;
+#endif
 	CCarCtrl::UpdateCarCount(this, false);
 	m_fHealth = 1000.0f;
 	bEngineOn = true;
@@ -117,7 +120,7 @@ CVehicle::CVehicle(uint8 CreatedBy)
 	m_numPedsUseItAsCover = 0;
 	bIsCarParkVehicle = false;
 	bHasAlreadyBeenRecorded = false;
-	m_bSirenOrAlarm = 0;
+	m_bSirenOrAlarm = false;
 	m_nCarHornTimer = 0;
 	m_nCarHornPattern = 0;
 	m_nCarHornDelay = 0;
@@ -748,7 +751,7 @@ CVehicle::ProcessWheel(CVector &wheelFwd, CVector &wheelRight, CVector &wheelCon
 	static bool bBraking;
 	static bool bDriving;
 
-#ifdef FIX_BUGS
+#ifdef FIX_SIGNIFICANT_BUGS
 	bAlreadySkidding = false;
 #endif
 
@@ -903,7 +906,7 @@ CVehicle::ProcessBikeWheel(CVector &wheelFwd, CVector &wheelRight, CVector &whee
 	static bool bDriving;
 	static bool bReversing;
 
-#ifdef FIX_BUGS
+#ifdef FIX_SIGNIFICANT_BUGS
 	bAlreadySkidding = false;
 #endif
 
@@ -1032,7 +1035,6 @@ CVehicle::ProcessBikeWheel(CVector &wheelFwd, CVector &wheelRight, CVector &whee
 		float impulse = speed*m_fMass;
 		float turnImpulse = speed*GetMass(wheelContactPoint, direction);
 		CVector vTurnImpulse = turnImpulse * direction;
-
 		ApplyMoveForce(impulse * direction);
 
 		float turnRight = DotProduct(vTurnImpulse, GetRight());

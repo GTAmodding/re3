@@ -90,6 +90,7 @@ public:
 	static bool TestRoomForDummyObject(CObject*);
 	static bool TestSafeForRealObject(CDummyObject*);
 	static bool IsSkateable(CVector const&);
+	static bool CanJeerAtStripper(int32 model);
 
 	static CPed* AddDeadPedInFrontOfCar(const CVector& pos, CVehicle* pCulprit);
 };

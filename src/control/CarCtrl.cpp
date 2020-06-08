@@ -925,7 +925,7 @@ CCarCtrl::RemoveCarsIfThePoolGetsFull(void)
 	if (CPools::GetVehiclePool()->GetNoOfFreeSpaces() >= 8)
 		return;
 	int i = CPools::GetVehiclePool()->GetSize();
-	float md = 999999.9f;
+	float md = 10000000.f;
 	CVehicle* pClosestVehicle = nil;
 	while (i--) {
 		CVehicle* pVehicle = CPools::GetVehiclePool()->GetSlot(i);
@@ -1127,7 +1127,7 @@ CCarCtrl::FindMaximumSpeedForThisCarInTraffic(CVehicle* pVehicle)
 		}
 	}
 	pVehicle->bWarnedPeds = true;
-	if (pVehicle->AutoPilot.m_nDrivingStyle == DRIVINGSTYLE_STOP_FOR_CARS)
+	if (pVehicle->AutoPilot.m_nDrivingStyle == DRIVINGSTYLE_STOP_FOR_CARS || pVehicle->AutoPilot.m_nDrivingStyle == DRIVINGSTYLE_STOP_FOR_CARS_IGNORE_LIGHTS)
 		return maxSpeed;
 	return (maxSpeed + pVehicle->AutoPilot.GetCruiseSpeed()) / 2;
 }
@@ -1226,13 +1226,13 @@ void CCarCtrl::SlowCarDownForPedsSectorList(CPtrList& lst, CVehicle* pVehicle, f
 					if (pVehicle->GetModelIndex() == MI_RCBANDIT){
 						if (dotVelocity * GAME_SPEED_TO_METERS_PER_SECOND / 2 > distanceUntilHit)
 							pPed->SetEvasiveStep(pVehicle, 0);
-					}else if (dotVelocity > 0.3f){
-						if (sideLength - 0.5f < sidewaysDistance)
+					}else if (dotVelocity > 0.3f) {
+						if (sideLength + 0.1f < sidewaysDistance)
 							pPed->SetEvasiveStep(pVehicle, 0);
 						else
 							pPed->SetEvasiveDive(pVehicle, 0);
-					}else{
-						if (sideLength + 0.1f < sidewaysDistance)
+					}else if (dotVelocity > 0.1f) {
+						if (sideLength - 0.5f < sidewaysDistance)
 							pPed->SetEvasiveStep(pVehicle, 0);
 						else
 							pPed->SetEvasiveDive(pVehicle, 0);
@@ -1261,7 +1261,7 @@ void CCarCtrl::SlowCarDownForPedsSectorList(CPtrList& lst, CVehicle* pVehicle, f
 						CPlayerPed* pPlayerPed = (CPlayerPed*)pPed;
 						if (pPlayerPed->IsPlayer() && dotDirection < frontSafe &&
 						  pPlayerPed->IsPedInControl() &&
-						  pPlayerPed->m_fMoveSpeed < 0.1f && pPlayerPed->bIsLooking &&
+						  pPlayerPed->m_fMoveSpeed < 1.0f && !pPlayerPed->bIsLooking &&
 						  CTimer::GetTimeInMilliseconds() > pPlayerPed->m_lookTimer) {
 							pPlayerPed->AnnoyPlayerPed(false);
 							pPlayerPed->SetLookFlag(pVehicle, true);
@@ -1615,7 +1615,7 @@ void CCarCtrl::WeaveThroughPedsSectorList(CPtrList& lst, CVehicle* pVehicle, CPh
 			continue;
 		if (Abs(pPed->GetPosition().z - pVehicle->GetPosition().z) >= PED_HEIGHT_DIFF_TO_CONSIDER_WEAVING)
 			continue;
-		if (pPed->m_pCurSurface != pVehicle)
+		if (pPed->m_pCurSurface != pVehicle && pPed->m_attachedTo != pVehicle)
 			WeaveForPed(pPed, pVehicle, pAngleToWeaveLeft, pAngleToWeaveRight);
 	}
 
@@ -2424,7 +2424,13 @@ void CCarCtrl::SteerAICarWithPhysics_OnlyMission(CVehicle* pVehicle, float* pSwe
 	case MISSION_GOTOCOORDS_ACCURATE:
 	case MISSION_RAMCAR_FARAWAY:
 	case MISSION_BLOCKCAR_FARAWAY:
-		SteerAICarWithPhysicsFollowPath(pVehicle, pSwerve, pAccel, pBrake, pHandbrake);
+		if (pVehicle->AutoPilot.m_bIgnorePathfinding) {
+			*pSwerve = 0.0f;
+			*pAccel = 1.0f;
+			*pBrake = 0.0f;
+			*pHandbrake = false;
+		}else
+			SteerAICarWithPhysicsFollowPath(pVehicle, pSwerve, pAccel, pBrake, pHandbrake);
 		return;
 	case MISSION_RAMPLAYER_CLOSE:
 	{
@@ -2684,7 +2690,7 @@ void CCarCtrl::SteerAIHeliTowardsTargetCoors(CAutomobile* pHeli)
 		if (Abs(ZSpeedChangeTarget) < ZSpeedChangeMax)
 			pHeli->SetMoveSpeed(pHeli->GetMoveSpeed().x, pHeli->GetMoveSpeed().y, ZSpeedTarget);
 		else if (ZSpeedChangeTarget < 0.0f)
-			pHeli->AddToMoveSpeed(0.0f, 0.0f, 1.5f * ZSpeedChangeMax);
+			pHeli->AddToMoveSpeed(0.0f, 0.0f, -1.5f * ZSpeedChangeMax);
 		else
 			pHeli->AddToMoveSpeed(0.0f, 0.0f, ZSpeedChangeMax);
 	}
@@ -2709,6 +2715,13 @@ void CCarCtrl::SteerAIHeliTowardsTargetCoors(CAutomobile* pHeli)
 			ZTurnSpeedTarget = -0.03f;
 	}
 	float ZTurnSpeedChangeTarget = ZTurnSpeedTarget - pHeli->GetTurnSpeed().z;
+	float ZTurnSpeedLimit = 0.0002f * CTimer::GetTimeStep();
+	if (Abs(ZTurnSpeedChangeTarget) < ZTurnSpeedLimit)
+		pHeli->m_vecTurnSpeed.z = ZTurnSpeedTarget;
+	else if (ZTurnSpeedChangeTarget < 0.0f)
+		pHeli->m_vecTurnSpeed.z -= ZTurnSpeedLimit;
+	else
+		pHeli->m_vecTurnSpeed.z += ZTurnSpeedLimit;
 	pHeli->m_fOrientation += pHeli->GetTurnSpeed().z * CTimer::GetTimeStep();
 	CVector up;
 	if (pHeli->bHeliMinimumTilt)
@@ -2751,10 +2764,12 @@ void CCarCtrl::SteerAICarWithPhysicsFollowPath(CVehicle* pVehicle, float* pSwerv
 		if (PickNextNodeAccordingStrategy(pVehicle)) {
 			switch (pVehicle->AutoPilot.m_nCarMission){
 			case MISSION_GOTOCOORDS:
+				pVehicle->AutoPilot.m_nCarMission = MISSION_GOTOCOORDS_STRAIGHT;
 				SteerAICarWithPhysicsHeadingForTarget(pVehicle, nil, pVehicle->AutoPilot.m_vecDestinationCoors.x,
 					pVehicle->AutoPilot.m_vecDestinationCoors.y, pSwerve, pAccel, pBrake, pHandbrake);
 				return;
 			case MISSION_GOTOCOORDS_ACCURATE:
+				pVehicle->AutoPilot.m_nCarMission = MISSION_GOTO_COORDS_STRAIGHT_ACCURATE;
 				SteerAICarWithPhysicsHeadingForTarget(pVehicle, nil, pVehicle->AutoPilot.m_vecDestinationCoors.x,
 					pVehicle->AutoPilot.m_vecDestinationCoors.y, pSwerve, pAccel, pBrake, pHandbrake);
 				return;
@@ -3048,6 +3063,7 @@ bool CCarCtrl::JoinCarWithRoadSystemGotoCoors(CVehicle* pVehicle, CVector vecTar
 		pVehicle->AutoPilot.m_aPathFindNodesInfo, &pVehicle->AutoPilot.m_nPathFindNodesCount);
 	if (pVehicle->AutoPilot.m_nPathFindNodesCount < 2){
 		pVehicle->AutoPilot.m_nPrevRouteNode = pVehicle->AutoPilot.m_nCurrentRouteNode = pVehicle->AutoPilot.m_nNextRouteNode = 0;
+		pVehicle->AutoPilot.m_nPathFindNodesCount = 0;
 		return true;
 	}
 	pVehicle->AutoPilot.m_nPrevRouteNode = 0;

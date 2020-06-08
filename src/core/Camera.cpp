@@ -2198,26 +2198,24 @@ CCamera::ProcessWideScreenOn(void)
 void
 CCamera::DrawBordersForWideScreen(void)
 {
+	float bottomBorderTopY, topBorderBottomY;
+	if (m_WideScreenOn) {
+		float centerY = (SCREEN_HEIGHT / 2) * (m_ScreenReductionPercentage / 100.f);
+		topBorderBottomY = centerY - SCREEN_SCALE_Y(22.f);
+		bottomBorderTopY = SCREEN_HEIGHT - centerY - SCREEN_SCALE_Y(14.f);
+	} else {
+		topBorderBottomY = 0.f;
+		bottomBorderTopY = SCREEN_HEIGHT;
+	}
+
 	if(m_BlurType == MBLUR_NONE || m_BlurType == MBLUR_NORMAL)
 		SetMotionBlurAlpha(80);
 
-	CSprite2d::DrawRect(
-#ifdef FIX_BUGS
-		CRect(0.0f, (SCREEN_HEIGHT/2) * m_ScreenReductionPercentage/100.0f - SCREEN_SCALE_Y(8.0f),
-#else
-		CRect(0.0f, (SCREEN_HEIGHT/2) * m_ScreenReductionPercentage/100.0f - 8.0f,
-#endif
-		      SCREEN_WIDTH, 0.0f),
-		CRGBA(0, 0, 0, 255));
+	// top border
+	CSprite2d::DrawRect(CRect(0.0f, 0.0f, SCREEN_WIDTH, topBorderBottomY), CRGBA(0, 0, 0, 255));
 
-	CSprite2d::DrawRect(
-		CRect(0.0f, SCREEN_HEIGHT,
-#ifdef FIX_BUGS
-		      SCREEN_WIDTH, SCREEN_HEIGHT - (SCREEN_HEIGHT/2) * m_ScreenReductionPercentage/100.0f - SCREEN_SCALE_Y(8.0f)),
-#else
-		      SCREEN_WIDTH, SCREEN_HEIGHT - (SCREEN_HEIGHT/2) * m_ScreenReductionPercentage/100.0f - 8.0f),
-#endif
-		CRGBA(0, 0, 0, 255));
+	// bottom border
+	CSprite2d::DrawRect(CRect(0.0f, bottomBorderTopY, SCREEN_WIDTH, SCREEN_HEIGHT), CRGBA(0, 0, 0, 255));
 }
 
 

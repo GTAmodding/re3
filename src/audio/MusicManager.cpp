@@ -160,7 +160,7 @@ cMusicManager::DisplayRadioStationName()
 		CFont::SetBackgroundOff();
 		CFont::SetScale(SCREEN_SCALE_X(0.8f), SCREEN_SCALE_Y(1.35f));
 		CFont::SetPropOn();
-		CFont::SetFontStyle(FONT_HEADING);
+		CFont::SetFontStyle(FONT_STANDARD);
 		CFont::SetCentreOn();
 		CFont::SetCentreSize(SCREEN_SCALE_X(640.0f));
 		CFont::SetColor(CRGBA(0, 0, 0, 255));

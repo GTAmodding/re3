@@ -69,11 +69,11 @@ public:
 	uint8 m_bike_flag01 : 1;
 	uint8 m_bike_flag02 : 1;
 	uint8 bWaterTight : 1;
-	uint8 m_bike_flag08 : 1;
+	uint8 bIsBeingPickedUp : 1;
 	uint8 bIsStanding : 1;
 	uint8 bExtraSpeed : 1;	// leaning forward
 	uint8 bIsOnFire : 1;
-	uint8 m_bike_flag80 : 1; // doing wheelie?
+	uint8 m_bike_flag80 : 1;
 	int16 m_doingBurnout;
 	float m_fTireTemperature;
 	float m_fBrakeDestabilization;
@@ -117,9 +117,12 @@ public:
 	float GetHeightAboveRoad(void);
 	void PlayCarHorn(void);
 
+	void KnockOffRider(eWeaponType weapon, uint8 direction, CPed *ped, bool bGetBackOn);
 	void VehicleDamage(void);
 	void ProcessBuoyancy(void);
 	void DoDriveByShootings(void);
+	void AddDamagedVehicleParticles(void);
+	int32 AddWheelDirtAndWater(CColPoint *colpoint, uint32 belowEffectSpeed);
 	void PlayHornIfNecessary(void);
 	void ResetSuspension(void);
 	void SetupSuspensionLines(void);

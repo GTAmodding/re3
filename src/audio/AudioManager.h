@@ -217,7 +217,7 @@ public:
 
 	// "Should" be in alphabetic order, except "getXTalkSfx"
 	void AddDetailsToRequestedOrderList(uint8 sample);
-	void AddPlayerCarSample(uint8 emittingVolume, int32 freq, uint32 sample, uint8 unk1,
+	void AddPlayerCarSample(uint8 emittingVolume, int32 freq, uint32 sample, uint8 bank,
 	                        uint8 counter, bool notLooping);
 	void AddReflectionsToRequestedQueue();
 	void AddReleasingSounds();

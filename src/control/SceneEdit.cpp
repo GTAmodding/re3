@@ -269,7 +269,7 @@ void CSceneEdit::Draw(void)
 	CFont::SetRightJustifyWrap(0.0f);
 	CFont::SetBackGroundOnlyTextOff();
 #ifdef FIX_BUGS
-	CFont::SetFontStyle(FONT_BANK);
+	CFont::SetFontStyle(FONT_STANDARD);
 	CFont::SetPropOn();
 	CFont::SetDropColor(CRGBA(0, 0, 0, 255));
 	CFont::SetDropShadowPosition(1);
@@ -292,7 +292,7 @@ void CSceneEdit::Draw(void)
 	CFont::SetCentreOff();
 	CFont::SetScale(SCREEN_SCALE_X(0.7f), SCREEN_SCALE_Y(0.7f));
 #ifdef FIX_BUGS
-	CFont::SetFontStyle(FONT_BANK);
+	CFont::SetFontStyle(FONT_STANDARD);
 #else
 	CFont::SetFontStyle(FONT_HEADING);
 #endif

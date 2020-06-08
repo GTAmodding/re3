@@ -233,7 +233,7 @@ ConvertingTexturesScreen(uint32 num, uint32 count, const char *text)
 	CFont::SetJustifyOff();
 	CFont::SetColor(CRGBA(255, 217, 106, 255));
 	CFont::SetBackGroundOnlyTextOff();
-	CFont::SetFontStyle(FONT_BANK);
+	CFont::SetFontStyle(FONT_STANDARD);
 	CFont::PrintString(SCREEN_SCALE_X(170.0f), SCREEN_SCALE_Y(160.0f), TheText.Get(text));
 	CFont::DrawFonts();
 	DoRWStuffEndOfFrame();

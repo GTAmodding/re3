@@ -1114,3 +1114,9 @@ CPopulation::IsSkateable(CVector const& pos)
 
 	return foundCol.surfaceB == SURFACE_TARMAC || foundCol.surfaceB == SURFACE_PAVEMENT;
 }
+
+bool
+CPopulation::CanJeerAtStripper(int32 model)
+{
+	return model == MI_WMOBE || model == MI_WMYBE || model == MI_WMOST || model == MI_BMYBB;
+}

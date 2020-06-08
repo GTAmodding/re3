@@ -405,7 +405,7 @@ inline T *WriteSaveBuf(uint8 *&buf, const T &value)
 	WriteSaveBuf(buf, b);\
 	WriteSaveBuf(buf, c);\
 	WriteSaveBuf(buf, d);\
-	WriteSaveBuf(buf, size);
+	WriteSaveBuf<uint32>(buf, size);
 
 #define CheckSaveHeader(buf,a,b,c,d,size)\
 	assert(ReadSaveBuf<char>(buf) == a);\

@@ -421,7 +421,7 @@ CAutomobile::ProcessControl(void)
 			   m_aSuspensionSpringRatio[3] < 1.0f && CSurfaceTable::GetAdhesionGroup(m_aWheelColPoints[3].surfaceB) == ADHESIVE_SAND){
 				if(GetModelIndex() != MI_RCBANDIT && GetModelIndex() != MI_RHINO){
 					float slowdown;
-					CVector parallelSpeed = m_vecMoveSpeed - DotProduct(m_vecMoveSpeed, GetUp())*m_vecMoveSpeed;
+					CVector parallelSpeed = m_vecMoveSpeed - DotProduct(m_vecMoveSpeed, GetUp())*GetUp();
 					float fSpeed = parallelSpeed.MagnitudeSqr();
 					if(fSpeed > SQR(0.3f)){
 						fSpeed = Sqrt(fSpeed);
@@ -752,7 +752,7 @@ CAutomobile::ProcessControl(void)
 				fwdSpeed *= 0.7f;
 				float f = 1.0f - fwdSpeed/0.3f - 0.7f*CWeather::WetRoads;
 				f = Max(f, 0.4f);
-				m_aSuspensionSpringRatio[i] += f*(m_aSuspensionLineLength[i]-m_aSuspensionSpringLength[i])/m_aSuspensionSpringLength[i];
+				m_aSuspensionSpringRatio[i] += 0.35f*f*(m_aSuspensionLineLength[i]-m_aSuspensionSpringLength[i])/m_aSuspensionSpringLength[i];
 				if(m_aSuspensionSpringRatio[i] > 1.0f)
 					m_aSuspensionSpringRatio[i] = 1.0f;
 			}
@@ -1860,7 +1860,7 @@ CAutomobile::PreRender(void)
 				if(Damage.GetWheelStatus(i) == WHEEL_STATUS_BURST && m_aSuspensionSpringRatioPrev[i] < 1.0f){
 					static float speedSq;
 					speedSq = m_vecMoveSpeed.MagnitudeSqr();
-					if(speedSq > 0.01f &&
+					if(speedSq > SQR(0.1f) &&
 					   m_aWheelColPoints[i].surfaceB != SURFACE_GRASS &&
 					   m_aWheelColPoints[i].surfaceB != SURFACE_MUD_DRY &&
 					   m_aWheelColPoints[i].surfaceB != SURFACE_SAND &&
@@ -3847,7 +3847,7 @@ CAutomobile::DoDriveByShootings(void)
 
 		if (!anim || !anim->IsRunning()) {
 			if (CPad::GetPad(0)->GetCarGunFired() && CTimer::GetTimeInMilliseconds() > weapon->m_nTimer) {
-				weapon->FireFromCar(this, lookingLeft);
+				weapon->FireFromCar(this, lookingLeft, true);
 				weapon->m_nTimer = CTimer::GetTimeInMilliseconds() + 70;
 			}
 		}
@@ -4450,25 +4450,16 @@ CAutomobile::AddWheelDirtAndWater(CColPoint *colpoint, uint32 belowEffectSpeed)
 		}
 		return 0;
 	default:
-		if ( CWeather::WetRoads > 0.01f 
-#ifdef PC_PARTICLE	
-			&& CTimer::GetFrameCounter() & 1
-#endif	
-			)
-		{
-			CParticle::AddParticle(
-#ifdef FIX_BUGS
-				PARTICLE_WHEEL_WATER,
-#else
-				PARTICLE_WATERSPRAY,
-#endif
-				colpoint->point + CVector(0.0f, 0.0f, 0.25f+0.25f),
-				CVector(0.0f, 0.0f, CGeneral::GetRandomNumberInRange(0.005f, 0.04f)),
-				nil,
-				CGeneral::GetRandomNumberInRange(0.1f, 0.5f), waterCol);
+		if(CWeather::WetRoads > 0.01f){
+			if(CTimer::GetFrameCounter() & 1)
+				CParticle::AddParticle(
+					PARTICLE_WATERSPRAY,
+					colpoint->point + CVector(0.0f, 0.0f, 0.25f+0.25f),
+					CVector(0.0f, 0.0f, CGeneral::GetRandomNumberInRange(0.005f, 0.04f)),
+					nil,
+					CGeneral::GetRandomNumberInRange(0.1f, 0.5f), waterCol);
 			return 0;
 		}
-		
 		return 1;
 	}
 }

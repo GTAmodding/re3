@@ -31,6 +31,7 @@
 #include "WeaponInfo.h"
 #include "World.h"
 #include "SurfaceTable.h"
+#include "Bike.h"
 
 // TODO(Miami)
 #define AUDIO_NOT_READY
@@ -386,7 +387,7 @@ CWeapon::Fire(CEntity *shooter, CVector *fireSource)
 }
 
 bool
-CWeapon::FireFromCar(CVehicle *shooter, bool left)
+CWeapon::FireFromCar(CVehicle *shooter, bool left, bool right)
 {
 	ASSERT(shooter!=nil);
 
@@ -396,7 +397,7 @@ CWeapon::FireFromCar(CVehicle *shooter, bool left)
 	if ( m_nAmmoInClip <= 0 )
 		return false;
 
-	if ( FireInstantHitFromCar(shooter, left) )
+	if ( FireInstantHitFromCar(shooter, left, right) )
 	{
 		DMAudio.PlayOneShot(shooter->m_audioEntityId, SOUND_WEAPON_SHOT_FIRED, 0.0f);
 
@@ -524,7 +525,22 @@ CWeapon::FireMelee(CEntity *shooter, CVector &fireSource)
 							}
 
 							damageEntityRegistered = 3;
-							// TODO(Miami): Bike
+							if (victimPed->bInVehicle) {
+								CVehicle *victimVeh = victimPed->m_pMyVehicle;
+								if (victimVeh) {
+									if (victimVeh->IsBike()) {
+										CBike *victimBike = (CBike*)victimVeh;
+										victimBike->KnockOffRider(m_eWeaponType, localDir, victimPed, false);
+										if (victimBike->pDriver) {
+											victimBike->pDriver->ReactToAttack(shooterPed);
+										} else {
+											if (victimVeh->pPassengers[0])
+												victimVeh->pPassengers[0]->ReactToAttack(shooterPed);
+										}
+										continue;
+									}
+								}
+							}
 
 							if ( !victimPed->DyingOrDead() )
 								victimPed->ReactToAttack(shooterPed);
@@ -2005,8 +2021,9 @@ CWeapon::FireM16_1stPerson(CEntity *shooter)
 }
 
 bool
-CWeapon::FireInstantHitFromCar(CVehicle *shooter, bool left)
+CWeapon::FireInstantHitFromCar(CVehicle *shooter, bool left, bool right)
 {
+// TODO(MIAMI): bikes
 	CWeaponInfo *info = GetInfo();
 
 	CVehicleModelInfo *modelInfo = shooter->GetModelInfo();

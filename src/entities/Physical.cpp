@@ -27,6 +27,10 @@ CPhysical::CPhysical(void)
 {
 	int i;
 
+#ifdef FIX_BUGS
+	m_nLastTimeCollided = 0;
+#endif
+
 	m_fForceMultiplier = 1.0f;
 	m_vecMoveSpeed = CVector(0.0f, 0.0f, 0.0f);
 	m_vecTurnSpeed = CVector(0.0f, 0.0f, 0.0f);
@@ -68,6 +72,9 @@ CPhysical::CPhysical(void)
 
 	m_phy_flagA20 = false;
 
+#ifdef FIX_BUGS
+	m_nSurfaceTouched = SURFACE_DEFAULT;
+#endif
 	m_nZoneLevel = LEVEL_NONE;
 
 	bIsFrozen = false;
@@ -1603,7 +1610,7 @@ CPhysical::ProcessCollisionSectorList(CPtrList *lists)
 				A->bSkipLineCol = true;
 			}else if(A->IsPed() && Aped->m_pCollidingEntity == B){
 				skipCollision = true;
-				if(!Aped->bKnockedUpIntoAir || Aped->b158_4)
+				if(!Aped->bKnockedUpIntoAir || Aped->bKnockedOffBike)
 					A->bSkipLineCol = true;
 			}else if(B->IsPed() && Bped->m_pCollidingEntity == A){
 				skipCollision = true;

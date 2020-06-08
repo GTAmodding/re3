@@ -37,7 +37,7 @@ public:
 	void Shutdown();
 	
 	bool Fire          (CEntity *shooter, CVector *fireSource);
-	bool FireFromCar   (CVehicle *shooter, bool left);
+	bool FireFromCar   (CVehicle *shooter, bool left, bool right);
 	bool FireMelee     (CEntity *shooter, CVector &fireSource);
 	bool FireInstantHit(CEntity *shooter, CVector *fireSource);
 	
@@ -52,7 +52,7 @@ public:
 	bool FireAreaEffect       (CEntity *shooter, CVector *fireSource);
 	bool FireSniper           (CEntity *shooter);
 	bool FireM16_1stPerson    (CEntity *shooter);
-	bool FireInstantHitFromCar(CVehicle *shooter, bool left);
+	bool FireInstantHitFromCar(CVehicle *shooter, bool left, bool right);
 	
 	static void DoDoomAiming       (CEntity *shooter, CVector *source, CVector *target);
 	static void DoTankDoomAiming   (CEntity *shooter, CEntity *driver, CVector *source, CVector *target);

@@ -55,7 +55,7 @@ CDebug::DebugDisplayTextBuffer()
 		CFont::SetJustifyOn();
 		CFont::SetRightJustifyWrap(0.0f);
 		CFont::SetBackGroundOnlyTextOff();
-		CFont::SetFontStyle(FONT_BANK);
+		CFont::SetFontStyle(FONT_STANDARD);
 #else
 		// this is not even readable
 		CFont::SetPropOff();
@@ -65,7 +65,7 @@ CDebug::DebugDisplayTextBuffer()
 		CFont::SetRightJustifyOn();
 		CFont::SetRightJustifyWrap(0.0f);
 		CFont::SetBackGroundOnlyTextOff();
-		CFont::SetFontStyle(FONT_BANK);
+		CFont::SetFontStyle(FONT_STANDARD);
 		CFont::SetPropOff();
 #endif
 		do {
@@ -113,7 +113,7 @@ CDebug::DisplayScreenStrings()
 	CFont::SetRightJustifyWrap(0.0f);
 	CFont::SetWrapx(9999.0f);
 	CFont::SetBackGroundOnlyTextOff();
-	CFont::SetFontStyle(FONT_BANK);
+	CFont::SetFontStyle(FONT_STANDARD);
 
 	for(i = 0; i < ms_nScreenStrs; i++){
 /*

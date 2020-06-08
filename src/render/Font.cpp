@@ -3,68 +3,39 @@
 #include "Sprite2d.h"
 #include "TxdStore.h"
 #include "Font.h"
+#include "Timer.h"
 
 CFontDetails CFont::Details;
 int16 CFont::NewLine;
 CSprite2d CFont::Sprite[MAX_FONTS];
+CFontRenderState CFont::RenderState;
 
 #ifdef MORE_LANGUAGES
 uint8 CFont::LanguageSet = FONT_LANGSET_EFIGS;
 int32 CFont::Slot = -1;
 #define JAP_TERMINATION (0x8000 | '~')
 
-int16 CFont::Size[LANGSET_MAX][MAX_FONTS][193] = {
+int16 CFont::Size[LANGSET_MAX][MAX_FONTS][210] = {
 	{
 #else
-int16 CFont::Size[MAX_FONTS][193] = {
+int16 CFont::Size[MAX_FONTS][210] = {
 #endif
-		{
-		13, 12, 31, 35, 23, 35, 31,  9, 14, 15, 25, 30, 11, 17, 13, 31,
-		23, 16, 22, 21, 24, 23, 23, 20, 23, 22, 10, 35, 26, 26, 26, 26,
-		30, 26, 24, 23, 24, 22, 21, 24, 26, 10, 20, 26, 22, 29, 26, 25,
-		23, 25, 24, 24, 22, 25, 24, 29, 29, 23, 25, 37, 22, 37, 35, 37,
-		35, 21, 22, 21, 21, 22, 13, 22, 21, 10, 16, 22, 11, 32, 21, 21,
-		23, 22, 16, 20, 14, 21, 20, 30, 25, 21, 21, 33, 33, 33, 33, 35,
-		27, 27, 27, 27, 32, 24, 23, 23, 23, 23, 11, 11, 11, 11, 26, 26,
-		26, 26, 26, 26, 26, 25, 26, 21, 21, 21, 21, 32, 23, 22, 22, 22,
-		22, 11, 11, 11, 11, 22, 22, 22, 22, 22, 22, 22, 22, 26, 21, 24,
-		12, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26,
-		26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 18, 26, 26,
-		26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26,
-		20
-		},
-
-		{
-		13,  9, 21, 35, 23, 35, 35, 11, 35, 35, 25, 35, 11, 17, 13, 33,
-		28, 14, 22, 21, 24, 23, 23, 21, 23, 22, 10, 35, 13, 35, 13, 33,
-		 5, 25, 22, 23, 24, 21, 21, 24, 24,  9, 20, 24, 21, 27, 25, 25,
-		22, 25, 23, 20, 23, 23, 23, 31, 23, 23, 23, 37, 33, 37, 35, 37,
-		35, 21, 19, 19, 21, 19, 17, 21, 21,  8, 17, 18, 14, 24, 21, 21,
-		20, 22, 19, 20, 20, 19, 20, 26, 21, 20, 21, 33, 33, 33, 33, 35,
-		19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19,
-		19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19,
-		19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19,
-		19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19,
-		19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19,
-		19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19,
-		16
-		},
-
-		{
-		15, 14, 16, 25, 19, 26, 22, 11, 18, 18, 27, 26, 13, 19,  9, 27,
-		19, 18, 19, 19, 22, 19, 20, 18, 19, 20, 12, 32, 15, 32, 15, 35,
-		15, 19, 19, 19, 19, 19, 16, 19, 20,  9, 19, 20, 14, 29, 19, 20,
-		19, 19, 19, 19, 21, 19, 20, 32, 20, 19, 19, 33, 31, 39, 37, 39,
-		37, 21, 21, 21, 23, 21, 19, 23, 23, 10, 19, 20, 16, 26, 23, 23,
-		20, 20, 20, 22, 21, 22, 22, 26, 22, 22, 23, 35, 35, 35, 35, 37,
-		19, 19, 19, 19, 29, 19, 19, 19, 19, 19,  9,  9,  9,  9, 19, 19,
-		19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 30, 19, 19, 19, 19,
-		19, 10, 10, 10, 10, 19, 19, 19, 19, 19, 19, 19, 19, 19, 23, 35,
-		12, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19,
-		19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 11, 19, 19,
-		19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19,
-		19
-		}
+	{
+		12, 9,  22, 17, 19, 19, 25, 4,  33, 33, 25, 35, 11, 10, 6,  33, 18, 10, 17, 17, 17, 17, 17, 15, 12, 16, 5,  30, 30, 30, 30, 30, 12, 16, 19,
+		16, 19, 18, 18, 17, 22, 11, 17, 18, 18, 30, 22, 19, 22, 19, 19, 20, 18, 19, 19, 29, 19, 18, 19, 19, 33, 33, 19, 19, 12, 14, 11, 11, 16, 11,
+		12, 14, 14, 10, 13, 12, 10, 19, 18, 12, 16, 13, 13, 11, 12, 15, 12, 15, 13, 12, 12, 37, 33, 37, 35, 37, 16, 16, 16, 16, 33, 17, 18, 18, 18,
+		18, 11, 11, 11, 11, 19, 19, 19, 19, 19, 19, 19, 19, 15, 14, 14, 14, 14, 20, 14, 11, 11, 11, 11, 10, 10, 10, 10, 12, 12, 12, 12, 15, 15, 15,
+		15, 24, 18, 21, 10, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19,
+		19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 16
+	},
+	{
+		15, 7, 31, 25, 20, 23, 21, 7, 11, 10, 26, 14, 6, 12, 6, 26, 20, 7, 20, 20, 21, 20, 20, 19, 21, 20, 8, 30, 24, 30, 24, 19, 20, 22, 22, 21, 22, 18, 18, 22,
+		22, 9, 14, 21, 18, 27, 21, 24, 22, 22, 23, 20, 19, 23, 22, 31, 23, 23, 21, 25, 13, 30, 10, 19, 10, 17, 17, 16, 17, 17, 11, 17, 17, 7, 7, 18, 7, 25, 17,
+		17, 17, 17, 11, 17, 11, 17, 18, 25, 19, 18, 17, 28, 26, 20, 15, 15, 20, 20, 20, 20, 29, 22, 19, 19, 19, 19, 9, 9, 9, 9, 23, 23, 23, 23, 24, 24, 24, 24,
+		20, 19, 17, 17, 17, 30, 16, 17, 17, 17, 17, 11, 11, 15, 12, 17, 17, 17, 17, 17, 17, 17, 17, 19, 20, 20, 20, 18, 19, 19, 21, 19, 19, 19, 19, 19, 16, 19,
+		19, 19, 20, 19, 16, 19, 19, 9, 19, 20, 14, 29, 19, 19, 19, 19, 19, 19, 21, 19, 20, 32, 20, 19, 19, 19, 19, 19, 19, 29, 19, 19, 19, 19, 19, 9, 9, 9, 9,
+		19, 19, 19, 19, 19, 19, 19, 19, 19, 21, 21, 10, 9, 10, 20
+	}
 #ifdef MORE_LANGUAGES
 	},
 	{
@@ -198,6 +169,21 @@ wchar foreign_table[128] = {
 	  0, 174, 165, 166, 167,   0, 168,   0,   0, 169, 170, 171, 172,   0,   0,   0,
 };
 
+union tFontRenderStatePointer
+{
+	CFontRenderState *pRenderState;
+	wchar *pStr;
+
+	void Align()
+	{
+		if ((uintptr)pStr % 4)
+			pStr++;
+	}
+};
+
+tFontRenderStatePointer FontRenderStatePointer;
+uint8 FontRenderStateBuf[1024];
+
 void
 CFont::Initialise(void)
 {
@@ -228,16 +214,14 @@ CFont::Initialise(void)
 	CTxdStore::AddRef(slot);
 	CTxdStore::PushCurrentTxd();
 	CTxdStore::SetCurrentTxd(slot);
-	Sprite[0].SetTexture("font2", "font2_mask");
+	Sprite[0].SetTexture("font2", "font2m");
 #ifdef MORE_LANGUAGES
 	if (IsJapanese()) {
 		Sprite[1].SetTexture("FONTJAP", "FONTJAP_mask");
 		Sprite[3].SetTexture("FONTJAP", "FONTJAP_mask");
 	}
-	else
 #endif // MORE_LANGUAGES
-		Sprite[1].SetTexture("pager", "pager_mask");
-	Sprite[2].SetTexture("font1", "font1_mask");
+	Sprite[1].SetTexture("font1", "font1m");
 	SetScale(1.0f, 1.0f);
 	SetSlantRefPoint(SCREEN_WIDTH, 0.0f);
 	SetSlant(0.0f);
@@ -305,7 +289,6 @@ CFont::Shutdown(void)
 {
 	Sprite[0].Delete();
 	Sprite[1].Delete();
-	Sprite[2].Delete();
 #ifdef MORE_LANGUAGES
 	if (IsJapanese())
 		Sprite[3].Delete();
@@ -319,13 +302,9 @@ CFont::Shutdown(void)
 void
 CFont::InitPerFrame(void)
 {
-	Details.bank = CSprite2d::GetBank(30, Sprite[0].m_pTexture);
-	CSprite2d::GetBank(15, Sprite[1].m_pTexture);
-	CSprite2d::GetBank(15, Sprite[2].m_pTexture);
-#ifdef MORE_LANGUAGES
-	if (IsJapanese())
-		CSprite2d::GetBank(15, Sprite[3].m_pTexture);
-#endif
+	RenderState.style = -1;
+	Details.anonymous_25 = 0;
+	FontRenderStatePointer.pRenderState = (CFontRenderState*)FontRenderStateBuf;
 	SetDropShadowPosition(0);
 	NewLine = 0;
 }
@@ -333,11 +312,15 @@ CFont::InitPerFrame(void)
 void
 CFont::PrintChar(float x, float y, wchar c)
 {
+	bool bDontPrint = false;
 	if(x <= 0.0f || x > SCREEN_WIDTH ||
 	   y <= 0.0f || y > SCREEN_HEIGHT)	// BUG: game uses SCREENW again
 		return;
 
+	bDontPrint = c == '\0';
 	float w = GetCharacterWidth(c) / 32.0f;
+	if (Details.bFontHalfTexture && c == 208)
+		c = '\0';
 	float xoff = c % 16;
 	float yoff = c / 16;
 #ifdef MORE_LANGUAGES
@@ -348,28 +331,40 @@ CFont::PrintChar(float x, float y, wchar c)
 	}
 #endif
 
-	if(Details.style == FONT_BANK || Details.style == FONT_HEADING){
-		if(Details.dropShadowPosition != 0){
-			CSprite2d::AddSpriteToBank(Details.bank + Details.style,	// BUG: game doesn't add bank
-				CRect(x + SCREEN_SCALE_X(Details.dropShadowPosition),
-				      y + SCREEN_SCALE_Y(Details.dropShadowPosition),
-				      x + SCREEN_SCALE_X(Details.dropShadowPosition) + 32.0f * Details.scaleX * 1.0f,
-				      y + SCREEN_SCALE_Y(Details.dropShadowPosition) + 40.0f * Details.scaleY * 0.5f),
-				Details.dropColor,
-				xoff/16.0f,                 yoff/12.8f,
-				(xoff+1.0f)/16.0f - 0.001f, yoff/12.8f,
-				xoff/16.0f,                 (yoff+1.0f)/12.8f,
-				(xoff+1.0f)/16.0f - 0.001f, (yoff+1.0f)/12.8f - 0.0001f);
-		}
-		CSprite2d::AddSpriteToBank(Details.bank + Details.style,	// BUG: game doesn't add bank
-			CRect(x, y,
-			      x + 32.0f * Details.scaleX * 1.0f,
-			      y + 40.0f * Details.scaleY * 0.5f),
-			Details.color,
-			xoff/16.0f,                 yoff/12.8f,
-			(xoff+1.0f)/16.0f - 0.001f, yoff/12.8f,
-			xoff/16.0f,                 (yoff+1.0f)/12.8f - 0.002f,
-			(xoff+1.0f)/16.0f - 0.001f, (yoff+1.0f)/12.8f - 0.002f);
+	if(Details.style == FONT_BANK || Details.style == FONT_STANDARD){
+		if (bDontPrint) return;
+		if (RenderState.slant == 0.0f) {
+			if (c < 193) {
+				CSprite2d::AddToBuffer(
+					CRect(x, y,
+						x + 32.0f * RenderState.scaleX * 1.0f,
+						y + 40.0f * RenderState.scaleY * 0.5f),
+					RenderState.color,
+					xoff / 16.0f, yoff / 12.8f + 0.0021f,
+					(xoff + 1.0f) / 16.0f - 0.001f, yoff / 12.8f + 0.0021f,
+					xoff / 16.0f, (yoff + 1.0f) / 12.8f - 0.0021f,
+					(xoff + 1.0f) / 16.0f - 0.001f, (yoff + 1.0f) / 12.8f - 0.0021f);
+			} else {
+				CSprite2d::AddToBuffer(
+					CRect(x, y,
+						x + 32.0f * RenderState.scaleX * 1.0f,
+						y + 33.0f * RenderState.scaleY * 0.5f),
+					RenderState.color,
+					xoff / 16.0f, yoff / 12.8f,
+					(xoff + 1.0f) / 16.0f - 0.001f, yoff / 12.8f - 0.017f,
+					xoff / 16.0f, (yoff + 1.0f) / 12.8f,
+					(xoff + 1.0f) / 16.0f - 0.001f, (yoff + 1.0f) / 12.8f - 0.017f);
+			}
+		} else
+			CSprite2d::AddToBuffer(
+				CRect(x, y,
+					x + 32.0f * RenderState.scaleX * 1.0f,
+					y + 40.0f * RenderState.scaleY * 0.5f),
+				RenderState.color,
+				xoff / 16.0f, yoff / 12.8f + 0.00055f,
+				(xoff + 1.0f) / 16.0f - 0.001f, yoff / 12.8f + 0.0021f + 0.01f,
+				xoff / 16.0f, (yoff + 1.0f) / 12.8f - 0.009f,
+				(xoff + 1.0f) / 16.0f - 0.001f, (yoff + 1.0f) / 12.8f - 0.0021f + 0.01f);
 #ifdef MORE_LANGUAGES
 	}else if (IsJapaneseFont()) {
 		if (Details.dropShadowPosition != 0) {
@@ -394,16 +389,18 @@ CFont::PrintChar(float x, float y, wchar c)
 			xoff * w / 1024.0f, (yoff + 1.0f) / 25.6f - 0.002f,
 			xoff * w / 1024.0f + (1.0f / 48.0f) - 0.001f, (yoff + 1.0f) / 25.6f - 0.0001f);
 #endif
-	}else
-		CSprite2d::AddSpriteToBank(Details.bank + Details.style,	// BUG: game doesn't add bank
+	} else {
+		if (bDontPrint) return;
+		CSprite2d::AddToBuffer(
 			CRect(x, y,
-					x + 32.0f * Details.scaleX * w,
-					y + 32.0f * Details.scaleY * 0.5f),
-			Details.color,
-			xoff/16.0f,               yoff/16.0f,
-			(xoff+w)/16.0f,           yoff/16.0f,
-			xoff/16.0f,               (yoff+1.0f)/16.0f,
-			(xoff+w)/16.0f - 0.0001f, (yoff+1.0f)/16.0f - 0.0001f);
+				x + 32.0f * RenderState.scaleX * w,
+				y + 32.0f * RenderState.scaleY * 0.5f),
+			RenderState.color,
+			xoff / 16.0f, yoff / 16.0f,
+			(xoff + w) / 16.0f, yoff / 16.0f,
+			xoff / 16.0f, (yoff + 1.0f) / 16.0f,
+			(xoff + w) / 16.0f - 0.0001f, (yoff + 1.0f) / 16.0f - 0.0001f);
+	}
 }
 
 #ifdef MORE_LANGUAGES
@@ -483,6 +480,8 @@ CFont::PrintString(float xstart, float ystart, wchar *s)
 					              xstart;
 #ifdef MORE_LANGUAGES
 					PrintString(xleft, y, start, s, spaceWidth, xstart);
+#else
+					PrintString(xleft, y, Details.anonymous_25, start, s, spaceWidth);
 #endif
 					// reset things
 					lineLength = 0.0f;
@@ -562,7 +561,7 @@ CFont::PrintString(float xstart, float ystart, wchar *s)
 			lineLength = 0.0f;
 		}
 #else
-		PrintString(xleft, y, start, s, 0.0f);
+		PrintString(xleft, y, Details.anonymous_25, start, s, 0.0f);
 #endif
 	}
 }
@@ -803,23 +802,80 @@ CFont::PrintString(float x, float y, wchar *start, wchar *&end, float spwidth, f
 }
 #else
 void
-CFont::PrintString(float x, float y, wchar *start, wchar *end, float spwidth)
+CFont::PrintString(float x, float y, uint32, wchar *start, wchar *end, float spwidth)
 {
-	wchar *s, c, unused;
+	wchar *s;
 
-	for(s = start; s < end; s++){
-		if(*s == '~')
-			s = ParseToken(s, &unused);
-		c = *s - ' ';
-		if(Details.slant != 0.0f)
-			y = (Details.slantRefX - x)*Details.slant + Details.slantRefY;
-		PrintChar(x, y, c);
-		x += GetCharacterSize(c);
-		if(c == 0)	// space
-			x += spwidth;
+	if (RenderState.style != Details.style) {
+		RenderFontBuffer();
+		RenderState.style = Details.style;
 	}
+
+	float dropShadowPosition = Details.dropShadowPosition;
+	if (dropShadowPosition != 0.0f && (Details.style == FONT_BANK || Details.style == FONT_STANDARD)) {
+		CRGBA color = Details.color;
+		Details.color = Details.dropColor;
+		Details.dropShadowPosition = 0;
+		Details.bIsShadow = true;
+		if (Details.slant != 0.0f) {
+			Details.slantRefX += dropShadowPosition;
+			Details.slantRefY += dropShadowPosition;
+			PrintString(dropShadowPosition + x, dropShadowPosition + y, Details.anonymous_25, start, end, spwidth);
+			Details.slantRefX -= dropShadowPosition;
+			Details.slantRefY -= dropShadowPosition;
+		} else {
+			PrintString(dropShadowPosition + x, dropShadowPosition + y, Details.anonymous_25, start, end, spwidth);
+		}
+		Details.color = color;
+		Details.dropShadowPosition = dropShadowPosition;
+		Details.bIsShadow = false;
+	}
+	if (FontRenderStatePointer.pStr >= (wchar*)&FontRenderStateBuf[ARRAY_SIZE(FontRenderStateBuf)] - (end - start + 26)) // why 26?
+		RenderFontBuffer();
+	CFontRenderState *pRenderState = FontRenderStatePointer.pRenderState;
+	pRenderState->fTextPosX = x;
+	pRenderState->fTextPosY = y;
+	pRenderState->scaleX = Details.scaleX;
+	pRenderState->scaleY = Details.scaleY;
+	pRenderState->color = Details.color;
+	pRenderState->fExtraSpace = spwidth;
+	pRenderState->slant = Details.slant;
+	pRenderState->slantRefX = Details.slantRefX;
+	pRenderState->slantRefY = Details.slantRefY;
+	pRenderState->bFontHalfTexture = Details.bFontHalfTexture;
+	pRenderState->proportional = Details.proportional;
+	pRenderState->style = Details.style;
+	pRenderState->bIsShadow = Details.bIsShadow;
+	FontRenderStatePointer.pRenderState++;
+
+	for(s = start; s < end;){
+		if (*s == '~') {
+			for (wchar *i = ParseToken(s); s != i; FontRenderStatePointer.pStr++) {
+				*FontRenderStatePointer.pStr = *(s++);
+			}
+			if (Details.bFlash) {
+				if (CTimer::GetTimeInMilliseconds() - Details.nFlashTimer > 300) {
+					Details.bFlashState = !Details.bFlashState;
+					Details.nFlashTimer = CTimer::GetTimeInMilliseconds();
+				}
+				Details.color.a = Details.bFlashState ? 0 : 255;
+			}
+		} else
+			*(FontRenderStatePointer.pStr++) = *(s++);
+	}
+	*(FontRenderStatePointer.pStr++) = '\0';
+	FontRenderStatePointer.Align();
 }
 #endif
+
+void
+CFont::PrintStringFromBottom(float x, float y, wchar *str)
+{
+	y -= (32.0f * Details.scaleY / 2.0f + 2.0f * Details.scaleY) * GetNumberLines(x, y, str);
+	if (Details.slant == 0.0f)
+		y -= ((Details.slantRefX - x) * Details.slant + Details.slantRefY);
+	PrintString(x, y, str);
+}
 
 float
 CFont::GetCharacterWidth(wchar c)
@@ -861,7 +917,7 @@ CFont::GetCharacterWidth(wchar c)
 	if (Details.proportional)
 		return Size[Details.style][c];
 	else
-		return Size[Details.style][192];
+		return Size[Details.style][209];
 #endif // MORE_LANGUAGES
 }
 
@@ -873,7 +929,7 @@ CFont::GetCharacterSize(wchar c)
 	if (IsJapanese())
 	{
 		if (!Details.proportional)
-			return Size[0][Details.style][192] * Details.scaleX;
+			return Size[0][Details.style][209] * Details.scaleX;
 		if (c <= 94 || Details.style == FONT_HEADING || Details.style == FONT_BANK) {
 			switch (Details.style)
 			{
@@ -901,12 +957,14 @@ CFont::GetCharacterSize(wchar c)
 	else if(Details.proportional)
 		return Size[LanguageSet][Details.style][c] * Details.scaleX;
 	else
-		return Size[LanguageSet][Details.style][192] * Details.scaleX;
+		return Size[LanguageSet][Details.style][209] * Details.scaleX;
 #else
+	if (Details.bFontHalfTexture)
+		c = FindNewCharacter(c);
 	if (Details.proportional)
 		return Size[Details.style][c] * Details.scaleX;
 	else
-		return Size[Details.style][192] * Details.scaleX;
+		return Size[Details.style][209] * Details.scaleX;
 #endif // MORE_LANGUAGES
 }
 
@@ -936,15 +994,28 @@ CFont::GetStringWidth(wchar *s, bool spaces)
 	} else
 #endif
 	{
-		for (; (*s != ' ' || spaces) && *s != '\0'; s++) {
-			if (*s == '~') {
+		for (wchar c = *s; (c != ' ' || spaces) && c != '\0'; c = *(++s)) {
+			if (c == '~') {
+
+				// This is original code
+#if 0
 				s++;
-				while (*s != '~') s++;
-				s++;
-				if (*s == ' ' && !spaces)
-					break;
+				while (*s != '~') {
+					s++;
+				}
+#else
+				// TODO(Miami): This is my code to prevent fuck up until InsertPlayerControlKeysInString is done 
+				if (*(s + 1) != '~') {
+					s++;
+					while (*s != '~') {
+						s++;
+					}
+				}
+#endif
 			}
-			w += GetCharacterSize(*s - ' ');
+			else {
+				w += GetCharacterSize(c - ' ');
+			}
 		}
 	}
 	return w;
@@ -1008,7 +1079,7 @@ CFont::GetNextSpace(wchar *s)
 
 #ifdef MORE_LANGUAGES
 wchar*
-CFont::ParseToken(wchar *s, wchar*, bool japShit)
+CFont::ParseToken(wchar *s, bool japShit)
 {
 	s++;
 	if ((Details.color.r || Details.color.g || Details.color.b) && !japShit) {
@@ -1038,44 +1109,232 @@ CFont::ParseToken(wchar *s, wchar*, bool japShit)
 }
 #else
 wchar*
-CFont::ParseToken(wchar *s, wchar*)
+CFont::ParseToken(wchar *s)
 {
-	// Updated from gta vc idb file. Bold font left.
+	Details.anonymous_23 = false;
 	s++;
 	if(Details.color.r || Details.color.g || Details.color.b)
 		switch(*s){
+		case 'B':
+			Details.bBold = !Details.bBold;
 		case 'N':
 		case 'n':
 			NewLine = 1;
 			break;
-		case 'b': SetColor(CRGBA(0x1B, 0x59, 0x82, 0xFF)); break;
-		case 'g': SetColor(CRGBA(0xFF, 0x96, 0xE1, 0xFF)); break;
-		case 'h': SetColor(CRGBA(0xE1, 0xE1, 0xE1, 0xFF)); break;
-		case 'l': SetColor(CRGBA(0x00, 0x00, 0x00, 0xFF)); break;
-		case 'o': SetColor(CRGBA(0xE5, 0x7D, 0x7E, 0xFF)); break;
-		case 'p': SetColor(CRGBA(0xA8, 0x6E, 0xFC, 0xFF)); break;
-		case 'q': SetColor(CRGBA(0xC7, 0x90, 0xCB, 0xFF)); break;
-		case 'r': SetColor(CRGBA(0xFF, 0x96, 0xE1, 0xFF)); break;
-		case 't': SetColor(CRGBA(0x56, 0xD4, 0x92, 0xFF)); break;
-		case 'w': SetColor(CRGBA(0xAF, 0xAF, 0xAF, 0xFF)); break;
-		case 'x': SetColor(CRGBA(0x84, 0x92, 0xC5, 0xFF)); break;
-		case 'y': SetColor(CRGBA(0xFF, 0xE3, 0x4F, 0xFF)); break;
+		case 'b': SetColor(CRGBA(27, 89, 130, 255)); Details.anonymous_23 = true; break;
+		case 'f':
+			Details.bFlash = !Details.bFlash;
+			if (Details.bFlash)
+				Details.color.a = 255;
+			break;
+		case 'g': SetColor(CRGBA(255, 150, 225, 255)); Details.anonymous_23 = true; break;
+		case 'h': SetColor(CRGBA(225, 225, 225, 255)); Details.anonymous_23 = true; break;
+		case 'l': SetColor(CRGBA(0, 0, 0, 255)); Details.anonymous_23 = true; break;
+		case 'o': SetColor(CRGBA(229, 125, 126, 255)); Details.anonymous_23 = true; break;
+		case 'p': SetColor(CRGBA(168, 110, 252, 255)); Details.anonymous_23 = true; break;
+		case 'q': SetColor(CRGBA(199, 144, 203, 255)); Details.anonymous_23 = true; break;
+		case 'r': SetColor(CRGBA(255, 150, 225, 255)); Details.anonymous_23 = true; break;
+		case 't': SetColor(CRGBA(86, 212, 146, 255)); Details.anonymous_23 = true; break;
+		case 'w': SetColor(CRGBA(175, 175, 175, 255)); Details.anonymous_23 = true; break;
+		case 'x': SetColor(CRGBA(132, 146, 197, 255)); Details.anonymous_23 = true; break;
+		case 'y': SetColor(CRGBA(255, 227, 79, 255)); Details.anonymous_23 = true; break;
 		}
 	while(*s != '~') s++;
-	return s+1;
+	if (*(++s) == '~')
+		s = ParseToken(s);
+	return s;
 }
 #endif
+
+wchar*
+CFont::ParseToken(wchar* str, CRGBA &color, bool &flash, bool &bold)
+{
+	Details.anonymous_23 = false;
+	wchar *s = str + 1;
+	if (Details.color.r || Details.color.g || Details.color.b)
+	{
+		switch (*s)
+		{
+		case 'B':
+			bold = !bold;
+			break;
+		case 'b':
+			color.r = 27;
+			color.g = 89;
+			color.b = 130;
+			break;
+		case 'f':
+			flash = !flash;
+			break;
+		case 'g':
+			color.r = 255;
+			color.g = 150;
+			color.b = 225;
+			break;
+		case 'h':
+			color.r = 225;
+			color.g = 225;
+			color.b = 225;
+			break;
+		case 'l':
+			color.r = 0;
+			color.g = 0;
+			color.b = 0;
+			break;
+		case 'o':
+			color.r = 229;
+			color.g = 125;
+			color.b = 126;
+			break;
+		case 'p':
+			color.r = 168;
+			color.g = 110;
+			color.b = 252;
+			break;
+		case 'q':
+			color.r = 199;
+			color.g = 144;
+			color.b = 203;
+			break;
+		case 'r':
+			color.r = 255;
+			color.g = 150;
+			color.b = 225;
+			break;
+		case 't':
+			color.r = 86;
+			color.g = 212;
+			color.b = 146;
+			break;
+		case 'w':
+			color.r = 175;
+			color.g = 175;
+			color.b = 175;
+			break;
+		case 'x':
+			color.r = 132;
+			color.g = 146;
+			color.b = 197;
+			break;
+		case 'y':
+			color.r = 255;
+			color.g = 227;
+			color.b = 79;
+			break;
+		default:
+			break;
+		}
+	}
+	while (*s != '~')
+		++s;
+	if (*(++s) == '~')
+		s = ParseToken(s, color, flash, bold);
+	return s;
+}
 
 void
 CFont::DrawFonts(void)
 {
-	CSprite2d::DrawBank(Details.bank);
-	CSprite2d::DrawBank(Details.bank+1);
-	CSprite2d::DrawBank(Details.bank+2);
-#ifdef MORE_LANGUAGES
-	if (IsJapanese())
-		CSprite2d::DrawBank(Details.bank+3);
-#endif
+	RenderFontBuffer();
+}
+
+void
+CFont::RenderFontBuffer()
+{
+	if (FontRenderStatePointer.pRenderState == (CFontRenderState*)FontRenderStateBuf) return;
+
+	float textPosX;
+	float textPosY;
+	CRGBA color;
+	bool bBold = false;
+	bool bFlash = false;
+
+	Sprite[RenderState.style].SetRenderState();
+	RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)TRUE);
+	RenderState = *(CFontRenderState*)&FontRenderStateBuf[0];
+	textPosX = RenderState.fTextPosX;
+	textPosY = RenderState.fTextPosY;
+	tFontRenderStatePointer pRenderStateBufPointer;
+	pRenderStateBufPointer.pRenderState = (CFontRenderState*)&FontRenderStateBuf[0];
+	for (++pRenderStateBufPointer.pRenderState; pRenderStateBufPointer.pStr < FontRenderStatePointer.pStr; pRenderStateBufPointer.pStr++) {
+		if (*pRenderStateBufPointer.pStr == '\0') {
+			tFontRenderStatePointer tmpPointer = pRenderStateBufPointer;
+			tmpPointer.pStr++;
+			tmpPointer.Align();
+			if (tmpPointer.pStr >= FontRenderStatePointer.pStr)
+				break;
+
+			RenderState = *(tmpPointer.pRenderState++);
+
+			pRenderStateBufPointer = tmpPointer;
+
+			textPosX = RenderState.fTextPosX;
+			textPosY = RenderState.fTextPosY;
+			color = RenderState.color;
+		}
+		if (*pRenderStateBufPointer.pStr == '~') {
+			pRenderStateBufPointer.pStr = ParseToken(pRenderStateBufPointer.pStr, color, bFlash, bBold);
+			if (bFlash) {
+				if (CTimer::GetTimeInMilliseconds() - Details.nFlashTimer > 300) {
+					Details.bFlashState = !Details.bFlashState;
+					Details.nFlashTimer = CTimer::GetTimeInMilliseconds();
+				}
+				Details.color.alpha = Details.bFlashState ? 0 : 255;
+			}
+			if (!RenderState.bIsShadow)
+				RenderState.color = color;
+		}
+		wchar c = *pRenderStateBufPointer.pStr;
+		c -= ' ';
+		if (RenderState.bFontHalfTexture) 
+			c = FindNewCharacter(c); 
+		else if (c > 155) 
+			c = 0; 
+
+		if (RenderState.slant != 0.0f)
+			textPosY = (RenderState.slantRefX - textPosX) * RenderState.slant + RenderState.slantRefY;
+		PrintChar(textPosX, textPosY, c);
+		if (bBold) {
+			PrintChar(textPosX + 1.0f, textPosY, c);
+			PrintChar(textPosX + 2.0f, textPosY, c);
+			textPosX += 2.0f;
+		}
+		textPosX += RenderState.scaleX * (RenderState.proportional ? Size[RenderState.style][c] : Size[RenderState.style][209]);
+		if (c == '\0')
+			textPosX += RenderState.fExtraSpace;
+	}
+	CSprite2d::RenderVertexBuffer();
+	FontRenderStatePointer.pRenderState = (CFontRenderState*)FontRenderStateBuf;
+}
+
+
+void
+CFont::SetFontStyle(int16 style)
+{
+	if (style == FONT_HEADING) {
+		Details.style = FONT_STANDARD;
+		Details.bFontHalfTexture = true;
+	} else {
+		Details.style = style;
+		Details.bFontHalfTexture = false;
+	}
+}
+
+wchar CFont::FindNewCharacter(wchar c)
+{
+	if (c >= 16 && c <= 26) return c + 128;
+	if (c >= 8 && c <= 9) return c + 86;
+	if (c == 4) return c + 89;
+	if (c == 7) return 206;
+	if (c == 14) return 207;
+	if (c >= 33 && c <= 58) return c + 122;
+	if (c >= 65 && c <= 90) return c + 90;
+	if (c >= 96 && c <= 118) return c + 85;
+	if (c >= 119 && c <= 140) return c + 62;
+	if (c >= 141 && c <= 142) return 204;
+	if (c == 143) return 205;
+	if (c == 1) return 208;
+	return c;
 }
 
 wchar

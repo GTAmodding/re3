@@ -105,7 +105,7 @@ enum
 #define MAX2DCHANNELS              1
 #define CHANNEL2D                  MAXCHANNELS
 
-#define MAX_STREAMS                2
+#define MAX_STREAMS                3
 
 #define DIGITALRATE                32000
 #define DIGITALBITS                16

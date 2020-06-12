@@ -12,6 +12,7 @@
 #include "General.h"
 #include "Camera.h"
 #include "Vehicle.h"
+#include "Bike.h"
 #include "PlayerSkin.h"
 #include "PlayerInfo.h"
 #include "World.h"
@@ -47,6 +48,10 @@ CAnimViewer::Render(void) {
 	if (pTarget) {
 //		pTarget->GetPosition() = CVector(0.0f, 0.0f, 0.0f);
 		if (pTarget) {
+#ifdef FIX_BUGS
+			if(pTarget->IsPed())
+				((CPed*)pTarget)->UpdateRpHAnim();
+#endif
 			pTarget->Render();
 			CRenderer::RenderOneNonRoad(pTarget);
 		}
@@ -67,11 +72,7 @@ CAnimViewer::Initialise(void) {
 	CReferences::Init();
 	TheCamera.Init();
 	TheCamera.SetRwCamera(Scene.camera);
-
-	// I didn't get which camera og code selects.
-	for (int i = 0; i < 3; i++) {
-		TheCamera.Cams[i].Distance = 5.0f;
-	}
+	TheCamera.Cams[TheCamera.ActiveCam].Distance = 5.0f;
 
 	gbModelViewer = true;
 	CHud::m_Wants_To_Draw_Hud = false;
@@ -89,19 +90,20 @@ CAnimViewer::Initialise(void) {
 	CPedStats::Initialise();
 	CMessages::Init();
 	CdStreamAddImage("MODELS\\GTA3.IMG");
+	CFileLoader::LoadLevel("DATA\\DEFAULT.DAT");
 	CFileLoader::LoadLevel("DATA\\ANIMVIEWER.DAT");
 	CStreaming::Init();
+	for(int i = 0; i < MODELINFOSIZE; i++)
+		if(CModelInfo::GetModelInfo(i))
+			CModelInfo::GetModelInfo(i)->ConvertAnimFileIndex();
 	CStreaming::LoadInitialPeds();
 	CStreaming::RequestSpecialModel(MI_PLAYER, "player", STREAMFLAGS_DONT_REMOVE);
 	CStreaming::LoadAllRequestedModels(false);
 	CRenderer::Init();
-	CRadar::Initialise();
-	CRadar::LoadTextures();
 	CVehicleModelInfo::LoadVehicleColours();
 	CAnimManager::LoadAnimFiles();
 	CWorld::PlayerInFocus = 0;
 	CWeapon::InitialiseWeapons();
-	CShadows::Init();
 	CPed::Initialise();
 	CTimer::Initialise();
 	CClock::Initialise(60000);
@@ -134,11 +136,7 @@ CAnimViewer::Initialise(void) {
 		}
 		CFileMgr::CloseFile(fd);
 	} else {
-		// From xbox
-		CStreaming::RequestSpecialChar(0, "luigi", STREAMFLAGS_DONT_REMOVE);
-		CStreaming::RequestSpecialChar(1, "joey", STREAMFLAGS_DONT_REMOVE);
-		CStreaming::RequestSpecialChar(2, "tony", STREAMFLAGS_DONT_REMOVE);
-		CStreaming::RequestSpecialChar(3, "curly", STREAMFLAGS_DONT_REMOVE);
+		// TODO? maybe request some special models here so the thing doesn't crash
 	}
 }
 
@@ -146,30 +144,33 @@ int
 LastPedModelId(int modelId)
 {
 	CBaseModelInfo *model;
-	for (int i = modelId; i >= 0; i--) {
-		model = CModelInfo::GetModelInfo(i);
-		if (model->GetModelType() == MITYPE_PED)
-			return i;
+	for(;;){
+		assert(modelId < MODELINFOSIZE);
+		model = CModelInfo::GetModelInfo(modelId);
+		if (model && model->GetModelType() == MITYPE_PED)
+			break;
+		modelId--;
 	}
 	return modelId;
 }
 
 int
-LastVehicleModelId(int modelId)
+FirstCarModelId(int modelId)
 {
-	CBaseModelInfo* model;
-	for (int i = modelId; i >= 0; i--) {
-		model = CModelInfo::GetModelInfo(i);
-		if (model->GetModelType() == MITYPE_VEHICLE)
-			return i;
+	CBaseModelInfo *model;
+	for(;;){
+		assert(modelId < MODELINFOSIZE);
+		model = CModelInfo::GetModelInfo(modelId);
+		if (model && model->GetModelType() == MITYPE_VEHICLE)
+			break;
+		modelId++;
 	}
 	return modelId;
 }
 
 
-// It's me that named this.
 int
-FindMeAModelID(int modelId, int wantedChange)
+NextModelId(int modelId, int wantedChange)
 {
 	// Max. 2 trials wasn't here, it's me that added it.
 
@@ -220,7 +221,6 @@ CAnimViewer::Update(void)
 	AssocGroupId animGroup = ASSOCGRP_STD;
 	int nextModelId = modelId;
 	CBaseModelInfo *modelInfo = CModelInfo::GetModelInfo(modelId);
-	CEntity *newEntity = nil;
 
 	if (modelInfo->GetModelType() == MITYPE_PED) {
 		int animGroup = ((CPedModelInfo*)modelInfo)->m_animGroup;
@@ -261,40 +261,32 @@ CAnimViewer::Update(void)
 			if (modelInfo->GetModelType() == MITYPE_VEHICLE) {
 
 				CVehicleModelInfo* veh = (CVehicleModelInfo*)modelInfo;
-				if (veh->m_vehicleType != VEHICLE_TYPE_CAR) {
-					// Not ready yet
-/*					if (veh->m_vehicleType == VEHICLE_TYPE_BOAT)
-					{
-						v33 = (CBoat*)CVehicle::operator new((CVehicle*)0x488, v6);
-						CBoat::CBoat(v33, modelId, 1u);
-						newEntity = (int)v33;
-						pTarget = (int)v33;
-					}
-					else
-					{
-*/						newEntity = pTarget = new CObject(modelId, true);
-						if (!modelInfo->GetColModel()) {
-							modelInfo->SetColModel(&CTempColModels::ms_colModelWheel1);
-						}
-//					}
+				if (veh->m_vehicleType == VEHICLE_TYPE_CAR) {
+					pTarget = new CAutomobile(modelId, RANDOM_VEHICLE);
+				} else if (veh->m_vehicleType == VEHICLE_TYPE_BOAT) {
+					pTarget = new CBoat(modelId, RANDOM_VEHICLE);
+				} else if (veh->m_vehicleType == VEHICLE_TYPE_BIKE) {
+					pTarget = new CBike(modelId, RANDOM_VEHICLE);
 				} else {
-					newEntity = pTarget = new CAutomobile(modelId, RANDOM_VEHICLE);
-					newEntity->SetStatus(STATUS_ABANDONED);
+					pTarget = new CObject(modelId, true);
+					if (!modelInfo->GetColModel()) {
+						modelInfo->SetColModel(&CTempColModels::ms_colModelWheel1);
+					}
 				}
-				newEntity->bIsStuck = true;
+				pTarget->SetStatus(STATUS_ABANDONED);
 			} else if (modelInfo->GetModelType() == MITYPE_PED) {
-				pTarget = newEntity = new CPed(PEDTYPE_CIVMALE);
-				newEntity->SetModelIndex(modelId);
+				pTarget = new CPed(PEDTYPE_CIVMALE);
+				pTarget->SetModelIndex(modelId);
 			} else {
-				newEntity = pTarget = new CObject(modelId, true);
+				pTarget = new CObject(modelId, true);
 				if (!modelInfo->GetColModel())
 				{
 					modelInfo->SetColModel(&CTempColModels::ms_colModelWheel1);
 				}
-				newEntity->bIsStuck = true;
+				pTarget->SetStatus(STATUS_ABANDONED);
 			}
-			newEntity->SetPosition(0.0f, 0.0f, 0.0f);
-			CWorld::Add(newEntity);
+			pTarget->SetPosition(0.0f, 0.0f, 0.0f);
+			CWorld::Add(pTarget);
 			TheCamera.TakeControl(pTarget, CCam::MODE_MODELVIEW, JUMP_CUT, CAMCONTROL_SCRIPT);
 		}
 		if (pTarget->IsVehicle() || pTarget->IsPed() || pTarget->IsObject()) {
@@ -302,43 +294,26 @@ CAnimViewer::Update(void)
 		}
 		pTarget->GetMatrix().GetPosition().z = 0.0f;
 
-		if (modelInfo->GetModelType() != MITYPE_PED) {
-
-			if (modelInfo->GetModelType() == MITYPE_VEHICLE) {
-
-				if (pad->NewState.LeftShoulder1 && !pad->OldState.LeftShoulder1) {
-					nextModelId = LastPedModelId(modelId);
-					AsciiToUnicode("Switched to peds", gUString);
-					CMessages::AddMessage(gUString, 1000, 0);
-				} else {
-					// Start in mobile
-					if (pad->NewState.Square && !pad->OldState.Square) {
-						CVehicleModelInfo::LoadVehicleColours();
-						AsciiToUnicode("Carcols.dat reloaded", gUString);
-						CMessages::AddMessage(gUString, 1000, 0);
-					}
-				}
-			}
-		} else {
+		if (modelInfo->GetModelType() == MITYPE_PED) {
 			((CPed*)pTarget)->bKindaStayInSamePlace = true;
 
 			// Triangle in mobile
-			if (pad->NewState.Square && !pad->OldState.Square) {
+			if (pad->GetSquareJustDown()) {
 				reloadIFP = 1;
 				AsciiToUnicode("IFP reloaded", gUString);
 				CMessages::AddMessage(gUString, 1000, 0);
 
-			} else if (pad->NewState.Cross && !pad->OldState.Cross) {
+			} else if (pad->GetCrossJustDown()) {
 				PlayAnimation(pTarget->GetClump(), animGroup, (AnimationId)animId);
 				AsciiToUnicode("Animation restarted", gUString);
 				CMessages::AddMessage(gUString, 1000, 0);
 
-			} else if (pad->NewState.Circle && !pad->OldState.Circle) {
+			} else if (pad->GetCircleJustDown()) {
 				PlayAnimation(pTarget->GetClump(), animGroup, ANIM_IDLE_STANCE);
 				AsciiToUnicode("Idle animation playing", gUString);
 				CMessages::AddMessage(gUString, 1000, 0);
 
-			} else if (pad->NewState.DPadUp && pad->OldState.DPadUp == 0) {
+			} else if (pad->GetDPadUpJustDown()) {
 				animId--;
 				if (animId < 0) {
 					animId = NUM_ANIMS - 1;
@@ -349,7 +324,7 @@ CAnimViewer::Update(void)
 				AsciiToUnicode(gString, gUString);
 				CMessages::AddMessage(gUString, 1000, 0);
 
-			} else if (pad->NewState.DPadDown && !pad->OldState.DPadDown) {
+			} else if (pad->GetDPadDownJustDown()) {
 				animId = (animId == (NUM_ANIMS - 1) ? 0 : animId + 1);
 				PlayAnimation(pTarget->GetClump(), animGroup, (AnimationId)animId);
 
@@ -357,36 +332,42 @@ CAnimViewer::Update(void)
 				AsciiToUnicode(gString, gUString);
 				CMessages::AddMessage(gUString, 1000, 0);
 
-			} else {
-				if (pad->NewState.Start && !pad->OldState.Start) {
+			} else if (pad->GetStartJustDown()) {
 
-				} else {
-					if (pad->NewState.LeftShoulder1 && !pad->OldState.LeftShoulder1) {
-						nextModelId = LastVehicleModelId(modelId);
-						AsciiToUnicode("Switched to vehicles", gUString);
-						CMessages::AddMessage(gUString, 1000, 0);
-					} else {
-						// Originally it was GetPad(1)->LeftShoulder2
-						if (pad->NewState.Triangle) {
-							((CPedModelInfo *)CModelInfo::GetModelInfo(pTarget->GetModelIndex()))->AnimatePedColModelSkinned(pTarget->GetClump());
-							AsciiToUnicode("Ped Col model will be animated as long as you hold the button", gUString);
-							CMessages::AddMessage(gUString, 100, 0);
-						}
-					}
-				}
+			} else if (pad->GetLeftShoulder1JustDown()) {
+				nextModelId = FirstCarModelId(modelId);
+				AsciiToUnicode("Switched to vehicles", gUString);
+				CMessages::AddMessage(gUString, 1000, 0);
+				// Originally it was GetPad(1)->LeftShoulder2
+			} else if (pad->NewState.Triangle) {
+				((CPedModelInfo *)CModelInfo::GetModelInfo(pTarget->GetModelIndex()))->AnimatePedColModelSkinned(pTarget->GetClump());
+				AsciiToUnicode("Ped Col model will be animated as long as you hold the button", gUString);
+				CMessages::AddMessage(gUString, 100, 0);
+			}
+		} else if (modelInfo->GetModelType() == MITYPE_VEHICLE) {
+
+			if (pad->GetLeftShoulder1JustDown()) {
+				nextModelId = LastPedModelId(modelId);
+				AsciiToUnicode("Switched to peds", gUString);
+				CMessages::AddMessage(gUString, 1000, 0);
+				// Start in mobile
+			} else if (pad->GetSquareJustDown()) {
+				CVehicleModelInfo::LoadVehicleColours();
+				AsciiToUnicode("Carcols.dat reloaded", gUString);
+				CMessages::AddMessage(gUString, 1000, 0);
 			}
 		}
 	}
 
-	if (pad->NewState.DPadLeft && pad->OldState.DPadLeft == 0) {
-		nextModelId = FindMeAModelID(modelId, -1);
+	if (pad->GetDPadLeftJustDown()) {
+		nextModelId = NextModelId(modelId, -1);
 
 		sprintf(gString, "Current model ID: %d", nextModelId);
 		AsciiToUnicode(gString, gUString);
 		CMessages::AddMessage(gUString, 1000, 0);
 
-	} else if (pad->NewState.DPadRight && pad->OldState.DPadRight == 0) {
-		nextModelId = FindMeAModelID(modelId, 1);
+	} else if (pad->GetDPadRightJustDown()) {
+		nextModelId = NextModelId(modelId, 1);
 
 		sprintf(gString, "Current model ID: %d", nextModelId);
 		AsciiToUnicode(gString, gUString);

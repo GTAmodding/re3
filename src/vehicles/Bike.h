@@ -133,3 +133,17 @@ public:
 	void SetupModelNodes(void);
 	void ReduceHornCounter(void);
 };
+
+inline int8 GetBikeDoorFlag(int32 carnode) {
+	switch (carnode) {
+		case CAR_DOOR_RR:
+		case CAR_DOOR_LR:
+			return CAR_DOOR_FLAG_RR | CAR_DOOR_FLAG_LR;
+		case CAR_DOOR_RF:
+		case CAR_DOOR_LF:
+		case CAR_WINDSCREEN:
+			return CAR_DOOR_FLAG_RF | CAR_DOOR_FLAG_LF;
+		default:
+			return CAR_DOOR_FLAG_UNKNOWN;
+	}
+}

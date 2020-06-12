@@ -84,9 +84,6 @@ void CCranes::AddThisOneCrane(CEntity* pEntity)
 	pCrane->m_nTimeForNextCheck = 0;
 	pCrane->m_nCraneState = CCrane::IDLE;
 	pCrane->m_bWasMilitaryCrane = false;
-	pCrane->m_nAudioEntity = DMAudio.CreateEntity(AUDIOTYPE_CRANE, &aCranes[NumCranes]);
-	if (pCrane->m_nAudioEntity >= 0)
-		DMAudio.SetEntityStatus(pCrane->m_nAudioEntity, 1);
 	pCrane->m_bIsTop = (MODELID_CRANE_1 != pEntity->GetModelIndex());
 #if 0
 	// Is this used to avoid military crane?
@@ -669,11 +666,11 @@ void CCranes::Load(uint8* buf, uint32 size)
 		if (pCrane->m_pVehiclePickedUp != nil)
 			pCrane->m_pVehiclePickedUp = CPools::GetVehiclePool()->GetSlot((uintptr)pCrane->m_pVehiclePickedUp - 1);
 	}
-	for (int i = 0; i < NUM_CRANES; i++) {
+	/*for (int i = 0; i < NUM_CRANES; i++) {
 		aCranes[i].m_nAudioEntity = DMAudio.CreateEntity(AUDIOTYPE_CRANE, &aCranes[i]);
 		if (aCranes[i].m_nAudioEntity != 0)
 			DMAudio.SetEntityStatus(aCranes[i].m_nAudioEntity, 1);
-	}
+	}*/
 
 	VALIDATESAVEBUF(size);
 }

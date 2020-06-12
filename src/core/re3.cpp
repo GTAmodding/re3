@@ -485,6 +485,7 @@ DebugMenuPopulate(void)
 		DebugMenuAddVarBool8("Render", "Don't render Objects", &gbDontRenderObjects, nil);
 		DebugMenuAddVarBool8("Render", "Don't Render Water", &gbDontRenderWater, nil);
 
+		DebugMenuAddVarBool8("Debug", "pad 1 -> pad 2", &CPad::m_bMapPadOneToPadTwo, nil);
 		DebugMenuAddVarBool8("Debug", "Edit on", &CSceneEdit::m_bEditOn, nil);
 #ifdef MENU_MAP
 		DebugMenuAddCmd("Debug", "Teleport to map waypoint", TeleportToWaypoint);

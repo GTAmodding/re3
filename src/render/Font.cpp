@@ -818,13 +818,13 @@ CFont::PrintString(float x, float y, uint32, wchar *start, wchar *end, float spw
 		Details.dropShadowPosition = 0;
 		Details.bIsShadow = true;
 		if (Details.slant != 0.0f) {
-			Details.slantRefX += dropShadowPosition;
-			Details.slantRefY += dropShadowPosition;
-			PrintString(dropShadowPosition + x, dropShadowPosition + y, Details.anonymous_25, start, end, spwidth);
-			Details.slantRefX -= dropShadowPosition;
-			Details.slantRefY -= dropShadowPosition;
+			Details.slantRefX += SCREEN_SCALE_X(dropShadowPosition);
+			Details.slantRefY += SCREEN_SCALE_Y(dropShadowPosition);
+			PrintString(SCREEN_SCALE_X(dropShadowPosition) + x, SCREEN_SCALE_Y(dropShadowPosition) + y, Details.anonymous_25, start, end, spwidth);
+			Details.slantRefX -= SCREEN_SCALE_X(dropShadowPosition);
+			Details.slantRefY -= SCREEN_SCALE_Y(dropShadowPosition);
 		} else {
-			PrintString(dropShadowPosition + x, dropShadowPosition + y, Details.anonymous_25, start, end, spwidth);
+			PrintString(SCREEN_SCALE_X(dropShadowPosition) + x, SCREEN_SCALE_Y(dropShadowPosition) + y, Details.anonymous_25, start, end, spwidth);
 		}
 		Details.color = color;
 		Details.dropShadowPosition = dropShadowPosition;

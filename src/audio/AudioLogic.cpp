@@ -149,26 +149,57 @@ cAudioManager::PostInitialiseGameSpecificSetup()
 	m_nPoliceChannelEntity = CreateEntity(AUDIOTYPE_POLICERADIO, (void *)1);
 	if (m_nPoliceChannelEntity >= 0)
 		SetEntityStatus(m_nPoliceChannelEntity, 1);
-
-	m_nBridgeEntity = CreateEntity(AUDIOTYPE_BRIDGE, (void *)1);
+#ifdef GTA_BRIDGE
+	m_nBridgeEntity = CreateEntity(AUDIOTYPE_BRIDGE, (void*)1);
 	if (m_nBridgeEntity >= 0)
 		SetEntityStatus(m_nBridgeEntity, 1);
+#endif // GTA_BRIDGE
+	m_nEscalatorEntity = CreateEntity(AUDIOTYPE_ESCALATOR, (void*)1);
+	if (m_nEscalatorEntity >= 0)
+		SetEntityStatus(m_nEscalatorEntity, 1);
 
-	m_sMissionAudio.m_nSampleIndex = NO_SAMPLE;
-	m_sMissionAudio.m_nLoadingStatus = LOADING_STATUS_NOT_LOADED;
-	m_sMissionAudio.m_nPlayStatus = PLAY_STATUS_STOPPED;
-	m_sMissionAudio.field_22 = 0;
-	m_sMissionAudio.m_bIsPlayed = false;
-	m_sMissionAudio.m_bPredefinedProperties = true;
-	m_sMissionAudio.m_nMissionAudioCounter = 0;
+	m_nExtraSoundsEntity = CreateEntity(AUDIOTYPE_EXTRA_SOUNDS, (void*)1);
+	if (m_nExtraSoundsEntity >= 0)
+		SetEntityStatus(m_nExtraSoundsEntity, 1);
+
+
+	m_sMissionAudio.m_nSampleIndex[0] = NO_SAMPLE;
+	m_sMissionAudio.m_nLoadingStatus[0] = LOADING_STATUS_NOT_LOADED;
+	m_sMissionAudio.m_nPlayStatus[0] = PLAY_STATUS_STOPPED;
+	m_sMissionAudio.field_22[0] = 0;
+	m_sMissionAudio.m_bIsPlayed[0] = false;
+	m_sMissionAudio.m_bPredefinedProperties[0] = true;
+	m_sMissionAudio.m_nMissionAudioCounter[0] = 0;
+	m_sMissionAudio.m_bIsMobile[0] = false;
+	field_5538 = 127;
+	m_sMissionAudio.m_nSampleIndex[1] = NO_SAMPLE;
+	m_sMissionAudio.m_nLoadingStatus[1] = LOADING_STATUS_NOT_LOADED;
+	m_sMissionAudio.m_nPlayStatus[1] = PLAY_STATUS_STOPPED;
+	m_sMissionAudio.field_22[1] = 0;
+	m_sMissionAudio.m_bIsPlayed[1] = false;
+	m_sMissionAudio.m_bPredefinedProperties[1] = true;
+	m_sMissionAudio.m_nMissionAudioCounter[1] = 0;
+	m_sMissionAudio.m_bIsMobile[1] = false;
+	field_5538 = 127;
+
 	ResetAudioLogicTimers(CTimer::GetTimeInMilliseconds());
 }
 void
 cAudioManager::PreTerminateGameSpecificShutdown()
 {
+#ifdef GTA_BRIDGE
 	if (m_nBridgeEntity >= 0) {
 		DestroyEntity(m_nBridgeEntity);
 		m_nBridgeEntity = AEHANDLE_NONE;
+	}
+#endif
+	if (m_nEscalatorEntity >= 0) {
+		DestroyEntity(m_nEscalatorEntity);
+		m_nEscalatorEntity = AEHANDLE_NONE;
+	}
+	if (m_nExtraSoundsEntity >= 0) {
+		DestroyEntity(m_nExtraSoundsEntity);
+		m_nExtraSoundsEntity = AEHANDLE_NONE;
 	}
 	if (m_nPoliceChannelEntity >= 0) {
 		DestroyEntity(m_nPoliceChannelEntity);
@@ -223,7 +254,8 @@ cAudioManager::ResetAudioLogicTimers(uint32 timer)
 			}
 		}
 	}
-	ClearMissionAudio();
+	ClearMissionAudio(0);
+	ClearMissionAudio(1);
 	SampleManager.StopChannel(policeChannel);
 }
 
@@ -5203,7 +5235,7 @@ cAudioManager::ProcessBridgeOneShots()
 #endif
 
 #pragma region MISSION_AUDIO
-bool g_bMissionAudioLoadFailed;
+bool g_bMissionAudioLoadFailed[MISSION_AUDIO_SLOTS];
 
 struct MissionAudioData {
 	const char *m_pName;
@@ -5605,77 +5637,104 @@ cAudioManager::MissionScriptAudioUsesPoliceChannel(int32 soundMission) const
 }
 
 void
-cAudioManager::PreloadMissionAudio(const char *name)
+cAudioManager::PreloadMissionAudio(uint8 slot, Const char *name)
 {
-	if (m_bIsInitialised) {
+	if (m_bIsInitialised && slot < MISSION_AUDIO_SLOTS) {
 		int32 missionAudioSfx = FindMissionAudioSfx(name);
 		if (missionAudioSfx != NO_SAMPLE) {
-			m_sMissionAudio.m_nSampleIndex = missionAudioSfx;
-			m_sMissionAudio.m_nLoadingStatus = LOADING_STATUS_NOT_LOADED;
-			m_sMissionAudio.m_nPlayStatus = PLAY_STATUS_STOPPED;
-			m_sMissionAudio.field_22 = 0;
-			m_sMissionAudio.m_nMissionAudioCounter = m_nTimeSpent * SampleManager.GetStreamedFileLength(missionAudioSfx) / 1000;
-			m_sMissionAudio.m_nMissionAudioCounter *= 4;
-			m_sMissionAudio.m_bIsPlayed = false;
-			m_sMissionAudio.m_bPredefinedProperties = 1;
-			g_bMissionAudioLoadFailed = false;
+			m_sMissionAudio.m_nSampleIndex[slot] = missionAudioSfx;
+			m_sMissionAudio.m_nLoadingStatus[slot] = LOADING_STATUS_NOT_LOADED;
+			m_sMissionAudio.m_nPlayStatus[slot] = PLAY_STATUS_STOPPED;
+			m_sMissionAudio.field_22[slot] = 0;
+			m_sMissionAudio.m_nMissionAudioCounter[slot] = m_nTimeSpent * SampleManager.GetStreamedFileLength(missionAudioSfx) / 1000;
+			m_sMissionAudio.m_nMissionAudioCounter[slot] *= 4;
+			m_sMissionAudio.m_bIsPlayed[slot] = false;
+			m_sMissionAudio.m_bPredefinedProperties[slot] = true;
+			g_bMissionAudioLoadFailed[slot] = false;
 		}
 	}
 }
 
 uint8
-cAudioManager::GetMissionAudioLoadingStatus() const
+cAudioManager::GetMissionAudioLoadingStatus(uint8 slot) const
 {
-	if (m_bIsInitialised)
-		return m_sMissionAudio.m_nLoadingStatus;
+	if (m_bIsInitialised && slot < MISSION_AUDIO_SLOTS)
+		return m_sMissionAudio.m_nLoadingStatus[slot];
 
 	return LOADING_STATUS_LOADED;
 }
 
 void
-cAudioManager::SetMissionAudioLocation(float x, float y, float z)
+cAudioManager::SetMissionAudioLocation(uint8 slot, float x, float y, float z)
 {
-	if (m_bIsInitialised) {
-		m_sMissionAudio.m_bPredefinedProperties = false;
-		m_sMissionAudio.m_vecPos = CVector(x, y, z);
+	if (m_bIsInitialised && slot < MISSION_AUDIO_SLOTS) {
+		m_sMissionAudio.m_bPredefinedProperties[slot] = false;
+		m_sMissionAudio.m_vecPos[slot] = CVector(x, y, z);
 	}
 }
 
 void
-cAudioManager::PlayLoadedMissionAudio()
+cAudioManager::PlayLoadedMissionAudio(uint8 slot)
 {
-	if (m_bIsInitialised && m_sMissionAudio.m_nSampleIndex != NO_SAMPLE && m_sMissionAudio.m_nLoadingStatus == LOADING_STATUS_LOADED &&
-	    m_sMissionAudio.m_nPlayStatus == PLAY_STATUS_STOPPED)
-		m_sMissionAudio.m_bIsPlayed = true;
+	if (m_bIsInitialised && slot < MISSION_AUDIO_SLOTS && m_sMissionAudio.m_nSampleIndex[slot] != NO_SAMPLE && m_sMissionAudio.m_nLoadingStatus[slot] == LOADING_STATUS_LOADED &&
+	    m_sMissionAudio.m_nPlayStatus[slot] == PLAY_STATUS_STOPPED)
+		m_sMissionAudio.m_bIsPlayed[slot] = true;
 }
 
 bool
-cAudioManager::IsMissionAudioSampleFinished()
+cAudioManager::ShouldDuckMissionAudio(uint8 slot) const
 {
-	if (m_bIsInitialised)
-		return m_sMissionAudio.m_nPlayStatus == PLAY_STATUS_FINISHED;
+	if (IsMissionAudioSamplePlaying(slot))
+		return m_sMissionAudio.m_nSampleIndex[slot] != STREAMED_SOUND_MISSION_ROK2_01;
+	return false;
+}
 
-	static int32 cPretendFrame = 1;
+bool
+cAudioManager::IsMissionAudioSamplePlaying(uint8 slot) const
+{
+	if (m_bIsInitialised) {
+		if (slot < MISSION_AUDIO_SLOTS)
+			return m_sMissionAudio.m_nPlayStatus[slot] == PLAY_STATUS_PLAYING;
+		else
+			return true;
+	} else {
+		static int32 cPretendFrame[MISSION_AUDIO_SLOTS] = { 1, 1 };
 
-	return (cPretendFrame++ & 63) == 0;
+		return (cPretendFrame[slot]++ % 64) != 0;
+	}
+}
+
+bool
+cAudioManager::IsMissionAudioSampleFinished(uint8 slot)
+{
+	if (m_bIsInitialised) {
+		if (slot < MISSION_AUDIO_SLOTS)
+			return m_sMissionAudio.m_nPlayStatus[slot] == PLAY_STATUS_FINISHED;
+		else
+			return true;
+	}
+
+	static int32 cPretendFrame[MISSION_AUDIO_SLOTS] = { 1, 1 };
+
+	return (cPretendFrame[slot]++ % 64) == 0;
 }
 
 void
-cAudioManager::ClearMissionAudio()
+cAudioManager::ClearMissionAudio(uint8 slot)
 {
-	if (m_bIsInitialised) {
-		m_sMissionAudio.m_nSampleIndex = NO_SAMPLE;
-		m_sMissionAudio.m_nLoadingStatus = LOADING_STATUS_NOT_LOADED;
-		m_sMissionAudio.m_nPlayStatus = PLAY_STATUS_STOPPED;
-		m_sMissionAudio.field_22 = 0;
-		m_sMissionAudio.m_bIsPlayed = false;
-		m_sMissionAudio.m_bPredefinedProperties = true;
-		m_sMissionAudio.m_nMissionAudioCounter = 0;
+	if (m_bIsInitialised && slot < MISSION_AUDIO_SLOTS) {
+		m_sMissionAudio.m_nSampleIndex[slot] = NO_SAMPLE;
+		m_sMissionAudio.m_nLoadingStatus[slot] = LOADING_STATUS_NOT_LOADED;
+		m_sMissionAudio.m_nPlayStatus[slot] = PLAY_STATUS_STOPPED;
+		m_sMissionAudio.field_22[slot] = 0;
+		m_sMissionAudio.m_bIsPlayed[slot] = false;
+		m_sMissionAudio.m_bPredefinedProperties[slot] = true;
+		m_sMissionAudio.m_nMissionAudioCounter[slot] = 0;
 	}
 }
 
 void
-cAudioManager::ProcessMissionAudio()
+cAudioManager::ProcessMissionAudioSlot(uint8 slot)
 {
 	float dist;
 	uint8 emittingVol;
@@ -5683,104 +5742,135 @@ cAudioManager::ProcessMissionAudio()
 	float distSquared;
 	CVector vec;
 
-	static uint8 nCheckPlayingDelay = 0;
-	static uint8 nFramesUntilFailedLoad = 0;
-	static uint8 nFramesForPretendPlaying = 0;
+	static uint8 nCheckPlayingDelay[MISSION_AUDIO_SLOTS] = { 0, 0 };
+	static uint8 nFramesUntilFailedLoad[MISSION_AUDIO_SLOTS] = { 0, 0 };
+	static uint8 nFramesForPretendPlaying[MISSION_AUDIO_SLOTS] = { 0, 0 };
 
-	if (!m_bIsInitialised) return;
-	if (m_sMissionAudio.m_nSampleIndex == NO_SAMPLE) return;
+	if (m_sMissionAudio.m_nSampleIndex[slot] == NO_SAMPLE) return;
 
-	switch (m_sMissionAudio.m_nLoadingStatus) {
+	switch (m_sMissionAudio.m_nLoadingStatus[slot]) {
 	case LOADING_STATUS_NOT_LOADED:
-		SampleManager.PreloadStreamedFile(m_sMissionAudio.m_nSampleIndex, 1);
-		m_sMissionAudio.m_nLoadingStatus = LOADING_STATUS_LOADED;
-		nFramesUntilFailedLoad = 0;
+		SampleManager.PreloadStreamedFile(m_sMissionAudio.m_nSampleIndex[slot], slot + 1);
+		m_sMissionAudio.m_nLoadingStatus[slot] = LOADING_STATUS_LOADED;
+		nFramesUntilFailedLoad[slot] = 0;
 		break;
 	case LOADING_STATUS_LOADED:
-		if (!m_sMissionAudio.m_bIsPlayed)
+		if (!m_sMissionAudio.m_bIsPlayed[slot])
 			return;
-		if (g_bMissionAudioLoadFailed) {
+		if (g_bMissionAudioLoadFailed[slot]) {
 			if (m_bTimerJustReset) {
-				ClearMissionAudio();
-				SampleManager.StopStreamedFile(1);
-				nFramesForPretendPlaying = 0;
-				nCheckPlayingDelay = 0;
-				nFramesUntilFailedLoad = 0;
+				ClearMissionAudio(slot);
+				SampleManager.StopStreamedFile(slot + 1);
+				nFramesForPretendPlaying[slot] = 0;
+				nCheckPlayingDelay[slot] = 0;
+				nFramesUntilFailedLoad[slot] = 0;
 			} else if (!m_nUserPause) {
-				if (++nFramesForPretendPlaying < 120) {
-					m_sMissionAudio.m_nPlayStatus = PLAY_STATUS_PLAYING;
+				if (++nFramesForPretendPlaying[slot] < 120) {
+					m_sMissionAudio.m_nPlayStatus[slot] = PLAY_STATUS_PLAYING;
 				} else {
-					m_sMissionAudio.m_nPlayStatus = PLAY_STATUS_FINISHED;
-					m_sMissionAudio.m_nSampleIndex = NO_SAMPLE;
+					m_sMissionAudio.m_nPlayStatus[slot] = PLAY_STATUS_FINISHED;
+					m_sMissionAudio.m_nSampleIndex[slot] = NO_SAMPLE;
 				}
 			}
 			break;
 		}
-		switch (m_sMissionAudio.m_nPlayStatus) {
+		switch (m_sMissionAudio.m_nPlayStatus[slot]) {
 		case PLAY_STATUS_STOPPED:
-			if (MissionScriptAudioUsesPoliceChannel(m_sMissionAudio.m_nSampleIndex)) {
-				SetMissionScriptPoliceAudio(m_sMissionAudio.m_nSampleIndex);
+			if (MissionScriptAudioUsesPoliceChannel(m_sMissionAudio.m_nSampleIndex[slot])) {
+				SetMissionScriptPoliceAudio(m_sMissionAudio.m_nSampleIndex[slot]);
 			} else {
 				if (m_nUserPause)
-					SampleManager.PauseStream(1, 1);
+					SampleManager.PauseStream(1, slot + 1);
 				if (m_sMissionAudio.m_bPredefinedProperties) {
-					SampleManager.SetStreamedVolumeAndPan(80, 63, 1, 1);
+					if (m_sMissionAudio.m_nSampleIndex[slot] == STREAMED_SOUND_MISSION_CAMERAL)
+						SampleManager.SetStreamedVolumeAndPan(80, 0, 1, slot + 1);
+					else if (m_sMissionAudio.m_nSampleIndex[slot] == STREAMED_SOUND_MISSION_CAMERAR)
+						SampleManager.SetStreamedVolumeAndPan(80, 127, 1, slot + 1);
+					else
+						SampleManager.SetStreamedVolumeAndPan(80, 63, 1, slot + 1);
 				} else {
-					distSquared = GetDistanceSquared(m_sMissionAudio.m_vecPos);
-					if (distSquared >= SQR(50.0f)) {
+					distSquared = GetDistanceSquared(m_sMissionAudio.m_vecPos[slot]);
+					if (distSquared >= SQR(80.0f)) {
 						emittingVol = 0;
 						pan = 63;
 					} else {
-						dist = Sqrt(distSquared);
-						emittingVol = ComputeVolume(80, 50.0f, dist);
-						TranslateEntity(&m_sMissionAudio.m_vecPos, &vec);
-						pan = ComputePan(50.f, &vec);
+						emittingVol = 80;
+						if (distSquared > 0.0f) {
+							dist = Sqrt(distSquared);
+							emittingVol = ComputeVolume(80, 80.0f, dist);
+						}
+						TranslateEntity(&m_sMissionAudio.m_vecPos[slot], &vec);
+						pan = ComputePan(80.f, &vec);
 					}
-					SampleManager.SetStreamedVolumeAndPan(emittingVol, pan, 1, 1);
+					SampleManager.SetStreamedVolumeAndPan(emittingVol, pan, 1, slot + 1);
 				}
-				SampleManager.StartPreloadedStreamedFile(1);
+				SampleManager.StartPreloadedStreamedFile(slot + 1);
 			}
-			m_sMissionAudio.m_nPlayStatus = PLAY_STATUS_PLAYING;
-			nCheckPlayingDelay = 30;
+			m_sMissionAudio.m_nPlayStatus[slot] = PLAY_STATUS_PLAYING;
+			nCheckPlayingDelay[slot] = 30;
+			if (m_sMissionAudio.m_nSampleIndex[slot] >= STREAMED_SOUND_MISSION_MOB_01A && m_sMissionAudio.m_nSampleIndex[slot] <= STREAMED_SOUND_MISSION_MOB_99A)
+				m_sMissionAudio.m_bIsMobile[slot] = true;
 			break;
 		case PLAY_STATUS_PLAYING:
 			if (m_bTimerJustReset) {
-				ClearMissionAudio();
-				SampleManager.StopStreamedFile(1);
+				ClearMissionAudio(slot);
+				SampleManager.StopStreamedFile(slot + 1);
 				break;
 			}
-			if (MissionScriptAudioUsesPoliceChannel(m_sMissionAudio.m_nSampleIndex)) {
+			if (MissionScriptAudioUsesPoliceChannel(m_sMissionAudio.m_nSampleIndex[slot])) {
 				if (!m_nUserPause) {
-					if (nCheckPlayingDelay) {
-						--nCheckPlayingDelay;
-					} else if (GetMissionScriptPoliceAudioPlayingStatus() == PLAY_STATUS_FINISHED || m_sMissionAudio.m_nMissionAudioCounter-- == 0) {
-						m_sMissionAudio.m_nPlayStatus = PLAY_STATUS_FINISHED;
-						m_sMissionAudio.m_nSampleIndex = NO_SAMPLE;
-						SampleManager.StopStreamedFile(1);
-						m_sMissionAudio.m_nMissionAudioCounter = 0;
+					if (nCheckPlayingDelay[slot]) {
+						--nCheckPlayingDelay[slot];
+					} else if (GetMissionScriptPoliceAudioPlayingStatus() == PLAY_STATUS_FINISHED || m_sMissionAudio.m_nMissionAudioCounter[slot]-- == 0) {
+						m_sMissionAudio.m_nPlayStatus[slot] = PLAY_STATUS_FINISHED;
+						m_sMissionAudio.m_nSampleIndex[slot] = NO_SAMPLE;
+						SampleManager.StopStreamedFile(slot + 1);
+						m_sMissionAudio.m_nMissionAudioCounter[slot] = 0;
 					}
 				}
-			} else if (m_sMissionAudio.field_22) {
-				if (SampleManager.IsStreamPlaying(1) || m_nUserPause || m_nPreviousUserPause) {
+			} else if (m_sMissionAudio.field_22[slot]) {
+				if (SampleManager.IsStreamPlaying(slot + 1) || m_nUserPause || m_nPreviousUserPause) {
 					if (m_nUserPause)
-						SampleManager.PauseStream(1, 1);
+						SampleManager.PauseStream(1, slot + 1);
 					else
-						SampleManager.PauseStream(0, 1);
+					{
+						SampleManager.PauseStream(0, slot + 1);
+						if (!m_sMissionAudio.m_bPredefinedProperties) {
+							distSquared = GetDistanceSquared(m_sMissionAudio.m_vecPos[slot]);
+							if (distSquared >= SQR(80.0f)) {
+								emittingVol = 0;
+								pan = 63;
+							} else {
+								emittingVol = 127;
+								if (distSquared > 0.0f) {
+									dist = Sqrt(distSquared);
+									emittingVol = ComputeVolume(127, 80.0f, dist);
+								}
+								TranslateEntity(&m_sMissionAudio.m_vecPos[slot], &vec);
+								pan = ComputePan(80.f, &vec);
+							}
+							SampleManager.SetStreamedVolumeAndPan(emittingVol, pan, 1, slot + 1);
+						}
+					}
+				} else if (m_sMissionAudio.m_nSampleIndex[slot] == STREAMED_SOUND_MISSION_ROK2_01) {
+					m_sMissionAudio.m_nPlayStatus[slot] = PLAY_STATUS_STOPPED;
 				} else {
-					m_sMissionAudio.m_nPlayStatus = PLAY_STATUS_FINISHED;
-					m_sMissionAudio.m_nSampleIndex = NO_SAMPLE;
-					SampleManager.StopStreamedFile(1);
-					m_sMissionAudio.m_nMissionAudioCounter = 0;
+					m_sMissionAudio.m_nPlayStatus[slot] = PLAY_STATUS_FINISHED;
+					if (m_sMissionAudio.m_nSampleIndex[slot] >= STREAMED_SOUND_MISSION_MOB_01A && m_sMissionAudio.m_nSampleIndex[slot] <= STREAMED_SOUND_MISSION_MOB_99A)
+						m_sMissionAudio.m_bIsMobile[slot] = false;
+					m_sMissionAudio.m_nSampleIndex[slot] = NO_SAMPLE;
+					SampleManager.StopStreamedFile(slot + 1);
+					m_sMissionAudio.m_nMissionAudioCounter[slot] = 0;
 				}
 			} else {
 				if (m_nUserPause)
 					break;
-				if (nCheckPlayingDelay--) {
-					if (!SampleManager.IsStreamPlaying(1))
+				if (nCheckPlayingDelay[slot]--) {
+					if (!SampleManager.IsStreamPlaying(slot + 1))
 						break;
-					nCheckPlayingDelay = 0;
+					nCheckPlayingDelay[slot] = 0;
 				}
-				m_sMissionAudio.field_22 = 1;
+				m_sMissionAudio.field_22[slot] = 1;
 			}
 			break;
 		default:
@@ -5788,15 +5878,32 @@ cAudioManager::ProcessMissionAudio()
 		}
 		break;
 	case LOADING_STATUS_FAILED:
-		if (++nFramesUntilFailedLoad >= 90) {
-			nFramesForPretendPlaying = 0;
-			g_bMissionAudioLoadFailed = true;
-			nFramesUntilFailedLoad = 0;
-			m_sMissionAudio.m_nLoadingStatus = LOADING_STATUS_LOADED;
+		if (++nFramesUntilFailedLoad[slot] >= 90) {
+			nFramesForPretendPlaying[slot] = 0;
+			g_bMissionAudioLoadFailed[slot] = true;
+			nFramesUntilFailedLoad[slot] = 0;
+			m_sMissionAudio.m_nLoadingStatus[slot] = LOADING_STATUS_LOADED;
 		}
 		break;
 	default:
 		break;
+	}
+}
+
+void
+cAudioManager::ProcessMissionAudio()
+{
+	if (!m_bIsInitialised) return;
+	
+	for (int i = 0; i < MISSION_AUDIO_SLOTS; i++)
+		ProcessMissionAudioSlot(i);
+
+	if (m_sMissionAudio.m_bIsMobile[0] || m_sMissionAudio.m_bIsMobile[1])
+		field_5538 = 64;
+	else if (field_5538 < 127) {
+		field_5538 += 5;
+		if (field_5538 > 127)
+			field_5538 = 127;
 	}
 }
 #pragma endregion All the mission audio stuff

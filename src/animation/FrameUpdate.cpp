@@ -233,6 +233,7 @@ void
 FrameUpdateCallBackSkinned(AnimBlendFrameData *frame, void *arg)
 {
 	CVector vec, pos(0.0f, 0.0f, 0.0f);
+	float transBlendAmount = 0.0f;
 	CQuaternion q, rot(0.0f, 0.0f, 0.0f, 0.0f);
 	float totalBlendAmount = 0.0f;
 	RpHAnimStdKeyFrame *xform = frame->hanimFrame;
@@ -256,8 +257,10 @@ FrameUpdateCallBackSkinned(AnimBlendFrameData *frame, void *arg)
 	for(node = updateData->nodes; *node; node++){
 		if((*node)->sequence){
 			(*node)->Update(vec, q, 1.0f-totalBlendAmount);
-			if((*node)->sequence->HasTranslation())
+			if((*node)->sequence->HasTranslation()){
 				pos += vec;
+				transBlendAmount += (*node)->association->blendAmount;
+			}
 			if(DotProduct(rot, q) < 0.0f)
 				rot -= q;
 			else
@@ -275,12 +278,12 @@ FrameUpdateCallBackSkinned(AnimBlendFrameData *frame, void *arg)
 	}
 
 	if((frame->flag & AnimBlendFrameData::IGNORE_TRANSLATION) == 0){
-		xform->t.x = pos.x;
-		xform->t.y = pos.y;
-		xform->t.z = pos.z;
-		xform->t.x += frame->resetPos.x;
-		xform->t.y += frame->resetPos.y;
-		xform->t.z += frame->resetPos.z;
+		xform->t.x = transBlendAmount*pos.x;
+		xform->t.y = transBlendAmount*pos.y;
+		xform->t.z = transBlendAmount*pos.z;
+		xform->t.x += (1.0f-transBlendAmount)*frame->resetPos.x;
+		xform->t.y += (1.0f-transBlendAmount)*frame->resetPos.y;
+		xform->t.z += (1.0f-transBlendAmount)*frame->resetPos.z;
 	}
 }
 

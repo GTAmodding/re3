@@ -74,20 +74,18 @@ CCopPed::CCopPed(eCopType copType, int32 modifier) : CPed(PEDTYPE_COP)
 		break;
 	}
 	m_bIsInPursuit = false;
-	field_1350 = 1;
+	field_5FE = 1;
 	m_bIsDisabledCop = false;
-	m_fAbseilPos = 0.0f;
 	m_attackTimer = 0;
-	m_bBeatingSuspect = false;
 	m_bStopAndShootDisabledZone = false;
+	field_601 = false;
 	m_bZoneDisabled = false;
-	field_1364 = -1;
+	field_628 = -1;
+	m_nRoadblockNode = -1; // TODO(Miami): this will be nil
+	field_5FF = 0;
+	m_fAbseilPos = 0.0f;
+	m_bBeatingSuspect = false;
 	m_pPointGunAt = nil;
-
-	// VC also initializes in here, but as nil
-#ifdef FIX_BUGS
-	m_nRoadblockNode = -1;
-#endif
 }
 
 CCopPed::~CCopPed()

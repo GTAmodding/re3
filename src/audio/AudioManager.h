@@ -28,6 +28,7 @@ public:
 	uint8 m_nLoopsRemaining;
 	bool m_bRequireReflection; // Used for oneshots
 	uint8 m_nOffset;
+	uint8 field_4C;
 	int32 m_nReleasingVolumeDivider;
 	bool m_bIsProcessed;
 	bool m_bLoopEnded;
@@ -35,7 +36,7 @@ public:
 	int8 m_nVolumeChange;
 };
 
-VALIDATE_SIZE(tSound, 92);
+VALIDATE_SIZE(tSound, 96);
 
 class CPhysical;
 class CAutomobile;
@@ -95,19 +96,24 @@ VALIDATE_SIZE(cPedComments, 1164);
 
 class CEntity;
 
+#define MISSION_AUDIO_SLOTS (2)
+
+// So instead of doing cMissionAudio [2] they've added [2] to every field of the struct...
+// Only someone with a VERY EXTRAORDINARY mind could have come up with that
 class cMissionAudio
 {
 public:
-	CVector m_vecPos;
-	bool m_bPredefinedProperties;
-	int32 m_nSampleIndex;
-	uint8 m_nLoadingStatus;
-	uint8 m_nPlayStatus;
-	uint8 field_22; // todo find a name
-	int32 m_nMissionAudioCounter;
-	bool m_bIsPlayed;
+	CVector m_vecPos[MISSION_AUDIO_SLOTS];
+	bool m_bPredefinedProperties[MISSION_AUDIO_SLOTS];
+	int32 m_nSampleIndex[MISSION_AUDIO_SLOTS];
+	uint8 m_nLoadingStatus[MISSION_AUDIO_SLOTS];
+	uint8 m_nPlayStatus[MISSION_AUDIO_SLOTS];
+	uint8 field_22[MISSION_AUDIO_SLOTS]; // todo find a name
+	int32 m_nMissionAudioCounter[MISSION_AUDIO_SLOTS];
+	bool m_bIsPlayed[MISSION_AUDIO_SLOTS];
+	bool m_bIsMobile[MISSION_AUDIO_SLOTS];
 };
-VALIDATE_SIZE(cMissionAudio, 32);
+VALIDATE_SIZE(cMissionAudio, 0x38);
 
 // name made up
 class cAudioScriptObjectManager
@@ -188,6 +194,14 @@ public:
 	CVector m_avecReflectionsPos[NUM_AUDIO_REFLECTIONS];
 	float m_afReflectionsDistances[NUM_AUDIO_REFLECTIONS];
 	cAudioScriptObjectManager m_sAudioScriptObjectManager;
+
+	// miami
+	uint8 field_4B30;
+	uint8 m_bPlayerMood;
+	uint32 field_4B34;
+	uint8 field_rest[4];
+	uint8 field_4B3C;
+
 	cPedComments m_sPedComments;
 	int32 m_nFireAudioEntity;
 	int32 m_nWaterCannonEntity;
@@ -197,13 +211,19 @@ public:
 	int32 m_nCollisionEntity;
 	cAudioCollisionManager m_sCollisionManager;
 	int32 m_nProjectileEntity;
+#ifdef GTA_BRIDGE
 	int32 m_nBridgeEntity;
+#endif
+	int32 m_nEscalatorEntity;
+	int32 m_nExtraSoundsEntity;
 	cMissionAudio m_sMissionAudio;
+	uint8 field_5538; // something related to phone dialogues
 	int32 m_anRandomTable[5];
 	uint8 m_nTimeSpent;
 	uint8 m_nUserPause;
 	uint8 m_nPreviousUserPause;
 	uint32 m_FrameCounter;
+	uint32 field_5554;
 
 	cAudioManager();
 	~cAudioManager();
@@ -213,7 +233,8 @@ public:
 	float GetReflectionsDistance(int32 idx) const { return m_afReflectionsDistances[idx]; }
 	int32 GetRandomNumber(int32 idx) const { return m_anRandomTable[idx]; }
 	int32 GetRandomNumberInRange(int32 idx, int32 low, int32 high) const { return (m_anRandomTable[idx] % (high - low + 1)) + low; }
-	bool IsMissionAudioPlaying() const { return m_sMissionAudio.m_nPlayStatus == 1; }
+	bool IsMissionAudioSamplePlaying(uint8 slot) const;// { return m_sMissionAudio.m_nPlayStatus == 1; }
+	bool ShouldDuckMissionAudio(uint8 slot) const;
 
 	// "Should" be in alphabetic order, except "getXTalkSfx"
 	void AddDetailsToRequestedOrderList(uint8 sample);
@@ -227,7 +248,7 @@ public:
 	void CalculateDistance(bool &condition, float dist);
 	bool CheckForAnAudioFileOnCD() const;
 	void ClearActiveSamples();
-	void ClearMissionAudio();
+	void ClearMissionAudio(uint8 slot);
 	void ClearRequestedQueue();
 	int32 ComputeDopplerEffectedFrequency(uint32 oldFreq, float position1, float position2,
 	                                      float speedMultiplier) const;
@@ -253,7 +274,7 @@ public:
 	float GetCollisionRatio(float a, float b, float c, float d) const;
 	float GetDistanceSquared(const CVector &v) const;
 	int32 GetJumboTaxiFreq() const;
-	uint8 GetMissionAudioLoadingStatus() const;
+	uint8 GetMissionAudioLoadingStatus(uint8 slot) const;
 	int8 GetMissionScriptPoliceAudioPlayingStatus() const;
 	uint8 GetNum3DProvidersAvailable() const;
 	int32 GetPedCommentSfx(CPed *ped, int32 sound);
@@ -270,12 +291,12 @@ public:
 	void InitialisePoliceRadioZones();
 	void InterrogateAudioEntities();
 	bool IsAudioInitialised() const;
-	bool IsMissionAudioSampleFinished();
+	bool IsMissionAudioSampleFinished(uint8 slot);
 	bool IsMP3RadioChannelAvailable() const;
 
 	bool MissionScriptAudioUsesPoliceChannel(int32 soundMission) const;
 
-	void PlayLoadedMissionAudio();
+	void PlayLoadedMissionAudio(uint8 slot);
 	void PlayOneShot(int32 index, int16 sound, float vol);
 	void PlaySuspectLastSeen(float x, float y, float z);
 	void PlayerJustGotInCar() const;
@@ -283,7 +304,7 @@ public:
 	void PostInitialiseGameSpecificSetup();
 	void PostTerminateGameSpecificShutdown();
 	void PreInitialiseGameSpecificSetup() const;
-	void PreloadMissionAudio(const char *name);
+	void PreloadMissionAudio(uint8 slot, Const char *name);
 	void PreTerminateGameSpecificShutdown();
 	/// processX - main logic of adding new sounds
 	void ProcessActiveQueues();
@@ -316,6 +337,7 @@ public:
 	void ProcessJumboTaxi();
 	void ProcessLoopingScriptObject(uint8 sound);
 	void ProcessMissionAudio();
+	void ProcessMissionAudioSlot(uint8 slot);
 	void ProcessModelCarEngine(cVehicleParams *params);
 	void ProcessOneShotScriptObject(uint8 sound);
 	void ProcessPed(CPhysical *ped);
@@ -366,7 +388,7 @@ public:
 	void SetEffectsMasterVolume(uint8 volume) const;
 	void SetEntityStatus(int32 id, uint8 status);
 	uint32 SetLoopingCollisionRequestedSfxFreqAndGetVol(const cAudioCollision &audioCollision);
-	void SetMissionAudioLocation(float x, float y, float z);
+	void SetMissionAudioLocation(uint8 slot, float x, float y, float z);
 	void SetMissionScriptPoliceAudio(int32 sfx) const;
 	void SetMonoMode(uint8); // todo (mobile)
 	void SetMusicFadeVol(uint8 volume) const;
@@ -400,7 +422,7 @@ public:
 };
 
 #ifdef AUDIO_MSS
-static_assert(sizeof(cAudioManager) == 19220, "cAudioManager: error");
+static_assert(sizeof(cAudioManager) == 0x5558, "cAudioManager: error");
 #endif
 
 extern cAudioManager AudioManager;

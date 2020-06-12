@@ -469,14 +469,14 @@ public:
 	//uint32 b157_8
 	//uint32 b157_10
 	//uint32 b157_20
-	//uint32 b157_40
+	uint32 b157_40 : 1;
 	uint32 bIgnoreThreatsBehindObjects : 1;
 
 	uint32 bNeverEverTargetThisPed : 1;
 	uint32 bCrouchWhenScared : 1;
 	uint32 bKnockedOffBike : 1;
 	//uint32 b158_8
-	//uint32 b158_10
+	uint32 b158_10 : 1;
 	uint32 bBoughtIceCream : 1;
 	//uint32 b158_40
 	//uint32 b158_80
@@ -654,14 +654,14 @@ public:
 	void AimGun(void);
 	void KillPedWithCar(CVehicle *veh, float impulse);
 	void Say(uint16 audio);
-	void SetLookFlag(CEntity *target, bool keepTryingToLook);
-	void SetLookFlag(float direction, bool keepTryingToLook);
+	void SetLookFlag(CEntity* target, bool keepTryingToLook, bool cancelPrevious = false);
+	void SetLookFlag(float direction, bool keepTryingToLook, bool cancelPrevious = false);
 	void SetLookTimer(int time);
 	void SetDie(AnimationId anim = ANIM_KO_SHOT_FRONT1, float arg1 = 4.0f, float arg2 = 0.0f);
 	void SetDead(void);
 	void ApplyHeadShot(eWeaponType weaponType, CVector pos, bool evenOnPlayer);
 	void RemoveBodyPart(PedNode nodeId, int8 direction);
-	bool OurPedCanSeeThisOne(CEntity *target);
+	bool OurPedCanSeeThisOne(CEntity *target, bool shootablesDoBlock = false);
 	void Avoid(void);
 	void Attack(void);
 	void ClearAimFlag(void);
@@ -842,6 +842,7 @@ public:
 	void PedShuffle();
 	void DriveVehicle();
 	void PositionAttachedPed();
+	bool CanUseTorsoWhenLooking();
 
 	// Static methods
 	static CVector GetLocalPositionToOpenCarDoor(CVehicle *veh, uint32 component, float offset);

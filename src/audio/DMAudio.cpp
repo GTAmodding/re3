@@ -290,39 +290,39 @@ cDMAudio::StopCutSceneMusic(void)
 }
 
 void
-cDMAudio::PreloadMissionAudio(char *missionAudio)
+cDMAudio::PreloadMissionAudio(uint8 slot, Const char *missionAudio)
 {
-	AudioManager.PreloadMissionAudio(missionAudio);
+	AudioManager.PreloadMissionAudio(slot, missionAudio);
 }
 
 uint8
-cDMAudio::GetMissionAudioLoadingStatus(void)
+cDMAudio::GetMissionAudioLoadingStatus(uint8 slot)
 {
-	return AudioManager.GetMissionAudioLoadingStatus();
+	return AudioManager.GetMissionAudioLoadingStatus(slot);
 }
 
 void
-cDMAudio::SetMissionAudioLocation(float x, float y, float z)
+cDMAudio::SetMissionAudioLocation(uint8 slot, float x, float y, float z)
 {
-	AudioManager.SetMissionAudioLocation(x, y, z);
+	AudioManager.SetMissionAudioLocation(slot, x, y, z);
 }
 
 void
-cDMAudio::PlayLoadedMissionAudio(void)
+cDMAudio::PlayLoadedMissionAudio(uint8 slot)
 {
-	AudioManager.PlayLoadedMissionAudio();
+	AudioManager.PlayLoadedMissionAudio(slot);
 }
 
 bool
-cDMAudio::IsMissionAudioSampleFinished(void)
+cDMAudio::IsMissionAudioSampleFinished(uint8 slot)
 {
-	return AudioManager.IsMissionAudioSampleFinished();
+	return AudioManager.IsMissionAudioSampleFinished(slot);
 }
 
 void
-cDMAudio::ClearMissionAudio(void)
+cDMAudio::ClearMissionAudio(uint8 slot)
 {
-	AudioManager.ClearMissionAudio();
+	AudioManager.ClearMissionAudio(slot);
 }
 
 uint8

@@ -17,13 +17,15 @@ public:
 	float m_fDistanceToTarget;
 	bool m_bIsInPursuit;
 	bool m_bIsDisabledCop;
-	int8 field_1350;
+	int8 field_5FE;
+	int8 field_5FF;
 	bool m_bBeatingSuspect;
 	bool m_bStopAndShootDisabledZone;
+	bool field_601; // set when police dragging player from car
 	bool m_bZoneDisabled;
-	float m_fAbseilPos; // VC leftover, unused
+	float m_fAbseilPos;
 	eCopType m_nCopType;
-	int8 field_1364;
+	int8 field_628;
 
 	CCopPed(eCopType, int32 modifier = 0);
 	~CCopPed();

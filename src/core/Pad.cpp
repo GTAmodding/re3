@@ -37,6 +37,7 @@
 #include "Wanted.h"
 #include "WaterLevel.h"
 #include "General.h"
+#include "Fluff.h"
 
 CPad Pads[MAX_PADS];
 CMousePointerStateHelper MousePointerStateHelper;
@@ -249,6 +250,14 @@ void ChangePlayerCheat()
 	}
 }
 
+void ChangePlayerModel(const char* name) {
+	if (!FindPlayerVehicle()) {
+		FindPlayerPed()->Undress(name);
+		CStreaming::LoadAllRequestedModels(0);
+		FindPlayerPed()->Dress();
+	}
+}
+
 void MayhemCheat()
 {
 	CHud::SetHelpMessage(TheText.Get("CHEAT1"), true);
@@ -404,6 +413,10 @@ void BackToTheFuture(void)
 	CVehicle::bHoverCheat = !CVehicle::bHoverCheat;
 }
 
+void SuicideCheat(void) {
+	CHud::SetHelpMessage(TheText.Get("CHEAT1"), true);
+	FindPlayerPed()->InflictDamage(nil, WEAPONTYPE_UNARMED, 1000.0f, PEDPIECE_TORSO, 0);
+}
 
 //////////////////////////////////////////////////////////////////////////
 
@@ -1089,50 +1102,169 @@ void CPad::AddToPCCheatString(char c)
 		KeyBoardCheatString[0] = ' ';
 		WeaponsForAllCheat();
 	}
-	// "TRAVELINSTYLE"
-	if (!_CHEATCMP("ELYTSNILEVART"))
-		VehicleCheat(true, MI_BLOODRA);
-
-	// "GETTHEREQUICKLY"
-	if (!_CHEATCMP("YLKCIUQEREHTTEG"))
-		VehicleCheat(true, MI_BLOODRB);
-
-	// "GETTHEREFAST"
-	if (!_CHEATCMP("TSAFEREHTTEG"))
-		VehicleCheat(true, MI_SABRETUR);
-
-	// "GETTHEREVERYFASTINDEED"
-	if (!_CHEATCMP("DEEDNITSAFYREVEREHTTEG"))
-		VehicleCheat(true, MI_HOTRINA);
-
-	// "GETTHEREAMAZINGLYFAST"
-	if (!_CHEATCMP("TSAFYLGNIZAMAEREHTTEG"))
-		VehicleCheat(true, MI_HOTRINB);
-
-	// "THELASTRIDE"
-	if (!_CHEATCMP("EDIRTSALEHT"))
-		VehicleCheat(true, MI_ROMERO);
-
-	// "ROCKANDROLLCAR"
-	if (!_CHEATCMP("RACLLORDNAKCOR"))
-		VehicleCheat(true, MI_LOVEFIST);
-
-	// "RUBBISHCAR"
-	if (!_CHEATCMP("RACHSIBBUR"))
-		VehicleCheat(true, MI_TRASH);
-
-	// "BETTERTHANWALKING"
-	if (!_CHEATCMP("GNIKLAWNAHTRETTEB"))
-		VehicleCheat(true, MI_CADDY);
-
-	// "TIMEFLIESWHENYOU"
-	if (!_CHEATCMP("UOYNEHWSEILFEMIT"))
+	// "ONSPEED"
+	else if (!Cheat_strncmp(KeyBoardCheatString, "GJLQ`iR")) {
+		KeyBoardCheatString[0] = ' ';
 		FastTimeCheat();
-
-	// "BOOOOORING"
-	if (!_CHEATCMP("GNIROOOOOB"))
+	}
+	// "BOOOOOORING"
+	else if (!Cheat_strncmp(KeyBoardCheatString, "JSPS\\jRVPZO")) {
+		KeyBoardCheatString[0] = ' ';
 		SlowTimeCheat();
-
+	}
+	// "WHEELSAREALLINEED"
+	else if (!Cheat_strncmp(KeyBoardCheatString, "GJLOVgOHF]N[SeRNs")) {
+		KeyBoardCheatString[0] = ' ';
+		OnlyRenderWheelsCheat();
+	}
+	//COMEFLYWITHME
+	else if (!Cheat_strncmp(KeyBoardCheatString, "HROUVr\\SGPZWJ")) {
+		KeyBoardCheatString[0] = ' ';
+	}
+	// "GRIPISEVERYTHING"
+	else if (!Cheat_strncmp(KeyBoardCheatString, "JSPIatULWP`QWi_M")) {
+		KeyBoardCheatString[0] = ' ';
+		StrongGripCheat();
+	}
+	// "CHASESTAT"
+	else if (!Cheat_strncmp(KeyBoardCheatString, "WF[TRnDOD")) {
+		KeyBoardCheatString[0] = ' ';
+	}
+	// "CHICKSWITHGUNS"
+	else if (!Cheat_strncmp(KeyBoardCheatString, "VS\\HUoL^TVPQOc")) {
+		KeyBoardCheatString[0] = ' ';
+	}
+	// "ICANTTAKEITANYMORE"
+	else if (!Cheat_strncmp(KeyBoardCheatString, "HWVNfiD[JPXI[t[G_\\")) {
+		KeyBoardCheatString[0] = ' ';
+		SuicideCheat();
+	}
+	// "GREENLIGHT"
+	else if (!Cheat_strncmp(KeyBoardCheatString, "WMNJYiHLSR")) {
+		KeyBoardCheatString[0] = ' ';
+	}
+	// "MIAMITRAFFIC"
+	else if (!Cheat_strncmp(KeyBoardCheatString, "FNMGNmWPNLVU")) {
+		KeyBoardCheatString[0] = ' ';
+	}
+	// "AHAIRDRESSERSCAR"
+	else if (!Cheat_strncmp(KeyBoardCheatString, "UFJT_`VZF]QZPaUG")) {
+		KeyBoardCheatString[0] = ' ';
+		PinkCarsCheat();
+	}
+	// "IWANTITPAINTEDBLACK"
+	else if (!Cheat_strncmp(KeyBoardCheatString, "NHHMO_H[OTNX[iaT]jS")) {
+		KeyBoardCheatString[0] = ' ';
+		BlackCarsCheat();
+	}
+	// "TRAVELINSTYLE"
+	else if (!Cheat_strncmp(KeyBoardCheatString, "HQ`U`iLSFaNZ[")) {
+		KeyBoardCheatString[0] = ' ';
+		VehicleCheat(true, MI_BLOODRA);
+	}
+	// "THELASTRIDE"
+	else if (!Cheat_strncmp(KeyBoardCheatString, "HIPSanDSFSa")) {
+		KeyBoardCheatString[0] = ' ';
+		VehicleCheat(true, MI_ROMERO);
+	}
+	// "ROCKANDROLLCAR"
+	else if (!Cheat_strncmp(KeyBoardCheatString, "UFJMYjUKOLXKVr")) {
+		KeyBoardCheatString[0] = ' ';
+		VehicleCheat(true, MI_LOVEFIST);
+	}
+	// "RUBBISHCAR"
+	else if (!Cheat_strncmp(KeyBoardCheatString, "UFJI`dEIV]")) {
+		KeyBoardCheatString[0] = ' ';
+		VehicleCheat(true, MI_TRASH);
+	}
+	// "GETTHEREQUICKLY"
+	else if (!Cheat_strncmp(KeyBoardCheatString, "\\QRDVpTLSPU\\[eT")) {
+		KeyBoardCheatString[0] = ' ';
+		VehicleCheat(true, MI_BLOODRB);
+	}
+	// "GETTHEREFAST"
+	else if (!Cheat_strncmp(KeyBoardCheatString, "WXHGRmHOU_RO")) {
+		KeyBoardCheatString[0] = ' ';
+		VehicleCheat(true, MI_SABRETUR);
+	}
+	// "BETTERTHANWALKING"
+	else if (!Cheat_strncmp(KeyBoardCheatString, "JSPLY\\ZUBSaZLtaK^")) {
+		KeyBoardCheatString[0] = ' ';
+		VehicleCheat(true, MI_CADDY);
+	}
+	// "GETTHEREFASTINDEED"
+	else if (!Cheat_strncmp(KeyBoardCheatString, "GJLE[dWZBQfZLvRXa[^WHL")) {
+		KeyBoardCheatString[0] = ' ';
+		VehicleCheat(true, MI_HOTRINA);
+	}
+	// "GETTHEREAMAZINGLYFAST"
+	else if (!Cheat_strncmp(KeyBoardCheatString, "WXHGfgJUJeNUHe_Kdg^HJ")) {
+		KeyBoardCheatString[0] = ' ';
+		VehicleCheat(true, MI_HOTRINB);
+	}
+	// LOOKLIKELANCE
+	else if (!Cheat_strncmp(KeyBoardCheatString, "HHUBY`NPMV\\WS")) {
+		KeyBoardCheatString[0] = ' ';
+		ChangePlayerModel("igbuddy");
+	}
+	// IWANTBIGTITS
+	else if (!Cheat_strncmp(KeyBoardCheatString, "VYPUTdE[OLdQ")) {
+		KeyBoardCheatString[0] = ' ';
+		ChangePlayerModel("igcandy");
+	}
+	// MYSONISALAWYER
+	else if (!Cheat_strncmp(KeyBoardCheatString, "UJ`XNgDZJY\\[`m")) {
+		KeyBoardCheatString[0] = ' ';
+		ChangePlayerModel("igken");
+	}
+	// ILOOKLIKEHILARY
+	else if (!Cheat_strncmp(KeyBoardCheatString, "\\WHMVcHRJWXWVlV")) {
+		KeyBoardCheatString[0] = ' ';
+		ChangePlayerModel("ighlary");
+	}
+	// ROCKANDROLLMAN
+	else if (!Cheat_strncmp(KeyBoardCheatString, "QFTMYjUKOLXKVr")) {
+		KeyBoardCheatString[0] = ' ';
+		ChangePlayerModel("igjezz");
+	}
+	// ONEARMEDBANDIT
+	else if (!Cheat_strncmp(KeyBoardCheatString, "WNKON]GLN]NMUo")) {
+		KeyBoardCheatString[0] = ' ';
+		ChangePlayerModel("igphil");
+	}
+	// IDONTHAVETHEMONEYSONNY
+	else if (!Cheat_strncmp(KeyBoardCheatString, "\\SUP`tHUPXRP[ecGdgXRGN")) {
+		KeyBoardCheatString[0] = ' ';
+		ChangePlayerModel("igsonny");
+	}
+	// FOXYLITTLETHING
+	else if (!Cheat_strncmp(KeyBoardCheatString, "JSPIa`O[UTYa_oS")) {
+		KeyBoardCheatString[0] = ' ';
+		ChangePlayerModel("igmerc");
+	}
+	// WELOVEOURDICK
+	else if (!Cheat_strncmp(KeyBoardCheatString, "NHPE_pRLWZYM^")) {
+		KeyBoardCheatString[0] = ' ';
+		ChangePlayerModel("igdick");
+	}
+	// CHEATSHAVEBEENCRACKED
+	else if (!Cheat_strncmp(KeyBoardCheatString, "GJRDNmFUFPOM]aUYpTOKF")) {
+		KeyBoardCheatString[0] = ' ';
+		ChangePlayerModel("igdiaz");
+	}
+	// SEAWAYS
+	else if (!Cheat_strncmp(KeyBoardCheatString, "V^HXN`V")) {
+		KeyBoardCheatString[0] = ' ';
+		BackToTheFuture();
+	}
+	//CERTAINDEATH
+	else if (!Cheat_strncmp(KeyBoardCheatString, "KYHFQiLHU]RK")) {
+		KeyBoardCheatString[0] = ' ';
+		if (!CSmokeTrails::CigOn)
+			CSmokeTrails::CigOn = true;
+		else
+			CSmokeTrails::CigOn = false;
+	}
 	// "ILOVESCOTLAND"
 	if (!_CHEATCMP("DNALTOCSEVOLI"))
 		RainyWeatherCheat();
@@ -1141,29 +1273,13 @@ void CPad::AddToPCCheatString(char c)
 	if (!_CHEATCMP("REHTAEWDAM"))
 		FastWeatherCheat();
 
-	// "ANICESETOFWHEELS"
-	if (!_CHEATCMP("SLEEHWFOTESECINA"))
-		OnlyRenderWheelsCheat();
-
 	// "CHITTYCHITTYBB"
 	if (!_CHEATCMP("BBYTTIHCYTTIHC"))
 		ChittyChittyBangBangCheat();
 
-	// "CORNERSLIKEMAD"
-	if (!_CHEATCMP("DAMEKILSRENROC"))
-		StrongGripCheat();
-
 	// "NASTYLIMBSCHEAT"
 	if (!_CHEATCMP("TAEHCSBMILYTSAN"))
 		NastyLimbsCheat();
-
-	// "IWANTITPAINTEDBLACK"
-	if (!_CHEATCMP("KCALBDETNIAPTITNAWI"))
-		BlackCarsCheat();
-
-	// "AHAIRDRESSERSCAR"
-	if (!_CHEATCMP("RACSRESSERDRIAHA"))
-		PinkCarsCheat();
 
 #ifdef KANGAROO_CHEAT
 	// "KANGAROO"
@@ -1198,10 +1314,6 @@ void CPad::AddToPCCheatString(char c)
 	if (!_CHEATCMP("TAEHCSREYALRETAW"))
 		RenderWaterLayersCheat();
 #endif
-
-	// SEAWAYS
-	if (!_CHEATCMP("SYAWAES"))
-		BackToTheFuture();
 
 #undef _CHEATCMP
 }
@@ -1274,8 +1386,8 @@ void CPad::UpdatePads(void)
 	
 	GetPad(0)->UpdateMouse();
 #ifdef XINPUT
-	GetPad(0)->AffectFromXinput(0);
-	GetPad(1)->AffectFromXinput(1);
+	GetPad(0)->AffectFromXinput(m_bMapPadOneToPadTwo ? 1 : 0);
+	GetPad(1)->AffectFromXinput(m_bMapPadOneToPadTwo ? 0 : 1);
 #else
 	CapturePad(0);
 #endif

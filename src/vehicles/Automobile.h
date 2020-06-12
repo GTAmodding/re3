@@ -7,30 +7,6 @@
 
 class CObject;
 
-enum eCarNodes
-{
-	CAR_WHEEL_RF = 1,
-	CAR_WHEEL_RM,
-	CAR_WHEEL_RB,
-	CAR_WHEEL_LF,
-	CAR_WHEEL_LM,
-	CAR_WHEEL_LB,
-	CAR_BUMP_FRONT,
-	CAR_BUMP_REAR,
-	CAR_WING_RF,
-	CAR_WING_RR,
-	CAR_DOOR_RF,
-	CAR_DOOR_RR,
-	CAR_WING_LF,
-	CAR_WING_LR,
-	CAR_DOOR_LF,
-	CAR_DOOR_LR,
-	CAR_BONNET,
-	CAR_BOOT,
-	CAR_WINDSCREEN,
-	NUM_CAR_NODES,
-};
-
 // These are used for all the wheel arrays
 // DON'T confuse with VEHWHEEL, which are vehicle components
 enum {
@@ -40,13 +16,6 @@ enum {
 	CARWHEEL_REAR_RIGHT
 };
 
-enum {
-	CAR_DOOR_FLAG_UNKNOWN = 0x0,
-	CAR_DOOR_FLAG_LF = 0x1,
-	CAR_DOOR_FLAG_LR = 0x2,
-	CAR_DOOR_FLAG_RF = 0x4,
-	CAR_DOOR_FLAG_RR = 0x8
-};
 
 class CAutomobile : public CVehicle
 {
@@ -197,18 +166,3 @@ public:
 
 	static void SetAllTaxiLights(bool set);
 };
-
-inline uint8 GetCarDoorFlag(int32 carnode) {
-	switch (carnode) {
-	case CAR_DOOR_LF:
-		return CAR_DOOR_FLAG_LF;
-	case CAR_DOOR_LR:
-		return CAR_DOOR_FLAG_LR;
-	case CAR_DOOR_RF:
-		return CAR_DOOR_FLAG_RF;
-	case CAR_DOOR_RR:
-		return CAR_DOOR_FLAG_RR;
-	default:
-		return CAR_DOOR_FLAG_UNKNOWN;
-	}
-}

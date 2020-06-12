@@ -257,7 +257,8 @@ cAudioManager::ResetTimers(uint32 time)
 			m_nActiveSampleQueue = 0;
 		}
 		ClearActiveSamples();
-		ClearMissionAudio();
+		ClearMissionAudio(0);
+		ClearMissionAudio(1);
 		SampleManager.StopChannel(policeChannel);
 		SampleManager.SetEffectsFadeVolume(0);
 		SampleManager.SetMusicFadeVolume(0);
@@ -280,7 +281,7 @@ cAudioManager::DestroyAllGameCreatedEntities()
 				case AUDIOTYPE_PHYSICAL:
 				case AUDIOTYPE_EXPLOSION:
 				case AUDIOTYPE_WEATHER:
-				case AUDIOTYPE_CRANE:
+				//case AUDIOTYPE_CRANE:
 				case AUDIOTYPE_GARAGE:
 				case AUDIOTYPE_FIREHYDRANT:
 					DestroyEntity(i);

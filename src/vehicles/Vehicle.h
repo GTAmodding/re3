@@ -20,6 +20,38 @@ enum {
 	PERMANENT_VEHICLE = 4,
 };
 
+enum eCarNodes
+{
+	CAR_WHEEL_RF = 1,
+	CAR_WHEEL_RM,
+	CAR_WHEEL_RB,
+	CAR_WHEEL_LF,
+	CAR_WHEEL_LM,
+	CAR_WHEEL_LB,
+	CAR_BUMP_FRONT,
+	CAR_BUMP_REAR,
+	CAR_WING_RF,
+	CAR_WING_RR,
+	CAR_DOOR_RF,
+	CAR_DOOR_RR,
+	CAR_WING_LF,
+	CAR_WING_LR,
+	CAR_DOOR_LF,
+	CAR_DOOR_LR,
+	CAR_BONNET,
+	CAR_BOOT,
+	CAR_WINDSCREEN,
+	NUM_CAR_NODES,
+};
+
+enum {
+	CAR_DOOR_FLAG_UNKNOWN = 0x0,
+	CAR_DOOR_FLAG_LF = 0x1,
+	CAR_DOOR_FLAG_LR = 0x2,
+	CAR_DOOR_FLAG_RF = 0x4,
+	CAR_DOOR_FLAG_RR = 0x8
+};
+
 enum eCarLock {
 	CARLOCK_NOT_USED,
 	CARLOCK_UNLOCKED,
@@ -379,3 +411,43 @@ public:
 
 void DestroyVehicleAndDriverAndPassengers(CVehicle* pVehicle);
 bool IsVehiclePointerValid(CVehicle* pVehicle);
+
+// Names of functions below are made up by us.
+
+// Used in III and VC.
+inline int8 GetCarDoorFlag(int32 carnode) {
+	switch (carnode) {
+	case CAR_DOOR_LF:
+		return CAR_DOOR_FLAG_LF;
+	case CAR_DOOR_LR:
+		return CAR_DOOR_FLAG_LR;
+	case CAR_DOOR_RF:
+		return CAR_DOOR_FLAG_RF;
+	case CAR_DOOR_RR:
+		return CAR_DOOR_FLAG_RR;
+	default:
+		return CAR_DOOR_FLAG_UNKNOWN;
+	}
+}
+
+// VC. Accounts the case numMaxPassengers == 0, only for m_nGettingInFlags.
+inline int8 GetEnterCarDoorFlag(int32 carnode, uint8 numMaxPassengers) {
+	switch (carnode) {
+	case CAR_DOOR_RF:
+		return CAR_DOOR_FLAG_RF;
+	case CAR_DOOR_RR:
+		return CAR_DOOR_FLAG_RR;
+	case CAR_DOOR_LF:
+		if (numMaxPassengers != 0)
+			return CAR_DOOR_FLAG_LF;
+		else
+			return CAR_DOOR_FLAG_LF | CAR_DOOR_FLAG_LR;
+	case CAR_DOOR_LR:
+		if (numMaxPassengers != 0)
+			return CAR_DOOR_FLAG_LR;
+		else
+			return CAR_DOOR_FLAG_LF | CAR_DOOR_FLAG_LR;
+	default:
+		return CAR_DOOR_FLAG_UNKNOWN;
+	}
+}

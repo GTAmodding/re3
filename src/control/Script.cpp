@@ -318,8 +318,8 @@ void CMissionCleanup::Process()
 	//CSpecialFX::bLiftCam = false;
 	//CSpecialFX::bVideoCam = false;
 	//CTimeCycle::StopExtraColour(0);
-	// TODO(MIAMI): change this to loop when it supports parameters
-	DMAudio.ClearMissionAudio();
+	for (int i = 0; i < MISSION_AUDIO_SLOTS; i++)
+		DMAudio.ClearMissionAudio(i);
 	CWeather::ReleaseWeather();
 	for (int i = 0; i < NUM_OF_SPECIAL_CHARS; i++)
 		CStreaming::SetMissionDoesntRequireSpecialChar(i);
@@ -8662,42 +8662,24 @@ int8 CRunningScript::ProcessCommands900To999(int32 command)
 		strncpy(str, (char*)&CTheScripts::ScriptSpace[m_nIp], KEY_LENGTH_IN_SCRIPT);
 		for (int i = 0; i < KEY_LENGTH_IN_SCRIPT; i++)
 			str[i] = tolower(str[i]);
-		static bool bShowed = false;
 		m_nIp += KEY_LENGTH_IN_SCRIPT;
-		if (!bShowed) {
-			debug("LOAD_MISSION_AUDIO not implemented\n");
-			bShowed = true;
-		}
-		//DMAudio.PreloadMissionAudio(str);
+		DMAudio.PreloadMissionAudio(ScriptParams[0] - 1, str);
 		return 0;
 	}
 	case COMMAND_HAS_MISSION_AUDIO_LOADED:
 	{
 		CollectParameters(&m_nIp, 1);
-		static bool bShowed = false;
-		if (!bShowed) {
-			debug("HAS_MISSION_AUDIO_LOADED not implemented, default to TRUE\n");
-			bShowed = true;
-		}
-		UpdateCompareFlag(true);
-		//UpdateCompareFlag(DMAudio.GetMissionAudioLoadingStatus() == 1);
+		UpdateCompareFlag(DMAudio.GetMissionAudioLoadingStatus(ScriptParams[0] - 1) == 1);
 		return 0;
 	}
 	case COMMAND_PLAY_MISSION_AUDIO:
 		CollectParameters(&m_nIp, 1);
-		debug("PLAY_MISSION_AUDIO doesn't support parameter yet, skipping\n");
-		//DMAudio.PlayLoadedMissionAudio();
+		DMAudio.PlayLoadedMissionAudio(ScriptParams[0] - 1);
 		return 0;
 	case COMMAND_HAS_MISSION_AUDIO_FINISHED:
 	{
 		CollectParameters(&m_nIp, 1);
-		static bool bShowed = false;
-		if (!bShowed) {
-			debug("HAS_MISSION_AUDIO_FINISHED not implemented, default to TRUE\n");
-			bShowed = true;
-		}
-		UpdateCompareFlag(true);
-		//UpdateCompareFlag(DMAudio.IsMissionAudioSampleFinished());
+		UpdateCompareFlag(DMAudio.IsMissionAudioSampleFinished(ScriptParams[0] - 1));
 		return 0;
 	}
 	case COMMAND_GET_CLOSEST_CAR_NODE_WITH_HEADING:
@@ -8735,12 +8717,7 @@ int8 CRunningScript::ProcessCommands900To999(int32 command)
 	{
 		CollectParameters(&m_nIp, 4);
 		CVector pos = *(CVector*)&ScriptParams[1];
-		static bool bShowed = false;
-		if (!bShowed) {
-			debug("SET_MISSION_AUDIO_POSITION not implemented\n");
-			bShowed = true;
-		}
-		//DMAudio.SetMissionAudioLocation(pos.x, pos.y, pos.z);
+		DMAudio.SetMissionAudioLocation(ScriptParams[0] - 1, pos.x, pos.y, pos.z);
 		return 0;
 	}
 	case COMMAND_ACTIVATE_SAVE_MENU:

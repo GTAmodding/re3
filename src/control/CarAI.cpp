@@ -183,7 +183,7 @@ void CCarAI::UpdateCarAI(CVehicle* pVehicle)
 			float distance = (pVehicle->AutoPilot.m_vecDestinationCoors - pVehicle->GetPosition()).Magnitude2D();
 			if ((pVehicle->bIsAmbulanceOnDuty || pVehicle->bIsFireTruckOnDuty) && distance < 20.0f)
 				pVehicle->AutoPilot.m_nCarMission = MISSION_EMERGENCYVEHICLE_STOP;
-			if (distance < 5.0f){
+			if (distance < 3.0f){
 				pVehicle->AutoPilot.m_nCarMission = MISSION_NONE;
 				pVehicle->AutoPilot.m_nTempAction = TEMPACT_NONE;
 				if (pVehicle->bParking) {
@@ -236,8 +236,8 @@ void CCarAI::UpdateCarAI(CVehicle* pVehicle)
 			}
 			break;
 		case MISSION_GOTOCOORDS_ACCURATE:
-			if ((pVehicle->AutoPilot.m_vecDestinationCoors - pVehicle->GetPosition()).Magnitude2D() < 20.0f ||
-			  pVehicle->AutoPilot.m_bIgnorePathfinding)
+			if ((pVehicle->AutoPilot.m_vecDestinationCoors - pVehicle->GetPosition()).Magnitude2D() < FindSwitchDistanceClose(pVehicle) ||
+				pVehicle->AutoPilot.m_bIgnorePathfinding)
 				pVehicle->AutoPilot.m_nCarMission = MISSION_GOTO_COORDS_STRAIGHT_ACCURATE;
 			break;
 		case MISSION_GOTO_COORDS_STRAIGHT_ACCURATE:
@@ -402,7 +402,7 @@ void CCarAI::UpdateCarAI(CVehicle* pVehicle)
 					if (flatSpeed < SQR(0.018f) && CTimer::GetTimeInMilliseconds() - pVehicle->AutoPilot.m_nAntiReverseTimer > 2000){
 						pVehicle->AutoPilot.m_nTempAction = TEMPACT_REVERSE;
 						if (pVehicle->AutoPilot.m_nCarMission != MISSION_NONE &&
-						  pVehicle->AutoPilot.m_nCarMission != MISSION_CRUISE || pVehicle->VehicleCreatedBy == RANDOM_VEHICLE)
+						  pVehicle->AutoPilot.m_nCarMission != MISSION_CRUISE || pVehicle->VehicleCreatedBy == MISSION_VEHICLE)
 							pVehicle->AutoPilot.m_nTimeTempAction = CTimer::GetTimeInMilliseconds() + 1500;
 						else
 							pVehicle->AutoPilot.m_nTimeTempAction = CTimer::GetTimeInMilliseconds() + 750;
@@ -434,7 +434,7 @@ void CCarAI::UpdateCarAI(CVehicle* pVehicle)
 				pVehicle->AutoPilot.m_nCarMission = MISSION_BLOCKPLAYER_FARAWAY;
 		}
 	}
-	if (pVehicle->GetUp().z < 0.7f){
+	if (pVehicle->GetUp().z < -0.7f){
 		pVehicle->AutoPilot.m_nTempAction = TEMPACT_WAIT;
 		pVehicle->AutoPilot.m_nTimeTempAction = CTimer::GetTimeInMilliseconds() + 1000;
 	}

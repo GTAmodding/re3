@@ -524,7 +524,7 @@ cMusicManager::ServiceGameMode()
 					} else if (dist >= 100.0f) {
 						int8 volume = ((45.0f - (Sqrt(dist) - 10.0f)) / 45.0f * 100.0f);
 						int8 pan;
-						if (AudioManager.IsMissionAudioPlaying())
+						if (AudioManager.ShouldDuckMissionAudio(0) || AudioManager.ShouldDuckMissionAudio(1))
 							volume /= 4;
 						if (volume != 0) {
 							CVector trVec;
@@ -536,7 +536,7 @@ cMusicManager::ServiceGameMode()
 						if (gRetuneCounter)
 							volume /= 4;
 						SampleManager.SetStreamedVolumeAndPan(volume, pan, 0, 0);
-					} else if (AudioManager.IsMissionAudioPlaying()) {
+					} else if (AudioManager.ShouldDuckMissionAudio(0) || AudioManager.ShouldDuckMissionAudio(1)) {
 						SampleManager.SetStreamedVolumeAndPan(25, 63, 0, 0);
 					} else if (gRetuneCounter) {
 						SampleManager.SetStreamedVolumeAndPan(25, 63, 0, 0);
@@ -544,7 +544,7 @@ cMusicManager::ServiceGameMode()
 						SampleManager.SetStreamedVolumeAndPan(100, 63, 0, 0);
 					}
 				}
-			} else if (AudioManager.IsMissionAudioPlaying()) {
+			} else if (AudioManager.ShouldDuckMissionAudio(0) || AudioManager.ShouldDuckMissionAudio(1)) {
 				SampleManager.SetStreamedVolumeAndPan(25, 63, 0, 0);
 				nFramesSinceCutsceneEnded = 0;
 			} else {
@@ -830,7 +830,7 @@ cMusicManager::ServiceAnnouncement()
 
 		SampleManager.SetStreamedVolumeAndPan(0, 63, 0, 0);
 		if (SampleManager.StartStreamedFile(m_nAnnouncement, 0, 0)) {
-			SampleManager.SetStreamedVolumeAndPan(AudioManager.IsMissionAudioPlaying() ? 25 : 100, 63, 0, 0);
+			SampleManager.SetStreamedVolumeAndPan((AudioManager.IsMissionAudioSamplePlaying(0) || AudioManager.IsMissionAudioSamplePlaying(1)) ? 25 : 100, 63, 0, 0);
 			m_bAnnouncementInProgress = true;
 			m_nPreviousStreamedSound = m_nCurrentStreamedSound;
 			m_nCurrentStreamedSound = m_nAnnouncement;
@@ -903,7 +903,7 @@ cMusicManager::ChangeRadioChannel()
 			return false;
 		if (!SampleManager.StartStreamedFile(m_nCurrentStreamedSound, GetTrackStartPos(m_nCurrentStreamedSound), 0))
 			return false;
-		SampleManager.SetStreamedVolumeAndPan(AudioManager.IsMissionAudioPlaying() ? 25 : 100, 63, 0, 0);
+		SampleManager.SetStreamedVolumeAndPan((AudioManager.IsMissionAudioSamplePlaying(0) || AudioManager.IsMissionAudioSamplePlaying(1)) ? 25 : 100, 63, 0, 0);
 	}
 	return true;
 }

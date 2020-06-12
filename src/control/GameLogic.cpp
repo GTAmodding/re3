@@ -193,15 +193,15 @@ CGameLogic::Update()
 				pPlayerInfo.m_nBustedAudioStatus = BUSTEDAUDIO_LOADING;
 				char name[12];
 				sprintf(name, pPlayerInfo.m_nCurrentBustedAudio >= 10 ? "bust_%d" : "bust_0%d", pPlayerInfo.m_nCurrentBustedAudio);
-				DMAudio.ClearMissionAudio(); // TODO(MIAMI): argument is 0
-				DMAudio.PreloadMissionAudio(name); // TODO(MIAMI): argument is 0
+				DMAudio.ClearMissionAudio(0);
+				DMAudio.PreloadMissionAudio(0, name);
 				pPlayerInfo.m_nCurrentBustedAudio = pPlayerInfo.m_nCurrentBustedAudio % 28 + 1; // enum? const? TODO
 			}
 		}
 		if (CTimer::GetTimeInMilliseconds() - pPlayerInfo.m_nWBTime > 4000 &&
 			pPlayerInfo.m_nBustedAudioStatus == BUSTEDAUDIO_LOADING &&
-			DMAudio.GetMissionAudioLoadingStatus() == 1) { // TODO: argument is 0
-			DMAudio.PlayLoadedMissionAudio(); // TODO: argument is 0
+			DMAudio.GetMissionAudioLoadingStatus(0) == 1) {
+			DMAudio.PlayLoadedMissionAudio(0);
 			pPlayerInfo.m_nBustedAudioStatus = BUSTEDAUDIO_DONE;
 		}
 		

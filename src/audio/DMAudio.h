@@ -76,12 +76,12 @@ public:
 	void PlayPreloadedCutSceneMusic(void);
 	void StopCutSceneMusic(void);
 	
-	void PreloadMissionAudio(char *missionAudio);
-	uint8 GetMissionAudioLoadingStatus(void);
-	void SetMissionAudioLocation(float x, float y, float z);
-	void PlayLoadedMissionAudio(void);
-	bool IsMissionAudioSampleFinished(void);
-	void ClearMissionAudio(void);
+	void PreloadMissionAudio(uint8 slot, Const char *missionAudio);
+	uint8 GetMissionAudioLoadingStatus(uint8 slot);
+	void SetMissionAudioLocation(uint8 slot, float x, float y, float z);
+	void PlayLoadedMissionAudio(uint8 slot);
+	bool IsMissionAudioSampleFinished(uint8 slot);
+	void ClearMissionAudio(uint8 slot);
 
 	uint8 GetRadioInCar(void);
 	void SetRadioInCar(uint32 radio);

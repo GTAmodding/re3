@@ -3825,7 +3825,6 @@ int8 CRunningScript::ProcessCommands400To499(int32 command)
 	{
 		CollectParameters(&m_nIp, 1);
 		CVehicle* pVehicle = CPools::GetVehiclePool()->GetAt(ScriptParams[0]);
-		assert(pVehicle);
 		CTheScripts::UpsideDownCars.RemoveCarFromCheck(ScriptParams[0]);
 		return 0;
 	}
@@ -5524,8 +5523,13 @@ int8 CRunningScript::ProcessCommands600To699(int32 command)
 		CollectParameters(&m_nIp, 2);
 		CVehicle* pVehicle = CPools::GetVehiclePool()->GetAt(ScriptParams[0]);
 		assert(pVehicle);
-		assert(pVehicle->m_vehType == VEHICLE_TYPE_CAR);
-		((CAutomobile*)pVehicle)->bFixedColour = (ScriptParams[1] == 0);
+		//assert(pVehicle->m_vehType == VEHICLE_TYPE_CAR);
+		// they DO call this for bikes, we don't really want to destroy the structure...
+#ifdef FIX_BUGS
+		if (pVehicle->m_vehType == VEHICLE_TYPE_CAR)
+#endif
+			((CAutomobile*)pVehicle)->bFixedColour = (ScriptParams[1] == 0);
+		
 		return 0;
 	}
 	/*
@@ -7926,7 +7930,7 @@ int8 CRunningScript::ProcessCommands900To999(int32 command)
 		CollectParameters(&m_nIp, 4);
 		CObject* pObject = CPools::GetObjectPool()->GetAt(ScriptParams[0]);
 		assert(pObject);
-		pObject->SetMoveSpeed(pObject->GetMoveSpeed() + *(CVector*)&ScriptParams[1] / METERS_PER_SECOND_TO_GAME_SPEED);
+		pObject->AddToMoveSpeed(*(CVector*)&ScriptParams[1] * METERS_PER_SECOND_TO_GAME_SPEED);
 		return 0;
 	}
 	case COMMAND_DRAW_SPRITE:
@@ -9062,7 +9066,7 @@ int8 CRunningScript::ProcessCommands1000To1099(int32 command)
 	{
 		CollectParameters(&m_nIp, 1);
 		debug("CLEAR_MISSION_AUDIO not implemented\n");
-		//DMAudio.ClearMissionAudio();
+		//DMAudio.ClearMissionAudio(ScriptParams[0]);
 		return 0;
 	}
 	/*
@@ -10372,6 +10376,7 @@ int8 CRunningScript::ProcessCommands1100To1199(int32 command)
 				bIsBurst = pCar->Damage.GetWheelStatus(ScriptParams[1] == WHEEL_STATUS_BURST);
 		}
 		UpdateCompareFlag(bIsBurst);
+		return 0;
 	}
 	//case COMMAND_SET_CAR_DRIVE_STRAIGHT_AHEAD:
 	//case COMMAND_SET_CAR_WAIT:
@@ -11447,6 +11452,7 @@ int8 CRunningScript::ProcessCommands1300To1399(int32 command)
 		CPed* pPed = CWorld::Players[ScriptParams[0]].m_pPed;
 		assert(pPed);
 		pPed->bDoomAim = ScriptParams[1];
+		return 0;
 	}
 	case COMMAND_FIRE_HUNTER_GUN:
 	{
@@ -11806,6 +11812,7 @@ int8 CRunningScript::ProcessCommands1300To1399(int32 command)
 		CPed* pPed = CPools::GetPedPool()->GetAt(ScriptParams[0]);
 		assert(pPed);
 		UpdateCompareFlag(pPed->m_nWaitState == WAITSTATE_STUCK);
+		return 0;
 	}
 	case COMMAND_SET_ALL_TAXIS_HAVE_NITRO:
 	{
@@ -11827,6 +11834,7 @@ int8 CRunningScript::ProcessCommands1300To1399(int32 command)
 			pPed->bStopAndShoot = false;
 		}
 		pPed->m_nLastPedState = PED_NONE;
+		return 0;
 	}
 	case COMMAND_FREEZE_CAR_POSITION_AND_DONT_LOAD_COLLISION:
 	{

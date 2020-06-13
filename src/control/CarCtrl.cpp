@@ -2645,7 +2645,7 @@ void CCarCtrl::SteerAIHeliTowardsTargetCoors(CAutomobile* pHeli)
 {
 	if (pHeli->m_aWheelSpeed[1] < 0.22f)
 		pHeli->m_aWheelSpeed[1] += 0.001f;
-	if (pHeli->m_aWheelSpeed[1] < 0.22f)
+	if (pHeli->m_aWheelSpeed[1] < 0.15f)
 		return;
 	CVector2D vecToTarget = pHeli->AutoPilot.m_vecDestinationCoors - pHeli->GetPosition();
 	float distanceToTarget = vecToTarget.Magnitude();
@@ -2654,7 +2654,7 @@ void CCarCtrl::SteerAIHeliTowardsTargetCoors(CAutomobile* pHeli)
 #else
 	float speed = pHeli->AutoPilot.m_nCruiseSpeed * 0.01f;
 #endif
-	if (distanceToTarget >= 100.0f)
+	if (distanceToTarget <= 100.0f)
 	{
 		if (distanceToTarget > 75.0f)
 			speed *= 0.7f;
@@ -2668,34 +2668,33 @@ void CCarCtrl::SteerAIHeliTowardsTargetCoors(CAutomobile* pHeli)
 	float resistance = Pow(0.997f, CTimer::GetTimeStep());
 	pHeli->m_vecMoveSpeed.x *= resistance;
 	pHeli->m_vecMoveSpeed.y *= resistance;
-	vecAdvanceThisFrame -= pHeli->m_vecMoveSpeed;
-	CVector2D vecSpeedChange = vecAdvanceThisFrame - pHeli->m_vecMoveSpeed;
-	float vecSpeedChangeLength = vecSpeedChange.Magnitude();
-	vecSpeedChange.Normalise();
+	CVector2D vecSpeedDirection = vecAdvanceThisFrame - pHeli->m_vecMoveSpeed;
+	float vecSpeedChangeLength = vecSpeedDirection.Magnitude();
+	vecSpeedDirection.Normalise();
 	float changeMultiplier = 0.002f * CTimer::GetTimeStep();
 	if (distanceToTarget < 5.0f)
 		changeMultiplier /= 5.0f;
 	if (vecSpeedChangeLength < changeMultiplier)
-		pHeli->AddToMoveSpeed(vecAdvanceThisFrame);
+		pHeli->SetMoveSpeed(vecAdvanceThisFrame.x, vecAdvanceThisFrame.y, pHeli->GetMoveSpeed().z);
 	else
-		pHeli->AddToMoveSpeed(vecSpeedChange * changeMultiplier);
-	pHeli->SetPosition(pHeli->GetPosition() + CVector(CTimer::GetTimeStep() * pHeli->GetMoveSpeed().x, CTimer::GetTimeStep() * pHeli->GetMoveSpeed().y, 0.0f));
+		pHeli->AddToMoveSpeed(vecSpeedDirection * changeMultiplier);
+	pHeli->GetMatrix().Translate(CTimer::GetTimeStep() * pHeli->GetMoveSpeed().x, CTimer::GetTimeStep() * pHeli->GetMoveSpeed().y, 0.0f);
 	float ZTarget = pHeli->AutoPilot.m_vecDestinationCoors.z;
 	if (CTimer::GetTimeInMilliseconds() & 0x800) // switch every ~2 seconds
 		ZTarget += 2.0f;
 	float ZSpeedTarget = (ZTarget - pHeli->GetPosition().z) * 0.01f;
 	float ZSpeedChangeTarget = ZSpeedTarget - pHeli->GetMoveSpeed().z;
-	float ZSpeedChangeMax = 0.01f * CTimer::GetTimeStep();
+	float ZSpeedChangeMax = 0.001f * CTimer::GetTimeStep();
 	if (!pHeli->bHeliDestroyed) {
 		if (Abs(ZSpeedChangeTarget) < ZSpeedChangeMax)
 			pHeli->SetMoveSpeed(pHeli->GetMoveSpeed().x, pHeli->GetMoveSpeed().y, ZSpeedTarget);
 		else if (ZSpeedChangeTarget < 0.0f)
-			pHeli->AddToMoveSpeed(0.0f, 0.0f, -1.5f * ZSpeedChangeMax);
+			pHeli->AddToMoveSpeed(0.0f, 0.0f, -ZSpeedChangeMax);
 		else
-			pHeli->AddToMoveSpeed(0.0f, 0.0f, ZSpeedChangeMax);
+			pHeli->AddToMoveSpeed(0.0f, 0.0f, 1.5f * ZSpeedChangeMax);
 	}
-	pHeli->SetPosition(pHeli->GetPosition() + CVector(0.0f, 0.0f, CTimer::GetTimeStep() * pHeli->GetMoveSpeed().z));
-	pHeli->SetTurnSpeed(pHeli->GetTurnSpeed().x, pHeli->GetTurnSpeed().y, pHeli->GetTurnSpeed().z * Pow(0.99f, CTimer::GetTimeStep()));
+	pHeli->GetMatrix().Translate(0.0f, 0.0f, CTimer::GetTimeStep() * pHeli->GetMoveSpeed().z);
+	pHeli->m_vecTurnSpeed.z *= Pow(0.99f, CTimer::GetTimeStep());
 	float ZTurnSpeedTarget;
 	if (distanceToTarget < 8.0f && pHeli->m_fHeliOrientation < 0.0f)
 		ZTurnSpeedTarget = 0.0f;
@@ -2703,6 +2702,7 @@ void CCarCtrl::SteerAIHeliTowardsTargetCoors(CAutomobile* pHeli)
 		float fAngleTarget = CGeneral::GetATanOfXY(vecToTarget.x, vecToTarget.y) + PI;
 		if (pHeli->m_fHeliOrientation >= 0.0f)
 			fAngleTarget = pHeli->m_fHeliOrientation;
+		fAngleTarget -= pHeli->m_fOrientation;
 		while (fAngleTarget < -PI)
 			fAngleTarget += TWOPI;
 		while (fAngleTarget > PI)
@@ -2710,9 +2710,9 @@ void CCarCtrl::SteerAIHeliTowardsTargetCoors(CAutomobile* pHeli)
 		if (Abs(fAngleTarget) <= 0.4f)
 			ZTurnSpeedTarget = 0.0f;
 		else if (fAngleTarget < 0.0f)
-			ZTurnSpeedTarget = 0.03f;
-		else
 			ZTurnSpeedTarget = -0.03f;
+		else
+			ZTurnSpeedTarget = 0.03f;
 	}
 	float ZTurnSpeedChangeTarget = ZTurnSpeedTarget - pHeli->GetTurnSpeed().z;
 	float ZTurnSpeedLimit = 0.0002f * CTimer::GetTimeStep();
@@ -2729,7 +2729,7 @@ void CCarCtrl::SteerAIHeliTowardsTargetCoors(CAutomobile* pHeli)
 	else
 		up = CVector(3.0f * pHeli->GetMoveSpeed().x, 3.0f * pHeli->GetMoveSpeed().y, 1.0f);
 	up.Normalise();
-	CVector forward(Sin(pHeli->m_fOrientation), Cos(pHeli->m_fOrientation), 0.0f);
+	CVector forward(Cos(pHeli->m_fOrientation), Sin(pHeli->m_fOrientation), 0.0f);
 	CVector right = CrossProduct(up, forward);
 	forward = CrossProduct(up, right);
 	pHeli->GetMatrix().GetRight() = right;

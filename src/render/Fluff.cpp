@@ -185,7 +185,7 @@ void CMovingThings::Update()
 		if (aMovingThings[i].m_nHidden == 0)
 			aMovingThings[i].Update();
 	}
-
+	/* I don't think these are done yet? 
 	for (i = 0; i < 11; ++i)
 	{
 		if (aScrollBars[i].IsVisible() || (CTimer::GetFrameCounter() + i) % 8 == 0)
@@ -201,6 +201,7 @@ void CMovingThings::Update()
 		if (aDigitalClocks[i].IsVisible() || (CTimer::GetFrameCounter() + i) % 8 == 0)
 			aDigitalClocks[i].Update();
 	}
+	*/
 }
 
 void CMovingThings::Render()

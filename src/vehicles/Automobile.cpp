@@ -5566,7 +5566,7 @@ CAutomobile::TellHeliToGoToCoors(float x, float y, float z, uint8 speed)
 	SetStatus(STATUS_PHYSICS);
 
 	if(m_fOrientation == 0.0f){
-		m_fOrientation = CGeneral::GetATanOfXY(GetForward().x, GetForward().y) + TWOPI;
+		m_fOrientation = CGeneral::GetATanOfXY(GetForward().x, GetForward().y) + PI;
 		while(m_fOrientation > TWOPI) m_fOrientation -= TWOPI;
 	}
 }

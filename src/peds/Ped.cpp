@@ -19167,10 +19167,11 @@ CPed::AttachPedToEntity(CEntity *ent, CVector offset, uint16 type, float rot, eW
 void
 CPed::DettachPedFromEntity(void)
 {
+	CEntity* pVehicleAttachedTo = m_attachedTo;
 	m_attachedTo = nil;
 	if (m_nPedState == PED_DIE) {
-		m_pCollidingEntity = m_attachedTo;
-		ApplyMoveForce(m_attachedTo->GetForward() * -4.0f);
+		m_pCollidingEntity = pVehicleAttachedTo;
+		ApplyMoveForce(pVehicleAttachedTo->GetForward() * -4.0f);
 		bIsStanding = false;
 	} else if (m_nPedState != PED_DEAD) {
 		RestorePreviousState();

@@ -773,10 +773,10 @@ CPopulation::AddPedInCar(CVehicle* car, bool isDriver)
 		case MI_KAUFMAN:
 			if (CGeneral::GetRandomTrueFalse()) {
 				pedType = PEDTYPE_CIVMALE;
-				preferredModel = MI_TAXI_D;
+				preferredModel = MI_HMOCA;
 				break;
 			}
-			defaultModel = MI_TAXI_D;
+			defaultModel = MI_HMOCA;
 
 			// fall through
 		default:

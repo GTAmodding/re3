@@ -50,8 +50,8 @@ public:
 	static int32 GetGangPedModel2(int16 gang) { return Gang[gang].m_nPedModel2MI; }
 	static int32 GetGangVehicleModel(int16 gang) { return Gang[gang].m_nVehicleMI; }
 	static CGangInfo *GetGangInfo(int16 gang) { return &Gang[gang]; }
+	static CGangInfo Gang[NUM_GANGS];
 
 private:
-	static CGangInfo Gang[NUM_GANGS];
 	static bool GangAttackWithCops[NUM_GANGS];
 };

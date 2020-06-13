@@ -38,6 +38,7 @@
 #include "WaterLevel.h"
 #include "General.h"
 #include "Fluff.h"
+#include "Gangs.h"
 
 CPad Pads[MAX_PADS];
 CMousePointerStateHelper MousePointerStateHelper;
@@ -176,8 +177,11 @@ void HealthCheat()
 	FindPlayerPed()->m_fHealth = CWorld::Players[0].m_nMaxHealth;
 	if (FindPlayerVehicle()) {
 		FindPlayerVehicle()->m_fHealth = 1000.0f;
-		if (FindPlayerVehicle()->m_vehType == VEHICLE_TYPE_CAR)
+		if (FindPlayerVehicle()->m_vehType == VEHICLE_TYPE_CAR) {
 			((CAutomobile*)FindPlayerVehicle())->Damage.SetEngineStatus(0);
+			for (int32 i = 0; i < 4; i++)
+				((CAutomobile*)FindPlayerVehicle())->Damage.SetWheelStatus(i, WHEEL_STATUS_OK);
+		}
 	}
 }
 
@@ -234,7 +238,7 @@ void ChangePlayerCheat()
 			do
 				modelId = CGeneral::GetRandomNumberInRange(0, MI_WFYG2+1);
 			while (!CModelInfo::GetModelInfo(modelId));
-		} while (modelId == MI_TAXI_D);
+		} while (modelId == MI_HMOCA);
 
 		uint8 flags = CStreaming::ms_aInfoForModel[modelId].m_flags;
 		ped->DeleteRwObject();
@@ -380,6 +384,12 @@ void NastyLimbsCheat()
 	CPed::bNastyLimbsCheat = !CPed::bNastyLimbsCheat;
 }
 
+void FannyMagnetCheat()
+{
+	CHud::SetHelpMessage(TheText.Get("CHEAT1"), true);
+	CPed::bFannyMagnetCheat = !CPed::bFannyMagnetCheat;
+}
+
 void BlackCarsCheat()
 {
 	CHud::SetHelpMessage(TheText.Get("CHEAT1"), true);
@@ -416,6 +426,17 @@ void BackToTheFuture(void)
 void SuicideCheat(void) {
 	CHud::SetHelpMessage(TheText.Get("CHEAT1"), true);
 	FindPlayerPed()->InflictDamage(nil, WEAPONTYPE_UNARMED, 1000.0f, PEDPIECE_TORSO, 0);
+}
+
+void DoChicksWithGunsCheat(void) {
+	CHud::SetHelpMessage(TheText.Get("CHEAT1"), true);
+	CStreaming::SetModelIsDeletable(CGangs::Gang[6].m_nPedModel1MI);
+	CStreaming::SetModelIsDeletable(CGangs::Gang[6].m_nPedModel2MI);
+	CStreaming::SetModelTxdIsDeletable(CGangs::Gang[6].m_nPedModel1MI);
+	CStreaming::SetModelTxdIsDeletable(CGangs::Gang[6].m_nPedModel2MI);
+	CStreaming::RemoveCurrentZonesModels();
+	CGangs::SetGangPedModels(GANG_PLAYER, MI_HFYBE, MI_WFYBE);
+	CGangs::SetGangWeapons(GANG_PLAYER, WEAPONTYPE_M4, WEAPONTYPE_M4);
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -473,6 +494,12 @@ void AltDodoCheat(void)
 	CHud::SetHelpMessage(string, true);
 }
 #endif
+
+void FlyingFishCheat(void)
+{
+	CHud::SetHelpMessage(TheText.Get("CHEAT1"), true);
+	CVehicle::bCheat8 = !CVehicle::bCheat8;
+}
 
 bool
 CControllerState::CheckForInput(void)
@@ -996,7 +1023,7 @@ int Cheat_strncmp(char* sourceStr, char* origCheatStr)
 {
 	char cheatCodeVals[] = { 3,5,7,1,13,27,3,7,1,11,13,8,7,32,13,6,28,19,10,3,3,5,7,1,13,27,3,7 };
 
-	for (int32 i = 0; i < strlen(origCheatStr); i++) {
+	for (uint32 i = 0; i < strlen(origCheatStr); i++) {
 		if ((sourceStr[i] != origCheatStr[i] - cheatCodeVals[i]) || i >= ARRAY_SIZE(cheatCodeVals)) {
 			return 1;
 		}
@@ -1120,6 +1147,7 @@ void CPad::AddToPCCheatString(char c)
 	//COMEFLYWITHME
 	else if (!Cheat_strncmp(KeyBoardCheatString, "HROUVr\\SGPZWJ")) {
 		KeyBoardCheatString[0] = ' ';
+		ChittyChittyBangBangCheat();
 	}
 	// "GRIPISEVERYTHING"
 	else if (!Cheat_strncmp(KeyBoardCheatString, "JSPIatULWP`QWi_M")) {
@@ -1133,6 +1161,7 @@ void CPad::AddToPCCheatString(char c)
 	// "CHICKSWITHGUNS"
 	else if (!Cheat_strncmp(KeyBoardCheatString, "VS\\HUoL^TVPQOc")) {
 		KeyBoardCheatString[0] = ' ';
+		DoChicksWithGunsCheat();
 	}
 	// "ICANTTAKEITANYMORE"
 	else if (!Cheat_strncmp(KeyBoardCheatString, "HWVNfiD[JPXI[t[G_\\")) {
@@ -1260,10 +1289,17 @@ void CPad::AddToPCCheatString(char c)
 	//CERTAINDEATH
 	else if (!Cheat_strncmp(KeyBoardCheatString, "KYHFQiLHU]RK")) {
 		KeyBoardCheatString[0] = ' ';
-		if (!CSmokeTrails::CigOn)
-			CSmokeTrails::CigOn = true;
-		else
-			CSmokeTrails::CigOn = false;
+		CSmokeTrails::CigOn = !CSmokeTrails::CigOn;
+	}
+	//AIRSHIP
+	else if (!Cheat_strncmp(KeyBoardCheatString, "SNOT_dD")) {
+		KeyBoardCheatString[0] = ' ';
+		FlyingFishCheat();
+	}
+	//FANNYMAGNET
+	else if (!Cheat_strncmp(KeyBoardCheatString, "WJUHNh\\UOLS")) {
+		KeyBoardCheatString[0] = ' ';
+		FannyMagnetCheat();
 	}
 	// "ILOVESCOTLAND"
 	if (!_CHEATCMP("DNALTOCSEVOLI"))
@@ -1272,10 +1308,6 @@ void CPad::AddToPCCheatString(char c)
 	// "MADWEATHER"
 	if (!_CHEATCMP("REHTAEWDAM"))
 		FastWeatherCheat();
-
-	// "CHITTYCHITTYBB"
-	if (!_CHEATCMP("BBYTTIHCYTTIHC"))
-		ChittyChittyBangBangCheat();
 
 	// "NASTYLIMBSCHEAT"
 	if (!_CHEATCMP("TAEHCSBMILYTSAN"))
@@ -2671,6 +2703,7 @@ void CPad::ResetCheats(void)
 	CPopulation::ms_bGivePedsWeapons = false;
 	
 	CPed::bNastyLimbsCheat = false;
+	CPed::bFannyMagnetCheat = false;
 	CPed::bPedCheat2 = false;
 	CPed::bPedCheat3 = false;
 	
@@ -2679,6 +2712,7 @@ void CPad::ResetCheats(void)
 	CVehicle::bCheat3 = false;
 	CVehicle::bCheat4 = false;
 	CVehicle::bCheat5 = false;
+	CVehicle::bCheat8 = false;
 	gbBlackCars = false;
 	gbPinkCars = false;
 	

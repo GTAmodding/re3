@@ -55,6 +55,7 @@ CBoat::CBoat(int mi, uint8 owner) : CVehicle(owner)
 	SetModelIndex(mi);
 
 	pHandling = mod_HandlingManager.GetHandlingData((eHandlingId)minfo->m_handlingId);
+	pFlyingHandling = mod_HandlingManager.GetFlyingPointer((eHandlingId)minfo->m_handlingId);
 	minfo->ChooseVehicleColour(m_currentColour1, m_currentColour2);
 
 	m_fMass = pHandling->fMass;
@@ -536,12 +537,34 @@ CBoat::ProcessControl(void)
 		m_vecMoveSpeed.y = 0.0f;
 
 		if(m_fOrientation == INVALID_ORIENTATION){
-			m_fOrientation = GetForward().Heading();
+			m_fOrientation = GetForward().Heading();	
 		}else{
 			// is this some inlined CPlaceable method?
 			CVector pos = GetPosition();
 			GetMatrix().RotateZ(m_fOrientation - GetForward().Heading());
 			GetMatrix().GetPosition() = pos;
+		}
+	}
+	
+	if (m_modelIndex != MI_SKIMMER || CTimer::GetTimeStep() <= 0.0f) {
+		if (bCheat8) {
+			FlyingControl(FLIGHT_MODEL_PLANE);
+		}
+	}
+	else {
+		if (m_type) {
+			if (GetRight().x <= CTimer::GetTimeStep() * 0.0005f) {
+				GetRight().x = 0.0f;
+			}
+			else {
+				GetRight().x -= CTimer::GetTimeStep() * 0.0005f;
+			}
+		}
+		else {
+			if (GetRight().x >= 0.22f) {
+				GetRight().x += CTimer::GetTimeStep() * 0.001f;
+			}
+			FlyingControl(FLIGHT_MODEL_SEAPLANE);
 		}
 	}
 

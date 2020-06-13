@@ -98,6 +98,7 @@ CVector vecPedDirtBikeJumpRhsAnimOffset;
 CVector vecPedBikeKickAnimOffset;
 
 bool CPed::bNastyLimbsCheat;
+bool CPed::bFannyMagnetCheat;
 bool CPed::bPedCheat2;
 bool CPed::bPedCheat3;
 CVector2D CPed::ms_vec2DFleePosition;
@@ -11419,6 +11420,11 @@ CPed::ProcessControl(void)
 #ifndef VC_PED_PORTS
 			m_pCurrentPhysSurface = nil;
 #endif
+			if (bFannyMagnetCheat && m_nPedType == PEDTYPE_CIVFEMALE
+				&& m_pedStats->m_sexiness > 40 && !m_leader) {
+				SetLeader(FindPlayerPed());
+			}
+
 		} else {
 			if (bIsStanding && (!m_pCurrentPhysSurface || IsPlayer())
 				|| bIsInWater || !bUsesCollision) {

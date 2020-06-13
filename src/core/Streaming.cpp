@@ -1331,7 +1331,7 @@ CStreaming::LoadInitialPeds(void)
 {
 	RequestModel(MI_COP, STREAMFLAGS_DONT_REMOVE);
 	RequestModel(MI_MALE01, STREAMFLAGS_DONT_REMOVE);
-	RequestModel(MI_HMOCA, STREAMFLAGS_DONT_REMOVE);
+	RequestModel(MI_TAXI_D, STREAMFLAGS_DONT_REMOVE);
 }
 
 void
@@ -1565,7 +1565,7 @@ CStreaming::RemoveCurrentZonesModels(void)
 		}
 
 	CStreaming::RequestModel(MI_MALE01, STREAMFLAGS_DONT_REMOVE);
-	CStreaming::RequestModel(MI_HMOCA, STREAMFLAGS_DONT_REMOVE);
+	CStreaming::RequestModel(MI_TAXI_D, STREAMFLAGS_DONT_REMOVE);
 
 	for(i = 0; i < NUM_GANGS; i++){
 		if (CGangs::GetGangPedModel1(i) != -1) {

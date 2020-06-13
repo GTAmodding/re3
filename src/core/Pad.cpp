@@ -238,7 +238,7 @@ void ChangePlayerCheat()
 			do
 				modelId = CGeneral::GetRandomNumberInRange(0, MI_WFYG2+1);
 			while (!CModelInfo::GetModelInfo(modelId));
-		} while (modelId == MI_HMOCA);
+		} while (modelId == MI_TAXI_D);
 
 		uint8 flags = CStreaming::ms_aInfoForModel[modelId].m_flags;
 		ped->DeleteRwObject();

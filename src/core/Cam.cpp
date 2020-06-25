@@ -1688,7 +1688,7 @@ CCam::Process_BehindCar(const CVector &CameraTarget, float TargetOrientation, fl
 	if(Length < 0.002f)
 		Length = 0.002f;
 	Beta = CGeneral::GetATanOfXY(TargetCoors.x - Source.x, TargetCoors.y - Source.y);
-#ifdef TOGGLEABLE_BETA_FEATURES
+#if 1
 	// This is completely made up but Bill's cam manipulates an angle before calling this
 	// and otherwise calculating Beta doesn't make much sense.
 	Beta += fBillsBetaOffset;

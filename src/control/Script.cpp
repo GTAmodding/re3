@@ -3281,7 +3281,12 @@ int8 CRunningScript::ProcessCommands100To199(int32 command)
 		ped->ClearAll();
 		int8 path = ScriptParams[1];
 		if (ScriptParams[1] < 0 || ScriptParams[1] > 7)
+			// Max number GetRandomNumberInRange returns is max-1
+#ifdef FIX_BUGS
+			path = CGeneral::GetRandomNumberInRange(0, 8);
+#else
 			path = CGeneral::GetRandomNumberInRange(0, 7);
+#endif
 		ped->SetWanderPath(path);
 		return 0;
 	}

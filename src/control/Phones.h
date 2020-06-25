@@ -61,6 +61,9 @@ public:
 	void Initialise(void);
 	void Shutdown(void);
 	void Update(void);
+#ifdef PEDS_REPORT_CRIMES_ON_PHONE
+	int SwapPhone(float xPos, float yPos, int into);
+#endif
 };
 
 extern CPhoneInfo gPhoneInfo;
@@ -68,7 +71,7 @@ extern CPhoneInfo gPhoneInfo;
 void PhonePutDownCB(CAnimBlendAssociation *assoc, void *arg);
 void PhonePickUpCB(CAnimBlendAssociation *assoc, void *arg);
 
-#ifdef TOGGLEABLE_BETA_FEATURES
+#ifdef PEDS_REPORT_CRIMES_ON_PHONE
 extern CPed *crimeReporters[NUMPHONES];
 bool isPhoneAvailable(int);
 #endif

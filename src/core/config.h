@@ -190,7 +190,6 @@ enum Config {
 #endif
 
 #define FIX_BUGS		// fixes bugs that we've came across during reversing, TODO: use this more
-#define TOGGLEABLE_BETA_FEATURES // toggleable from debug menu. not too many things
 #define MORE_LANGUAGES		// Add more translations to the game
 #define COMPATIBLE_SAVES // this allows changing structs while keeping saves compatible
 
@@ -233,7 +232,7 @@ enum Config {
 #define USE_PRECISE_MEASUREMENT_CONVERTION // makes game convert feet to meeters more precisely
 #define MISSION_REPLAY // mobile feature
 //#define SIMPLIER_MISSIONS // apply simplifications from mobile
-#define USE_ADVANCED_SCRIPT_DEBUG_OUTPUT
+//#define USE_ADVANCED_SCRIPT_DEBUG_OUTPUT
 #define SCRIPT_LOG_FILE_LEVEL 1 // 0 == no log, 1 == overwrite every frame, 2 == full log
 
 // Replay
@@ -254,6 +253,7 @@ enum Config {
 #define VC_PED_PORTS			// various ports from VC's CPed, mostly subtle
 // #define NEW_WALK_AROUND_ALGORITHM	// to make walking around vehicles/objects less awkward
 #define CANCELLABLE_CAR_ENTER
+//#define PEDS_REPORT_CRIMES_ON_PHONE
 
 // Camera
 //#define PS2_CAM_TRANSITION	// old way of transitioning between cam modes

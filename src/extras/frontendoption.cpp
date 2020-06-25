@@ -68,9 +68,11 @@ int8 RegisterNewOption(int screen)
 {
 	numCustomFrontendOptions++;
 	if (numCustomFrontendOptions == 1)
-		customFrontendOptions = (FrontendOption*)malloc(numCustomFrontendOptions * sizeof(FrontendOption));
-	else
-		customFrontendOptions = (FrontendOption*)realloc(customFrontendOptions, numCustomFrontendOptions * sizeof(FrontendOption));
+		customFrontendOptions = (FrontendOption*)malloc(5 * sizeof(FrontendOption));
+	else if (numCustomFrontendOptions % 5 == 1)
+		customFrontendOptions = (FrontendOption*)realloc(customFrontendOptions, (numCustomFrontendOptions + 4) * sizeof(FrontendOption));
+
+	assert(customFrontendOptions != nil && "Custom frontend options can't be allocated");
 
 	uint8 nth = GetNumberOfMenuOptions(screen);
 	if (optionCursor < 0) {

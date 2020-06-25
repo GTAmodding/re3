@@ -161,7 +161,11 @@ CWanted::RegisterCrime(eCrimeType type, const CVector &coors, uint32 id, bool po
 void
 CWanted::RegisterCrime_Immediately(eCrimeType type, const CVector &coors, uint32 id, bool policeDoesntCare)
 {
-	if(!AddCrimeToQ(type, id, coors, false, policeDoesntCare))
+#ifdef FIX_BUGS
+	if (!AddCrimeToQ(type, id, coors, true, policeDoesntCare))
+#else
+	if (!AddCrimeToQ(type, id, coors, false, policeDoesntCare))
+#endif
 		ReportCrimeNow(type, coors, policeDoesntCare);
 }
 
@@ -219,6 +223,9 @@ CWanted::ReportCrimeNow(eCrimeType type, const CVector &coors, bool policeDoesnt
 		chaos *= 0.333f;
 	switch(type){
 	case CRIME_POSSESSION_GUN:
+#ifdef PEDS_REPORT_CRIMES_ON_PHONE
+		m_nChaos += 5.0f*chaos;
+#endif
 		break;
 	case CRIME_HIT_PED:
 		m_nChaos += 5.0f*chaos;
@@ -440,6 +447,30 @@ CWanted::Reset(void)
 	Initialise();
 }
 
+#ifdef PEDS_REPORT_CRIMES_ON_PHONE
+bool
+CrimeShouldBeReportedOnPhone(eCrimeType crime)
+{
+	switch (crime) {
+		case CRIME_POSSESSION_GUN:
+		case CRIME_HIT_PED:
+		case CRIME_HIT_COP:
+		case CRIME_SHOOT_PED:
+		case CRIME_SHOOT_COP:
+		case CRIME_STEAL_CAR:
+		case CRIME_RECKLESS_DRIVING:
+		case CRIME_RUNOVER_PED:
+		case CRIME_RUNOVER_COP:
+		case CRIME_PED_BURNED:
+		case CRIME_COP_BURNED:
+		case CRIME_VEHICLE_BURNED:
+			return true;
+		default:
+			return false;
+	}
+}
+#endif
+
 void
 CWanted::UpdateCrimesQ(void)
 {
@@ -447,6 +478,9 @@ CWanted::UpdateCrimesQ(void)
 
 		CCrimeBeingQd &crime = m_aCrimes[i];
 		if (crime.m_nType != CRIME_NONE) {
+#ifdef PEDS_REPORT_CRIMES_ON_PHONE
+			if (!CrimeShouldBeReportedOnPhone(crime.m_nType))
+#endif
 			if (CTimer::GetTimeInMilliseconds() > crime.m_nTime + 500 && !crime.m_bReported) {
 				ReportCrimeNow(crime.m_nType, crime.m_vecPosn, crime.m_bPoliceDoesntCare);
 				crime.m_bReported = true;

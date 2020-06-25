@@ -10,6 +10,30 @@
 #include "Vehicle.h"
 #include "SurfaceTable.h"
 
+#ifdef PEDS_REPORT_CRIMES_ON_PHONE
+eCrimeType
+EventTypeToCrimeType(eEventType event)
+{
+	eCrimeType crime;
+	switch (event) {
+	case EVENT_ASSAULT: crime = CRIME_HIT_PED; break;
+	case EVENT_RUN_REDLIGHT: crime = CRIME_RUN_REDLIGHT; break;
+	case EVENT_ASSAULT_POLICE: crime = CRIME_HIT_COP; break;
+	case EVENT_GUNSHOT: crime = CRIME_POSSESSION_GUN; break;
+	case EVENT_STEAL_CAR: crime = CRIME_STEAL_CAR; break;
+	case EVENT_HIT_AND_RUN: crime = CRIME_RUNOVER_PED; break;
+	case EVENT_HIT_AND_RUN_COP: crime = CRIME_RUNOVER_COP; break;
+	case EVENT_SHOOT_PED: crime = CRIME_SHOOT_PED; break;
+	case EVENT_SHOOT_COP: crime = CRIME_SHOOT_COP; break;
+	case EVENT_PED_SET_ON_FIRE: crime = CRIME_PED_BURNED; break;
+	case EVENT_COP_SET_ON_FIRE: crime = CRIME_COP_BURNED; break;
+	case EVENT_CAR_SET_ON_FIRE: crime = CRIME_VEHICLE_BURNED; break;
+	default: crime = CRIME_NONE; break;
+	}
+	return crime;
+}
+#endif
+
 CCivilianPed::CCivilianPed(ePedType pedtype, uint32 mi) : CPed(pedtype)
 {
 	SetModelIndex(mi);
@@ -113,25 +137,20 @@ CCivilianPed::CivilianAI(void)
 					investigateDeadPed = false;
 			}
 
-#ifdef TOGGLEABLE_BETA_FEATURES
-			eCrimeType crime = (((CPed*)m_pEventEntity)->m_ped_flagI40 ?
-				(((CPed*)m_pEventEntity)->m_nPedType == PEDTYPE_COP ? CRIME_RUNOVER_COP : CRIME_RUNOVER_PED) :
-				(((CPed*)m_pEventEntity)->m_nPedType == PEDTYPE_COP ? CRIME_SHOOT_COP : CRIME_SHOOT_PED));
-			bool eligibleToReport = bMakePedsRunToPhonesToReportCrimes && killerOfDeadPed && killerOfDeadPed->IsPed() && ((CPed*)killerOfDeadPed)->IsPlayer() &&
-				m_pedStats->m_fear <= m_pedStats->m_lawfulness && m_pedStats->m_temper <= m_pedStats->m_fear;
+#ifdef PEDS_REPORT_CRIMES_ON_PHONE
+			int32 eventId = CheckForPlayerCrimes((CPed*)m_pEventEntity);
+			eCrimeType crime = (eventId == -1 ? CRIME_NONE : EventTypeToCrimeType(gaEvent[eventId].type));
+			bool eligibleToReport = crime != CRIME_NONE && m_pedStats->m_fear <= m_pedStats->m_lawfulness && m_pedStats->m_temper <= m_pedStats->m_fear;
 			if (IsGangMember() || !eligibleToReport || !RunToReportCrime(crime))
 #endif
 			if (investigateDeadPed)
 				SetInvestigateEvent(EVENT_DEAD_PED, CVector2D(m_pEventEntity->GetPosition()), 1.0f, 20000, 0.0f);
 
 		} else {
-#ifdef TOGGLEABLE_BETA_FEATURES
-			CEntity* killerOfDeadPed = ((CPed*)m_pEventEntity)->m_threatEntity;
-			eCrimeType crime = (((CPed*)m_pEventEntity)->m_ped_flagI40 ?
-				(((CPed*)m_pEventEntity)->m_nPedType == PEDTYPE_COP ? CRIME_RUNOVER_COP : CRIME_RUNOVER_PED) :
-				(((CPed*)m_pEventEntity)->m_nPedType == PEDTYPE_COP ? CRIME_SHOOT_COP : CRIME_SHOOT_PED));
-			bool eligibleToReport = bMakePedsRunToPhonesToReportCrimes && killerOfDeadPed && killerOfDeadPed->IsPed() && ((CPed*)killerOfDeadPed)->IsPlayer() &&
-				m_pedStats->m_fear <= m_pedStats->m_lawfulness && m_pedStats->m_temper <= m_pedStats->m_fear;
+#ifdef PEDS_REPORT_CRIMES_ON_PHONE
+			int32 eventId = CheckForPlayerCrimes((CPed*)m_pEventEntity);
+			eCrimeType crime = (eventId == -1 ? CRIME_NONE : EventTypeToCrimeType(gaEvent[eventId].type));
+			bool eligibleToReport = crime != CRIME_NONE && m_pedStats->m_fear <= m_pedStats->m_lawfulness && m_pedStats->m_temper <= m_pedStats->m_fear;
 			if(!eligibleToReport || !RunToReportCrime(crime))
 #endif
 			{
@@ -165,22 +184,48 @@ CCivilianPed::CivilianAI(void)
 			}
 		}
 	} else {
+#ifdef PEDS_REPORT_CRIMES_ON_PHONE
+		bool youShouldRunEventually = false;
+		bool dontGoToPhone = false;
+#endif
 		if (m_threatEntity && m_threatEntity->IsPed()) {
 			CPed *threatPed = (CPed*)m_threatEntity;
 			if (m_pedStats->m_fear <= 100 - threatPed->m_pedStats->m_temper && threatPed->m_nPedType != PEDTYPE_COP) {
 				if (threatPed->GetWeapon(m_currentWeapon).IsTypeMelee() || !GetWeapon()->IsTypeMelee()) {
 					if (threatPed->IsPlayer() && FindPlayerPed()->m_pWanted->m_CurrentCops != 0) {
 						if (m_objective == OBJECTIVE_KILL_CHAR_ON_FOOT || m_objective == OBJECTIVE_KILL_CHAR_ANY_MEANS) {
+#ifdef PEDS_REPORT_CRIMES_ON_PHONE
+							dontGoToPhone = true;
+#endif
 							SetFindPathAndFlee(m_threatEntity, 10000);
 						}
 					} else {
+#ifdef PEDS_REPORT_CRIMES_ON_PHONE
+						dontGoToPhone = true;
+#endif
 						SetObjective(OBJECTIVE_KILL_CHAR_ON_FOOT, m_threatEntity);
 					}
 				}
 			} else {
+#ifdef PEDS_REPORT_CRIMES_ON_PHONE
+				youShouldRunEventually = true;
+#else
+				SetFindPathAndFlee(m_threatEntity, 10000, true);
+#endif
+			}
+		}
+
+#ifdef PEDS_REPORT_CRIMES_ON_PHONE
+		if (!dontGoToPhone) {
+			int32 eventId = CheckForPlayerCrimes(nil);
+			eCrimeType crime = (eventId == -1 ? CRIME_NONE : EventTypeToCrimeType(gaEvent[eventId].type));
+			bool eligibleToReport = crime != CRIME_NONE && m_pedStats->m_fear <= m_pedStats->m_lawfulness;
+
+			if ((!eligibleToReport || !RunToReportCrime(crime)) && youShouldRunEventually) {
 				SetFindPathAndFlee(m_threatEntity, 10000, true);
 			}
 		}
+#endif
 	}
 }
 
@@ -217,15 +262,18 @@ CCivilianPed::ProcessControl(void)
 			if (Seek()) {
 				if ((m_objective == OBJECTIVE_GOTO_AREA_ON_FOOT || m_objective == OBJECTIVE_RUN_TO_AREA) && m_pNextPathNode) {
 					m_pNextPathNode = nil;
-#ifdef TOGGLEABLE_BETA_FEATURES
+#ifdef PEDS_REPORT_CRIMES_ON_PHONE
 				} else if (bRunningToPhone && m_objective < OBJECTIVE_FLEE_TILL_SAFE) {
 					if (!isPhoneAvailable(m_phoneId)) {
 						RestorePreviousState();
-						crimeReporters[m_phoneId] = nil;
+						if (crimeReporters[m_phoneId] == this)
+							crimeReporters[m_phoneId] = nil;
+
 						m_phoneId = -1;
 						bRunningToPhone = false;
 					} else {
 						crimeReporters[m_phoneId] = this;
+						m_facePhoneStart = true;
 						m_nPedState = PED_FACE_PHONE;
 					}
 #else

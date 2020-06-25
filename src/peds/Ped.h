@@ -385,9 +385,8 @@ public:
 #ifdef PED_SKIN
 	uint32 bDontAcceptIKLookAts : 1;	// TODO: find uses of this
 #endif
-	// our own flags
-	uint32 m_ped_flagI40 : 1; // bMakePedsRunToPhonesToReportCrimes makes use of this as runover by car indicator
-	uint32 m_ped_flagI80 : 1; // KANGAROO_CHEAT define makes use of this as cheat toggle 
+	uint32 m_ped_flagI40 : 1;
+	uint32 m_ped_flagI80 : 1; // originally unused, KANGAROO_CHEAT define makes use of this as cheat toggle 
 
 	uint8 CharCreatedBy;
 	eObjective m_objective;
@@ -454,6 +453,10 @@ public:
 	float m_distanceToCountSeekDone;
 	bool bRunningToPhone;
 	int16 m_phoneId;
+#ifdef PEDS_REPORT_CRIMES_ON_PHONE
+	bool m_facePhoneStart;
+	CEntity *m_victimOfPlayerCrime;
+#endif
 	eCrimeType m_crimeToReportOnPhone;
 	uint32 m_phoneTalkTimer;
 	CAccident *m_lastAccident;
@@ -588,6 +591,9 @@ public:
 	bool MakePhonecall(void);
 	bool FacePhone(void);
 	CPed *CheckForDeadPeds(void);
+#ifdef PEDS_REPORT_CRIMES_ON_PHONE
+	int32 CheckForPlayerCrimes(CPed *victim = nil);
+#endif
 	bool CheckForExplosions(CVector2D &area);
 	CPed *CheckForGunShots(void);
 	PointBlankNecessity CheckForPointBlankPeds(CPed*);
@@ -872,9 +878,8 @@ public:
 	static bool bPedCheat3;
 	static CVector2D ms_vec2DFleePosition;
 
-#ifdef TOGGLEABLE_BETA_FEATURES
+#ifdef DEBUGMENU
 	static bool bPopHeadsOnHeadshot;
-	static bool bMakePedsRunToPhonesToReportCrimes;
 #endif
 
 #ifndef MASTER

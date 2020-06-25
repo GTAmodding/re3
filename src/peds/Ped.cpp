@@ -118,9 +118,8 @@ void *CPed::operator new(size_t sz, int handle) { return CPools::GetPedPool()->N
 void CPed::operator delete(void *p, size_t sz) { CPools::GetPedPool()->Delete((CPed*)p); }
 void CPed::operator delete(void *p, int handle) { CPools::GetPedPool()->Delete((CPed*)p); }
 
-#ifdef TOGGLEABLE_BETA_FEATURES
+#ifdef DEBUGMENU
 bool CPed::bPopHeadsOnHeadshot = false;
-bool CPed::bMakePedsRunToPhonesToReportCrimes = false;
 #endif
 
 CPed::~CPed(void)
@@ -683,7 +682,7 @@ CPed::RemoveBodyPart(PedNode nodeId, int8 direction)
 			if(!IsClumpSkinned(GetClump()))
 #endif
 			{
-#ifdef TOGGLEABLE_BETA_FEATURES
+#ifdef DEBUGMENU
 				if (bPopHeadsOnHeadshot || nodeId != PED_HEAD)
 #else
 				if (nodeId != PED_HEAD)
@@ -2014,18 +2013,19 @@ CPed::SortPeds(CPed **list, int min, int max)
 void
 CPed::BuildPedLists(void)
 {
-	if ((CTimer::GetFrameCounter() + (m_randomSeed % 256)) % 16) {
+	if ((CTimer::GetFrameCounter() + m_randomSeed) % 16) {
 
 		for(int i = 0; i < ARRAY_SIZE(m_nearPeds); ) {
+			bool removePed = false;
 			if (m_nearPeds[i]) {
 				if (m_nearPeds[i]->IsPointerValid()) {
 					float distSqr = (GetPosition() - m_nearPeds[i]->GetPosition()).MagnitudeSqr2D();
-					if (distSqr < 900.0f) {
-						i++;
-						continue;
-					}
-				}
-
+					if (distSqr > 900.0f)
+						removePed = true;
+				} else
+					removePed = true;
+			}
+			if (removePed) {
 				// If we arrive here, the ped we're checking isn't "near", so we should remove it.
 				for (int j = i; j < ARRAY_SIZE(m_nearPeds) - 1; j++) {
 					m_nearPeds[j] = m_nearPeds[j + 1];
@@ -2033,7 +2033,7 @@ CPed::BuildPedLists(void)
 				}
 				// Above loop won't work when it's 9, so we need to empty slot 9.
 				m_nearPeds[9] = nil;
-				m_numNearPeds--;
+				m_numNearPeds--;	
 			} else
 				i++;
 		}
@@ -3078,47 +3078,106 @@ CPed::CheckAroundForPossibleCollisions(void)
 	}
 }
 
+#ifdef PEDS_REPORT_CRIMES_ON_PHONE
+void
+ReportPhonePickUpCB(CAnimBlendAssociation* assoc, void* arg)
+{
+	CPed* ped = (CPed*)arg;
+	ped->m_nMoveState = PEDMOVE_STILL;
+	CAnimManager::BlendAnimation(ped->GetClump(), ASSOCGRP_STD, ANIM_IDLE_STANCE, 8.0f);
+
+	if (assoc->blendAmount > 0.5f && ped) {
+		CAnimManager::BlendAnimation(ped->GetClump(), ASSOCGRP_STD, ANIM_PHONE_TALK, 8.0f);
+	}
+}
+
+void
+ReportPhonePutDownCB(CAnimBlendAssociation* assoc, void* arg)
+{
+	assoc->flags |= ASSOC_DELETEFADEDOUT;
+	assoc->blendDelta = -1000.0f;
+	CPed* ped = (CPed*)arg;
+
+	if (ped->m_phoneId != -1 && crimeReporters[ped->m_phoneId] == ped) {
+		crimeReporters[ped->m_phoneId] = nil;
+		gPhoneInfo.m_aPhones[ped->m_phoneId].m_nState = PHONE_STATE_FREE;
+		ped->m_phoneId = -1;
+	}
+
+	if (assoc->blendAmount > 0.5f)
+		ped->bUpdateAnimHeading = true;
+
+	ped->SetWanderPath(CGeneral::GetRandomNumber() & 7);
+}
+#endif
+
 bool
 CPed::MakePhonecall(void)
 {
-#ifdef TOGGLEABLE_BETA_FEATURES
-	if (bMakePedsRunToPhonesToReportCrimes)
-		if (!IsPlayer() && CTimer::GetTimeInMilliseconds() > m_phoneTalkTimer - 7000 && bRunningToPhone) {
+#ifdef PEDS_REPORT_CRIMES_ON_PHONE
+	if (!IsPlayer() && CTimer::GetTimeInMilliseconds() > m_phoneTalkTimer - 7000 && bRunningToPhone) {
 
-			FindPlayerPed()->m_pWanted->RegisterCrime_Immediately(m_crimeToReportOnPhone, GetPosition(),
-				(m_crimeToReportOnPhone == CRIME_POSSESSION_GUN ? (uintptr)m_threatEntity : (uintptr)((CPed*)m_pEventEntity)->m_threatEntity), false);
-			bRunningToPhone = false;
-		}
+		FindPlayerPed()->m_pWanted->RegisterCrime_Immediately(m_crimeToReportOnPhone, GetPosition(),
+			(m_crimeToReportOnPhone == CRIME_POSSESSION_GUN ? (uintptr)m_threatEntity : (uintptr)m_victimOfPlayerCrime), false);
+
+		if (m_crimeToReportOnPhone != CRIME_POSSESSION_GUN)
+			FindPlayerPed()->m_pWanted->SetWantedLevelNoDrop(1);
+
+		bRunningToPhone = false;
+	}
 #endif
 	if (CTimer::GetTimeInMilliseconds() <= m_phoneTalkTimer)
 		return false;
 
-	SetIdle();
-	gPhoneInfo.m_aPhones[m_phoneId].m_nState = PHONE_STATE_FREE;
-#ifdef TOGGLEABLE_BETA_FEATURES
-	crimeReporters[m_phoneId] = nil;
+#ifdef PEDS_REPORT_CRIMES_ON_PHONE
+	CAnimBlendAssociation* talkAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_PHONE_TALK);
+	if (talkAssoc && talkAssoc->blendAmount > 0.5f) {
+		CAnimBlendAssociation* endAssoc = CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ANIM_PHONE_OUT, 8.0f);
+		endAssoc->flags &= ~ASSOC_DELETEFADEDOUT;
+		endAssoc->SetFinishCallback(ReportPhonePutDownCB, this);
+	}
 #endif
+	SetIdle();
+
+	gPhoneInfo.m_aPhones[m_phoneId].m_nState = PHONE_STATE_FREE;
+#ifndef PEDS_REPORT_CRIMES_ON_PHONE
 	m_phoneId = -1;
+#endif
+
+	// Because SetWanderPath is now done async in ReportPhonePutDownCB
+#ifdef PEDS_REPORT_CRIMES_ON_PHONE
+	return false;
+#else
 	return true;
+#endif
 }
 
 bool
 CPed::FacePhone(void)
 {
-	// FIX: This function was broken since it's left unused early in development.
-#ifdef FIX_BUGS
+	// This function was broken since it's left unused early in development.
+#ifdef PEDS_REPORT_CRIMES_ON_PHONE
 	float phoneDir = CGeneral::GetRadianAngleBetweenPoints(
 		gPhoneInfo.m_aPhones[m_phoneId].m_vecPos.x, gPhoneInfo.m_aPhones[m_phoneId].m_vecPos.y,
 		GetPosition().x, GetPosition().y);
 
-	SetLookFlag(phoneDir, false);
-	bool turnDone = TurnBody();
-	if (turnDone) {
-		SetIdle();
-		ClearLookFlag();
-		m_phoneTalkTimer = CTimer::GetTimeInMilliseconds() + 10000;
+	if (m_facePhoneStart) {
+		m_lookTimer = 0;
+		SetLookFlag(phoneDir, true);
+		m_lookTimer = CTimer::GetTimeInMilliseconds() + 3000;
+		m_facePhoneStart = false;
 	}
-	return turnDone;
+
+	if (bIsLooking && TurnBody()) {
+		ClearLookFlag();
+		SetIdle();
+		m_phoneTalkTimer = CTimer::GetTimeInMilliseconds() + 10000;
+		CAnimBlendAssociation* assoc = CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ANIM_PHONE_IN, 4.0f);
+		assoc->SetFinishCallback(ReportPhonePickUpCB, this);
+		return true;
+	}
+
+	return false;
 #else
 	float currentRot = RADTODEG(m_fRotationCur);
 	float phoneDir = CGeneral::GetRadianAngleBetweenPoints(
@@ -3164,6 +3223,63 @@ CPed::CheckForDeadPeds(void)
 	bGonnaInvestigateEvent = false;
 	return nil;
 }
+
+#ifdef PEDS_REPORT_CRIMES_ON_PHONE
+// returns event id, parameter is optional
+int32
+CPed::CheckForPlayerCrimes(CPed *victim)
+{
+	int i;
+	float dist;
+	float mindist = 60.0f;
+	CPlayerPed *player = FindPlayerPed();
+	int32 victimRef = (victim ? CPools::GetPedRef(victim) : 0);
+	int event = -1;
+
+	for (i = 0; i < NUMEVENTS; i++) {
+		if (gaEvent[i].type == EVENT_NULL || gaEvent[i].type > EVENT_CAR_SET_ON_FIRE)
+			continue;
+
+		// those are already handled in game, also DEAD_PED isn't registered alone, most of the time there is SHOOT_PED etc.
+		if (gaEvent[i].type == EVENT_DEAD_PED || gaEvent[i].type == EVENT_GUNSHOT || gaEvent[i].type == EVENT_EXPLOSION)
+			continue;
+
+		if (victim && gaEvent[i].entityRef != victimRef)
+			continue;
+
+		if (gaEvent[i].criminal != player)
+			continue;
+
+		dist = (GetPosition() - gaEvent[i].posn).Magnitude();
+		if (dist < mindist) {
+			mindist = dist;
+			event = i;
+		}
+	}
+
+	if (event != -1) {
+		if (victim) {
+			m_victimOfPlayerCrime = victim;
+		} else {
+			switch (gaEvent[event].entityType) {
+			case EVENT_ENTITY_PED:
+				m_victimOfPlayerCrime = CPools::GetPed(gaEvent[event].entityRef);
+				break;
+			case EVENT_ENTITY_VEHICLE:
+				m_victimOfPlayerCrime = CPools::GetVehicle(gaEvent[event].entityRef);
+				break;
+			case EVENT_ENTITY_OBJECT:
+				m_victimOfPlayerCrime = CPools::GetObject(gaEvent[event].entityRef);
+				break;
+			default:
+				break;
+			}
+		}
+	}
+
+	return event;
+}
+#endif
 
 bool
 CPed::CheckForExplosions(CVector2D &area)
@@ -4542,6 +4658,14 @@ CPed::SetEvasiveDive(CPhysical *reason, uint8 onlyRandomJump)
 			wanted->RegisterCrime_Immediately(CRIME_SPEEDING, GetPosition(), (uintptr)this, false);
 		}
 	}
+#ifdef PEDS_REPORT_CRIMES_ON_PHONE
+	else if (reason->IsVehicle()) {
+		if (veh->pDriver && veh->pDriver->IsPlayer()) {
+			CWanted* wanted = FindPlayerPed()->m_pWanted;
+			wanted->RegisterCrime(CRIME_RECKLESS_DRIVING, GetPosition(), (uintptr)this, false);
+		}
+	}
+#endif
 }
 
 void
@@ -5384,61 +5508,15 @@ CPed::CollideWithPed(CPed *collideWith)
 									SetDirectionToWalkAroundObject(collideWith);
 								}
 							} else {
-#ifdef VC_PED_PORTS
-								if (FindPlayerPed() != m_pedInObjective
-									|| m_objective != OBJECTIVE_KILL_CHAR_ANY_MEANS && m_objective != OBJECTIVE_KILL_CHAR_ON_FOOT
-									|| collideWith == m_pedInObjective) {
-#endif
-									if (weAreMissionChar || m_pedStats->m_fear <= 100 - collideWith->m_pedStats->m_temper
-										|| (collideWith->IsPlayer() || collideWith->m_nMoveState == PEDMOVE_NONE || collideWith->m_nMoveState == PEDMOVE_STILL) &&
-										(!collideWith->IsPlayer() || ((CPlayerPed*)collideWith)->m_fMoveSpeed <= 1.0f)) {
-										SetDirectionToWalkAroundObject(collideWith);
-										if (!weAreMissionChar)
-											Say(SOUND_PED_CHAT);
-									} else {
-										SetEvasiveStep(collideWith, 2);
-									}
-#ifdef VC_PED_PORTS
-								} else if (collideWith->m_nMoveState != PEDMOVE_STILL && GetWeapon()->IsTypeMelee()
-									&& collideWith->m_pedInObjective == m_pedInObjective) {
-
-									int colliderIsAtPlayerSafePosID = -1;
-									int weAreAtPlayerSafePosID = -1;
-									for (int i = 0; i < ARRAY_SIZE(((CPlayerPed*)m_pedInObjective)->m_pPedAtSafePos); i++) {
-										CPed *pedAtSafePos = ((CPlayerPed*)m_pedInObjective)->m_pPedAtSafePos[i];
-										if (pedAtSafePos == this) {
-											weAreAtPlayerSafePosID = i;
-										} else if (pedAtSafePos == collideWith) {
-											colliderIsAtPlayerSafePosID = i;
-										}
-									}
-									bool weAreCloserToTargetThenCollider = false;
-									if ((GetPosition() - m_vecSeekPos).MagnitudeSqr2D() < (collideWith->GetPosition() - m_vecSeekPos).MagnitudeSqr2D())
-										weAreCloserToTargetThenCollider = true;
-
-									if (weAreAtPlayerSafePosID <= 0 || weAreCloserToTargetThenCollider) {
-										if (!weAreCloserToTargetThenCollider) {
-											int time = 300;
-											SetWaitState(WAITSTATE_CROSS_ROAD_LOOK, &time);
-											m_nPedStateTimer = CTimer::GetTimeInMilliseconds() + time;
-										}
-									} else if (colliderIsAtPlayerSafePosID <= 0) {
-										if (collideWith->m_pedInObjective == FindPlayerPed()) {
-											// VC specific
-											// ((CPlayerPed*)m_pedInObjective)->RemovePedFromMeleeList(this);
-											int time = 500;
-											SetWaitState(WAITSTATE_CROSS_ROAD_LOOK, &time);
-											m_nPedStateTimer = CTimer::GetTimeInMilliseconds() + time;
-										}
-									} else {
-										int time = 300;
-										SetWaitState(WAITSTATE_CROSS_ROAD_LOOK, &time);
-										m_nPedStateTimer = CTimer::GetTimeInMilliseconds() + time;
-									}
-								} else {
+								if (weAreMissionChar || m_pedStats->m_fear <= 100 - collideWith->m_pedStats->m_temper
+									|| (collideWith->IsPlayer() || collideWith->m_nMoveState == PEDMOVE_NONE || collideWith->m_nMoveState == PEDMOVE_STILL) &&
+									(!collideWith->IsPlayer() || ((CPlayerPed*)collideWith)->m_fMoveSpeed <= 1.0f)) {
 									SetDirectionToWalkAroundObject(collideWith);
+									if (!weAreMissionChar)
+										Say(SOUND_PED_CHAT);
+								} else {
+									SetEvasiveStep(collideWith, 2);
 								}
-#endif
 							}
 						} else {
 							if (m_pedStats->m_temper <= m_pedStats->m_fear
@@ -5452,12 +5530,20 @@ CPed::CollideWithPed(CPed *collideWith)
 							} else {
 								TurnBody();
 								SetAttack(collideWith);
+#ifdef VC_PED_PORTS
+								m_fRotationCur = 0.3f + m_fRotationCur;
+								m_fRotationDest = m_fRotationCur;
+#endif
 							}
 							m_nPedStateTimer = CTimer::GetTimeInMilliseconds() + CGeneral::GetRandomNumberInRange(250, 450);
 						}
 					}
 				} else {
+#ifdef VC_PED_PORTS
+					if (m_pedInObjective && (collideWith == m_pedInObjective || collideWith->m_pedInObjective == m_pedInObjective) && CTimer::GetTimeInMilliseconds() > m_nPedStateTimer) {
+#else
 					if (m_pedInObjective && collideWith == m_pedInObjective && CTimer::GetTimeInMilliseconds() > m_nPedStateTimer) {
+#endif
 						if (heLooksToUs) {
 							SetEvasiveStep(collideWith, 1);
 							m_nPedStateTimer = CTimer::GetTimeInMilliseconds() + 3000;
@@ -5466,7 +5552,11 @@ CPed::CollideWithPed(CPed *collideWith)
 
 						if (m_pedStats != collideWith->m_pedStats) {
 
-							if (collideWith->m_pedStats->m_fear <= 100 - m_pedStats->m_temper) {
+							if (collideWith->m_pedStats->m_fear <= 100 - m_pedStats->m_temper
+#ifdef VC_PED_PORTS
+								|| collideWith->IsPlayer() || CTimer::GetTimeInMilliseconds() < m_nPedStateTimer
+#endif						
+								) {
 
 								if (collideWith->IsPlayer()) {
 									// He's on our right side
@@ -5476,16 +5566,19 @@ CPed::CollideWithPed(CPed *collideWith)
 										m_fRotationCur += m_headingRate;
 								} else {
 									// He's on our right side
-									if (DotProduct(posDiff, GetRight()) <= 0.0f)
-										m_fRotationCur -= m_headingRate;
+									if (DotProduct(posDiff, collideWith->GetRight()) <= 0.0f)
+										collideWith->m_fRotationCur -= collideWith->m_headingRate;
 									else
-										m_fRotationCur += m_headingRate;
+										collideWith->m_fRotationCur += collideWith->m_headingRate;
 								}
 							} else {
 								SetLookFlag(collideWith, false);
 								TurnBody();
 								animAssoc = CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ANIM_FIGHT_PPUNCH, 8.0f);
 								animAssoc->flags |= ASSOC_FADEOUTWHENDONE;
+#ifdef VC_PED_PORTS
+								m_nPedStateTimer = CTimer::GetTimeInMilliseconds() + 2000;
+#endif
 								if (!heIsMissionChar) {
 									CVector2D posDiff2D(posDiff);
 									int direction = collideWith->GetLocalDirection(posDiff2D);
@@ -8423,10 +8516,6 @@ CPed::KillPedWithCar(CVehicle *car, float impulse)
 
 		if (car->pDriver) {
 			CEventList::RegisterEvent((m_nPedType == PEDTYPE_COP ? EVENT_HIT_AND_RUN_COP : EVENT_HIT_AND_RUN), EVENT_ENTITY_PED, this, car->pDriver, 1000);
-#ifdef TOGGLEABLE_BETA_FEATURES
-			if (bMakePedsRunToPhonesToReportCrimes)
-				m_ped_flagI40 = true;
-#endif
 		}
 
 		ePedPieceTypes pieceToDamage;
@@ -8966,7 +9055,11 @@ CPed::PedAnimAlignCB(CAnimBlendAssociation *animAssoc, void *arg)
 		return;
 
 	if (!ped->EnteringCar()) {
-		ped->QuitEnteringCar();
+#ifdef VC_PED_PORTS
+		if (ped->m_nPedState != PED_DRIVING)
+#endif
+			ped->QuitEnteringCar();
+
 		return;
 	}
 	if (ped->m_fHealth == 0.0f) {
@@ -10558,7 +10651,11 @@ CPed::PedAnimDoorOpenCB(CAnimBlendAssociation* animAssoc, void* arg)
 		return;
 
 	if (!ped->EnteringCar()) {
-		ped->QuitEnteringCar();
+#ifdef VC_PED_PORTS
+		if (ped->m_nPedState != PED_DRIVING)
+#endif
+			ped->QuitEnteringCar();
+
 		return;
 	}
 
@@ -11589,16 +11686,21 @@ CPed::PedStaggerCB(CAnimBlendAssociation* animAssoc, void* arg)
 	*/
 }
 
-// It's "CPhoneInfo::ProcessNearestFreePhone" in PC IDB, but it's not true, someone made it up.
+// It's "CPhoneInfo::ProcessNearestFreePhone" in PC IDB but that's not true, someone made it up.
 bool
 CPed::RunToReportCrime(eCrimeType crimeToReport)
 {
-#ifdef TOGGLEABLE_BETA_FEATURES
-	if (!bMakePedsRunToPhonesToReportCrimes)
-		return false;
+#ifdef PEDS_REPORT_CRIMES_ON_PHONE
+	if (bRunningToPhone) {
+		if (!isPhoneAvailable(m_phoneId)) {
+			m_phoneId = -1;
+			bIsRunning = false;
+			ClearSeek(); // clears bRunningToPhone
+			return false;
+		}
 
-	if (bRunningToPhone)
 		return true;
+	}
 #else
 	// They changed true into false to make this function unusable. So running to phone actually starts but first frame after that cancels it.
 	if (m_nPedState == PED_SEEK_POS)
@@ -11612,11 +11714,13 @@ CPed::RunToReportCrime(eCrimeType crimeToReport)
 		return false;
 
 	CPhone *phone = &gPhoneInfo.m_aPhones[phoneId];
+#ifndef PEDS_REPORT_CRIMES_ON_PHONE
 	if (phone->m_nState != PHONE_STATE_FREE)
 		return false;
+#endif
 
 	bRunningToPhone = true;
-	SetSeek(phone->m_pEntity->GetPosition() - phone->m_pEntity->GetForward(), 1.3f); // original: phone.m_vecPos, 0.3f
+	SetSeek(phone->m_pEntity->GetMatrix() * -phone->m_pEntity->GetForward(), 1.0f); // original: phone.m_vecPos, 0.3f
 	SetMoveState(PEDMOVE_RUN);
 	bIsRunning = true; // not there in original
 	m_phoneId = phoneId;
@@ -13672,6 +13776,11 @@ CPed::SetSeekCar(CVehicle *car, uint32 doorNode)
 	if (m_nPedState == PED_SEEK_CAR)
 		return;
 
+#ifdef VC_PED_PORTS
+	if (!CanSetPedState() || m_nPedState == PED_DRIVING)
+		return;
+#endif
+
 	SetStoredState();
 	m_pSeekTarget = car;
 	m_pSeekTarget->RegisterReference((CEntity**) &m_pSeekTarget);
@@ -13789,14 +13898,13 @@ CPed::SetDirectionToWalkAroundObject(CEntity *obj)
 	if (m_nMoveState == PEDMOVE_NONE || m_nMoveState == PEDMOVE_STILL)
 		return;
 
-#ifdef TOGGLEABLE_BETA_FEATURES
-	if (!bMakePedsRunToPhonesToReportCrimes)
+#ifndef PEDS_REPORT_CRIMES_ON_PHONE
+	if (CharCreatedBy != MISSION_CHAR && obj->GetModelIndex() == MI_PHONEBOOTH1) {
+		bool isRunning = m_nMoveState == PEDMOVE_RUN || m_nMoveState == PEDMOVE_SPRINT;
+		SetFindPathAndFlee(obj, 5000, !isRunning);
+		return;
+	}
 #endif
-		if (CharCreatedBy != MISSION_CHAR && obj->GetModelIndex() == MI_PHONEBOOTH1) {
-			bool isRunning = m_nMoveState == PEDMOVE_RUN || m_nMoveState == PEDMOVE_SPRINT;
-			SetFindPathAndFlee(obj, 5000, !isRunning);
-			return;
-		}
 
 	CVector2D adjustedColMin(objColMin.x - 0.35f, objColMin.y - 0.35f);
 	CVector2D adjustedColMax(objColMax.x + 0.35f, objColMax.y + 0.35f);

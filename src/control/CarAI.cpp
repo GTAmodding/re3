@@ -381,7 +381,7 @@ void CCarAI::UpdateCarAI(CVehicle* pVehicle)
 					if (flatSpeed < SQR(0.018f) && CTimer::GetTimeInMilliseconds() - pVehicle->AutoPilot.m_nAntiReverseTimer > 2000){
 						pVehicle->AutoPilot.m_nTempAction = TEMPACT_REVERSE;
 						if (pVehicle->AutoPilot.m_nCarMission != MISSION_NONE &&
-						  pVehicle->AutoPilot.m_nCarMission != MISSION_CRUISE || pVehicle->VehicleCreatedBy == RANDOM_VEHICLE)
+						  pVehicle->AutoPilot.m_nCarMission != MISSION_CRUISE || pVehicle->VehicleCreatedBy == MISSION_VEHICLE)
 							pVehicle->AutoPilot.m_nTimeTempAction = CTimer::GetTimeInMilliseconds() + 1500;
 						else
 							pVehicle->AutoPilot.m_nTimeTempAction = CTimer::GetTimeInMilliseconds() + 750;
@@ -406,7 +406,7 @@ void CCarAI::UpdateCarAI(CVehicle* pVehicle)
 			pVehicle->AutoPilot.m_nTimeTempAction = CTimer::GetTimeInMilliseconds() + 400;
 		}
 	}
-	if (pVehicle->GetUp().z < 0.7f){
+	if (pVehicle->GetUp().z < -0.7f){
 		pVehicle->AutoPilot.m_nTempAction = TEMPACT_WAIT;
 		pVehicle->AutoPilot.m_nTimeTempAction = CTimer::GetTimeInMilliseconds() + 1000;
 	}

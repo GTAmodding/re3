@@ -34,15 +34,14 @@ CPed *CPhoneInfo::pCallBackPed; // ped who picking up the phone (reset after pic
 	after 60 seconds of last phone pick-up.
 */
 
-#ifdef TOGGLEABLE_BETA_FEATURES
+#ifdef PEDS_REPORT_CRIMES_ON_PHONE
 CPed* crimeReporters[NUMPHONES] = {};
 bool
 isPhoneAvailable(int m_phoneId)
 {
-	return gPhoneInfo.m_aPhones[m_phoneId].m_nState == PHONE_STATE_FREE &&
-		(crimeReporters[m_phoneId] == nil || !crimeReporters[m_phoneId]->IsPointerValid() || !crimeReporters[m_phoneId]->bRunningToPhone || crimeReporters[m_phoneId]->m_objective > OBJECTIVE_IDLE ||
+	return crimeReporters[m_phoneId] == nil || !crimeReporters[m_phoneId]->IsPointerValid() || crimeReporters[m_phoneId]->m_objective > OBJECTIVE_IDLE ||
 			crimeReporters[m_phoneId]->m_nLastPedState != PED_SEEK_POS &&
-			(crimeReporters[m_phoneId]->m_nPedState != PED_MAKE_CALL && crimeReporters[m_phoneId]->m_nPedState != PED_FACE_PHONE && crimeReporters[m_phoneId]->m_nPedState != PED_SEEK_POS));
+			(crimeReporters[m_phoneId]->m_nPedState != PED_MAKE_CALL && crimeReporters[m_phoneId]->m_nPedState != PED_FACE_PHONE && crimeReporters[m_phoneId]->m_nPedState != PED_SEEK_POS);
 }
 #endif
 
@@ -162,13 +161,14 @@ CPhoneInfo::FindNearestFreePhone(CVector *pos)
 	int nearestPhoneId = -1;
 	float nearestPhoneDist = 60.0f;
 
-	for (int phoneId = 0; phoneId < m_nMax; phoneId++) {
+ 	for (int phoneId = 0; phoneId < m_nMax; phoneId++) {
 
-		if (gPhoneInfo.m_aPhones[phoneId].m_nState == PHONE_STATE_FREE
-#ifdef TOGGLEABLE_BETA_FEATURES
-			&& isPhoneAvailable(phoneId)
+#ifdef PEDS_REPORT_CRIMES_ON_PHONE
+		if (isPhoneAvailable(phoneId))
+#else
+		if (gPhoneInfo.m_aPhones[phoneId].m_nState == PHONE_STATE_FREE)
 #endif
-			) {
+		{
 			float phoneDist = (m_aPhones[phoneId].m_vecPos - *pos).Magnitude2D();
 
 			if (phoneDist < nearestPhoneDist) {
@@ -213,8 +213,42 @@ void
 CPhoneInfo::Load(uint8 *buf, uint32 size)
 {
 INITSAVEBUF
-	m_nMax = ReadSaveBuf<int32>(buf);
-	m_nScriptPhonesMax = ReadSaveBuf<int32>(buf);
+	int max = ReadSaveBuf<int32>(buf);
+	int scriptPhonesMax = ReadSaveBuf<int32>(buf);
+
+#ifdef PEDS_REPORT_CRIMES_ON_PHONE
+	m_nMax = Min(NUMPHONES, max);
+	m_nScriptPhonesMax = 0;
+
+	bool ignoreOtherPhones = false;
+
+	// We can do it without touching saves. We'll only load script phones, others are already loaded in Initialise
+	for (int i = 0; i < 50; i++) {
+		CPhone phoneToLoad = ReadSaveBuf<CPhone>(buf);
+
+		if (ignoreOtherPhones)
+			continue;
+
+		if (i < scriptPhonesMax) {
+			if (i >= m_nMax) {
+				assert(0 && "Number of phones used by script exceeds the NUMPHONES or the stored phones in save file. Ignoring some phones");
+				ignoreOtherPhones = true;
+				continue;
+			}
+			SwapPhone(phoneToLoad.m_vecPos.x, phoneToLoad.m_vecPos.y, i);
+
+			m_aPhones[i] = phoneToLoad;
+			// It's saved as building pool index in save file, convert it to true entity
+			if (m_aPhones[i].m_pEntity) {
+				m_aPhones[i].m_pEntity = CPools::GetBuildingPool()->GetSlot((uintptr)m_aPhones[i].m_pEntity - 1);
+			}
+		} else 
+			ignoreOtherPhones = true;
+	}
+#else
+	m_nMax = max;
+	m_nScriptPhonesMax = scriptPhonesMax;
+
 	for (int i = 0; i < NUMPHONES; i++) {
 		m_aPhones[i] = ReadSaveBuf<CPhone>(buf);
 		// It's saved as building pool index in save file, convert it to true entity
@@ -222,6 +256,7 @@ INITSAVEBUF
 			m_aPhones[i].m_pEntity = CPools::GetBuildingPool()->GetSlot((uintptr)m_aPhones[i].m_pEntity - 1);
 		}
 	}
+#endif
 VALIDATESAVEBUF(size)
 }
 
@@ -258,6 +293,32 @@ CPhoneInfo::SetPhoneMessage_Repeatedly(int phoneId, wchar *msg1, wchar *msg2, wc
 		m_aPhones[phoneId].m_nState = PHONE_STATE_MESSAGE_REMOVED;
 	}
 }
+
+#ifdef PEDS_REPORT_CRIMES_ON_PHONE
+int
+CPhoneInfo::SwapPhone(float xPos, float yPos, int into)
+{
+	// "into" should be in 0 - m_nScriptPhonesMax range
+	int nearestPhoneId = -1;
+	CVector pos(xPos, yPos, 0.0f);
+	float nearestPhoneDist = 1.0f;
+
+	for (int phoneId = m_nScriptPhonesMax; phoneId < m_nMax; phoneId++) {
+		float phoneDistance = (m_aPhones[phoneId].m_vecPos - pos).Magnitude2D();
+		if (phoneDistance < nearestPhoneDist) {
+			nearestPhoneDist = phoneDistance;
+			nearestPhoneId = phoneId;
+		}
+	}
+	m_aPhones[nearestPhoneId].m_nState = PHONE_STATE_MESSAGE_REMOVED;
+
+	CPhone oldPhone = m_aPhones[into];
+	m_aPhones[into] = m_aPhones[nearestPhoneId];
+	m_aPhones[nearestPhoneId] = oldPhone;
+	m_nScriptPhonesMax++;
+	return m_nScriptPhonesMax - 1;
+}
+#endif
 
 int
 CPhoneInfo::GrabPhone(float xPos, float yPos)
@@ -300,6 +361,7 @@ CPhoneInfo::Initialise(void)
 		CBuilding *building = pool->GetSlot(i);
 		if (building) {
 			if (building->GetModelIndex() == MI_PHONEBOOTH1) {
+				assert(m_nMax < ARRAY_SIZE(m_aPhones) && "NUMPHONES should be increased");
 				CPhone *maxPhone = &m_aPhones[m_nMax];
 				maxPhone->m_nState = PHONE_STATE_FREE;
 				maxPhone->m_vecPos = building->GetPosition();
@@ -317,7 +379,11 @@ CPhoneInfo::Save(uint8 *buf, uint32 *size)
 INITSAVEBUF
 	WriteSaveBuf(buf, m_nMax);
 	WriteSaveBuf(buf, m_nScriptPhonesMax);
-	for(int phoneId = 0; phoneId < NUMPHONES; phoneId++) {
+#ifdef PEDS_REPORT_CRIMES_ON_PHONE
+	for (int phoneId = 0; phoneId < 50; phoneId++) { // We can do it without touching saves
+#else
+	for (int phoneId = 0; phoneId < NUMPHONES; phoneId++) {
+#endif
 		CPhone* phone = WriteSaveBuf(buf, m_aPhones[phoneId]);
 
 		// Convert entity pointer to building pool index while saving

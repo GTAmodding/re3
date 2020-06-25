@@ -874,7 +874,7 @@ CWeapon::DoBulletImpact(CEntity *shooter, CEntity *victim,
 		if ( victim->IsPed() && ((CPed*)shooter)->m_nPedType != ((CPed*)victim)->m_nPedType || ((CPed*)shooter)->m_nPedType == PEDTYPE_PLAYER2 )
 		{
 			CPed *victimPed = (CPed *)victim;
-			if ( !victimPed->OnGround() && victim != shooter )
+			if ( !victimPed->DyingOrDead() && victim != shooter )
 			{
 				if ( victimPed->DoesLOSBulletHitPed(*point) )
 				{

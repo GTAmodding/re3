@@ -484,11 +484,7 @@ DebugMenuPopulate(void)
 #ifdef CUSTOM_FRONTEND_OPTIONS
 		DebugMenuAddCmd("Debug", "Reload custom frontend options", ReloadFrontendOptions);
 #endif
-#ifdef TOGGLEABLE_BETA_FEATURES
 		DebugMenuAddVarBool8("Debug", "Toggle popping heads on headshot", &CPed::bPopHeadsOnHeadshot, nil);
-		DebugMenuAddVarBool8("Debug", "Toggle peds running to phones to report crimes", &CPed::bMakePedsRunToPhonesToReportCrimes, nil);
-#endif
-
 		DebugMenuAddCmd("Debug", "Start Credits", CCredits::Start);
 		DebugMenuAddCmd("Debug", "Stop Credits", CCredits::Stop);
 

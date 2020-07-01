@@ -161,7 +161,7 @@ CWanted::RegisterCrime(eCrimeType type, const CVector &coors, uint32 id, bool po
 void
 CWanted::RegisterCrime_Immediately(eCrimeType type, const CVector &coors, uint32 id, bool policeDoesntCare)
 {
-#ifdef FIX_BUGS
+#if defined FIX_SIGNIFICANT_BUGS || defined PEDS_REPORT_CRIMES_ON_PHONE
 	if (!AddCrimeToQ(type, id, coors, true, policeDoesntCare))
 #else
 	if (!AddCrimeToQ(type, id, coors, false, policeDoesntCare))

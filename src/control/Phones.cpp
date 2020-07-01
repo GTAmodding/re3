@@ -295,7 +295,7 @@ CPhoneInfo::SetPhoneMessage_Repeatedly(int phoneId, wchar *msg1, wchar *msg2, wc
 }
 
 #ifdef PEDS_REPORT_CRIMES_ON_PHONE
-int
+void
 CPhoneInfo::SwapPhone(float xPos, float yPos, int into)
 {
 	// "into" should be in 0 - m_nScriptPhonesMax range
@@ -316,7 +316,6 @@ CPhoneInfo::SwapPhone(float xPos, float yPos, int into)
 	m_aPhones[into] = m_aPhones[nearestPhoneId];
 	m_aPhones[nearestPhoneId] = oldPhone;
 	m_nScriptPhonesMax++;
-	return m_nScriptPhonesMax - 1;
 }
 #endif
 

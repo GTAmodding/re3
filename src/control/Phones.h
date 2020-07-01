@@ -62,7 +62,7 @@ public:
 	void Shutdown(void);
 	void Update(void);
 #ifdef PEDS_REPORT_CRIMES_ON_PHONE
-	int SwapPhone(float xPos, float yPos, int into);
+	void SwapPhone(float xPos, float yPos, int into);
 #endif
 };
 

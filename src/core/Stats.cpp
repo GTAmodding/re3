@@ -49,7 +49,6 @@ int32 CStats::LivesSavedWithAmbulance;
 int32 CStats::CriminalsCaught;
 int32 CStats::HighestLevelAmbulanceMission;
 int32 CStats::FiresExtinguished;
-int32 CStats::LongestFlightInDodo;
 int32 CStats::TimeTakenDefuseMission;
 int32 CStats::TotalNumberKillFrenzies;
 int32 CStats::TotalNumberMissions;
@@ -58,8 +57,6 @@ int32 CStats::KgsOfExplosivesUsed;
 int32 CStats::InstantHitsFiredByPlayer;
 int32 CStats::InstantHitsHitByPlayer;
 int32 CStats::BestTimeBombDefusal;
-int32 CStats::mmRain;
-int32 CStats::CarsCrushed;
 int32 CStats::FastestTimes[CStats::TOTAL_FASTEST_TIMES];
 int32 CStats::HighestScores[CStats::TOTAL_HIGHEST_SCORES];
 int32 CStats::BestPositions[CStats::TOTAL_BEST_POSITIONS];
@@ -83,13 +80,11 @@ void CStats::Init()
 	KgsOfExplosivesUsed = 0;
 	InstantHitsFiredByPlayer = 0;
 	InstantHitsHitByPlayer = 0;
-	CarsCrushed = 0;
 	HeadsPopped = 0;
 	TimesArrested = 0;
 	TimesDied = 0;
 	DaysPassed = 0;
 	NumberOfUniqueJumpsFound = 0;
-	mmRain = 0;
 	MaximumJumpFlips = 0;
 	MaximumJumpSpins = 0;
 	MaximumJumpDistance = 0;
@@ -97,7 +92,6 @@ void CStats::Init()
 	BestStuntJump = 0;
 	TotalNumberOfUniqueJumps = 0;
 	Record4x4One = 0;
-	LongestFlightInDodo = 0;
 	Record4x4Two = 0;
 	PassengersDroppedOffWithTaxi = 0;
 	Record4x4Three = 0;
@@ -202,11 +196,6 @@ void CStats::AnotherFireExtinguished()
 	++FiresExtinguished;
 }
 
-void CStats::RegisterLongestFlightInDodo(int32 time)
-{
-	LongestFlightInDodo = Max(LongestFlightInDodo, time);
-}
-
 void CStats::RegisterTimeTakenDefuseMission(int32 time)
 {
 	TimeTakenDefuseMission = (TimeTakenDefuseMission && TimeTakenDefuseMission < time) ? TimeTakenDefuseMission : time;
@@ -296,12 +285,10 @@ void CStats::SaveStats(uint8 *buf, uint32 *size)
 		sizeof(KgsOfExplosivesUsed) +
 		sizeof(InstantHitsFiredByPlayer) +
 		sizeof(InstantHitsHitByPlayer) +
-		sizeof(CarsCrushed) +
 		sizeof(HeadsPopped) +
 		sizeof(TimesArrested) +
 		sizeof(TimesDied) +
 		sizeof(DaysPassed) +
-		sizeof(mmRain) +
 		sizeof(MaximumJumpDistance) +
 		sizeof(MaximumJumpHeight) +
 		sizeof(MaximumJumpFlips) +
@@ -327,7 +314,6 @@ void CStats::SaveStats(uint8 *buf, uint32 *size)
 		sizeof(CriminalsCaught) +
 		sizeof(HighestLevelAmbulanceMission) +
 		sizeof(FiresExtinguished) +
-		sizeof(LongestFlightInDodo) +
 		sizeof(TimeTakenDefuseMission) +
 		sizeof(NumberKillFrenziesPassed) +
 		sizeof(TotalNumberKillFrenzies) +
@@ -351,12 +337,10 @@ void CStats::SaveStats(uint8 *buf, uint32 *size)
 	CopyToBuf(buf, KgsOfExplosivesUsed);
 	CopyToBuf(buf, InstantHitsFiredByPlayer);
 	CopyToBuf(buf, InstantHitsHitByPlayer);
-	CopyToBuf(buf, CarsCrushed);
 	CopyToBuf(buf, HeadsPopped);
 	CopyToBuf(buf, TimesArrested);
 	CopyToBuf(buf, TimesDied);
 	CopyToBuf(buf, DaysPassed);
-	CopyToBuf(buf, mmRain);
 	CopyToBuf(buf, MaximumJumpDistance);
 	CopyToBuf(buf, MaximumJumpHeight);
 	CopyToBuf(buf, MaximumJumpFlips);
@@ -382,7 +366,6 @@ void CStats::SaveStats(uint8 *buf, uint32 *size)
 	CopyToBuf(buf, CriminalsCaught);
 	CopyToBuf(buf, HighestLevelAmbulanceMission);
 	CopyToBuf(buf, FiresExtinguished);
-	CopyToBuf(buf, LongestFlightInDodo);
 	CopyToBuf(buf, TimeTakenDefuseMission);
 	CopyToBuf(buf, NumberKillFrenziesPassed);
 	CopyToBuf(buf, TotalNumberKillFrenzies);
@@ -415,12 +398,10 @@ void CStats::LoadStats(uint8 *buf, uint32 size)
 	CopyFromBuf(buf, KgsOfExplosivesUsed);
 	CopyFromBuf(buf, InstantHitsFiredByPlayer);
 	CopyFromBuf(buf, InstantHitsHitByPlayer);
-	CopyFromBuf(buf, CarsCrushed);
 	CopyFromBuf(buf, HeadsPopped);
 	CopyFromBuf(buf, TimesArrested);
 	CopyFromBuf(buf, TimesDied);
 	CopyFromBuf(buf, DaysPassed);
-	CopyFromBuf(buf, mmRain);
 	CopyFromBuf(buf, MaximumJumpDistance);
 	CopyFromBuf(buf, MaximumJumpHeight);
 	CopyFromBuf(buf, MaximumJumpFlips);
@@ -446,7 +427,6 @@ void CStats::LoadStats(uint8 *buf, uint32 size)
 	CopyFromBuf(buf, CriminalsCaught);
 	CopyFromBuf(buf, HighestLevelAmbulanceMission);
 	CopyFromBuf(buf, FiresExtinguished);
-	CopyFromBuf(buf, LongestFlightInDodo);
 	CopyFromBuf(buf, TimeTakenDefuseMission);
 	CopyFromBuf(buf, NumberKillFrenziesPassed);
 	CopyFromBuf(buf, TotalNumberKillFrenzies);

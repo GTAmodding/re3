@@ -5429,13 +5429,9 @@ CMenuManager::ConstructStatLine(int rowIdx)
 	if (CStats::Record4x4Mayhem > 0) {
 		STAT_LINE("FEST_RM", &CStats::Record4x4Mayhem, false, nil);
 	}
-	if (CStats::LongestFlightInDodo > 0) {
-		STAT_LINE("FEST_LF", &CStats::LongestFlightInDodo, false, nil);
-	}
 	if (CStats::TimeTakenDefuseMission > 0) {
 		STAT_LINE("FEST_BD", &CStats::TimeTakenDefuseMission, false, nil);
 	}
-	STAT_LINE("CAR_CRU", &CStats::CarsCrushed, false, nil);
 
 	if (CStats::HighestScores[0] > 0) {
 		STAT_LINE("FEST_BB", nil, false, nil);
@@ -5463,7 +5459,6 @@ CMenuManager::ConstructStatLine(int rowIdx)
 			float fTemp;
 			STAT_LINE("FEST_DF", &(fTemp = CStats::DistanceTravelledOnFoot * MILES_IN_METER), true, nil);
 			STAT_LINE("FEST_DC", &(fTemp = CStats::DistanceTravelledInVehicle * MILES_IN_METER), true, nil);
-			STAT_LINE("MMRAIN", &CStats::mmRain, false, nil);
 			STAT_LINE("MXCARD", &(fTemp = CStats::MaximumJumpDistance * FEET_IN_METER), true, nil);
 			STAT_LINE("MXCARJ", &(fTemp = CStats::MaximumJumpHeight * FEET_IN_METER), true, nil);
 			break;
@@ -5479,7 +5474,6 @@ CMenuManager::ConstructStatLine(int rowIdx)
 #endif
 			STAT_LINE("FESTDFM", &CStats::DistanceTravelledOnFoot, true, nil);
 			STAT_LINE("FESTDCM", &CStats::DistanceTravelledInVehicle, true, nil);
-			STAT_LINE("MMRAIN", &CStats::mmRain, false, nil);
 			STAT_LINE("MXCARDM", &CStats::MaximumJumpDistance, true, nil);
 			STAT_LINE("MXCARJM", &CStats::MaximumJumpHeight, true, nil);
 			break;

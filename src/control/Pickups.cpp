@@ -274,7 +274,7 @@ CPickup::Update(CPlayerPed *player, CVehicle *vehicle, int playerId)
 				if (CWorld::Players[playerId].m_nCollectedPackages == CWorld::Players[playerId].m_nTotalPackages) {
 					printf("All collectables have been picked up\n");
 					CGarages::TriggerMessage("CO_ALL", -1, 5000, -1);
-					CWorld::Players[CWorld::PlayerInFocus].m_nMoney += 10000;
+					CWorld::Players[CWorld::PlayerInFocus].m_nMoney += 100000;
 				} else
 					CGarages::TriggerMessage("CO_ONE", CWorld::Players[CWorld::PlayerInFocus].m_nCollectedPackages, 5000, CWorld::Players[CWorld::PlayerInFocus].m_nTotalPackages);
 

@@ -3421,7 +3421,7 @@ CMenuManager::PrintStats()
 			} else
 				alphaMult = 1.0f;
 
-			CFont::SetColor(CRGBA(235, 170, 50, FadeIn(255.0f * alphaMult)));
+			CFont::SetColor(CRGBA(0, 0, 0, FadeIn(255.0f * alphaMult)));
 			CFont::SetRightJustifyOff();
 			CFont::PrintString(MENU_X_LEFT_ALIGNED(STATS_ROW_X_MARGIN), y - MENU_Y(STATS_BOTTOM_MARGIN - STATS_TOP_MARGIN), gUString);
 			CFont::SetRightJustifyOn();
@@ -3431,7 +3431,7 @@ CMenuManager::PrintStats()
 	// Game doesn't do that, but it's better
 	float nextX = MENU_X_LEFT_ALIGNED(STATS_RATING_X);
 
-	CFont::SetColor(CRGBA(235, 170, 50, FadeIn(255)));
+	CFont::SetColor(CRGBA(255, 150, 225, FadeIn(255)));
 	CFont::SetRightJustifyOff();
 	CFont::PrintString(nextX, MENU_Y(STATS_RATING_Y), TheText.Get("CRIMRA"));
 #ifdef MORE_LANGUAGES

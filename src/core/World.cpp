@@ -948,7 +948,13 @@ CWorld::TestSphereAgainstSectorList(CPtrList &list, CVector spherePos, float rad
 					CColModel *eCol = CModelInfo::GetModelInfo(e->GetModelIndex())->GetColModel();
 					int collidedSpheres =
 					    CCollision::ProcessColModels(sphereMat, sphereCol, e->GetMatrix(), *eCol,
-					                                 gaTempSphereColPoints, nil, nil);				
+					                                 gaTempSphereColPoints, nil, nil);
+
+					if(collidedSpheres != 0 ||
+					   (e->IsVehicle() && ((CVehicle *)e)->m_vehType == VEHICLE_TYPE_CAR && e->GetModelIndex() != MI_DODO &&
+					    radius + eCol->boundingBox.max.x > distance)) {
+						return e;
+					}
 				}
 			}
 		}

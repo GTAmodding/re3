@@ -66,20 +66,23 @@
 #define PLAYERSETUP_LIST_BODY_TOP 47
 #define PLAYERSETUP_ROW_HEIGHT 9
 
-#define STATS_SLIDE_Y_PER_SECOND 30.0f
-#define STATS_ROW_HEIGHT 20.0f
-#define STATS_ROW_X_MARGIN 50.0f
-#define STATS_BOTTOM_MARGIN 135.0f
-#define STATS_TOP_MARGIN 40.0f
-#define STATS_TOP_DIMMING_AREA_LENGTH (93.0f - STATS_TOP_MARGIN)
-#define STATS_BOTTOM_DIMMING_AREA_LENGTH 55.0f
-#define STATS_PUT_BACK_TO_BOTTOM_Y 50.0f
-#define STATS_RATING_X 24.0f
-#define STATS_RATING_Y 20.0f
+#define STATS_ROW_HEIGHT 17.0f
+#define STATS_ROW_LEFT_MARGIN 110.0f
+#define STATS_ROW_RIGHT_MARGIN 113.0f
+#define STATS_TOP_Y 135.0f // Just faded in
+#define STATS_BOTTOM_Y 300.0f // Starts to fade out after that
+#define STATS_FADING_AREA_LENGTH 50.0f
+#define STATS_VISIBLE_START_Y (STATS_TOP_Y - 10.f)
+#define STATS_VISIBLE_END_Y (STATS_BOTTOM_Y + 21.f)
+#define STATS_RATING_X 320.0f
+#define STATS_RATING_Y_1 85.0f
+#define STATS_RATING_Y_2 110.0f
 
-#define BRIEFS_TOP_MARGIN 40.0f
-#define BRIEFS_LINE_X 50.0f
-#define BRIEFS_LINE_HEIGHT 60.0f
+#define BRIEFS_TOP_MARGIN 140.0f
+#define BRIEFS_BOTTOM_MARGIN 280.0f
+#define BRIEFS_LINE_X 100.0f
+#define BRIEFS_LINE_HEIGHT 20.0f
+#define BRIEFS_LINE_SPACING 10.0f
 
 #define CONTSETUP_STANDARD_ROW_HEIGHT 10.7f
 #define CONTSETUP_CLASSIC_ROW_HEIGHT 9.0f
@@ -477,10 +480,10 @@ public:
 	int8 m_nPrefsAudio3DProviderIndex;
 	int8 m_PrefsSpeakers;
 	int8 m_PrefsDMA;
-	uint8 m_PrefsSfxVolume;
-	uint8 m_PrefsMusicVolume;
+	int8 m_PrefsSfxVolume;
+	int8 m_PrefsMusicVolume;
 	uint8 m_PrefsRadioStation;
-	uint8 field_2C;
+	uint8 m_PrefsStereoMono; // unused except restore settings
 	int32 m_nCurrOption;
 	bool m_bQuitGameNoCD;
 	bool m_bMenuMapActive;
@@ -595,8 +598,6 @@ public:
 	};
 	bool GetIsMenuActive() {return !!m_bMenuActive;}
 
-	static uint8 m_PrefsStereoMono;
-
 #ifndef MASTER
 	static bool m_PrefsMarketing;
 	static bool m_PrefsDisableTutorials;
@@ -625,7 +626,7 @@ public:
 	void DrawBackground(bool transitionCall);
 	void DrawPlayerSetupScreen();
 	int FadeIn(int alpha);
-	void FilterOutColorMarkersFromString(wchar*, CRGBA &);
+	void FilterOutColorMarkersFromString(wchar*);
 	int GetStartOptionsCntrlConfigScreens();
 	void InitialiseChangedLanguageSettings();
 	void LoadAllTextures();

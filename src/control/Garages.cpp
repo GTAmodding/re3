@@ -1378,13 +1378,14 @@ bool CGarages::IsCarSprayable(CVehicle * pVehicle)
 {
 	switch (pVehicle->GetModelIndex()) {
 	case MI_FIRETRUCK:
+	case MI_FBIRANCH:
 	case MI_AMBULAN:
 	case MI_POLICE:
 	case MI_ENFORCER:
 	case MI_BUS:
 	case MI_RHINO:
 	case MI_BARRACKS:
-	case MI_DODO:
+	case MI_DODO: //III leftover - still left in mobile miami function.
 	case MI_COACH:
 		return false;
 	default:

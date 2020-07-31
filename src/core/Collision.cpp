@@ -983,8 +983,10 @@ CCollision::IsStoredPolyStillValidVerticalLine(const CVector &pos, float z, CCol
 	// The rest is pretty much CCollision::ProcessLineTriangle
 
 	// if points are on the same side, no collision
-	if(plane.CalcPoint(p0) * plane.CalcPoint(p1) > 0.0f)
-		return poly->valid = false;
+	if(plane.CalcPoint(p0) * plane.CalcPoint(p1) > 0.0f) {
+		poly->valid = false;
+		return false;
+	}
 
 	// intersection parameter on line
 	t = -plane.CalcPoint(p0) / DotProduct(p1 - p0, plane.normal);
@@ -1032,11 +1034,14 @@ CCollision::IsStoredPolyStillValidVerticalLine(const CVector &pos, float z, CCol
 	default:
 		assert(0);
 	}
-	if(CrossProduct2D(vec2-vec1, vect-vec1) < 0.0f) return poly->valid = false;
-	if(CrossProduct2D(vec3-vec1, vect-vec1) > 0.0f) return poly->valid = false;
-	if(CrossProduct2D(vec3-vec2, vect-vec2) < 0.0f) return poly->valid = false;
-	point.point = p;
-	return poly->valid = true;
+	if(CrossProduct2D(vec2 - vec1, vect - vec1) < 0.0f || CrossProduct2D(vec3 - vec1, vect - vec1) > 0.0f ||
+	   CrossProduct2D(vec3 - vec2, vect - vec2) < 0.0f) {
+		poly->valid = false;
+	} else {
+		point.point = p;
+		poly->valid = true;
+	}
+	return poly->valid;
 }
 
 bool

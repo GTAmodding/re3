@@ -34,13 +34,13 @@ jobs:
       run: |
         echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
         echo "::set-output name=sha_short::$(git rev-parse --short HEAD)"
-    - name: Download or restore dependency
+    - if: matrix.platform == "win-x86-librw_gl3_glfw-mss"
+      name: Download or restore dependency
       run: |
           wget ${env.GLEW_URL}"
           7z x "${env.GLEW_FILE}"
           wget ${env.GLFW_URL}"
           7z x "${env.GLFW_FILE}"
-      if: matrix.platform == "win-x86-librw_gl3_glfw-mss"
     - name: Configure build
       run: |
         premake5 vs2019 --with-librw --glewdir=${env.GLEW_BASE} --glfwdir32=${env.GLFW_BASE}

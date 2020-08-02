@@ -19,10 +19,10 @@ jobs:
       with:
         GLEW_VER: "2.1.0"
         GLFW_VER: "3.3.2"
-        GLEW_BASE: glew-${env.GLEW_VER}
-        GLFW_BASE: glfw-${env.GLFW_VER}.bin.WIN32
-        GLEW_FILE: "${env.GLEW_BASE}-win32.zip"
-        GLFW_FILE: "${env.GLFW_BASE}.zip"
+        GLEW_BASE: glew-${{ env.GLEW_VER }}
+        GLFW_BASE: glfw-${{ env.GLFW_VER }}.bin.WIN32
+        GLEW_FILE: "${{ env.GLEW_BASE }}-win32.zip"
+        GLFW_FILE: "${{ env.GLFW_BASE }}.zip"
         GLEW_URL: https://github.com/nigels-com/glew/releases/download/${env.GLEW_BASE}/${env.GLEW_FILE}
         GLFW_URL: https://github.com/glfw/glfw/releases/download/${env.GLFW_VER}/${env.GLFW_FILE}
     - uses: actions/checkout@v2

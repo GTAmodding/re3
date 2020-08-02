@@ -13,17 +13,18 @@ jobs:
       matrix:
         buildtype: [Debug, Release]
         platform: [win-x86-librw_d3d9-mss, win-x86-librw_gl3_glfw-mss]
-    env:
-      #APPVEYOR_SAVE_CACHE_ON_ERROR: true
-      GLEW_VER: "2.1.0"
-      GLFW_VER: "3.3.2"
-      GLEW_BASE: glew-${{env.GLEW_VER}}
-      GLFW_BASE: glfw-${{env.GLFW_VER}}.bin.WIN32
-      GLEW_FILE: "${{env.GLEW_BASE}}-win32.zip"
-      GLFW_FILE: "${{env.GLFW_BASE}}.zip"
-      GLEW_URL: https://github.com/nigels-com/glew/releases/download/${{env.GLEW_BASE}}/${{env.GLEW_FILE}}
-      GLFW_URL: https://github.com/glfw/glfw/releases/download/${{env.GLFW_VER}}/${{env.GLFW_FILE}}
     steps:
+    - name: set environment variables
+      uses: allenevans/set-env@v1.0.0
+      with:
+        GLEW_VER: "2.1.0"
+        GLFW_VER: "3.3.2"
+        GLEW_BASE: glew-${env.GLEW_VER}
+        GLFW_BASE: glfw-${env.GLFW_VER}.bin.WIN32
+        GLEW_FILE: "${env.GLEW_BASE}-win32.zip"
+        GLFW_FILE: "${env.GLFW_BASE}.zip"
+        GLEW_URL: https://github.com/nigels-com/glew/releases/download/${env.GLEW_BASE}/${env.GLEW_FILE}
+        GLFW_URL: https://github.com/glfw/glfw/releases/download/${env.GLFW_VER}/${env.GLFW_FILE}
     - uses: actions/checkout@v2
       with:
         submodules: 'true'
@@ -35,13 +36,13 @@ jobs:
         echo "::set-output name=sha_short::$(git rev-parse --short HEAD)"
     - name: Download or restore dependency
       run: |
-        - IF [${{matrix.platform}}] == [win-x86-librw_gl3_glfw-mss] IF NOT EXIST ${{env.GLEW_FILE}} wget ${{env.GLEW_URL}}"
-        - IF [${{matrix.platform}}] == [win-x86-librw_gl3_glfw-mss] 7z x "${{env.GLEW_FILE}}"
-        - IF [${{matrix.platform}}] == [win-x86-librw_gl3_glfw-mss] IF NOT EXIST ${{env.GLFW_FILE}} wget ${{env.GLFW_URL}}"
-        - IF [${{matrix.platform}}] == [win-x86-librw_gl3_glfw-mss] 7z x "${{env.GLFW_FILE}}"
+        - IF [${matrix.platform}] == [win-x86-librw_gl3_glfw-mss] IF NOT EXIST ${env.GLEW_FILE} wget ${env.GLEW_URL}"
+        - IF [${matrix.platform}] == [win-x86-librw_gl3_glfw-mss] 7z x "${env.GLEW_FILE}"
+        - IF [${matrix.platform}] == [win-x86-librw_gl3_glfw-mss] IF NOT EXIST ${env.GLFW_FILE} wget ${env.GLFW_URL}"
+        - IF [${matrix.platform}] == [win-x86-librw_gl3_glfw-mss] 7z x "${env.GLFW_FILE}"
     - name: Configure build
       run: |
-        premake5 vs2019 --with-librw --glewdir=${{env.GLEW_BASE}} --glfwdir32=${{env.GLFW_BASE}}
+        premake5 vs2019 --with-librw --glewdir=${env.GLEW_BASE} --glfwdir32=${env.GLFW_BASE}
     - name: Build
       run: |
         msbuild build/re3.sln
@@ -49,9 +50,9 @@ jobs:
       shell: bash
       run: |
         mkdir artifact
-        export ZIPNAME=vanillaconquer_win32_${{ matrix.buildtype }}
-        if [ ${{ matrix.features }} != "ON" ]; then export FEATURES=_full; fi
-        7z a "re3_${{matrix.buildtype}}_${{matrix.platform}}_1.0-${{sha_short}}.zip" bin/${{matrix.platform}}/${{matrix.buildtype}}/re3.exe bin/${{matrix.platform}}/${{matrix.buildtype}}/re3.pdb
+        export ZIPNAME=vanillaconquer_win32_${ matrix.buildtype }
+        if [ ${ matrix.features } != "ON" ]; then export FEATURES=_full; fi
+        7z a "re3_${matrix.buildtype}_${matrix.platform}_1.0-${sha_short}.zip" bin/${matrix.platform}/${matrix.buildtype}/re3.exe bin/${matrix.platform}/${matrix.buildtype}/re3.pdb
   
     - name: Upload package to Bintray
       uses: bpicode/github-action-upload-bintray@master
@@ -61,7 +62,7 @@ jobs:
         api_key: xWnYDfNWM87iPoBFbz6L1XAduxijJRWSpQLhMDOjznmzbMCsORtdx2tmWmFLTwf6
         repository_user: gtamodding
         repository: re3
-        package: "${{matrix.buildtype}}_${{matrix.platform}}"
-        version: "1.0-${{sha_short}}"
+        package: "${matrix.buildtype}_${matrix.platform}"
+        version: "1.0-${sha_short}"
         upload_path: pool/main/m # Typical for debian repository layout
         publish: 1

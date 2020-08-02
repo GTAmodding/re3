@@ -37,11 +37,11 @@ jobs:
     - if: ${{ matrix.platform }} == "win-x86-librw_gl3_glfw-mss"
       name: Download glew
       uses: wei/wget@v1
-      args: ${env.GLEW_URL}
+      args: ${{ env.GLEW_URL }}
     - if: ${{ matrix.platform }} == "win-x86-librw_gl3_glfw-mss"
       name: Download glfw
       uses: wei/wget@v1
-      args: ${env.GLFW_URL} 
+      args: ${{ env.GLFW_URL }}
     - if: ${{ matrix.platform }} == "win-x86-librw_gl3_glfw-mss"
       run: |
           7z x "${env.GLEW_FILE}"

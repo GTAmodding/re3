@@ -1,0 +1,67 @@
+name: windows
+
+on:
+  pull_request:
+  push:
+  release:
+    types: published
+
+jobs:
+  build:
+    runs-on: windows-2019
+    strategy:
+      matrix:
+        buildtype: [Debug, Release]
+        platform: [win-x86-librw_d3d9-mss, win-x86-librw_gl3_glfw-mss]
+    env:
+      #APPVEYOR_SAVE_CACHE_ON_ERROR: true
+      GLEW_VER: "2.1.0"
+      GLFW_VER: "3.3.2"
+      GLEW_BASE: glew-${{GLEW_VER}}
+      GLFW_BASE: glfw-${{GLFW_VER}}.bin.WIN32
+      GLEW_FILE: "${{GLEW_BASE}}-win32.zip"
+      GLFW_FILE: "${{GLFW_BASE}}.zip"
+      GLEW_URL: https://github.com/nigels-com/glew/releases/download/${{GLEW_BASE}}/${{GLEW_FILE}}
+      GLFW_URL: https://github.com/glfw/glfw/releases/download/${{GLFW_VER}}/${{GLFW_FILE}}
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        submodules: 'true'
+    - name: Declare some variables
+      id: vars
+      shell: bash
+      run: |
+        echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
+        echo "::set-output name=sha_short::$(git rev-parse --short HEAD)"
+    - name: Download or restore dependency
+      run: |
+        - IF [${{matrix.platform}}] == [win-x86-librw_gl3_glfw-mss] IF NOT EXIST ${{GLEW_FILE}} wget ${{GLEW_URL}}"
+        - IF [${{matrix.platform}}] == [win-x86-librw_gl3_glfw-mss] 7z x "${{GLEW_FILE}}"
+        - IF [${{matrix.platform}}] == [win-x86-librw_gl3_glfw-mss] IF NOT EXIST ${{GLFW_FILE}} wget ${{GLFW_URL}}"
+        - IF [${{matrix.platform}}] == [win-x86-librw_gl3_glfw-mss] 7z x "${{GLFW_FILE}}"
+    - name: Configure build
+      run: |
+        premake5 vs2019 --with-librw --glewdir=${{GLEW_BASE}} --glfwdir32=${{GLFW_BASE}}
+    - name: Build
+      run: |
+        msbuild build/re3.sln
+    - name: Collect artifacts
+      shell: bash
+      run: |
+        mkdir artifact
+        export ZIPNAME=vanillaconquer_win32_${{ matrix.buildtype }}
+        if [ ${{ matrix.features }} != "ON" ]; then export FEATURES=_full; fi
+        7z a "re3_${{matrix.buildtype}}_${{matrix.platform}}_1.0-${{sha_short}}.zip" bin/${{matrix.platform}}/${{matrix.buildtype}}/re3.exe bin/${{matrix.platform}}/${{matrix.buildtype}}/re3.pdb
+  
+    - name: Upload package to Bintray
+      uses: bpicode/github-action-upload-bintray@master
+      with:
+        file: ./re3.zip
+        api_user: shfil119
+        api_key: xWnYDfNWM87iPoBFbz6L1XAduxijJRWSpQLhMDOjznmzbMCsORtdx2tmWmFLTwf6
+        repository_user: gtamodding
+        repository: re3
+        package: "${{matrix.buildtype}}_${{matrix.platform}}"
+        version: "1.0-${{sha_short}}"
+        upload_path: pool/main/m # Typical for debian repository layout
+        publish: 1

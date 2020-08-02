@@ -36,10 +36,14 @@ jobs:
         echo "::set-output name=sha_short::$(git rev-parse --short HEAD)"
     - name: Download or restore dependency
       run: |
-        - if: matrix.platform == "win-x86-librw_gl3_glfw-mss" IF NOT EXIST ${env.GLEW_FILE} wget ${env.GLEW_URL}"
-        - if: matrix.platform == "win-x86-librw_gl3_glfw-mss" 7z x "${env.GLEW_FILE}"
-        - if: matrix.platform == "win-x86-librw_gl3_glfw-mss" IF NOT EXIST ${env.GLFW_FILE} wget ${env.GLFW_URL}"
-        - if: matrix.platform == "win-x86-librw_gl3_glfw-mss" 7z x "${env.GLFW_FILE}"
+        - wget ${env.GLEW_URL}"
+          if: matrix.platform == "win-x86-librw_gl3_glfw-mss"
+        - 7z x "${env.GLEW_FILE}"
+          if: matrix.platform == "win-x86-librw_gl3_glfw-mss"
+        - wget ${env.GLFW_URL}"
+          if: matrix.platform == "win-x86-librw_gl3_glfw-mss"
+        - 7z x "${env.GLFW_FILE}"
+          if: matrix.platform == "win-x86-librw_gl3_glfw-mss"
     - name: Configure build
       run: |
         premake5 vs2019 --with-librw --glewdir=${env.GLEW_BASE} --glfwdir32=${env.GLFW_BASE}

@@ -17,12 +17,12 @@ jobs:
       #APPVEYOR_SAVE_CACHE_ON_ERROR: true
       GLEW_VER: "2.1.0"
       GLFW_VER: "3.3.2"
-      GLEW_BASE: glew-${{GLEW_VER}}
-      GLFW_BASE: glfw-${{GLFW_VER}}.bin.WIN32
-      GLEW_FILE: "${{GLEW_BASE}}-win32.zip"
-      GLFW_FILE: "${{GLFW_BASE}}.zip"
-      GLEW_URL: https://github.com/nigels-com/glew/releases/download/${{GLEW_BASE}}/${{GLEW_FILE}}
-      GLFW_URL: https://github.com/glfw/glfw/releases/download/${{GLFW_VER}}/${{GLFW_FILE}}
+      GLEW_BASE: glew-${{env.GLEW_VER}}
+      GLFW_BASE: glfw-${{env.GLFW_VER}}.bin.WIN32
+      GLEW_FILE: "${{env.GLEW_BASE}}-win32.zip"
+      GLFW_FILE: "${{env.GLFW_BASE}}.zip"
+      GLEW_URL: https://github.com/nigels-com/glew/releases/download/${{env.GLEW_BASE}}/${{env.GLEW_FILE}}
+      GLFW_URL: https://github.com/glfw/glfw/releases/download/${{env.GLFW_VER}}/${{env.GLFW_FILE}}
     steps:
     - uses: actions/checkout@v2
       with:
@@ -35,13 +35,13 @@ jobs:
         echo "::set-output name=sha_short::$(git rev-parse --short HEAD)"
     - name: Download or restore dependency
       run: |
-        - IF [${{matrix.platform}}] == [win-x86-librw_gl3_glfw-mss] IF NOT EXIST ${{GLEW_FILE}} wget ${{GLEW_URL}}"
-        - IF [${{matrix.platform}}] == [win-x86-librw_gl3_glfw-mss] 7z x "${{GLEW_FILE}}"
-        - IF [${{matrix.platform}}] == [win-x86-librw_gl3_glfw-mss] IF NOT EXIST ${{GLFW_FILE}} wget ${{GLFW_URL}}"
-        - IF [${{matrix.platform}}] == [win-x86-librw_gl3_glfw-mss] 7z x "${{GLFW_FILE}}"
+        - IF [${{matrix.platform}}] == [win-x86-librw_gl3_glfw-mss] IF NOT EXIST ${{env.GLEW_FILE}} wget ${{env.GLEW_URL}}"
+        - IF [${{matrix.platform}}] == [win-x86-librw_gl3_glfw-mss] 7z x "${{env.GLEW_FILE}}"
+        - IF [${{matrix.platform}}] == [win-x86-librw_gl3_glfw-mss] IF NOT EXIST ${{env.GLFW_FILE}} wget ${{env.GLFW_URL}}"
+        - IF [${{matrix.platform}}] == [win-x86-librw_gl3_glfw-mss] 7z x "${{env.GLFW_FILE}}"
     - name: Configure build
       run: |
-        premake5 vs2019 --with-librw --glewdir=${{GLEW_BASE}} --glfwdir32=${{GLFW_BASE}}
+        premake5 vs2019 --with-librw --glewdir=${{env.GLEW_BASE}} --glfwdir32=${{env.GLFW_BASE}}
     - name: Build
       run: |
         msbuild build/re3.sln

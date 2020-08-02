@@ -34,7 +34,7 @@ jobs:
       run: |
         echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
         echo "::set-output name=sha_short::$(git rev-parse --short HEAD)"
-    - if: ${{ matrix.platform == "win-x86-librw_gl3_glfw-mss" }}
+    - if: ${{ matrix.platform }} == "win-x86-librw_gl3_glfw-mss"
       name: Download or restore dependency
       run: |
           wget ${env.GLEW_URL}"

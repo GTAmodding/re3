@@ -36,14 +36,14 @@ jobs:
         echo "::set-output name=sha_short::$(git rev-parse --short HEAD)"
     - if: ${{ matrix.platform }} == "win-x86-librw_gl3_glfw-mss"
       name: Download glew
-      uses: wei/wget@v1
+      uses: carlosperate/download-file-action@v1.0.3
       with:
-        args: ${{ env.GLEW_URL }}
+        file-url: ${{ env.GLEW_URL }}
     - if: ${{ matrix.platform }} == "win-x86-librw_gl3_glfw-mss"
       name: Download glfw
-      uses: wei/wget@v1
+      uses: carlosperate/download-file-action@v1.0.3
       with:
-        args: ${{ env.GLFW_URL }}
+        file-url: ${{ env.GLFW_URL }}
     - if: ${{ matrix.platform }} == "win-x86-librw_gl3_glfw-mss"
       run: |
           7z x "${env.GLEW_FILE}"

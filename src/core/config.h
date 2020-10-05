@@ -311,3 +311,6 @@ enum Config {
 	#define PC_PARTICLE
 	#define VC_PED_PORTS // To not process collisions always. But should be tested if that's really beneficial
 #endif
+
+// Store GTA 3 files in ${HOME}/.local/share/re3
+// #define XDG_ROOT

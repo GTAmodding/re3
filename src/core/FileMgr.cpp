@@ -197,11 +197,45 @@ myfeof(int fd)
 char CFileMgr::ms_rootDirName[128] = {'\0'};
 char CFileMgr::ms_dirName[128];
 
+#ifdef XDG_ROOT
+void CFileMgr::GetHomeDirectory(char *homeDir) {
+  char **p = environ;
+  while (*p++)
+  {
+    if (!strncmp("HOME=", *p, 5)) {
+      strcpy(homeDir, *p + 5);
+      break;
+    }
+  }
+}
+#endif
+
 void
 CFileMgr::Initialise(void)
 {
+#ifdef XDG_ROOT
+  char homeDir[255];
+  bzero(homeDir, 255);
+  GetHomeDirectory(homeDir);
+  // Build up ${HOME}/.local/share/re3
+  strcat(homeDir, "/.local");
+  struct stat buf;
+  if (stat(homeDir, &buf) < 0) {
+    assert(mkdir(homeDir, 0755) == 0);
+  }
+  strcat(homeDir, "/share");
+  if (stat(homeDir, &buf) < 0) {
+    assert(mkdir(homeDir, 0755) == 0);
+  }
+  strcat(homeDir, "/re3");
+  if (stat(homeDir, &buf) < 0) {
+    assert(mkdir(homeDir, 0755) == 0);
+  }
+  strcpy(ms_rootDirName, homeDir);
+#else
 	_getcwd(ms_rootDirName, 128);
-	strcat(ms_rootDirName, "\\");
+#endif
+  strcat(ms_rootDirName, "\\");
 }
 
 void
@@ -264,7 +298,18 @@ CFileMgr::LoadFile(const char *file, uint8 *buf, int unused, const char *mode)
 int
 CFileMgr::OpenFile(const char *file, const char *mode)
 {
-	return myfopen(file, mode);
+#ifdef XDG_ROOT
+  char fixedPath[128] = {'\0'};
+  bzero(fixedPath, 128);
+  if (ms_dirName[0] == '\0') {
+    strcpy(ms_dirName, ms_rootDirName);
+  }
+  strncpy(fixedPath, ms_dirName, strlen(ms_dirName));
+  strcat(fixedPath, file);
+  return myfopen(fixedPath, mode);
+#else
+  return myfopen(file, mode);
+#endif
 }
 
 int

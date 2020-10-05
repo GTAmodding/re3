@@ -514,3 +514,6 @@ enum Config {
 #undef RADIO_SCROLL_TO_PREV_STATION
 #undef BIG_IMG
 #endif
+
+// Store GTA 3 files in ${HOME}/.local/share/re3
+// #define XDG_ROOT

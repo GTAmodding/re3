@@ -20,4 +20,7 @@ public:
 	static int CloseFile(int fd);
 	static int GetErrorReadWrite(int fd);
 	static char *GetRootDirName() { return ms_rootDirName; }
+#ifdef XDG_ROOT
+  static void GetHomeDirectory(char *homeDir);
+#endif
 };

@@ -198,15 +198,24 @@ char CFileMgr::ms_rootDirName[128] = {'\0'};
 char CFileMgr::ms_dirName[128];
 
 #ifdef XDG_ROOT
-void CFileMgr::GetHomeDirectory(char *homeDir) {
-  char **p = environ;
-  while (*p++)
-  {
-    if (!strncmp("HOME=", *p, 5)) {
-      strcpy(homeDir, *p + 5);
-      break;
-    }
+#define getenvvar(varName)                            \
+  char **p = environ;                                 \
+  size_t varNameLength = ARRAY_SIZE(varName) - 1;     \
+  for (; *p; *p++)                                    \
+  {                                                   \
+    if (!strncmp(varName "=", *p, varNameLength + 1)) \
+    {                                                 \
+      strcpy(homeDir, *p + varNameLength + 1);        \
+      break;                                          \
+    }                                                 \
   }
+
+void CFileMgr::GetHomeDirectory(char *homeDir) {
+  getenvvar("HOME");
+}
+
+void CFileMgr::GetXDGDataHome(char *homeDir) {
+  getenvvar("XDG_DATA_HOME");
 }
 #endif
 
@@ -215,21 +224,31 @@ CFileMgr::Initialise(void)
 {
 #ifdef XDG_ROOT
   char homeDir[255];
-  bzero(homeDir, 255);
-  GetHomeDirectory(homeDir);
-  // Build up ${HOME}/.local/share/re3
-  strcat(homeDir, "/.local");
   struct stat buf;
-  if (stat(homeDir, &buf) < 0) {
-    assert(mkdir(homeDir, 0755) == 0);
+  bzero(homeDir, 255);
+  GetXDGDataHome(homeDir);
+  if (strlen(homeDir) > 0) {
+    strcat(homeDir, "/re3");
+    if (stat(homeDir, &buf) < 0) {
+      assert(mkdir(homeDir, 0755) == 0);
+    }
   }
-  strcat(homeDir, "/share");
-  if (stat(homeDir, &buf) < 0) {
-    assert(mkdir(homeDir, 0755) == 0);
-  }
-  strcat(homeDir, "/re3");
-  if (stat(homeDir, &buf) < 0) {
-    assert(mkdir(homeDir, 0755) == 0);
+  else {
+    bzero(homeDir, 255);
+    GetHomeDirectory(homeDir);
+    // Build up ${HOME}/.local/share/re3
+    strcat(homeDir, "/.local");
+    if (stat(homeDir, &buf) < 0) {
+      assert(mkdir(homeDir, 0755) == 0);
+    }
+    strcat(homeDir, "/share");
+    if (stat(homeDir, &buf) < 0) {
+      assert(mkdir(homeDir, 0755) == 0);
+    }
+    strcat(homeDir, "/re3");
+    if (stat(homeDir, &buf) < 0) {
+      assert(mkdir(homeDir, 0755) == 0);
+    }
   }
   strcpy(ms_rootDirName, homeDir);
 #else

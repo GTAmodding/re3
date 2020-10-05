@@ -22,5 +22,6 @@ public:
 	static char *GetRootDirName() { return ms_rootDirName; }
 #ifdef XDG_ROOT
   static void GetHomeDirectory(char *homeDir);
+  static void GetXDGDataHome(char *homeDir);
 #endif
 };

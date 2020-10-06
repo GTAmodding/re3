@@ -1,0 +1,65 @@
+{
+    "inputs": [
+        {
+            "default": "5",
+            "description": "Number of jobs to run simultaneously when compiling",
+            "id": "numberOfJobs",
+            "type": "promptString"
+        }
+    ],
+    "tasks": [
+        {
+            "args": ["--with-librw", "gmake2"],
+            "command": "./premake5Linux",
+            "label": "Premake (Linux)",
+            "problemMatcher": "$gcc",
+            "type": "shell"
+        },
+        {
+            "args": ["--with-librw", "gmake2"],
+            "command": "premake5",
+            "label": "Premake (macOS)",
+            "problemMatcher": "$gcc",
+            "type": "shell"
+        },
+        {
+            "args": [
+                "-j${input:numberOfJobs}",
+                "config=debug_linux-amd64-librw_gl3_glfw-oal",
+                "verbose=1"
+            ],
+            "command": "make",
+            "dependsOn": "Premake (Linux)",
+            "group": {
+                "isDefault": true,
+                "kind": "build"
+            },
+            "label": "Compile (Linux x64)",
+            "options": {
+                "cwd": "${workspaceFolder}/build"
+            },
+            "problemMatcher": "$gcc",
+            "type": "shell"
+        },
+        {
+            "args": [
+                "-j5",
+                "config=debug_macosx-amd64-librw_gl3_glfw-oal",
+                "verbose=1"
+            ],
+            "command": "make",
+            "dependsOn": "Premake (macOS)",
+            "group": {
+                "isDefault": true,
+                "kind": "build"
+            },
+            "label": "Compile (macOS x64)",
+            "options": {
+                "cwd": "${workspaceFolder}/build"
+            },
+            "problemMatcher": "$gcc",
+            "type": "shell"
+        }
+    ],
+    "version": "2.0.0"
+}

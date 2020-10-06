@@ -1,0 +1,47 @@
+{
+  "configurations": [
+    {
+      "MIMode": "gdb",
+      "args": [],
+      "cwd": "${workspaceFolder}",
+      "environment": [],
+      "externalConsole": false,
+      "name": "(gdb) Launch",
+      "preLaunchTask": "Compile (Linux x64)",
+      "program": "${workspaceFolder}/bin/linux-amd64-librw_gl3_glfw-oal/Debug/re3",
+      "request": "launch",
+      "setupCommands": [
+        {
+          "description": "Enable pretty-printing for gdb",
+          "ignoreFailures": true,
+          "text": "-enable-pretty-printing"
+        }
+      ],
+      "stopAtEntry": false,
+      "targetArchitecture": "x64",
+      "type": "cppdbg"
+    },
+    {
+      "MIMode": "lldb",
+      "args": [],
+      "cwd": "${workspaceFolder}",
+      "environment": [],
+      "externalConsole": false,
+      "name": "(lldb) Launch",
+      "preLaunchTask": "Compile (macOS x64)",
+      "program": "${workspaceFolder}/bin/macosx-amd64-librw_gl3_glfw-oal/Debug/re3.app",
+      "request": "launch",
+      "setupCommands": [
+        {
+          "description": "Enable pretty-printing for lldb",
+          "ignoreFailures": true,
+          "text": "-enable-pretty-printing"
+        }
+      ],
+      "stopAtEntry": false,
+      "targetArchitecture": "x64",
+      "type": "cppdbg"
+    }
+  ],
+  "version": "0.2.0"
+}

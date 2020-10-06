@@ -1,0 +1,30 @@
+{
+  "configurations": [
+    {
+      "name": "Mac",
+      "includePath": [
+        "${default}",
+        "src/fakerw",
+        "src/math",
+        "src/render",
+        "src/skel",
+        "vendor/librw"
+      ],
+      "defines": [],
+      "macFrameworkPath": [
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/System/Library/Frameworks"
+      ],
+      "compilerPath": "/opt/local/bin/clang",
+      "compilerArgs": ["-g"],
+      "cStandard": "gnu11",
+      "cppStandard": "gnu++14",
+      "browse": {
+        "path": [
+          "/opt/local/include",
+          "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include"
+        ]
+      }
+    }
+  ],
+  "version": 4
+}

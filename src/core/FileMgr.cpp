@@ -8,6 +8,11 @@
 
 #include "FileMgr.h"
 
+#ifdef APPSUPPORT_ROOT
+#include <crt_externs.h>
+#include <sysdir.h>
+#endif
+
 const char *_psGetUserFilesFolder();
 
 /*
@@ -197,7 +202,10 @@ myfeof(int fd)
 char CFileMgr::ms_rootDirName[128] = {'\0'};
 char CFileMgr::ms_dirName[128];
 
-#ifdef XDG_ROOT
+#if defined(XDG_ROOT) || defined(APPSUPPORT_ROOT)
+#ifdef __APPLE__
+#define environ (*_NSGetEnviron())
+#endif
 #define getenvvar(varName)                            \
   char **p = environ;                                 \
   size_t varNameLength = ARRAY_SIZE(varName) - 1;     \
@@ -214,9 +222,11 @@ void CFileMgr::GetHomeDirectory(char *homeDir) {
   getenvvar("HOME");
 }
 
+#ifdef XDG_ROOT
 void CFileMgr::GetXDGDataHome(char *homeDir) {
   getenvvar("XDG_DATA_HOME");
 }
+#endif
 #endif
 
 void
@@ -251,6 +261,24 @@ CFileMgr::Initialise(void)
     }
   }
   strcpy(ms_rootDirName, homeDir);
+#elif defined(APPSUPPORT_ROOT)
+	char path[PATH_MAX], homeDir[PATH_MAX];
+	struct stat buf;
+	bzero(path, PATH_MAX);
+	bzero(homeDir, PATH_MAX);
+	GetHomeDirectory(homeDir);
+	assert(homeDir[0] != '\0');
+	sysdir_search_path_enumeration_state state = sysdir_start_search_path_enumeration(SYSDIR_DIRECTORY_APPLICATION_SUPPORT, SYSDIR_DOMAIN_MASK_USER);
+	while ((state = sysdir_get_next_search_path_enumeration(state, path)) != 0) {
+		assert(path[0] != '\0');
+		strcat(homeDir, path + 1);
+		strcat(homeDir, "/re3");
+		break;
+	}
+	if (stat(homeDir, &buf) < 0) {
+      assert(mkdir(homeDir, 0755) == 0);
+    }
+	strcpy(ms_rootDirName, homeDir);
 #else
 	_getcwd(ms_rootDirName, 128);
 #endif
@@ -317,7 +345,7 @@ CFileMgr::LoadFile(const char *file, uint8 *buf, int unused, const char *mode)
 int
 CFileMgr::OpenFile(const char *file, const char *mode)
 {
-#ifdef XDG_ROOT
+#if defined(XDG_ROOT) || defined(APPSUPPORT_ROOT)
   char fixedPath[128] = {'\0'};
   bzero(fixedPath, 128);
   if (ms_dirName[0] == '\0') {

@@ -17,7 +17,7 @@
 #include "CdStream.h"
 #include "rwcore.h"
 #include "RwHelper.h"
-#ifdef XDG_ROOT
+#if defined(XDG_ROOT) || defined(APPSUPPORT_ROOT)
 #include "FileMgr.h"
 #endif
 
@@ -148,9 +148,9 @@ void
 CdStreamInit(int32 numChannels)
 {
     struct statvfs fsInfo;
-    char imgPath[128] = {'\0'};
+    char imgPath[PATH_MAX] = {'\0'};
 
-#ifdef XDG_ROOT
+#if defined(XDG_ROOT) || defined(APPSUPPORT_ROOT)
     const char *rootDir = CFileMgr::GetRootDirName();
     strncpy(imgPath, rootDir, strlen(rootDir) - 1);
     strcat(imgPath, "/");

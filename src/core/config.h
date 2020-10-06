@@ -314,3 +314,8 @@ enum Config {
 
 // Store GTA 3 files in ${HOME}/.local/share/re3
 // #define XDG_ROOT
+
+#ifdef __APPLE__
+// Store GTA 3 files in ${HOME}/Library/Application Support/re3
+// #define APPSUPPORT_ROOT
+#endif

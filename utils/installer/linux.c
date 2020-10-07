@@ -144,17 +144,17 @@ int main(int argc, char *argv[]) {
 		fprintf(stderr, "\nISO1 must be the first disc as an ISO image.\n");
 		fprintf(stderr, "ISO2 must be the second disc as an ISO image.\n");
 		fprintf(stderr,
-				"DIR1 must be the directory containing data1.cab, "
-				"data1.hdr, and data2.cab from the first disc.\n");
+		        "DIR1 must be the directory containing data1.cab, "
+		        "data1.hdr, and data2.cab from the first disc.\n");
 		fprintf(stderr,
-				"DIR2 must be the directory containing the Audio directory "
-				"from the second disc.\n");
+		        "DIR2 must be the directory containing the Audio directory "
+		        "from the second disc.\n");
 		fprintf(stderr, "\nBoth arguments must be of the same type.\n");
 		return 1;
 	}
 
 	if ((!isISO(argv[1]) && isISO(argv[2])) ||
-		(!isDirectory(argv[1]) && isDirectory(argv[2]))) {
+	    (!isDirectory(argv[1]) && isDirectory(argv[2]))) {
 		fprintf(stderr, "\nBoth arguments must be of the same type.\n");
 		return 1;
 	}
@@ -174,19 +174,19 @@ int main(int argc, char *argv[]) {
 		if (pid == 0) {
 			// Child process
 			int ret = execlp("7z",
-							 "7z",
-							 "x",
-							 "-aoa",
-							 "-bb0",
-							 "-bd",
-							 "-y",
-							 outArg,
-							 "--",
-							 argv[1],
-							 "data1.cab",
-							 "data1.hdr",
-							 "data2.cab",
-							 NULL);
+			                 "7z",
+			                 "x",
+			                 "-aoa",
+			                 "-bb0",
+			                 "-bd",
+			                 "-y",
+			                 outArg,
+			                 "--",
+			                 argv[1],
+			                 "data1.cab",
+			                 "data1.hdr",
+			                 "data2.cab",
+			                 NULL);
 			assert(ret == 0);
 			_exit(EXIT_SUCCESS);
 		} else if (pid < 0) {
@@ -208,17 +208,17 @@ int main(int argc, char *argv[]) {
 		if (pid == 0) {
 			// Child process
 			int ret = execlp("7z",
-							 "7z",
-							 "x",
-							 "-aoa",
-							 "-bb0",
-							 "-bd",
-							 "-y",
-							 outArg,
-							 "--",
-							 argv[2],
-							 "Audio",
-							 NULL);
+			                 "7z",
+			                 "x",
+			                 "-aoa",
+			                 "-bb0",
+			                 "-bd",
+			                 "-y",
+			                 outArg,
+			                 "--",
+			                 argv[2],
+			                 "Audio",
+			                 NULL);
 			assert(ret == 0);
 			_exit(EXIT_SUCCESS);
 		} else if (pid < 0) {
@@ -244,7 +244,7 @@ int main(int argc, char *argv[]) {
 		return 1;
 	}
 	UnshieldFileGroup *appExecGroup =
-		unshield_file_group_find(unshield, CAB_FILE_GROUP_APP_EXEC);
+	    unshield_file_group_find(unshield, CAB_FILE_GROUP_APP_EXEC);
 	if (!appExecGroup) {
 		fprintf(stderr, "Could not find App Executables group\n");
 		return 1;
@@ -268,7 +268,7 @@ int main(int argc, char *argv[]) {
 				continue;
 			}
 			char *dir = (char *)unshield_directory_name(
-				unshield, unshield_file_directory(unshield, i));
+			    unshield, unshield_file_directory(unshield, i));
 			for (int j = 0; j < strlen(dir); j++) {
 				if (dir[j] == '\\') {
 					dir[j] = '/';
@@ -279,10 +279,10 @@ int main(int argc, char *argv[]) {
 				dir[0] = 'A';
 			}
 			int ret = sprintf(targetDir,
-							  "%s%s%s",
-							  outputDir,
-							  dir ? "/" : "",
-							  dir ? dir : "");
+			                  "%s%s%s",
+			                  outputDir,
+			                  dir ? "/" : "",
+			                  dir ? dir : "");
 			assert(ret > 0);
 			if (mkdir_p(targetDir) < 0) {
 				assert(errno != EEXIST);

@@ -14,3 +14,6 @@
 	path = vendor/librw
 	url = https://github.com/aap/librw.git
 	branch = master
+[submodule "vendor/unshield"]
+	path = vendor/unshield
+	url = git@github.com:twogood/unshield.git

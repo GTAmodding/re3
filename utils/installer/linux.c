@@ -1,0 +1,327 @@
+#include <limits.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#include <assert.h>
+#include <errno.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <sys/wait.h>
+#include <unistd.h>
+
+#include <libunshield.h>
+
+#ifdef _MSC_VER
+#include <direct.h>
+#define mkdir _mkdir
+#define strncasecmp _strnicmp
+#endif
+
+#ifdef __APPLE__
+#define environ (*_NSGetEnviron())
+#else
+extern char **environ;
+#endif
+
+const char *CAB_FILE_GROUP_APP_EXEC = "App Executables";
+// Has the default skin
+const char *CAB_FILE_GROUP_DONT_DELETE = "Don't Delete";
+
+char *getenvvar(const char *varName) {
+	char **p = environ;
+	char *homeDir = malloc(PATH_MAX);
+	bzero(homeDir, PATH_MAX);
+	size_t varNameLength = strlen(varName);
+	char *search = malloc(varNameLength + 2);
+	bzero(search, varNameLength + 2);
+	strcpy(search, varName);
+	strcat(search, "=");
+	for (; *p; p++) {
+		if (!strncmp(search, *p, varNameLength + 1)) {
+			strcpy(homeDir, *p + varNameLength + 1);
+			break;
+		}
+	}
+	return homeDir;
+}
+
+/** From
+ * https://gist.github.com/JonathonReinhart/8c0d90191c38af2dcadb102c4e202950 */
+int mkdir_p(const char *path) {
+	/* Adapted from http://stackoverflow.com/a/2336245/119527 */
+	const size_t len = strlen(path);
+	char _path[PATH_MAX];
+	char *p;
+
+	errno = 0;
+
+	/* Copy string so its mutable */
+	if (len > sizeof(_path) - 1) {
+		errno = ENAMETOOLONG;
+		return -1;
+	}
+	strcpy(_path, path);
+
+	/* Iterate the string */
+	for (p = _path + 1; *p; p++) {
+		if (*p == '/') {
+			/* Temporarily truncate */
+			*p = '\0';
+
+			if (mkdir(_path, S_IRWXU) != 0) {
+				if (errno != EEXIST)
+					return -1;
+			}
+
+			*p = '/';
+		}
+	}
+
+	if (mkdir(_path, S_IRWXU) != 0) {
+		if (errno != EEXIST)
+			return -1;
+	}
+
+	return 0;
+}
+
+bool isFile(const char *path) {
+	struct stat statbuf;
+	stat(path, &statbuf);
+	return (statbuf.st_mode & S_IFMT) == S_IFREG;
+}
+
+bool isDirectory(const char *path) {
+	struct stat statbuf;
+	stat(path, &statbuf);
+	return (statbuf.st_mode & S_IFMT) == S_IFDIR;
+}
+
+bool isISO(const char *path) {
+	size_t len = strlen(path);
+	char arr[3];
+	for (int i = (len - 1), j = 0; i > (len - 4); i--, j++) {
+		arr[j] = path[i];
+	}
+	return isFile(path) && !strncasecmp(arr, "osi", 3);
+}
+
+bool endsWithDLL(const char *path) {
+	size_t len = strlen(path);
+	char arr[3];
+	for (int i = (len - 1), j = 0; i > (len - 4); i--, j++) {
+		arr[j] = path[i];
+	}
+	return !strncasecmp(arr, "lld", 3);
+}
+
+bool endsWithEXE(const char *path) {
+	size_t len = strlen(path);
+	char arr[3];
+	for (int i = (len - 1), j = 0; i > (len - 4); i--, j++) {
+		arr[j] = path[i];
+	}
+	return !strncasecmp(arr, "exe", 3);
+}
+
+bool endsWithURL(const char *path) {
+	size_t len = strlen(path);
+	char arr[3];
+	for (int i = (len - 1), j = 0; i > (len - 4); i--, j++) {
+		arr[j] = path[i];
+	}
+	return !strncasecmp(arr, "lru", 3);
+}
+
+bool canIgnore(const char *path) {
+	return endsWithEXE(path) || endsWithDLL(path) || endsWithURL(path);
+}
+
+int main(int argc, char *argv[]) {
+	if (argc != 3) {
+		fprintf(stderr, "Usage: %s ISO1|DIR1 ISO2|DIR2\n", argv[0]);
+		fprintf(stderr, "\nISO1 must be the first disc as an ISO image.\n");
+		fprintf(stderr, "ISO2 must be the second disc as an ISO image.\n");
+		fprintf(stderr,
+				"DIR1 must be the directory containing data1.cab, "
+				"data1.hdr, and data2.cab from the first disc.\n");
+		fprintf(stderr,
+				"DIR2 must be the directory containing the Audio directory "
+				"from the second disc.\n");
+		fprintf(stderr, "\nBoth arguments must be of the same type.\n");
+		return 1;
+	}
+
+	if ((!isISO(argv[1]) && isISO(argv[2])) ||
+		(!isDirectory(argv[1]) && isDirectory(argv[2]))) {
+		fprintf(stderr, "\nBoth arguments must be of the same type.\n");
+		return 1;
+	}
+
+	char *dir1 = strdup(argv[1]);
+	char *dir2 = strdup(argv[2]);
+
+	if (isISO(argv[1]) && isISO(argv[2])) {
+		// Extract disc 1
+		char *tempDir = mkdtemp(strdup("/tmp/re3.XXXXXX"));
+		assert(tempDir != NULL);
+		char outArg[PATH_MAX];
+		bzero(outArg, PATH_MAX);
+		sprintf(outArg, "-o%s", tempDir);
+		int status;
+		pid_t pid = fork();
+		if (pid == 0) {
+			// Child process
+			int ret = execlp("7z",
+							 "7z",
+							 "x",
+							 "-aoa",
+							 "-bb0",
+							 "-bd",
+							 "-y",
+							 outArg,
+							 "--",
+							 argv[1],
+							 "data1.cab",
+							 "data1.hdr",
+							 "data2.cab",
+							 NULL);
+			assert(ret == 0);
+			_exit(EXIT_SUCCESS);
+		} else if (pid < 0) {
+			// Fork failed
+			status = -1;
+		} else {
+			// Parent process. Wait for child to exit
+			if (waitpid(pid, &status, 0) != pid) {
+				status = -1;
+			}
+		}
+		assert(status == 0);
+		free(dir1);
+		free(dir2);
+		dir1 = dir2 = strdup(tempDir);
+		free(tempDir);
+		// Extract disc 2
+		pid = fork();
+		if (pid == 0) {
+			// Child process
+			int ret = execlp("7z",
+							 "7z",
+							 "x",
+							 "-aoa",
+							 "-bb0",
+							 "-bd",
+							 "-y",
+							 outArg,
+							 "--",
+							 argv[2],
+							 "Audio",
+							 NULL);
+			assert(ret == 0);
+			_exit(EXIT_SUCCESS);
+		} else if (pid < 0) {
+			// Fork failed
+			status = -1;
+		} else {
+			// Parent process. Wait for child to exit
+			if (waitpid(pid, &status, 0) != pid) {
+				status = -1;
+			}
+		}
+		assert(status == 0);
+	}
+
+	// Extract data1.cab
+	char *data1CabPath = malloc(PATH_MAX);
+	bzero(data1CabPath, PATH_MAX);
+	sprintf(data1CabPath, "%s/data1.cab", dir1);
+	unshield_set_log_level(UNSHIELD_LOG_LEVEL_ERROR);
+	Unshield *unshield = unshield_open(data1CabPath);
+	if (!unshield) {
+		fprintf(stderr, "Failed to open %s\n", data1CabPath);
+		return 1;
+	}
+	UnshieldFileGroup *appExecGroup =
+		unshield_file_group_find(unshield, CAB_FILE_GROUP_APP_EXEC);
+	if (!appExecGroup) {
+		fprintf(stderr, "Could not find App Executables group\n");
+		return 1;
+	}
+	char *outputDir = malloc(PATH_MAX);
+	char *xdgDataHome = getenvvar("XDG_DATA_HOME");
+	if (strlen(xdgDataHome) == 0) {
+		char *homeDir = getenvvar("HOME");
+		assert(strlen(homeDir) > 0);
+		sprintf(outputDir, "%s/.local/share/re3", homeDir);
+		free(homeDir);
+	} else {
+		sprintf(outputDir, "%s/re3", xdgDataHome);
+		free(xdgDataHome);
+	}
+	char *targetDir = malloc(PATH_MAX);
+	for (int i = appExecGroup->first_file; i <= appExecGroup->last_file; i++) {
+		if (unshield_file_is_valid(unshield, i)) {
+			const char *name = unshield_file_name(unshield, i);
+			if (canIgnore(name)) {
+				continue;
+			}
+			char *dir = (char *)unshield_directory_name(
+				unshield, unshield_file_directory(unshield, i));
+			for (int j = 0; j < strlen(dir); j++) {
+				if (dir[j] == '\\') {
+					dir[j] = '/';
+				}
+			}
+			bzero(targetDir, PATH_MAX);
+			if (!strcmp(dir, "audio")) { // Keep casing consistent
+				dir[0] = 'A';
+			}
+			int ret = sprintf(targetDir,
+							  "%s%s%s",
+							  outputDir,
+							  dir ? "/" : "",
+							  dir ? dir : "");
+			assert(ret > 0);
+			if (mkdir_p(targetDir) < 0) {
+				assert(errno != EEXIST);
+			}
+			char *targetPath = malloc(PATH_MAX);
+			bzero(targetPath, PATH_MAX);
+			ret = sprintf(targetPath, "%s/%s", targetDir, name);
+			assert(ret > 0);
+			bool unshieldRet = unshield_file_save(unshield, i, targetPath);
+			assert(unshieldRet);
+			free(targetPath);
+		}
+	}
+	free(targetDir);
+	// Copy disc 2 Audio
+	int status;
+	pid_t pid = fork();
+	char *audioDir = malloc(PATH_MAX);
+	sprintf(audioDir, "%s/Audio/", dir2);
+	if (pid == 0) {
+		// Child process
+		int ret = execlp("cp", "cp", "-R", "--", audioDir, outputDir, NULL);
+		assert(ret == 0);
+		_exit(EXIT_SUCCESS);
+	} else if (pid < 0) {
+		// Fork failed
+		status = -1;
+	} else {
+		// Parent process. Wait for child to exit
+		if (waitpid(pid, &status, 0) != pid) {
+			status = -1;
+		}
+	}
+	free(dir1);
+	if (dir2 != dir1) {
+		free(dir2);
+	}
+	free(audioDir);
+	free(outputDir);
+	free(data1CabPath);
+	return status == 0 ? 0 : 1;
+}

@@ -191,11 +191,11 @@ int main(int argc, char *argv[]) {
 		} else {
 			strcat(tmpDirEnv, "/re3.XXXXXX");
 		}
-		char *tempDir = mkdtemp(tmpDirEnv);
-		assert(tempDir != NULL);
+		mkdtemp(tmpDirEnv);
+		assert(tmpDirEnv != NULL);
 		char outArg[PATH_MAX];
 		memset(outArg, 0, PATH_MAX);
-		sprintf(outArg, "-o%s", tempDir);
+		sprintf(outArg, "-o%s", tmpDirEnv);
 		int status;
 		pid_t pid = fork();
 		if (pid == 0) {
@@ -226,13 +226,16 @@ int main(int argc, char *argv[]) {
 			}
 			if (status != 0) {
 				fprintf(stderr, "7z failed to extract %s\n.", argv[1]);
+				free(tmpDirEnv);
+				free(dir1);
+				free(dir2);
 				return 1;
 			}
 		}
 		free(dir1);
 		free(dir2);
-		dir1 = dir2 = strdup(tempDir);
-		free(tempDir);
+		dir1 = dir2 = strdup(tmpDirEnv);
+		free(tmpDirEnv);
 		// Extract disc 2
 		pid = fork();
 		if (pid == 0) {
@@ -262,6 +265,7 @@ int main(int argc, char *argv[]) {
 		}
 		if (status != 0) {
 			fprintf(stderr, "7z failed to extract %s\n.", argv[2]);
+			free(dir1);
 			return 1;
 		}
 	}
@@ -284,6 +288,10 @@ int main(int argc, char *argv[]) {
 	        SYSDIR_DIRECTORY_APPLICATION_SUPPORT, SYSDIR_DOMAIN_MASK_USER);
 	while ((state = sysdir_get_next_search_path_enumeration(state, path)) !=
 	       0) {
+		if (state == 0) {
+			fprintf(stderr, "Failed to get a valid directory.\n");
+			return 1;
+		}
 		assert(path[0] != '\0');
 		sprintf(outputDir, "%s%s/re3", homeDir, path + 1);
 		break;
@@ -299,6 +307,8 @@ int main(int argc, char *argv[]) {
 	Unshield *unshield = unshield_open(data1CabPath);
 	if (!unshield) {
 		fprintf(stderr, "Failed to open %s\n", data1CabPath);
+		free(dir2);
+		free(outputDir);
 		return 1;
 	}
 	for (int groupIndex = 0;
@@ -308,6 +318,8 @@ int main(int argc, char *argv[]) {
 		    unshield_file_group_find(unshield, GROUPS[groupIndex]);
 		if (!group) {
 			fprintf(stderr, "Could not find %s group\n", GROUPS[groupIndex]);
+			free(dir2);
+			free(outputDir);
 			return 1;
 		}
 		char *targetDir = malloc(PATH_MAX);
@@ -337,6 +349,7 @@ int main(int argc, char *argv[]) {
 				assert(ret > 0);
 				if (mkdir_p(targetDir) < 0) {
 					if (errno != EEXIST) {
+						free(dir2);
 						fprintf(stderr,
 						        "Failed to create directory %s: ",
 						        targetDir);
@@ -375,6 +388,7 @@ int main(int argc, char *argv[]) {
 			status = -1;
 		}
 		if (status != 0) {
+			free(outputDir);
 			fprintf(stderr, "cp command failed.\n.");
 			return 1;
 		}
@@ -383,7 +397,7 @@ int main(int argc, char *argv[]) {
 	if (isoMode) {
 		pid = fork();
 		if (pid == 0) {
-			int ret = execlp("rm", "rm", "-fR", dir2, NULL);
+			execlp("rm", "rm", "-fR", dir2, NULL);
 			_exit(EXIT_SUCCESS);
 		} else if (pid < 0) {
 			status = -1;

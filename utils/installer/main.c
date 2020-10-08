@@ -245,6 +245,7 @@ int main(int argc, char *argv[]) {
 		free(xdgDataHome);
 	}
 #elif defined(__APPLE__)
+	char path[PATH_MAX];
 	sysdir_search_path_enumeration_state state =
 	    sysdir_start_search_path_enumeration(
 	        SYSDIR_DIRECTORY_APPLICATION_SUPPORT, SYSDIR_DOMAIN_MASK_USER);

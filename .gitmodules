@@ -16,4 +16,4 @@
 	branch = master
 [submodule "vendor/unshield"]
 	path = vendor/unshield
-	url = git@github.com:twogood/unshield.git
+	url = https://github.com/twogood/unshield.git

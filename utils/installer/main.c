@@ -43,6 +43,7 @@ char *getenvvar(const char *varName) {
 			break;
 		}
 	}
+	free(search);
 	return value;
 }
 
@@ -239,11 +240,10 @@ int main(int argc, char *argv[]) {
 	if (strlen(xdgDataHome) == 0) {
 		assert(strlen(homeDir) > 0);
 		sprintf(outputDir, "%s/.local/share/re3", homeDir);
-		free(homeDir);
 	} else {
 		sprintf(outputDir, "%s/re3", xdgDataHome);
-		free(xdgDataHome);
 	}
+	free(xdgDataHome);
 #elif defined(__APPLE__)
 	char path[PATH_MAX];
 	sysdir_search_path_enumeration_state state =
@@ -256,6 +256,7 @@ int main(int argc, char *argv[]) {
 		break;
 	}
 #endif
+	free(homeDir);
 
 	// Extract data1.cab
 	char *data1CabPath = malloc(PATH_MAX);
@@ -315,6 +316,7 @@ int main(int argc, char *argv[]) {
 		}
 		free(targetDir);
 	}
+	unshield_close(unshield);
 	// Copy disc 2 Audio
 	int status;
 	pid_t pid = fork();

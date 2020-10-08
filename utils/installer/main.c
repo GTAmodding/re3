@@ -184,7 +184,14 @@ int main(int argc, char *argv[]) {
 	if (isISO(argv[1]) && isISO(argv[2])) {
 		isoMode = true;
 		// Extract disc 1
-		char *tempDir = mkdtemp(strdup("/tmp/re3.XXXXXX"));
+		char *tmpDirEnv = getenvvar("TMPDIR");
+		if (!strlen(tmpDirEnv)) {
+			bzero(tmpDirEnv, PATH_MAX);
+			strcpy(tmpDirEnv, "/tmp/re3.XXXXXX");
+		} else {
+			strcat(tmpDirEnv, "/re3.XXXXXX");
+		}
+		char *tempDir = mkdtemp(tmpDirEnv);
 		assert(tempDir != NULL);
 		char outArg[PATH_MAX];
 		bzero(outArg, PATH_MAX);
@@ -368,7 +375,7 @@ int main(int argc, char *argv[]) {
 			status = -1;
 		}
 		if (status != 0) {
-			fprintf(stderr, "cp command failed.\n.", argv[2]);
+			fprintf(stderr, "cp command failed.\n.");
 			return 1;
 		}
 	}

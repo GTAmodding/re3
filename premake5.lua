@@ -120,10 +120,18 @@ workspace "re3"
 		architecture "ARM"
 
 	filter { "platforms:macosx-arm64-*" }
-		buildoptions { "-target", "arm64-apple-macos11", "-std=gnu++14" }
+		buildoptions { "-target", "arm64-apple-macos11" }
+		filter { "language:C++" } 
+			buildoptions { "-std=gnu++14" }
+		filter { "language:C" }
+			buildoptions { "-std=gnu11" }
 
 	filter { "platforms:macosx-amd64-*" }
-		buildoptions { "-target", "x86_64-apple-macos10.12", "-std=gnu++14" }
+		buildoptions { "-target", "x86_64-apple-macos10.12" }
+		filter { "language:C++" } 
+			buildoptions { "-std=gnu++14" }
+		filter { "language:C" }
+			buildoptions { "-std=gnu11" }
 
 	filter { "platforms:*librw_d3d9*" }
 		defines { "RW_D3D9" }

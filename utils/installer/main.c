@@ -179,8 +179,10 @@ int main(int argc, char *argv[]) {
 
 	char *dir1 = strdup(argv[1]);
 	char *dir2 = strdup(argv[2]);
+	bool isoMode = false;
 
 	if (isISO(argv[1]) && isISO(argv[2])) {
+		isoMode = true;
 		// Extract disc 1
 		char *tempDir = mkdtemp(strdup("/tmp/re3.XXXXXX"));
 		assert(tempDir != NULL);
@@ -368,6 +370,20 @@ int main(int argc, char *argv[]) {
 		if (status != 0) {
 			fprintf(stderr, "cp command failed.\n.", argv[2]);
 			return 1;
+		}
+	}
+	// Clean up
+	if (isoMode) {
+		pid = fork();
+		if (pid == 0) {
+			int ret = execlp("rm", "rm", "-fR", dir2, NULL);
+			_exit(EXIT_SUCCESS);
+		} else if (pid < 0) {
+			status = -1;
+		} else {
+			if (waitpid(pid, &status, 0) != pid) {
+				perror(NULL);
+			}
 		}
 	}
 	free(dir1);

@@ -26,9 +26,7 @@
 extern char **environ;
 #endif
 
-const char *CAB_FILE_GROUP_APP_EXEC = "App Executables";
-// Has the default skin
-const char *CAB_FILE_GROUP_DONT_DELETE = "Don't Delete";
+const char *GROUPS[] = {"App Executables", "Don't Delete", NULL};
 
 char *getenvvar(const char *varName) {
 	char **p = environ;
@@ -234,22 +232,6 @@ int main(int argc, char *argv[]) {
 		assert(status == 0);
 	}
 
-	// Extract data1.cab
-	char *data1CabPath = malloc(PATH_MAX);
-	bzero(data1CabPath, PATH_MAX);
-	sprintf(data1CabPath, "%s/data1.cab", dir1);
-	unshield_set_log_level(UNSHIELD_LOG_LEVEL_ERROR);
-	Unshield *unshield = unshield_open(data1CabPath);
-	if (!unshield) {
-		fprintf(stderr, "Failed to open %s\n", data1CabPath);
-		return 1;
-	}
-	UnshieldFileGroup *appExecGroup =
-	    unshield_file_group_find(unshield, CAB_FILE_GROUP_APP_EXEC);
-	if (!appExecGroup) {
-		fprintf(stderr, "Could not find App Executables group\n");
-		return 1;
-	}
 	char *outputDir = malloc(PATH_MAX);
 #ifdef XDG_ROOT
 	char *xdgDataHome = getenvvar("XDG_DATA_HOME");
@@ -273,43 +255,65 @@ int main(int argc, char *argv[]) {
 		break;
 	}
 #endif
-	char *targetDir = malloc(PATH_MAX);
-	for (int i = appExecGroup->first_file; i <= appExecGroup->last_file; i++) {
-		if (unshield_file_is_valid(unshield, i)) {
-			const char *name = unshield_file_name(unshield, i);
-			if (canIgnore(name)) {
-				continue;
-			}
-			char *dir = (char *)unshield_directory_name(
-			    unshield, unshield_file_directory(unshield, i));
-			for (int j = 0; j < strlen(dir); j++) {
-				if (dir[j] == '\\') {
-					dir[j] = '/';
-				}
-			}
-			bzero(targetDir, PATH_MAX);
-			if (!strcmp(dir, "audio")) { // Keep casing consistent
-				dir[0] = 'A';
-			}
-			int ret = sprintf(targetDir,
-			                  "%s%s%s",
-			                  outputDir,
-			                  dir ? "/" : "",
-			                  dir ? dir : "");
-			assert(ret > 0);
-			if (mkdir_p(targetDir) < 0) {
-				assert(errno != EEXIST);
-			}
-			char *targetPath = malloc(PATH_MAX);
-			bzero(targetPath, PATH_MAX);
-			ret = sprintf(targetPath, "%s/%s", targetDir, name);
-			assert(ret > 0);
-			bool unshieldRet = unshield_file_save(unshield, i, targetPath);
-			assert(unshieldRet);
-			free(targetPath);
-		}
+
+	// Extract data1.cab
+	char *data1CabPath = malloc(PATH_MAX);
+	bzero(data1CabPath, PATH_MAX);
+	sprintf(data1CabPath, "%s/data1.cab", dir1);
+	unshield_set_log_level(UNSHIELD_LOG_LEVEL_ERROR);
+	Unshield *unshield = unshield_open(data1CabPath);
+	if (!unshield) {
+		fprintf(stderr, "Failed to open %s\n", data1CabPath);
+		return 1;
 	}
-	free(targetDir);
+	for (int groupIndex = 0;
+	     groupIndex < ((sizeof GROUPS / sizeof GROUPS[0]) - 1);
+	     groupIndex++) {
+		UnshieldFileGroup *group =
+		    unshield_file_group_find(unshield, GROUPS[groupIndex]);
+		if (!group) {
+			fprintf(stderr, "Could not find App Executables group\n");
+			return 1;
+		}
+		char *targetDir = malloc(PATH_MAX);
+		for (int i = group->first_file; i <= group->last_file; i++) {
+			if (unshield_file_is_valid(unshield, i)) {
+				const char *name = unshield_file_name(unshield, i);
+				if (canIgnore(name)) {
+					continue;
+				}
+				char *dir = (char *)unshield_directory_name(
+				    unshield, unshield_file_directory(unshield, i));
+				for (int j = 0; j < strlen(dir); j++) {
+					if (dir[j] == '\\') {
+						dir[j] = '/';
+					}
+				}
+				bzero(targetDir, PATH_MAX);
+				if (groupIndex == 0 &&
+				    !strcmp(dir, "audio")) { // Keep casing consistent
+					dir[0] = 'A';
+				}
+				int ret = sprintf(targetDir,
+				                  "%s%s%s",
+				                  outputDir,
+				                  dir ? "/" : "",
+				                  dir ? dir : "");
+				assert(ret > 0);
+				if (mkdir_p(targetDir) < 0) {
+					assert(errno != EEXIST);
+				}
+				char *targetPath = malloc(PATH_MAX);
+				bzero(targetPath, PATH_MAX);
+				ret = sprintf(targetPath, "%s/%s", targetDir, name);
+				assert(ret > 0);
+				bool unshieldRet = unshield_file_save(unshield, i, targetPath);
+				assert(unshieldRet);
+				free(targetPath);
+			}
+		}
+		free(targetDir);
+	}
 	// Copy disc 2 Audio
 	int status;
 	pid_t pid = fork();

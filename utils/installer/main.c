@@ -19,6 +19,8 @@
 #endif
 
 #ifdef __APPLE__
+#include <crt_externs.h>
+#include <sysdir.h>
 #define environ (*_NSGetEnviron())
 #else
 extern char **environ;
@@ -30,8 +32,8 @@ const char *CAB_FILE_GROUP_DONT_DELETE = "Don't Delete";
 
 char *getenvvar(const char *varName) {
 	char **p = environ;
-	char *homeDir = malloc(PATH_MAX);
-	bzero(homeDir, PATH_MAX);
+	char *value = malloc(PATH_MAX);
+	bzero(value, PATH_MAX);
 	size_t varNameLength = strlen(varName);
 	char *search = malloc(varNameLength + 2);
 	bzero(search, varNameLength + 2);
@@ -39,11 +41,11 @@ char *getenvvar(const char *varName) {
 	strcat(search, "=");
 	for (; *p; p++) {
 		if (!strncmp(search, *p, varNameLength + 1)) {
-			strcpy(homeDir, *p + varNameLength + 1);
+			strcpy(value, *p + varNameLength + 1);
 			break;
 		}
 	}
-	return homeDir;
+	return value;
 }
 
 /** From
@@ -99,39 +101,38 @@ bool isDirectory(const char *path) {
 }
 
 bool isISO(const char *path) {
-	size_t len = strlen(path);
-	char arr[3];
-	for (int i = (len - 1), j = 0; i > (len - 4); i--, j++) {
-		arr[j] = path[i];
+	if (!strncmp(path, "iso", 3)) {
+		return true;
 	}
-	return isFile(path) && !strncasecmp(arr, "osi", 3);
+	size_t len = strlen(path);
+	if (len < 3) {
+		return false;
+	}
+	return isFile(path) && !strncasecmp(path + len - 3, "iso", 3);
 }
 
 bool endsWithDLL(const char *path) {
 	size_t len = strlen(path);
-	char arr[3];
-	for (int i = (len - 1), j = 0; i > (len - 4); i--, j++) {
-		arr[j] = path[i];
+	if (len < 3) {
+		return false;
 	}
-	return !strncasecmp(arr, "lld", 3);
+	return !strncasecmp(path + len - 3, "dll", 3);
 }
 
 bool endsWithEXE(const char *path) {
 	size_t len = strlen(path);
-	char arr[3];
-	for (int i = (len - 1), j = 0; i > (len - 4); i--, j++) {
-		arr[j] = path[i];
+	if (len < 3) {
+		return false;
 	}
-	return !strncasecmp(arr, "exe", 3);
+	return !strncasecmp(path + len - 3, "exe", 3);
 }
 
 bool endsWithURL(const char *path) {
 	size_t len = strlen(path);
-	char arr[3];
-	for (int i = (len - 1), j = 0; i > (len - 4); i--, j++) {
-		arr[j] = path[i];
+	if (len < 3) {
+		return false;
 	}
-	return !strncasecmp(arr, "lru", 3);
+	return !strncasecmp(path + len - 3, "url", 3);
 }
 
 bool canIgnore(const char *path) {
@@ -250,6 +251,7 @@ int main(int argc, char *argv[]) {
 		return 1;
 	}
 	char *outputDir = malloc(PATH_MAX);
+#ifdef XDG_ROOT
 	char *xdgDataHome = getenvvar("XDG_DATA_HOME");
 	if (strlen(xdgDataHome) == 0) {
 		char *homeDir = getenvvar("HOME");
@@ -260,6 +262,17 @@ int main(int argc, char *argv[]) {
 		sprintf(outputDir, "%s/re3", xdgDataHome);
 		free(xdgDataHome);
 	}
+#elif defined(__APPLE__)
+	sysdir_search_path_enumeration_state state =
+	    sysdir_start_search_path_enumeration(
+	        SYSDIR_DIRECTORY_APPLICATION_SUPPORT, SYSDIR_DOMAIN_MASK_USER);
+	while ((state = sysdir_get_next_search_path_enumeration(state, path)) !=
+	       0) {
+		assert(path[0] != '\0');
+		sprintf(outputDir, "%s/re3", path + 1);
+		break;
+	}
+#endif
 	char *targetDir = malloc(PATH_MAX);
 	for (int i = appExecGroup->first_file; i <= appExecGroup->last_file; i++) {
 		if (unshield_file_is_valid(unshield, i)) {

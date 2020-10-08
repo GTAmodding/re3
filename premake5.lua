@@ -364,3 +364,31 @@ project "re3"
 		includedirs { "/usr/local/include" }
 		libdirs { "/opt/local/lib" }
 		libdirs { "/usr/local/lib" }
+
+project "installer"
+	kind "ConsoleApp"
+	language "C"
+	targetname "re3-installer"
+	targetdir "bin/%{cfg.platform}/%{cfg.buildcfg}"
+
+	files { addSrcFiles("utils/installer") }
+
+	links { "unshield" }
+
+	filter "platforms:win*"
+		-- For now
+		flags { "ExcludeFromBuild" }
+
+	filter "platforms:linux*"
+		defines { "XDG_ROOT" }
+
+	filter "platforms:bsd*"
+		defines { "XDG_ROOT" }
+
+	filter "platforms:macosx*"
+		-- Support MacPorts and Homebrew
+		includedirs { "/opt/local/include" }
+		includedirs {"/usr/local/include" }
+		libdirs { "/opt/local/lib" }
+		libdirs { "/usr/local/lib" }
+	

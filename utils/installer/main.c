@@ -233,10 +233,10 @@ int main(int argc, char *argv[]) {
 	}
 
 	char *outputDir = malloc(PATH_MAX);
+	char *homeDir = getenvvar("HOME");
 #ifdef XDG_ROOT
 	char *xdgDataHome = getenvvar("XDG_DATA_HOME");
 	if (strlen(xdgDataHome) == 0) {
-		char *homeDir = getenvvar("HOME");
 		assert(strlen(homeDir) > 0);
 		sprintf(outputDir, "%s/.local/share/re3", homeDir);
 		free(homeDir);
@@ -252,7 +252,7 @@ int main(int argc, char *argv[]) {
 	while ((state = sysdir_get_next_search_path_enumeration(state, path)) !=
 	       0) {
 		assert(path[0] != '\0');
-		sprintf(outputDir, "%s/re3", path + 1);
+		sprintf(outputDir, "%s%s/re3", homeDir, path + 1);
 		break;
 	}
 #endif

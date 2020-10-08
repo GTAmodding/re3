@@ -89,13 +89,19 @@ int mkdir_p(const char *path) {
 
 bool isFile(const char *path) {
 	struct stat statbuf;
-	stat(path, &statbuf);
+	int ret = stat(path, &statbuf);
+	if (ret < 0) {
+		return false;
+	}
 	return (statbuf.st_mode & S_IFMT) == S_IFREG;
 }
 
 bool isDirectory(const char *path) {
 	struct stat statbuf;
-	stat(path, &statbuf);
+	int ret = stat(path, &statbuf);
+	if (ret < 0) {
+		return false;
+	}
 	return (statbuf.st_mode & S_IFMT) == S_IFDIR;
 }
 
@@ -107,7 +113,7 @@ bool isISO(const char *path) {
 	if (len < 3) {
 		return false;
 	}
-	return isFile(path) && !strncasecmp(path + len - 3, "iso", 3);
+	return !strncasecmp(path + len - 3, "iso", 3);
 }
 
 bool endsWithDLL(const char *path) {
@@ -159,6 +165,18 @@ int main(int argc, char *argv[]) {
 		return 1;
 	}
 
+	struct stat buf;
+	if (stat(argv[1], &buf) < 0) {
+		fprintf(stderr, "Error occurred when reading %s: ", argv[1]);
+		perror(NULL);
+		return 1;
+	}
+	if (stat(argv[2], &buf) < 0) {
+		fprintf(stderr, "Error occurred when reading %s: ", argv[2]);
+		perror(NULL);
+		return 1;
+	}
+
 	char *dir1 = strdup(argv[1]);
 	char *dir2 = strdup(argv[2]);
 
@@ -197,8 +215,11 @@ int main(int argc, char *argv[]) {
 			if (waitpid(pid, &status, 0) != pid) {
 				status = -1;
 			}
+			if (status != 0) {
+				fprintf(stderr, "7z failed to extract %s\n.", argv[1]);
+				return 1;
+			}
 		}
-		assert(status == 0);
 		free(dir1);
 		free(dir2);
 		dir1 = dir2 = strdup(tempDir);
@@ -230,7 +251,10 @@ int main(int argc, char *argv[]) {
 				status = -1;
 			}
 		}
-		assert(status == 0);
+		if (status != 0) {
+			fprintf(stderr, "7z failed to extract %s\n.", argv[2]);
+			return 1;
+		}
 	}
 
 	char *outputDir = malloc(PATH_MAX);
@@ -303,7 +327,13 @@ int main(int argc, char *argv[]) {
 				                  dir ? dir : "");
 				assert(ret > 0);
 				if (mkdir_p(targetDir) < 0) {
-					assert(errno != EEXIST);
+					if (errno != EEXIST) {
+						fprintf(stderr,
+						        "Failed to create directory %s: ",
+						        targetDir);
+						perror(NULL);
+						return 1;
+					}
 				}
 				char *targetPath = malloc(PATH_MAX);
 				bzero(targetPath, PATH_MAX);
@@ -334,6 +364,10 @@ int main(int argc, char *argv[]) {
 		// Parent process. Wait for child to exit
 		if (waitpid(pid, &status, 0) != pid) {
 			status = -1;
+		}
+		if (status != 0) {
+			fprintf(stderr, "cp command failed.\n.", argv[2]);
+			return 1;
 		}
 	}
 	free(dir1);

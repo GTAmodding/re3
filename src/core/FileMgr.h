@@ -20,4 +20,10 @@ public:
 	static int CloseFile(int fd);
 	static int GetErrorReadWrite(int fd);
 	static char *GetRootDirName() { return ms_rootDirName; }
+#if defined(XDG_ROOT) || defined(APPSUPPORT_ROOT)
+  static void GetHomeDirectory(char *homeDir);
+#endif
+#ifdef XDG_ROOT
+  static void GetXDGDataHome(char *homeDir);
+#endif
 };

@@ -17,6 +17,9 @@
 #include "CdStream.h"
 #include "rwcore.h"
 #include "RwHelper.h"
+#if defined(XDG_ROOT) || defined(APPSUPPORT_ROOT)
+#include "FileMgr.h"
+#endif
 
 #define CDDEBUG(f, ...)   debug ("%s: " f "\n", "cdvd_stream", ## __VA_ARGS__)
 #define CDTRACE(f, ...)   printf("%s: " f "\n", "cdvd_stream", ## __VA_ARGS__)
@@ -139,12 +142,23 @@ CdStreamInitThread(void)
 #endif
 }
 
+static const char *gta3ImgPath = "models/gta3.img";
+
 void
 CdStreamInit(int32 numChannels)
 {
     struct statvfs fsInfo;
+    char imgPath[PATH_MAX] = {'\0'};
 
-    if((statvfs("models/gta3.img", &fsInfo)) < 0)
+#if defined(XDG_ROOT) || defined(APPSUPPORT_ROOT)
+    const char *rootDir = CFileMgr::GetRootDirName();
+    strncpy(imgPath, rootDir, strlen(rootDir) - 1);
+    strcat(imgPath, "/");
+    strcat(imgPath, gta3ImgPath);
+#else
+    strcpy(imgPath, gta3ImgPath);
+#endif
+    if((statvfs(imgPath, &fsInfo)) < 0)
     {
         CDTRACE("can't get filesystem info");
         ASSERT(0);

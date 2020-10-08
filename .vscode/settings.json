@@ -1,0 +1,20 @@
+{
+    "C_Cpp.default.cStandard": "gnu11",
+    "C_Cpp.default.cppStandard": "gnu++14",
+    "C_Cpp.default.includePath": [
+        "src/fakerw",
+        "src/math",
+        "src/render",
+        "src/rw",
+        "src/skel",
+        "vendor/librw"
+    ],
+    "C_Cpp.vcFormat.indent.gotoLabels": "leftmostColumn",
+    "C_Cpp.vcFormat.space.pointerReferenceAlignment": "right",
+    "cSpell.enabled": false,
+    "editor.insertSpaces": false,
+    "editor.tabSize": 4,
+    "files.trimFinalNewlines": false,
+    "files.trimTrailingWhitespace": false,
+    "prettier.tabWidth": 4
+}

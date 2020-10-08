@@ -31,10 +31,10 @@ const char *GROUPS[] = {"App Executables", "Don't Delete", NULL};
 char *getenvvar(const char *varName) {
 	char **p = environ;
 	char *value = malloc(PATH_MAX);
-	bzero(value, PATH_MAX);
+	memset(value, 0, PATH_MAX);
 	size_t varNameLength = strlen(varName);
 	char *search = malloc(varNameLength + 2);
-	bzero(search, varNameLength + 2);
+	memset(search, 0, varNameLength + 2);
 	strcpy(search, varName);
 	strcat(search, "=");
 	for (; *p; p++) {
@@ -186,7 +186,7 @@ int main(int argc, char *argv[]) {
 		// Extract disc 1
 		char *tmpDirEnv = getenvvar("TMPDIR");
 		if (!strlen(tmpDirEnv)) {
-			bzero(tmpDirEnv, PATH_MAX);
+			memset(tmpDirEnv, 0, PATH_MAX);
 			strcpy(tmpDirEnv, "/tmp/re3.XXXXXX");
 		} else {
 			strcat(tmpDirEnv, "/re3.XXXXXX");
@@ -194,7 +194,7 @@ int main(int argc, char *argv[]) {
 		char *tempDir = mkdtemp(tmpDirEnv);
 		assert(tempDir != NULL);
 		char outArg[PATH_MAX];
-		bzero(outArg, PATH_MAX);
+		memset(outArg, 0, PATH_MAX);
 		sprintf(outArg, "-o%s", tempDir);
 		int status;
 		pid_t pid = fork();
@@ -293,7 +293,7 @@ int main(int argc, char *argv[]) {
 
 	// Extract data1.cab
 	char *data1CabPath = malloc(PATH_MAX);
-	bzero(data1CabPath, PATH_MAX);
+	memset(data1CabPath, 0, PATH_MAX);
 	sprintf(data1CabPath, "%s/data1.cab", dir1);
 	unshield_set_log_level(UNSHIELD_LOG_LEVEL_ERROR);
 	Unshield *unshield = unshield_open(data1CabPath);
@@ -324,7 +324,7 @@ int main(int argc, char *argv[]) {
 						dir[j] = '/';
 					}
 				}
-				bzero(targetDir, PATH_MAX);
+				memset(targetDir, 0, PATH_MAX);
 				if (groupIndex == 0 &&
 				    !strcmp(dir, "audio")) { // Keep casing consistent
 					dir[0] = 'A';
@@ -345,7 +345,7 @@ int main(int argc, char *argv[]) {
 					}
 				}
 				char *targetPath = malloc(PATH_MAX);
-				bzero(targetPath, PATH_MAX);
+				memset(targetPath, 0, PATH_MAX);
 				ret = sprintf(targetPath, "%s/%s", targetDir, name);
 				assert(ret > 0);
 				bool unshieldRet = unshield_file_save(unshield, i, targetPath);

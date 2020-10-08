@@ -300,7 +300,7 @@ int main(int argc, char *argv[]) {
 		UnshieldFileGroup *group =
 		    unshield_file_group_find(unshield, GROUPS[groupIndex]);
 		if (!group) {
-			fprintf(stderr, "Could not find App Executables group\n");
+			fprintf(stderr, "Could not find %s group\n", GROUPS[groupIndex]);
 			return 1;
 		}
 		char *targetDir = malloc(PATH_MAX);

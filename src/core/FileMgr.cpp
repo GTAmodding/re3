@@ -230,7 +230,8 @@ CFileMgr::Initialise(void)
   if (strlen(homeDir) > 0) {
     strcat(homeDir, "/re3");
     if (stat(homeDir, &buf) < 0) {
-      assert(mkdir(homeDir, 0755) == 0);
+      int ret = mkdir(homeDir, 0755);
+      assert(ret == 0);
     }
   }
   else {
@@ -239,15 +240,18 @@ CFileMgr::Initialise(void)
     // Build up ${HOME}/.local/share/re3
     strcat(homeDir, "/.local");
     if (stat(homeDir, &buf) < 0) {
-      assert(mkdir(homeDir, 0755) == 0);
+      int ret = mkdir(homeDir, 0755);
+      assert(ret == 0);
     }
     strcat(homeDir, "/share");
     if (stat(homeDir, &buf) < 0) {
-      assert(mkdir(homeDir, 0755) == 0);
+      int ret = mkdir(homeDir, 0755);
+      assert(ret == 0);
     }
     strcat(homeDir, "/re3");
     if (stat(homeDir, &buf) < 0) {
-      assert(mkdir(homeDir, 0755) == 0);
+      int ret = mkdir(homeDir, 0755);
+      assert(ret == 0);
     }
   }
   strcpy(ms_rootDirName, homeDir);

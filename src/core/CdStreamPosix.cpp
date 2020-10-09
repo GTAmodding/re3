@@ -15,12 +15,10 @@
 #include <sys/syscall.h>
 
 #include "CdStream.h"
+#include "FileMgr.h"
 #include "rwcore.h"
 #include "MemoryMgr.h"
 #include "RwHelper.h"
-#ifdef XDG_ROOT
-#include "FileMgr.h"
-#endif
 
 #define CDDEBUG(f, ...)   debug ("%s: " f "\n", "cdvd_stream", ## __VA_ARGS__)
 #define CDTRACE(f, ...)   printf("%s: " f "\n", "cdvd_stream", ## __VA_ARGS__)
@@ -506,6 +504,8 @@ CdStreamAddImage(char const *path)
 {
 	ASSERT(path != nil);
 	ASSERT(gNumImages < MAX_CDIMAGES);
+
+	CFileMgr::SetDir("");
 
 	gImgFiles[gNumImages] = open(path, _gdwCdStreamFlags);
 

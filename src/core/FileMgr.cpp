@@ -198,6 +198,7 @@ char CFileMgr::ms_rootDirName[128] = {'\0'};
 char CFileMgr::ms_dirName[128];
 
 #ifdef XDG_ROOT
+// Must have char homeDir[PATH_MAX] in scope.
 #define getenvvar(varName)                            \
   char **p = environ;                                 \
   size_t varNameLength = ARRAY_SIZE(varName) - 1;     \
@@ -324,18 +325,7 @@ CFileMgr::LoadFile(const char *file, uint8 *buf, int maxlen, const char *mode)
 int
 CFileMgr::OpenFile(const char *file, const char *mode)
 {
-#ifdef XDG_ROOT
-  char fixedPath[128] = {'\0'};
-  bzero(fixedPath, 128);
-  if (ms_dirName[0] == '\0') {
-    strcpy(ms_dirName, ms_rootDirName);
-  }
-  strncpy(fixedPath, ms_dirName, strlen(ms_dirName));
-  strcat(fixedPath, file);
-  return myfopen(fixedPath, mode);
-#else
   return myfopen(file, mode);
-#endif
 }
 
 int

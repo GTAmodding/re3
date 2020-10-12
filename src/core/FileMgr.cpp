@@ -199,24 +199,26 @@ char CFileMgr::ms_dirName[128];
 
 #ifdef XDG_ROOT
 // Must have char homeDir[PATH_MAX] in scope.
-#define getenvvar(varName)                            \
-  char **p = environ;                                 \
-  size_t varNameLength = ARRAY_SIZE(varName) - 1;     \
-  for (; *p; *p++)                                    \
-  {                                                   \
-    if (!strncmp(varName "=", *p, varNameLength + 1)) \
-    {                                                 \
-      strcpy(homeDir, *p + varNameLength + 1);        \
-      break;                                          \
-    }                                                 \
-  }
+#define getenvvar(varName)                                  \
+	char **p = environ;                                     \
+	size_t varNameLength = ARRAY_SIZE(varName) - 1;         \
+	for (; *p; p++) {                                       \
+		if (!strncmp(varName "=", *p, varNameLength + 1)) { \
+			strcpy(homeDir, *p + varNameLength + 1);        \
+			break;                                          \
+		}                                                   \
+	}
 
-void CFileMgr::GetHomeDirectory(char *homeDir) {
-  getenvvar("HOME");
+void
+CFileMgr::GetHomeDirectory(char *homeDir)
+{
+	getenvvar("HOME");
 }
 
-void CFileMgr::GetXDGDataHome(char *homeDir) {
-  getenvvar("XDG_DATA_HOME");
+void
+CFileMgr::GetXDGDataHome(char *homeDir)
+{
+	getenvvar("XDG_DATA_HOME");
 }
 #endif
 

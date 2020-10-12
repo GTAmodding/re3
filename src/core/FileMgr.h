@@ -21,7 +21,7 @@ public:
 	static int GetErrorReadWrite(int fd);
 	static char *GetRootDirName() { return ms_rootDirName; }
 #ifdef XDG_ROOT
-  static void GetHomeDirectory(char *homeDir);
-  static void GetXDGDataHome(char *homeDir);
+	static void GetHomeDirectory(char *homeDir);
+	static void GetXDGDataHome(char *homeDir);
 #endif
 };

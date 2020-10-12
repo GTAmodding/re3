@@ -224,42 +224,41 @@ void
 CFileMgr::Initialise(void)
 {
 #ifdef XDG_ROOT
-  char homeDir[255];
-  struct stat buf;
-  bzero(homeDir, 255);
-  GetXDGDataHome(homeDir);
-  if (strlen(homeDir) > 0) {
-    strcat(homeDir, "/re3");
-    if (stat(homeDir, &buf) < 0) {
-      int ret = mkdir(homeDir, 0755);
-      assert(ret == 0);
-    }
-  }
-  else {
-    bzero(homeDir, 255);
-    GetHomeDirectory(homeDir);
-    // Build up ${HOME}/.local/share/re3
-    strcat(homeDir, "/.local");
-    if (stat(homeDir, &buf) < 0) {
-      int ret = mkdir(homeDir, 0755);
-      assert(ret == 0);
-    }
-    strcat(homeDir, "/share");
-    if (stat(homeDir, &buf) < 0) {
-      int ret = mkdir(homeDir, 0755);
-      assert(ret == 0);
-    }
-    strcat(homeDir, "/re3");
-    if (stat(homeDir, &buf) < 0) {
-      int ret = mkdir(homeDir, 0755);
-      assert(ret == 0);
-    }
-  }
-  strcpy(ms_rootDirName, homeDir);
+	char homeDir[255];
+	struct stat buf;
+	bzero(homeDir, 255);
+	GetXDGDataHome(homeDir);
+	if (strlen(homeDir) > 0) {
+		strcat(homeDir, "/re3");
+		if (stat(homeDir, &buf) < 0) {
+			int ret = mkdir(homeDir, 0755);
+			assert(ret == 0);
+		}
+	} else {
+		bzero(homeDir, 255);
+		GetHomeDirectory(homeDir);
+		// Build up ${HOME}/.local/share/re3
+		strcat(homeDir, "/.local");
+		if (stat(homeDir, &buf) < 0) {
+			int ret = mkdir(homeDir, 0755);
+			assert(ret == 0);
+		}
+		strcat(homeDir, "/share");
+		if (stat(homeDir, &buf) < 0) {
+			int ret = mkdir(homeDir, 0755);
+			assert(ret == 0);
+		}
+		strcat(homeDir, "/re3");
+		if (stat(homeDir, &buf) < 0) {
+			int ret = mkdir(homeDir, 0755);
+			assert(ret == 0);
+		}
+	}
+	strcpy(ms_rootDirName, homeDir);
 #else
 	_getcwd(ms_rootDirName, 128);
 #endif
-  strcat(ms_rootDirName, "\\");
+	strcat(ms_rootDirName, "\\");
 }
 
 void

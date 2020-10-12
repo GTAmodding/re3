@@ -226,7 +226,7 @@ CFileMgr::Initialise(void)
 #ifdef XDG_ROOT
 	char homeDir[255];
 	struct stat buf;
-	bzero(homeDir, 255);
+	memset(homeDir, 0, 255);
 	GetXDGDataHome(homeDir);
 	if (strlen(homeDir) > 0) {
 		strcat(homeDir, "/re3");
@@ -235,7 +235,7 @@ CFileMgr::Initialise(void)
 			assert(ret == 0);
 		}
 	} else {
-		bzero(homeDir, 255);
+		memset(homeDir, 0, 255);
 		GetHomeDirectory(homeDir);
 		// Build up ${HOME}/.local/share/re3
 		strcat(homeDir, "/.local");

@@ -25,6 +25,9 @@
   "C_Cpp.vcFormat.indent.gotoLabels": "leftmostColumn",
   "C_Cpp.vcFormat.space.pointerReferenceAlignment": "right",
   "cSpell.enabled": false,
+  "editor.formatOnPaste": false,
+  "editor.formatOnSave": false,
+  "editor.formatOnType": false,
   "files.trimFinalNewlines": false,
   "files.trimTrailingWhitespace": false
 }

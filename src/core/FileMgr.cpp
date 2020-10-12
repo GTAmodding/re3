@@ -325,7 +325,7 @@ CFileMgr::LoadFile(const char *file, uint8 *buf, int maxlen, const char *mode)
 int
 CFileMgr::OpenFile(const char *file, const char *mode)
 {
-  return myfopen(file, mode);
+	return myfopen(file, mode);
 }
 
 int

@@ -161,7 +161,7 @@ void
 ValidateVersion()
 {
 #ifdef XDG_ROOT
-  CFileMgr::SetDir("");
+	CFileMgr::SetDir("");
 #endif
 	int32 file = CFileMgr::OpenFile("models\\coll\\peds.col", "rb");
 	char buff[128];

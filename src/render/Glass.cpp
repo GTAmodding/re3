@@ -256,7 +256,7 @@ CGlass::Render(void)
 	RwRenderStateSet(rwRENDERSTATEZWRITEENABLE,      (void *)FALSE);
 	RwRenderStateSet(rwRENDERSTATETEXTUREFILTER,     (void *)rwFILTERLINEAR);
 	RwRenderStateSet(rwRENDERSTATEFOGENABLE,         (void *)TRUE);
-	RwRenderStateSet(rwRENDERSTATEFOGCOLOR,          (void *)RWRGBALONG(CTimeCycle::GetFogRed(), CTimeCycle::GetFogGreen(), CTimeCycle::GetFogBlue(), 255));
+	RwRenderStateSet(rwRENDERSTATEFOGCOLOR,          (void *)(uintptr)RWRGBALONG(CTimeCycle::GetFogRed(), CTimeCycle::GetFogGreen(), CTimeCycle::GetFogBlue(), 255));
 	RwRenderStateSet(rwRENDERSTATESRCBLEND,          (void *)rwBLENDONE);
 	RwRenderStateSet(rwRENDERSTATEDESTBLEND,         (void *)rwBLENDONE);
 	RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void *)TRUE);

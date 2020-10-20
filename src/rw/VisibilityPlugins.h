@@ -45,7 +45,7 @@ public:
 
 	static RpAtomic *RenderWheelAtomicCB(RpAtomic *atomic);
 	static RpAtomic *RenderObjNormalAtomic(RpAtomic *atomic);
-	static RpAtomic *RenderAlphaAtomic(RpAtomic *atomic, int alpha);
+	static RpAtomic *RenderAlphaAtomic(RpAtomic *atomic, intptr alpha);
 	static RpAtomic *RenderFadingAtomic(RpAtomic *atm, float dist);
 
 	static RpAtomic *RenderVehicleHiDetailCB(RpAtomic *atomic);

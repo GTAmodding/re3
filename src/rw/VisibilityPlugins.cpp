@@ -216,7 +216,7 @@ CVisibilityPlugins::RenderObjNormalAtomic(RpAtomic *atomic)
 }
 
 RpAtomic*
-CVisibilityPlugins::RenderAlphaAtomic(RpAtomic *atomic, int alpha)
+CVisibilityPlugins::RenderAlphaAtomic(RpAtomic *atomic, intptr alpha)
 {
 	RpGeometry *geo;
 	uint32 flags;
@@ -236,7 +236,7 @@ CVisibilityPlugins::RenderFadingAtomic(RpAtomic *atomic, float camdist)
 {
 	RpAtomic *lodatm;
 	float fadefactor;
-	uint32 alpha;
+	uintptr alpha;
 	CSimpleModelInfo *mi;
 
 	mi = GetAtomicModelInfo(atomic);

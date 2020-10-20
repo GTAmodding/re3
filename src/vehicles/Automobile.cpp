@@ -4558,7 +4558,7 @@ SetVehicleAtomicVisibilityCB(RwObject *object, void *data)
 }
 
 void
-CAutomobile::SetComponentVisibility(RwFrame *frame, uint32 flags)
+CAutomobile::SetComponentVisibility(RwFrame *frame, uintptr flags)
 {
 	HideAllComps();
 	bIsDamaged = true;

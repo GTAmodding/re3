@@ -252,7 +252,7 @@ CMotionBlurStreaks::Render(void)
 				RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)TRUE);
 				RwRenderStateSet(rwRENDERSTATEFOGENABLE, (void *)TRUE);
 				RwRenderStateSet(rwRENDERSTATEFOGCOLOR,
-					(void*)RWRGBALONG(CTimeCycle::GetFogRed(), CTimeCycle::GetFogGreen(), CTimeCycle::GetFogBlue(), 255));
+					(void*)(uintptr)RWRGBALONG(CTimeCycle::GetFogRed(), CTimeCycle::GetFogGreen(), CTimeCycle::GetFogBlue(), 255));
 				RwRenderStateSet(rwRENDERSTATESRCBLEND, (void*)rwBLENDSRCALPHA);
 				RwRenderStateSet(rwRENDERSTATEDESTBLEND, (void*)rwBLENDINVSRCALPHA);
 				RwRenderStateSet(rwRENDERSTATETEXTURERASTER, (void*)FALSE);

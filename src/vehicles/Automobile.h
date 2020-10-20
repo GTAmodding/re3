@@ -172,7 +172,7 @@ public:
 	void SetDoorDamage(int32 component, eDoors door, bool noFlyingComponents = false);
 
 	void Fix(void);
-	void SetComponentVisibility(RwFrame *frame, uint32 flags);
+	void SetComponentVisibility(RwFrame *frame, uintptr flags);
 	void SetupModelNodes(void);
 	void SetTaxiLight(bool light);
 	bool GetAllWheelsOffGround(void);

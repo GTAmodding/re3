@@ -159,6 +159,7 @@ const char *_psGetUserFilesFolder()
 #else
 	static char szUserFiles[256];
 	strcpy(szUserFiles, "userfiles");
+	CFileMgr::SetDir("");
 	_psCreateFolder(szUserFiles);
 	return szUserFiles;
 #endif

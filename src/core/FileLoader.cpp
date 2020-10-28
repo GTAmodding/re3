@@ -210,6 +210,7 @@ CFileLoader::LoadCollisionFile(const char *filename)
 	PUSH_MEMID(MEMID_COLLISION);
 
 	debug("Loading collision file %s\n", filename);
+	CFileMgr::SetDir("");
 	fd = CFileMgr::OpenFile(filename, "rb");
 
 	while(CFileMgr::Read(fd, (char*)&header, sizeof(header))){
@@ -987,6 +988,7 @@ CFileLoader::LoadObjectTypes(const char *filename)
 	mlo = 0;
 	debug("Loading object types from %s...\n", filename);
 
+	CFileMgr::SetDir("");
 	fd = CFileMgr::OpenFile(filename, "rb");
 	for(line = CFileLoader::LoadLine(fd); line; line = CFileLoader::LoadLine(fd)){
 		if(*line == '\0' || *line == '#')
@@ -1493,6 +1495,7 @@ CFileLoader::LoadScene(const char *filename)
 	pathIndex = -1;
 	debug("Creating objects from %s...\n", filename);
 
+	CFileMgr::SetDir("");
 	fd = CFileMgr::OpenFile(filename, "rb");
 	for(line = CFileLoader::LoadLine(fd); line; line = CFileLoader::LoadLine(fd)){
 		if(*line == '\0' || *line == '#')
@@ -1656,6 +1659,7 @@ CFileLoader::LoadMapZones(const char *filename)
 	section = NONE;
 	debug("Creating zones from %s...\n", filename);
 
+	CFileMgr::SetDir("");
 	fd = CFileMgr::OpenFile(filename, "rb");
 	for(line = CFileLoader::LoadLine(fd); line; line = CFileLoader::LoadLine(fd)){
 		if(*line == '\0' || *line == '#')
@@ -1699,6 +1703,7 @@ CFileLoader::ReloadPaths(const char *filename)
 	char pathTypeStr[20];
 	debug("Reloading paths from %s...\n", filename);
 
+	CFileMgr::SetDir("");
 	int fd = CFileMgr::OpenFile(filename, "r");
 	for (line = CFileLoader::LoadLine(fd); line; line = CFileLoader::LoadLine(fd)) {
 		if (*line == '\0' || *line == '#')

@@ -1772,6 +1772,7 @@ void
 InitialiseGame(void)
 {
 	LoadingScreen(nil, nil, "loadsc0");
+	CFileMgr::SetDir("");
 	CGame::Initialise("DATA\\GTA3.DAT");
 }
 

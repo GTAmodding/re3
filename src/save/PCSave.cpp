@@ -40,6 +40,7 @@ C_PcSave::SaveSlot(int32 slot)
 	MakeValidSaveName(slot);
 	PcSaveHelper.nErrorCode = SAVESTATUS_SUCCESSFUL;
 	_psGetUserFilesFolder();
+	CFileMgr::SetDir("");
 	int file = CFileMgr::OpenFile(ValidSaveName, "wb");
 	if (file != 0) {
 #ifdef MISSION_REPLAY
@@ -93,6 +94,7 @@ C_PcSave::PopulateSlotInfo()
 		SlotFileName[i][0] = '\0';
 		SlotSaveDate[i][0] = '\0';
 	}
+	CFileMgr::SetDir("");
 	for (int i = 0; i < SLOT_COUNT; i++) {
 #ifdef FIX_BUGS
 		char savename[MAX_PATH];

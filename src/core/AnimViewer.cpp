@@ -117,6 +117,7 @@ CAnimViewer::Initialise(void) {
 	CDraw::SetFOV(120.0f);
 	CDraw::ms_fLODDistance = 500.0f;
 
+	CFileMgr::SetDir("");
 	int fd = CFileMgr::OpenFile("DATA\\SPECIAL.TXT", "r");
 	char animGroup[32], modelName[32];
 	if (fd) {

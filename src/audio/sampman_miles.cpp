@@ -15,6 +15,7 @@
 #include "MusicManager.h"
 #include "Frontend.h"
 #include "Timer.h"
+#include "FileMgr.h"
 
 
 #pragma comment( lib, "mss32.lib" )

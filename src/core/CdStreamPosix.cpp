@@ -429,7 +429,7 @@ void *CdStreamThread(void *param)
 			ASSERT(pChannel->hFile >= 0);
 			ASSERT(pChannel->pBuffer != nil );
 
-			lseek(pChannel->hFile, pChannel->nSectorOffset * CDSTREAM_SECTOR_SIZE, SEEK_SET);
+			lseek(pChannel->hFile, (size_t)pChannel->nSectorOffset * (size_t)CDSTREAM_SECTOR_SIZE, SEEK_SET);
 			if (read(pChannel->hFile, pChannel->pBuffer, pChannel->nSectorsToRead * CDSTREAM_SECTOR_SIZE) == -1) {
 				// pChannel->nSectorsToRead == 0 at this point means we wanted to flush channel
 				// STREAM_WAITING is a little hack to make CStreaming not process this data

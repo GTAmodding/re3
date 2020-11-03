@@ -323,6 +323,8 @@ enum Config {
 #endif
 //#define PS2_AUDIO   // changes audio paths for cutscenes and radio to PS2 paths, needs vbdec to support VB with MSS
 
+// IMG
+#define BIG_IMG // allows to read larger img files
 
 //#define SQUEEZE_PERFORMANCE
 #ifdef SQUEEZE_PERFORMANCE

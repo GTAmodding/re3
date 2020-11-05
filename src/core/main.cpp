@@ -856,6 +856,7 @@ DisplayGameDebugText()
 }
 #endif
 
+#ifdef NEW_RENDERER
 bool gbRenderRoads = true;
 bool gbRenderEverythingBarRoads = true;
 bool gbRenderFadingInUnderwaterEntities = true;
@@ -867,7 +868,6 @@ bool gbRenderWorld0 = true;
 bool gbRenderWorld1 = true;
 bool gbRenderWorld2 = true;
 
-#ifdef NEW_RENDERER
 void
 MattRenderScene(void)
 {

@@ -1,4 +1,4 @@
-#include "common.h"
+﻿#include "common.h"
 #include "main.h"
 
 #include "General.h"
@@ -142,7 +142,7 @@ CRubbish::Render(void)
 void
 CRubbish::StirUp(CVehicle *veh)
 {
-	if((CTimer::GetFrameCounter() ^ (veh->m_randomSeed&3)) == 0)
+	if((CTimer::GetTickCounter() ^ (veh->m_randomSeed&3)) == 0)
 		return;
 
 	if(Abs(veh->GetPosition().x - TheCamera.GetPosition().x) < 20.0f &&
@@ -295,7 +295,7 @@ CRubbish::Update(void)
 		freq = 1;
 	else
 		freq = 0;
-	if((CTimer::GetFrameCounter() & freq) == 0){
+	if((CTimer::GetTickCounter() & freq) == 0){
 		// Pick a random sheet and set animation state if static
 		int i = CGeneral::GetRandomNumber() % NUM_RUBBISH_SHEETS;
 		if(aSheets[i].m_state == 1){
@@ -324,8 +324,8 @@ CRubbish::Update(void)
 	}
 
 	// Remove sheets that are too far away
-	int i = (CTimer::GetFrameCounter()%(NUM_RUBBISH_SHEETS/4))*4;
-	int last = ((CTimer::GetFrameCounter()%(NUM_RUBBISH_SHEETS/4)) + 1)*4;
+	int i = (CTimer::GetTickCounter()%(NUM_RUBBISH_SHEETS/4))*4;
+	int last = ((CTimer::GetTickCounter()%(NUM_RUBBISH_SHEETS/4)) + 1)*4;
 	for(; i < last; i++){
 		if(aSheets[i].m_state == 1 &&
 		   (aSheets[i].m_basePos - TheCamera.GetPosition()).MagnitudeSqr2D() > SQR(RUBBISH_MAX_DIST+1.0f)){

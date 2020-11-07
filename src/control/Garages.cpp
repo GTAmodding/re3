@@ -1,4 +1,4 @@
-#include "common.h"
+﻿#include "common.h"
 
 #include "Garages.h"
 #include "main.h"
@@ -190,7 +190,7 @@ void CGarages::Update(void)
 		if (aGarages[i].IsUsed())
 			aGarages[i].Update();
 	}
-	if ((CTimer::GetFrameCounter() & 0xF) != 0xC)
+	if ((CTimer::GetTickCounter() & 0xF) != 0xC)
 		return;
 	if (++GarageToBeTidied >= NUM_GARAGES)
 		GarageToBeTidied = 0;
@@ -593,7 +593,7 @@ void CGarage::Update()
 		switch (m_eGarageState) {
 		case GS_OPENED:
 			if (((CVector2D)FindPlayerCoors() - CVector2D(GetGarageCenterX(), GetGarageCenterY())).MagnitudeSqr() > SQR(DISTANCE_TO_CLOSE_MISSION_GARAGE)) {
-				if ((CTimer::GetFrameCounter() & 0x1F) == 0 && !IsAnyOtherCarTouchingGarage(nil)) {
+				if ((CTimer::GetTickCounter() & 0x1F) == 0 && !IsAnyOtherCarTouchingGarage(nil)) {
 					m_eGarageState = GS_CLOSING;
 					m_bClosingWithoutTargetCar = true;
 				}
@@ -859,8 +859,8 @@ void CGarage::Update()
 		switch (m_eGarageState) {
 		case GS_OPENED:
 		{
-			int i = CPools::GetVehiclePool()->GetSize() * (CTimer::GetFrameCounter() % CRUSHER_VEHICLE_TEST_SPAN) / CRUSHER_VEHICLE_TEST_SPAN;
-			int end = CPools::GetVehiclePool()->GetSize() * (CTimer::GetFrameCounter() % CRUSHER_VEHICLE_TEST_SPAN + 1) / CRUSHER_VEHICLE_TEST_SPAN;
+			int i = CPools::GetVehiclePool()->GetSize() * (CTimer::GetTickCounter() % CRUSHER_VEHICLE_TEST_SPAN) / CRUSHER_VEHICLE_TEST_SPAN;
+			int end = CPools::GetVehiclePool()->GetSize() * (CTimer::GetTickCounter() % CRUSHER_VEHICLE_TEST_SPAN + 1) / CRUSHER_VEHICLE_TEST_SPAN;
 			for (; i < end; i++) {
 				CVehicle* pVehicle = CPools::GetVehiclePool()->GetSlot(i);
 				if (!pVehicle)
@@ -923,7 +923,7 @@ void CGarage::Update()
 		default:
 			break;
 		}
-		if (!FindPlayerVehicle() && (CTimer::GetFrameCounter() & 0x1F) == 0x17 && IsEntityEntirelyInside(FindPlayerPed()))
+		if (!FindPlayerVehicle() && (CTimer::GetTickCounter() & 0x1F) == 0x17 && IsEntityEntirelyInside(FindPlayerPed()))
 			FindPlayerPed()->InflictDamage(nil, WEAPONTYPE_RAMMEDBYCAR, 300.0f, PEDPIECE_TORSO, 0);
 		break;
 	case GARAGE_MISSION_KEEPCAR:

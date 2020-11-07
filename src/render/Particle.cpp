@@ -1,4 +1,4 @@
-#include "common.h"
+﻿#include "common.h"
 
 #include "General.h"
 #include "Timer.h"
@@ -781,7 +781,7 @@ CParticle *CParticle::AddParticle(tParticleType type, CVector const &vecPos, CVe
 		|| type == PARTICLE_BURNINGRUBBER_SMOKE
 		|| type == PARTICLE_EXHAUST_FUMES
 		|| type == PARTICLE_CARCOLLISION_DUST )
-		&& nParticleCreationInterval & CTimer::GetFrameCounter() )
+		&& nParticleCreationInterval & CTimer::GetTickCounter() )
 	{
 		return nil;
 	}

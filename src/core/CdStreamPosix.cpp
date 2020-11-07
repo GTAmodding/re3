@@ -1,4 +1,4 @@
-#ifndef _WIN32
+﻿#ifndef _WIN32
 #include "common.h"
 #include "crossplatform.h"
 #include <pthread.h>

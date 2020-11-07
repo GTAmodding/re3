@@ -1,4 +1,4 @@
-#include "common.h"
+﻿#include "common.h"
 
 #include "General.h"
 #include "Timecycle.h"
@@ -252,7 +252,7 @@ CBoat::ProcessControl(void)
 				BlowUpCar(m_pSetOnFireEntity);
 		}
 
-		if(speedSq < 0.25f && (CTimer::GetFrameCounter() + m_randomSeed) & 1)
+		if(speedSq < 0.25f && (CTimer::GetTickCounter() + m_randomSeed) & 1)
 			CParticle::AddParticle(PARTICLE_ENGINE_STEAM, smokePos, smokeDir);
 		if(speedSq < 0.25f && m_fHealth <= 350.0f)
 			CParticle::AddParticle(PARTICLE_ENGINE_SMOKE, smokePos, 1.25f*smokeDir);
@@ -370,7 +370,7 @@ CBoat::ProcessControl(void)
 #endif
 							if(!cameraHack)
 								CParticle::AddParticle(PARTICLE_BOAT_WAKE, wakePos, wakeDir, nil, 0.0f, jetColor);
-						}else if((CTimer::GetFrameCounter() + m_randomSeed) & 1){
+						}else if((CTimer::GetTickCounter() + m_randomSeed) & 1){
 #ifdef PC_PARTICLE
 							jetDir.z = 0.018f;
 							jetDir.x *= 0.01f;

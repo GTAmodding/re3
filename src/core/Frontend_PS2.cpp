@@ -1,4 +1,4 @@
-#include "common.h"
+﻿#include "common.h"
 #ifdef PS2_MENU
 #include "platform.h"
 #include "main.h"
@@ -319,7 +319,7 @@ CMenuManager::LoadAllTextures(void)
 	CTxdStore::LoadTxd(slot, "MODELS/FRONTEND.TXD");
 	CTxdStore::SetCurrentTxd(slot);
 	CStreaming::IHaveUsedStreamingMemory();
-	CTimer::Update();
+	//CTimer::Update();
 
 	for(i = 0; i < NUM_SPRIRES; i++)
 	{
@@ -857,7 +857,7 @@ CMenuManager::InitialiseChangedLanguageSettings(void)
 		CTimer::Stop();
 		TheText.Unload();
 		TheText.Load();
-		CTimer::Update();
+		//CTimer::Update();
 
 		FrontEndMenuManager.AnaliseMenuContents();
 		CGame::frenchGame = false;
@@ -2056,7 +2056,7 @@ CMenuManager::DrawMemoryCardStartUpMenus()
 		DisplayWarningControllerMsg();
 		DoRWStuffEndOfFrame();
 		CPad::UpdatePads();
-		CTimer::Update();
+		//CTimer::Update();
 	}
 
 	CTimer::EndUserPause();

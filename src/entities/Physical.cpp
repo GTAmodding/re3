@@ -1,4 +1,4 @@
-#include "common.h"
+﻿#include "common.h"
 
 #include "World.h"
 #include "Timer.h"
@@ -321,7 +321,7 @@ CPhysical::PlacePhysicalRelativeToOtherPhysical(CPhysical *other, CPhysical *phy
 	CVector pos = other->m_vecMoveSpeed*step + worldPos;
 
 	CWorld::Remove(phys);
-	phys->GetMatrix() = other->GetMatrix();
+	phys->GetMatrix().save(other->GetMatrix());
 	phys->SetPosition(pos);
 	phys->m_vecMoveSpeed = other->m_vecMoveSpeed;
 	phys->GetMatrix().UpdateRW();
@@ -1791,7 +1791,7 @@ CPhysical::ProcessShift(void)
 			CWorld::AdvanceCurrentScanCode();
 			for(node = m_entryInfoList.first; node; node = node->next)
 				if(ProcessCollisionSectorList(node->sector->m_lists)){
-					GetMatrix() = matrix;
+					GetMatrix().save(matrix);
 					return;
 				}
 		}
@@ -1898,7 +1898,7 @@ CPhysical::ProcessCollision(void)
 			   !ped->bWasStanding &&
 			   ped->bIsStanding)
 				savedMatrix.GetPosition().z = GetPosition().z;
-			GetMatrix() = savedMatrix;
+			GetMatrix().save(savedMatrix);
 			CTimer::SetTimeStep(savedTimeStep);
 			return;
 		}
@@ -1906,7 +1906,7 @@ CPhysical::ProcessCollision(void)
 		   !ped->bWasStanding &&
 		   ped->bIsStanding)
 			savedMatrix.GetPosition().z = GetPosition().z;
-		GetMatrix() = savedMatrix;
+		GetMatrix().save(savedMatrix);
 		CTimer::SetTimeStep(savedTimeStep);
 		if(IsVehicle()){
 			CVehicle *veh = (CVehicle*)this;
@@ -1937,7 +1937,7 @@ CPhysical::ProcessCollision(void)
 		if(IsVehicle())
 			((CVehicle*)this)->bVehicleColProcessed = true;
 		if(CheckCollision()){
-			GetMatrix() = savedMatrix;
+			GetMatrix().save(savedMatrix);
 			return;
 		}
 	}

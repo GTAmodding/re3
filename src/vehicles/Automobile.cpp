@@ -1108,7 +1108,7 @@ CAutomobile::ProcessControl(void)
 	ProcessDelayedExplosion();
 
 
-	if(m_bSirenOrAlarm && (CTimer::GetFrameCounter()&7) == 5 &&
+	if(m_bSirenOrAlarm && (CTimer::GetTickCounter()&7) == 5 &&
 	   UsesSiren(GetModelIndex()) && GetModelIndex() != MI_MRWHOOP)
 		CCarAI::MakeWayForCarWithSiren(this);
 
@@ -1234,9 +1234,10 @@ CAutomobile::PreRender(void)
 {
 	int i, j, n;
 	CVehicleModelInfo *mi = (CVehicleModelInfo*)CModelInfo::GetModelInfo(GetModelIndex());
+	CVector camPos = *RwMatrixGetPos(RwFrameGetMatrix(RwCameraGetFrame(TheCamera.m_pRwCamera)));
 
 	if(GetModelIndex() == MI_RCBANDIT){
-		CVector pos = GetMatrix() * CVector(0.218f, -0.444f, 0.391f);
+		CVector pos = GetMatrix().GetMatrixInterpolated() * CVector(0.218f, -0.444f, 0.391f);
 		CAntennas::RegisterOne((uintptr)this, GetUp(), pos, 1.0f);
 	}
 
@@ -1269,25 +1270,25 @@ CAutomobile::PreRender(void)
 			mat.Attach(RwFrameGetMatrix(m_aCarNodes[CAR_WHEEL_RB]));
 			pos = mat.GetPosition();
 			pos.z = 1.5f*m_aWheelPosition[CARWHEEL_REAR_RIGHT];
-			m_aWheelColPoints[CARWHEEL_REAR_RIGHT].point = GetMatrix() * pos;
+			m_aWheelColPoints[CARWHEEL_REAR_RIGHT].point = GetMatrix().GetMatrixInterpolated() * pos;
 			m_aWheelColPoints[CARWHEEL_REAR_RIGHT].surfaceB = SURFACE_DEFAULT;
 
 			mat.Attach(RwFrameGetMatrix(m_aCarNodes[CAR_WHEEL_LB]));
 			pos = mat.GetPosition();
 			pos.z = 1.5f*m_aWheelPosition[CARWHEEL_REAR_LEFT];
-			m_aWheelColPoints[CARWHEEL_REAR_LEFT].point = GetMatrix() * pos;
+			m_aWheelColPoints[CARWHEEL_REAR_LEFT].point = GetMatrix().GetMatrixInterpolated() * pos;
 			m_aWheelColPoints[CARWHEEL_REAR_LEFT].surfaceB = SURFACE_DEFAULT;
 
 			mat.Attach(RwFrameGetMatrix(m_aCarNodes[CAR_WHEEL_RF]));
 			pos = mat.GetPosition();
 			pos.z = 1.5f*m_aWheelPosition[CARWHEEL_FRONT_RIGHT];
-			m_aWheelColPoints[CARWHEEL_FRONT_RIGHT].point = GetMatrix() * pos;
+			m_aWheelColPoints[CARWHEEL_FRONT_RIGHT].point = GetMatrix().GetMatrixInterpolated() * pos;
 			m_aWheelColPoints[CARWHEEL_FRONT_RIGHT].surfaceB = SURFACE_DEFAULT;
 
 			mat.Attach(RwFrameGetMatrix(m_aCarNodes[CAR_WHEEL_LF]));
 			pos = mat.GetPosition();
 			pos.z = 1.5f*m_aWheelPosition[CARWHEEL_FRONT_LEFT];
-			m_aWheelColPoints[CARWHEEL_FRONT_LEFT].point = GetMatrix() * pos;
+			m_aWheelColPoints[CARWHEEL_FRONT_LEFT].point = GetMatrix().GetMatrixInterpolated() * pos;
 			m_aWheelColPoints[CARWHEEL_FRONT_LEFT].surfaceB = SURFACE_DEFAULT;
 		}
 
@@ -1415,11 +1416,11 @@ CAutomobile::PreRender(void)
 			CVector p1, p2, p3, c;
 
 			colModel->GetTrianglePoint(p1, colModel->triangles[i].a);
-			p1 = GetMatrix() * p1;
+			p1 = GetMatrix().GetMatrixInterpolated() * p1;
 			colModel->GetTrianglePoint(p2, colModel->triangles[i].b);
-			p2 = GetMatrix() * p2;
+			p2 = GetMatrix().GetMatrixInterpolated() * p2;
 			colModel->GetTrianglePoint(p3, colModel->triangles[i].c);
-			p3 = GetMatrix() * p3;
+			p3 = GetMatrix().GetMatrixInterpolated() * p3;
 			c = (p1 + p2 + p3)/3.0f;
 
 			n = 6.0f*CWeather::Rain;
@@ -1442,7 +1443,7 @@ CAutomobile::PreRender(void)
 			dir.z = 0.0f;
 			if(fwdSpeed < 10.0f){
 				CVector steerFwd(-Sin(m_fSteerAngle), Cos(m_fSteerAngle), 0.0f);
-				steerFwd = Multiply3x3(GetMatrix(), steerFwd);
+				steerFwd = GetMatrix().GetMatrixInterpolated() * steerFwd;
 				float r = CGeneral::GetRandomNumberInRange(-0.06f, -0.03f);
 				dir.x = steerFwd.x * r;
 				dir.y = steerFwd.y * r;
@@ -1452,12 +1453,12 @@ CAutomobile::PreRender(void)
 			}
 
 			bool dblExhaust = false;
-			pos1 = GetMatrix() * exhaustPos;
+			pos1 = GetMatrix().GetMatrixInterpolated() * exhaustPos;
 			if(pHandling->Flags & HANDLING_DBL_EXHAUST){
 				dblExhaust = true;
 				pos2 = exhaustPos;
 				pos2.x = -pos2.x;
-				pos2 = GetMatrix() * pos2;
+				pos2 = GetMatrix().GetMatrixInterpolated() * pos2;
 			}
 
 			n = 4.0f*m_fGasPedal;
@@ -1547,8 +1548,8 @@ CAutomobile::PreRender(void)
 				pos + GetUp()*2.0f, CVector(0.0f, 0.0f, 0.0f), 12.0f,
 				r*0.02f, g*0.02f, b*0.02f, CPointLights::FOG_NONE, true);
 
-			pos1 = GetMatrix() * pos1;
-			pos2 = GetMatrix() * pos2;
+			pos1 = GetMatrix().GetMatrixInterpolated() * pos1;
+			pos2 = GetMatrix().GetMatrixInterpolated() * pos2;
 
 			for(i = 0; i < 4; i++){
 				uint8 sirenTimer = ((CTimer::GetTimeInMilliseconds() + (i<<6))>>8) & 3;
@@ -1581,9 +1582,9 @@ CAutomobile::PreRender(void)
 
 	case MI_FBICAR:
 		if(m_bSirenOrAlarm){
-			CVector pos = GetMatrix() * CVector(0.4f, 0.6f, 0.3f);
+			CVector pos = GetMatrix().GetMatrixInterpolated() * CVector(0.4f, 0.6f, 0.3f);
 			if(CTimer::GetTimeInMilliseconds() & 0x100 &&
-			   DotProduct(GetForward(), GetPosition() - TheCamera.GetPosition()) < 0.0f)
+			   DotProduct(GetForward(), GetPositionInterpolated() - camPos) < 0.0f)
 				CCoronas::RegisterCorona((uintptr)this + 21,
 					0, 0, 255, 255,
 					pos, 0.4f, 50.0f,
@@ -1629,7 +1630,7 @@ CAutomobile::PreRender(void)
 		if(GetStatus() == STATUS_ABANDONED){
 			// Turn off lights on abandoned vehicles only when we they're far away
 			if(bLightsOn &&
-			   Abs(TheCamera.GetPosition().x - GetPosition().x) + Abs(TheCamera.GetPosition().y - GetPosition().y) > 100.0f)
+			   Abs(camPos.x - GetPositionInterpolated().x) + Abs(camPos.y - GetPositionInterpolated().y) > 100.0f)
 				bLightsOn = false;
 		}else
 			bLightsOn = shouldLightsBeOn;
@@ -1645,10 +1646,10 @@ CAutomobile::PreRender(void)
 			alarmOff = true;
 	}
 	if(bEngineOn && bLightsOn || alarmOn || alarmOff){
-		CVector lookVector = GetPosition() - TheCamera.GetPosition();
+		CVector lookVector = GetPositionInterpolated() - camPos;
 		float camDist = lookVector.Magnitude();
 		if(camDist != 0.0f)
-			lookVector *= 1.0f/camDist;
+			lookVector *= 1.0f / camDist;
 		else
 			lookVector = CVector(1.0f, 0.0f, 0.0f);
 
@@ -1663,7 +1664,7 @@ CAutomobile::PreRender(void)
 		// Headlights
 
 		CVector headLightPos = mi->m_positions[CAR_POS_HEADLIGHTS];
-		CVector lightR = GetMatrix() * headLightPos;
+		CVector lightR = GetMatrix().GetMatrixInterpolated() * headLightPos;
 		CVector lightL = lightR;
 		lightL -= GetRight()*2.0f*headLightPos.x;
 
@@ -1753,7 +1754,7 @@ CAutomobile::PreRender(void)
 		// Taillights
 
 		CVector tailLightPos = mi->m_positions[CAR_POS_TAILLIGHTS];
-		lightR = GetMatrix() * tailLightPos;
+		lightR = GetMatrix().GetMatrixInterpolated() * tailLightPos;
 		lightL = lightR;
 		lightL -= GetRight()*2.0f*tailLightPos.x;
 
@@ -1866,7 +1867,7 @@ CAutomobile::PreRender(void)
 		// Lights off
 
 		CVector lightPos = mi->m_positions[CAR_POS_TAILLIGHTS];
-		CVector lightR = GetMatrix() * lightPos;
+		CVector lightR = GetMatrix().GetMatrixInterpolated() * lightPos;
 		CVector lightL = lightR;
 		lightL -= GetRight()*2.0f*lightPos.x;
 
@@ -1948,7 +1949,7 @@ CAutomobile::Render(void)
 
 	CVector contactPoints[4];	// relative to model
 	CVector contactSpeeds[4];	// speed at contact points
-	CVector frontWheelFwd = Multiply3x3(GetMatrix(), CVector(-Sin(m_fSteerAngle), Cos(m_fSteerAngle), 0.0f));
+	CVector frontWheelFwd = GetMatrix().GetMatrixInterpolated() * CVector(-Sin(m_fSteerAngle), Cos(m_fSteerAngle), 0.0f);
 	CVector rearWheelFwd = GetForward();
 	for(i = 0; i < 4; i++){
 		if (m_aWheelTimer[i] > 0.0f) {
@@ -2990,11 +2991,11 @@ CAutomobile::ProcessBuoyancy(void)
 						pos + GetPosition(), -0.6f*right,
 						nil, size, smokeCol, 0, 0, 0, 0);
 				
-					if((CTimer::GetFrameCounter() & 0xF) == 0)
+					if((CTimer::GetTickCounter() & 0xF) == 0)
 						DMAudio.PlayOneShot(m_audioEntityId, SOUND_CAR_SPLASH, 2000.0f*fSpeed);
 				}
 #else
-				if ( ( (CTimer::GetFrameCounter() + i) & 3 ) == 0 )
+				if ( ( (CTimer::GetTickCounter() + i) & 3 ) == 0 )
 				{
 					if(fSpeed > sq(0.05f))
 					{
@@ -3017,7 +3018,7 @@ CAutomobile::ProcessBuoyancy(void)
 								0.75f*m_vecMoveSpeed, NULL, 0.0f, color);
 						}
 						
-						if((CTimer::GetFrameCounter() & 0xF) == 0)
+						if((CTimer::GetTickCounter() & 0xF) == 0)
 							DMAudio.PlayOneShot(m_audioEntityId, SOUND_CAR_SPLASH, 2000.0f*fSpeed);
 					}
 				}
@@ -3583,7 +3584,7 @@ CAutomobile::AddWheelDirtAndWater(CColPoint *colpoint, uint32 belowEffectSpeed)
 	default:
 		if ( CWeather::WetRoads > 0.01f 
 #ifdef PC_PARTICLE	
-			&& CTimer::GetFrameCounter() & 1
+			&& CTimer::GetTickCounter() & 1
 #endif	
 			)
 		{

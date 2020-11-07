@@ -1,4 +1,4 @@
-#include "common.h"
+﻿#include "common.h"
 
 #include "main.h"
 
@@ -666,9 +666,9 @@ CPickups::Update()
 #endif
 #define PICKUPS_FRAME_SPAN (6)
 #ifdef FIX_BUGS
-	for (uint32 i = NUMGENERALPICKUPS * (CTimer::GetFrameCounter() % PICKUPS_FRAME_SPAN) / PICKUPS_FRAME_SPAN; i < NUMGENERALPICKUPS * (CTimer::GetFrameCounter() % PICKUPS_FRAME_SPAN + 1) / PICKUPS_FRAME_SPAN; i++) {
+	for (uint32 i = NUMGENERALPICKUPS * (CTimer::GetTickCounter() % PICKUPS_FRAME_SPAN) / PICKUPS_FRAME_SPAN; i < NUMGENERALPICKUPS * (CTimer::GetTickCounter() % PICKUPS_FRAME_SPAN + 1) / PICKUPS_FRAME_SPAN; i++) {
 #else // BUG: this code can only reach 318 out of 320 pickups
-	for (uint32 i = NUMGENERALPICKUPS / PICKUPS_FRAME_SPAN * (CTimer::GetFrameCounter() % PICKUPS_FRAME_SPAN); i < NUMGENERALPICKUPS / PICKUPS_FRAME_SPAN * (CTimer::GetFrameCounter() % PICKUPS_FRAME_SPAN + 1); i++) {
+	for (uint32 i = NUMGENERALPICKUPS / PICKUPS_FRAME_SPAN * (CTimer::GetTickCounter() % PICKUPS_FRAME_SPAN); i < NUMGENERALPICKUPS / PICKUPS_FRAME_SPAN * (CTimer::GetTickCounter() % PICKUPS_FRAME_SPAN + 1); i++) {
 #endif
 		if (aPickUps[i].m_eType != PICKUP_NONE && aPickUps[i].Update(FindPlayerPed(), FindPlayerVehicle(), CWorld::PlayerInFocus)) {
 			AddToCollectedPickupsArray(i);
@@ -1111,7 +1111,7 @@ CPacManPickups::Update()
 	}
 	if (bPMActive) {
 #define PACMANPICKUPS_FRAME_SPAN (4)
-		for (uint32 i = (CTimer::GetFrameCounter() % PACMANPICKUPS_FRAME_SPAN) * (NUMPACMANPICKUPS / PACMANPICKUPS_FRAME_SPAN); i < ((CTimer::GetFrameCounter() % PACMANPICKUPS_FRAME_SPAN) + 1) * (NUMPACMANPICKUPS / PACMANPICKUPS_FRAME_SPAN); i++) {
+		for (uint32 i = (CTimer::GetTickCounter() % PACMANPICKUPS_FRAME_SPAN) * (NUMPACMANPICKUPS / PACMANPICKUPS_FRAME_SPAN); i < ((CTimer::GetTickCounter() % PACMANPICKUPS_FRAME_SPAN) + 1) * (NUMPACMANPICKUPS / PACMANPICKUPS_FRAME_SPAN); i++) {
 			if (aPMPickUps[i].m_eType != PACMAN_NONE)
 				aPMPickUps[i].Update();
 		}
@@ -1343,7 +1343,7 @@ CPacManPickups::Render()
 			if (CSprite::CalcScreenCoors(aPMPickUps[i].m_vecPosn, &pos, &w, &h, true) && pos.z < 100.0f) {
 				if (aPMPickUps[i].m_pObject != nil) {
 					aPMPickUps[i].m_pObject->GetMatrix().SetRotateZOnly((CTimer::GetTimeInMilliseconds() % 1024) * TWOPI / 1024.0f);
-					aPMPickUps[i].m_pObject->GetMatrix().UpdateRW();
+					aPMPickUps[i].m_pObject->GetMatrix().UpdateRWInterPolated();
 					aPMPickUps[i].m_pObject->UpdateRwFrame();
 				}
 				float fsin = Sin((CTimer::GetTimeInMilliseconds() % 1024) * 6.28f / 1024.0f); // yes, it is 6.28f when it was TWOPI just now...

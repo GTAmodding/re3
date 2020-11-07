@@ -1,4 +1,4 @@
-#include "common.h"
+﻿#include "common.h"
 
 #include "General.h"
 #include "Building.h"
@@ -258,7 +258,7 @@ CCullZones::Update(void)
 	if(bCullZonesDisabled)
 		return;
 
-	switch(CTimer::GetFrameCounter() & 7){
+	switch(CTimer::GetTickCounter() & 7){
 	case 0:
 	case 4:
 		/* Update Cull zone */

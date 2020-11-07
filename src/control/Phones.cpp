@@ -1,4 +1,4 @@
-#include "common.h"
+﻿#include "common.h"
 
 #include "Phones.h"
 #include "Pools.h"
@@ -148,7 +148,7 @@ CPhoneInfo::Update(void)
 			}
 			if (CVector2D(TheCamera.GetPosition() - m_aPhones[phoneId].m_vecPos).MagnitudeSqr() > sq(100.0f))
 				m_aPhones[phoneId].m_visibleToCam = false;
-		} else if (!((CTimer::GetFrameCounter() + m_aPhones[phoneId].m_pEntity->m_randomSeed) % 16)) {
+		} else if (!((CTimer::GetTickCounter() + m_aPhones[phoneId].m_pEntity->m_randomSeed) % 16)) {
 			if (CVector2D(TheCamera.GetPosition() - m_aPhones[phoneId].m_vecPos).MagnitudeSqr() < sq(60.0f))
 				m_aPhones[phoneId].m_visibleToCam = true;
 		}

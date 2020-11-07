@@ -1,4 +1,4 @@
-#include "common.h"
+﻿#include "common.h"
 
 #include "Camera.h"
 #include "Clock.h"
@@ -52,23 +52,23 @@ CTrafficLights::DisplayActualLight(CEntity *ent)
 	case CAR_LIGHTS_GREEN:
 		r = 0;
 		g = 255;
-		pos1 = ent->GetMatrix() * CVector(x, yMax, zMin);
-		pos2 = ent->GetMatrix() * CVector(x, yMin, zMin);
+		pos1 = ent->GetMatrix().GetMatrixInterpolated() * CVector(x, yMax, zMin);
+		pos2 = ent->GetMatrix().GetMatrixInterpolated() * CVector(x, yMin, zMin);
 		id = 0;
 		break;
 	case CAR_LIGHTS_YELLOW:
 		r = 255;
 		g = 128;
-		pos1 = ent->GetMatrix() * CVector(x, yMax, (zMin+zMax)/2.0f);
-		pos2 = ent->GetMatrix() * CVector(x, yMin, (zMin+zMax)/2.0f);
+		pos1 = ent->GetMatrix().GetMatrixInterpolated() * CVector(x, yMax, (zMin+zMax)/2.0f);
+		pos2 = ent->GetMatrix().GetMatrixInterpolated() * CVector(x, yMin, (zMin+zMax)/2.0f);
 		id = 1;
 		break;
 	case CAR_LIGHTS_RED:
 	default:
 		r = 255;
 		g = 0;
-		pos1 = ent->GetMatrix() * CVector(x, yMax, zMax);
-		pos2 = ent->GetMatrix() * CVector(x, yMin, zMax);
+		pos1 = ent->GetMatrix().GetMatrixInterpolated() * CVector(x, yMax, zMax);
+		pos2 = ent->GetMatrix().GetMatrixInterpolated() * CVector(x, yMin, zMax);
 		id = 2;
 		break;
 	}
@@ -119,7 +119,7 @@ CTrafficLights::DisplayActualLight(CEntity *ent)
 		CVector p1(2.7f, left, top);
 		CVector p2(2.7f, right, mid);
 		CVector p3(2.7f, left, mid);
-		CShinyTexts::RegisterOne(ent->GetMatrix()*p0, ent->GetMatrix()*p1, ent->GetMatrix()*p2, ent->GetMatrix()*p3,
+		CShinyTexts::RegisterOne(ent->GetMatrix().GetMatrixInterpolated()*p0, ent->GetMatrix().GetMatrixInterpolated()*p1, ent->GetMatrix().GetMatrixInterpolated()*p2, ent->GetMatrix()*p3,
 			1.0f, 0.0f,  0.0f, 0.0f,  1.0f, 1.0f,  0.0f, 1.0f,
 			SHINYTEXT_WALK, 255, 0, 0, 60.0f);
 	}else if(phase == PED_LIGHTS_WALK || CTimer::GetTimeInMilliseconds() & 0x100){
@@ -127,7 +127,7 @@ CTrafficLights::DisplayActualLight(CEntity *ent)
 		CVector p1(2.7f, left, mid);
 		CVector p2(2.7f, right, bot);
 		CVector p3(2.7f, left, bot);
-		CShinyTexts::RegisterOne(ent->GetMatrix()*p0, ent->GetMatrix()*p1, ent->GetMatrix()*p2, ent->GetMatrix()*p3,
+		CShinyTexts::RegisterOne(ent->GetMatrix().GetMatrixInterpolated()*p0, ent->GetMatrix().GetMatrixInterpolated()*p1, ent->GetMatrix().GetMatrixInterpolated()*p2, ent->GetMatrix().GetMatrixInterpolated()*p3,
 			1.0f, 0.5f,  0.0f, 0.5f,  1.0f, 1.0f,  0.0f, 1.0f,
 			SHINYTEXT_WALK, 255, 255, 255, 60.0f);
 	}

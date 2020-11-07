@@ -1,4 +1,4 @@
-#include "common.h"
+﻿#include "common.h"
 
 #include "DMAudio.h"
 #include "MusicManager.h"

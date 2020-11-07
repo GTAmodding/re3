@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 class CVector
 {
@@ -128,3 +128,4 @@ class CMatrix;
 CVector Multiply3x3(const CMatrix &mat, const CVector &vec);
 CVector Multiply3x3(const CVector &vec, const CMatrix &mat);
 CVector operator*(const CMatrix &mat, const CVector &vec);
+CVector operator*(const RwMatrix &mat, const CVector &vec);

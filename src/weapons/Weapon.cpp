@@ -1,4 +1,4 @@
-#include "common.h"
+﻿#include "common.h"
 
 #include "Weapon.h"
 #include "AnimBlendAssociation.h"
@@ -636,7 +636,7 @@ CWeapon::FireInstantHit(CEntity *shooter, CVector *fireSource)
 	if ( shooter == FindPlayerPed() )
 	{
 		CStats::InstantHitsFiredByPlayer++;
-		if ( !(CTimer::GetFrameCounter() & 3) )
+		if ( !(CTimer::GetTickCounter() & 3) )
 			MakePedsJumpAtShot((CPhysical*)shooter, fireSource, &target);
 	}
 
@@ -1697,7 +1697,7 @@ CWeapon::FireInstantHitFromCar(CAutomobile *shooter, bool left)
 	CEntity *victim;
 	ProcessLineOfSight(source, target, point, victim, m_eWeaponType, shooter, true, true, true, true, true, true, false);
 
-	if ( !(CTimer::GetFrameCounter() & 3) )
+	if ( !(CTimer::GetTickCounter() & 3) )
 		MakePedsJumpAtShot(shooter, &source, &target);
 
 	if ( victim )

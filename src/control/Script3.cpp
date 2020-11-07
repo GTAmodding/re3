@@ -1,4 +1,4 @@
-#include "common.h"
+﻿#include "common.h"
 
 #include "Script.h"
 #include "ScriptCommands.h"
@@ -1793,7 +1793,7 @@ int8 CRunningScript::ProcessCommands700To799(int32 command)
 		m_nIp += KEY_LENGTH_IN_SCRIPT;
 		CTimer::Stop();
 		CCutsceneMgr::SetHeadAnim(name, pCutHead);
-		CTimer::Update();
+		//CTimer::Update();
 		return 0;
 	}
 	case COMMAND_SIN:

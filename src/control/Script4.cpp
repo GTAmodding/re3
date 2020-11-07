@@ -1,4 +1,4 @@
-#include "common.h"
+﻿#include "common.h"
 
 #include "Script.h"
 #include "ScriptCommands.h"
@@ -1217,7 +1217,7 @@ int8 CRunningScript::ProcessCommands900To999(int32 command)
 	case COMMAND_LOAD_ALL_MODELS_NOW:
 		CTimer::Stop();
 		CStreaming::LoadAllRequestedModels(false);
-		CTimer::Update();
+		//CTimer::Update();
 		return 0;
 	case COMMAND_ADD_TO_OBJECT_VELOCITY:
 	{
@@ -1856,7 +1856,7 @@ int8 CRunningScript::ProcessCommands900To999(int32 command)
 		CVector pos = *(CVector*)&ScriptParams[0];
 		CTimer::Stop();
 		CStreaming::LoadScene(pos);
-		CTimer::Update();
+		//CTimer::Update();
 		return 0;
 	}
 	case COMMAND_ADD_STUCK_CAR_CHECK:

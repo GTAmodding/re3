@@ -1,4 +1,4 @@
-#include "common.h"
+﻿#include "common.h"
 
 #include "Automobile.h"
 #include "Bridge.h"
@@ -383,7 +383,7 @@ CPlayerInfo::Process(void)
 			m_nVisibleMoney += changeBy;
 	}
 
-	if (!(CTimer::GetFrameCounter() & 15)) {
+	if (!(CTimer::GetTickCounter() & 15)) {
 		CVector2D playerPos = m_pPed->bInVehicle ? m_pPed->m_pMyVehicle->GetPosition() : m_pPed->GetPosition();
 		m_fRoadDensity = ThePaths.CalcRoadDensity(playerPos.x, playerPos.y);
 	}
@@ -515,7 +515,7 @@ CPlayerInfo::Process(void)
 				CCullZones::ForceCullZoneCoors(TheCamera.GetPosition());
 				CRenderer::RequestObjectsInFrustum();
 				CStreaming::LoadAllRequestedModels(false);
-				CTimer::Update();
+				//CTimer::Update(1000/30);
 			}
 			m_bInRemoteMode = false;
 			CWorld::Players[CWorld::PlayerInFocus].m_pRemoteVehicle = nil;
@@ -524,7 +524,7 @@ CPlayerInfo::Process(void)
 			}
 		}
 	}
-	if (!(CTimer::GetFrameCounter() & 31)) {
+	if (!(CTimer::GetTickCounter() & 31)) {
 		CVehicle *veh = FindPlayerVehicle();
 		if (veh && m_pPed->bInVehicle && veh->GetUp().z < 0.0f
 			&& veh->m_vecMoveSpeed.Magnitude() < 0.05f && veh->IsCar() && !veh->bIsInWater) {

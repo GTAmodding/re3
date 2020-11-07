@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "ModelInfo.h"
 #include "Placeable.h"
@@ -152,6 +152,7 @@ public:
 	bool IsVisibleComplex(void) { return m_rwObject && bIsVisible && GetIsOnScreenComplex(); }
 	int16 GetModelIndex(void) const { return m_modelIndex; }
 	void UpdateRwFrame(void);
+	void UpdateRwFrameInterpolated();
 	void SetupBigBuilding(void);
 
 	void AttachToRwObject(RwObject *obj);

@@ -1,4 +1,4 @@
-#include "common.h"
+﻿#include "common.h"
 #include "rpmatfx.h"
 #include "rphanim.h"
 #include "rpskin.h"
@@ -67,6 +67,8 @@
 #include "custompipes.h"
 #include "screendroplets.h"
 #include "frontendoption.h"
+
+#include <thread>
 
 GlobalScene Scene;
 
@@ -1022,6 +1024,11 @@ Render2dStuffAfterFade(void)
 	CFont::DrawFonts();
 }
 
+#include <chrono>
+namespace chrono = std::chrono;
+float timeAlpha = 0.f;
+bool toProcess = false;
+
 void
 Idle(void *arg)
 {
@@ -1029,13 +1036,7 @@ Idle(void *arg)
 	CDraw::SetAspectRatio(CDraw::FindAspectRatio());
 #endif
 
-	CTimer::Update();
-
 	tbInit();
-
-	CSprite2d::InitPerFrame();
-	CFont::InitPerFrame();
-
 	// We're basically merging FrontendIdle and Idle (just like TheGame on PS2)
 #ifdef PS2_SAVE_DIALOG
 	// Only exists on PC FrontendIdle, probably some PS2 bug fix
@@ -1056,19 +1057,54 @@ Idle(void *arg)
 		tbEndTimer("DMAudio.Service");
 	}
 
-	if (RsGlobal.quit)
-		return;
+	if(RsGlobal.quit) return;
 #else
+	//
+	static auto lastFrame = chrono::steady_clock::now();
+	static float accumulatedTime = 0.f;
+
+	auto now = chrono::steady_clock::now();
+	auto deltaTime = chrono::duration<float>(now - lastFrame).count();
+	static constexpr float timestep = 1.f / 30;
+	lastFrame = now;
+
+	accumulatedTime += deltaTime;
+	if(accumulatedTime > 0.25f) accumulatedTime = 0.25f;
+	while(accumulatedTime >= timestep) {
+		TheCamera.m_matrix.SaveOldMatrix();
+		CGame::UpdateMatrices();
+		tbStartTimer(0, "CGame::Process");
+		CGame::Process();
+		tbEndTimer("CGame::Process");
+		tbStartTimer(0, "DMAudio.Service");
+		DMAudio.Service();
+		tbEndTimer("DMAudio.Service");
+		CTimer::Update(timestep * 1000);
+		accumulatedTime -= timestep;
+	}
+
+	timeAlpha = accumulatedTime / timestep;
+	CGame::InterpolateMatrices();
+
+	if(TheCamera.m_pRwCamera) {
+		static RwMatrix interpolated;
+		interpolated = TheCamera.m_matrix.CreateMatrixInterpolated();
+		RwFrame *frame = RwCameraGetFrame(TheCamera.m_pRwCamera);
+		*RwMatrixGetPos(RwFrameGetMatrix(frame)) = interpolated.pos;
+		*RwMatrixGetAt(RwFrameGetMatrix(frame)) = interpolated.up;
+		*RwMatrixGetUp(RwFrameGetMatrix(frame)) = interpolated.at;
+		*RwMatrixGetRight(RwFrameGetMatrix(frame)) = interpolated.right;
+		RwMatrixUpdate(RwFrameGetMatrix(frame));
+		RwFrameUpdateObjects(frame);
+	}
+
+	uint32 f = CTimer::GetFrameCounter() + 1;
+	CTimer::SetFrameCounter(f);
 	CPointLights::InitPerFrame();
-
-	tbStartTimer(0, "CGame::Process");
-	CGame::Process();
-	tbEndTimer("CGame::Process");
-
-	tbStartTimer(0, "DMAudio.Service");
-	DMAudio.Service();
-	tbEndTimer("DMAudio.Service");
 #endif
+
+	CSprite2d::InitPerFrame();
+	CFont::InitPerFrame();
 
 	if(CGame::bDemoMode && CTimer::GetTimeInMilliseconds() > (3*60 + 30)*1000 && !CCutsceneMgr::IsCutsceneProcessing()){
 #ifdef PS2_MENU
@@ -1138,7 +1174,6 @@ Idle(void *arg)
 		RwCameraSetFarClipPlane(Scene.camera, CTimeCycle::GetFarClip());
 		RwCameraSetFogDistance(Scene.camera, CTimeCycle::GetFogStart());
 #endif
-
 		tbStartTimer(0, "RenderScene");
 		RenderScene();
 		tbEndTimer("RenderScene");
@@ -1219,7 +1254,7 @@ FrontendIdle(void)
 	CDraw::SetAspectRatio(CDraw::FindAspectRatio());
 #endif
 
-	CTimer::Update();
+	CTimer::Update(1000.f/30);
 	CSprite2d::SetRecipNearClip(); // this should be on InitialiseRenderWare according to PS2 asm. seems like a bug fix
 	CSprite2d::InitPerFrame();
 	CFont::InitPerFrame();
@@ -1357,7 +1392,7 @@ TheModelViewer(void)
 	CDraw::SetAspectRatio(CDraw::FindAspectRatio());
 #endif
 	CAnimViewer::Update();
-	CTimer::Update();
+	CTimer::Update(1000.f/30);
 	SetLightsWithTimeOfDayColour(Scene.world);
 	CRenderer::ConstructRenderList();
 	DoRWStuffStartOfFrame(CTimeCycle::GetSkyTopRed(), CTimeCycle::GetSkyTopGreen(), CTimeCycle::GetSkyTopBlue(),
@@ -1436,7 +1471,7 @@ void TheGame(void)
 		FrontEndMenuManager.m_bWantToLoad = false;
 #endif
 
-		CTimer::Update();
+		//CTimer::Update();
 
 #ifdef PS2
 		while (!(FrontEndMenuManager.m_bWantToRestart || TheMemoryCard.b_FoundRecentSavedGameWantToLoad))
@@ -1545,7 +1580,7 @@ void TheGame(void)
 
 			frameCount = 0;
 
-			CTimer::Update();
+			//CTimer::Update();
 
 #ifdef GTA_PS2
 			gMainHeap.PopMemId();

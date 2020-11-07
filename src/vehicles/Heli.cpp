@@ -1,4 +1,4 @@
-#include "common.h"
+﻿#include "common.h"
 #include "main.h"
 
 #include "General.h"
@@ -299,7 +299,7 @@ CHeli::ProcessControl(void)
 	CVector2D targetSpeed = vTargetDist * speed;
 
 	if(m_heliStatus == HELI_STATUS_HOVER2 || m_heliStatus == HELI_STATUS_SHOT_DOWN){
-		bool force = !!((CTimer::GetFrameCounter() + m_randomSeed) & 8);
+		bool force = !!((CTimer::GetTickCounter() + m_randomSeed) & 8);
 		if(m_bTestRight){
 			if(force || CWorld::TestSphereAgainstWorld(GetPosition() + 4.0f*GetRight(), 2.0f, this, true, false, false, false, false, false) == nil){
 				if(m_heliStatus == HELI_STATUS_SHOT_DOWN){
@@ -567,7 +567,7 @@ CHeli::PreRender(void)
 	uint8 r, g, b;
 	float testLowZ = FindPlayerCoors().z - 10.0f;
 	float radius = (GetPosition().z - FindPlayerCoors().z - 10.0f - 1.0f) * 0.3f + 10.0f;
-	int frm = CTimer::GetFrameCounter() & 7;
+	int frm = CTimer::GetTickCounter() & 7;
 
 	i = 0;
 	for(angle = 0.0f; angle < TWOPI; angle += TWOPI/32){

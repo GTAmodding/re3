@@ -1,4 +1,4 @@
-#include "common.h"
+﻿#include "common.h"
 
 #include "main.h"
 #include "Pools.h"
@@ -348,7 +348,7 @@ CPed::SetPedStats(ePedStats pedStat)
 void
 CPed::BuildPedLists(void)
 {
-	if (((CTimer::GetFrameCounter() + m_randomSeed) % 16) == 0) {
+	if (((CTimer::GetTickCounter() + m_randomSeed) % 16) == 0) {
 		CVector centre = CEntity::GetBoundCentre();
 		CRect rect(centre.x - 20.0f,
 			centre.y - 20.0f,
@@ -746,7 +746,7 @@ CPed::ScanForThreats(void)
 		bool weSawOurEnemy = false;
 		bool weMaySeeOurEnemy = false;
 		float closestEnemyDist = 60.0f;
-		if ((CTimer::GetFrameCounter() + (uint8)m_randomSeed + 16) & 4) {
+		if ((CTimer::GetTickCounter() + (uint8)m_randomSeed + 16) & 4) {
 
 			for (int i = 0; i < m_numNearPeds; ++i) {
 				if (CharCreatedBy == RANDOM_CHAR && m_nearPeds[i]->CharCreatedBy == MISSION_CHAR && !m_nearPeds[i]->IsPlayer()) {
@@ -2502,7 +2502,7 @@ CPed::ProcessControl(void)
 						}
 #endif
 					}
-				} else if ((CTimer::GetFrameCounter() + m_randomSeed % 256 + 3) & 7) {
+				} else if ((CTimer::GetTickCounter() + m_randomSeed % 256 + 3) & 7) {
 					if (IsPlayer() && m_nPedState != PED_JUMP && pad0->JumpJustDown()) {
 						int16 padWalkX = pad0->GetPedWalkLeftRight();
 						int16 padWalkY = pad0->GetPedWalkUpDown();
@@ -2992,7 +2992,7 @@ CPed::ProcessControl(void)
 			SetMoveAnim();
 			if (bPedIsBleeding) {
 				if (CGame::nastyGame) {
-					if (!(CTimer::GetFrameCounter() & 3)) {
+					if (!(CTimer::GetTickCounter() & 3)) {
 						CVector cameraDist = GetPosition() - TheCamera.GetPosition();
 						if (cameraDist.MagnitudeSqr() < sq(50.0f)) {
 
@@ -3434,7 +3434,7 @@ CPed::PlayFootSteps(void)
 
 	if (m_nSurfaceTouched == SURFACE_WATER) {
 		float pedSpeed = CVector2D(m_vecMoveSpeed).Magnitude();
-		if (pedSpeed > 0.03f && CTimer::GetFrameCounter() % 2 == 0 && pedSpeed > 0.13f) {
+		if (pedSpeed > 0.03f && CTimer::GetTickCounter() % 2 == 0 && pedSpeed > 0.13f) {
 #ifdef PC_PARTICLE
 			float particleSize = pedSpeed * 2.0f;
 
@@ -4824,7 +4824,7 @@ CPed::PreRender(void)
 	}
 #endif
 
-	if (bBodyPartJustCameOff && bIsPedDieAnimPlaying && m_bodyPartBleeding != -1 && (CTimer::GetFrameCounter() & 7) > 3) {
+	if (bBodyPartJustCameOff && bIsPedDieAnimPlaying && m_bodyPartBleeding != -1 && (CTimer::GetTickCounter() & 7) > 3) {
 		CVector bloodDir(0.0f, 0.0f, 0.0f);
 		CVector bloodPos(0.0f, 0.0f, 0.0f);
 
@@ -5078,13 +5078,13 @@ CPed::SetFall(int extraTime, AnimationId animId, uint8 evenIfNotInControl)
 			m_getUpTimer = 1000.0f * fallAssoc->hierarchy->totalLength
 				+ CTimer::GetTimeInMilliseconds()
 				+ extraTime
-				+ ((m_randomSeed + CTimer::GetFrameCounter()) % 1000);
+				+ ((m_randomSeed + CTimer::GetTickCounter()) % 1000);
 		}
 	} else {
 		m_getUpTimer = extraTime
 			+ CTimer::GetTimeInMilliseconds()
 			+ 1000
-			+ ((m_randomSeed + CTimer::GetFrameCounter()) % 1000);
+			+ ((m_randomSeed + CTimer::GetTickCounter()) % 1000);
 	}
 	bFallenDown = true;
 }
@@ -5227,7 +5227,7 @@ CPed::SetGetUp(void)
 		CVehicle *veh = (CVehicle*)CPedPlacement::IsPositionClearOfCars(&GetPosition());
 		if (veh && veh->m_vehType != VEHICLE_TYPE_BIKE ||
 			collidingVeh && collidingVeh->IsVehicle() && collidingVeh->m_vehType != VEHICLE_TYPE_BIKE
-			&& ((uint8)(CTimer::GetFrameCounter() + m_randomSeed + 5) % 8 ||
+			&& ((uint8)(CTimer::GetTickCounter() + m_randomSeed + 5) % 8 ||
 		         CCollision::ProcessColModels(GetMatrix(), *GetColModel(), collidingVeh->GetMatrix(), *collidingVeh->GetColModel(),
 					aTempPedColPts, nil, nil) > 0)) {
 
@@ -5421,7 +5421,7 @@ CPed::Seek(void)
 			m_objective != OBJECTIVE_ENTER_CAR_AS_PASSENGER && m_objective != OBJECTIVE_SOLICIT_VEHICLE && !bDuckAndCover) {
 			
 			if ((!m_pedInObjective || !m_pedInObjective->bInVehicle)
-				&& !((CTimer::GetFrameCounter() + (m_randomSeed % 256) + 17) & 7)) {
+				&& !((CTimer::GetTickCounter() + (m_randomSeed % 256) + 17) & 7)) {
 
 				CEntity *obstacle = CWorld::TestSphereAgainstWorld(m_vecSeekPos, 0.4f, nil,
 									false, true, false, false, false, false);
@@ -5822,7 +5822,7 @@ CPed::WanderRange(void)
 	bool arrived = Seek();
 	if (arrived) {
 		Idle();
-		if ((m_randomSeed + 3 * CTimer::GetFrameCounter()) % 1000 > 997) {
+		if ((m_randomSeed + 3 * CTimer::GetTickCounter()) % 1000 > 997) {
 			CVector2D newCoords2D = m_wanderRangeBounds->GetRandomPointInRange();
 			SetSeek(CVector(newCoords2D.x, newCoords2D.y, GetPosition().z), 2.5f);
 		}
@@ -5894,7 +5894,7 @@ CPed::WanderPath(void)
 		return;
 
   	CPathNode *previousLastNode = m_pLastPathNode;
-	uint8 randVal = (m_randomSeed + 3 * CTimer::GetFrameCounter()) % 100;
+	uint8 randVal = (m_randomSeed + 3 * CTimer::GetTickCounter()) % 100;
 
 	// We don't prefer 180-degree turns in normal situations
 	uint8 dirWeWouldntPrefer = m_nPathDir;
@@ -6000,7 +6000,7 @@ CPed::Avoid(void)
 
 					if (distToPed.Magnitude() <= 1.0f && OurPedCanSeeThisOne((CEntity*)nearestPed)) {
 						m_nPedStateTimer = CTimer::GetTimeInMilliseconds()
-							+ 500 + (m_randomSeed + 3 * CTimer::GetFrameCounter())
+							+ 500 + (m_randomSeed + 3 * CTimer::GetTickCounter())
 							% 1000 / 5;
 
 						m_fRotationDest += DEGTORAD(45.0f);
@@ -7063,7 +7063,7 @@ CPed::LookForInterestingNodes(void)
 	C2dEffect *effect;
 	CMatrix *objMat;
 
-	if ((CTimer::GetFrameCounter() + (m_randomSeed % 256)) & 7 || CTimer::GetTimeInMilliseconds() <= m_standardTimer) {
+	if ((CTimer::GetTickCounter() + (m_randomSeed % 256)) & 7 || CTimer::GetTimeInMilliseconds() <= m_standardTimer) {
 		return false;
 	}
 	bool found = false;

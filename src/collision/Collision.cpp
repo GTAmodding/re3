@@ -1,4 +1,4 @@
-#include "common.h"
+﻿#include "common.h"
 
 #include "VuVector.h"
 #include "main.h"
@@ -272,7 +272,7 @@ CCollision::LoadCollisionWhenINeedIt(bool forceChange)
 #ifdef FIX_BUGS
 		CTimer::Resume();
 #else
-		CTimer::Update();
+		//CTimer::Update();
 #endif
 		ISLAND_LOADING_IS(LOW)
 			DMAudio.SetEffectsFadeVol(127);
@@ -2106,7 +2106,7 @@ CCollision::ProcessColModels(const CMatrix &matrixA, CColModel &modelA,
 	assert(modelA.numLines <= MAXNUMLINES);
 
 	// From model A space to model B space
-	matAB = Invert(matrixB, matAB);
+	matAB.save(Invert(matrixB, matAB));
 	matAB *= matrixA;
 
 	CColSphere bsphereAB;	// bounding sphere of A in B space
@@ -2115,7 +2115,7 @@ CCollision::ProcessColModels(const CMatrix &matrixA, CColModel &modelA,
 	if(!TestSphereBox(bsphereAB, modelB.boundingBox))
 		return 0;
 	// B to A space
-	matBA = Invert(matrixA, matBA);
+	matBA.save(Invert(matrixA, matBA));
 	matBA *= matrixB;
 
 	// transform modelA's spheres and lines to B space
@@ -2592,7 +2592,7 @@ CCollision::DrawColModel_Coloured(const CMatrix &mat, const CColModel &colModel,
 
 		if(s == SURFACE_TRANSPARENT_CLOTH || s == SURFACE_METAL_CHAIN_FENCE ||
 		   s == SURFACE_TRANSPARENT_STONE || s == SURFACE_SCAFFOLD_POLE)
-			if(CTimer::GetFrameCounter() & 1){
+			if(CTimer::GetTickCounter() & 1){
 				r = 0;
 				g = 0;
 				b = 0;
@@ -2673,7 +2673,7 @@ CCollision::DrawColModel_Coloured(const CMatrix &mat, const CColModel &colModel,
 
 		if(s == SURFACE_TRANSPARENT_CLOTH || s == SURFACE_METAL_CHAIN_FENCE ||
 		   s == SURFACE_TRANSPARENT_STONE || s == SURFACE_SCAFFOLD_POLE)
-			if(CTimer::GetFrameCounter() & 1){
+			if(CTimer::GetTickCounter() & 1){
 				r = 0;
 				g = 0;
 				b = 0;

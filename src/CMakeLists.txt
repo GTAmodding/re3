@@ -1,4 +1,4 @@
-set(THREADS_PREFER_PTHREAD_FLAG ON)
+﻿set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
 
 if(${RE3_AUDIO} STREQUAL "OAL")
@@ -76,7 +76,6 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang
             PRIVATE
                 "-Wextra"
                 "-Wdouble-promotion"
-                "-Wpedantic"
             )
     endif()
 elseif(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
@@ -91,7 +90,7 @@ set_target_properties(re3
         C_STANDARD 11
         C_EXTENSIONS OFF
         C_STANDARD_REQUIRED ON
-        CXX_STANDARD 11
+        CXX_STANDARD 14
         CXX_EXTENSIONS OFF
         CXX_STANDARD_REQUIRED ON
         PREFIX ""

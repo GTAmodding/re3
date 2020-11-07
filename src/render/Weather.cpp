@@ -1,4 +1,4 @@
-#include "common.h"
+﻿#include "common.h"
 
 #include "Weather.h"
 
@@ -163,7 +163,7 @@ void CWeather::Update(void)
 			else {
 				// 0.125 probability
 				LightningBurst = false;
-				LightningDuration = Min(CTimer::GetFrameCounter() - LightningStart, 20);
+				LightningDuration = Min(CTimer::GetTickCounter() - LightningStart, 20);
 				LightningFlash = false;
 				WhenToPlayLightningSound = CTimer::GetTimeInMilliseconds() + 150 * (20 - LightningDuration);
 			}
@@ -175,7 +175,7 @@ void CWeather::Update(void)
 			}
 			else {
 				LightningBurst = true;
-				LightningStart = CTimer::GetFrameCounter();
+				LightningStart = CTimer::GetTickCounter();
 				LightningFlashLastChange = CTimer::GetTimeInMilliseconds();
 				LightningFlash = true;
 			}

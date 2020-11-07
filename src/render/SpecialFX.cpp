@@ -1,4 +1,4 @@
-#include "common.h"
+﻿#include "common.h"
 
 #include "SpecialFX.h"
 #include "RenderBuffer.h"
@@ -1108,7 +1108,7 @@ CRGBA FoamColour(255, 255, 255, 255);
 unsigned int CSpecialParticleStuff::BoatFromStart;
 
 void
-CSpecialParticleStuff::CreateFoamAroundObject(CMatrix* pMatrix, float innerFw, float innerRg, float innerUp, int32 particles)
+CSpecialParticleStuff::CreateFoamAroundObject(CMatrix *pMatrix, float innerFw, float innerRg, float innerUp, int32 particles)
 {
 	float outerFw = innerFw + 5.0f;
 	float outerRg = innerRg + 5.0f;
@@ -1147,7 +1147,7 @@ CSpecialParticleStuff::StartBoatFoamAnimation()
 }
 
 void
-CSpecialParticleStuff::UpdateBoatFoamAnimation(CMatrix* pMatrix)
+CSpecialParticleStuff::UpdateBoatFoamAnimation(CMatrix *pMatrix)
 {
 	static int32 FrameInAnimation = 0;
 	static float X, Y, Z, dX, dY, dZ;

@@ -1,4 +1,4 @@
-#include "common.h"
+﻿#include "common.h"
 
 #include "RwHelper.h"
 #include "PlayerPed.h"
@@ -1257,7 +1257,7 @@ CPlayerPed::ProcessControl(void)
 
 	if (m_pCurrentPhysSurface && m_pCurrentPhysSurface->IsVehicle() && ((CVehicle*)m_pCurrentPhysSurface)->IsBoat()) {
 		bTryingToReachDryLand = true;
-	} else if (!(((uint8)CTimer::GetFrameCounter() + m_randomSeed) & 0xF)) {
+	} else if (!(((uint8)CTimer::GetTickCounter() + m_randomSeed) & 0xF)) {
 		CVehicle *nearVeh = (CVehicle*)CWorld::TestSphereAgainstWorld(GetPosition(), 7.0f, nil,
 								false, true, false, false, false, false);
 		if (nearVeh && nearVeh->IsBoat())

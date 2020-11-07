@@ -1,4 +1,4 @@
-#include "common.h"
+﻿#include "common.h"
 
 #include "main.h"
 #include "General.h"
@@ -443,7 +443,7 @@ CCoronas::RenderReflections(void)
 
 			// check if we want a reflection on this corona
 			if(aCoronas[i].renderReflection){
-				if(((CTimer::GetFrameCounter() + i) & 0xF) == 0 &&
+				if(((CTimer::GetTickCounter() + i) & 0xF) == 0 &&
 				   CWorld::ProcessVerticalLine(aCoronas[i].coors, -1000.0f, point, entity, true, false, false, false, true, false, nil))
 					aCoronas[i].heightAboveRoad = aCoronas[i].coors.z - point.point.z;
 			}else{

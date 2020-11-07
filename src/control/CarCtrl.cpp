@@ -1,4 +1,4 @@
-#include "common.h"
+﻿#include "common.h"
 
 #include "CarCtrl.h"
 
@@ -168,7 +168,7 @@ CCarCtrl::GenerateOneRandomCar()
 		testForCollision = true;
 		frontX = TheCamera.CamFrontXNorm;
 		frontY = TheCamera.CamFrontYNorm;
-		switch (CTimer::GetFrameCounter() & 1) {
+		switch (CTimer::GetTickCounter() & 1) {
 		case 0:
 			/* Spawn a vehicle relatively far away from player. */
 			/* Forward to his current direction (camera direction). */
@@ -190,7 +190,7 @@ CCarCtrl::GenerateOneRandomCar()
 		frontX = vecPlayerVehicleSpeed.x / fPlayerVehicleSpeed;
 		frontY = vecPlayerVehicleSpeed.y / fPlayerVehicleSpeed;
 		testForCollision = false;
-		switch (CTimer::GetFrameCounter() & 3) {
+		switch (CTimer::GetTickCounter() & 3) {
 		case 0:
 		case 1:
 			/* Spawn a vehicle in a very narrow gap in front of a player */
@@ -219,7 +219,7 @@ CCarCtrl::GenerateOneRandomCar()
 		frontX = vecPlayerVehicleSpeed.x / fPlayerVehicleSpeed;
 		frontY = vecPlayerVehicleSpeed.y / fPlayerVehicleSpeed;
 		testForCollision = false;
-		switch (CTimer::GetFrameCounter() & 3) {
+		switch (CTimer::GetTickCounter() & 3) {
 		case 0:
 			/* Spawn a vehicle in a very narrow gap in front of a player */
 			angleLimit = 0.85f; /* approx 30 degrees */
@@ -248,7 +248,7 @@ CCarCtrl::GenerateOneRandomCar()
 		testForCollision = true;
 		frontX = TheCamera.CamFrontXNorm;
 		frontY = TheCamera.CamFrontYNorm;
-		switch (CTimer::GetFrameCounter() & 1) {
+		switch (CTimer::GetTickCounter() & 1) {
 		case 0:
 			/* Spawn a vehicle relatively far away from player. */
 			/* Forward to his current direction (camera direction). */

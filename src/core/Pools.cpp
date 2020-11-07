@@ -1,4 +1,4 @@
-#include "common.h"
+﻿#include "common.h"
 
 #include "Pools.h"
 
@@ -397,12 +397,12 @@ INITSAVEBUF
 		if (GetObjectPool()->GetSlot(ref >> 8))
 			CPopulation::ConvertToDummyObject(GetObjectPool()->GetSlot(ref >> 8));
 		CObject* pObject = new(ref) CObject(mi, false);
-		pObject->GetMatrix() = pBufferObject->GetMatrix();
+		pObject->GetMatrix().save(pBufferObject->GetMatrix());
 #ifdef COMPATIBLE_SAVES
 		pObject->LoadEntityFlags(buf);
 #endif
 		pObject->m_fUprootLimit = pBufferObject->m_fUprootLimit;
-		pObject->m_objectMatrix = pBufferObject->m_objectMatrix;
+		pObject->m_objectMatrix.save(pBufferObject->m_objectMatrix);
 		pObject->ObjectCreatedBy = pBufferObject->ObjectCreatedBy;
 		pObject->bIsPickup = pBufferObject->bIsPickup;
 		pObject->bPickupObjWithMessage = pBufferObject->bPickupObjWithMessage;

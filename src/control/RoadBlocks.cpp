@@ -1,4 +1,4 @@
-#include "common.h"
+﻿#include "common.h"
 
 #include "RoadBlocks.h"
 #include "PathFind.h"
@@ -110,7 +110,7 @@ CRoadBlocks::GenerateRoadBlocks(void)
 		return;
 #endif
 	CMatrix offsetMatrix;
-	uint32 frame = CTimer::GetFrameCounter() & 0xF;
+	uint32 frame = CTimer::GetTickCounter() & 0xF;
 	int16 nRoadblockNode = (int16)(NUMROADBLOCKS * frame) / 16;
 	const int16 maxRoadBlocks = (int16)(NUMROADBLOCKS * (frame + 1)) / 16;
 	for (; nRoadblockNode < Min(NumRoadBlocks, maxRoadBlocks); nRoadblockNode++) {
@@ -163,7 +163,7 @@ CRoadBlocks::GenerateRoadBlocks(void)
 							pVehicle->SetStatus(STATUS_ABANDONED);
 							// pVehicle->GetHeightAboveRoad(); // called but return value is ignored?
 							vehicleMatrix.GetPosition().z += fModelRadius - 0.6f;
-							pVehicle->m_matrix = vehicleMatrix;
+							pVehicle->m_matrix.save(vehicleMatrix);
 							pVehicle->PlaceOnRoadProperly();
 							pVehicle->SetIsStatic(false);
 							pVehicle->m_matrix.UpdateRW();

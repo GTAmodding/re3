@@ -1,4 +1,4 @@
-#include "common.h"
+﻿#include "common.h"
 
 #include "main.h"
 #include "Darkel.h"
@@ -105,7 +105,7 @@ CDarkel::DrawMessages()
 				uint32 timeLeft = CDarkel::TimeLimit - (CTimer::GetTimeInMilliseconds() - CDarkel::TimeOfFrenzyStart);
 				sprintf(gString, "%d:%02d", timeLeft / 60000, timeLeft % 60000 / 1000);
 				AsciiToUnicode(gString, gUString);
-				if (timeLeft > 4000 || CTimer::GetFrameCounter() & 1) {
+				if (timeLeft > 4000 || CTimer::GetTickCounter() & 1) {
 					CFont::SetColor(CRGBA(0, 0, 0, 255));
 					CFont::PrintString(SCREEN_SCALE_FROM_RIGHT(35.0f), SCREEN_SCALE_Y(109.0f), gUString);
 					CFont::SetColor(CRGBA(150, 100, 255, 255));

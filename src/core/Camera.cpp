@@ -1,4 +1,4 @@
-#include "common.h"
+﻿#include "common.h"
 
 #include "main.h"
 #include "Draw.h"
@@ -99,7 +99,7 @@ CCamera::Init(void)
 	
 	#ifdef FIX_BUGS
 		static const CCamera DummyCamera = CCamera(0.f);
-		*this = DummyCamera;
+		//*this = DummyCamera;
 	#else
 		memset(this, 0, sizeof(CCamera));	// getting rid of vtable, eh?
 	#endif
@@ -1805,7 +1805,7 @@ CCamera::UpdateSoundDistances(void)
 		center = GetPosition() + 5.0f*GetForward();
 
 	// check up
-	n = CTimer::GetFrameCounter() % 12;
+	n = CTimer::GetTickCounter() % 12;
 	if(n == 0){
 		SoundDistUpAsReadOld = SoundDistUpAsRead;
 		if(CWorld::ProcessVerticalLine(center, center.z+SOUND_DIST, colPoint, entity, true, false, false, false, true, false, nil))
@@ -1817,7 +1817,7 @@ CCamera::UpdateSoundDistances(void)
 	SoundDistUp = (1.0f-f)*SoundDistUpAsReadOld + f*SoundDistUpAsRead;
 
 	// check left
-	n = (CTimer::GetFrameCounter()+2) % 12;
+	n = (CTimer::GetTickCounter()+2) % 12;
 	if(n == 0){
 		SoundDistLeftAsReadOld = SoundDistLeftAsRead;
 		end = center + SOUND_DIST*GetRight();
@@ -1831,7 +1831,7 @@ CCamera::UpdateSoundDistances(void)
 
 	// check right
 	// end = center - SOUND_DIST*GetRight();	// useless
-	n = (CTimer::GetFrameCounter()+4) % 12;
+	n = (CTimer::GetTickCounter()+4) % 12;
 	if(n == 0){
 		SoundDistRightAsReadOld = SoundDistRightAsRead;
 		end = center - SOUND_DIST*GetRight();
@@ -3584,7 +3584,7 @@ CCamera::SetRwCamera(RwCamera *cam)
 void
 CCamera::CalculateDerivedValues(void)
 {
-	m_cameraMatrix = Invert(m_matrix);
+	m_cameraMatrix.save(Invert(m_matrix));
 
 	float hfov = DEGTORAD(CDraw::GetScaledFOV()/2.0f);
 	float c = Cos(hfov);

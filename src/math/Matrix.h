@@ -1,9 +1,10 @@
-#pragma once
+﻿#pragma once
 
 class CMatrix
 {
 public:
 	RwMatrix m_matrix;
+	RwMatrix m_matrix_old;
 	RwMatrix *m_attachment;
 	bool m_hasRwMatrix;	// are we the owner?
 
@@ -21,14 +22,26 @@ public:
 	void Detach(void);
 	void Update(void);
 	void UpdateRW(void);
+	void UpdateRWInterPolated();
 	void operator=(CMatrix const &rhs);
+	void save(CMatrix const &rhs);
 	CMatrix &operator+=(CMatrix const &rhs);
 	CMatrix &operator*=(CMatrix const &rhs);
 
-	CVector &GetPosition(void){ return *(CVector*)&m_matrix.pos; }
-	CVector &GetRight(void) { return *(CVector*)&m_matrix.right; }
-	CVector &GetForward(void) { return *(CVector*)&m_matrix.up; }
-	CVector &GetUp(void) { return *(CVector*)&m_matrix.at; }
+	void SaveOldMatrix();
+	RwMatrix CreateMatrixInterpolated();
+
+	CVector &GetPosition(void) { return *(CVector *)&m_matrix.pos; }
+	CVector &GetRight(void) { return *(CVector *)&m_matrix.right; }
+	CVector &GetForward(void) { return *(CVector *)&m_matrix.up; }
+	CVector &GetUp(void) { return *(CVector *)&m_matrix.at; }
+
+    
+	CVector &GetPositionInterpolated(void); // we assume that matrix was interpolated and updated earlier
+	CVector &GetRightInterpolated(void);    // also here
+	CVector &GetForwardInterpolated(void);  // also here
+	CVector &GetUpInterpolated(void);       // also here
+    RwMatrix &GetMatrixInterpolated(void);       // also here
 
 	void SetTranslate(float x, float y, float z);
 	void SetTranslate(const CVector &trans){ SetTranslate(trans.x, trans.y, trans.z); }
@@ -81,7 +94,7 @@ public:
 	void RotateY(float y);
 	void RotateZ(float z);
 
-	void Reorthogonalise(void);
+	void Reorthogonalise(void) const;
 	void CopyOnlyMatrix(CMatrix *other);
 	void SetUnity(void);
 	void ResetOrientation(void);
@@ -109,7 +122,10 @@ inline CVector MultiplyInverse(const CMatrix &mat, const CVector &vec)
 		mat.m_matrix.at.x * v.x + mat.m_matrix.at.y * v.y + mat.m_matrix.at.z * v.z);
 }
 
-
+RwMatrix Mult(const RwMatrix &src1_, const RwMatrix &src2_);
+RwMatrix CreateMatrixWithScale(float s);
+RwMatrix Add(const RwMatrix &m1, const RwMatrix &m2);
+RwMatrix InterpolateMatrix(RwMatrix &prev, RwMatrix &now, float t);
 
 class CCompressedMatrixNotAligned
 {
@@ -121,7 +137,7 @@ class CCompressedMatrixNotAligned
 	int8 m_upY;
 	int8 m_upZ;
 public:
-	void CompressFromFullMatrix(CMatrix &other);
+	void CompressFromFullMatrix(CMatrix other);
 	void DecompressIntoFullMatrix(CMatrix &other);
 };
 

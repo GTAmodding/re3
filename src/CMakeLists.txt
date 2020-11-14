@@ -13,6 +13,7 @@ MACRO(HEADER_DIRECTORIES return_list)
     FILE(GLOB_RECURSE new_list *.cpp)
     SET(dir_list "animation"
             "audio"
+            "collision"
             "control"
             "core"
             "entities"

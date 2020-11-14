@@ -1,7 +1,6 @@
 #include "common.h"
 
 #include "TempColModels.h"
-#include "SurfaceTable.h"
 
 CColModel CTempColModels::ms_colModelPed1;
 CColModel CTempColModels::ms_colModelPed2;
@@ -45,13 +44,13 @@ CTempColModels::Initialise(void)
 
 	int i;
 
-	ms_colModelBBox.boundingSphere.Set(2.0f, CVector(0.0f, 0.0f, 0.0f), SURFACE_DEFAULT, 0);
-	ms_colModelBBox.boundingBox.Set(CVector(-2.0f, -2.0f, -2.0f), CVector(2.0f, 2.0f, 2.0f), SURFACE_DEFAULT, 0);
+	ms_colModelBBox.boundingSphere.Set(2.0f, CVector(0.0f, 0.0f, 0.0f));
+	ms_colModelBBox.boundingBox.Set(CVector(-2.0f, -2.0f, -2.0f), CVector(2.0f, 2.0f, 2.0f));
 	ms_colModelBBox.level = LEVEL_GENERIC;
 
 	for (i = 0; i < ARRAY_SIZE(ms_colModelCutObj); i++) {
-		ms_colModelCutObj[i].boundingSphere.Set(2.0f, CVector(0.0f, 0.0f, 0.0f), SURFACE_DEFAULT, 0);
-		ms_colModelCutObj[i].boundingBox.Set(CVector(-2.0f, -2.0f, -2.0f), CVector(2.0f, 2.0f, 2.0f), SURFACE_DEFAULT, 0);
+		ms_colModelCutObj[i].boundingSphere.Set(2.0f, CVector(0.0f, 0.0f, 0.0f));
+		ms_colModelCutObj[i].boundingBox.Set(CVector(-2.0f, -2.0f, -2.0f), CVector(2.0f, 2.0f, 2.0f));
 		ms_colModelCutObj[i].level = LEVEL_GENERIC;
 	}
 
@@ -73,8 +72,8 @@ CTempColModels::Initialise(void)
 		s_aPedSpheres[i].piece = 0;
 	}
 
-	ms_colModelPed1.boundingSphere.Set(1.25f, CVector(0.0f, 0.0f, 0.0f), SURFACE_DEFAULT, 0);
-	ms_colModelPed1.boundingBox.Set(CVector(-0.35f, -0.35f, -1.0f), CVector(0.35f, 0.35f, 0.9f), SURFACE_DEFAULT, 0);
+	ms_colModelPed1.boundingSphere.Set(1.25f, CVector(0.0f, 0.0f, 0.0f));
+	ms_colModelPed1.boundingBox.Set(CVector(-0.35f, -0.35f, -1.0f), CVector(0.35f, 0.35f, 0.9f));
 	SET_COLMODEL_SPHERES(ms_colModelPed1, s_aPedSpheres);
 
 	// Ped 2 Spheres
@@ -92,8 +91,8 @@ CTempColModels::Initialise(void)
 		s_aPed2Spheres[i].piece = 0;
 	}
 
-	ms_colModelPed2.boundingSphere.Set(2.0f, CVector(0.0f, 0.0f, 0.0f), SURFACE_DEFAULT, 0);
-	ms_colModelPed2.boundingBox.Set(CVector(-0.7f, -0.7f, -1.2f), CVector(0.7f, 0.7f, 0.0f), SURFACE_DEFAULT, 0);
+	ms_colModelPed2.boundingSphere.Set(2.0f, CVector(0.0f, 0.0f, 0.0f));
+	ms_colModelPed2.boundingBox.Set(CVector(-0.7f, -0.7f, -1.2f), CVector(0.7f, 0.7f, 0.0f));
 
 	SET_COLMODEL_SPHERES(ms_colModelPed2, s_aPed2Spheres);
 
@@ -118,8 +117,8 @@ CTempColModels::Initialise(void)
 	s_aPedGSpheres[2].piece = 0;
 	s_aPedGSpheres[3].piece = 6;
 
-	ms_colModelPedGroundHit.boundingSphere.Set(2.0f, CVector(0.0f, 0.0f, 0.0f), SURFACE_DEFAULT, 0);
-	ms_colModelPedGroundHit.boundingBox.Set(CVector(-0.4f, -1.0f, -1.25f), CVector(0.4f, 1.2f, -0.5f), SURFACE_DEFAULT, 0);
+	ms_colModelPedGroundHit.boundingSphere.Set(2.0f, CVector(0.0f, 0.0f, 0.0f));
+	ms_colModelPedGroundHit.boundingBox.Set(CVector(-0.4f, -1.0f, -1.25f), CVector(0.4f, 1.2f, -0.5f));
 
 	SET_COLMODEL_SPHERES(ms_colModelPedGroundHit, s_aPedGSpheres);
 
@@ -142,8 +141,8 @@ CTempColModels::Initialise(void)
 		s_aDoorSpheres[i].piece = 0;
 	}
 
-	ms_colModelDoor1.boundingSphere.Set(1.5f, CVector(0.0f, -0.6f, 0.0f), SURFACE_DEFAULT, 0);
-	ms_colModelDoor1.boundingBox.Set(CVector(-0.3f, 0.0f, -0.6f), CVector(0.3f, -1.2f, 0.6f), SURFACE_DEFAULT, 0);
+	ms_colModelDoor1.boundingSphere.Set(1.5f, CVector(0.0f, -0.6f, 0.0f));
+	ms_colModelDoor1.boundingBox.Set(CVector(-0.3f, 0.0f, -0.6f), CVector(0.3f, -1.2f, 0.6f));
 
 	SET_COLMODEL_SPHERES(ms_colModelDoor1, s_aDoorSpheres);
 
@@ -162,8 +161,8 @@ CTempColModels::Initialise(void)
 		s_aBumperSpheres[i].piece = 0;
 	}
 
-	ms_colModelBumper1.boundingSphere.Set(2.2f, CVector(0.0f, -0.6f, 0.0f), SURFACE_DEFAULT, 0);
-	ms_colModelBumper1.boundingBox.Set(CVector(-1.2f, -0.3f, -0.2f), CVector(1.2f, 0.3f, 0.2f), SURFACE_DEFAULT, 0);
+	ms_colModelBumper1.boundingSphere.Set(2.2f, CVector(0.0f, -0.6f, 0.0f));
+	ms_colModelBumper1.boundingBox.Set(CVector(-1.2f, -0.3f, -0.2f), CVector(1.2f, 0.3f, 0.2f));
 
 	SET_COLMODEL_SPHERES(ms_colModelBumper1, s_aBumperSpheres);
 
@@ -182,8 +181,8 @@ CTempColModels::Initialise(void)
 		s_aPanelSpheres[i].piece = 0;
 	}
 
-	ms_colModelPanel1.boundingSphere.Set(1.4f, CVector(0.0f, 0.0f, 0.0f), SURFACE_DEFAULT, 0);
-	ms_colModelPanel1.boundingBox.Set(CVector(-0.3f, -0.6f, -0.15f), CVector(0.3f, 0.6f, 0.15f), SURFACE_DEFAULT, 0);
+	ms_colModelPanel1.boundingSphere.Set(1.4f, CVector(0.0f, 0.0f, 0.0f));
+	ms_colModelPanel1.boundingBox.Set(CVector(-0.3f, -0.6f, -0.15f), CVector(0.3f, 0.6f, 0.15f));
 
 	SET_COLMODEL_SPHERES(ms_colModelPanel1, s_aPanelSpheres);
 
@@ -202,8 +201,8 @@ CTempColModels::Initialise(void)
 		s_aBonnetSpheres[i].piece = 0;
 	}
 
-	ms_colModelBonnet1.boundingSphere.Set(1.7f, CVector(0.0f, 0.5f, 0.0f), SURFACE_DEFAULT, 0);
-	ms_colModelBonnet1.boundingBox.Set(CVector(-0.7f, -0.2f, -0.3f), CVector(0.7f, 1.2f, 0.3f), SURFACE_DEFAULT, 0);
+	ms_colModelBonnet1.boundingSphere.Set(1.7f, CVector(0.0f, 0.5f, 0.0f));
+	ms_colModelBonnet1.boundingBox.Set(CVector(-0.7f, -0.2f, -0.3f), CVector(0.7f, 1.2f, 0.3f));
 
 	SET_COLMODEL_SPHERES(ms_colModelBonnet1, s_aBonnetSpheres);
 
@@ -222,8 +221,8 @@ CTempColModels::Initialise(void)
 		s_aBootSpheres[i].piece = 0;
 	}
 
-	ms_colModelBoot1.boundingSphere.Set(1.4f, CVector(0.0f, -0.4f, 0.0f), SURFACE_DEFAULT, 0);
-	ms_colModelBoot1.boundingBox.Set(CVector(-0.7f, -0.9f, -0.3f), CVector(0.7f, 0.2f, 0.3f), SURFACE_DEFAULT, 0);
+	ms_colModelBoot1.boundingSphere.Set(1.4f, CVector(0.0f, -0.4f, 0.0f));
+	ms_colModelBoot1.boundingBox.Set(CVector(-0.7f, -0.9f, -0.3f), CVector(0.7f, 0.2f, 0.3f));
 
 	SET_COLMODEL_SPHERES(ms_colModelBoot1, s_aBootSpheres);
 
@@ -244,8 +243,8 @@ CTempColModels::Initialise(void)
 		s_aWheelSpheres[i].piece = 0;
 	}
 
-	ms_colModelWheel1.boundingSphere.Set(1.4f, CVector(0.0f, 0.0f, 0.0f), SURFACE_DEFAULT, 0);
-	ms_colModelWheel1.boundingBox.Set(CVector(-0.7f, -0.4f, -0.4f), CVector(0.7f, 0.4f, 0.4f), SURFACE_DEFAULT, 0);
+	ms_colModelWheel1.boundingSphere.Set(1.4f, CVector(0.0f, 0.0f, 0.0f));
+	ms_colModelWheel1.boundingBox.Set(CVector(-0.7f, -0.4f, -0.4f), CVector(0.7f, 0.4f, 0.4f));
 
 	SET_COLMODEL_SPHERES(ms_colModelWheel1, s_aWheelSpheres);
 
@@ -266,8 +265,8 @@ CTempColModels::Initialise(void)
 		s_aBodyPartSpheres1[i].piece = 0;
 	}
 
-	ms_colModelBodyPart1.boundingSphere.Set(0.7f, CVector(0.4f, 0.0f, 0.0f), SURFACE_DEFAULT, 0);
-	ms_colModelBodyPart1.boundingBox.Set(CVector(-0.3f, -0.3f, -0.3f), CVector(1.1f, 0.3f, 0.3f), SURFACE_DEFAULT, 0);
+	ms_colModelBodyPart1.boundingSphere.Set(0.7f, CVector(0.4f, 0.0f, 0.0f));
+	ms_colModelBodyPart1.boundingBox.Set(CVector(-0.3f, -0.3f, -0.3f), CVector(1.1f, 0.3f, 0.3f));
 
 	SET_COLMODEL_SPHERES(ms_colModelBodyPart1, s_aBodyPartSpheres1);
 
@@ -288,8 +287,8 @@ CTempColModels::Initialise(void)
 		s_aBodyPartSpheres2[i].piece = 0;
 	}
 
-	ms_colModelBodyPart2.boundingSphere.Set(0.5f, CVector(0.25f, 0.0f, 0.0f), SURFACE_DEFAULT, 0);
-	ms_colModelBodyPart2.boundingBox.Set(CVector(-0.2f, -0.2f, -0.2f), CVector(0.7f, 0.2f, 0.2f), SURFACE_DEFAULT, 0);
+	ms_colModelBodyPart2.boundingSphere.Set(0.5f, CVector(0.25f, 0.0f, 0.0f));
+	ms_colModelBodyPart2.boundingBox.Set(CVector(-0.2f, -0.2f, -0.2f), CVector(0.7f, 0.2f, 0.2f));
 
 	SET_COLMODEL_SPHERES(ms_colModelBodyPart2, s_aBodyPartSpheres2);
 

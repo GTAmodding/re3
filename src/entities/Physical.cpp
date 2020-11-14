@@ -572,7 +572,7 @@ CPhysical::ApplyCollision(CPhysical *B, CColPoint &colpoint, float &impulseA, fl
 						if(IsGlass(B->GetModelIndex()))
 							CGlass::WindowRespondsToSoftCollision(B, impulseA);
 						if(!A->bInfiniteMass)
-							A->ApplyMoveForce(colpoint.normal*(1.0f + A->m_fElasticity)*impulseA);
+							A->ApplyMoveForce(colpoint.GetNormal() * (1.0f + A->m_fElasticity) * impulseA);
 						return true;
 					}
 				}else if(!B->bInfiniteMass)
@@ -624,7 +624,7 @@ CPhysical::ApplyCollision(CPhysical *B, CColPoint &colpoint, float &impulseA, fl
 					}else{
 						if(IsGlass(B->GetModelIndex()))
 							CGlass::WindowRespondsToSoftCollision(B, impulseA);
-						CVector f = colpoint.normal * impulseA;
+						CVector f = colpoint.GetNormal() * impulseA;
 						if(A->IsVehicle() && colpoint.normal.z < 0.7f)
 							f.z *= 0.3f;
 						if(!A->bInfiniteMass){
@@ -1146,43 +1146,43 @@ CPhysical::ProcessShiftSectorList(CPtrList *lists)
 
 			mostColliding = 0;
 			for(j = 1; j < numCollisions; j++)
-				if(colpoints[j].depth > colpoints[mostColliding].depth)
+				if (colpoints[j].GetDepth() > colpoints[mostColliding].GetDepth())
 					mostColliding = j;
 
 			if(CWorld::bSecondShift)
 				for(j = 0; j < numCollisions; j++)
-					shift += colpoints[j].normal * colpoints[j].depth * 1.5f/numCollisions;
+					shift += colpoints[j].GetNormal() * colpoints[j].GetDepth() * 1.5f / numCollisions;
 			else
 				for(j = 0; j < numCollisions; j++)
-					shift += colpoints[j].normal * colpoints[j].depth * 1.2f/numCollisions;
+					shift += colpoints[j].GetNormal() * colpoints[j].GetDepth() * 1.2f / numCollisions;
 
 			if(A->IsVehicle() && B->IsVehicle()){
 				CVector dir = A->GetPosition() - B->GetPosition();
 				dir.Normalise();
 				if(dir.z < 0.0f && dir.z < A->GetForward().z && dir.z < A->GetRight().z)
 					dir.z = Min(0.0f, Min(A->GetForward().z, A->GetRight().z));
-				shift += dir * colpoints[mostColliding].depth * 0.5f;
+				shift += dir * colpoints[mostColliding].GetDepth() * 0.5f;
 			}else if(A->IsPed() && B->IsVehicle() && ((CVehicle*)B)->IsBoat()){
-				CVector dir = colpoints[mostColliding].normal;
+				CVector dir = colpoints[mostColliding].GetNormal();
 				float f = Min(Abs(dir.z), 0.9f);
 				dir.z = 0.0f;
 				dir.Normalise();
-				shift += dir * colpoints[mostColliding].depth / (1.0f - f);
+				shift += dir * colpoints[mostColliding].GetDepth() / (1.0f - f);
 				boat = B;
 			}else if(B->IsPed() && A->IsVehicle() && ((CVehicle*)A)->IsBoat()){
-				CVector dir = colpoints[mostColliding].normal * -1.0f;
+				CVector dir = colpoints[mostColliding].GetNormal() * -1.0f;
 				float f = Min(Abs(dir.z), 0.9f);
 				dir.z = 0.0f;
 				dir.Normalise();
-				B->GetMatrix().Translate(dir * colpoints[mostColliding].depth / (1.0f - f));
+				B->GetMatrix().Translate(dir * colpoints[mostColliding].GetDepth() / (1.0f - f));
 				// BUG? how can that ever happen? A is a Ped
 				if(B->IsVehicle())
 					B->ProcessEntityCollision(A, colpoints);
 			}else{
 				if(CWorld::bSecondShift)
-					shift += colpoints[mostColliding].normal * colpoints[mostColliding].depth * 0.4f;
+					shift += colpoints[mostColliding].GetNormal() * colpoints[mostColliding].GetDepth() * 0.4f;
 				else
-					shift += colpoints[mostColliding].normal * colpoints[mostColliding].depth * 0.2f;
+					shift += colpoints[mostColliding].GetNormal() * colpoints[mostColliding].GetDepth() * 0.2f;
 			}
 
 			doShift = true;

@@ -1,0 +1,5 @@
+#!/bin/sh
+set +e
+(cd $SNAP_USER_COMMON/GTAIII; re3)
+(cd $SNAP_COMMON/GTAIII; re3)
+

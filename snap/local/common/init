@@ -1,0 +1,76 @@
+#################
+# Launcher init #
+#################
+
+START=$(date +%s.%N)
+
+declare -A PIDS
+function async_exec() {
+  $@ &
+  PIDS[$!]=$@
+}
+function wait_for_async_execs() {
+  for i in ${!PIDS[@]}
+  do
+    wait $i && continue || echo "ERROR: ${PIDS[$i]} exited abnormally with status $?"
+  done
+}
+
+# ensure_dir_exists calls `mkdir -p` if the given path is not a directory.
+# This speeds up execution time by avoiding unnecessary calls to mkdir.
+#
+# Usage: ensure_dir_exists <path> [<mkdir-options>]...
+#
+function ensure_dir_exists() {
+  [ -d "$1" ] ||  mkdir -p "$@"
+}
+
+# On Fedora $SNAP is under /var and there is some magic to map it to /snap.
+# # We need to handle that case and reset $SNAP
+SNAP=`echo $SNAP | sed -e "s|/var/lib/snapd||g"`
+
+needs_update=true
+
+. $SNAP_USER_DATA/.last_revision 2>/dev/null || true
+if [ "$SNAP_DESKTOP_LAST_REVISION" = "$SNAP_REVISION" ]; then
+  needs_update=false
+fi
+
+# Set $REALHOME to the users real home directory
+REALHOME=`getent passwd $UID | cut -d ':' -f 6`
+
+# Set config folder to local path
+export XDG_CONFIG_HOME=$SNAP_USER_DATA/.config
+ensure_dir_exists $XDG_CONFIG_HOME -m 700
+
+# If the user has modified their user-dirs settings, force an update
+if [[ -f "$XDG_CONFIG_HOME/user-dirs.dirs.md5sum" ]]; then
+  if [[ "$(md5sum < "$REALHOME/.config/user-dirs.dirs")" != "$(cat "$XDG_CONFIG_HOME/user-dirs.dirs.md5sum")" ||
+        ( -f "$XDG_CONFIG_HOME/user-dirs.locale.md5sum" &&
+          "$(md5sum < "$REALHOME/.config/user-dirs.locale")" != "$(cat "$XDG_CONFIG_HOME/user-dirs.locale.md5sum")" ) ]]; then
+    needs_update=true
+  fi
+else
+  needs_update=true
+fi
+
+if [ "$SNAP_ARCH" == "amd64" ]; then
+  ARCH="x86_64-linux-gnu"
+elif [ "$SNAP_ARCH" == "armhf" ]; then
+  ARCH="arm-linux-gnueabihf"
+elif [ "$SNAP_ARCH" == "arm64" ]; then
+  ARCH="aarch64-linux-gnu"
+elif [ "$SNAP_ARCH" == "ppc64el" ]; then
+  ARCH="powerpc64le-linux-gnu"
+else
+  ARCH="$SNAP_ARCH-linux-gnu"
+fi
+
+export SNAP_LAUNCHER_ARCH_TRIPLET=$ARCH
+
+# Don't LD_PRELOAD bindtextdomain for classic snaps
+if ! grep -qs "^\s*confinement:\s*classic\s*" $SNAP/meta/snap.yaml; then
+  if [ -f $SNAP/lib/bindtextdomain.so ]; then
+    export LD_PRELOAD=$LD_PRELOAD:$SNAP/lib/bindtextdomain.so
+  fi
+fi

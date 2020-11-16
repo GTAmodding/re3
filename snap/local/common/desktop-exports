@@ -1,0 +1,443 @@
+###############################################
+# Launcher common exports for any desktop app #
+###############################################
+
+function prepend_dir() {
+  local var="$1"
+  local dir="$2"
+  if [ -d "$dir" ]; then
+    eval "export $var=\"\$dir\${$var:+:\$$var}\""
+  fi
+}
+
+function append_dir() {
+  local var="$1"
+  local dir="$2"
+  if [ -d "$dir" ]; then
+    eval "export $var=\"\${$var:+\$$var:}\$dir\""
+  fi
+}
+
+function can_open_file() {
+  return `head -c0 "$1" &> /dev/null`;
+}
+
+function update_xdg_dirs_values() {
+  local save_initial_values=false
+  local XDG_DIRS="DOCUMENTS DESKTOP DOWNLOAD MUSIC PICTURES VIDEOS PUBLICSHARE TEMPLATES"
+  unset XDG_SPECIAL_DIRS_PATHS
+
+  if [ -f "${XDG_CONFIG_HOME:-$HOME/.config}/user-dirs.dirs" ]; then
+    source "${XDG_CONFIG_HOME:-$HOME/.config}/user-dirs.dirs"
+  fi
+
+  if [ -z ${XDG_SPECIAL_DIRS+x} ]; then
+    save_initial_values=true
+  fi
+
+  for d in $XDG_DIRS; do
+    var="XDG_${d}_DIR"
+    value="$(eval echo $(echo \$${var}))"
+
+    if [ "$save_initial_values" = true ]; then
+      XDG_SPECIAL_DIRS+=("$var")
+      XDG_SPECIAL_DIRS_INITIAL_PATHS+=("$value")
+    fi
+
+    XDG_SPECIAL_DIRS_PATHS+=("$value")
+  done
+}
+
+function is_subpath() {
+  dir=$(realpath $1)
+  parent=$(realpath $2)
+  [ "${dir##$parent/}" != "$dir" ] && return 0 || return 1
+}
+
+WITH_RUNTIME=no
+if [ -z "$RUNTIME" ]; then
+  RUNTIME=$SNAP
+else
+  # add general paths not added by snapcraft due to runtime snap
+  append_dir LD_LIBRARY_PATH $RUNTIME/lib/$ARCH
+  append_dir LD_LIBRARY_PATH $RUNTIME/usr/lib
+  append_dir LD_LIBRARY_PATH $RUNTIME/usr/lib/$ARCH
+  append_dir PATH $RUNTIME/usr/bin
+  WITH_RUNTIME=yes
+fi
+
+# XKB config
+export XKB_CONFIG_ROOT=$RUNTIME/usr/share/X11/xkb
+
+# Give XOpenIM a chance to locate locale data.
+# This is required for text input to work in SDL2 games.
+export XLOCALEDIR=$RUNTIME/usr/share/X11/locale
+
+# Set XCursors path
+export XCURSOR_PATH=$RUNTIME/usr/share/icons
+prepend_dir XCURSOR_PATH $SNAP/data-dir/icons
+
+# Mesa Libs for OpenGL support
+append_dir LD_LIBRARY_PATH $RUNTIME/usr/lib/$ARCH/mesa
+append_dir LD_LIBRARY_PATH $RUNTIME/usr/lib/$ARCH/mesa-egl
+
+# Tell libGL and libva where to find the drivers
+export LIBGL_DRIVERS_PATH=$RUNTIME/usr/lib/$ARCH/dri
+append_dir LD_LIBRARY_PATH $LIBGL_DRIVERS_PATH
+export LIBVA_DRIVERS_PATH=$RUNTIME/usr/lib/$ARCH/dri
+
+# Unity7 export (workaround for https://launchpad.net/bugs/1638405)
+append_dir LD_LIBRARY_PATH $RUNTIME/usr/lib/$ARCH/libunity
+
+# Pulseaudio export
+append_dir LD_LIBRARY_PATH $RUNTIME/usr/lib/$ARCH/pulseaudio
+
+# EGL vendor files on glvnd enabled systems
+[ -d /var/lib/snapd/lib/glvnd/egl_vendor.d ] && \
+    prepend_dir __EGL_VENDOR_LIBRARY_DIRS /var/lib/snapd/lib/glvnd/egl_vendor.d
+
+# EGL vendor files
+append_dir __EGL_VENDOR_LIBRARY_DIRS $RUNTIME/etc/glvnd/egl_vendor.d
+append_dir __EGL_VENDOR_LIBRARY_DIRS $RUNTIME/usr/share/glvnd/egl_vendor.d
+
+# Tell GStreamer where to find its plugins
+export GST_PLUGIN_PATH=$SNAP/usr/lib/$ARCH/gstreamer-1.0
+export GST_PLUGIN_SYSTEM_PATH=$RUNTIME/usr/lib/$ARCH/gstreamer-1.0
+# gst plugin scanner doesn't install in the correct path: https://github.com/ubuntu/snapcraft-desktop-helpers/issues/43
+export GST_PLUGIN_SCANNER=$RUNTIME/usr/lib/$ARCH/gstreamer1.0/gstreamer-1.0/gst-plugin-scanner
+
+# XDG Config
+[ "$WITH_RUNTIME" = yes ] && prepend_dir XDG_CONFIG_DIRS $RUNTIME/etc/xdg
+prepend_dir XDG_CONFIG_DIRS $SNAP/etc/xdg
+
+# Define snaps' own data dir
+[ "$WITH_RUNTIME" = yes ] && prepend_dir XDG_DATA_DIRS $RUNTIME/usr/share
+prepend_dir XDG_DATA_DIRS $SNAP/usr/share
+prepend_dir XDG_DATA_DIRS $SNAP/share
+prepend_dir XDG_DATA_DIRS $SNAP/data-dir
+prepend_dir XDG_DATA_DIRS $SNAP_USER_DATA
+
+# Set XDG_DATA_HOME to local path
+export XDG_DATA_HOME=$SNAP_USER_DATA/.local/share
+ensure_dir_exists $XDG_DATA_HOME
+
+# Workaround for GLib < 2.53.2 not searching for schemas in $XDG_DATA_HOME:
+#   https://bugzilla.gnome.org/show_bug.cgi?id=741335
+prepend_dir XDG_DATA_DIRS $XDG_DATA_HOME
+
+# Set cache folder to local path
+export XDG_CACHE_HOME=$SNAP_USER_COMMON/.cache
+if [[ -d $SNAP_USER_DATA/.cache && ! -e $XDG_CACHE_HOME ]]; then
+  # the .cache directory used to be stored under $SNAP_USER_DATA, migrate it
+  mv $SNAP_USER_DATA/.cache $SNAP_USER_COMMON/
+fi
+ensure_dir_exists $XDG_CACHE_HOME
+
+# Create $XDG_RUNTIME_DIR if not exists (to be removed when LP: #1656340 is fixed)
+ensure_dir_exists $XDG_RUNTIME_DIR -m 700
+
+# Ensure the app finds locale definitions (requires locales-all to be installed)
+append_dir LOCPATH $RUNTIME/usr/lib/locale
+
+# If any, keep track of where XDG dirs were so we can potentially migrate the content later
+update_xdg_dirs_values
+
+# Setup user-dirs.* or run xdg-user-dirs-update if needed
+needs_xdg_update=false
+needs_xdg_reload=false
+needs_xdg_links=false
+
+if [ "$HOME" != "$SNAP_USER_DATA" ] && ! is_subpath "$XDG_CONFIG_HOME" "$HOME"; then
+  for f in user-dirs.dirs user-dirs.locale; do
+    if [ -f "$HOME/.config/$f" ]; then
+      mv "$HOME/.config/$f" "$XDG_CONFIG_HOME"
+      needs_xdg_reload=true
+    fi
+  done
+fi
+
+if can_open_file "$REALHOME/.config/user-dirs.dirs"; then
+  # shellcheck disable=SC2154
+  if [ "$needs_update" = true ] || [ "$needs_xdg_reload" = true ]; then
+    sed "/^#/!s#\$HOME#${REALHOME}#g" "$REALHOME/.config/user-dirs.dirs" > "$XDG_CONFIG_HOME/user-dirs.dirs"
+    md5sum < "$REALHOME/.config/user-dirs.dirs" > "$XDG_CONFIG_HOME/user-dirs.dirs.md5sum"
+    # It's possible user-dirs.dirs exists when user-dirs.locale doesn't. This
+    # simply means the user opted to never ask to translate their user dirs
+    if can_open_file "$REALHOME/.config/user-dirs.locale"; then
+      cp -a "$REALHOME/.config/user-dirs.locale" "$XDG_CONFIG_HOME"
+      md5sum < "$REALHOME/.config/user-dirs.locale" > "$XDG_CONFIG_HOME/user-dirs.locale.md5sum"
+    elif [ -f "$XDG_CONFIG_HOME/user-dirs.locale.md5sum" ]; then
+      rm "$XDG_CONFIG_HOME/user-dirs.locale.md5sum"
+    fi
+    needs_xdg_reload=true
+  fi
+else
+  needs_xdg_update=true
+  needs_xdg_links=true
+fi
+
+if [ $needs_xdg_reload = true ]; then
+  update_xdg_dirs_values
+  needs_xdg_reload=false
+fi
+
+# Check if we can actually read the contents of each xdg dir
+for ((i = 0; i < ${#XDG_SPECIAL_DIRS_PATHS[@]}; i++)); do
+  if ! can_open_file "${XDG_SPECIAL_DIRS_PATHS[$i]}"; then
+    needs_xdg_update=true
+    needs_xdg_links=true
+    break
+  fi
+done
+
+# If needs XDG update and xdg-user-dirs-update exists in $PATH, run it
+if [ $needs_xdg_update = true ] && command -v xdg-user-dirs-update >/dev/null; then
+  xdg-user-dirs-update
+  update_xdg_dirs_values
+fi
+
+# Create links for user-dirs.dirs
+if [ $needs_xdg_links = true ]; then
+  for ((i = 0; i < ${#XDG_SPECIAL_DIRS_PATHS[@]}; i++)); do
+    b=$(realpath "${XDG_SPECIAL_DIRS_PATHS[$i]}" --relative-to="$HOME")
+    if [[ "$b" != "." && -e $REALHOME/$b ]]; then
+      [ -d $HOME/$b ] && rmdir $HOME/$b 2> /dev/null
+      [ ! -e $HOME/$b ] && ln -s $REALHOME/$b $HOME/$b
+    fi
+  done
+else
+  # If we aren't creating new links, check if we have content saved in old locations and move it
+  for ((i = 0; i < ${#XDG_SPECIAL_DIRS[@]}; i++)); do
+    old="${XDG_SPECIAL_DIRS_INITIAL_PATHS[$i]}"
+    new="${XDG_SPECIAL_DIRS_PATHS[$i]}"
+    if [ -L "$old" ] && [ -d "$new" ] && [ `readlink "$old"` != "$new" ]; then
+      mv -vn "$old"/* "$new"/ 2>/dev/null
+    elif [ -d "$old" ] && [ -d "$new" ] && [ "$old" != "$new" ] &&
+         (is_subpath "$old" "$SNAP_USER_DATA" || is_subpath "$old" "$SNAP_USER_COMMON"); then
+      mv -vn "$old"/* "$new"/ 2>/dev/null
+    fi
+  done
+fi
+
+# If detect wayland server socket, then set environment so applications prefer
+# wayland, and setup compat symlink (until we use user mounts. Remember,
+# XDG_RUNTIME_DIR is /run/user/<uid>/snap.$SNAP so look in the parent directory
+# for the socket. For details:
+# https://forum.snapcraft.io/t/wayland-dconf-and-xdg-runtime-dir/186/10
+# Applications that don't support wayland natively may define DISABLE_WAYLAND
+# (to any non-empty value) to skip that logic entirely.
+wayland_available=false
+if [[ -n "$XDG_RUNTIME_DIR" && -z "$DISABLE_WAYLAND" ]]; then
+    wdisplay="wayland-0"
+    if [ -n "$WAYLAND_DISPLAY" ]; then
+        wdisplay="$WAYLAND_DISPLAY"
+    fi
+    wayland_sockpath="$XDG_RUNTIME_DIR/../$wdisplay"
+    wayland_snappath="$XDG_RUNTIME_DIR/$wdisplay"
+    if [ -S "$wayland_sockpath" ]; then
+        # if running under wayland, use it
+        #export WAYLAND_DEBUG=1
+        wayland_available=true
+        # create the compat symlink for now
+        if [ ! -e "$wayland_snappath" ]; then
+            ln -s "$wayland_sockpath" "$wayland_snappath"
+        fi
+    fi
+fi
+
+# Make PulseAudio socket available inside the snap-specific $XDG_RUNTIME_DIR
+if [ -n "$XDG_RUNTIME_DIR" ]; then
+    pulsenative="pulse/native"
+    pulseaudio_sockpath="$XDG_RUNTIME_DIR/../$pulsenative"
+    if [ -S "$pulseaudio_sockpath" ]; then
+        export PULSE_SERVER="unix:${pulseaudio_sockpath}"
+    fi
+fi
+
+# GI repository
+[ "$WITH_RUNTIME" = yes ] && prepend_dir GI_TYPELIB_PATH $RUNTIME/usr/lib/$ARCH/girepository-1.0
+[ "$WITH_RUNTIME" = yes ] && prepend_dir GI_TYPELIB_PATH $RUNTIME/usr/lib/girepository-1.0
+prepend_dir GI_TYPELIB_PATH $SNAP/usr/lib/$ARCH/girepository-1.0
+prepend_dir GI_TYPELIB_PATH $SNAP/usr/lib/girepository-1.0
+prepend_dir GI_TYPELIB_PATH $SNAP/usr/lib/gjs/girepository-1.0
+
+# Keep an array of data dirs, for looping through them
+IFS=':' read -r -a data_dirs_array <<< "$XDG_DATA_DIRS"
+
+# Font Config and themes
+export FONTCONFIG_PATH=$RUNTIME/etc/fonts
+export FONTCONFIG_FILE=$RUNTIME/etc/fonts/fonts.conf
+
+function make_user_fontconfig {
+  echo "<fontconfig>"
+  if [ -d $REALHOME/.local/share/fonts ]; then
+    echo "  <dir>$REALHOME/.local/share/fonts</dir>"
+  fi
+  if [ -d $REALHOME/.fonts ]; then
+    echo "  <dir>$REALHOME/.fonts</dir>"
+  fi
+  for ((i = 0; i < ${#data_dirs_array[@]}; i++)); do
+    if [ -d "${data_dirs_array[$i]}/fonts" ]; then
+      echo "  <dir>${data_dirs_array[$i]}/fonts</dir>"
+    fi
+  done
+  echo '  <include ignore_missing="yes">conf.d</include>'
+  # We need to include this default cachedir first so that caching
+  # works: without it, fontconfig will try to write to the real user home
+  # cachedir and be blocked by AppArmor.
+  echo '  <cachedir prefix="xdg">fontconfig</cachedir>'
+  if [ -d $REALHOME/.cache/fontconfig ]; then
+    echo "  <cachedir>$REALHOME/.cache/fontconfig</cachedir>"
+  fi
+  echo "</fontconfig>"
+}
+
+if [ $needs_update = true ]; then
+  rm -rf $XDG_DATA_HOME/{fontconfig,fonts,fonts-*,themes,.themes}
+
+  # This fontconfig fragment is installed in a location that is
+  # included by the system fontconfig configuration: namely the
+  # etc/fonts/conf.d/50-user.conf file.
+  ensure_dir_exists $XDG_CONFIG_HOME/fontconfig
+  async_exec make_user_fontconfig > $XDG_CONFIG_HOME/fontconfig/fonts.conf
+
+  # the themes symlink are needed for GTK 3.18 when the prefix isn't changed
+  # GTK 3.20 looks into XDG_DATA_DIR which has connected themes.
+  if [ -d $SNAP/data-dir/themes ]; then
+    ln -sf $SNAP/data-dir/themes $XDG_DATA_HOME
+    ln -sfn $SNAP/data-dir/themes $SNAP_USER_DATA/.themes
+  else
+    ln -sf $RUNTIME/usr/share/themes $XDG_DATA_HOME
+    ln -sfn $RUNTIME/usr/share/themes $SNAP_USER_DATA/.themes
+  fi
+fi
+
+# Build mime.cache
+# needed for gtk and qt icon
+if [ $needs_update = true ]; then
+  rm -rf $XDG_DATA_HOME/mime
+  if [ ! -f $RUNTIME/usr/share/mime/mime.cache ]; then
+    if command -v update-mime-database >/dev/null; then
+      cp --preserve=timestamps -dR $RUNTIME/usr/share/mime $XDG_DATA_HOME
+      async_exec update-mime-database $XDG_DATA_HOME/mime
+    fi
+  fi
+fi
+
+# Gio modules and cache (including gsettings module)
+export GIO_MODULE_DIR=$XDG_CACHE_HOME/gio-modules
+function compile_giomodules {
+  if [ -f $1/glib-2.0/gio-querymodules ]; then
+    rm -rf $GIO_MODULE_DIR
+    ensure_dir_exists $GIO_MODULE_DIR
+    ln -s $1/gio/modules/*.so $GIO_MODULE_DIR
+    $1/glib-2.0/gio-querymodules $GIO_MODULE_DIR
+  fi
+}
+if [ $needs_update = true ]; then
+  async_exec compile_giomodules $RUNTIME/usr/lib/$ARCH
+fi
+
+# Setup compiled gsettings schema
+GS_SCHEMA_DIR=$XDG_DATA_HOME/glib-2.0/schemas
+function compile_schemas {
+  if [ -f "$1" ]; then
+    rm -rf $GS_SCHEMA_DIR
+    ensure_dir_exists $GS_SCHEMA_DIR
+    for ((i = 0; i < ${#data_dirs_array[@]}; i++)); do
+      schema_dir="${data_dirs_array[$i]}/glib-2.0/schemas"
+      if [ -f "$schema_dir/gschemas.compiled" ]; then
+        # This directory already has compiled schemas
+        continue
+      fi
+      if [ -n "$(ls -A $schema_dir/*.xml 2>/dev/null)" ]; then
+        ln -s $schema_dir/*.xml $GS_SCHEMA_DIR
+      fi
+      if [ -n "$(ls -A $schema_dir/*.override 2>/dev/null)" ]; then
+        ln -s $schema_dir/*.override $GS_SCHEMA_DIR
+      fi
+    done
+    # Only compile schemas if we copied anyting
+    if [ -n "$(ls -A $GS_SCHEMA_DIR/*.xml $GS_SCHEMA_DIR/*.override 2>/dev/null)" ]; then
+      "$1" $GS_SCHEMA_DIR
+    fi
+  fi
+}
+if [ $needs_update = true ]; then
+  async_exec compile_schemas $RUNTIME/usr/lib/$ARCH/glib-2.0/glib-compile-schemas
+fi
+
+# Enable gsettings user changes
+# symlink the dconf file if home plug is connected for read
+DCONF_DEST_USER_DIR=$SNAP_USER_DATA/.config/dconf
+if [ ! -f $DCONF_DEST_USER_DIR/user ]; then
+  if [ -f $REALHOME/.config/dconf/user ]; then
+    ensure_dir_exists $DCONF_DEST_USER_DIR
+    ln -s $REALHOME/.config/dconf/user $DCONF_DEST_USER_DIR
+  fi
+fi
+# symlink the runtime dconf file as well
+if [ -r $XDG_RUNTIME_DIR/../dconf/user ]; then
+  ensure_dir_exists $XDG_RUNTIME_DIR/dconf
+  ln -sf ../../dconf/user $XDG_RUNTIME_DIR/dconf/user
+fi
+
+# Testability support
+append_dir LD_LIBRARY_PATH $SNAP/testability
+append_dir LD_LIBRARY_PATH $SNAP/testability/$ARCH
+append_dir LD_LIBRARY_PATH $SNAP/testability/$ARCH/mesa
+
+# Gdk-pixbuf loaders
+export GDK_PIXBUF_MODULE_FILE=$XDG_CACHE_HOME/gdk-pixbuf-loaders.cache
+export GDK_PIXBUF_MODULEDIR=$RUNTIME/usr/lib/$ARCH/gdk-pixbuf-2.0/2.10.0/loaders
+if [ $needs_update = true ] || [ ! -f $GDK_PIXBUF_MODULE_FILE ]; then
+  rm -f $GDK_PIXBUF_MODULE_FILE
+  if [ -f $RUNTIME/usr/lib/$ARCH/gdk-pixbuf-2.0/gdk-pixbuf-query-loaders ]; then
+    async_exec $RUNTIME/usr/lib/$ARCH/gdk-pixbuf-2.0/gdk-pixbuf-query-loaders > $GDK_PIXBUF_MODULE_FILE
+  fi
+fi
+
+# Icon themes cache
+if [ $needs_update = true ]; then
+  rm -rf $XDG_DATA_HOME/icons
+  ensure_dir_exists $XDG_DATA_HOME/icons
+  for ((i = 0; i < ${#data_dirs_array[@]}; i++)); do
+    # The runtime and theme content snaps should already contain icon caches
+    # so we skip them to optimise app start time.
+    if [[ "${data_dirs_array[$i]}" == "$SNAP/data-dir" || "${data_dirs_array[$i]}" == "$RUNTIME/"* ]]; then
+      continue
+    fi
+    for theme in "${data_dirs_array[$i]}/icons/"*; do
+      if [ -f "$theme/index.theme" -a ! -f "$theme/icon-theme.cache" ]; then
+        theme_dir=$XDG_DATA_HOME/icons/$(basename "$theme")
+        if [ ! -d "$theme_dir" ]; then
+          ensure_dir_exists "$theme_dir"
+          ln -s $theme/* "$theme_dir"
+          if [ -f $RUNTIME/usr/sbin/update-icon-caches ]; then
+            async_exec $RUNTIME/usr/sbin/update-icon-caches "$theme_dir"
+          elif [ -f $RUNTIME/usr/sbin/update-icon-cache.gtk2 ]; then
+            async_exec $RUNTIME/usr/sbin/update-icon-cache.gtk2 "$theme_dir"
+          fi
+        fi
+      fi
+    done
+  done
+fi
+
+# GTK theme and behavior modifier
+# Those can impact the theme engine used by Qt as well
+gtk_configs=(gtk-3.0/settings.ini gtk-3.0/bookmarks gtk-2.0/gtkfilechooser.ini)
+for f in ${gtk_configs[@]}; do
+  dest="$XDG_CONFIG_HOME/$f"
+  if [ ! -L "$dest" ]; then
+    ensure_dir_exists `dirname $dest`
+    ln -s $REALHOME/.config/$f $dest
+  fi
+done
+
+# create symbolic link to ibus socket path for ibus to look up its socket files
+# (see comments #3 and #6 on https://launchpad.net/bugs/1580463)
+IBUS_CONFIG_PATH=$XDG_CONFIG_HOME/ibus
+ensure_dir_exists $IBUS_CONFIG_PATH
+[ -d $IBUS_CONFIG_PATH/bus ] && rm -rf $IBUS_CONFIG_PATH/bus
+ln -sfn $REALHOME/.config/ibus/bus $IBUS_CONFIG_PATH

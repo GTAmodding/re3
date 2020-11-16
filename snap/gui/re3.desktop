@@ -1,0 +1,12 @@
+[Desktop Entry]
+Version=1.1
+Type=Application
+Name=re3
+GenericName=GTAII for Linux
+icon=${SNAP}/meta/gui/re3.svg
+Exec=re3
+Actions=
+Categories=Game
+Keywords=gta;grand;gta3;re3
+
+

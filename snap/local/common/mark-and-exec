@@ -1,0 +1,14 @@
+###############################
+# Mark update and exec binary #
+###############################
+
+[ $needs_update = true ] && echo "SNAP_DESKTOP_LAST_REVISION=$SNAP_REVISION" > $SNAP_USER_DATA/.last_revision
+
+wait_for_async_execs
+
+if [ -n "$SNAP_DESKTOP_DEBUG" ]; then
+  echo "desktop-launch elapsed time: " $(date +%s.%N --date="$START seconds ago") 
+  echo "Now running: exec $@"
+fi
+
+exec "$@"

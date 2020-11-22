@@ -36,9 +36,6 @@
 #include "Sprite.h"
 #include "Pickups.h"
 
-// TODO(Miami)
-#define AUDIO_NOT_READY
-
 float fReloadAnimSampleFraction[5] = {  0.5f,  0.7f,  0.75f,  0.75f,  0.7f };
 float fSeaSparrowAimingAngle = 10.0f;
 float fHunterAimingAngle = 30.0f;
@@ -2899,26 +2896,15 @@ CWeapon::Update(int32 audioEntity, CPed *pedToAdjustSound)
 						default:
 							break;
 					}
-					if (reloadAssoc->GetProgress() >= soundStart && (reloadAssoc->currentTime - reloadAssoc->timeStep) / reloadAssoc->hierarchy->totalLength < soundStart) {
-#ifdef AUDIO_NOT_READY
-						DMAudio.PlayOneShot(audioEntity, SOUND_WEAPON_RELOAD, 0.0f);
-#else
+					if (reloadAssoc->GetProgress() >= soundStart && (reloadAssoc->currentTime - reloadAssoc->timeStep) / reloadAssoc->hierarchy->totalLength < soundStart)
 						DMAudio.PlayOneShot(audioEntity, SOUND_WEAPON_RELOAD, m_eWeaponType);
-#endif
-					}
 					if (CTimer::GetTimeInMilliseconds() > m_nTimer && reloadAssoc->GetProgress() < 0.9f) {
 						m_nTimer = CTimer::GetTimeInMilliseconds();
 					}
 				} else {
 					uint32 timePassed = m_nTimer - CWeaponInfo::ms_aReloadSampleTime[m_eWeaponType];
 					if (CTimer::GetPreviousTimeInMilliseconds() < timePassed && CTimer::GetTimeInMilliseconds() >= timePassed)
-					{
-#ifdef AUDIO_NOT_READY
-						DMAudio.PlayOneShot(audioEntity, SOUND_WEAPON_RELOAD, 0.0f);
-#else
 						DMAudio.PlayOneShot(audioEntity, SOUND_WEAPON_RELOAD, m_eWeaponType);
-#endif
-					}
 				}
 			}
 

@@ -4889,7 +4889,7 @@ CPed::PreRender(void)
 			fWindMult = DotProduct(m_pMyVehicle->m_vecMoveSpeed, GetForward());
 			if (fWindMult > 0.4f) {
 				float volume = (fWindMult - 0.4f) / 0.6f;
-				DMAudio.PlayOneShot(m_audioEntityId, SOUND_SET_202, volume); //TODO(MIAMI): revise when audio is done
+				DMAudio.PlayOneShot(m_audioEntityId, SOUND_SHIRT_WIND_FLAP, volume);
 			}
 		}
 

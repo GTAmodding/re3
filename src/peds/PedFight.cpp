@@ -27,9 +27,6 @@
 
 //--MIAMI: file done except TODOs
 
-// TODO(Miami)
-#define AUDIO_NOT_READY
-
 uint16 nPlayerInComboMove;
 RpClump* flyingClumpTemp;
 
@@ -874,23 +871,14 @@ CPed::Attack(void)
 				}
 				switch (ourWeapon->m_AnimToPlay) {
 					case ASSOCGRP_UNARMED:
-						if (weaponAnimAssoc->animId == ANIM_MELEE_ATTACK || weaponAnimAssoc->animId == ANIM_MELEE_ATTACK_START) {
-#ifdef AUDIO_NOT_READY
-							DMAudio.PlayOneShot(m_audioEntityId, SOUND_FIGHT_46, 0.0f);
-#else
+						if (weaponAnimAssoc->animId == ANIM_MELEE_ATTACK || weaponAnimAssoc->animId == ANIM_MELEE_ATTACK_START) 
 							DMAudio.PlayOneShot(m_audioEntityId, SOUND_FIGHT_46, (damagerType | (ourWeaponType << 8)));
-#endif
-						}
 						break;
 					case ASSOCGRP_KNIFE:
 					case ASSOCGRP_BASEBALLBAT:
 					case ASSOCGRP_GOLFCLUB:
 					case ASSOCGRP_CHAINSAW:
-#ifdef AUDIO_NOT_READY
-						DMAudio.PlayOneShot(m_audioEntityId, SOUND_WEAPON_BAT_ATTACK, 1.0f);
-#else
 						DMAudio.PlayOneShot(m_audioEntityId, SOUND_WEAPON_BAT_ATTACK, (damagerType | (ourWeaponType << 8)));
-#endif
 						break;
 					default:
 						break;
@@ -991,11 +979,7 @@ CPed::Attack(void)
 				bIsAttacking = false;
 				bIsPointingGunAt = false;
 				m_shootTimer = CTimer::GetTimeInMilliseconds();
-#ifdef AUDIO_NOT_READY
-				DMAudio.PlayOneShot(m_audioEntityId, SOUND_WEAPON_AK47_BULLET_ECHO, 0.0f);
-#else
 				DMAudio.PlayOneShot(m_audioEntityId, SOUND_WEAPON_AK47_BULLET_ECHO, GetWeapon()->m_eWeaponType);
-#endif
 				return;
 			}
 		}
@@ -1040,14 +1024,8 @@ CPed::Attack(void)
 		ClearAimFlag();
 
 		// Echoes of bullets, at the end of the attack. (Bug: doesn't play while reloading)
-		if (weaponAnimAssoc->currentTime - weaponAnimAssoc->timeStep < animLoopEnd) {
-
-#ifdef AUDIO_NOT_READY
-			DMAudio.PlayOneShot(m_audioEntityId, SOUND_WEAPON_AK47_BULLET_ECHO, 0.0f);
-#else
+		if (weaponAnimAssoc->currentTime - weaponAnimAssoc->timeStep < animLoopEnd) 
 			DMAudio.PlayOneShot(m_audioEntityId, SOUND_WEAPON_AK47_BULLET_ECHO, ourWeaponType);
-#endif
-		}
 
 		// Fun fact: removing this part leds to reloading flamethrower
 		if (ourWeaponType == WEAPONTYPE_FLAMETHROWER && weaponAnimAssoc->IsRunning()) {

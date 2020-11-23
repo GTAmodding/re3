@@ -283,6 +283,7 @@ enum Config {
 //#	define CIRCLE_BACK_BUTTON
 //#	define PS2_LIKE_MENU	// An effort to recreate PS2 menu, cycling through tabs, different bg etc.
 //#	define PS2_SAVE_DIALOG		// PS2 style save dialog with transparent black box
+#	define RED_DELETE_TEXTS // some red warning texts when deleting a save, i.e. "delete game" and "proceed with deleting?" to make you switch out of muscle memory mode
 #	define CUSTOM_FRONTEND_OPTIONS
 
 #	ifdef CUSTOM_FRONTEND_OPTIONS

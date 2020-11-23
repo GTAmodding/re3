@@ -1049,6 +1049,18 @@ CMenuManager::Draw()
 	if (aScreens[m_nCurrScreen].m_ScreenName[0] != '\0') {
 		
 		PREPARE_MENU_HEADER
+#ifdef RED_DELETE_TEXTS
+		switch(m_nCurrScreen){
+		case MENUPAGE_CHOOSE_DELETE_SLOT:
+		case MENUPAGE_DELETE_SLOT_CONFIRM:
+		case MENUPAGE_DELETING_IN_PROGRESS:
+		case MENUPAGE_DELETE_FAILED:
+		case MENUPAGE_DELETING:
+		case MENUPAGE_DELETE_SUCCESS:
+			CFont::SetColor(CRGBA(220, 0, 0, 255));
+			break;
+		}
+#endif
 		CFont::PrintString(PAGE_NAME_X(MENUHEADER_POS_X), SCREEN_SCALE_FROM_BOTTOM(MENUHEADER_POS_Y), TheText.Get(aScreens[m_nCurrScreen].m_ScreenName));
 
 		// Weird place to put that.
@@ -1087,6 +1099,9 @@ CMenuManager::Draw()
 			break;
 		}
 
+#ifdef RED_DELETE_TEXTS
+		if (m_nCurrScreen == MENUPAGE_DELETE_SLOT_CONFIRM) CFont::SetColor(CRGBA(255, 0, 0, 255));
+#endif
 #ifdef FIX_BUGS
 		// Label is wrapped from right by StretchX(40)px, but wrapped from left by 40px. And this is only place R* didn't use StretchX in here.
 		CFont::PrintString(MENU_X_LEFT_ALIGNED(MENU_X_MARGIN), MENU_Y(MENUACTION_POS_Y), str);

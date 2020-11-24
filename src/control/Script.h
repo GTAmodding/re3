@@ -13,6 +13,29 @@ class CPlayerInfo;
 
 class CRunningScript;
 
+extern int32 ScriptParams[32];
+
+void FlushLog();
+#define script_assert(_Expression) FlushLog(); assert(_Expression);
+
+#define PICKUP_PLACEMENT_OFFSET 0.5f
+#define PED_FIND_Z_OFFSET 5.0f
+
+#define SPHERE_MARKER_R 0
+#define SPHERE_MARKER_G 128
+#define SPHERE_MARKER_B 255
+#define SPHERE_MARKER_A 128
+#define SPHERE_MARKER_PULSE_PERIOD 2048
+#define SPHERE_MARKER_PULSE_FRACTION 0.1f
+
+#ifdef USE_PRECISE_MEASUREMENT_CONVERTION
+#define METERS_IN_FOOT 0.3048f
+#define FEET_IN_METER 3.28084f
+#else
+#define METERS_IN_FOOT 0.3f
+#define FEET_IN_METER 3.33f
+#endif
+
 #define KEY_LENGTH_IN_SCRIPT 8
 
 struct intro_script_rectangle 

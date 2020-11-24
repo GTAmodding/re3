@@ -1443,7 +1443,7 @@ CAutomobile::PreRender(void)
 			dir.z = 0.0f;
 			if(fwdSpeed < 10.0f){
 				CVector steerFwd(-Sin(m_fSteerAngle), Cos(m_fSteerAngle), 0.0f);
-				steerFwd = GetMatrix().GetMatrixInterpolated() * steerFwd;
+				steerFwd = Multiply3x3(GetMatrix().GetMatrixInterpolated(), steerFwd);
 				float r = CGeneral::GetRandomNumberInRange(-0.06f, -0.03f);
 				dir.x = steerFwd.x * r;
 				dir.y = steerFwd.y * r;
@@ -1949,7 +1949,7 @@ CAutomobile::Render(void)
 
 	CVector contactPoints[4];	// relative to model
 	CVector contactSpeeds[4];	// speed at contact points
-	CVector frontWheelFwd = GetMatrix().GetMatrixInterpolated() * CVector(-Sin(m_fSteerAngle), Cos(m_fSteerAngle), 0.0f);
+	CVector frontWheelFwd = Multiply3x3(GetMatrix().GetMatrixInterpolated(), CVector(-Sin(m_fSteerAngle), Cos(m_fSteerAngle), 0.0f));
 	CVector rearWheelFwd = GetForward();
 	for(i = 0; i < 4; i++){
 		if (m_aWheelTimer[i] > 0.0f) {

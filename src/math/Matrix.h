@@ -36,12 +36,11 @@ public:
 	CVector &GetForward(void) { return *(CVector *)&m_matrix.up; }
 	CVector &GetUp(void) { return *(CVector *)&m_matrix.at; }
 
-    
 	CVector &GetPositionInterpolated(void); // we assume that matrix was interpolated and updated earlier
 	CVector &GetRightInterpolated(void);    // also here
 	CVector &GetForwardInterpolated(void);  // also here
 	CVector &GetUpInterpolated(void);       // also here
-    RwMatrix &GetMatrixInterpolated(void);       // also here
+	RwMatrix &GetMatrixInterpolated(void);  // also here
 
 	void SetTranslate(float x, float y, float z);
 	void SetTranslate(const CVector &trans){ SetTranslate(trans.x, trans.y, trans.z); }
@@ -137,7 +136,7 @@ class CCompressedMatrixNotAligned
 	int8 m_upY;
 	int8 m_upZ;
 public:
-	void CompressFromFullMatrix(CMatrix other);
+	void CompressFromFullMatrix(CMatrix &other);
 	void DecompressIntoFullMatrix(CMatrix &other);
 };
 

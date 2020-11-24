@@ -661,7 +661,7 @@ Invert(const CMatrix &matrix)
 }
 
 void
-CCompressedMatrixNotAligned::CompressFromFullMatrix(CMatrix other)
+CCompressedMatrixNotAligned::CompressFromFullMatrix(CMatrix& other)
 {
 	m_rightX = 127.0f * other.GetRight().x;
 	m_rightY = 127.0f * other.GetRight().y;

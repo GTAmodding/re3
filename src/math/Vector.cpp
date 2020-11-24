@@ -29,6 +29,15 @@ Multiply3x3(const CMatrix &mat, const CVector &vec)
 }
 
 CVector
+Multiply3x3(const RwMatrix &mat, const CVector &vec)
+{
+	// TODO: VU0 code
+	return CVector(mat.right.x * vec.x + mat.up.x * vec.y + mat.at.x * vec.z,
+	               mat.right.y * vec.x + mat.up.y * vec.y + mat.at.y * vec.z,
+	               mat.right.z * vec.x + mat.up.z * vec.y + mat.at.z * vec.z);
+}
+
+CVector
 Multiply3x3(const CVector &vec, const CMatrix &mat)
 {
 	return CVector(mat.m_matrix.right.x * vec.x + mat.m_matrix.right.y * vec.y + mat.m_matrix.right.z * vec.z,

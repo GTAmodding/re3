@@ -1,4 +1,4 @@
-#include "common.h"
+﻿#include "common.h"
 
 #include "Automobile.h"
 #include "Bike.h"
@@ -330,7 +330,7 @@ CExplosion::Update()
 			case EXPLOSION_HELI:
 			case EXPLOSION_MINE:
 			case EXPLOSION_BARREL:
-				if (CTimer::GetFrameCounter() & 1) {
+				if (CTimer::GetTickCounter() & 1) {
 					CPointLights::AddLight(CPointLights::LIGHT_POINT, explosion.m_vecPosition, CVector(0.0f, 0.0f, 0.0f), 20.0f, 1.0f, 1.0f, 0.5f, CPointLights::FOG_NONE, true);
 					CCoronas::RegisterCorona((uintptr)&explosion, 255, 255, 200, 255, explosion.m_vecPosition, 8.0f, 120.0f, gpCoronaTexture[0], CCoronas::TYPE_NORMAL, CCoronas::REFLECTION_ON, CCoronas::LOSCHECK_OFF, CCoronas::STREAK_OFF, 0.0f);
 				} else
@@ -390,7 +390,7 @@ CExplosion::Update()
 							}
 						}
 					}
-					if (CTimer::GetFrameCounter() & 1) {
+					if (CTimer::GetTickCounter() & 1) {
 						CPointLights::AddLight(CPointLights::LIGHT_POINT, explosion.m_vecPosition, CVector(0.0f, 0.0f, 0.0f), 15.0f, 1.0f, 0.0f, 0.0f, CPointLights::FOG_NONE, true);
 						CCoronas::RegisterCorona((uintptr)&explosion, 200, 100, 0, 255, explosion.m_vecPosition, 6.0f, 80.0f, gpCoronaTexture[0], CCoronas::TYPE_NORMAL, CCoronas::REFLECTION_ON, CCoronas::LOSCHECK_OFF, CCoronas::STREAK_OFF, 0.0f);
 					} else

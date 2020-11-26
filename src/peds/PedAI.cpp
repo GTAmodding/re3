@@ -1,4 +1,4 @@
-#include "common.h"
+﻿#include "common.h"
 
 #include "main.h"
 #include "Particle.h"
@@ -897,8 +897,8 @@ CPed::ProcessObjective(void)
 										int chosenModel = CCarCtrl::ChooseModel(&zoneInfo, &ourPos, &chosenCarClass);
 										CAutomobile *newVeh = new CAutomobile(chosenModel, RANDOM_VEHICLE);
 										if (newVeh) {
-										    newVeh->GetMatrix().GetPosition() = ThePaths.m_pathNodes[closestNode].GetPosition();
-										    newVeh->GetMatrix().GetPosition().z += 4.0f;
+											newVeh->GetMatrix().GetPosition() = ThePaths.m_pathNodes[closestNode].GetPosition();
+											newVeh->GetMatrix().GetPosition().z += 4.0f;
 											newVeh->SetHeading(DEGTORAD(200.0f));
 											newVeh->SetStatus(STATUS_ABANDONED);
 											newVeh->m_nDoorLock = CARLOCK_UNLOCKED;
@@ -3280,7 +3280,7 @@ CPed::LineUpPedWithCar(PedLineUpPhase phase)
 		CMatrix vehDoorMat(veh->GetMatrix());
 		vehDoorMat.GetPosition() += Multiply3x3(vehDoorMat, GetLocalPositionToOpenCarDoor(veh, m_vehEnterType, 0.0f));
 		// VC couch anims are inverted, so they're fixing it here.
-		GetMatrix() = vehDoorMat;
+		GetMatrix().save(vehDoorMat);
 	}
 
 }

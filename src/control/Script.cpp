@@ -1,4 +1,4 @@
-#include "common.h"
+﻿#include "common.h"
 
 #include "Script.h"
 #include "ScriptCommands.h"
@@ -4313,7 +4313,6 @@ int8 CRunningScript::ProcessCommands200To299(int32 command)
 	}
 	return -1;
 }
-
 
 void CRunningScript::Save(uint8*& buf)
 {

@@ -1,4 +1,4 @@
-#include "common.h"
+﻿#include "common.h"
 
 #include "Sprite.h"
 #include "Sprite2d.h"
@@ -336,7 +336,7 @@ CClouds::RenderBackground(int16 topred, int16 topgreen, int16 topblue,
 		ms_colourTop.b = 50;
 		ms_colourTop.a = 255;
 		if(gbShowCollisionPolys){
-			if(CTimer::GetFrameCounter() & 1){
+			if(CTimer::GetTickCounter() & 1){
 				ms_colourTop.r = 0;
 				ms_colourTop.g = 0;
 				ms_colourTop.b = 0;

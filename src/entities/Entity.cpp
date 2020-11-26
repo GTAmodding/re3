@@ -1,4 +1,4 @@
-#include "common.h"
+﻿#include "common.h"
 
 #include "General.h"
 #include "RwHelper.h"
@@ -314,6 +314,17 @@ CEntity::DeleteRwObject(void)
 void
 CEntity::UpdateRwFrame(void)
 {
+	if(m_rwObject) {
+		if(RwObjectGetType(m_rwObject) == rpATOMIC)
+			RwFrameUpdateObjects(RpAtomicGetFrame((RpAtomic *)m_rwObject));
+		else if(RwObjectGetType(m_rwObject) == rpCLUMP)
+			RwFrameUpdateObjects(RpClumpGetFrame((RpClump *)m_rwObject));
+	}
+}
+
+void
+CEntity::UpdateRwFrameInterpolated(void)
+{
 	if(m_rwObject){
 		if(RwObjectGetType(m_rwObject) == rpATOMIC)
 			RwFrameUpdateObjects(RpAtomicGetFrame((RpAtomic*)m_rwObject));
@@ -381,24 +392,24 @@ CEntity::PreRender(void)
 	case ENTITY_TYPE_OBJECT:
 		if(GetModelIndex() == MI_COLLECTABLE1){
 			CPickups::DoCollectableEffects(this);
-			GetMatrix().UpdateRW();
+			GetMatrix().UpdateRWInterPolated();
 			UpdateRwFrame();
 		}else if(GetModelIndex() == MI_MONEY){
 			CPickups::DoMoneyEffects(this);
-			GetMatrix().UpdateRW();
+			GetMatrix().UpdateRWInterPolated();
 			UpdateRwFrame();
 		}else if(GetModelIndex() == MI_NAUTICALMINE ||
 		         GetModelIndex() == MI_CARMINE ||
 		         GetModelIndex() == MI_BRIEFCASE){
 			if(((CObject*)this)->bIsPickup){
 				CPickups::DoMineEffects(this);
-				GetMatrix().UpdateRW();
+				GetMatrix().UpdateRWInterPolated();
 				UpdateRwFrame();
 			}
 		}else if(IsPickupModel(GetModelIndex())){
 			if(((CObject*)this)->bIsPickup){
 				CPickups::DoPickUpEffects(this);
-				GetMatrix().UpdateRW();
+				GetMatrix().UpdateRWInterPolated();
 				UpdateRwFrame();
 			}else if(GetModelIndex() == MI_GRENADE){
 				CMotionBlurStreaks::RegisterStreak((uintptr)this,

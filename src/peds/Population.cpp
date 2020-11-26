@@ -1,4 +1,4 @@
-#include "common.h"
+﻿#include "common.h"
 
 #include "Game.h"
 #include "General.h"
@@ -859,7 +859,7 @@ CPopulation::MoveCarsAndPedsOutOfAbandonedZones()
 {
 	eLevelName level;
 	int zone;
-	int frame = CTimer::GetFrameCounter() & 7;
+	int frame = CTimer::GetTickCounter() & 7;
 	if (frame == 1) {
 		int movedVehicleCount = 0;
 		int poolSize = CPools::GetVehiclePool()->GetSize();
@@ -1067,7 +1067,7 @@ CPopulation::TestSafeForRealObject(CDummyObject *dummy)
 void
 CPopulation::ManagePopulation(void)
 {
-	int frameMod32 = CTimer::GetFrameCounter() & 31;
+	int frameMod32 = CTimer::GetTickCounter() & 31;
 	CVector playerPos = FindPlayerCentreOfWorld(CWorld::PlayerInFocus);
 
 	// Why this code is here?! Delete temporary objects when they got too far, and convert others to "dummy" objects. (like lamp posts)

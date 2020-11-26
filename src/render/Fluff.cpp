@@ -1,4 +1,4 @@
-#include "common.h"
+﻿#include "common.h"
 #include "main.h"
 
 #include "Entity.h"
@@ -156,7 +156,7 @@ void CMovingThings::Update()
 #ifndef SQUEEZE_PERFORMANCE
 	const int TIME_SPAN = 64; // frames to process all aMovingThings
 
-	int block = CTimer::GetFrameCounter() % TIME_SPAN;
+	int block = CTimer::GetTickCounter() % TIME_SPAN;
 
 	for (i = (block * NUMMOVINGTHINGS) / TIME_SPAN; i < ((block + 1) * NUMMOVINGTHINGS) / TIME_SPAN; i++) {
 		if (aMovingThings[i].m_nHidden == 1)
@@ -171,17 +171,17 @@ void CMovingThings::Update()
 
 	for (i = 0; i < ARRAY_SIZE(aScrollBars); ++i)
 	{
-		if (aScrollBars[i].IsVisible() || (CTimer::GetFrameCounter() + i) % 8 == 0)
+		if (aScrollBars[i].IsVisible() || (CTimer::GetTickCounter() + i) % 8 == 0)
 			aScrollBars[i].Update();
 	}
 	for (i = 0; i < ARRAY_SIZE(aTowerClocks); ++i)
 	{
-		if (aTowerClocks[i].IsVisible() || (CTimer::GetFrameCounter() + i) % 8 == 0)
+		if (aTowerClocks[i].IsVisible() || (CTimer::GetTickCounter() + i) % 8 == 0)
 			aTowerClocks[i].Update();
 	}
 	for (i = 0; i < ARRAY_SIZE(aDigitalClocks); ++i)
 	{
-		if (aDigitalClocks[i].IsVisible() || (CTimer::GetFrameCounter() + i) % 8 == 0)
+		if (aDigitalClocks[i].IsVisible() || (CTimer::GetTickCounter() + i) % 8 == 0)
 			aDigitalClocks[i].Update();
 	}
 }

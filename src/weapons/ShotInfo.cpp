@@ -1,4 +1,4 @@
-#include "common.h"
+﻿#include "common.h"
 
 #include "ShotInfo.h"
 #include "Entity.h"
@@ -143,7 +143,7 @@ CShotInfo::Update()
 				}
 			}
 		}
-		if (!((CTimer::GetFrameCounter() + slot) & 3))
+		if (!((CTimer::GetTickCounter() + slot) & 3))
 			CWorld::SetCarsOnFire(shot.m_startPos.x, shot.m_startPos.y, shot.m_startPos.z, 4.0f, shot.m_sourceEntity);
 	}
 }

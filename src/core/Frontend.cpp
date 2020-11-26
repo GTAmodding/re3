@@ -1,4 +1,4 @@
-#if defined RW_D3D9 || defined RWLIBS
+﻿#if defined RW_D3D9 || defined RWLIBS
 #define DIRECTINPUT_VERSION 0x0800
 #include <dinput.h>
 #endif
@@ -3461,7 +3461,7 @@ CMenuManager::InitialiseChangedLanguageSettings()
 		CTimer::Stop();
 		TheText.Unload();
 		TheText.Load();
-		CTimer::Update();
+		//CTimer::Update(1000/30);
 		CGame::frenchGame = false;
 		CGame::germanGame = false;
 #ifdef MORE_LANGUAGES
@@ -3540,7 +3540,7 @@ CMenuManager::LoadAllTextures()
 	CTxdStore::SetCurrentTxd(frontendTxdSlot);
 #ifndef GTA3_1_1_PATCH
 	CStreaming::IHaveUsedStreamingMemory();
-	CTimer::Update();
+	//CTimer::Update();
 #endif
 
 	for (int i = 0; i < ARRAY_SIZE(FrontendFilenames); i++) {
@@ -3570,7 +3570,7 @@ CMenuManager::LoadAllTextures()
 #endif
 #ifdef GTA3_1_1_PATCH
 	CStreaming::IHaveUsedStreamingMemory();
-	CTimer::Update();
+	//CTimer::Update(1000/30);
 #endif
 	m_bSpritesLoaded = true;
 	CTxdStore::PopCurrentTxd();

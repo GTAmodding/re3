@@ -1,4 +1,4 @@
-#include "common.h"
+﻿#include "common.h"
 #include "main.h"
 
 #include "General.h"
@@ -1051,7 +1051,7 @@ CFileLoader::LoadMLOInstance(int id, const char *line)
 	RwMatrixRotate(matrix, &rot, -RADTODEG(rad), rwCOMBINEPOSTCONCAT);
 	RwMatrixTranslate(matrix, &pos, rwCOMBINEPOSTCONCAT);
 
-	inst->GetMatrix() = CMatrix(matrix);
+	inst->GetMatrix().save(CMatrix(matrix));
 	inst->GetMatrix().UpdateRW();
 
 	inst->m_modelIndex = modelIndex;
@@ -1453,7 +1453,7 @@ CFileLoader::LoadObjectInstance(const char *line)
 		}else
 			entity = new CBuilding;
 		entity->SetModelIndexNoCreate(id);
-		entity->GetMatrix() = CMatrix(xform);
+		entity->GetMatrix().save(CMatrix(xform));
 		entity->m_level = CTheZones::GetLevelFromPosition(&entity->GetPosition());
 		if(mi->IsSimple()){
 			if(mi->m_isBigBuilding)
@@ -1467,7 +1467,7 @@ CFileLoader::LoadObjectInstance(const char *line)
 	}else{
 		entity = new CDummyObject;
 		entity->SetModelIndexNoCreate(id);
-		entity->GetMatrix() = CMatrix(xform);
+		entity->GetMatrix().save(CMatrix(xform));
 		CWorld::Add(entity);
 		if(IsGlass(entity->GetModelIndex()))
 			entity->bIsVisible = false;

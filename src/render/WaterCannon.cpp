@@ -1,4 +1,4 @@
-#include "common.h"
+﻿#include "common.h"
 
 #include "WaterCannon.h"
 #include "Vector.h"
@@ -81,7 +81,7 @@ void CWaterCannon::Update_OncePerFrame(int16 index)
 	if ( m_abUsed[extinguishingPoint] )
 		gFireManager.ExtinguishPoint(m_avecPos[extinguishingPoint], 3.0f);
 	
-	if ( ((index + CTimer::GetFrameCounter()) & 3) == 0 )
+	if ( ((index + CTimer::GetTickCounter()) & 3) == 0 )
 		PushPeds();
 	
 	// free if unused

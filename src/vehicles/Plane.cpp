@@ -1,4 +1,4 @@
-#include "common.h"
+﻿#include "common.h"
 #include "main.h"
 
 #include "General.h"
@@ -127,7 +127,7 @@ CPlane::ProcessControl(void)
 	if(m_bHasBeenHit){
 		// BUG: since this is all based on frames, you can skip the explosion processing when you go into the menu
 		if(GetModelIndex() == MI_AIRTRAIN){
-			int frm = CTimer::GetFrameCounter() - m_nFrameWhenHit;
+			int frm = CTimer::GetTickCounter() - m_nFrameWhenHit;
 			if(frm == 20){
 				static int nFrameGen;
 				CRGBA colors[8];
@@ -181,7 +181,7 @@ CPlane::ProcessControl(void)
 				FlagToDestroyWhenNextProcessed();
 			}
 		}else{
-			int frm = CTimer::GetFrameCounter() - m_nFrameWhenHit;
+			int frm = CTimer::GetTickCounter() - m_nFrameWhenHit;
 			if(frm == 20){
 				static int nFrameGen;
 				CRGBA colors[8];
@@ -246,7 +246,7 @@ CPlane::ProcessControl(void)
 	}
 
 	// Update plane position and speed
-	if(GetModelIndex() == MI_AIRTRAIN || !m_isFarAway || ((CTimer::GetFrameCounter() + m_randomSeed) & 7) == 0){
+	if(GetModelIndex() == MI_AIRTRAIN || !m_isFarAway || ((CTimer::GetTickCounter() + m_randomSeed) & 7) == 0){
 		if(GetModelIndex() == MI_AIRTRAIN){
 			float pathPositionRear = PlanePathPosition[m_nPlaneId] - 30.0f;
 			if(pathPositionRear < 0.0f)
@@ -910,7 +910,7 @@ CPlane::TestRocketCollision(CVector *rocketPos)
 		   plane->GetModelIndex() != MI_AIRTRAIN && plane->GetModelIndex() == MI_DEADDODO &&	// strange check
 #endif
 		   !plane->m_bHasBeenHit && (*rocketPos - plane->GetPosition()).Magnitude() < 25.0f){
-			plane->m_nFrameWhenHit = CTimer::GetFrameCounter();
+			plane->m_nFrameWhenHit = CTimer::GetTickCounter();
 			plane->m_bHasBeenHit = true;
 			CWorld::Players[CWorld::PlayerInFocus].m_pPed->m_pWanted->RegisterCrime_Immediately(CRIME_DESTROYED_CESSNA,
 				plane->GetPosition(), i+1983, false);

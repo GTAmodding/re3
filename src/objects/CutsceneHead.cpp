@@ -1,4 +1,4 @@
-#include "common.h"
+﻿#include "common.h"
 #include <rpskin.h>
 
 #include "main.h"
@@ -125,7 +125,7 @@ CCutsceneHead::Render(void)
 		m_matrix = CMatrix(RwFrameGetLTM(m_pHeadNode)) * m_matrix;
 	}
 
-	UpdateRwFrame();
+	UpdateRwFrameInterpolated();
 
 	assert(RwObjectGetType(m_rwObject) == rpCLUMP);
 	atm = GetFirstAtomic((RpClump*)m_rwObject);

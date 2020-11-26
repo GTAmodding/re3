@@ -1,4 +1,4 @@
-#include "common.h"
+﻿#include "common.h"
 
 #include "Record.h"
 
@@ -209,8 +209,8 @@ void CRecordDataForChase::SaveOrRetrieveDataForThisFrame(void)
 		return;
 	case STATE_RECORD:
 	{
-		if ((CTimer::GetFrameCounter() & 1) == 0)
-			StoreInfoForCar(pChaseCars[CurrentCar], &pBaseMemForCar[CurrentCar][CTimer::GetFrameCounter() / 2]);
+		if ((CTimer::GetTickCounter() & 1) == 0)
+			StoreInfoForCar(pChaseCars[CurrentCar], &pBaseMemForCar[CurrentCar][CTimer::GetTickCounter() / 2]);
 		if (CTimer::GetFrameCounter() < CHASE_SCENE_LENGTH_IN_FRAMES * 2)
 			return;
 		CFileMgr::SetDir("data\\paths");
@@ -267,14 +267,14 @@ void CRecordDataForChase::SaveOrRetrieveCarPositions(void)
 	case STATE_RECORD:
 	case STATE_PLAYBACK_BEFORE_RECORDING:
 		for (int i = 0; i < NUM_CHASE_CARS; i++) {
-			if (i != CurrentCar && CTimer::GetFrameCounter()) {
-				RestoreInfoForCar(pChaseCars[i], &pBaseMemForCar[i][CTimer::GetFrameCounter() / 2], false);
+			if (i != CurrentCar && CTimer::GetTickCounter()) {
+				RestoreInfoForCar(pChaseCars[i], &pBaseMemForCar[i][CTimer::GetTickCounter() / 2], false);
 				pChaseCars[i]->GetMatrix().UpdateRW();
 				pChaseCars[i]->UpdateRwFrame();
 			}
 		}
-		if (Status == STATE_PLAYBACK_BEFORE_RECORDING && CTimer::GetFrameCounter()) {
-			RestoreInfoForCar(pChaseCars[CurrentCar], &pBaseMemForCar[CurrentCar][CTimer::GetFrameCounter() / 2], false);
+		if (Status == STATE_PLAYBACK_BEFORE_RECORDING && CTimer::GetTickCounter()) {
+			RestoreInfoForCar(pChaseCars[CurrentCar], &pBaseMemForCar[CurrentCar][CTimer::GetTickCounter() / 2], false);
 			pChaseCars[CurrentCar]->GetMatrix().UpdateRW();
 			pChaseCars[CurrentCar]->UpdateRwFrame();
 		}

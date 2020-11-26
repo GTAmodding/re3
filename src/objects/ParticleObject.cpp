@@ -1,4 +1,4 @@
-#include "common.h"
+﻿#include "common.h"
 
 #include "ParticleObject.h"
 #include "Timer.h"
@@ -427,7 +427,7 @@ CParticleObject::UpdateAll(void)
 	}
 
 	{
-		int32 frame = CTimer::GetFrameCounter() & 31;
+		int32 frame = CTimer::GetTickCounter() & 31;
 		int32 counter = 0;
 	
 		CParticleObject *pobj = pFarListHead;

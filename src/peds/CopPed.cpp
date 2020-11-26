@@ -1,4 +1,4 @@
-#include "common.h"
+﻿#include "common.h"
 
 #include "World.h"
 #include "PlayerPed.h"
@@ -710,7 +710,7 @@ CCopPed::ProcessControl(void)
 
 	bool dontShoot = false;
 	if (GetIsOnScreen() && CRenderer::IsEntityCullZoneVisible(this)) {
-		if (((CTimer::GetFrameCounter() + m_randomSeed) & 0x1F) == 17) {
+		if (((CTimer::GetTickCounter() + m_randomSeed) & 0x1F) == 17) {
 			CEntity *foundBuilding = nil;
 			CColPoint foundCol;
 			CVector lookPos = GetPosition() + CVector(0.0f, 0.0f, 0.7f);

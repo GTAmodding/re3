@@ -1,4 +1,4 @@
-#include "common.h"
+﻿#include "common.h"
 
 #include "CarAI.h"
 
@@ -204,7 +204,7 @@ void CCarAI::UpdateCarAI(CVehicle* pVehicle)
 				pVehicle->AutoPilot.m_nCarMission = MISSION_NONE;
 				pVehicle->AutoPilot.m_nTempAction = TEMPACT_NONE;
 			}
-			else if (distance > FindSwitchDistanceFarNormalVehicle(pVehicle) && !pVehicle->AutoPilot.m_bIgnorePathfinding && (CTimer::GetFrameCounter() & 7) == 0){
+			else if (distance > FindSwitchDistanceFarNormalVehicle(pVehicle) && !pVehicle->AutoPilot.m_bIgnorePathfinding && (CTimer::GetTickCounter() & 7) == 0){
 				pVehicle->AutoPilot.m_nTempAction = TEMPACT_NONE;
 				pVehicle->AutoPilot.m_nCarMission = (CCarCtrl::JoinCarWithRoadSystemGotoCoors(pVehicle, pVehicle->AutoPilot.m_vecDestinationCoors, true)) ?
 					MISSION_GOTOCOORDS_STRAIGHT : MISSION_GOTOCOORDS;
@@ -260,7 +260,7 @@ void CCarAI::UpdateCarAI(CVehicle* pVehicle)
 				pVehicle->AutoPilot.m_nCarMission = MISSION_NONE;
 				pVehicle->AutoPilot.m_nTempAction = TEMPACT_NONE;
 			}
-			else if (distance > FindSwitchDistanceFarNormalVehicle(pVehicle) && !pVehicle->AutoPilot.m_bIgnorePathfinding && (CTimer::GetFrameCounter() & 7) == 0) {
+			else if (distance > FindSwitchDistanceFarNormalVehicle(pVehicle) && !pVehicle->AutoPilot.m_bIgnorePathfinding && (CTimer::GetTickCounter() & 7) == 0) {
 				pVehicle->AutoPilot.m_nTempAction = TEMPACT_NONE;
 				pVehicle->AutoPilot.m_nCarMission = (CCarCtrl::JoinCarWithRoadSystemGotoCoors(pVehicle, pVehicle->AutoPilot.m_vecDestinationCoors, true)) ?
 					MISSION_GOTO_COORDS_STRAIGHT_ACCURATE : MISSION_GOTOCOORDS_ACCURATE;

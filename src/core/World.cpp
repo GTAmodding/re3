@@ -1,4 +1,4 @@
-#include "common.h"
+﻿#include "common.h"
 #include "Camera.h"
 #include "CarCtrl.h"
 #include "CopPed.h"
@@ -1917,7 +1917,7 @@ CWorld::RemoveStaticObjects()
 void
 CWorld::Process(void)
 {
-	if(!(CTimer::GetFrameCounter() & 63)) CReferences::PruneAllReferencesInWorld();
+	if(!(CTimer::GetTickCounter() & 63)) CReferences::PruneAllReferencesInWorld();
 
 	if(bProcessCutsceneOnly) {
 		for(int i = 0; i < NUMCUTSCENEOBJECTS; i++) {
@@ -2079,9 +2079,9 @@ CWorld::Process(void)
 		CMessages::Process();
 		Players[PlayerInFocus].Process();
 		CRecordDataForChase::SaveOrRetrieveCarPositions();
-		if((CTimer::GetFrameCounter() & 7) == 1) {
+		if((CTimer::GetTickCounter() & 7) == 1) {
 			RemoveFallenPeds();
-		} else if((CTimer::GetFrameCounter() & 7) == 5) {
+		} else if((CTimer::GetTickCounter() & 7) == 5) {
 			RemoveFallenCars();
 		}
 	}

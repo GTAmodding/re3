@@ -1,4 +1,4 @@
-#pragma warning( push )
+﻿#pragma warning( push )
 #pragma warning( disable : 4005)
 #pragma warning( pop )
 #include "common.h"
@@ -638,7 +638,7 @@ void CGame::ReloadIPLs(void)
 	CWorld::RepositionCertainDynamicObjects();
 	CCullZones::ResolveVisibilities();
 	CRenderer::SortBIGBuildings();
-	CTimer::Update();
+	//CTimer::Update(1000/30);
 }
 
 void CGame::ShutDownForRestart(void)
@@ -799,7 +799,7 @@ void CGame::InitialiseWhenRestarting(void)
 	}
 #endif
 	
-	CTimer::Update();
+	//CTimer::Update(1000/30);
 	
 	DMAudio.ChangeMusicMode(MUSICMODE_GAME);
 }
@@ -884,6 +884,25 @@ void CGame::Process(void)
 #ifdef PS2
 	CMemCheck::DoTest();
 #endif
+}
+
+void
+CGame::UpdateMatrices()
+{
+	for(CPtrNode *node = CWorld::GetMovingEntityList().first; node; node = node->next) {
+		CPlaceable *movingEnt = (CPlaceable *)node->item;
+		if(movingEnt) { movingEnt->m_matrix.SaveOldMatrix(); }
+	}
+}
+
+void
+CGame::InterpolateMatrices()
+{
+	for(CPtrNode *node = CWorld::GetMovingEntityList().first; node; node = node->next) {
+		CPhysical *movingEnt = (CPhysical *)node->item;
+		movingEnt->m_matrix.UpdateRWInterPolated();
+		movingEnt->UpdateRwFrameInterpolated();
+	}
 }
 
 void CGame::DrasticTidyUpMemory(bool)

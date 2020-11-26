@@ -1,4 +1,4 @@
-#include "common.h"
+﻿#include "common.h"
 
 #include <ctype.h>
 
@@ -124,7 +124,7 @@ void
 CTheZones::Update(void)
 {
 #ifdef SQUEEZE_PERFORMANCE
-	if (CTimer::GetFrameCounter() % 5 != 0)
+	if (CTimer::GetTickCounter() % 5 != 0)
 		return;
 #endif
 	CVector pos;

@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 class CTimer
 {
@@ -8,6 +8,7 @@ class CTimer
 	static uint32 m_snTimeInMillisecondsNonClipped;
 	static uint32 m_snPreviousTimeInMilliseconds;
 	static uint32 m_FrameCounter;
+	static uint32 m_TickCounter;
 	static float ms_fTimeScale;
 	static float ms_fTimeStep;
 	static float ms_fTimeStepNonClipped;
@@ -24,6 +25,7 @@ public:
 	static float GetTimeStepNonClippedInMilliseconds(void) { return ms_fTimeStepNonClipped / 50.0f * 1000.0f; }
 	static void SetTimeStepNonClipped(float ts) { ms_fTimeStepNonClipped = ts; }
 	static const uint32 &GetFrameCounter(void) { return m_FrameCounter; }
+    static const uint32 &GetTickCounter(void) { return m_FrameCounter; }
 	static void SetFrameCounter(uint32 fc) { m_FrameCounter = fc; }
 	static const uint32 &GetTimeInMilliseconds(void) { return m_snTimeInMilliseconds; }
 	static void SetTimeInMilliseconds(uint32 t) { m_snTimeInMilliseconds = t; }
@@ -44,7 +46,7 @@ public:
 	
 	static void Initialise(void);
 	static void Shutdown(void);
-	static void Update(void);
+	static void Update(float timeMs);
 	static void Suspend(void);
 	static void Resume(void);
 	static uint32 GetCyclesPerMillisecond(void);

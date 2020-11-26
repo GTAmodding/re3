@@ -1,4 +1,4 @@
-#define WITHWINDOWS
+﻿#define WITHWINDOWS
 #include "common.h"
 #include "crossplatform.h"
 
@@ -11,6 +11,7 @@ uint32 CTimer::m_snTimeInMillisecondsPauseMode = 1;
 uint32 CTimer::m_snTimeInMillisecondsNonClipped;
 uint32 CTimer::m_snPreviousTimeInMilliseconds;
 uint32 CTimer::m_FrameCounter;
+uint32 CTimer::m_TickCounter;
 float CTimer::ms_fTimeScale;
 float CTimer::ms_fTimeStep;
 float CTimer::ms_fTimeStepNonClipped;
@@ -69,6 +70,7 @@ void CTimer::Initialise(void)
 	m_snTimeInMilliseconds = m_snPreviousTimeInMilliseconds;
 	
 	m_FrameCounter = 0;
+    m_TickCounter = 0;
 	
 	DMAudio.ResetTimers(m_snPreviousTimeInMilliseconds);
 	
@@ -80,7 +82,7 @@ void CTimer::Shutdown(void)
 	;
 }
 
-void CTimer::Update(void)
+void CTimer::Update(float timeMs)
 {
 	m_snPreviousTimeInMilliseconds = m_snTimeInMilliseconds;
 	
@@ -124,7 +126,7 @@ void CTimer::Update(void)
 #ifndef FIX_BUGS
 		double
 #endif
-		frameTime = (double)updInMs * ms_fTimeScale;
+		frameTime = (double)timeMs * ms_fTimeScale;
 		
 		oldPcTimer = timer;
 		
@@ -159,7 +161,7 @@ void CTimer::Update(void)
 		m_snTimeInMilliseconds = m_snPreviousTimeInMilliseconds + 16;
 	}
   
-	m_FrameCounter++;
+	m_TickCounter++;
 }
 
 void CTimer::Suspend(void)

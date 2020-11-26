@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 enum eLevelName {
 	LEVEL_IGNORE = -1, // beware, this is only used in CPhysical's m_nZoneLevel
@@ -36,7 +36,9 @@ public:
 	static void ShutDownForRestart(void);
 	static void InitialiseWhenRestarting(void);
 	static void Process(void);
-	
+	static void UpdateMatrices();
+	static void InterpolateMatrices();
+
 	// NB: these do something on PS2
 	static void TidyUpMemory(bool, bool);
 	static void DrasticTidyUpMemory(bool);

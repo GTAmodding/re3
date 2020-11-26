@@ -1,4 +1,6 @@
-#include "common.h"
+﻿#include "common.h"
+
+extern float timeAlpha;
 
 CMatrix::CMatrix(void)
 {
@@ -66,8 +68,17 @@ CMatrix::Update(void)
 void
 CMatrix::UpdateRW(void)
 {
-	if (m_attachment) {
+	if(m_attachment) {
 		*m_attachment = m_matrix;
+		RwMatrixUpdate(m_attachment);
+	}
+}
+
+void
+CMatrix::UpdateRWInterPolated(void)
+{
+	if(m_attachment) {
+		*m_attachment = CreateMatrixInterpolated();
 		RwMatrixUpdate(m_attachment);
 	}
 }
@@ -76,8 +87,12 @@ void
 CMatrix::operator=(CMatrix const &rhs)
 {
 	m_matrix = rhs.m_matrix;
-	if (m_attachment)
-		UpdateRW();
+}
+
+void
+CMatrix::save(CMatrix const &rhs)
+{
+	m_matrix = rhs.m_matrix;
 }
 
 void
@@ -419,11 +434,58 @@ CMatrix::operator*=(CMatrix const &rhs)
 }
 
 void
-CMatrix::Reorthogonalise(void)
+CMatrix::SaveOldMatrix()
 {
-	CVector &r = GetRight();
-	CVector &f = GetForward();
-	CVector &u = GetUp();
+	m_matrix_old = m_matrix;
+}
+
+RwMatrix
+CMatrix::CreateMatrixInterpolated()
+{
+	RwMatrix m_matrix_interpolated;
+	if(*(CVector *)&m_matrix_old.pos != CVector(0, 0, 0))
+		m_matrix_interpolated = InterpolateMatrix(m_matrix_old, m_matrix, timeAlpha);
+	else
+		m_matrix_interpolated = m_matrix;
+	return m_matrix_interpolated;
+}
+
+CVector &
+CMatrix::GetPositionInterpolated()
+{
+	return *(CVector*)RwMatrixGetPos(m_attachment);
+}
+
+CVector &
+CMatrix::GetRightInterpolated()
+{
+	return *(CVector *)RwMatrixGetRight(m_attachment);
+}
+
+CVector &
+CMatrix::GetForwardInterpolated()
+{
+	return *(CVector *)RwMatrixGetUp(m_attachment);
+}
+
+CVector &
+CMatrix::GetUpInterpolated()
+{
+	return *(CVector *)RwMatrixGetAt(m_attachment);
+}
+
+RwMatrix &
+CMatrix::GetMatrixInterpolated()
+{
+	return *m_attachment;
+}
+
+void
+CMatrix::Reorthogonalise(void) const
+{
+	CVector &r = *(CVector *)&m_matrix.right;
+	CVector &f = *(CVector *)&m_matrix.up;
+	CVector &u = *(CVector *)&m_matrix.at;
 	u = CrossProduct(r, f);
 	u.Normalise();
 	r = CrossProduct(f, u);
@@ -518,6 +580,79 @@ Invert(const CMatrix &src, CMatrix &dst)
 	return dst;
 }
 
+RwMatrix
+Mult(const RwMatrix &src1_, const RwMatrix &src2_)
+{
+	RwMatrix result;
+	RwMatrix *dst = &result;
+	const RwMatrix *src1 = &src1_;
+	const RwMatrix *src2 = &src2_;
+	dst->right.x = src1->right.x * src2->right.x + src1->up.x * src2->right.y + src1->at.x * src2->right.z;
+	dst->right.y = src1->right.y * src2->right.x + src1->up.y * src2->right.y + src1->at.y * src2->right.z;
+	dst->right.z = src1->right.z * src2->right.x + src1->up.z * src2->right.y + src1->at.z * src2->right.z;
+	dst->up.x = src1->right.x * src2->up.x + src1->up.x * src2->up.y + src1->at.x * src2->up.z;
+	dst->up.y = src1->right.y * src2->up.x + src1->up.y * src2->up.y + src1->at.y * src2->up.z;
+	dst->up.z = src1->right.z * src2->up.x + src1->up.z * src2->up.y + src1->at.z * src2->up.z;
+	dst->at.x = src1->right.x * src2->at.x + src1->up.x * src2->at.y + src1->at.x * src2->at.z;
+	dst->at.y = src1->right.y * src2->at.x + src1->up.y * src2->at.y + src1->at.y * src2->at.z;
+	dst->at.z = src1->right.z * src2->at.x + src1->up.z * src2->at.y + src1->at.z * src2->at.z;
+	dst->pos.x = src1->right.x * src2->pos.x + src1->up.x * src2->pos.y + src1->at.x * src2->pos.z + src1->pos.x;
+	dst->pos.y = src1->right.y * src2->pos.x + src1->up.y * src2->pos.y + src1->at.y * src2->pos.z + src1->pos.y;
+	dst->pos.z = src1->right.z * src2->pos.x + src1->up.z * src2->pos.y + src1->at.z * src2->pos.z + src1->pos.z;
+	return result;
+}
+
+RwMatrix
+CreateMatrixWithScale(float s)
+{
+	RwMatrix m_matrix;
+	m_matrix.right.x = s;
+	m_matrix.right.y = 0.0f;
+	m_matrix.right.z = 0.0f;
+
+	m_matrix.up.x = 0.0f;
+	m_matrix.up.y = s;
+	m_matrix.up.z = 0.0f;
+
+	m_matrix.at.x = 0.0f;
+	m_matrix.at.y = 0.0f;
+	m_matrix.at.z = s;
+
+	m_matrix.pos.x = 0.0f;
+	m_matrix.pos.y = 0.0f;
+	m_matrix.pos.z = 0.0f;
+	return m_matrix;
+}
+
+RwMatrix
+Add(const RwMatrix &m1, const RwMatrix &m2)
+{
+	RwMatrix o;
+	o.right.x = m1.right.x + m2.right.x;
+	o.up.x = m1.up.x + m2.up.x;
+	o.at.x = m1.at.x + m2.at.x;
+	o.right.y = m1.right.y + m2.right.y;
+	o.up.y = m1.up.y + m2.up.y;
+	o.at.y = m1.at.y + m2.at.y;
+	o.right.z = m1.right.z + m2.right.z;
+	o.up.z = m1.up.z + m2.up.z;
+	o.at.z = m1.at.z + m2.at.z;
+	o.pos.x = m1.pos.x + m2.pos.x;
+	o.pos.y = m1.pos.y + m2.pos.y;
+	o.pos.z = m1.pos.z + m2.pos.z;
+	return o;
+}
+
+RwMatrix
+InterpolateMatrix(RwMatrix &prev, RwMatrix &now, float interpolation)
+{
+	RwMatrix result;
+	result = Mult(prev, CreateMatrixWithScale(1.0f - interpolation));
+	result.pos = result.pos * (1.f - interpolation);
+	result = Add(result, Mult(CreateMatrixWithScale(interpolation), now));
+	return result;
+}
+
 CMatrix
 Invert(const CMatrix &matrix)
 {
@@ -526,7 +661,7 @@ Invert(const CMatrix &matrix)
 }
 
 void
-CCompressedMatrixNotAligned::CompressFromFullMatrix(CMatrix &other)
+CCompressedMatrixNotAligned::CompressFromFullMatrix(CMatrix other)
 {
 	m_rightX = 127.0f * other.GetRight().x;
 	m_rightY = 127.0f * other.GetRight().y;

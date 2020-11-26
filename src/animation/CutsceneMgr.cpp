@@ -1,4 +1,4 @@
-#include "common.h"
+﻿#include "common.h"
 
 #include "General.h"
 #include "CutsceneMgr.h"
@@ -225,7 +225,7 @@ CCutsceneMgr::LoadCutsceneData(const char *szCutsceneName)
 	ms_cutsceneOffset = CVector(0.0f, 0.0f, 0.0f);
 
 	pPlayerPed = FindPlayerPed();
-	CTimer::Update();
+	//CTimer::Update(1000/30);
 
 	pPlayerPed->m_pWanted->ClearQdCrimes();
 	pPlayerPed->bIsVisible = false;
@@ -275,8 +275,8 @@ CCutsceneMgr::SetupCutsceneToStart(void)
 		}
 	}
 
-	CTimer::Update();
-	CTimer::Update();
+	//CTimer::Update(1000/30);
+	//CTimer::Update(1000/30);
 	ms_running = true;
 	ms_cutsceneTimer = 0.0f;
 }
@@ -375,7 +375,7 @@ CCutsceneMgr::DeleteCutsceneData(void)
 	}
 	CTimer::Stop();
 	CGame::DrasticTidyUpMemory(TheCamera.GetScreenFadeStatus() == FADE_2);
-	CTimer::Update();
+	//CTimer::Update(1000/30);
 }
 
 void

@@ -1,4 +1,4 @@
-#include "common.h"
+﻿#include "common.h"
 
 #include "Script.h"
 #include "ScriptCommands.h"
@@ -141,7 +141,7 @@ int8 CRunningScript::ProcessCommands1000To1099(int32 command)
 			CStreaming::RequestIslands(CGame::currLevel);
 			CStreaming::LoadAllRequestedModels(true);
 		}
-		CTimer::Update();
+		//CTimer::Update();
 		return 0;
 	}
 	case COMMAND_GET_BODY_CAST_HEALTH:
@@ -784,7 +784,7 @@ int8 CRunningScript::ProcessCommands1100To1199(int32 command)
 			ISLAND_LOADING_IS(LOW)
 				DMAudio.SetEffectsFadeVol(127);
 		}
-		CTimer::Update();
+		//CTimer::Update();
 		return 0;
 	case COMMAND_LOAD_SPLASH_SCREEN:
 		CTheScripts::ReadTextLabelFromScript(&m_nIp, tmp);

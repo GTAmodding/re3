@@ -1,4 +1,4 @@
-#include "common.h"
+﻿#include "common.h"
 
 #include "GameLogic.h"
 #include "Clock.h"
@@ -60,7 +60,7 @@ CGameLogic::SortOutStreamingAndMemory(const CVector &pos)
 	CStreaming::RemoveUnusedModelsInLoadedList();
 	CGame::DrasticTidyUpMemory(true);
 	CStreaming::LoadScene(pos);
-	CTimer::Update();
+	//CTimer::Update(1000/30);
 }
 
 void

@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 class CSpecialFX
 {
@@ -218,7 +218,7 @@ class CSpecialParticleStuff
 {
 	static uint32 BoatFromStart;
 public:
-	static void CreateFoamAroundObject(CMatrix*, float, float, float, int32);
+	static void CreateFoamAroundObject(CMatrix *, float, float, float, int32);
 	static void StartBoatFoamAnimation();
-	static void UpdateBoatFoamAnimation(CMatrix*);
+	static void UpdateBoatFoamAnimation(CMatrix *);
 };

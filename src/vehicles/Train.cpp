@@ -1,4 +1,4 @@
-#include "common.h"
+﻿#include "common.h"
 #include "main.h"
 
 #include "Timer.h"
@@ -83,7 +83,7 @@ CTrain::SetModelIndex(uint32 id)
 void
 CTrain::ProcessControl(void)
 {
-	if(gbModelViewer || m_isFarAway && (CTimer::GetFrameCounter() + m_nWagonId) & 0xF)
+	if(gbModelViewer || m_isFarAway && (CTimer::GetTickCounter() + m_nWagonId) & 0xF)
 		return;
 
 	CTrainNode *trackNodes;
@@ -304,7 +304,7 @@ CTrain::PreRender(void)
 		if(behindness < 0.0f){
 			// In front of train
 			CVector lightPos = mi->m_positions[TRAIN_POS_LIGHT_FRONT];
-			CVector lightR = GetMatrix() * lightPos;
+			CVector lightR = GetMatrix().GetMatrixInterpolated() * lightPos;
 			CVector lightL = lightR;
 			lightL -= GetRight()*2.0f*lightPos.x;
 
@@ -336,7 +336,7 @@ CTrain::PreRender(void)
 
 	if(m_bIsLastWagon){
 		CVector lightPos = mi->m_positions[TRAIN_POS_LIGHT_REAR];
-		CVector lightR = GetMatrix() * lightPos;
+		CVector lightR = GetMatrix().GetMatrixInterpolated() * lightPos;
 		CVector lightL = lightR;
 		lightL -= GetRight()*2.0f*lightPos.x;
 

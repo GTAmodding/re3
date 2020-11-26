@@ -1,4 +1,4 @@
-#include "common.h"
+﻿#include "common.h"
 
 void
 CVector::Normalise(void)
@@ -43,4 +43,13 @@ operator*(const CMatrix &mat, const CVector &vec)
 	return CVector(mat.m_matrix.right.x * vec.x + mat.m_matrix.up.x * vec.y + mat.m_matrix.at.x * vec.z + mat.m_matrix.pos.x,
 	               mat.m_matrix.right.y * vec.x + mat.m_matrix.up.y * vec.y + mat.m_matrix.at.y * vec.z + mat.m_matrix.pos.y,
 	               mat.m_matrix.right.z * vec.x + mat.m_matrix.up.z * vec.y + mat.m_matrix.at.z * vec.z + mat.m_matrix.pos.z);
+}
+
+CVector
+operator*(const RwMatrix &mat, const CVector &vec)
+{
+	// TODO: VU0 code
+	return CVector(mat.right.x * vec.x + mat.up.x * vec.y + mat.at.x * vec.z + mat.pos.x,
+	               mat.right.y * vec.x + mat.up.y * vec.y + mat.at.y * vec.z + mat.pos.y,
+	               mat.right.z * vec.x + mat.up.z * vec.y + mat.at.z * vec.z + mat.pos.z);
 }

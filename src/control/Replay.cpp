@@ -1,4 +1,4 @@
-#include "common.h"
+﻿#include "common.h"
 
 #include "AnimBlendAssociation.h"
 #include "Boat.h"
@@ -492,7 +492,7 @@ void CReplay::ProcessPedUpdate(CPed *ped, float interpolation, CAddressInReplayB
 	ped->m_fRotationDest = pp->heading * PI / 128.0f;
 	CMatrix ped_matrix;
 	pp->matrix.DecompressIntoFullMatrix(ped_matrix);
-	ped->GetMatrix() = ped->GetMatrix() * CMatrix(1.0f - interpolation);
+	ped->GetMatrix().save(ped->GetMatrix() * CMatrix(1.0f - interpolation));
 	ped->GetMatrix().GetPosition() *= (1.0f - interpolation);
 	ped->GetMatrix() += CMatrix(interpolation) * ped_matrix;
 	if (pp->vehicle_index) {
@@ -717,7 +717,7 @@ void CReplay::ProcessCarUpdate(CVehicle *vehicle, float interpolation, CAddressI
 	}
 	CMatrix vehicle_matrix;
 	vp->matrix.DecompressIntoFullMatrix(vehicle_matrix);
-	vehicle->GetMatrix() = vehicle->GetMatrix() * CMatrix(1.0f - interpolation);
+	vehicle->GetMatrix().save(vehicle->GetMatrix() * CMatrix(1.0f - interpolation));
 	vehicle->GetMatrix().GetPosition() *= (1.0f - interpolation);
 	vehicle->GetMatrix() += CMatrix(interpolation) * vehicle_matrix;
 	vehicle->m_vecTurnSpeed = CVector(0.0f, 0.0f, 0.0f);
@@ -896,7 +896,7 @@ bool CReplay::PlayBackThisFrameInterpolation(CAddressInReplayBuffer *buffer, flo
 		case REPLAYPACKET_GENERAL:
 		{
 			tGeneralPacket* pg = (tGeneralPacket*)&ptr[offset];
-			TheCamera.GetMatrix() = TheCamera.GetMatrix() * CMatrix(split);
+			TheCamera.GetMatrix().save(TheCamera.GetMatrix() * CMatrix(split));
 			TheCamera.GetMatrix().GetPosition() *= split;
 			TheCamera.GetMatrix() += CMatrix(interpolation) * pg->camera_pos;
 			RwMatrix* pm = RwFrameGetMatrix(RwCameraGetFrame(TheCamera.m_pRwCamera));

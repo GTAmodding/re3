@@ -864,6 +864,11 @@ bool IsThisJoystickBlacklisted(int i)
 
 void _InputInitialiseJoys()
 {
+	char const* EnvControlConfig = getenv("SDL_GAMECONTROLLERCONFIG");
+	if ( EnvControlConfig != NULL ) {
+		glfwUpdateGamepadMappings(EnvControlConfig);
+	}
+	
 	PSGLOBAL(joy1id) = -1;
 	PSGLOBAL(joy2id) = -1;
 

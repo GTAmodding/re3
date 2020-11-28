@@ -42,7 +42,7 @@
 #include "MBlur.h"
 #include "PedRoutes.h"
 #include "RoadBlocks.h"
-#include "SpecialFx.h"
+#include "SpecialFX.h"
 #include "Timecycle.h"
 #include "TxdStore.h"
 #include "Bike.h"

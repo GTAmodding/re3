@@ -8026,6 +8026,255 @@ HARDAWARE NO DISPONIBLE. RESTAURADO AJUSTE ORIGINAL
 [CRED270]
 MIKE HONG
 
+{ ======================================================================= }
+{ ================= NEW STRINGS FROM THE iOS CONVERSION ================= }
+{ ======================================================================= }
+
+[FEC_OFI]
+Puedes arrastrar los botones y elementos de la interfaz. Toca dos veces cualquier botón para cambiar su tamaño. Toca dos veces la pantalla para volver al menú.
+
+[FEL_JPN]
+JAPONÉS
+
+[MM_MARK]
+MARKETING
+
+[MM_INV]
+INVENCIBILIDAD
+
+[MM_MODE]
+MODO DE MARKETING
+
+[MM_SLV]
+PERMITIR SALTO DE NIVEL
+
+[MM_TUTS]
+DESACTIVAR TUTORIALES
+
+[FET_RMS]
+REINTENTAR MISIÓN
+
+[FESZ_RM]
+¿REINTENTAR?
+
+[FET_CT7]
+INVERTIR VISTA
+
+[FEA_OFF]
+RADIO APAGADA
+
+[FEM_SL0]
+Autoguardado sin usar
+
+[RM_KEY]
+Leyenda
+
+[RM_TONI]
+Toni Cipriani
+
+[RM_SALV]
+Salvatore Leone
+
+[RM_RAY]
+Ray Machowski
+
+[RM_KEN]
+Kenji Kasen
+
+[RM_JOEY]
+Joey Leone
+
+[RM_DON]
+Donald Love
+
+[RM_EIG]
+8 Ball
+
+[RM_ASU]
+Asuka Kasen
+
+[RM_LUIG]
+Club de Luigi
+
+[RM_CATA]
+Catalina
+
+[RM_BPHO]
+Diablos
+
+[RM_GPHO]
+Jamaicanos
+
+[RM_RPHO]
+Hoods
+
+[RM_SPRY]
+Taller de pintura
+
+[RM_AMMU]
+Ammu-Nation
+
+[RM_SAFE]
+Piso franco
+
+[RM_BOMB]
+Bombas
+
+[RM_G1]
+Cártel colombiano
+
+[RM_G2]
+Familia Leone
+
+[RM_G3]
+Diablos
+
+[RM_G4]
+Tríadas
+
+[RM_G5]
+Yakuza
+
+[RM_G6]
+Yardies
+
+[RM_G7]
+Hoods del sur
+
+[SPLASH]
+Toca para continuar
+
+[FEM_SL9]
+Autoguardado sin usar
+
+[NEW_H1]
+Toca el radar para acceder al mapa de la ciudad. Podrás ver tu objetivo así como los lugares importantes.
+
+[TUT_RAD]
+Para cambiar la emisora de radio, desliza sobre el nombre de la emisora hacia la izquiera o a la derecha.
+
+[NEW_H2]
+Para mirar alrededor, pulsa en el centro y desliza el dedo por la pantalla.
+
+{ EXTRA CREDIT STRINGS }
+
+[CRED345]
+War Drum Studios
+
+[CRED346]
+Thomas Williamson
+
+[CRED347]
+Michael Owen
+
+[CRED348]
+Morgan Hughes
+
+[CRED349]
+Abner Williamson
+
+[RM_YOU]
+Tu posición
+
+[RM_TARG]
+Objetivo
+
+[RM_GANG]
+Mostrar bandas
+
+[CNT_FOT]
+a pie
+
+[CNT_LFT]
+Izquierda
+
+[CNT_RHT]
+Derecha
+
+[CNT_JMP]
+Saltar
+
+[CNT_RUN]
+Correr
+
+[CNT_SCP]
+Mira
+
+[CNT_SHT]
+Disparar
+
+[CNT_PCH]
+Golpear
+
+[CNT_THR]
+Lanzar
+
+[CNT_ZIN]
+Acercar vista
+
+[CNT_ZOT]
+Alejar vista
+
+[CNT_CAR]
+en vehículo
+
+[CNT_ACL]
+Acelerar
+
+[CNT_BRK]
+Frenar
+
+[CNT_EEX]
+Entrar/salir vehíc.
+
+[CNT_STC]
+Disparar
+
+[CNT_HBK]
+Freno de mano
+
+[CNT_HRN]
+Claxon
+
+[CNT_RTL]
+Girar a la izq.
+
+[CNT_RTR]
+Girar a la der.
+
+[CNT_ATM]
+Activar misión
+
+[CNT_MNU]
+Menú
+
+[CNT_CAM]
+Cámara
+
+[FED_HAP]
+Vibración
+
+[FEL_KOR]
+Coreano
+
+[FEM_CL7]
+El archivo 7 no está en la nube
+
+[FEM_CL8]
+El archivo 8 no está en la nube
+
+[FEM_NC]
+La nube no está disponible
+
+[FEM_CSE]
+Espacio vacío en la nube
+
+[FEH_RTE]
+Valora GTA III
+
+[T_RATE]
+Si te gusta jugar a GTA III, puntúalo. ~N~¡Gracias por tu apoyo!
+
 { re3 updates }
 { new languages }
 [FEL_JAP]

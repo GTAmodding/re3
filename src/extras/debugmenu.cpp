@@ -860,7 +860,7 @@ processInput(void)
 #define X(var, keycode) \
 	if(var){ \
 		repeattime = downtime = CTimer::GetTimeInMilliseconds(); \
-		lastkeydown = keycode;
+		lastkeydown = keycode; \
 		keyptr = &var; \
 	}
 	MUHKEYS

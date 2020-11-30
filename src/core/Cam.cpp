@@ -5033,8 +5033,8 @@ CCam::Process_FollowCar_SA(const CVector& CameraTarget, float TargetOrientation,
 	float stickY = pad->GetCarGunUpDown();
 
 	// In SA this checks for m_bUseMouse3rdPerson so num2/num8 do not move camera when Keyboard & Mouse controls are used.
-	if (CCamera::m_bUseMouse3rdPerson)
-		stickY = 0.0f;
+	//if (CCamera::m_bUseMouse3rdPerson)
+	//	stickY = 0.0f;
 
 	float xMovement = Abs(stickX) * (FOV / 80.0f * 5.f / 70.f) * stickX * 0.007f * 0.007f;
 	float yMovement = Abs(stickY) * (FOV / 80.0f * 3.f / 70.f) * stickY * 0.007f * 0.007f;

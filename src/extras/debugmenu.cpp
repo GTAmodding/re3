@@ -259,10 +259,20 @@ Menu *findMenu(const char *name);
 	X(pgupjustdown, rsPGUP) \
 	X(pgdnjustdown, rsPGDN)
 
-#define MUHBUTTONS \
-	X(button1justdown, 1) \
-	X(button2justdown, 2) \
-	X(button3justdown, 3)
+#define MUHMOUSEBUTTONS \
+	X(mbutton1justdown, 1) \
+	X(mbutton2justdown, 2) \
+	X(mbutton3justdown, 3)
+
+ #define MUHGAMEPAD \
+ 	X(crossjustdown, 1) \
+	X(circlejustdown, 2) \
+	X(trianglejustdown, 3) \
+	X(trianglejustdown, 4) \
+	X(padleftjustdown, 5) \
+	X(padrightjustdown, 6) \
+	X(padupjustdown, 7) \
+	X(paddownjustdown, 8)
 
 #define REPEATDELAY 700
 #define REPEATINTERVAL 50
@@ -274,11 +284,17 @@ static int repeattime;
 static int lastkeydown;
 static int *keyptr;
 
-static int buttondown[3];
-static int lastbuttondown;
-static int *buttonptr;
-static int button1justdown, button2justdown, button3justdown;
+static int mbuttondown[3];
+static int lastmbuttondown;
+static int *mbuttonptr;
+static int mbutton1justdown, mbutton2justdown, mbutton3justdown;
 static float mouseX, mouseY;
+
+static int padbuttondown[8];
+static int lastpadbuttondown;
+static bool *padbuttonptr;
+static bool padleftjustdown, padrightjustdown, padupjustdown, paddownjustdown;
+static bool crossjustdown, circlejustdown, trianglejustdown, squarejustdown;
 
 static int menuOn;
 static int menuInitialized;
@@ -378,12 +394,12 @@ MenuEntry_##NAME::processInput(bool mouseOver, bool selected)				     \
 	v = *this->variable;					     \
 	oldv = v;						     \
 								     \
-	if((selected && leftjustdown) || (mouseOver && button3justdown)){					     \
+	if((selected && leftjustdown) || (selected && ( squarejustdown || padleftjustdown )) || (mouseOver && mbutton3justdown)){					     \
 		v -= this->step;				     \
 		if(v > oldv)					     \
 			underflow = 1;				     \
 	}							     \
-	if((selected && rightjustdown) || (mouseOver && button1justdown)){					     \
+	if((selected && rightjustdown) || (selected && (crossjustdown || padrightjustdown )) || (mouseOver && mbutton1justdown)){					     \
 		v += this->step;				     \
 		if(v < oldv)					     \
 			overflow = 1;				     \
@@ -469,12 +485,12 @@ MenuEntry_##NAME::processInput(bool mouseOver, bool selected)													     \
 	v = *this->variable;														     \
 	oldv = v;															     \
 																	     \
-	if((selected && leftjustdown) || (mouseOver && button3justdown)){					     \
+	if((selected && leftjustdown) || (selected && ( squarejustdown || padleftjustdown )) || (mouseOver && mbutton3justdown)){					     \
 		v -= this->step;				     \
 		if(v > oldv)					     \
 			underflow = 1;				     \
 	}							     \
-	if((selected && rightjustdown) || (mouseOver && button1justdown)){					     \
+	if((selected && rightjustdown) || (selected && (crossjustdown || padrightjustdown )) || (mouseOver && mbutton1justdown)){					     \
 		v += this->step;				     \
 		if(v < oldv)					     \
 			overflow = 1;				     \
@@ -505,7 +521,7 @@ void
 MenuEntry_Cmd::processInput(bool mouseOver, bool selected)
 {
 	// Don't execute on button3
-	if(this->triggerFunc && (selected && (leftjustdown || rightjustdown) || (mouseOver && button1justdown)))
+	if(this->triggerFunc && (selected && (leftjustdown || rightjustdown) || (mouseOver && mbutton1justdown) || crossjustdown))
 		this->triggerFunc();
 }
 
@@ -844,7 +860,7 @@ processInput(void)
 #define X(var, keycode) \
 	if(var){ \
 		repeattime = downtime = CTimer::GetTimeInMilliseconds(); \
-		lastkeydown = keycode; \
+		lastkeydown = keycode;
 		keyptr = &var; \
 	}
 	MUHKEYS
@@ -867,22 +883,46 @@ processInput(void)
 #define X(var, num)							  \
 	if(var){							  \
 		repeattime = downtime = CTimer::GetTimeInMilliseconds();	  \
-		lastbuttondown = num;					  \
-		buttonptr = &var;					  \
+		lastmbuttondown = num;				  \
+		mbuttonptr = &var;					  \
 	}
-	MUHBUTTONS
+	MUHMOUSEBUTTONS
 #undef X
-	if(lastbuttondown){
-		if(buttondown[lastbuttondown-1]){
+	if(lastmbuttondown){
+		if(mbuttondown[lastmbuttondown-1]){
 			int curtime = CTimer::GetTimeInMilliseconds();
 			if(curtime - downtime > REPEATDELAY){
 				if(curtime - repeattime > REPEATINTERVAL){
 					repeattime = curtime;
-					*buttonptr = 1;
+					*mbuttonptr = 1;
 				}
 			}
 		}else{
-			lastbuttondown = 0;
+			lastmbuttondown = 0;
+		}
+	}
+	
+	// Also for gampepad buttons
+	//TODO: Make the auto-repeating work for gamepad entry
+#define X(var, num)							  \
+	if(var){							  \
+		repeattime = downtime = CTimer::GetTimeInMilliseconds();	  \
+		lastpadbuttondown = num;				  \
+		padbuttonptr = &var;					  \
+	}
+	MUHGAMEPAD
+#undef X
+	if(lastpadbuttondown){
+		if(padbuttondown[lastpadbuttondown-1]){
+			int curtime = CTimer::GetTimeInMilliseconds();
+			if(curtime - downtime > REPEATDELAY){
+				if(curtime - repeattime > REPEATINTERVAL){
+					repeattime = curtime;
+					*padbuttonptr = 1;
+				}
+			}
+		}else{
+			lastpadbuttondown = 0;
 		}
 	}
 
@@ -930,9 +970,9 @@ processInput(void)
 		activeMenu->scroll(shift ? -5 : -1);
 	if(pgdnjustdown)
 		activeMenu->scroll(shift ? 5 : 1);
-	if(downjustdown)
+	if(downjustdown || paddownjustdown)
 		activeMenu->changeSelection(activeMenu->selection + (shift ? 5 : 1));
-	if(upjustdown)
+	if(upjustdown || padupjustdown)
 		activeMenu->changeSelection(activeMenu->selection - (shift ? 5 : 1));
 
 	if(CPad::NewMouseControllerState.WHEELUP){
@@ -947,27 +987,29 @@ processInput(void)
 	}
 
 	if(mouseOverEntry == &scrollUpEntry){
-		if(button1justdown){
+		if(mbutton1justdown){
 			activeMenu = mouseOverEntry->menu;
 			activeMenu->scroll(shift ? -5 : -1);
 		}
 	}
 	if(mouseOverEntry == &scrollDownEntry){
-		if(button1justdown){
+		if(mbutton1justdown){
 			activeMenu = mouseOverEntry->menu;
 			activeMenu->scroll(shift ? 5 : 1);
 		}
 	}
 
 	// Have to call this before processInput below because menu entry can change
-	if((button1justdown || button3justdown) && mouseOverEntry){
+	if((mbutton1justdown || mbutton3justdown) && mouseOverEntry){
 		activeMenu = mouseOverEntry->menu;
 		activeMenu->changeSelection(mouseOverEntry);
 	}
-	if(KEYJUSTDOWN(rsENTER)){
+	if(KEYJUSTDOWN(rsENTER) || ( crossjustdown && activeMenu->selectedEntry->type == MENUSUB )){
 		if(activeMenu->selectedEntry && activeMenu->selectedEntry->type == MENUSUB)
 			activeMenu = ((MenuEntry_Sub*)activeMenu->selectedEntry)->submenu;
-	}else if(KEYJUSTDOWN(rsBACKSP)){
+	}else if( circlejustdown && activeMenu->selectedEntry->type == MENUSUB ){
+		menuOn = !menuOn;
+	}else if(KEYJUSTDOWN(rsBACKSP) || circlejustdown){
 		if(activeMenu->parent)
 			activeMenu = activeMenu->parent;
 	}else{
@@ -997,16 +1039,40 @@ updateMouse(void)
 	if(mouseX >= screenWidth) mouseX = screenWidth;
 	if(mouseY >= screenHeight) mouseY = screenHeight;
 
-	button1justdown = pad->NewMouseControllerState.LMB && !pad->OldMouseControllerState.LMB;
-	button2justdown = pad->NewMouseControllerState.MMB && !pad->OldMouseControllerState.MMB;
-	button3justdown = pad->NewMouseControllerState.RMB && !pad->OldMouseControllerState.RMB;
-	buttondown[0] = pad->NewMouseControllerState.LMB;
-	buttondown[1] = pad->NewMouseControllerState.MMB;
-	buttondown[2] = pad->NewMouseControllerState.RMB;
+	mbutton1justdown = pad->NewMouseControllerState.LMB && !pad->OldMouseControllerState.LMB;
+	mbutton2justdown = pad->NewMouseControllerState.MMB && !pad->OldMouseControllerState.MMB;
+	mbutton3justdown = pad->NewMouseControllerState.RMB && !pad->OldMouseControllerState.RMB;
+	mbuttondown[0] = pad->NewMouseControllerState.LMB;
+	mbuttondown[1] = pad->NewMouseControllerState.MMB;
+	mbuttondown[2] = pad->NewMouseControllerState.RMB;
 
 	// Zero the mouse position so the camera won't move
 	pad->NewMouseControllerState.x = 0.0f;
 	pad->NewMouseControllerState.y = 0.0f;
+}
+
+void
+updatePad(void)
+{
+	CPad *pad = CPad::GetPad(0);
+
+	crossjustdown = pad->GetCrossJustDown();
+	circlejustdown = pad->GetCircleJustDown();
+	trianglejustdown = pad->GetTriangleJustDown();
+	squarejustdown = pad->GetSquareJustDown();
+	padleftjustdown = pad->GetAnaloguePadLeft();
+	padrightjustdown = pad->GetAnaloguePadRight();
+	padupjustdown = pad->GetAnaloguePadUp();
+	paddownjustdown = pad->GetAnaloguePadDown() ;
+	padbuttondown[0] = crossjustdown;
+	padbuttondown[1] = circlejustdown;
+	padbuttondown[2] = trianglejustdown;
+	padbuttondown[3] = squarejustdown;
+	padbuttondown[4] = padleftjustdown;
+	padbuttondown[5] = padrightjustdown;
+	padbuttondown[6] = padupjustdown;
+	padbuttondown[7] = paddownjustdown;
+
 }
 
 void
@@ -1015,16 +1081,22 @@ DebugMenuProcess(void)
 	// We only process some input here
 
 	CPad *pad = CPad::GetPad(0);
-	if(CTRLJUSTDOWN('M'))
+	if(CTRLJUSTDOWN('M')||(pad->GetTriangleJustDown()&& pad->GetRightShoulder1()))
 		menuOn = !menuOn;
 	if(!menuOn)
 		return;
-
+	
+	//kill the menu if start or esc are pressed
+	if((CPad::GetPad(0)->GetStartJustDown() || CPad::GetPad(0)->GetEscapeJustDown()) && menuOn){
+		menuOn = !menuOn;
+	}
+	
 	pad->DisablePlayerControls = 1;
 	// TODO: this could happen earlier
 	if(!menuInitialized)
 		DebugMenuInit();
 	updateMouse();
+	updatePad();
 
 }
 

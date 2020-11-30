@@ -3061,7 +3061,7 @@ CAutomobile::DoDriveByShootings(void)
 				CAnimManager::AddAnimation(pDriver->GetClump(), ASSOCGRP_STD, ANIM_DRIVEBY_L);
 			else
 				anim->SetRun();
-		}else if(pDriver->m_pMyVehicle->pPassengers[0] == nil || TheCamera.Cams[TheCamera.ActiveCam].Mode == CCam::MODE_1STPERSON){
+		}else{
 			anim = RpAnimBlendClumpGetAssociation(pDriver->GetClump(), ANIM_DRIVEBY_L);
 			if(anim)
 				anim->blendDelta = -1000.0f;

@@ -651,7 +651,7 @@ psInitialize(void)
 	C_PcSave::SetSaveDirectory(_psGetUserFilesFolder());
 	
 	InitialiseLanguage();
-#ifndef GTA3_1_1_PATCH
+#if GTA_VERSION >= GTA3_PC_11
 	FrontEndMenuManager.LoadSettings();
 #endif
 
@@ -703,7 +703,7 @@ psInitialize(void)
 
 #ifndef PS2_MENU
 
-#ifdef GTA3_1_1_PATCH
+#if GTA_VERSION >= GTA3_PC_11
 	FrontEndMenuManager.LoadSettings();
 #endif
 

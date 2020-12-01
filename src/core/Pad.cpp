@@ -937,7 +937,7 @@ void CPad::AddToPCCheatString(char c)
 	if ( !_CHEATCMP("GNIROOOOOB") )
 		SlowTimeCheat();
 
-#ifndef GTA3_1_1_PATCH
+#if GTA_VERSION < GTA3_PC_11
 	// "TURTOISE"
 	if ( !_CHEATCMP("ESIOTRUT") )
 		ArmourCheat();

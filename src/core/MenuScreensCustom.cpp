@@ -115,7 +115,7 @@ void RestoreDefGraphics(int8 action) {
 		CMenuManager::m_PrefsVsync = true;
 		CMenuManager::m_PrefsUseWideScreen = false;
 		FrontEndMenuManager.m_nDisplayVideoMode = FrontEndMenuManager.m_nPrefsVideoMode;
-		#ifdef GTA3_1_1_PATCH
+		#if GTA_VERSION >= GTA3_PC_11
 			if (_dwOperatingSystemVersion == OS_WIN98) {
 				CMBlur::BlurOn = false;
 				CMBlur::MotionBlurClose();

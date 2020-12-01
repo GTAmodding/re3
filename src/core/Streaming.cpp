@@ -458,6 +458,35 @@ CStreaming::LoadCdDirectory(const char *dirname, int n)
 	CFileMgr::CloseFile(fd);
 }
 
+#ifdef USE_CUSTOM_ALLOCATOR
+RpAtomic*
+RegisterAtomicMemPtrsCB(RpAtomic *atomic, void *data)
+{
+#if THIS_IS_COMPATIBLE_WITH_GTA3_RW31
+	// not quite sure what's going on here:
+	// gta3's RW 3.1 allocates separate memory for geometry data of RpGeometry.
+	// Is that a R* change? rpDefaultGeometryInstance also depends on it
+	RpGeometry *geo = RpAtomicGetGeometry(atomic);
+	if(geo->triangles)
+		REGISTER_MEMPTR(&geo->triangles);
+	if(geo->matList.materials)
+		REGISTER_MEMPTR(&geo->matList.materials);
+	if(geo->preLitLum)
+		REGISTER_MEMPTR(&geo->preLitLum);
+	if(geo->texCoords[0])
+		REGISTER_MEMPTR(&geo->texCoords[0]);
+	if(geo->texCoords[1])
+		REGISTER_MEMPTR(&geo->texCoords[1]);
+#else
+	// normally RpGeometry is allocated in one block (excluding morph targets)
+	// so we don't really have allocated pointers in the struct.
+	// NB: in librw we actually do it in two allocations (geometry itself and data)
+	// so we could conceivably come up with something here
+#endif
+	return atomic;
+}
+#endif
+
 bool
 CStreaming::ConvertBufferToObject(int8 *buf, int32 streamId)
 {
@@ -494,9 +523,11 @@ CStreaming::ConvertBufferToObject(int8 *buf, int32 streamId)
 
 		PUSH_MEMID(MEMID_STREAM_MODELS);
 		CTxdStore::SetCurrentTxd(mi->GetTxdSlot());
-// TODO(USE_CUSTOM_ALLOCATOR): register mem pointers
 		if(mi->IsSimple()){
 			success = CFileLoader::LoadAtomicFile(stream, streamId);
+#ifdef USE_CUSTOM_ALLOCATOR
+			RegisterAtomicMemPtrsCB(((CSimpleModelInfo*)mi)->m_atomics[0], nil);
+#endif
 		} else if (mi->GetModelType() == MITYPE_VEHICLE) {
 			// load vehicles in two parts
 			CModelInfo::GetModelInfo(streamId)->AddRef();
@@ -505,6 +536,10 @@ CStreaming::ConvertBufferToObject(int8 *buf, int32 streamId)
 				ms_aInfoForModel[streamId].m_loadState = STREAMSTATE_STARTED;
 		}else{
 			success = CFileLoader::LoadClumpFile(stream, streamId);
+#ifdef USE_CUSTOM_ALLOCATOR
+			if(success)
+				RpClumpForAllAtomics((RpClump*)mi->GetRwObject(), RegisterAtomicMemPtrsCB, nil);
+#endif
 		}
 		POP_MEMID();
 		UpdateMemoryUsed();
@@ -628,13 +663,16 @@ CStreaming::FinishLoadingLargeFile(int8 *buf, int32 streamId)
 
 	if(streamId < STREAM_OFFSET_TXD){
 		// Model
-// TODO(USE_CUSTOM_ALLOCATOR): register pointers
 		mi = CModelInfo::GetModelInfo(streamId);
 		PUSH_MEMID(MEMID_STREAM_MODELS);
 		CTxdStore::SetCurrentTxd(mi->GetTxdSlot());
 		success = CFileLoader::FinishLoadClumpFile(stream, streamId);
-		if(success)
+		if(success){
+#ifdef USE_CUSTOM_ALLOCATOR
+			RpClumpForAllAtomics((RpClump*)mi->GetRwObject(), RegisterAtomicMemPtrsCB, nil);
+#endif
 			success = AddToLoadedVehiclesList(streamId);
+		}
 		POP_MEMID();
 		mi->RemoveRef();
 		CTxdStore::RemoveRefWithoutDelete(mi->GetTxdSlot());

@@ -590,7 +590,7 @@ void CParticle::Shutdown()
 	for ( int32 i = 0; i < MAX_SMOKE_FILES; i++ )
 	{
 		RwTextureDestroy(gpSmokeTex[i]);
-#ifdef GTA3_1_1_PATCH
+#if GTA_VERSION >= GTA3_PC_11
 		gpSmokeTex[i] = nil;
 #endif
 	}
@@ -598,7 +598,7 @@ void CParticle::Shutdown()
 	for ( int32 i = 0; i < MAX_SMOKE2_FILES; i++ )
 	{
 		RwTextureDestroy(gpSmoke2Tex[i]);
-#ifdef GTA3_1_1_PATCH
+#if GTA_VERSION >= GTA3_PC_11
 		gpSmoke2Tex[i] = nil;
 #endif
 	}
@@ -606,7 +606,7 @@ void CParticle::Shutdown()
 	for ( int32 i = 0; i < MAX_RUBBER_FILES; i++ )
 	{
 		RwTextureDestroy(gpRubberTex[i]);
-#ifdef GTA3_1_1_PATCH
+#if GTA_VERSION >= GTA3_PC_11
 		gpRubberTex[i] = nil;
 #endif
 	}
@@ -614,7 +614,7 @@ void CParticle::Shutdown()
 	for ( int32 i = 0; i < MAX_RAINSPLASH_FILES; i++ )
 	{
 		RwTextureDestroy(gpRainSplashTex[i]);
-#ifdef GTA3_1_1_PATCH
+#if GTA_VERSION >= GTA3_PC_11
 		gpRainSplashTex[i] = nil;
 #endif
 	}
@@ -622,7 +622,7 @@ void CParticle::Shutdown()
 	for ( int32 i = 0; i < MAX_WATERSPRAY_FILES; i++ )
 	{
 		RwTextureDestroy(gpWatersprayTex[i]);
-#ifdef GTA3_1_1_PATCH
+#if GTA_VERSION >= GTA3_PC_11
 		gpWatersprayTex[i] = nil;
 #endif
 	}
@@ -630,7 +630,7 @@ void CParticle::Shutdown()
 	for ( int32 i = 0; i < MAX_EXPLOSIONMEDIUM_FILES; i++ )
 	{
 		RwTextureDestroy(gpExplosionMediumTex[i]);
-#ifdef GTA3_1_1_PATCH
+#if GTA_VERSION >= GTA3_PC_11
 		gpExplosionMediumTex[i] = nil;
 #endif
 	}
@@ -638,7 +638,7 @@ void CParticle::Shutdown()
 	for ( int32 i = 0; i < MAX_GUNFLASH_FILES; i++ )
 	{
 		RwTextureDestroy(gpGunFlashTex[i]);
-#ifdef GTA3_1_1_PATCH
+#if GTA_VERSION >= GTA3_PC_11
 		gpGunFlashTex[i] = nil;
 #endif
 	}
@@ -646,7 +646,7 @@ void CParticle::Shutdown()
 	for ( int32 i = 0; i < MAX_RAINDROP_FILES; i++ )
 	{
 		RwTextureDestroy(gpRainDropTex[i]);
-#ifdef GTA3_1_1_PATCH
+#if GTA_VERSION >= GTA3_PC_11
 		gpRainDropTex[i] = nil;
 #endif
 	}
@@ -654,7 +654,7 @@ void CParticle::Shutdown()
 	for ( int32 i = 0; i < MAX_RAINSPLASHUP_FILES; i++ )
 	{
 		RwTextureDestroy(gpRainSplashupTex[i]);
-#ifdef GTA3_1_1_PATCH
+#if GTA_VERSION >= GTA3_PC_11
 		gpRainSplashupTex[i] = nil;
 #endif
 	}
@@ -662,7 +662,7 @@ void CParticle::Shutdown()
 	for ( int32 i = 0; i < MAX_BIRDFRONT_FILES; i++ )
 	{
 		RwTextureDestroy(gpBirdfrontTex[i]);
-#ifdef GTA3_1_1_PATCH
+#if GTA_VERSION >= GTA3_PC_11
 		gpBirdfrontTex[i] = nil;
 #endif
 	}
@@ -670,7 +670,7 @@ void CParticle::Shutdown()
 	for ( int32 i = 0; i < MAX_CARDEBRIS_FILES; i++ )
 	{
 		RwTextureDestroy(gpCarDebrisTex[i]);
-#ifdef GTA3_1_1_PATCH
+#if GTA_VERSION >= GTA3_PC_11
 		gpCarDebrisTex[i] = nil;
 #endif
 	}
@@ -678,78 +678,78 @@ void CParticle::Shutdown()
 	for ( int32 i = 0; i < MAX_CARSPLASH_FILES; i++ )
 	{
 		RwTextureDestroy(gpCarSplashTex[i]);
-#ifdef GTA3_1_1_PATCH
+#if GTA_VERSION >= GTA3_PC_11
 		gpCarSplashTex[i] = nil;
 #endif
 	}
 	
 	RwTextureDestroy(gpFlame1Tex);
-#ifdef GTA3_1_1_PATCH
+#if GTA_VERSION >= GTA3_PC_11
 	gpFlame1Tex = nil;
 #endif
 
 	RwTextureDestroy(gpFlame5Tex);
-#ifdef GTA3_1_1_PATCH
+#if GTA_VERSION >= GTA3_PC_11
 	gpFlame5Tex = nil;
 #endif
 	
 	RwTextureDestroy(gpRainDropSmallTex);
-#ifdef GTA3_1_1_PATCH
+#if GTA_VERSION >= GTA3_PC_11
 	gpRainDropSmallTex = nil;
 #endif
 	
 	RwTextureDestroy(gpBloodTex);
-#ifdef GTA3_1_1_PATCH
+#if GTA_VERSION >= GTA3_PC_11
 	gpBloodTex = nil;
 #endif
 	
 	RwTextureDestroy(gpLeafTex);
-#ifdef GTA3_1_1_PATCH
+#if GTA_VERSION >= GTA3_PC_11
 	gpLeafTex = nil;
 #endif
 	
 	RwTextureDestroy(gpCloudTex1);
-#ifdef GTA3_1_1_PATCH
+#if GTA_VERSION >= GTA3_PC_11
 	gpCloudTex1 = nil;
 #endif
 	
 	RwTextureDestroy(gpCloudTex4);
-#ifdef GTA3_1_1_PATCH
+#if GTA_VERSION >= GTA3_PC_11
 	gpCloudTex4 = nil;
 #endif
 	
 	RwTextureDestroy(gpBloodSmallTex);
-#ifdef GTA3_1_1_PATCH
+#if GTA_VERSION >= GTA3_PC_11
 	gpBloodSmallTex = nil;
 #endif
 	
 	RwTextureDestroy(gpGungeTex);
-#ifdef GTA3_1_1_PATCH
+#if GTA_VERSION >= GTA3_PC_11
 	gpGungeTex = nil;
 #endif
 	
 	RwTextureDestroy(gpCollisionSmokeTex);
-#ifdef GTA3_1_1_PATCH
+#if GTA_VERSION >= GTA3_PC_11
 	gpCollisionSmokeTex = nil;
 #endif
 	
 	RwTextureDestroy(gpBulletHitTex);
-#ifdef GTA3_1_1_PATCH
+#if GTA_VERSION >= GTA3_PC_11
 	gpBulletHitTex = nil;
 #endif
 	
 	RwTextureDestroy(gpGunShellTex);
-#ifdef GTA3_1_1_PATCH
+#if GTA_VERSION >= GTA3_PC_11
 	gpGunShellTex = nil;
 #endif
 	
 	RwTextureDestroy(gpWakeOldTex);
-#ifdef GTA3_1_1_PATCH
+#if GTA_VERSION >= GTA3_PC_11
 	gpWakeOldTex = nil;
 #endif
 	
 	RwTextureDestroy(gpPointlightTex);
-#ifdef GTA3_1_1_PATCH
+#if GTA_VERSION >= GTA3_PC_11
 	gpPointlightTex = nil;
 #endif
 

@@ -306,7 +306,7 @@ CRenderer::RenderEverythingBarRoads(void)
 			}else{
 				dist = ms_vecCameraPosition - e->GetPosition();
 				if(!CVisibilityPlugins::InsertEntityIntoSortedList(e, dist.Magnitude())){
-					printf("Ran out of space in alpha entity list");
+					printf("Ran out of space in alpha entity list\n");
 					RenderOneNonRoad(e);
 				}
 			}

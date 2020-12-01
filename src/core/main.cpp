@@ -110,6 +110,9 @@ void TheGame(void);
 void DebugMenuPopulate(void);
 #endif
 
+#ifndef FINAL
+bool gbPrintMemoryUsage;
+#endif
 
 #ifdef GTA_PS2
 #define WANT_TO_LOAD TheMemoryCard.m_bWantToLoad
@@ -957,9 +960,10 @@ DisplayGameDebugText()
 		TWEAKBOOL(bDisplayPosn);
 		TWEAKBOOL(bDisplayRate);
 	}
-#endif
 
-//	PrintMemoryUsage();	// TODO: put this somewhere else
+	if(gbPrintMemoryUsage)
+		PrintMemoryUsage();
+#endif
 
 	char str[200];
 	wchar ustr[200];

@@ -74,7 +74,7 @@ bool bDidWeProcessAnyCinemaCam;
 
 CCamera::CCamera(void)
 {
-#if defined(GTA3_1_1_PATCH) || defined(FIX_BUGS)
+#if GTA_VERSION >= GTA3_PC_11 || defined(FIX_BUGS)
 	m_fMouseAccelHorzntl = 0.0025f;
 	m_fMouseAccelVertical = 0.003f;
 #endif
@@ -88,7 +88,7 @@ CCamera::CCamera(float)
 void
 CCamera::Init(void)
 {
-#if defined(GTA3_1_1_PATCH) || defined(FIX_BUGS)
+#if GTA_VERSION >= GTA3_PC_11 || defined(FIX_BUGS)
 	float fMouseAccelHorzntl = m_fMouseAccelHorzntl;
 	float fMouseAccelVertical = m_fMouseAccelVertical;
 #endif
@@ -104,7 +104,7 @@ CCamera::Init(void)
 		memset(this, 0, sizeof(CCamera));	// getting rid of vtable, eh?
 	#endif
 	
-	#if defined(GTA3_1_1_PATCH) || defined(FIX_BUGS)
+	#if GTA_VERSION >= GTA3_PC_11 || defined(FIX_BUGS)
 		m_fMouseAccelHorzntl = fMouseAccelHorzntl;
 		m_fMouseAccelVertical = fMouseAccelVertical;
 	#endif
@@ -237,7 +237,7 @@ CCamera::Init(void)
 	m_uiTransitionState = 0;
 	m_uiTimeTransitionStart = 0;
 	m_bLookingAtPlayer = true;
-#if !defined(GTA3_1_1_PATCH) && !defined(FIX_BUGS)
+#if GTA_VERSION < GTA3_PC_11 && !defined(FIX_BUGS)
 	m_fMouseAccelHorzntl = 0.0025f;
 	m_fMouseAccelVertical = 0.003f;
 #endif

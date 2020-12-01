@@ -135,10 +135,6 @@ enum Config {
 	NUM_EXPLOSIONS = 48,
 };
 
-// We'll use this once we're ready to become independent of the game
-// Use it to mark bugs in the code that will prevent the game from working then
-//#define STANDALONE
-
 // We don't expect to compile for PS2 or Xbox
 // but it might be interesting for documentation purposes
 #define GTA_PC
@@ -165,6 +161,16 @@ enum Config {
 #define FINAL
 #endif
 
+// Version defines
+#define GTA3_PS2_140	300
+#define GTA3_PS2_160	301
+#define GTA3_PC_10	310
+#define GTA3_PC_11	311
+#define GTA3_PC_STEAM	312
+// TODO? maybe something for xbox or android?
+
+#define GTA_VERSION	GTA3_PC_11
+
 // quality of life fixes that should also be in FINAL
 #define NASTY_GAME	// nasty game for all languages
 #define NO_CDCHECK
@@ -173,14 +179,18 @@ enum Config {
 #define DRAW_GAME_VERSION_TEXT
 #define DRAW_MENU_VERSION_TEXT
 
+// Memory allocation and compression
+// #define USE_CUSTOM_ALLOCATOR		// use CMemoryHeap for allocation. use with care, not finished yet
+//#define COMPRESSED_COL_VECTORS	// use compressed vectors for collision vertices
+//#define ANIM_COMPRESSION	// only keep most recently used anims uncompressed
+
 #if defined GTA_PS2
 #	define GTA_PS2_STUFF
 #	define RANDOMSPLASH
+#	define USE_CUSTOM_ALLOCATOR
 #	define VU_COLLISION
 #	define ANIM_COMPRESSION
 #elif defined GTA_PC
-#	define GTA3_1_1_PATCH
-//#	define GTA3_STEAM_PATCH
 #	ifdef GTA_PS2_STUFF
 #		define USE_PS2_RAND
 #		define RANDOMSPLASH	// use random splash as on PS2
@@ -190,7 +200,7 @@ enum Config {
 #endif
 
 #ifdef VU_COLLISION
-#define COMPRESSED_COL_VECTORS	// current need compressed vectors in this code
+#define COMPRESSED_COL_VECTORS	// currently need compressed vectors in this code
 #endif
 
 #ifdef MASTER
@@ -242,7 +252,7 @@ enum Config {
 #endif
 
 #ifndef EXTENDED_COLOURFILTER
-#undef SCREEN_DROPLETS		// we need the frontbuffer for this effect
+#undef SCREEN_DROPLETS		// we need the backbuffer for this effect
 #endif
 #ifndef EXTENDED_PIPELINES
 #undef SCREEN_DROPLETS		// we need neo.txd

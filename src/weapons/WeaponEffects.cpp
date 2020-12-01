@@ -46,7 +46,7 @@ void
 CWeaponEffects::Shutdown(void)
 {
 	RwTextureDestroy(gpCrossHairTex);
-#ifdef GTA3_1_1_PATCH
+#if GTA_VERSION >= GTA3_PC_11
 	gpCrossHairTex = nil;
 #endif
 }

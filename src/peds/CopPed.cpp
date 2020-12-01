@@ -667,7 +667,7 @@ CCopPed::ProcessControl(void)
 				}
 
 				if (bDuckAndCover) {
-#if !defined(GTA3_1_1_PATCH) && !defined(VC_PED_PORTS)
+#if GTA_VERSION < GTA3_PC_11 && !defined(VC_PED_PORTS)
 					if (!bNotAllowedToDuck && Seek()) {
 						SetMoveState(PEDMOVE_STILL);
 						SetMoveAnim();

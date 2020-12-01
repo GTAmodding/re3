@@ -1009,7 +1009,7 @@ CMenuManager::Draw()
 	CFont::SetCentreOff();
 	CFont::SetJustifyOn();
 	CFont::SetBackGroundOnlyTextOn();
-#ifdef GTA3_1_1_PATCH
+#if GTA_VERSION >= GTA3_PC_11
 #ifdef DRAW_MENU_VERSION_TEXT
 	CFont::SetColor(CRGBA(235, 170, 50, FadeIn(255)));
 	CFont::SetRightJustifyOn();
@@ -3538,7 +3538,7 @@ CMenuManager::LoadAllTextures()
 	CTxdStore::LoadTxd(frontendTxdSlot, "MODELS/FRONTEND.TXD");
 	CTxdStore::AddRef(frontendTxdSlot);
 	CTxdStore::SetCurrentTxd(frontendTxdSlot);
-#ifndef GTA3_1_1_PATCH
+#if GTA_VERSION < GTA3_PC_11
 	CStreaming::IHaveUsedStreamingMemory();
 	CTimer::Update();
 #endif
@@ -3568,7 +3568,7 @@ CMenuManager::LoadAllTextures()
 		m_aMapSprites[i].SetAddressing(rwTEXTUREADDRESSBORDER);
 	}
 #endif
-#ifdef GTA3_1_1_PATCH
+#if GTA_VERSION >= GTA3_PC_11
 	CStreaming::IHaveUsedStreamingMemory();
 	CTimer::Update();
 #endif
@@ -3583,7 +3583,7 @@ CMenuManager::LoadSettings()
 	int fileHandle = CFileMgr::OpenFile("gta3.set", "r");
 
 	int32 prevLang = m_PrefsLanguage;
-#ifdef GTA3_1_1_PATCH
+#if GTA_VERSION >= GTA3_PC_11
 	CMBlur::BlurOn = (_dwOperatingSystemVersion != OS_WIN98);
 #else
 	CMBlur::BlurOn = true;
@@ -3882,7 +3882,7 @@ void
 CMenuManager::PrintStats()
 {
 	int rowNum = ConstructStatLine(99999);
-#ifdef GTA3_1_1_PATCH
+#if GTA_VERSION >= GTA3_PC_11
 	CFont::SetFontStyle(FONT_LOCALE(FONT_BANK));
 #endif
 	CFont::SetScale(MENU_X(MENU_TEXT_SIZE_X * 0.7), MENU_Y(MENU_TEXT_SIZE_Y * 0.9)); // second mulipliers are double, idk why
@@ -4936,7 +4936,7 @@ CMenuManager::ProcessButtonPresses(void)
 						m_PrefsUseWideScreen = false;
 						m_PrefsShowSubtitles = true;
 						m_nDisplayVideoMode = m_nPrefsVideoMode;
-#ifdef GTA3_1_1_PATCH
+#if GTA_VERSION >= GTA3_PC_11
 						if (_dwOperatingSystemVersion == OS_WIN98) {
 							CMBlur::BlurOn = false;
 							CMBlur::MotionBlurClose();
@@ -5588,7 +5588,7 @@ CMenuManager::WaitForUserCD()
 	CSprite2d *splash;
 	char *splashscreen = nil;
 
-#if (!(defined RANDOMSPLASH) && !(defined GTA3_1_1_PATCH))
+#if (!(defined RANDOMSPLASH) && GTA_VERSION < GTA3_PC_11)
 	if (CGame::frenchGame || CGame::germanGame || !CGame::nastyGame)
 		splashscreen = "mainsc2";
 	else

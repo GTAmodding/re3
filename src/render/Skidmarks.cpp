@@ -54,15 +54,15 @@ void
 CSkidmarks::Shutdown(void)
 {
 	RwTextureDestroy(gpSkidTex);
-#ifdef GTA3_1_1_PATCH
+#if GTA_VERSION >= GTA3_PC_11
 	gpSkidTex = nil;
 #endif
 	RwTextureDestroy(gpSkidBloodTex);
-#ifdef GTA3_1_1_PATCH
+#if GTA_VERSION >= GTA3_PC_11
 	gpSkidBloodTex = nil;
 #endif
 	RwTextureDestroy(gpSkidMudTex);
-#ifdef GTA3_1_1_PATCH
+#if GTA_VERSION >= GTA3_PC_11
 	gpSkidMudTex = nil;
 #endif
 }

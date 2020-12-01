@@ -824,7 +824,7 @@ CPhysical::ApplyCollisionAlt(CEntity *B, CColPoint &colpoint, float &impulse, CV
 		normalSpeed = DotProduct(speed, colpoint.normal);
 		if(normalSpeed < 0.0f){
 			float minspeed = 1.3f*GRAVITY * CTimer::GetTimeStep();
-#if GTA_VERSION >= GTA3_PC_11
+#ifdef GTA3_1_1_PATCH
 			if ((IsObject() || IsVehicle() && (GetUp().z < -0.3f || ((CVehicle*)this)->IsBike() && (GetStatus() == STATUS_ABANDONED || GetStatus() == STATUS_WRECKED))) &&
 #else
 			if((IsObject() || IsVehicle() && GetUp().z < -0.3f) &&

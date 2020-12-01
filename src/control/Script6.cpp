@@ -1326,7 +1326,7 @@ int8 CRunningScript::ProcessCommands1100To1199(int32 command)
 #endif
 		return 0;
 #endif
-#if GTA_VERSION < GTA3_PC_11
+#ifndef GTA3_1_1_PATCH
 	case COMMAND_SET_THREAT_REACTION_RANGE_MULTIPLIER:
 		CollectParameters(&m_nIp, 1);
 #ifdef FIX_BUGS

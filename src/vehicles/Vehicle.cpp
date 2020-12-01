@@ -405,7 +405,7 @@ CVehicle::FlyingControl(eFlightModel flightModel)
 		else
 			fThrust = fThrustVar * (CPad::GetPad(0)->GetAccelerate() - 2 * CPad::GetPad(0)->GetBrake()) / 255.0f + 0.95f;
 		fThrust -= fRotorFallOff * DotProduct(m_vecMoveSpeed, GetUp());
-#if GTA_VERSION >= GTA3_PC_11
+#ifdef GTA3_1_1_PATCH
 		if (fThrust > 0.9f && GetPosition().z > 80.0f)
 			fThrust = 0.9f;
 #endif

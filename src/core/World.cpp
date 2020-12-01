@@ -53,7 +53,7 @@ bool CWorld::bIncludeCarTyres;
 void
 CWorld::Initialise()
 {
-#if GTA_VERSION <= GTA3_PS2_160
+#ifdef GTA_PS2
 	CPools::Initialise();
 #endif
 	pIgnoreEntity = nil;
@@ -1783,9 +1783,6 @@ CWorld::ShutDown(void)
 		}
 	}
 	ms_listMovingEntityPtrs.Flush();
-#if GTA_VERSION <= GTA3_PS2_160
-	CPools::Shutdown();
-#endif
 }
 
 void

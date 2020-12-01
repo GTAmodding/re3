@@ -78,12 +78,12 @@ public:
 		if(type == EFFECT_LIGHT){
 			if(light.corona)
 				RwTextureDestroy(light.corona);
-#if GTA_VERSION >= GTA3_PC_11
+#ifdef GTA3_1_1_PATCH
 			light.corona = nil;
 #endif
 			if(light.shadow)
 				RwTextureDestroy(light.shadow);
-#if GTA_VERSION >= GTA3_PC_11
+#ifdef GTA3_1_1_PATCH
 			light.shadow = nil;
 #endif
 		}

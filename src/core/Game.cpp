@@ -265,19 +265,16 @@ void CGame::ShutdownRenderWare(void)
 #endif
 }
 
-// missing altogether on PS2
 bool CGame::InitialiseOnceAfterRW(void)
 {
-#if GTA_VERSION > GTA3_PS2_160
 	TheText.Load();
-	DMAudio.Initialise();	// before TheGame() on PS2
+	DMAudio.Initialise();
 	CTimer::Initialise();
 	CTempColModels::Initialise();
 	mod_HandlingManager.Initialise();
 	CSurfaceTable::Initialise("DATA\\SURFACE.DAT");
 	CPedStats::Initialise();
 	CTimeCycle::Initialise();
-#endif
 
 	if ( DMAudio.GetNum3DProvidersAvailable() == 0 )
 		FrontEndMenuManager.m_nPrefsAudio3DProviderIndex = -1;
@@ -333,15 +330,10 @@ bool CGame::Initialise(const char* datFile)
 {
 #ifdef GTA_PS2
 	// TODO: upload VU0 collision code here
-#endif
-
-#if GTA_VERSION > GTA3_PS2_160
+#else
 	ResetLoadingScreenBar();
 	strcpy(aDatFile, datFile);
 	CPools::Initialise();	// done in CWorld on PS2
-#endif
-
-#ifndef GTA_PS2
 	CIniFile::LoadIniFile();
 #endif
 
@@ -375,15 +367,13 @@ bool CGame::Initialise(const char* datFile)
 	CWeather::Init();
 	CCullZones::Init();
 	CCollision::Init();
-#ifdef PS2_MENU	// TODO: is this the right define?
+#ifdef PS2_MENU
 	TheText.Load();
 #endif
 	CTheZones::Init();
 	CUserDisplay::Init();
 	CMessages::Init();
-#if GTA_VERSION > GTA3_PS2_160
 	CMessages::ClearAllMessagesDisplayedByGame();
-#endif
 	CRecordDataForGame::Init();
 	CRestart::Initialise();
 
@@ -391,17 +381,11 @@ bool CGame::Initialise(const char* datFile)
 	CWorld::Initialise();
 	POP_MEMID();
 
-#if GTA_VERSION <= GTA3_PS2_160
-	mod_HandlingManager.Initialise();
-	CSurfaceTable::Initialise("DATA\\SURFACE.DAT");
-	CTempColModels::Initialise();
-#endif
-
 	PUSH_MEMID(MEMID_TEXTURES);
 	CParticle::Initialise();
 	POP_MEMID();
 
-#if GTA_VERSION <= GTA3_PS2_160
+#ifdef GTA_PS2
 	gStartX = -180.0f;
 	gStartY = 180.0f;
 	gStartZ = 14.0f;
@@ -416,31 +400,20 @@ bool CGame::Initialise(const char* datFile)
 	CCarCtrl::Init();
 	POP_MEMID();
 
-#if GTA_VERSION > GTA3_PS2_160
+#ifndef GTA_PS2
 	InitModelIndices();
 #endif
 
 	PUSH_MEMID(MEMID_DEF_MODELS);
 	CModelInfo::Initialise();
-#if GTA_VERSION <= GTA3_PS2_160
-	CPedStats::Initialise();	// InitialiseOnceAfterRW
-#else
+#ifndef GTA_PS2
 	// probably moved before LoadLevel for multiplayer maps?
 	CPickups::Init();
 	CTheCarGenerators::Init();
 #endif
-
-#ifndef GTA_PS2		// or GTA_VERSION?
 	CdStreamAddImage("MODELS\\GTA3.IMG");
-#endif
-
-#if GTA_VERSION > GTA3_PS2_160
 	CFileLoader::LoadLevel("DATA\\DEFAULT.DAT");
 	CFileLoader::LoadLevel(datFile);
-#else
-	CFileLoader::LoadLevel("GTA3.DAT");
-#endif
-
 #ifdef EXTENDED_PIPELINES
 	// for generic fallback
 	CustomPipes::SetTxdFindCallback();
@@ -451,25 +424,18 @@ bool CGame::Initialise(const char* datFile)
 	CTheZones::PostZoneCreation();
 	POP_MEMID();
 
-#if GTA_VERSION <= GTA3_PS2_160
-	TestModelIndices();
-#endif
 	LoadingScreen("Loading the Game", "Setup paths", GetRandomSplashScreen());
 	ThePaths.PreparePathData();
-#if GTA_VERSION > GTA3_PS2_160
+	// done elsewhere on PS2
 	for (int i = 0; i < NUMPLAYERS; i++)
 		CWorld::Players[i].Clear();
 	CWorld::Players[0].LoadPlayerSkin();
 	TestModelIndices();
-#endif
+	//
 
 	LoadingScreen("Loading the Game", "Setup water", nil);
 	CWaterLevel::Initialise("DATA\\WATER.DAT");
-#if GTA_VERSION <= GTA3_PS2_160
-	CTimeCycle::Initialise();	// InitialiseOnceAfterRW
-#else
 	TheConsole.Init();
-#endif
 	CDraw::SetFOV(120.0f);
 	CDraw::ms_fLODDistance = 500.0f;
 
@@ -506,11 +472,6 @@ bool CGame::Initialise(const char* datFile)
 
 	LoadingScreen("Loading the Game", "Setup game variables", nil);
 	CPopulation::Initialise();
-#if GTA_VERSION <= GTA3_PS2_160
-	for (int i = 0; i < NUMPLAYERS; i++)
-		CWorld::Players[i].Clear();
-//	CWorld::Players[0].LoadPlayerSkin();	// TODO: use a define for this
-#endif
 	CWorld::PlayerInFocus = 0;
 	CCoronas::Init();
 	CShadows::Init();
@@ -519,7 +480,7 @@ bool CGame::Initialise(const char* datFile)
 	CAntennas::Init();
 	CGlass::Init();
 	gPhoneInfo.Initialise();
-#ifndef GTA_PS2		// TODO: define for this
+#ifndef GTA_PS2
 	CSceneEdit::Initialise();
 #endif
 
@@ -530,11 +491,11 @@ bool CGame::Initialise(const char* datFile)
 	POP_MEMID();
 
 	LoadingScreen("Loading the Game", "Setup game variables", nil);
-#if GTA_VERSION <= GTA3_PS2_160
+#ifdef GTA_PS2
 	CTimer::Initialise();
 #endif
 	CClock::Initialise(1000);
-#if GTA_VERSION <= GTA3_PS2_160
+#ifdef GTA_PS2
 	CTheCarGenerators::Init();
 #endif
 	CHeli::InitHelis();
@@ -542,52 +503,44 @@ bool CGame::Initialise(const char* datFile)
 	CMovingThings::Init();
 	CDarkel::Init();
 	CStats::Init();
-#if GTA_VERSION <= GTA3_PS2_160
+#ifdef GTA_PS2
 	CPickups::Init();
 #endif
 	CPacManPickups::Init();
-#if GTA_VERSION <= GTA3_PS2_160
-	CGarages::Init();
-#endif
+	// CGarages::Init(); here on PS2 instead
 	CRubbish::Init();
 	CClouds::Init();
-#if GTA_VERSION <= GTA3_PS2_160
+#ifdef GTA_PS2
 	CRemote::Init();
 #endif
 	CSpecialFX::Init();
 	CWaterCannons::Init();
 	CBridge::Init();
-#if GTA_VERSION > GTA3_PS2_160
 	CGarages::Init();
-#endif
 
 	LoadingScreen("Loading the Game", "Position dynamic objects", nil);
 	CWorld::RepositionCertainDynamicObjects();
-#if GTA_VERSION <= GTA3_PS2_160
-	CCullZones::ResolveVisibilities();
-#endif
+	// CCullZones::ResolveVisibilities(); on PS2 here instead
 
 	LoadingScreen("Loading the Game", "Initialise vehicle paths", nil);
-#if GTA_VERSION > GTA3_PS2_160
 	CCullZones::ResolveVisibilities();
-#endif
 	CTrain::InitTrains();
 	CPlane::InitPlanes();
 	CCredits::Init();
 	CRecordDataForChase::Init();
-#ifndef GTA_PS2		// TODO: define for that
 	CReplay::Init();
-#endif
 
 #ifdef PS2_MENU
 	if ( !TheMemoryCard.m_bWantToLoad )
-#endif
 	{
-		LoadingScreen("Loading the Game", "Start script", nil);
-		CTheScripts::StartTestScript();
-		CTheScripts::Process();
-		TheCamera.Process();
+#endif
+	LoadingScreen("Loading the Game", "Start script", nil);
+	CTheScripts::StartTestScript();
+	CTheScripts::Process();
+	TheCamera.Process();
+#ifdef PS2_MENU
 	}
+#endif
 
 	LoadingScreen("Loading the Game", "Load scene", nil);
 	CModelInfo::RemoveColModelsFromOtherLevels(currLevel);
@@ -603,7 +556,7 @@ bool CGame::ShutDown(void)
 	CPlane::Shutdown();
 	CTrain::Shutdown();
 	CSpecialFX::Shutdown();
-#if GTA_VERSION > GTA3_PS2_160
+#ifndef PS2
 	CGarages::Shutdown();
 #endif
 	CMovingThings::Shutdown();
@@ -644,9 +597,7 @@ bool CGame::ShutDown(void)
 	CSkidmarks::Shutdown();
 	CWeaponEffects::Shutdown();
 	CParticle::Shutdown();
-#if GTA_VERSION > GTA3_PS2_160
 	CPools::ShutDown();
-#endif
 	CTxdStore::RemoveTxdSlot(gameTxdSlot);
 	CdStreamRemoveImages();
 	return true;
@@ -672,7 +623,7 @@ void CGame::ReInitGameObjectVariables(void)
 	CWorld::bDoingCarCollisions = false;
 	CHud::ReInitialise();
 	CRadar::Initialise();
-#if GTA_VERSION <= GTA3_PS2_160
+#ifdef GTA_PS2
 	gStartX = -180.0f;
 	gStartY = 180.0f;
 	gStartZ = 14.0f;
@@ -695,7 +646,7 @@ void CGame::ReInitGameObjectVariables(void)
 		CWorld::Players[i].Clear();
 	
 	CWorld::PlayerInFocus = 0;
-#if GTA_VERSION <= GTA3_PS2_160
+#ifdef GTA_PS2
 	CWeaponEffects::Init();
 	CSkidmarks::Init();
 #endif
@@ -718,7 +669,7 @@ void CGame::ReInitGameObjectVariables(void)
 	CPickups::Init();
 	CPacManPickups::Init();
 	CGarages::Init();
-#if GTA_VERSION <= GTA3_PS2_160
+#ifdef GTA_PS2
 	CClouds::Init();
 	CRemote::Init();
 #endif

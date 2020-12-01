@@ -29,7 +29,6 @@
 #include "Script.h"
 #include "postfx.h"
 #include "custompipes.h"
-#include "MemoryHeap.h"
 
 #ifdef DONT_TRUST_RECOGNIZED_JOYSTICKS
 #include "FileMgr.h"
@@ -384,10 +383,6 @@ SwitchToMission(void)
 }
 #endif
 
-#ifdef USE_CUSTOM_ALLOCATOR
-static void ParseHeap(void) { gMainHeap.ParseHeap(); }
-#endif
-
 static const char *carnames[] = {
 	"landstal", "idaho", "stinger", "linerun", "peren", "sentinel", "patriot", "firetruk", "trash", "stretch", "manana", "infernus", "blista", "pony",
 	"mule", "cheetah", "ambulan", "fbicar", "moonbeam", "esperant", "taxi", "kuruma", "bobcat", "mrwhoop", "bfinject", "corpse", "police", "enforcer",
@@ -570,12 +565,6 @@ DebugMenuPopulate(void)
 		DebugMenuAddVarBool8("Render", "Don't render Objects", &gbDontRenderObjects, nil);
 		DebugMenuAddVarBool8("Render", "Don't Render Water", &gbDontRenderWater, nil);
 
-#ifndef FINAL
-		DebugMenuAddVarBool8("Debug", "Print Memory Usage", &gbPrintMemoryUsage, nil);
-#ifdef USE_CUSTOM_ALLOCATOR
-		DebugMenuAddCmd("Debug", "Parse Heap", ParseHeap);
-#endif
-#endif
 		DebugMenuAddVarBool8("Debug", "Show cullzone debug stuff", &gbShowCullZoneDebugStuff, nil);
 		DebugMenuAddVarBool8("Debug", "Disable zone cull", &gbDisableZoneCull, nil);
 

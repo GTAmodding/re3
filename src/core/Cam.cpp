@@ -2570,7 +2570,7 @@ CCam::Process_M16_1stPerson(const CVector &CameraTarget, float, float, float)
 		ResetStatics = false;
 	}
 
-#if GTA_VERSION < GTA3_PC_11
+#ifndef GTA3_1_1_PATCH
 	((CPed*)CamTargetEntity)->m_pedIK.GetComponentPosition(&HeadPos, PED_HEAD);
 	Source = HeadPos;
 	Source.z += 0.1f;
@@ -2605,7 +2605,7 @@ CCam::Process_M16_1stPerson(const CVector &CameraTarget, float, float, float)
 	if(Alpha > DEGTORAD(60.0f)) Alpha = DEGTORAD(60.0f);
 	else if(Alpha < -DEGTORAD(89.5f)) Alpha = -DEGTORAD(89.5f);
 
-#if GTA_VERSION >= GTA3_PC_11
+#ifdef GTA3_1_1_PATCH
 	HeadPos.x = 0.0f;
 	HeadPos.y = 0.0f;
 	HeadPos.z = 0.0f;

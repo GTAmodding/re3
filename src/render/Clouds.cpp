@@ -44,23 +44,23 @@ void
 CClouds::Shutdown(void)
 {
 	RwTextureDestroy(gpCloudTex[0]);
-#if GTA_VERSION >= GTA3_PC_11
+#ifdef GTA3_1_1_PATCH
 	gpCloudTex[0] = nil;
 #endif
 	RwTextureDestroy(gpCloudTex[1]);
-#if GTA_VERSION >= GTA3_PC_11
+#ifdef GTA3_1_1_PATCH
 	gpCloudTex[1] = nil;
 #endif
 	RwTextureDestroy(gpCloudTex[2]);
-#if GTA_VERSION >= GTA3_PC_11
+#ifdef GTA3_1_1_PATCH
 	gpCloudTex[2] = nil;
 #endif
 	RwTextureDestroy(gpCloudTex[3]);
-#if GTA_VERSION >= GTA3_PC_11
+#ifdef GTA3_1_1_PATCH
 	gpCloudTex[3] = nil;
 #endif
 	RwTextureDestroy(gpCloudTex[4]);
-#if GTA_VERSION >= GTA3_PC_11
+#ifdef GTA3_1_1_PATCH
 	gpCloudTex[4] = nil;
 #endif
 }

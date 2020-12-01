@@ -389,7 +389,7 @@ psInitialize(void)
 	
 	InitialiseLanguage();
 
-#if GTA_VERSION < GTA3_PC_11
+#ifndef GTA3_1_1_PATCH
 	FrontEndMenuManager.LoadSettings();
 #endif
 
@@ -443,7 +443,7 @@ psInitialize(void)
 	
 #ifndef PS2_MENU
 
-#if GTA_VERSION >= GTA3_PC_11
+#ifdef GTA3_1_1_PATCH
 	FrontEndMenuManager.LoadSettings();
 #endif
 

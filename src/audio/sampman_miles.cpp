@@ -65,7 +65,7 @@ uint32 _CurMP3Index;
 int32 _CurMP3Pos;
 bool _bIsMp3Active;
 
-#if GTA_VERSION >= GTA3_PC_11 || defined(NO_CDCHECK)
+#if defined(GTA3_1_1_PATCH) || defined(GTA3_STEAM_PATCH) || defined(NO_CDCHECK)
 bool _bUseHDDAudio;
 char _aHDDPath[MAX_PATH];
 #endif
@@ -1043,7 +1043,7 @@ cSampleManager::Initialise(void)
 					
 			if ( !m_bInitialised )
 			{
-#if GTA_VERSION < GTA3_PC_STEAM && !defined(NO_CDCHECK)
+#if !defined(GTA3_STEAM_PATCH) && !defined(NO_CDCHECK)
 				FrontEndMenuManager.WaitForUserCD();
 				if ( FrontEndMenuManager.m_bQuitGameNoCD )
 				{
@@ -1060,7 +1060,7 @@ cSampleManager::Initialise(void)
 		}
 	}
 
-#if GTA_VERSION >= GTA3_PC_11 || defined(NO_CDCHECK)
+#if defined(GTA3_1_1_PATCH) || defined(GTA3_STEAM_PATCH) || defined(NO_CDCHECK)
 	// hddaudio
 	/**
 		Option for user to play audio files directly from hard disk.
@@ -1297,17 +1297,17 @@ cSampleManager::Terminate(void)
 bool
 cSampleManager::CheckForAnAudioFileOnCD(void)
 {
-#if GTA_VERSION < GTA3_PC_STEAM && !defined(NO_CDCHECK)
+#if !defined(GTA3_STEAM_PATCH) && !defined(NO_CDCHECK)
 	char filepath[MAX_PATH];
 	
-#if GTA_VERSION >= GTA3_PC_11
+#if defined(GTA3_1_1_PATCH)
 	if (_bUseHDDAudio)
 		strcpy(filepath, _aHDDPath);
 	else
 		strcpy(filepath, m_szCDRomRootPath);
 #else
 	strcpy(filepath, m_szCDRomRootPath);
-#endif // #if GTA_VERSION >= GTA3_PC_11
+#endif // #if defined(GTA3_1_1_PATCH)
 
 	strcat(filepath, StreamedNameTable[AudioManager.GetRandomNumber(1) % TOTAL_STREAMED_SOUNDS]);
 	
@@ -1324,13 +1324,13 @@ cSampleManager::CheckForAnAudioFileOnCD(void)
 	
 #else
 	return true;
-#endif // #if GTA_VERSION < GTA3_PC_STEAM && !defined(NO_CDCHECK)
+#endif // #if !defined(GTA3_STEAM_PATCH) && !defined(NO_CDCHECK)
 }
 
 char
 cSampleManager::GetCDAudioDriveLetter(void)
 {
-#if GTA_VERSION >= GTA3_PC_11 || defined(NO_CDCHECK)
+#if defined(GTA3_1_1_PATCH) || defined(GTA3_STEAM_PATCH) || defined(NO_CDCHECK)
 	if (_bUseHDDAudio)
 	{
 		if ( strlen(_aHDDPath) != 0 )

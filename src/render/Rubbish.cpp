@@ -414,19 +414,19 @@ void
 CRubbish::Shutdown(void)
 {
 	RwTextureDestroy(gpRubbishTexture[0]);
-#if GTA_VERSION >= GTA3_PC_11
+#ifdef GTA3_1_1_PATCH
 	gpRubbishTexture[0] = nil;
 #endif
 	RwTextureDestroy(gpRubbishTexture[1]);
-#if GTA_VERSION >= GTA3_PC_11
+#ifdef GTA3_1_1_PATCH
 	gpRubbishTexture[1] = nil;
 #endif
 	RwTextureDestroy(gpRubbishTexture[2]);
-#if GTA_VERSION >= GTA3_PC_11
+#ifdef GTA3_1_1_PATCH
 	gpRubbishTexture[2] = nil;
 #endif
 	RwTextureDestroy(gpRubbishTexture[3]);
-#if GTA_VERSION >= GTA3_PC_11
+#ifdef GTA3_1_1_PATCH
 	gpRubbishTexture[3] = nil;
 #endif
 }

@@ -59,13 +59,7 @@ CFileLoader::LoadLevel(const char *filename)
 		savedTxd = RwTexDictionaryCreate();
 		RwTexDictionarySetCurrent(savedTxd);
 	}
-#if GTA_VERSION <= GTA3_PS2_160
-	CFileMgr::ChangeDir("\\DATA\\");
 	fd = CFileMgr::OpenFile(filename, "r");
-	CFileMgr::ChangeDir("\\");
-#else
-	fd = CFileMgr::OpenFile(filename, "r");
-#endif
 	assert(fd > 0);
 
 	for(line = LoadLine(fd); line; line = LoadLine(fd)){
@@ -249,7 +243,6 @@ CFileLoader::LoadCollisionModel(uint8 *buf, CColModel &model, char *modelname)
 	buf += 44;
 	if(model.numSpheres > 0){
 		model.spheres = (CColSphere*)RwMalloc(model.numSpheres*sizeof(CColSphere));
-		REGISTER_MEMPTR(&model.spheres);
 		for(i = 0; i < model.numSpheres; i++){
 			model.spheres[i].Set(*(float*)buf, *(CVector*)(buf+4), buf[16], buf[17]);
 			buf += 20;
@@ -261,7 +254,6 @@ CFileLoader::LoadCollisionModel(uint8 *buf, CColModel &model, char *modelname)
 	buf += 4;
 	if(model.numLines > 0){
 		model.lines = (CColLine*)RwMalloc(model.numLines*sizeof(CColLine));
-		REGISTER_MEMPTR(&model.lines);
 		for(i = 0; i < model.numLines; i++){
 			model.lines[i].Set(*(CVector*)buf, *(CVector*)(buf+12));
 			buf += 24;
@@ -273,7 +265,6 @@ CFileLoader::LoadCollisionModel(uint8 *buf, CColModel &model, char *modelname)
 	buf += 4;
 	if(model.numBoxes > 0){
 		model.boxes = (CColBox*)RwMalloc(model.numBoxes*sizeof(CColBox));
-		REGISTER_MEMPTR(&model.boxes);
 		for(i = 0; i < model.numBoxes; i++){
 			model.boxes[i].Set(*(CVector*)buf, *(CVector*)(buf+12), buf[24], buf[25]);
 			buf += 28;
@@ -285,7 +276,6 @@ CFileLoader::LoadCollisionModel(uint8 *buf, CColModel &model, char *modelname)
 	buf += 4;
 	if(numVertices > 0){
 		model.vertices = (CompressedVector*)RwMalloc(numVertices*sizeof(CompressedVector));
-		REGISTER_MEMPTR(&model.vertices);
 		for(i = 0; i < numVertices; i++){
 			model.vertices[i].Set(*(float*)buf, *(float*)(buf+4), *(float*)(buf+8));
 			if(Abs(*(float*)buf) >= 256.0f ||
@@ -301,7 +291,6 @@ CFileLoader::LoadCollisionModel(uint8 *buf, CColModel &model, char *modelname)
 	buf += 4;
 	if(model.numTriangles > 0){
 		model.triangles = (CColTriangle*)RwMalloc(model.numTriangles*sizeof(CColTriangle));
-		REGISTER_MEMPTR(&model.triangles);
 		for(i = 0; i < model.numTriangles; i++){
 			model.triangles[i].Set(model.vertices, *(int32*)buf, *(int32*)(buf+4), *(int32*)(buf+8), buf[12], buf[13]);
 			buf += 16;

@@ -720,7 +720,10 @@ CCamera::Process(void)
 #ifdef FIX_BUGS
         // from VC. to high values bug out spawns
         LODDistMultiplier = Min(LODDistMultiplier, 2.2f);
-        GenerationDistMultiplier = Min(LODDistMultiplier, 1.36f);
+        #if GTA_VERSION > GTA3_PS2_160
+        // The LODDistMultiplier bugfix can apply to PS2, but the GenerationDistMultiplier isn't used in that build
+                GenerationDistMultiplier = Min(LODDistMultiplier, 1.36f);
+        #endif
 #elif GTA_VERSION > GTA3_PS2_160
         GenerationDistMultiplier = LODDistMultiplier;
         LODDistMultiplier *= CRenderer::ms_lodDistScale;

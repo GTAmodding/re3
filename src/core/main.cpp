@@ -412,6 +412,7 @@ PluginAttach(void)
 	return TRUE;
 }
 
+// rather different on PS2
 static RwBool 
 Initialise3D(void *param)
 {
@@ -1155,9 +1156,11 @@ Render2dStuff(void)
 
 	MusicManager.DisplayRadioStationName();
 	TheConsole.Display();
+#ifdef GTA_SCENE_EDIT
 	if(CSceneEdit::m_bEditOn)
 		CSceneEdit::Draw();
 	else
+#endif
 		CHud::Draw();
 	CUserDisplay::OnscnTimer.ProcessForDisplay();
 	CMessages::Display();

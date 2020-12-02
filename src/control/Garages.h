@@ -198,7 +198,6 @@ class CGarages
 	static CStoredCar aCarsInSafeHouse1[NUM_GARAGE_STORED_CARS];
 	static CStoredCar aCarsInSafeHouse2[NUM_GARAGE_STORED_CARS];
 	static CStoredCar aCarsInSafeHouse3[NUM_GARAGE_STORED_CARS];
-	static int32 AudioEntity;
 	static bool bCamShouldBeOutisde;
 
 public:
@@ -208,7 +207,7 @@ public:
 #endif
 	static void Update(void);
 
-	static int16 AddOne(float X1, float Y1, float Z1, float X2, float Y2, float Z2, eGarageType type, int32 targetId);
+	static int16 AddOne(CVector pos1, CVector pos2, eGarageType type, int32 targetId);
 	static void ChangeGarageType(int16, eGarageType, int32);
 	static void PrintMessages(void);
 	static void TriggerMessage(const char* text, int16, uint16 time, int16);

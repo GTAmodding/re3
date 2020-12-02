@@ -291,7 +291,7 @@ int8 CRunningScript::ProcessCommands500To599(int32 command)
 			infZ = *(float*)&ScriptParams[5];
 			supZ = *(float*)&ScriptParams[2];
 		}
-		ScriptParams[0] = CGarages::AddOne(infX, infY, infZ, supX, supY, supZ, (eGarageType)ScriptParams[6], 0);
+		ScriptParams[0] = CGarages::AddOne(CVector(infX, infY, infZ), CVector(supX, supY, supZ), (eGarageType)ScriptParams[6], 0);
 		StoreParameters(&m_nIp, 1);
 		return 0;
 	}
@@ -316,7 +316,7 @@ int8 CRunningScript::ProcessCommands500To599(int32 command)
 			infZ = *(float*)&ScriptParams[5];
 			supZ = *(float*)&ScriptParams[2];
 		}
-		ScriptParams[0] = CGarages::AddOne(infX, infY, infZ, supX, supY, supZ, (eGarageType)ScriptParams[6], ScriptParams[7]);
+		ScriptParams[0] = CGarages::AddOne(CVector(infX, infY, infZ), CVector(supX, supY, supZ), (eGarageType)ScriptParams[6], ScriptParams[7]);
 		StoreParameters(&m_nIp, 1);
 		return 0;
 	}

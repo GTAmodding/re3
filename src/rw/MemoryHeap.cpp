@@ -187,7 +187,7 @@ CMemoryHeap::Malloc(uint32 size)
 	void *mem = Malloc(size);
 	if (removeCollision) {
 		CTimer::Stop();
-		// different on PS2
+		// TODO: different on PS2
 		CFileLoader::LoadCollisionFromDatFile(CCollision::ms_collisionInMemory);
 		removeCollision = false;
 		CTimer::Update();

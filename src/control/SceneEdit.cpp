@@ -1,7 +1,7 @@
 #include "common.h"
 
 #include "SceneEdit.h"
-
+#ifdef GTA_SCENE_EDIT
 #include "Automobile.h"
 #include "Camera.h"
 #include "CarCtrl.h"
@@ -1096,3 +1096,4 @@ bool CSceneEdit::SelectWeapon(void)
 	}
 	return false;
 }
+#endif

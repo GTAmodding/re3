@@ -569,7 +569,9 @@ DebugMenuPopulate(void)
 		DebugMenuAddVarBool8("Debug", "Disable zone cull", &gbDisableZoneCull, nil);
 
 		DebugMenuAddVarBool8("Debug", "pad 1 -> pad 2", &CPad::m_bMapPadOneToPadTwo, nil);
+#ifdef GTA_SCENE_EDIT
 		DebugMenuAddVarBool8("Debug", "Edit on", &CSceneEdit::m_bEditOn, nil);
+#endif
 #ifdef MENU_MAP
 		DebugMenuAddCmd("Debug", "Teleport to map waypoint", TeleportToWaypoint);
 #endif

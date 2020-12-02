@@ -1,5 +1,5 @@
 #pragma once
-
+#ifdef GTA_SCENE_EDIT
 class CPed;
 class CVehicle;
 
@@ -93,3 +93,4 @@ public:
 	static void SelectVehicle(void);
 	static bool SelectWeapon(void);
 };
+#endif

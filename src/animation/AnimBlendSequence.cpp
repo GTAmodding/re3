@@ -176,3 +176,24 @@ CAnimBlendSequence::RemoveUncompressedData(void)
 	keyFrames = nil;
 }
 
+#ifdef USE_CUSTOM_ALLOCATOR
+bool
+CAnimBlendSequence::MoveMemory(void)
+{
+	if(keyFrames){
+		void *newaddr = gMainHeap.MoveMemory(keyFrames);
+		if(newaddr != keyFrames){
+			keyFrames = newaddr;
+			return true;
+		}
+	}else if(keyFramesCompressed){
+		void *newaddr = gMainHeap.MoveMemory(keyFramesCompressed);
+		if(newaddr != keyFramesCompressed){
+			keyFramesCompressed = newaddr;
+			return true;
+		}
+	}
+	return false;
+}
+#endif
+

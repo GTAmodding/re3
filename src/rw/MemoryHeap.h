@@ -198,6 +198,7 @@ public:
 	void TidyHeap(void);
 	uint32 GetMemoryUsed(int32 id);
 	uint32 GetBlocksUsed(int32 id);
+	int32 GetLargestFreeBlock(void) { return m_freeList.m_last.m_prev->m_size; }
 
 	void ParseHeap(void);
 

@@ -353,11 +353,11 @@ CPickup::Update(CPlayerPed *player, CVehicle *vehicle, int playerId)
 
 			m_pObject->GetMatrix().UpdateRW();
 			m_pObject->UpdateRwFrame();
-			if (CWaterLevel::GetWaterLevel(m_pObject->GetPosition().x, m_pObject->GetPosition().y, m_pObject->GetPosition().z + 5.0f, &waterLevel, 0) && waterLevel >= m_pObject->GetPosition().z)
+			if (CWaterLevel::GetWaterLevel(m_pObject->GetPosition().x, m_pObject->GetPosition().y, m_pObject->GetPosition().z + 5.0f, &waterLevel, false) && waterLevel >= m_pObject->GetPosition().z)
 				m_eType = PICKUP_FLOATINGPACKAGE_FLOATING;
 			break;
 		case PICKUP_FLOATINGPACKAGE_FLOATING:
-			if (CWaterLevel::GetWaterLevel(m_pObject->GetPosition().x, m_pObject->GetPosition().y, m_pObject->GetPosition().z + 5.0f, &waterLevel, 0))
+			if (CWaterLevel::GetWaterLevel(m_pObject->GetPosition().x, m_pObject->GetPosition().y, m_pObject->GetPosition().z + 5.0f, &waterLevel, false))
 				m_pObject->GetMatrix().GetPosition().z = waterLevel;
 
 			m_pObject->GetMatrix().UpdateRW();
@@ -1009,7 +1009,7 @@ INITSAVEBUF
 	for (int32 i = 0; i < NUMPICKUPS; i++) {
 		CPickup *buf_pickup = WriteSaveBuf(buf, aPickUps[i]);
 		if (buf_pickup->m_eType != PICKUP_NONE && buf_pickup->m_pObject != nil)
-			buf_pickup->m_pObject = (CObject*)(CPools::GetObjectPool()->GetJustIndex(buf_pickup->m_pObject) + 1);
+			buf_pickup->m_pObject = (CObject*)(CPools::GetObjectPool()->GetJustIndex_NoFreeAssert(buf_pickup->m_pObject) + 1);
 	}
 
 	WriteSaveBuf(buf, CollectedPickUpIndex);

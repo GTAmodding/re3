@@ -1604,10 +1604,10 @@ INITSAVEBUF
 			handle = 0;
 		} else if (pBuilding->GetIsATreadable()) {
 			type = 1;
-			handle = CPools::GetTreadablePool()->GetJustIndex((CTreadable*)pBuilding) + 1;
+			handle = CPools::GetTreadablePool()->GetJustIndex_NoFreeAssert((CTreadable*)pBuilding) + 1;
 		} else {
 			type = 2;
-			handle = CPools::GetBuildingPool()->GetJustIndex(pBuilding) + 1;
+			handle = CPools::GetBuildingPool()->GetJustIndex_NoFreeAssert(pBuilding) + 1;
 		}
 		WriteSaveBuf(buf, type);
 		WriteSaveBuf(buf, handle);
@@ -1625,19 +1625,19 @@ INITSAVEBUF
 			case ENTITY_TYPE_BUILDING:
 				if (((CBuilding*)pEntity)->GetIsATreadable()) {
 					type = 1;
-					handle = CPools::GetTreadablePool()->GetJustIndex((CTreadable*)pEntity) + 1;
+					handle = CPools::GetTreadablePool()->GetJustIndex_NoFreeAssert((CTreadable*)pEntity) + 1;
 				} else {
 					type = 2;
-					handle = CPools::GetBuildingPool()->GetJustIndex((CBuilding*)pEntity) + 1;
+					handle = CPools::GetBuildingPool()->GetJustIndex_NoFreeAssert((CBuilding*)pEntity) + 1;
 				}
 				break;
 			case ENTITY_TYPE_OBJECT:
 				type = 3;
-				handle = CPools::GetObjectPool()->GetJustIndex((CObject*)pEntity) + 1;
+				handle = CPools::GetObjectPool()->GetJustIndex_NoFreeAssert((CObject*)pEntity) + 1;
 				break;
 			case ENTITY_TYPE_DUMMY:
 				type = 4;
-				handle = CPools::GetDummyPool()->GetJustIndex((CDummy*)pEntity) + 1;
+				handle = CPools::GetDummyPool()->GetJustIndex_NoFreeAssert((CDummy*)pEntity) + 1;
 			default: break;
 			}
 		}

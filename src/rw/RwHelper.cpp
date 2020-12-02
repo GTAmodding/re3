@@ -605,11 +605,6 @@ CameraCreate(RwInt32 width, RwInt32 height, RwBool zBuffer)
 	return (nil);
 }
 
-#ifdef USE_TEXTURE_POOL
-WRAPPER void _TexturePoolsInitialise() { EAXJMP(0x598B10); }
-WRAPPER void _TexturePoolsShutdown() { EAXJMP(0x598B30); }
-#endif
-
 #ifdef LIBRW
 #include <rpmatfx.h>
 #include "VehicleModelInfo.h"

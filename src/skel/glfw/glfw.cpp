@@ -1458,12 +1458,14 @@ WinMain(HINSTANCE instance,
 	RwChar** argv;
 	SystemParametersInfo(SPI_SETFOREGROUNDLOCKTIMEOUT, 0, nil, SPIF_SENDCHANGE);
 
-#if 0
-	// TODO: make this an option somewhere
-	AllocConsole();
-	freopen("CONIN$", "r", stdin);
-	freopen("CONOUT$", "w", stdout);
-	freopen("CONOUT$", "w", stderr);
+#ifndef MASTER
+	if (strstr(cmdLine, "-console"))
+	{
+		AllocConsole();
+		freopen("CONIN$", "r", stdin);
+		freopen("CONOUT$", "w", stdout);
+		freopen("CONOUT$", "w", stderr);
+	}
 #endif
 
 #else

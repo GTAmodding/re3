@@ -1,5 +1,5 @@
 #include "common.h"
-
+#ifdef GTA_REPLAY
 #include "AnimBlendAssociation.h"
 #include "Boat.h"
 #include "SpecialFX.h"
@@ -1585,3 +1585,4 @@ void CReplay::Display()
 	if (Mode == MODE_PLAYBACK)
 		CFont::PrintString(SCREEN_SCALE_X(63.5f), SCREEN_SCALE_Y(30.0f), TheText.Get("REPLAY"));
 }
+#endif

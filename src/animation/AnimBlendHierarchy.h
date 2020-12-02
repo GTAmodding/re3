@@ -2,6 +2,10 @@
 
 #include "templates.h"
 
+#ifdef MoveMemory
+#undef MoveMemory	// windows shit
+#endif
+
 class CAnimBlendSequence;
 
 // A collection of sequences
@@ -23,6 +27,7 @@ public:
 	void RemoveAnimSequences(void);
 	void Uncompress(void);
 	void RemoveUncompressedData(void);
+	void MoveMemory(bool onlyone = false);
 };
 
 VALIDATE_SIZE(CAnimBlendHierarchy, 0x28);

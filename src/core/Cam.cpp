@@ -263,9 +263,11 @@ CCam::Process(void)
 	case MODE_FIGHT_CAM_RUNABOUT:
 		Process_1rstPersonPedOnPC(CameraTarget, TargetOrientation, SpeedVar, TargetSpeedVar);
 		break;
+#ifdef GTA_SCENE_EDIT
 	case MODE_EDITOR:
 		Process_Editor(CameraTarget, TargetOrientation, SpeedVar, TargetSpeedVar);
 		break;
+#endif
 	default:
 		Source = CVector(0.0f, 0.0f, 0.0f);
 		Front = CVector(0.0f, 1.0f, 0.0f);
@@ -3919,6 +3921,7 @@ CCam::Process_Debug(const CVector&, float, float, float)
 }
 #endif
 
+#ifdef GTA_SCENE_EDIT
 void
 CCam::Process_Editor(const CVector&, float, float, float)
 {
@@ -3997,6 +4000,7 @@ CCam::Process_Editor(const CVector&, float, float, float)
 		sprintf(str, "Look@: %f, Look@: %f, Look@: %f ", Front.x + Source.x, Front.y + Source.y, Front.z + Source.z);
 	}
 }
+#endif
 
 void
 CCam::Process_ModelView(const CVector &CameraTarget, float, float, float)

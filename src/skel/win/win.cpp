@@ -2011,16 +2011,18 @@ WinMain(HINSTANCE instance,
 	RwChar **argv;
 	SystemParametersInfo(SPI_SETFOREGROUNDLOCKTIMEOUT, 0, nil, SPIF_SENDCHANGE);
 
-#ifdef USE_CUSTOM_ALLOCATOR
-	InitMemoryMgr();
+#ifndef MASTER
+	if (strstr(cmdLine, "-console"))
+	{
+		AllocConsole();
+		freopen("CONIN$", "r", stdin);
+		freopen("CONOUT$", "w", stdout);
+		freopen("CONOUT$", "w", stderr);
+	}
 #endif
 
-#if 1
-	// TODO: make this an option somewhere
-	AllocConsole();
-	freopen("CONIN$", "r", stdin);
-	freopen("CONOUT$", "w", stdout);
-	freopen("CONOUT$", "w", stderr);
+#ifdef USE_CUSTOM_ALLOCATOR
+	InitMemoryMgr();
 #endif
 
 	/* 

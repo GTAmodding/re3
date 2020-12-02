@@ -1738,10 +1738,12 @@ CWorld::ShutDown(void)
 			CWorld::Remove(pEntity);
 			delete pEntity;
 		}
+#ifndef FIX_BUGS
 		pSector->m_lists[ENTITYLIST_BUILDINGS].Flush();
 		pSector->m_lists[ENTITYLIST_BUILDINGS_OVERLAP].Flush();
 		pSector->m_lists[ENTITYLIST_DUMMIES].Flush();
 		pSector->m_lists[ENTITYLIST_DUMMIES_OVERLAP].Flush();
+#endif
 	}
 	for(int32 i = 0; i < 4; i++) {
 		for(CPtrNode *pNode = GetBigBuildingList((eLevelName)i).first; pNode; pNode = pNode->next) {
@@ -1753,6 +1755,12 @@ CWorld::ShutDown(void)
 	}
 	for(int i = 0; i < NUMSECTORS_X * NUMSECTORS_Y; i++) {
 		CSector *pSector = GetSector(i % NUMSECTORS_X, i / NUMSECTORS_Y);
+#ifdef FIX_BUGS
+		pSector->m_lists[ENTITYLIST_BUILDINGS].Flush();
+		pSector->m_lists[ENTITYLIST_BUILDINGS_OVERLAP].Flush();
+		pSector->m_lists[ENTITYLIST_DUMMIES].Flush();
+		pSector->m_lists[ENTITYLIST_DUMMIES_OVERLAP].Flush();
+#endif
 		if(pSector->m_lists[ENTITYLIST_BUILDINGS].first) {
 			sprintf(gString, "Building list %d,%d not empty\n", i % NUMSECTORS_X, i / NUMSECTORS_Y);
 			pSector->m_lists[ENTITYLIST_BUILDINGS].Flush();

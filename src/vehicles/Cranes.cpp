@@ -639,11 +639,11 @@ void CCranes::Save(uint8* buf, uint32* size)
 	for (int i = 0; i < NUM_CRANES; i++) {
 		CCrane *pCrane = WriteSaveBuf(buf, aCranes[i]);
 		if (pCrane->m_pCraneEntity != nil)
-			pCrane->m_pCraneEntity = (CBuilding*)(CPools::GetBuildingPool()->GetJustIndex(pCrane->m_pCraneEntity) + 1);
+			pCrane->m_pCraneEntity = (CBuilding*)(CPools::GetBuildingPool()->GetJustIndex_NoFreeAssert(pCrane->m_pCraneEntity) + 1);
 		if (pCrane->m_pHook != nil)
-			pCrane->m_pHook = (CObject*)(CPools::GetObjectPool()->GetJustIndex(pCrane->m_pHook) + 1);
+			pCrane->m_pHook = (CObject*)(CPools::GetObjectPool()->GetJustIndex_NoFreeAssert(pCrane->m_pHook) + 1);
 		if (pCrane->m_pVehiclePickedUp != nil)
-			pCrane->m_pVehiclePickedUp = (CVehicle*)(CPools::GetVehiclePool()->GetJustIndex(pCrane->m_pVehiclePickedUp) + 1);
+			pCrane->m_pVehiclePickedUp = (CVehicle*)(CPools::GetVehiclePool()->GetJustIndex_NoFreeAssert(pCrane->m_pVehiclePickedUp) + 1);
 	}
 
 	VALIDATESAVEBUF(*size);

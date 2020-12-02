@@ -718,12 +718,12 @@ CCamera::Process(void)
 	else
 		LODDistMultiplier = 1.0f;
 #ifdef FIX_BUGS
-	// from VC. to high values bug out spawns
-	LODDistMultiplier = Min(LODDistMultiplier, 2.2f);
-#endif
-#if GTA_VERSION > GTA3_PS2_160
-	GenerationDistMultiplier = LODDistMultiplier;
-	LODDistMultiplier *= CRenderer::ms_lodDistScale;
+        // from VC. to high values bug out spawns
+        LODDistMultiplier = Min(LODDistMultiplier, 2.2f);
+        GenerationDistMultiplier = Min(LODDistMultiplier, 1.36f);
+#elif GTA_VERSION > GTA3_PS2_160
+        GenerationDistMultiplier = LODDistMultiplier;
+        LODDistMultiplier *= CRenderer::ms_lodDistScale;
 #endif
 
 	// Keep track of speed

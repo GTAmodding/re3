@@ -268,7 +268,7 @@ Menu *findMenu(const char *name);
  	X(crossjustdown, 1) \
 	X(circlejustdown, 2) \
 	X(trianglejustdown, 3) \
-	X(trianglejustdown, 4) \
+	X(squarejustdown, 4) \
 	X(padleftjustdown, 5) \
 	X(padrightjustdown, 6) \
 	X(padupjustdown, 7) \
@@ -292,9 +292,9 @@ static float mouseX, mouseY;
 
 static int padbuttondown[8];
 static int lastpadbuttondown;
-static bool *padbuttonptr;
-static bool padleftjustdown, padrightjustdown, padupjustdown, paddownjustdown;
-static bool crossjustdown, circlejustdown, trianglejustdown, squarejustdown;
+static int *padbuttonptr;
+static int padleftjustdown, padrightjustdown, padupjustdown, paddownjustdown;
+static int crossjustdown, circlejustdown, trianglejustdown, squarejustdown;
 
 static int menuOn;
 static int menuInitialized;
@@ -399,7 +399,7 @@ MenuEntry_##NAME::processInput(bool mouseOver, bool selected)				     \
 		if(v > oldv)					     \
 			underflow = 1;				     \
 	}							     \
-	if((selected && rightjustdown) || (selected && (crossjustdown || padrightjustdown )) || (mouseOver && mbutton1justdown)){					     \
+	if((selected && rightjustdown) || (selected && ( crossjustdown || padrightjustdown )) || (mouseOver && mbutton1justdown)){					     \
 		v += this->step;				     \
 		if(v < oldv)					     \
 			overflow = 1;				     \
@@ -521,7 +521,7 @@ void
 MenuEntry_Cmd::processInput(bool mouseOver, bool selected)
 {
 	// Don't execute on button3
-	if(this->triggerFunc && (selected && (leftjustdown || rightjustdown) || (mouseOver && mbutton1justdown) || crossjustdown))
+	if(this->triggerFunc && (selected && (leftjustdown || rightjustdown || padleftjustdown || padrightjustdown || crossjustdown) || (mouseOver && mbutton1justdown)))
 		this->triggerFunc();
 }
 
@@ -903,11 +903,10 @@ processInput(void)
 	}
 	
 	// Also for gampepad buttons
-	//TODO: Make the auto-repeating work for gamepad
-#define X(var, num)							  \
+#define X(var, btnnum)							  \
 	if(var){							  \
 		repeattime = downtime = CTimer::GetTimeInMilliseconds();	  \
-		lastpadbuttondown = num;				  \
+		lastpadbuttondown = btnnum;				  \
 		padbuttonptr = &var;					  \
 	}
 	MUHGAMEPAD
@@ -1022,7 +1021,7 @@ processInput(void)
 }
 
 void
-updateMouse(void)
+updatePad(void)
 {
 	CPad *pad = CPad::GetPad(0);
 	int dirX = 1;
@@ -1049,30 +1048,24 @@ updateMouse(void)
 	// Zero the mouse position so the camera won't move
 	pad->NewMouseControllerState.x = 0.0f;
 	pad->NewMouseControllerState.y = 0.0f;
-}
 
-void
-updatePad(void)
-{
-	CPad *pad = CPad::GetPad(0);
-
-	crossjustdown = pad->GetCrossJustDown();
-	circlejustdown = pad->GetCircleJustDown();
-	trianglejustdown = pad->GetTriangleJustDown();
-	squarejustdown = pad->GetSquareJustDown();
-	padleftjustdown = pad->GetAnaloguePadLeft();
-	padrightjustdown = pad->GetAnaloguePadRight();
-	padupjustdown = pad->GetAnaloguePadUp();
-	paddownjustdown = pad->GetAnaloguePadDown() ;
-	padbuttondown[0] = crossjustdown;
-	padbuttondown[1] = circlejustdown;
-	padbuttondown[2] = trianglejustdown;
-	padbuttondown[3] = squarejustdown;
-	padbuttondown[4] = padleftjustdown;
-	padbuttondown[5] = padrightjustdown;
-	padbuttondown[6] = padupjustdown;
-	padbuttondown[7] = paddownjustdown;
-
+        crossjustdown = pad->NewState.Cross && !pad->OldState.Cross;
+        circlejustdown = pad->NewState.Circle && !pad->OldState.Circle;
+        trianglejustdown = pad->NewState.Triangle && !pad->OldState.Triangle;
+        squarejustdown = pad->NewState.Square && !pad->OldState.Square;
+        padleftjustdown = (pad->NewState.LeftStickX < -30 && !padbuttondown[4]) || (pad->NewState.DPadLeft && !pad->OldState.DPadLeft);
+        padrightjustdown = (pad->NewState.LeftStickX > 30 && !padbuttondown[5]) || (pad->NewState.DPadRight && !pad->OldState.DPadRight);
+        padupjustdown = (pad->NewState.LeftStickY < -30 && !padbuttondown[6]) || (pad->NewState.DPadUp && !pad->OldState.DPadUp);
+        paddownjustdown = (pad->NewState.LeftStickY > 30 && !padbuttondown[7]) || (pad->NewState.DPadDown && !pad->OldState.DPadDown);
+        padbuttondown[0] = pad->NewState.Cross;
+        padbuttondown[1] = pad->NewState.Circle;
+        padbuttondown[2] = pad->NewState.Triangle;
+        padbuttondown[3] = pad->NewState.Square;
+        padbuttondown[4] = pad->NewState.LeftStickX < -30 || pad->NewState.DPadLeft;
+        padbuttondown[5] = pad->NewState.LeftStickX > 30 || pad->NewState.DPadRight;
+        padbuttondown[6] = pad->NewState.LeftStickY < -30 || pad->NewState.DPadUp;
+        padbuttondown[7] = pad->NewState.LeftStickY > 30 || pad->NewState.DPadDown;
+	
 }
 
 void
@@ -1088,6 +1081,7 @@ DebugMenuProcess(void)
 	
 	//kill the menu if start or esc are pressed
 	if((CPad::GetPad(0)->GetStartJustDown() || CPad::GetPad(0)->GetEscapeJustDown()) && menuOn){
+		
 		menuOn = !menuOn;
 	}
 	
@@ -1095,9 +1089,7 @@ DebugMenuProcess(void)
 	// TODO: this could happen earlier
 	if(!menuInitialized)
 		DebugMenuInit();
-	updateMouse();
 	updatePad();
-
 }
 
 void

@@ -7905,7 +7905,7 @@ CONTROL: ESTÁNDAR
 USAR APARIENCIA
 
 [GHOST]
-Fantasma
+Ghost
 
 [WIN_RSZ]
 Error al seleccionar la nueva resolución de pantalla

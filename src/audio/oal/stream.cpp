@@ -10,11 +10,13 @@
 #ifdef _WIN32
 #pragma comment( lib, "libsndfile-1.lib" )
 #pragma comment( lib, "libmpg123-0.lib" )
-#else
-#include "crossplatform.h"
 #endif
 #include <sndfile.h>
 #include <mpg123.h>
+#endif
+
+#ifndef _WIN32
+#include "crossplatform.h"
 #endif
 
 #ifndef AUDIO_OPUS

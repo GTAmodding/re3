@@ -996,7 +996,7 @@ int8 CRunningScript::ProcessCommands600To699(int32 command)
 		CollectParameters(&m_nIp, 4);
 		int mi = ScriptParams[0] >= 0 ? ScriptParams[0] : CTheScripts::UsedObjectArray[-ScriptParams[0]].index;
 		CObject* pObj = new CObject(mi, false);
-;		pObj->ObjectCreatedBy = MISSION_OBJECT;
+		pObj->ObjectCreatedBy = MISSION_OBJECT;
 		CVector pos = *(CVector*)&ScriptParams[1];
 		if (pos.z <= MAP_Z_LOW_LIMIT)
 			pos.z = CWorld::FindGroundZForCoord(pos.x, pos.y);

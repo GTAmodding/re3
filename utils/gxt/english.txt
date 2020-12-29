@@ -1115,52 +1115,52 @@ Shake the cops and get us to the safehouse!!
 I've got some urgent work for you! -Toni
 
 [TM1_A]
-~w~Take a seat kid, take a god damned seat.
+Take a seat kid, take a god damned seat.
 
 [TM1_B]
-~w~So the laundry won't pay any protection eh?
+So the laundry won't pay any protection eh?
 
 [TM1_C]
-~w~The Triads think they can mess with me?
+The Triads think they can mess with me?
 
 [TM1_D]
-~w~Let's teach these would be tough guys what it means to be a tough guy.
+Let's teach these would be tough guys what it means to be a tough guy.
 
 [TM1_E]
-~w~Yeah, teach 'em some respect. No son of mine gets it from some Triads.
+Yeah, teach 'em some respect. No son of mine gets it from some Triads.
 
 [TM1_F]
-~w~Your father, god rest his soul, took no crap from no Triads back in Sicily.
+Your father, god rest his soul, took no crap from no Triads back in Sicily.
 
 [TM1_G]
-~w~Sorry Ma. Yes Ma.
+Sorry Ma. Yes Ma.
 
 [TM1_H]
-~w~I want you to destroy their laundry vans
+I want you to destroy their laundry vans
 
 [TM1_I]
-~w~and mangle any triad gimp that gets in your way.
+and mangle any triad gimp that gets in your way.
 
 [TM1_J]
-~w~8-Ball can supply you with what you're gonna need.
+8-Ball can supply you with what you're gonna need.
 
 [TM2_A]
-~w~TONI's off making people bleed or trying to.
+TONI's off making people bleed or trying to.
 
 [TM2_AA]
-~w~He'll never be as tough as his Pop, but he left you a note on the table.
+He'll never be as tough as his Pop, but he left you a note on the table.
 
 [TM2_B]
-~w~The laundry has agreed to pay - you did real good kid!
+The laundry has agreed to pay - you did real good kid!
 
 [TM2_C]
-~w~Go collect the cash and bring it back here. Watch out for the Triads.
+Go collect the cash and bring it back here. Watch out for the Triads.
 
 [TM2_D]
-~w~They may be shoving a firecracker up your ass, but don't take no crap.
+They may be shoving a firecracker up your ass, but don't take no crap.
 
 [TM2_E]
-~w~Nobody I mean nobody, messes with TONI CIPRIANI!
+Nobody I mean nobody, messes with TONI CIPRIANI!
 
 [TM2_1]
 ~g~Get the cash back to Toni's!!
@@ -1169,34 +1169,34 @@ I've got some urgent work for you! -Toni
 ~g~You iced them all!
 
 [TM3_MA]
-~w~I don't know where he is!
+I don't know where he is!
 
 [TM3_MB]
-~w~I swear that boy of mine don't know himself sometimes.
+I swear that boy of mine don't know himself sometimes.
 
 [TM3_MC]
-~w~Now his father, he was different. Always on top, in charge, manful...
+Now his father, he was different. Always on top, in charge, manful...
 
 [TM3_A]
-~w~Don Salvatore has called a meeting.
+Don Salvatore has called a meeting.
 
 [TM3_B]
-~w~I need you to collect the limo and his boy, Joey, from the garage.
+I need you to collect the limo and his boy, Joey, from the garage.
 
 [TM3_C]
-~w~Then get Luigi from his club, come back here and pick me up,
+Then get Luigi from his club, come back here and pick me up,
 
 [TM3_D]
-~w~then we'll all drive over to the boss's place together.
+then we'll all drive over to the boss's place together.
 
 [TM3_E]
-~w~Those Triads, they don't know when to stop.
+Those Triads, they don't know when to stop.
 
 [TM3_F]
-~w~They want a war. They got a war.
+They want a war. They got a war.
 
 [TM3_G]
-~w~Now get going.
+Now get going.
 
 [TM3_1]
 ~g~Pick up the Stretch from Joey's.
@@ -1214,52 +1214,52 @@ I've got some urgent work for you! -Toni
 ~y~It's a triad ambush!!
 
 [TM4_B]
-~w~We're at WAR! The Triads have a fish factory as a front.
+We're at WAR! The Triads have a fish factory as a front.
 
 [TM4_C]
-~w~Most of their business goes down at the fish market in Chinatown.
+Most of their business goes down at the fish market in Chinatown.
 
 [TM4_D]
-~w~That laundry still owes us protection.
+That laundry still owes us protection.
 
 [TM4_E]
-~w~They reckon the Triads are protecting them now, so I say we exact a fitting punishment.
+They reckon the Triads are protecting them now, so I say we exact a fitting punishment.
 
 [TM4_F]
-~w~Take these boys over and whack the Triad Warlords!
+Take these boys over and whack the Triad Warlords!
 
 [TM4_G]
-~w~Hell, if you get a chance, pop some of their soldiers too.
+Hell, if you get a chance, pop some of their soldiers too.
 
 [TM4_GAT]
 ~g~You need a 'Triad fish van' to enter.
 
 [TM5_B]
-~w~OK, I've had enough of this shit.
+OK, I've had enough of this shit.
 
 [TM5_C]
-~w~We're gonna finish the Triads in Liberty once and for all!
+We're gonna finish the Triads in Liberty once and for all!
 
 [TM5_D]
 8-Ball's rigged a dustcart with a bomb.
 
 [TM5_E]
-~w~It's on a timer so if you mess up there'll be no evidence. Go and pick up the dustcart.
+It's on a timer so if you mess up there'll be no evidence. Go and pick up the dustcart.
 
 [TM5_F]
-~w~Careful, 8-Ball says it's real sensitive and the slightest bump could set that thing off!
+Careful, 8-Ball says it's real sensitive and the slightest bump could set that thing off!
 
 [TM5_G]
-~w~Their fish factory will open its gates for a dustcart, so you can drive right in.
+Their fish factory will open its gates for a dustcart, so you can drive right in.
 
 [TM5_H]
-~w~Park up between the gas canisters and get the hell out of there!
+Park up between the gas canisters and get the hell out of there!
 
 [TM5_I]
-~w~I want it to rain mackerel.
+I want it to rain mackerel.
 
 [TM5_J]
-~w~We're talking real biblical here, nothing low budget.
+We're talking real biblical here, nothing low budget.
 
 [FM2]
 'CUTTING THE GRASS'
@@ -1268,55 +1268,55 @@ I've got some urgent work for you! -Toni
 'LAST REQUESTS'
 
 [FM1_A]
-~w~Me an' the fellas need to talk business
+Me an' the fellas need to talk business
 
 [FM1_B]
-~w~so you're gonna look after my girl for the evening.
+so you're gonna look after my girl for the evening.
 
 [FM1_C]
-~w~HEY MARIA! MOVE YOUR BUTT!
+HEY MARIA! MOVE YOUR BUTT!
 
 [FM1_D]
-~w~Dumb broad does this every time.
+Dumb broad does this every time.
 
 [FM1_E]
-~w~And here she is, the one and only Queen of Sheba!
+And here she is, the one and only Queen of Sheba!
 
 [FM1_F]
-~w~What were you doing up there?
+What were you doing up there?
 
 [FM1_G]
-~w~Whatever it was, I bet it cost me money.
+Whatever it was, I bet it cost me money.
 
 [FM1_H]
-~w~Well, you don't think I hang around for the conversation, do you?
+Well, you don't think I hang around for the conversation, do you?
 
 [FM1_I]
-~w~Get in that car and keep your big mouth shut.
+Get in that car and keep your big mouth shut.
 
 [FM1_J]
-~w~Take the limo but bring it back in one piece, y'hear me?
+Take the limo but bring it back in one piece, y'hear me?
 
 [FM1_K]
-~w~And watch her, she can be trouble.
+And watch her, she can be trouble.
 
 [FM1_L]
-~w~Yeah, yeah, yeah! I'm sure your new lap dog has everything covered,
+Yeah, yeah, yeah! I'm sure your new lap dog has everything covered,
 
 [FM1_M]
-~w~and isn't he big and strong?
+and isn't he big and strong?
 
 [FM1_N]
-~w~Hey Fido, Let's go visit Chico and get some party treats!
+Hey Fido, Let's go visit Chico and get some party treats!
 
 [FM1_P]
 ~g~That's Chico over there, pull up next to him.
 
 [FM1_S]
-~w~Here you go lady.
+Here you go lady.
 
 [FM1_TT]
-~w~IT'S A POLICE RAID!
+IT'S A POLICE RAID!
 
 [FM1_1]
 ~g~Get back into the Stretch!
@@ -1424,49 +1424,49 @@ With loyalty like yours, what has he possibly got to worry about.
 ~r~He gave you the slip!
 
 [FM3_A]
-~w~We should take these Colombian bastards out,
+We should take these Colombian bastards out,
 
 [FM3_B]
-~w~but while we're at war with the Triads we ain't strong enough.
+but while we're at war with the Triads we ain't strong enough.
 
 [FM3_C]
-~w~The Cartel has got bottomless funds from pushing that SPANK crap.
+The Cartel has got bottomless funds from pushing that SPANK crap.
 
 [FM3_D]
-~w~If we make an open attack on them, they'll wipe the floor with us.
+If we make an open attack on them, they'll wipe the floor with us.
 
 [FM3_E]
-~w~They must be making SPANK on that big boat that Curly lead you to.
+They must be making SPANK on that big boat that Curly lead you to.
 
 [FM3_F]
-~w~So we gotta use our heads, or rather one head. Your head.
+So we gotta use our heads, or rather one head. Your head.
 
 [FM3_G]
-~w~I'm asking you to destroy that SPANK factory as a personal favor to me, Salvatore Leone.
+I'm asking you to destroy that SPANK factory as a personal favor to me, Salvatore Leone.
 
 [FM3_H]
-~w~If you do this for me, you will be a made man, anything you want.
+If you do this for me, you will be a made man, anything you want.
 
 [FM3_I]
-~w~Go and see 8-Ball, you'll need his expertise to blow-up that boat.
+Go and see 8-Ball, you'll need his expertise to blow-up that boat.
 
 [FM3_8A]
-~w~Yo my man! Salvatore phoned ahead,
+Yo my man! Salvatore phoned ahead,
 
 [FM3_8B]
-~w~but a job like this is gonna need a lot of fireworks.
+but a job like this is gonna need a lot of fireworks.
 
 [FM3_8D]
-~w~but you know with me you get a lot of bang for your buck.
+but you know with me you get a lot of bang for your buck.
 
 [FM3_8E]
-~w~Okay, let's do this thing!
+Okay, let's do this thing!
 
 [FM3_8F]
-~w~I can set this baby to detonate, but I still can't use a piece with these hands.
+I can set this baby to detonate, but I still can't use a piece with these hands.
 
 [FM3_8G]
-~w~Here, this rifle should help you pop some heads!
+Here, this rifle should help you pop some heads!
 
 [FM3_4]
 ~g~Stop the vehicle and let 8-Ball out!
@@ -1478,25 +1478,25 @@ With loyalty like yours, what has he possibly got to worry about.
 ~r~The guards have been alerted!
 
 [FM4_A]
-~w~It's my favorite cleaner.
+It's my favorite cleaner.
 
 [FM4_B]
-~w~I'm proud of you my boy, you kicked the shit out of those grease balls.
+I'm proud of you my boy, you kicked the shit out of those grease balls.
 
 [FM4_C]
-~w~I've got just one little job for you before we can all celebrate.
+I've got just one little job for you before we can all celebrate.
 
 [FM4_D]
-~w~There's a car around the block from Luigi's club.
+There's a car around the block from Luigi's club.
 
 [FM4_E]
-~w~The inside is covered in brains.
+The inside is covered in brains.
 
 [FM4_F]
-~w~We had to help some guy make up his mind and it proved a little messy.
+We had to help some guy make up his mind and it proved a little messy.
 
 [FM4_H]
-~w~Take it to the crusher before the cops find it.
+Take it to the crusher before the cops find it.
 
 [AM3]
 'PAPARAZZI PURGE'
@@ -1610,19 +1610,19 @@ Tanner's on to you!
 'RANSOM'
 
 [AS1_A]
-~w~Miguel seems to think I'm mistreating him.
+Miguel seems to think I'm mistreating him.
 
 [AS1_B]
-~w~Still, he's revealed the extent to which Catalina fears your quest for revenge.
+Still, he's revealed the extent to which Catalina fears your quest for revenge.
 
 [AS2_A]
-~w~We underestimated Catalina's plans for SPANK.
+We underestimated Catalina's plans for SPANK.
 
 [AS2_B]
-~w~It reaches far beyond the Yardies selling it on the street corners.
+It reaches far beyond the Yardies selling it on the street corners.
 
 [AS2_D]
-~w~They've been selling SPANK through the street stalls.
+They've been selling SPANK through the street stalls.
 
 [AS2_1]
 ~g~All espresso stalls in Portland wrecked!!
@@ -1661,13 +1661,13 @@ Tanner's on to you!
 ~W~Do we tighten it some more now, or just wait for it to turn black and fall off?
 
 [AS3_B]
-~w~Give it a quick prod...
+Give it a quick prod...
 
 [AS3_D]
-~w~My Handyman!
+My Handyman!
 
 [AS3_E]
-~w~I was bored so I came over to keep Asuka company.
+I was bored so I came over to keep Asuka company.
 
 [AS3_1]
 ~g~Find the ~r~boat~g~ and get to the ~b~marker buoy!
@@ -3182,22 +3182,22 @@ You drive a mean race. Drop by the payphone again and 'El Burro' may have some w
 King Courtney would like a word. Get to the payphone in Aspatria!!
 
 [YD1_A]
-~w~This is King Courtney.
+This is King Courtney.
 
 [YD1_A1]
-~w~My Yardie posse could do with a driver and you've got a reputation for hot moves.
+My Yardie posse could do with a driver and you've got a reputation for hot moves.
 
 [YD1_B]
-~w~Get to the waste ground opposite the stadium in a car and wait for the other hopefuls.
+Get to the waste ground opposite the stadium in a car and wait for the other hopefuls.
 
 [YD1_C]
-~w~I've got men watching checkpoints all over Staunton.
+I've got men watching checkpoints all over Staunton.
 
 [YD1_D]
-~w~First driver to a checkpoint gets a Grand, then it's on to the next stop.
+First driver to a checkpoint gets a Grand, then it's on to the next stop.
 
 [YD1_D1]
-~w~If you get more checkpoints than any other driver, I could have some work for you.
+If you get more checkpoints than any other driver, I could have some work for you.
 
 [YD1_E]
 ~g~Prepare to race!
@@ -3248,49 +3248,49 @@ $1000!!
 CAR IN WATER!!
 
 [YD2_A]
-~w~I need to see if you're capable of doing my dirty work.
+I need to see if you're capable of doing my dirty work.
 
 [YD2_A1]
-~w~See if you can be trusted.
+See if you can be trusted.
 
 [YD2_B]
-~w~Two of my boys will be there any second to take you for a ride,
+Two of my boys will be there any second to take you for a ride,
 
 [YD2_B1]
-~w~see if you are who you say you are.
+see if you are who you say you are.
 
 [YD2_C]
-~w~We're going for a little ride into Hepburn Heights, whack us some filthy Diablos been dissing Queen Lizzy.
+We're going for a little ride into Hepburn Heights, whack us some filthy Diablos been dissing Queen Lizzy.
 
 [YD2_CC]
-~w~Here, you'll need a 'piece'.
+Here, you'll need a 'piece'.
 
 [YD2_D]
-~w~You do the driving and shooting. We'll make sure you don't get cold feet.
+You do the driving and shooting. We'll make sure you don't get cold feet.
 
 [YD2_E]
-~w~Let's drive!!
+Let's drive!!
 
 [YD2_F]
 ~r~He's bailed out on us, cap his yellow ass!!!
 
 [YD2_G1]
-~w~Hepburn Heights..Let's kill me some filthy Diablos...
+Hepburn Heights... Let's kill me some filthy Diablos...
 
 [YD2_G2]
-~w~But remember, ~r~You don't leave this car!!
+But remember, ~r~You don't leave this car!!
 
 [YD2_H]
-~w~OK, Get us back to Yardie turf! GO GO GO!!
+OK, Get us back to Yardie turf! GO GO GO!!
 
 [YD2_L]
-~w~You did good, Reaperman!
+You did good, Reaperman!
 
 [YD2_M]
 ~r~He's wrecked my car! Waste him!
 
 [YD2_N]
-~w~Get your ass back in this car!
+Get your ass back in this car!
 
 [YD3_A]
 I want you to boost some gang cars
@@ -3578,10 +3578,10 @@ Your ~h~health~w~ is displayed in orange in the top right of the screen.
 ~g~Thats the party up ahead, drop Maria off out front.
 
 [FM1_Y]
-~w~You know I enjoyed myself for the first time in a long while, and you treated me really good. With respect and everything.
+You know I enjoyed myself for the first time in a long while, and you treated me really good. With respect and everything.
 
 [FM1_AA]
-~w~Oh, I'd better go. I'll see you around I hope.
+Oh, I'd better go. I'll see you around I hope.
 
 [NOCONTE]
 Please re-insert an analog controller (DUALSHOCK#) or analog controller (DUALSHOCK#2) in controller port 1 to continue.
@@ -3623,7 +3623,7 @@ The garage next door can store one vehicle when you save your game.
 out of stock
 
 [FM1_O]
-~w~He's at the rail station at the Chinatown waterfront I think.
+He's at the rail station at the Chinatown waterfront I think.
 
 [EBAL_B]
 This is the place right here, let's get off the street and find a change of clothes!
@@ -5057,55 +5057,55 @@ is another day the 'Jacks' look soft.
 and steal some stuff so I could claim on the insurance as you do.
 
 [TM3_H]
-~w~You did good back there kid, real good.
+You did good back there kid, real good.
 
 [TM3_I]
-~w~Come on, let's introduce you to the Don.
+Come on, let's introduce you to the Don.
 
 [TM3_J]
-~w~Heeyyy! Luigi!
+Heeyyy! Luigi!
 
 [TM3_K]
-~w~Oh my girls have been missing you so long Salvatore, you been away too long.
+Oh my girls have been missing you so long Salvatore, you been away too long.
 
 [TM3_L]
-~w~You tell them that once this unfortunate business is taken care of,
+You tell them that once this unfortunate business is taken care of,
 
 [TM3_M]
-~w~we'll all go down to the club and celebrate, ok?
+we'll all go down to the club and celebrate, ok?
 
 [TM3_N]
-~w~Here's my boy.
+Here's my boy.
 
 [TM3_N2]
-~w~How you doin' pop?
+How you doin' pop?
 
 [TM3_O]
-~w~You got yourself a good woman yet?
+You got yourself a good woman yet?
 
 [TM3_P]
-~w~Hey, your mother, god bless her soul, would be turning over in her grave
+Hey, your mother, god bless her soul, would be turning over in her grave
 
 [TM3_Q]
-~w~to see you without a wife.
+to see you without a wife.
 
 [TM3_R]
-~w~I know Pop, I'm working on it.
+I know Pop, I'm working on it.
 
 [TM3_S]
-~w~TONI! How's your Momma?
+TONI! How's your Momma?
 
 [TM3_T]
-~w~She's a great woman you know. Strong. Firenze.
+She's a great woman you know. Strong. Firenze.
 
 [TM3_U]
-~w~She's good...fine.
+She's good...fine.
 
 [TM3_V]
-~w~Terrific, Terrific. Now listen you guys, you go inside while I talk to our new friend here.
+Terrific, Terrific. Now listen you guys, you go inside while I talk to our new friend here.
 
 [TM3_W]
-~w~I see nothing but good things for you my boy...
+I see nothing but good things for you my boy...
 
 [RM1_A]
 That scumbag McAffrey, he took more bribes than anyone.
@@ -5207,31 +5207,31 @@ You are proving to be a safe investment, a rare thing in these days of false hoo
 ~g~Go 'jack a Colombian gang car, so you can infiltrate the hideout, head north you'll find one in Fort Staunton.
 
 [FM1_Q1]
-~w~You looking for some fun? A little...hmm? Some SPANK?
+You looking for some fun? A little...hmm? Some SPANK?
 
 [FM1_R]
-~w~Hi Chico. Nah, just the usual.
+Hi Chico. Nah, just the usual.
 
 [FM1_T]
-~w~Thanks Chico. See you around.
+Thanks Chico. See you around.
 
 [FM1_W]
-~w~Alright Fido, you wait here and look after the car while I go and shake my butt alright.
+Alright Fido, you wait here and look after the car while I go and shake my butt alright.
 
 [FM1_X]
-~w~OK Fido, let's get out of here. Wooooh!
+OK Fido, let's get out of here. Wooooh!
 
 [FM1_Q]
-~w~Hey Maria! It's my favorite lady!
+Hey Maria! It's my favorite lady!
 
 [FM1_S1]
-~w~Hey, maybe you should check out the warehouse party at the east end of Atlantic Quays.
+Hey, maybe you should check out the warehouse party at the east end of Atlantic Quays.
 
 [FM1_U]
-~w~Gracias and enjoy. That's good stuff.
+Gracias and enjoy. That's good stuff.
 
 [FM1_V]
-~w~C'mon Fido, let's go and check out this party!
+C'mon Fido, let's go and check out this party!
 
 [FM1_SS]
 ~r~SCANNER: ~g~Four-five to all units: Assist narcotics raid Atlantic Quays...
@@ -6155,7 +6155,7 @@ We got us a rat!
 He ain't pimpin' or pushin' so he must be talking.
 
 [FM3_CC]
-~w~Come back brother when you have the money.
+Come back brother when you have the money.
 
 [FEDS_AM]
 <>-CHANGE MENU
@@ -6191,7 +6191,7 @@ The business's fortunate enough to have our protection settle their accounts tod
 You must obtain the cars on this list and deliver them to a garage behind the car park in Newport.
 
 [FM3_8I]
-~w~Get a good vantage point then I'll head in when you fire the first shot.
+Get a good vantage point then I'll head in when you fire the first shot.
 
 [LOVE1_B]
 Experience has taught me that a man like you can be very loyal for the right price,
@@ -6224,25 +6224,25 @@ Let's go crack some skulls...
 ~g~Stop hanging around, get a Colombian Gang car and rescue Love's associate.
 
 [AS1_D]
-~w~Act as the bait, and get the death squads to follow you to Pike Creek
+Act as the bait, and get the death squads to follow you to Pike Creek
 
 [AS1_E]
-~w~where some of my men will be waiting for them.
+where some of my men will be waiting for them.
 
 [AS2_C]
-~w~The Cartel have a front company, The Kappa Coffee House.
+The Cartel have a front company, The Kappa Coffee House.
 
 [AS2_E]
-~w~We have no choice but to put these drug stands out of operation.
+We have no choice but to put these drug stands out of operation.
 
 [AS2_F]
-~w~Smash them to splinters!!
+Smash them to splinters!!
 
 [AS2_A1]
-~w~Miguel certainly has some of that famous Latin stamina.
+Miguel certainly has some of that famous Latin stamina.
 
 [AS2_A2]
-~w~I'm quite exhausted.
+I'm quite exhausted.
 
 [SIREN_3]
 To turn on this vehicle's sirens tap the ~h~~k~~VEHICLE_HORN~ button~w~.
@@ -6251,37 +6251,37 @@ To turn on this vehicle's sirens tap the ~h~~k~~VEHICLE_HORN~ button~w~.
 To turn on this vehicle's sirens tap the ~h~~k~~VEHICLE_HORN~ button~w~.
 
 [AS3_C]
-~w~Eeeeeeyoooo! What IS that gooey yellow stuff?
+Eeeeeeyoooo! What IS that gooey yellow stuff?
 
 [AS3_C1]
-~w~Oh hi Babe.
+Oh hi Babe.
 
 [AS3_F]
-~w~She's got the makings of a natural this girl.
+She's got the makings of a natural this girl.
 
 [AS3_F1]
-~w~She's managed to extract this little gem from our guest.
+She's managed to extract this little gem from our guest.
 
 [AS3_G]
-~w~There is a plane coming into Francis International in 2 hours time.
+There is a plane coming into Francis International in 2 hours time.
 
 [AS3_G1]
-~w~It is full of Catalina's poison.
+It is full of Catalina's poison.
 
 [AS3_H]
-~w~You can avoid airport security by getting a boat out to the runway-light buoys
+You can avoid airport security by getting a boat out to the runway-light buoys
 
 [AS3_H1]
 and shooting the plane down on its approach.
 
 [AS3_I]
-~w~Collect the cargo from the debris and stash it!
+Collect the cargo from the debris and stash it!
 
 [AS3_J]
-~w~Oh you be careful now, OK baby?
+Oh you be careful now, OK baby?
 
 [AS3_K]
-~w~Now try the chilli oil.....
+Now try the chilli oil...
 
 [RM2_F1]
 Those Colombians'll be here any minute!
@@ -6614,10 +6614,10 @@ NICK LOVE
 / button - SELECT " button - BACK
 
 [TM4_A]
-~w~Oh it's you. TONI ain't here.
+Oh it's you. TONI ain't here.
 
 [TM4_A2]
-~w~But he left one of his sugary love letters for you.
+But he left one of his sugary love letters for you.
 
 [DIAB2_A]
 I started my exotic entertainment business with nothing but the sizeable contents of my leather pants!
@@ -6692,7 +6692,7 @@ You can take the subway trains across Liberty. Press the~h~ ~k~~VEHICLE_ENTER_EX
 You can take the subway trains across Liberty. Press the~h~ ~k~~VEHICLE_ENTER_EXIT~ button~w~ to ~h~enter ~w~or ~h~exit~w~ a train.
 
 [AS1_C]
-~w~She has three death squads dotted around Liberty, whose sole job is to hunt you down.
+She has three death squads dotted around Liberty, whose sole job is to hunt you down.
 
 [AS1_G]
 ~r~All the Yakuza are dead!!
@@ -6845,7 +6845,7 @@ To turn on this vehicle's sirens tap the ~h~~k~~VEHICLE_HORN~ button~w~.
 To turn on this vehicle's sirens tap the ~h~~k~~VEHICLE_HORN~ button~w~.
 
 [FM3_8C]
-~w~I'll need $100,000 to cover expenses,
+I'll need $100,000 to cover expenses,
 
 [MCLOAD]
 Loading Data. Please do not remove the memory card (PS2) in MEMORY CARD slot 1, reset or switch off the console.

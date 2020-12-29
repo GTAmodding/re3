@@ -1373,7 +1373,7 @@ Y si nos está vendiendo..., mátalo.
 Aquí viene nuestro amiguito. El señor Bocón en persona.
 
 [FM2_G]
-¿Te han seguido? Ya sabes que esto es nuestro secretito.
+¿Te siguieron? Ya sabes que esto es nuestro secretito.
 
 [FM2_H]
 No, no, no me han seguido. ¿Tienes lo mío?
@@ -8121,6 +8121,9 @@ XBOX
 
 [FEC_IVP]
 INVERTIR VERTICALIDAD MANDO
+
+[FEM_TWP]
+Poner o quitar punto de referencia
 
 { end of file }
 

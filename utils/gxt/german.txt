@@ -1121,52 +1121,52 @@ Hãng die Cops ab und bring uns in die sichere Wohnung!
 Ich habe einen dringenden Job für dich! -Toni
 
 [TM1_A]
-~w~Setz dich, Junge. Los, mach's dir bequem.
+Setz dich, Junge. Los, mach's dir bequem.
 
 [TM1_B]
-~w~Die Wãscherei will also kein Schutzgeld zahlen, was?
+Die Wãscherei will also kein Schutzgeld zahlen, was?
 
 [TM1_C]
-~w~Denken die Triaden, sie können mich verscheißern?
+Denken die Triaden, sie können mich verscheißern?
 
 [TM1_D]
-~w~Diesen Möchtegern-Gangstern werden wir eine Lektion erteilen.
+Diesen Möchtegern-Gangstern werden wir eine Lektion erteilen.
 
 [TM1_E]
-~w~Ja, ich werde denen Respekt beibringen. Die rühren keinen meiner Söhne ungestraft an.
+Ja, ich werde denen Respekt beibringen. Die rühren keinen meiner Söhne ungestraft an.
 
 [TM1_F]
-~w~Dein Vater - Gott hab ihn selig - hat sich von den Triaden nie etwas gefallen lassen.
+Dein Vater - Gott hab ihn selig - hat sich von den Triaden nie etwas gefallen lassen.
 
 [TM1_G]
-~w~Sorry, Ma. Ja, Ma.
+Sorry, Ma. Ja, Ma.
 
 [TM1_H]
-~w~Ich will, dass du ihre Wãscherei-Transporter zerstörst
+Ich will, dass du ihre Wãscherei-Transporter zerstörst
 
 [TM1_I]
-~w~und jeden Triaden-Tölpel niedermachst, der dir in die Quere kommt.
+und jeden Triaden-Tölpel niedermachst, der dir in die Quere kommt.
 
 [TM1_J]
-~w~8-Ball liefert dir alles, was du dazu brauchst.
+8-Ball liefert dir alles, was du dazu brauchst.
 
 [TM2_A]
-~w~TONI ist unterwegs, um jemanden zu erledigen - oder er versucht es jedenfalls.
+TONI ist unterwegs, um jemanden zu erledigen - oder er versucht es jedenfalls.
 
 [TM2_AA]
 Er wird nie so sein wie sein Papa. Auf dem Tisch hat er dir eine Nachricht hinterlassen.
 
 [TM2_B]
-~w~Die Wãscherei will jetzt bezahlen. Gute Arbeit, mein Junge!
+Die Wãscherei will jetzt bezahlen. Gute Arbeit, mein Junge!
 
 [TM2_C]
-~w~Hol das Geld ab und bring es hierher. Pass auf die Triaden auf.
+Hol das Geld ab und bring es hierher. Pass auf die Triaden auf.
 
 [TM2_D]
-~w~Die wollen dich wahrscheinlich zu Chop Suey verarbeiten, aber lass dir nichts gefallen.
+Die wollen dich wahrscheinlich zu Chop Suey verarbeiten, aber lass dir nichts gefallen.
 
 [TM2_E]
-~w~Niemand, wirklich niemand, macht TONI CIPRIANI fertig!
+Niemand, wirklich niemand, macht TONI CIPRIANI fertig!
 
 [TM2_1]
 ~g~Bring das Geld zu Toni!!
@@ -1175,34 +1175,34 @@ Er wird nie so sein wie sein Papa. Auf dem Tisch hat er dir eine Nachricht hinte
 ~g~Du hast sie alle erledigt!
 
 [TM3_MA]
-~w~Ich weiß nicht, wo er ist!
+Ich weiß nicht, wo er ist!
 
 [TM3_MB]
-~w~Ach, mein Sohn weiß manchmal selbst nicht, wer er ist.
+Ach, mein Sohn weiß manchmal selbst nicht, wer er ist.
 
 [TM3_MC]
-~w~Ja, sein Vater, der war da ganz anders. Immer auf Draht, top, ein echter Mann...
+Ja, sein Vater, der war da ganz anders. Immer auf Draht, top, ein echter Mann...
 
 [TM3_A]
-~w~Don Salvatore hat ein Treffen angesetzt.
+Don Salvatore hat ein Treffen angesetzt.
 
 [TM3_B]
-~w~Du musst erst die Limo und seinen Sohn Joey aus der Werkstatt abholen.
+Du musst erst die Limo und seinen Sohn Joey aus der Werkstatt abholen.
 
 [TM3_C]
-~w~Dann holst du Luigi aus seinem Club ab und dann kommst du wieder her und holst mich ab.
+Dann holst du Luigi aus seinem Club ab und dann kommst du wieder her und holst mich ab.
 
 [TM3_D]
-~w~Dann fahren wir alle gemeinsam zum Boss.
+Dann fahren wir alle gemeinsam zum Boss.
 
 [TM3_E]
-~w~Diese Triaden wissen einfach nicht, wann Schluss ist.
+Diese Triaden wissen einfach nicht, wann Schluss ist.
 
 [TM3_F]
-~w~Wenn sie Krieg wollen, sollen sie Krieg haben.
+Wenn sie Krieg wollen, sollen sie Krieg haben.
 
 [TM3_G]
-~w~Also, los jetzt.
+Also, los jetzt.
 
 [TM3_1]
 ~g~Hol die Limousine bei Joey ab.
@@ -1220,22 +1220,22 @@ Er wird nie so sein wie sein Papa. Auf dem Tisch hat er dir eine Nachricht hinte
 ~y~Ein Hinterhalt der Triaden!!
 
 [TM4_B]
-~w~Es herrscht KRIEG! Die Triaden betreiben zur Tarnung einen Fischmarkt in Chinatown.
+Es herrscht KRIEG! Die Triaden betreiben zur Tarnung einen Fischmarkt in Chinatown.
 
 [TM4_C]
-~w~Die meisten ihrer Geschãfte werden auf diesem Fischmarkt durchgezogen.
+Die meisten ihrer Geschãfte werden auf diesem Fischmarkt durchgezogen.
 
 [TM4_D]
-~w~Diese Wãscherei schuldet uns immer noch Geld.
+Diese Wãscherei schuldet uns immer noch Geld.
 
 [TM4_E]
-~w~Die denken, die Triaden beschützen sie jetzt. Ich schlage vor, wir führen eine Strafaktion durch.
+Die denken, die Triaden beschützen sie jetzt. Ich schlage vor, wir führen eine Strafaktion durch.
 
 [TM4_F]
-~w~Nimm dir diese Jungs und knöpf dir die Köpfe der Triaden vor!
+Nimm dir diese Jungs und knöpf dir die Köpfe der Triaden vor!
 
 [TM4_G]
-~w~Und wenn es geht, macht auch ein paar von deren Soldaten fertig.
+Und wenn es geht, macht auch ein paar von deren Soldaten fertig.
 
 [TM4_GAT]
 ~g~Du brauchst einen 'Triaden-Packwagon', um da reinzukommen.
@@ -1244,31 +1244,31 @@ Er wird nie so sein wie sein Papa. Auf dem Tisch hat er dir eine Nachricht hinte
 TEXT NO LONGER REQUIRED
 
 [TM5_B]
-~w~Okay, jetzt hab ich aber die Schnauze voll.
+Okay, jetzt hab ich aber die Schnauze voll.
 
 [TM5_C]
-~w~Wir machen die Triaden ein für alle Mal fertig.
+Wir machen die Triaden ein für alle Mal fertig.
 
 [TM5_D]
 8-Ball hat einen Müllkarren mit einer Bombe prãpariert.
 
 [TM5_E]
-~w~Sie hat einen Zeitzünder. Wenn du's vermasselst, hinterlassen wir keine Spuren. Hol den Müllkarren ab.
+Sie hat einen Zeitzünder. Wenn du's vermasselst, hinterlassen wir keine Spuren. Hol den Müllkarren ab.
 
 [TM5_F]
-~w~Fahr vorsichtig. 8-Ball sagt, die Bombe ist extrem empfindlich, das kleinste Schlagloch und sie geht hoch.
+Fahr vorsichtig. 8-Ball sagt, die Bombe ist extrem empfindlich, das kleinste Schlagloch und sie geht hoch.
 
 [TM5_G]
-~w~In ihrer Fischfabrik werden sie dich reinlassen mit dem Müllkarren.
+In ihrer Fischfabrik werden sie dich reinlassen mit dem Müllkarren.
 
 [TM5_H]
-~w~Stell das Ding zwischen den Benzinkanistern ab und dann nichts wie weg.
+Stell das Ding zwischen den Benzinkanistern ab und dann nichts wie weg.
 
 [TM5_I]
-~w~Es soll rummsen, dass es Fische vom Himmel regnet.
+Es soll rummsen, dass es Fische vom Himmel regnet.
 
 [TM5_J]
-~w~Ne biblische Apokalypse will ich haben, nichts popeliges.
+Ne biblische Apokalypse will ich haben, nichts popeliges.
 
 [FM2]
 'CURLYS GEHEIMKONTAKTE'
@@ -1277,55 +1277,55 @@ TEXT NO LONGER REQUIRED
 'DER LETZTE WUNSCH'
 
 [FM1_A]
-~w~Die Jungs und ich haben einiges zu besprechen,
+Die Jungs und ich haben einiges zu besprechen,
 
 [FM1_B]
-~w~du wirst dich heute abend um meine Kleine kümmern.
+du wirst dich heute abend um meine Kleine kümmern.
 
 [FM1_C]
-~w~HEY, MARIA! WO BLEIBST DU?
+HEY, MARIA! WO BLEIBST DU?
 
 [FM1_D]
-~w~Dãmliche Ziege. Jedes Mal dasselbe.
+Dãmliche Ziege. Jedes Mal dasselbe.
 
 [FM1_E]
-~w~Und hier ist sie, die Königin der Nacht höchstpersönlich!
+Und hier ist sie, die Königin der Nacht höchstpersönlich!
 
 [FM1_F]
-~w~Was hast du denn da oben getrieben?
+Was hast du denn da oben getrieben?
 
 [FM1_G]
-~w~Was es auch war, jede Wette, es hat mich Geld gekostet.
+Was es auch war, jede Wette, es hat mich Geld gekostet.
 
 [FM1_H]
-~w~Du glaubst doch nicht, ich bin zum Palavern hier, oder?
+Du glaubst doch nicht, ich bin zum Palavern hier, oder?
 
 [FM1_I]
-~w~Halt die Klappe und steig in den Wagen.
+Halt die Klappe und steig in den Wagen.
 
 [FM1_J]
-~w~Nimm die Limo, aber bring sie mir heil wieder, hörst du?
+Nimm die Limo, aber bring sie mir heil wieder, hörst du?
 
 [FM1_K]
-~w~Und pass auf sie auf, sie kann eine Menge Ãrger machen.
+Und pass auf sie auf, sie kann eine Menge Ãrger machen.
 
 [FM1_L]
-~w~Ja, ja, ja! Dein neues Schoßhündchen wird schon alles im Griff haben.
+Ja, ja, ja! Dein neues Schoßhündchen wird schon alles im Griff haben.
 
 [FM1_M]
-~w~Er ist ja auch so groß und stark.
+Er ist ja auch so groß und stark.
 
 [FM1_N]
-~w~Hey, Fiffi, los, wir besuchen Chico und besorgen uns was zum 'Naschen'!
+Hey, Fiffi, los, wir besuchen Chico und besorgen uns was zum 'Naschen'!
 
 [FM1_P]
 ~g~Da ist Chico. Halt neben ihm an.
 
 [FM1_S]
-~w~Bitte sehr, die Dame.
+Bitte sehr, die Dame.
 
 [FM1_TT]
-~w~EINE POLIZEI-RAZZIA!
+EINE POLIZEI-RAZZIA!
 
 [FM1_1]
 ~g~Zurück in die Limo!
@@ -1433,49 +1433,49 @@ Bei treuen Gefolgsleuten wie dir, wie kann er sich da nur Sorgen machen?
 ~r~Er ist dir entwischt!
 
 [FM3_A]
-~w~Wir sollten diese kolumbianischen Mistkerle fertigmachen,
+Wir sollten diese kolumbianischen Mistkerle fertigmachen,
 
 [FM3_B]
-~w~aber durch den Krieg mit den Triaden sind wir dazu zu geschwãcht.
+aber durch den Krieg mit den Triaden sind wir dazu zu geschwãcht.
 
 [FM3_C]
-~w~Das Kartell hat unendlich Geld aus dem Handel mit diesem Mistzeug SPANK.
+Das Kartell hat unendlich Geld aus dem Handel mit diesem Mistzeug SPANK.
 
 [FM3_D]
-~w~Wenn wir sie offen angreifen, putzen sie uns weg.
+Wenn wir sie offen angreifen, putzen sie uns weg.
 
 [FM3_E]
-~w~Die müssen das SPANK auf diesem großen Schiff machen, zu dem dich Curly geführt hat.
+Die müssen das SPANK auf diesem großen Schiff machen, zu dem dich Curly geführt hat.
 
 [FM3_F]
-~w~Wir müssen also mit Köpfchen vorgehen. Genauer gesagt, mit DEINEM Köpfchen.
+Wir müssen also mit Köpfchen vorgehen. Genauer gesagt, mit DEINEM Köpfchen.
 
 [FM3_G]
-~w~Ich bitte dich, mir, Salvatore Leone zuliebe, dieses SPANK Labor zu zerstören.
+Ich bitte dich, mir, Salvatore Leone zuliebe, dieses SPANK Labor zu zerstören.
 
 [FM3_H]
-~w~Wenn du das für mich tust, bist du ein gemachter Mann. Du kriegst alles, was du willst.
+Wenn du das für mich tust, bist du ein gemachter Mann. Du kriegst alles, was du willst.
 
 [FM3_I]
-~w~Geh zu 8-Ball. Du brauchst einen Fachmann, um dieses Schiff hochzujagen.
+Geh zu 8-Ball. Du brauchst einen Fachmann, um dieses Schiff hochzujagen.
 
 [FM3_8A]
-~w~Hi, Kumpel! Salvatore hat schon angerufen,
+Hi, Kumpel! Salvatore hat schon angerufen,
 
 [FM3_8B]
-~w~aber für so einen Job brauchst du eine Menge Chinaböller.
+aber für so einen Job brauchst du eine Menge Chinaböller.
 
 [FM3_8D]
-~w~Aber du kennst mich. Dafür scheppert's dann auch gewaltig.
+Aber du kennst mich. Dafür scheppert's dann auch gewaltig.
 
 [FM3_8E]
-~w~Okay, dann wollen wir mal!
+Okay, dann wollen wir mal!
 
 [FM3_8F]
-~w~Ich kann das Baby scharf machen, aber eine Knarre kann ich mit diesen Hãnden immer noch nicht halten.
+Ich kann das Baby scharf machen, aber eine Knarre kann ich mit diesen Hãnden immer noch nicht halten.
 
 [FM3_8G]
-~w~Hier, das Gewehr hier wirst du sicher brauchen.
+Hier, das Gewehr hier wirst du sicher brauchen.
 
 [FM3_4]
 ~g~Halt an und lass 8-Ball aussteigen!
@@ -1487,25 +1487,25 @@ Bei treuen Gefolgsleuten wie dir, wie kann er sich da nur Sorgen machen?
 ~r~Die Wachmãnner wurden alarmiert!
 
 [FM4_A]
-~w~Ah, sieh an! Mein bester Troubleshooter.
+Ah, sieh an! Mein bester Troubleshooter.
 
 [FM4_B]
-~w~Ich bin stolz auf dich, meine Junge. Du hast es diesen Mistkerlen gezeigt.
+Ich bin stolz auf dich, meine Junge. Du hast es diesen Mistkerlen gezeigt.
 
 [FM4_C]
-~w~Ich hab nur noch einen kleinen Job für dich, bevor wir alle feiern können.
+Ich hab nur noch einen kleinen Job für dich, bevor wir alle feiern können.
 
 [FM4_D]
-~w~Um die Ecke von Luigis Club steht ein Wagen.
+Um die Ecke von Luigis Club steht ein Wagen.
 
 [FM4_E]
-~w~Innen drin sieht's ziemlich aus.
+Innen drin sieht's ziemlich aus.
 
 [FM4_F]
-~w~Wir haben so einem Typ versehentlich ein Loch in den Kopf gemacht.
+Wir haben so einem Typ versehentlich ein Loch in den Kopf gemacht.
 
 [FM4_H]
-~w~Bring den Wagen zur Schrottpresse, bevor die Cops ihn finden.
+Bring den Wagen zur Schrottpresse, bevor die Cops ihn finden.
 
 [AM3]
 'DER PAPARAZZO'
@@ -1619,19 +1619,19 @@ Tanner hat dich bemerkt!
 'DAS LÖSEGELD'
 
 [AS1_A]
-~w~Miguel findet anscheinend, dass ich ihn schlecht behandle.
+Miguel findet anscheinend, dass ich ihn schlecht behandle.
 
 [AS1_B]
-~w~Trotzdem hat er uns mitgeteilt, wie sehr Catalina deine Rache fürchtet.
+Trotzdem hat er uns mitgeteilt, wie sehr Catalina deine Rache fürchtet.
 
 [AS2_A]
-~w~Wir haben Catalinas Plãne mit dem SPANK unterschãtzt.
+Wir haben Catalinas Plãne mit dem SPANK unterschãtzt.
 
 [AS2_B]
-~w~Das beschrãnkt sich bei weitem nicht darauf, dass die Yardies es an der Straßenecke verkaufen.
+Das beschrãnkt sich bei weitem nicht darauf, dass die Yardies es an der Straßenecke verkaufen.
 
 [AS2_D]
-~w~Die verkaufen SPANK über Kaffeestãnde.
+Die verkaufen SPANK über Kaffeestãnde.
 
 [AS2_1]
 ~g~Alle Espressostãnde in Portland zerstört!!
@@ -1670,13 +1670,13 @@ Tanner hat dich bemerkt!
 ~W~Drücken wir noch fester zu oder warten wir, bis es von selbst abfãllt?
 
 [AS3_B]
-~w~Hau einfach drauf...
+Hau einfach drauf...
 
 [AS3_D]
-~w~Mein Helferlein!
+Mein Helferlein!
 
 [AS3_E]
-~w~Mir war langweilig, da dachte ich mir, ich leiste Asuka Gesellschaft.
+Mir war langweilig, da dachte ich mir, ich leiste Asuka Gesellschaft.
 
 [AS3_1]
 ~g~Such dir ein ~r~Boot~g~ und fahre zu der ~b~Markierungsboje!
@@ -3149,22 +3149,22 @@ Du bist kein übler Fahrer. Komm wieder zu dem Telefon. Vielleicht hat El Burro 
 King Courtney will dich sprechen - am Telefon in Aspatria!!
 
 [YD1_A]
-~w~Hier spricht King Courtney.
+Hier spricht King Courtney.
 
 [YD1_A1]
-~w~Meine Yardies könnten einen Fahrer brauchen, und du hast keinen schlechten Ruf.
+Meine Yardies könnten einen Fahrer brauchen, und du hast keinen schlechten Ruf.
 
 [YD1_B]
-~w~Fahr mit einem Wagen zu dem Gelãnde gegenüber dem Stadion und warte auf die anderen Mitbewerber.
+Fahr mit einem Wagen zu dem Gelãnde gegenüber dem Stadion und warte auf die anderen Mitbewerber.
 
 [YD1_C]
-~w~Meine Mãnner beobachten Checkpoints überall in Staunton.
+Meine Mãnner beobachten Checkpoints überall in Staunton.
 
 [YD1_D]
-~w~Wer einen Checkpoint als erster erreicht, kriegt $1000. Dann geht's weiter zur nãchsten Station.
+Wer einen Checkpoint als erster erreicht, kriegt $1000. Dann geht's weiter zur nãchsten Station.
 
 [YD1_D1]
-~w~Wenn du mehr Checkpoints als die anderen gewinnst, habe ich vielleicht Arbeit für dich.
+Wenn du mehr Checkpoints als die anderen gewinnst, habe ich vielleicht Arbeit für dich.
 
 [YD1_E]
 ~g~Fertigmachen zum Start!
@@ -3215,7 +3215,7 @@ $1000!!
 AUTO IM WASSER!!
 
 [YD2_A]
-~w~Ich will sehen, ob du die Drecksjobs für mich machen kannst.
+Ich will sehen, ob du die Drecksjobs für mich machen kannst.
 
 [YD2_A1]
 Mal sehen, ob man dir trauen kann.
@@ -3227,37 +3227,37 @@ Gleich kommen zwei meiner Jungs und holen dich ab.
 Wollen sehen, ob du so gut bist, wie du sagst.
 
 [YD2_C]
-~w~Wir fahren nach Hepburn Heights und nehmen uns ein paar Diablos vor, die Queen Lizzy angemacht haben.
+Wir fahren nach Hepburn Heights und nehmen uns ein paar Diablos vor, die Queen Lizzy angemacht haben.
 
 [YD2_CC]
-~w~Hier, du wirst 'ne Knarre brauchen.
+Hier, du wirst 'ne Knarre brauchen.
 
 [YD2_D]
-~w~Du fãhrst UND ballerst. Wir achten drauf, dass du keine kalten Füße kriegst.
+Du fãhrst UND ballerst. Wir achten drauf, dass du keine kalten Füße kriegst.
 
 [YD2_E]
-~w~Los geht's!!
+Los geht's!!
 
 [YD2_F]
 ~r~Er haut ab! Schnapp dir den Feigling!!!
 
 [YD2_G1]
-~w~Hepburn Heights. Knöpf dir ein paar Diablos vor.
+Hepburn Heights. Knöpf dir ein paar Diablos vor.
 
 [YD2_G2]
-~w~ Aber denk dran, ~r~du steigst nicht aus dem Wagen!!
+ Aber denk dran, ~r~du steigst nicht aus dem Wagen!!
 
 [YD2_H]
-~w~Okay, fahr uns zurück auf Yardie-Gebiet! LOS, LOS, LOS!!
+Okay, fahr uns zurück auf Yardie-Gebiet! LOS, LOS, LOS!!
 
 [YD2_L]
-~w~Gut gemacht, Sichler!
+Gut gemacht, Sichler!
 
 [YD2_M]
 ~r~Er hat mein Auto geschrottet! Mach ihn fertig!
 
 [YD2_N]
-~w~Steig sofort wieder in den Wagen!
+Steig sofort wieder in den Wagen!
 
 [YD3_A]
 Besorg ein paar Bandenautos,
@@ -3545,10 +3545,10 @@ Dein ~h~Gesundheit~w~ wird rechts oben auf dem Bildschirm in Orange angezeigt.
 ~g~Da vorne ist die Party. Setz Maria vor dem Gebãude ab.
 
 [FM1_Y]
-~w~Das war seit langem mal wieder ein guter Abend. Und du hast mich wirklich gut behandelt, mit Respekt und so.
+Das war seit langem mal wieder ein guter Abend. Und du hast mich wirklich gut behandelt, mit Respekt und so.
 
 [FM1_AA]
-~w~Oh, ich geh jetzt besser. Ich hoffe, wir sehen uns.
+Oh, ich geh jetzt besser. Ich hoffe, wir sehen uns.
 
 [NOCONTE]
 Bitte stecken Sie einen Analog Controller (DUALSHOCK#) oder einen Analog Controller (DUALSHOCK#2) in Controller-Anschluss 1, um fortzufahren.
@@ -3590,7 +3590,7 @@ In die Garage nebenan kann 1 Fahrzeug eingestellt werden, wenn du das Spiel spei
 Nicht vorrãtig
 
 [FM1_O]
-~w~Er ist beim Bahnhof am Chinatown-Ufer, glaube ich.
+Er ist beim Bahnhof am Chinatown-Ufer, glaube ich.
 
 [EBAL_B]
 Hier ist es! Los, wir tauchen ab und besorgen uns neue Klamotten!
@@ -5033,55 +5033,55 @@ ist ein Tag, an dem die Jacks schlecht aussehen.
 Und stiehl ein paar Sachen, damit ich die Versicherung kassieren kann.
 
 [TM3_H]
-~w~Das hast du gut gemacht vorhin, wirklich gut, mein Junge.
+Das hast du gut gemacht vorhin, wirklich gut, mein Junge.
 
 [TM3_I]
-~w~Komm, wir stellen dich dem Don vor.
+Komm, wir stellen dich dem Don vor.
 
 [TM3_J]
-~w~Heeyyy! Luigi!
+Heeyyy! Luigi!
 
 [TM3_K]
-~w~Meine Girls fragen andauernd nach dir, Salvatore. Du warst so lange nicht mehr bei uns.
+Meine Girls fragen andauernd nach dir, Salvatore. Du warst so lange nicht mehr bei uns.
 
 [TM3_L]
-~w~Sag ihnen, wenn diese lãstige Geschichte hier vorbei ist,
+Sag ihnen, wenn diese lãstige Geschichte hier vorbei ist,
 
 [TM3_M]
-~w~gehen wir alle in den Club und feiern, okay?
+gehen wir alle in den Club und feiern, okay?
 
 [TM3_N]
-~w~Ah, mein Junge!
+Ah, mein Junge!
 
 [TM3_N2]
-~w~ Hallo, Paps.
+Hallo, Paps.
 
 [TM3_O]
-~w~Hast du endlich eine Frau gefunden?
+Hast du endlich eine Frau gefunden?
 
 [TM3_P]
-~w~Hey, Deine Mutter - Gott hab sie selig - würde sich im Grab umdrehen,
+Hey, Deine Mutter - Gott hab sie selig - würde sich im Grab umdrehen,
 
 [TM3_Q]
-~w~wenn du keine abkriegen würdest.
+wenn du keine abkriegen würdest.
 
 [TM3_R]
-~w~Ich weiß, Paps, ich arbeite dran.
+Ich weiß, Paps, ich arbeite dran.
 
 [TM3_S]
-~w~TONI! Wie geht's deiner Mamma?
+TONI! Wie geht's deiner Mamma?
 
 [TM3_T]
-~w~Sie ist eine großartige Frau! Stark. Florentinerin eben.
+Sie ist eine großartige Frau! Stark. Florentinerin eben.
 
 [TM3_U]
-~w~Es geht ihr gut. Sehr gut.
+Es geht ihr gut. Sehr gut.
 
 [TM3_V]
-~w~Hervorragend. Okay, geht schon mal vor, ich hab was mit unserem neuen Freund hier zu bereden.
+Hervorragend. Okay, geht schon mal vor, ich hab was mit unserem neuen Freund hier zu bereden.
 
 [TM3_W]
-~w~Ich sehe goldene Zeiten auf dich zukommen, mein Junge...
+Ich sehe goldene Zeiten auf dich zukommen, mein Junge...
 
 [RM1_A]
 Dieser McAffrey! Der hat mehr Bestechungsgeld kassiert als jeder andere.
@@ -5183,31 +5183,31 @@ Du bist eine sichere Bank. So etwas ist selten in diesen schlechten Zeiten.
 ~g~Mit einem Wagen der Kolumbianer kommst du in ihren Unterschlupf rein. Im Norden, in Fort Staunton, findest du einen.
 
 [FM1_Q1]
-~w~Na, kleine Erfrischung gefãllig? Ein bisschen SPANK?
+Na, kleine Erfrischung gefãllig? Ein bisschen SPANK?
 
 [FM1_R]
-~w~Hi, Chico. Nein, nur das übliche.
+Hi, Chico. Nein, nur das übliche.
 
 [FM1_T]
-~w~Danke, Chico. Bis bald.
+Danke, Chico. Bis bald.
 
 [FM1_W]
-~w~Okay, Fiffi, du passt hier auf den Wagen auf, ich geh ein bisschen abtanzen.
+Okay, Fiffi, du passt hier auf den Wagen auf, ich geh ein bisschen abtanzen.
 
 [FM1_X]
-~w~Okay, Fiffi, lass uns 'nen Abgang machen. Huuh!
+Okay, Fiffi, lass uns 'nen Abgang machen. Huuh!
 
 [FM1_Q]
-~w~ Hey, Maria! Meine Traumfrau!
+Hey, Maria! Meine Traumfrau!
 
 [FM1_S1]
-~w~Vielleicht solltest du mal die Party in der Lagerhalle am Ostende von Atlantic Quays auschecken.
+Vielleicht solltest du mal die Party in der Lagerhalle am Ostende von Atlantic Quays auschecken.
 
 [FM1_U]
-~w~ Gracias. Und viel Spaß. Ist gutes Zeug.
+Gracias. Und viel Spaß. Ist gutes Zeug.
 
 [FM1_V]
-~w~Na los, Fiffi, sehen wir uns mal die Party an!
+Na los, Fiffi, sehen wir uns mal die Party an!
 
 [FM1_SS]
 ~r~SCANNER: ~g~4-5 an alle Einheiten: Assistieren Sie bei der Rauschgift-Razzia in Atlantic Quays...
@@ -6128,7 +6128,7 @@ Wir haben einen Verrãter unter uns!
 Er verdient kein Geld mit Mãdchen oder Dealen, also wird er Informationen verkaufen.
 
 [FM3_CC]
-~w~Komm wieder, wenn du die Kohle hast, Bruder.
+Komm wieder, wenn du die Kohle hast, Bruder.
 
 [FEDS_AM]
 <>-MENÜ WECHSELN
@@ -6164,7 +6164,7 @@ Für Lãden, die das Glück haben, unter unserem Schutz zu stehen, ist heute Zah
 Du musst die Autos auf der Liste besorgen und zu einer Garage hinter dem Parkplatz in Newport bringen.
 
 [FM3_8I]
-~w~Such dir eine günstige Position. Ich geh rein, wenn du den ersten Schuss abfeuerst.
+Such dir eine günstige Position. Ich geh rein, wenn du den ersten Schuss abfeuerst.
 
 [LOVE1_B]
 Ich weiß, dass einer wie du sehr loyal sein kann, wenn das Geld stimmt.
@@ -6197,25 +6197,25 @@ Dann wollen wir doch mal ein paar Leute aufmischen...
 ~g~Hãng hier nicht rum, besorg dir ein Auto der Kolumbianer und rette Loves Geschãftsfreund.
 
 [AS1_D]
-~w~Spiel den Köder und locke die Killerkommandos nach Pine Creek,
+Spiel den Köder und locke die Killerkommandos nach Pine Creek,
 
 [AS1_E]
-~w~wo meine Leute sie erwarten werden.
+wo meine Leute sie erwarten werden.
 
 [AS2_C]
-~w~Das Kartell betreibt eine Scheinfirma zur Tarnung - das Kappa Coffee House.
+Das Kartell betreibt eine Scheinfirma zur Tarnung - das Kappa Coffee House.
 
 [AS2_E]
-~w~Wir haben keine Wahl. Wir müssen diese Drogenbuden zerstören.
+Wir haben keine Wahl. Wir müssen diese Drogenbuden zerstören.
 
 [AS2_F]
-~w~Zerleg diese Dinger!!
+Zerleg diese Dinger!!
 
 [AS2_A1]
-~w~Miguel ist ein echter Latin Lover. Der hat ein Stehvermögen!
+Miguel ist ein echter Latin Lover. Der hat ein Stehvermögen!
 
 [AS2_A2]
-~w~Ich bin völlig erschöpft.
+Ich bin völlig erschöpft.
 
 [SIREN_3]
 Um die Sirenen dieses Fahrzeugs einzuschalten, drücke die ~h~~k~~VEHICLE_HORN~-Taste~w~.
@@ -6224,37 +6224,37 @@ Um die Sirenen dieses Fahrzeugs einzuschalten, drücke die ~h~~k~~VEHICLE_HORN~-
 Um die Sirenen dieses Fahrzeugs einzuschalten, drücke die ~h~~k~~VEHICLE_HORN~-Taste~w~.
 
 [AS3_C]
-~w~Iiiiiiiiiiih! Was ist denn das für ein gelbes Glibberzeug?
+Iiiiiiiiiiih! Was ist denn das für ein gelbes Glibberzeug?
 
 [AS3_C1]
-~w~Oh, hi, Baby.
+Oh, hi, Baby.
 
 [AS3_F]
-~w~Das Mãdchen ist ein Naturtalent.
+Das Mãdchen ist ein Naturtalent.
 
 [AS3_F1]
-~w~Sie hat unserem Gast eine kleine Info entlockt.
+Sie hat unserem Gast eine kleine Info entlockt.
 
 [AS3_G]
-~w~In 2 Stunden landet ein Flugzeug auf dem Francis Int. Airport.
+In 2 Stunden landet ein Flugzeug auf dem Francis Int. Airport.
 
 [AS3_G1]
-~w~Es ist voll mit Catalinas Giftzeug.
+Es ist voll mit Catalinas Giftzeug.
 
 [AS3_H]
-~w~Du entgehst den Security Checks am Flughafen, wenn du dir ein Boot besorgst, zu den Leuchtbojen rausfãhrst
+Du entgehst den Security Checks am Flughafen, wenn du dir ein Boot besorgst, zu den Leuchtbojen rausfãhrst
 
 [AS3_H1]
 und die Maschine im Anflug abschießt.
 
 [AS3_I]
-~w~Krame die Ladung aus den Trümmern!
+Krame die Ladung aus den Trümmern!
 
 [AS3_J]
-~w~Und sei vorsichtig, okay, Baby?
+Und sei vorsichtig, okay, Baby?
 
 [AS3_K]
-~w~Versuch's mal mit Chili-Öl...
+Versuch's mal mit Chili-Öl...
 
 [RM2_F1]
 Die Kolumbianer müssen jeden Moment hier sein!
@@ -6263,7 +6263,7 @@ Die Kolumbianer müssen jeden Moment hier sein!
 Verdammt, da sind sie!! LOS, LADEN!!
 
 [LOVE2_7]
-~g~ Jetzt lass den Wagen stehen!
+~g~Jetzt lass den Wagen stehen!
 
 [LOVE2_8]
 ~g~Jetzt verschwinde aus Newport!
@@ -6647,10 +6647,10 @@ In einer ersten Stellungnahme
 /-Taste - AUSWAHL "-Taste - ZURÜCK
 
 [TM4_A]
-~w~Ach, du bist es. Toni ist nicht da.
+Ach, du bist es. Toni ist nicht da.
 
 [TM4_A2]
-~w~Aber er hat wieder ein Liebesbriefchen für dich hinterlassen.
+Aber er hat wieder ein Liebesbriefchen für dich hinterlassen.
 
 [DIAB2_A]
 Ich habe mein Entertainment-Business mit nichts als dem üppigen Inhalt meiner Lederhose gestartet.
@@ -6722,7 +6722,7 @@ Mit der U-Bahn kannst du in Liberty herumfahren. Drücke die ~h~~k~~VEHICLE_ENTE
 Mit der U-Bahn kannst du in Liberty herumfahren. Drücke die ~h~~k~~VEHICLE_ENTER_EXIT~-Taste~w~, um in eine U-Bahn ~h~ein- oder auszusteigen~w~.
 
 [AS1_C]
-~w~Sie hat drei Killerkommandos in Liberty verteilt, die dich zur Strecke bringen sollen.
+Sie hat drei Killerkommandos in Liberty verteilt, die dich zur Strecke bringen sollen.
 
 [AS1_G]
 ~r~Alle Yakuza sind erledigt!
@@ -6875,7 +6875,7 @@ Um die Sirenen dieses Fahrzeugs einzuschalten, drücke die ~h~~k~~VEHICLE_HORN~-
 Um die Sirenen dieses Fahrzeugs einzuschalten, drücke die ~h~~k~~VEHICLE_HORN~-Taste~w~.
 
 [FM3_8C]
-~w~Ich brauch $100 000 für Auslagen.
+Ich brauch $100 000 für Auslagen.
 
 [MCLOAD]
 Daten werden geladen. Bitte die Memory Card (PS2) in MEMORY CARD-Steckplatz 1 nicht entfernen, kein Reset vornehmen und die Konsole nicht ausschalten.

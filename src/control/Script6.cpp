@@ -3,6 +3,12 @@
 #include "Script.h"
 #include "ScriptCommands.h"
 
+#include "audio_enums.h" //needs to be before AudioManager.h
+#include "vehicle_enums.h" //needs to be before AudioManager.h
+
+#include "AudioManager.h"
+#include "Vehicle.h"
+
 #include "CarCtrl.h"
 #include "Cranes.h"
 #include "Credits.h"
@@ -16,27 +22,27 @@
 #ifdef MISSION_REPLAY
 #include "GenericGameStorage.h"
 #endif
+#include "Bike.h"
+#include "CarAI.h"
+#include "Fluff.h"
+#include "GameLogic.h"
 #include "Messages.h"
 #include "Pad.h"
 #include "Particle.h"
 #include "Phones.h"
-#include "Population.h"
+#include "Pickups.h"
 #include "Pools.h"
+#include "Population.h"
 #include "Record.h"
 #include "Remote.h"
 #include "Restart.h"
 #include "SpecialFX.h"
+#include "Sprite.h"
 #include "Stats.h"
 #include "Streaming.h"
 #include "Weather.h"
 #include "Zones.h"
 #include "main.h"
-#include "Bike.h"
-#include "GameLogic.h"
-#include "Sprite.h"
-#include "CarAI.h"
-#include "Pickups.h"
-#include "Fluff.h"
 
 #ifdef USE_DEBUG_SCRIPT_LOADER
 extern const char* scriptfile;

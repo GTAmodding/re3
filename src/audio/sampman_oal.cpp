@@ -1,6 +1,7 @@
 //#define JUICY_OAL
 
 #ifdef AUDIO_OAL
+#include "common.h"
 #include "sampman.h"
 
 #include <time.h>
@@ -25,6 +26,9 @@
 #include "oal/aldlist.h"
 #include "oal/channel.h"
 #include "oal/stream.h"
+
+#include "audio_enums.h"
+#include "vehicle_enums.h"
 
 #include "AudioManager.h"
 #include "MusicManager.h"

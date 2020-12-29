@@ -1,21 +1,60 @@
 #include "common.h"
 
-#include "AudioManager.h"
-#include "audio_enums.h"
+#include "audio_enums.h" //needs to be before AudioManager.h
+#include "vehicle_enums.h" //needs to be before Vehicle.h
 
+#include "AudioCollision.h"
+#include "AudioManager.h"
 #include "AudioScriptObject.h"
-#include "MusicManager.h"
-#include "Timer.h"
-#include "DMAudio.h"
-#include "sampman.h"
 #include "Camera.h"
+#include "DMAudio.h"
+#include "MusicManager.h"
+#include "PoliceRadio.h"
+#include "Timer.h"
+#include "Vehicle.h"
+#include "VehicleModelInfo.h"
 #include "World.h"
+#include "sampman.h"
 
 cAudioManager AudioManager;
 
 const int channels = ARRAY_SIZE(cAudioManager::m_asActiveSamples);
 const int policeChannel = channels + 1;
 const int allChannels = channels + 2;
+
+cPedComments::cPedComments()
+{
+	for(int i = 0; i < NUM_PED_COMMENTS_SLOTS; i++)
+		for(int j = 0; j < NUM_PED_COMMENTS_BANKS; j++) {
+			m_asPedComments[j][i].m_nProcess = -1;
+			m_nIndexMap[j][i] = NUM_PED_COMMENTS_SLOTS;
+		}
+
+	for(int i = 0; i < NUM_PED_COMMENTS_BANKS; i++) m_nCommentsInBank[i] = 0;
+	m_nActiveBank = 0;
+}
+
+cAudioScriptObjectManager::cAudioScriptObjectManager() { m_nScriptObjectEntityTotal = 0; }
+
+cAudioScriptObjectManager::~cAudioScriptObjectManager() { m_nScriptObjectEntityTotal = 0; }
+
+cPedParams::cPedParams()
+{
+	m_bDistanceCalculated = false;
+	m_fDistance = 0.0f;
+	m_pPed = nil;
+}
+
+cVehicleParams::cVehicleParams()
+{
+	m_VehicleType = -1;
+	m_bDistanceCalculated = false;
+	m_fDistance = 0.0f;
+	m_pVehicle = nil;
+	m_pTransmission = nil;
+	m_nIndex = 0;
+	m_fVelocityChange = 0.0f;
+}
 
 cAudioManager::cAudioManager()
 {
@@ -50,15 +89,39 @@ cAudioManager::~cAudioManager()
 		Terminate();
 }
 
+uint32
+cAudioManager::GetFrameCounter() const
+{
+	return m_FrameCounter;
+}
+
+float
+cAudioManager::GetReflectionsDistance(int32 idx) const
+{
+	return m_afReflectionsDistances[idx];
+}
+
+int32
+cAudioManager::GetRandomNumber(int32 idx) const
+{
+	return m_anRandomTable[idx];
+}
+
+int32
+cAudioManager::GetRandomNumberInRange(int32 idx, int32 low, int32 high) const
+{
+	return (m_anRandomTable[idx] % (high - low + 1)) + low;
+}
+
 void
 cAudioManager::Initialise()
 {
-	if (!m_bIsInitialised) {
+	if(!m_bIsInitialised) {
 		PreInitialiseGameSpecificSetup();
 		m_bIsInitialised = SampleManager.Initialise();
-		if (m_bIsInitialised) {
+		if(m_bIsInitialised) {
 			m_nActiveSamples = SampleManager.GetMaximumSupportedChannels();
-			if (m_nActiveSamples <= 1) {
+			if(m_nActiveSamples <= 1) {
 				Terminate();
 			} else {
 				--m_nActiveSamples;

@@ -1,11 +1,13 @@
 #pragma once
-#include "CutsceneObject.h"
 
 #define CUTSCENENAMESIZE 8
 
 class CDirectory;
 class CAnimBlendAssocGroup;
 class CCutsceneHead;
+class CCutsceneObject;
+class CObject;
+class CEntity;
 
 class CCutsceneMgr
 {

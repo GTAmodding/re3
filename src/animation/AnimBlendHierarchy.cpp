@@ -129,3 +129,9 @@ CAnimBlendHierarchy::MoveMemory(bool onlyone)
 			return;
 }
 #endif
+
+bool
+CAnimBlendHierarchy::IsCompressed()
+{
+	return !!compressed;
+}

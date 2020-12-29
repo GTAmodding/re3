@@ -1,37 +1,40 @@
 #include "common.h"
-#include "main.h"
 
-#include "General.h"
-#include "Timer.h"
-#include "Pad.h"
+#include "vehicle_enums.h" //needs to be before Vehicle.h
+
 #include "Vehicle.h"
-#include "Bike.h"
+
 #include "Automobile.h"
-#include "Pools.h"
-#include "HandlingMgr.h"
-#include "CarCtrl.h"
-#include "Population.h"
-#include "ModelIndices.h"
-#include "World.h"
-#include "Lights.h"
-#include "PointLights.h"
-#include "Renderer.h"
-#include "VisibilityPlugins.h"
-#include "DMAudio.h"
-#include "Radar.h"
-#include "Fire.h"
-#include "Darkel.h"
-#include "Streaming.h"
+#include "Bike.h"
 #include "Camera.h"
-#include "Stats.h"
-#include "Garages.h"
-#include "Wanted.h"
-#include "SurfaceTable.h"
-#include "Particle.h"
-#include "WaterLevel.h"
-#include "Timecycle.h"
-#include "Weather.h"
+#include "CarCtrl.h"
 #include "Coronas.h"
+#include "DMAudio.h"
+#include "Darkel.h"
+#include "Fire.h"
+#include "Garages.h"
+#include "General.h"
+#include "HandlingMgr.h"
+#include "Lights.h"
+#include "ModelIndices.h"
+#include "Pad.h"
+#include "Particle.h"
+#include "PointLights.h"
+#include "Pools.h"
+#include "Population.h"
+#include "Radar.h"
+#include "Renderer.h"
+#include "Stats.h"
+#include "Streaming.h"
+#include "SurfaceTable.h"
+#include "Timecycle.h"
+#include "Timer.h"
+#include "VisibilityPlugins.h"
+#include "Wanted.h"
+#include "WaterLevel.h"
+#include "Weather.h"
+#include "World.h"
+#include "main.h"
 
 //--MIAMI: done
 
@@ -52,6 +55,8 @@ bool CVehicle::bDisableRemoteDetonationOnContact;
 void *CVehicle::operator new(size_t sz) { return CPools::GetVehiclePool()->New();  }
 void *CVehicle::operator new(size_t sz, int handle) { return CPools::GetVehiclePool()->New(handle); }
 void CVehicle::operator delete(void *p, size_t sz) { CPools::GetVehiclePool()->Delete((CVehicle*)p); }
+
+CVehicle::CVehicle() {}
 void CVehicle::operator delete(void *p, int handle) { CPools::GetVehiclePool()->Delete((CVehicle*)p); }
 
 #ifdef FIX_BUGS

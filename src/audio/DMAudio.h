@@ -16,8 +16,7 @@ class CEntity;
 class cDMAudio
 {
 public:
-	~cDMAudio()
-	{ }
+	~cDMAudio();
 
 	void Initialise(void);
 	void Terminate(void);

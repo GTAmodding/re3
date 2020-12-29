@@ -1,5 +1,5 @@
 #pragma once
-#include "common.h"
+
 #include "AnimBlendClumpData.h"
 
 struct LimbOrientation

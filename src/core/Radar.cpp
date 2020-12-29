@@ -1,21 +1,22 @@
-#include "config.h"
 #include "common.h"
 
-#include "RwHelper.h"
-#include "Radar.h"
+#include "config.h"
+#include "vehicle_enums.h" //needs to be before Vehicle.h
+
 #include "Camera.h"
-#include "Hud.h"
-#include "World.h"
+#include "Font.h"
 #include "Frontend.h"
 #include "General.h"
-#include "Vehicle.h"
+#include "Hud.h"
 #include "Pools.h"
+#include "Radar.h"
+#include "RwHelper.h"
 #include "Script.h"
-#include "TxdStore.h"
-#include "World.h"
-#include "Streaming.h"
 #include "SpecialFX.h"
-#include "Font.h"
+#include "Streaming.h"
+#include "TxdStore.h"
+#include "Vehicle.h"
+#include "World.h"
 
 // --MIAMI: file done
 

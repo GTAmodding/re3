@@ -30,7 +30,7 @@ public:
 	void Uncompress(void);
 	void RemoveUncompressedData(void);
 	void MoveMemory(bool onlyone = false);
-	bool IsCompressed() { return !!compressed; };
+	bool IsCompressed();
 };
 
 VALIDATE_SIZE(CAnimBlendHierarchy, 0x28);

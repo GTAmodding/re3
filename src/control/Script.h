@@ -1,5 +1,5 @@
 #pragma once
-#include "common.h"
+
 #include "PedType.h"
 #include "Text.h"
 #include "Sprite2d.h"

@@ -4,22 +4,24 @@
 #endif
 
 #include "common.h"
-#include "platform.h"
 #include "crossplatform.h" // for Windows version
+#include "platform.h"
+#include "vehicle_enums.h" //needs to be before Vehicle.h
+
+#include "Camera.h"
 #include "ControllerConfig.h"
-#include "Pad.h"
 #include "FileMgr.h"
-#include "Text.h"
 #include "Font.h"
-#include "Messages.h"
 #include "Frontend.h"
+#include "GenericGameStorage.h"
+#include "Messages.h"
+#include "ModelIndices.h"
+#include "Pad.h"
 #include "Ped.h"
 #include "PlayerPed.h"
+#include "Text.h"
 #include "Vehicle.h"
 #include "World.h"
-#include "ModelIndices.h"
-#include "Camera.h"
-#include "GenericGameStorage.h"
 
 // --MIAMI: file done
 

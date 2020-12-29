@@ -1,24 +1,27 @@
 #include "common.h"
 
-#include "World.h"
-#include "PlayerPed.h"
-#include "CopPed.h"
-#include "Wanted.h"
-#include "DMAudio.h"
-#include "ModelIndices.h"
+#include "vehicle_enums.h" //needs to be before Vehicle.h
+
 #include "Vehicle.h"
-#include "RpAnimBlend.h"
+
 #include "AnimBlendAssociation.h"
-#include "General.h"
-#include "ZoneCull.h"
-#include "PathFind.h"
-#include "RoadBlocks.h"
-#include "CarCtrl.h"
-#include "Renderer.h"
 #include "Camera.h"
+#include "CarCtrl.h"
+#include "CopPed.h"
+#include "DMAudio.h"
+#include "General.h"
+#include "ModelIndices.h"
+#include "PathFind.h"
 #include "PedPlacement.h"
+#include "PlayerPed.h"
+#include "Renderer.h"
+#include "RoadBlocks.h"
 #include "Ropes.h"
+#include "RpAnimBlend.h"
 #include "Stinger.h"
+#include "Wanted.h"
+#include "World.h"
+#include "ZoneCull.h"
 
 // --MIAMI: file done except TODOs
 

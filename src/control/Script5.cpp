@@ -3,6 +3,11 @@
 #include "Script.h"
 #include "ScriptCommands.h"
 
+#include "vehicle_enums.h"
+#include "ParticleType.h"
+
+#include "Vehicle.h"
+
 #include "CarCtrl.h"
 #include "BulletInfo.h"
 #include "General.h"

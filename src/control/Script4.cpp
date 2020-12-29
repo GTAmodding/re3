@@ -3,7 +3,15 @@
 #include "Script.h"
 #include "ScriptCommands.h"
 
+#include "audio_enums.h" //needs to be before AudioManager.h
+#include "vehicle_enums.h" //needs to be before AudioManager.h
+#include "ParticleType.h"
+
+#include "AudioManager.h"
+#include "Vehicle.h"
+
 #include "AnimBlendAssociation.h"
+#include "Bike.h"
 #include "BulletInfo.h"
 #include "CarAI.h"
 #include "CarCtrl.h"
@@ -38,7 +46,6 @@
 #include "WaterLevel.h"
 #include "World.h"
 #include "Zones.h"
-#include "Bike.h"
 
 #ifdef FIX_BUGS
 static bool IsSlideObjectUsedWrongByScript(const CVector& posTarget, const CVector& slideBy)

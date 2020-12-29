@@ -3,6 +3,14 @@
 #include "Script.h"
 #include "ScriptCommands.h"
 
+#include "audio_enums.h" //needs to be before AudioManager.h
+#include "vehicle_enums.h" //needs to be before AudioManager.h
+#include "ParticleType.h"
+
+#include "AudioManager.h"
+#include "Vehicle.h"
+
+#include "Bike.h"
 #include "Boat.h"
 #include "CarCtrl.h"
 #include "Clock.h"
@@ -12,8 +20,9 @@
 #include "Darkel.h"
 #include "Explosion.h"
 #include "Fire.h"
-#include "General.h"
+#include "GameLogic.h"
 #include "Garages.h"
+#include "General.h"
 #include "Heli.h"
 #include "Messages.h"
 #include "Pad.h"
@@ -21,8 +30,8 @@
 #include "Phones.h"
 #include "Pickups.h"
 #include "PointLights.h"
-#include "Population.h"
 #include "Pools.h"
+#include "Population.h"
 #include "ProjectileInfo.h"
 #include "Radar.h"
 #include "Restart.h"
@@ -32,8 +41,6 @@
 #include "WaterLevel.h"
 #include "Weather.h"
 #include "Zones.h"
-#include "GameLogic.h"
-#include "Bike.h"
 
 int8 CRunningScript::ProcessCommands500To599(int32 command)
 {

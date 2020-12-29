@@ -1,10 +1,12 @@
 #include "common.h"
 #include "PedAttractor.h"
 
+#include "vehicle_enums.h" //needs to be before Vehicle.h
+
 #include "General.h"
+#include "MemoryHeap.h"
 #include "Vehicle.h"
 #include "World.h"
-#include "MemoryHeap.h"
 
 const int gcMaxSizeOfAtmQueue = 1;
 const int gcMaxSizeOfSeatQueue = 1;

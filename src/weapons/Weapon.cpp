@@ -1,8 +1,13 @@
 #include "common.h"
 
-#include "Weapon.h"
+#include "audio_enums.h" //needs to be before AudioManager.h
+#include "vehicle_enums.h" //needs to be before AudioManager.h
+
 #include "AnimBlendAssociation.h"
 #include "AudioManager.h"
+#include "Automobile.h"
+#include "Bike.h"
+#include "Boat.h"
 #include "BulletInfo.h"
 #include "Camera.h"
 #include "Coronas.h"
@@ -16,25 +21,22 @@
 #include "Pad.h"
 #include "Particle.h"
 #include "Ped.h"
+#include "Pickups.h"
 #include "PointLights.h"
 #include "Pools.h"
 #include "ProjectileInfo.h"
 #include "RpAnimBlend.h"
 #include "ShotInfo.h"
 #include "SpecialFX.h"
+#include "Sprite.h"
 #include "Stats.h"
+#include "SurfaceTable.h"
 #include "TempColModels.h"
 #include "Timer.h"
-#include "Automobile.h"
-#include "Boat.h"
 #include "WaterLevel.h"
+#include "Weapon.h"
 #include "WeaponInfo.h"
 #include "World.h"
-#include "SurfaceTable.h"
-#include "Bike.h"
-#include "Glass.h"
-#include "Sprite.h"
-#include "Pickups.h"
 
 float fReloadAnimSampleFraction[5] = {  0.5f,  0.7f,  0.75f,  0.75f,  0.7f };
 float fSeaSparrowAimingAngle = 10.0f;

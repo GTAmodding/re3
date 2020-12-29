@@ -1,15 +1,16 @@
 #pragma once
 #include "PathFind.h"
 #include "Boat.h"
-#include "Vehicle.h"
 
 #define GAME_SPEED_TO_METERS_PER_SECOND 50.0f
 #define METERS_PER_SECOND_TO_GAME_SPEED (1.0f / GAME_SPEED_TO_METERS_PER_SECOND)
 #define GAME_SPEED_TO_CARAI_SPEED 60.0f
 #define TIME_COPS_WAIT_TO_EXIT_AFTER_STOPPING 2500
 
+class CVehicle;
 class CZoneInfo;
 class CAutomobile;
+class CPhysical;
 
 enum{
 	MAX_CARS_TO_KEEP = 2,
@@ -130,11 +131,7 @@ public:
 	static void SteerAIBoatWithPhysicsAttackingPlayer(CVehicle*, float*, float*, float*, bool*);
 	static void SteerAICarBlockingPlayerForwardAndBack(CVehicle*, float*, float*, float*, bool*);
 
-	static float GetPositionAlongCurrentCurve(CVehicle* pVehicle)
-	{
-		uint32 timeInCurve = CTimer::GetTimeInMilliseconds() - pVehicle->AutoPilot.m_nTimeEnteredCurve;
-		return (float)timeInCurve / pVehicle->AutoPilot.m_nTimeToSpendOnCurrentCurve;
-	}
+	static float GetPositionAlongCurrentCurve(CVehicle* pVehicle);
 
 	static float LimitRadianAngle(float angle)
 	{

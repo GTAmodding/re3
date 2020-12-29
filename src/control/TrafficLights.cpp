@@ -1,5 +1,7 @@
 #include "common.h"
 
+#include "vehicle_enums.h" //needs to be before Vehicle.h
+
 #include "Camera.h"
 #include "Clock.h"
 #include "Coronas.h"

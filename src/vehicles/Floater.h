@@ -1,6 +1,7 @@
 #pragma once
 
 class CPhysical;
+class CVehicle;
 
 enum tWaterLevel
 {

@@ -1,10 +1,12 @@
 #include "common.h"
 
-#include "World.h"
-#include "Vehicle.h"
+#include "vehicle_enums.h" //needs to be before Vehicle.h
+
 #include "PlayerPed.h"
 #include "Pools.h"
 #include "References.h"
+#include "Vehicle.h"
+#include "World.h"
 
 CReference CReferences::aRefs[NUMREFERENCES];
 CReference *CReferences::pEmptyList;

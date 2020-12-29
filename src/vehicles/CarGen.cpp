@@ -2,6 +2,8 @@
 
 #include "CarGen.h"
 
+#include "vehicle_enums.h" //needs to be before Vehicle.h
+
 #include "Automobile.h"
 #include "Bike.h"
 #include "Boat.h"
@@ -9,6 +11,7 @@
 #include "CarCtrl.h"
 #include "CutsceneMgr.h"
 #include "General.h"
+#include "Occlusion.h"
 #include "Pools.h"
 #include "Streaming.h"
 #include "Timer.h"
@@ -16,7 +19,6 @@
 #include "VisibilityPlugins.h"
 #include "World.h"
 #include "Zones.h"
-#include "Occlusion.h"
 
 // --MIAMI: file done
 

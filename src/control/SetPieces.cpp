@@ -1,11 +1,13 @@
 #include "common.h"
 
-#include "SetPieces.h"
+#include "vehicle_enums.h" //needs to be before Vehicle.h
+
 #include "Automobile.h"
 #include "CarAI.h"
 #include "CopPed.h"
 #include "GenericGameStorage.h"
 #include "PlayerPed.h"
+#include "SetPieces.h"
 #include "Timer.h"
 #include "Vehicle.h"
 #include "Wanted.h"

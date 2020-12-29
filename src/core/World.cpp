@@ -1,4 +1,10 @@
 #include "common.h"
+
+#include "vehicle_enums.h" //needs to be before Vehicle.h
+#include "ParticleType.h"
+
+#include "Vehicle.h"
+
 #include "Camera.h"
 #include "CarCtrl.h"
 #include "CopPed.h"

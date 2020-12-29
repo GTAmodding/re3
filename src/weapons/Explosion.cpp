@@ -1,5 +1,8 @@
 #include "common.h"
 
+#include "vehicle_enums.h" //needs to be before Vehicle.h
+#include "Vehicle.h"
+
 #include "Automobile.h"
 #include "Bike.h"
 #include "Camera.h"
@@ -8,14 +11,13 @@
 #include "Entity.h"
 #include "EventList.h"
 #include "Explosion.h"
-#include "General.h"
 #include "Fire.h"
+#include "General.h"
 #include "Pad.h"
 #include "Particle.h"
 #include "PointLights.h"
 #include "Shadows.h"
 #include "Timer.h"
-#include "Vehicle.h"
 #include "WaterLevel.h"
 #include "World.h"
 

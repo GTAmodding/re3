@@ -22,6 +22,7 @@ class CPed;
 class CVehicle;
 class CPlayerPed;
 class CCivilianPed;
+class CPtrList;
 
 class CPlayerInfo
 {

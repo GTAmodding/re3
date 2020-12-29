@@ -1,7 +1,5 @@
 #pragma once
 
-#include "Vehicle.h"
-
 class CObject;
 
 enum eHeliNodes

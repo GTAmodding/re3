@@ -4,6 +4,12 @@
 #include "Streaming.h"
 #include "Pools.h"
 
+CBuilding::CBuilding()
+{
+	m_type = ENTITY_TYPE_BUILDING;
+	bUsesCollision = true;
+}
+
 void *CBuilding::operator new(size_t sz) { return CPools::GetBuildingPool()->New();  }
 void CBuilding::operator delete(void *p, size_t sz) { CPools::GetBuildingPool()->Delete((CBuilding*)p); }
 

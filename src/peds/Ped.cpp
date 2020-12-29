@@ -1,5 +1,11 @@
 #include "common.h"
 
+#include "audio_enums.h"
+#include "vehicle_enums.h" //needs to be before Vehicle.h
+
+#include "AudioManager.h"
+#include "Vehicle.h"
+
 #include "main.h"
 #include "Pools.h"
 #include "Particle.h"

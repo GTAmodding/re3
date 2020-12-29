@@ -1,6 +1,10 @@
 #include "common.h"
 #if !defined(AUDIO_OAL) &&  !defined(AUDIO_MSS)
+
 #include "sampman.h"
+#include "audio_enums.h" //needs to be before AudioManager.h
+#include "vehicle_enums.h" //needs to be before AudioManager.h
+
 #include "AudioManager.h"
 
 cSampleManager SampleManager;

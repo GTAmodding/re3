@@ -3,6 +3,10 @@
 #include "Script.h"
 #include "ScriptCommands.h"
 
+#include "vehicle_enums.h" //needs to be before AudioManager.h
+
+#include "Vehicle.h"
+
 #include "Camera.h"
 #include "CarCtrl.h"
 #include "CarGen.h"

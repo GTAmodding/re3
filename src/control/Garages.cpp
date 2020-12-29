@@ -1,13 +1,14 @@
 #include "common.h"
 
 #include "Garages.h"
-#include "main.h"
+
+#include "vehicle_enums.h" //needs to be before Vehicle.h
 
 #include "Bike.h"
 #include "Boat.h"
 #include "DMAudio.h"
-#include "General.h"
 #include "Font.h"
+#include "General.h"
 #include "HandlingMgr.h"
 #include "Hud.h"
 #include "Messages.h"
@@ -23,6 +24,7 @@
 #include "Vehicle.h"
 #include "Wanted.h"
 #include "World.h"
+#include "main.h"
 
 //--MIAMI: file done
 

@@ -1,9 +1,5 @@
 #pragma once
 
-#include "AudioManager.h"
-#include "ParticleType.h"
-#include "Placeable.h"
-
 #define MAX_PARTICLEOBJECTS 70
 #define MAX_AUDIOHYDRANTS   8
 
@@ -100,10 +96,7 @@ public:
 	int32 AudioEntity;
 	CParticleObject *pParticleObject;
 	
-	CAudioHydrant() : 
-		AudioEntity(AEHANDLE_NONE),
-		pParticleObject(nil)
-	{ }
+	CAudioHydrant();
 	
 	static bool Add   (CParticleObject *particleobject);
 	static void Remove(CParticleObject *particleobject);

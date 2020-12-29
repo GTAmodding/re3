@@ -1,7 +1,9 @@
 #include "common.h"
 
-#include "Vehicle.h"
+#include "vehicle_enums.h" //needs to be before Vehicle.h
+
 #include "Door.h"
+#include "Vehicle.h"
 
 CDoor::CDoor(void)
 {

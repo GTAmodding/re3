@@ -5,10 +5,7 @@
 class CBuilding : public CEntity
 {
 public:
-	CBuilding(void) {
-		m_type = ENTITY_TYPE_BUILDING;
-		bUsesCollision = true;
-	}
+	CBuilding(void);
 	static void *operator new(size_t);
 	static void operator delete(void*, size_t);
 

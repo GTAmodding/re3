@@ -1,9 +1,12 @@
 ﻿#include "common.h"
 
-#include "AudioManager.h"
-#include "audio_enums.h"
+#include "audio_enums.h" //needs to be before AudioManager.h
+#include "vehicle_enums.h" //needs to be before Vehicle.h
 
+#include "AudioCollision.h"
+#include "AudioManager.h"
 #include "Automobile.h"
+#include "Bike.h"
 #include "Boat.h"
 #include "Bridge.h"
 #include "Camera.h"
@@ -12,6 +15,7 @@
 #include "Entity.h"
 #include "Explosion.h"
 #include "Fire.h"
+#include "Fluff.h"
 #include "Garages.h"
 #include "General.h"
 #include "HandlingMgr.h"
@@ -24,24 +28,23 @@
 #include "Placeable.h"
 #include "Plane.h"
 #include "PlayerPed.h"
+#include "PoliceRadio.h"
 #include "Pools.h"
 #include "Projectile.h"
 #include "ProjectileInfo.h"
 #include "Replay.h"
+#include "Script.h"
 #include "Stats.h"
 #include "SurfaceTable.h"
 #include "Train.h"
 #include "Transmission.h"
 #include "Vehicle.h"
+#include "VehicleModelInfo.h"
 #include "WaterCannon.h"
 #include "Weather.h"
+#include "WindModifiers.h"
 #include "ZoneCull.h"
 #include "sampman.h"
-#include "Bike.h"
-#include "WindModifiers.h"
-#include "Fluff.h"
-#include "Script.h"
-
 
 const int channels = ARRAY_SIZE(cAudioManager::m_asActiveSamples);
 const int policeChannel = channels + 1;
@@ -5215,7 +5218,12 @@ cAudioManager::SetPlayersMood(uint8 mood, uint32 time)
 		m_nPlayerMood = mood;
 		m_nPlayerMoodTimer = CTimer::GetTimeInMilliseconds() + time;
 	}
+}
 
+float
+cAudioManager::Sqrt(float v) const
+{
+	return v <= 0.0f ? 0.0f : ::Sqrt(v);
 }
 
 void

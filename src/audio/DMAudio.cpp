@@ -1,12 +1,18 @@
 #include "common.h"
 
 #include "DMAudio.h"
-#include "MusicManager.h"
+
+#include "audio_enums.h" //needs to be before AudioManager.h
+#include "vehicle_enums.h" //needs to be before AudioManager.h
+
 #include "AudioManager.h"
 #include "AudioScriptObject.h"
+#include "MusicManager.h"
 #include "sampman.h"
 
 cDMAudio DMAudio;
+
+cDMAudio::~cDMAudio() {}
 
 void
 cDMAudio::Initialise(void)

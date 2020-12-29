@@ -2,14 +2,18 @@
 
 #include "DMAudio.h"
 
-#include "AudioManager.h"
+#include "audio_enums.h" //needs to be before AudioManager.h
+#include "vehicle_enums.h" //needs to be before Vehicle.h
 
+#include "AudioCollision.h"
+#include "AudioManager.h"
 #include "AudioSamples.h"
 #include "MusicManager.h"
 #include "PlayerPed.h"
 #include "PoliceRadio.h"
 #include "Replay.h"
 #include "Vehicle.h"
+#include "VehicleModelInfo.h"
 #include "World.h"
 #include "Zones.h"
 #include "sampman.h"
@@ -742,5 +746,29 @@ cAudioManager::AgeCrimes()
 		if (m_sPoliceRadioQueue.crimes[i].type != CRIME_NONE) {
 			if (++m_sPoliceRadioQueue.crimes[i].timer > 1200) m_sPoliceRadioQueue.crimes[i].type = CRIME_NONE;
 		}
+	}
+}
+
+cAMCrime::cAMCrime()
+{
+	type = CRIME_NONE;
+	position = CVector(0.0f, 0.0f, 0.0f);
+	timer = 0;
+}
+
+cPoliceRadioQueue::cPoliceRadioQueue()
+{
+	policeChannelTimerSeconds = 0;
+	policeChannelCounterSeconds = 0;
+	policeChannelTimer = 0;
+}
+
+void
+cPoliceRadioQueue::Add(uint32 sample)
+{
+	if(policeChannelTimer != 60) {
+		crimesSamples[policeChannelTimerSeconds] = sample;
+		policeChannelTimer++;
+		policeChannelTimerSeconds = (policeChannelTimerSeconds + 1) % 60;
 	}
 }

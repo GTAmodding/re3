@@ -1,7 +1,9 @@
 #include "common.h"
+#ifdef GTA_SCENE_EDIT
+
+#include "vehicle_enums.h" //needs to be before Vehicle.h
 
 #include "SceneEdit.h"
-#ifdef GTA_SCENE_EDIT
 #include "Automobile.h"
 #include "Camera.h"
 #include "CarCtrl.h"
@@ -13,9 +15,9 @@
 #include "Pad.h"
 #include "Ped.h"
 #include "Population.h"
+#include "Streaming.h"
 #include "Text.h"
 #include "Timecycle.h"
-#include "Streaming.h"
 #include "Vehicle.h"
 #include "WeaponInfo.h"
 #include "World.h"

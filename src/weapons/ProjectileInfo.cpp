@@ -1,15 +1,19 @@
 #include "common.h"
 
+#include "vehicle_enums.h" //needs to be before Vehicle.h
+
+#include "Vehicle.h"
+
 #include "Camera.h"
+#include "Explosion.h"
 #include "General.h"
 #include "Heli.h"
 #include "ModelIndices.h"
 #include "Particle.h"
 #include "Ped.h"
 #include "Plane.h"
-#include "ProjectileInfo.h"
 #include "Projectile.h"
-#include "Explosion.h"
+#include "ProjectileInfo.h"
 #include "Weapon.h"
 #include "World.h"
 

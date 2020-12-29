@@ -3,16 +3,22 @@
 #include "Script.h"
 #include "ScriptCommands.h"
 
+#include "audio_enums.h" //needs to be before AudioManager.h
+#include "vehicle_enums.h" //needs to be before AudioManager.h
+
+#include "AudioManager.h"
+#include "Vehicle.h"
+
 #include "CarCtrl.h"
 #include "ColStore.h"
 #include "Coronas.h"
 #include "CutsceneMgr.h"
 #include "DMAudio.h"
 #include "Explosion.h"
+#include "Fluff.h"
 #include "GameLogic.h"
 #include "General.h"
 #include "Glass.h"
-#include "Fluff.h"
 #include "Hud.h"
 #include "MBlur.h"
 #include "Pad.h"

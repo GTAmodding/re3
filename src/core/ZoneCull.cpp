@@ -1,13 +1,17 @@
 #include "common.h"
 
+#include "vehicle_enums.h" //needs to be before Vehicle.h
+
+#include "Vehicle.h"
+
 #include "Building.h"
-#include "Treadable.h"
-#include "Train.h"
+#include "Camera.h"
+#include "FileMgr.h"
 #include "Pools.h"
 #include "Timer.h"
-#include "Camera.h"
+#include "Train.h"
+#include "Treadable.h"
 #include "World.h"
-#include "FileMgr.h"
 #include "ZoneCull.h"
 #include "Zones.h"
 

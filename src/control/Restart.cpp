@@ -1,5 +1,8 @@
 #include "common.h"
 
+#include "vehicle_enums.h"
+#include "Vehicle.h"
+
 #include "Restart.h"
 #include "Zones.h"
 #include "PathFind.h"

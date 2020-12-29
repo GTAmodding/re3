@@ -1,11 +1,13 @@
 #include "common.h"
 
-#include "Timer.h"
-#include "WaterLevel.h"
+#include "vehicle_enums.h" //needs to be before Vehicle.h
+
+#include "Floater.h"
 #include "ModelIndices.h"
 #include "Physical.h"
+#include "Timer.h"
 #include "Vehicle.h"
-#include "Floater.h"
+#include "WaterLevel.h"
 
 //--MIAMI: done
 

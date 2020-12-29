@@ -1,13 +1,15 @@
 #include "common.h"
 
+#include "vehicle_enums.h" //needs to be before Vehicle.h
+
 #include "Automobile.h"
-#include "CarCtrl.h"
 #include "Camera.h"
+#include "CarCtrl.h"
+#include "PlayerInfo.h"
 #include "Remote.h"
 #include "Timer.h"
-#include "World.h"
-#include "PlayerInfo.h"
 #include "Vehicle.h"
+#include "World.h"
 
 //--MIAMI: file done
 

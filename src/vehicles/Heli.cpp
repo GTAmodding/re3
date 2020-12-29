@@ -1,6 +1,10 @@
 #include "common.h"
 #include "main.h"
 
+#include "vehicle_enums.h" //needs to be before Vehicle.h
+
+#include "Vehicle.h"
+
 #include "General.h"
 #include "Darkel.h"
 #include "Stats.h"

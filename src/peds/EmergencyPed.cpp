@@ -1,13 +1,16 @@
 #include "common.h"
 
-#include "EmergencyPed.h"
-#include "DMAudio.h"
-#include "ModelIndices.h"
+#include "vehicle_enums.h" //needs to be before Vehicle.h
+
 #include "Vehicle.h"
+
+#include "Accident.h"
+#include "CarCtrl.h"
+#include "DMAudio.h"
+#include "EmergencyPed.h"
 #include "Fire.h"
 #include "General.h"
-#include "CarCtrl.h"
-#include "Accident.h"
+#include "ModelIndices.h"
 
 // --MIAMI: file done
 

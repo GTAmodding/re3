@@ -1,23 +1,24 @@
 ﻿#include "common.h"
 
-#include "Glass.h"
-#include "Timer.h"
-#include "Object.h"
-#include "Vehicle.h"
-#include "Pools.h"
-#include "General.h"
+#include "soundlist.h"
+#include "vehicle_enums.h" //needs to be before Vehicle.h
+
 #include "AudioScriptObject.h"
-#include "World.h"
-#include "Timecycle.h"
-#include "Particle.h"
 #include "Camera.h"
+#include "General.h"
+#include "Glass.h"
+#include "ModelIndices.h"
+#include "Object.h"
+#include "Particle.h"
+#include "Pools.h"
 #include "RenderBuffer.h"
 #include "Shadows.h"
-#include "ModelIndices.h"
-#include "main.h"
-#include "soundlist.h"
 #include "SurfaceTable.h"
-
+#include "Timecycle.h"
+#include "Timer.h"
+#include "Vehicle.h"
+#include "World.h"
+#include "main.h"
 
 uint32 CGlass::NumGlassEntities;
 CEntity *CGlass::apEntitiesToBeRendered[NUM_GLASSENTITIES];

@@ -1,6 +1,6 @@
 #include "common.h"
-
 #ifdef AUDIO_MSS
+
 #include <windows.h>
 #include <shobjidl.h>
 #include <shlguid.h>
@@ -11,12 +11,15 @@
 #include "eax-util.h"
 #include "mss.h"
 
-#include "sampman.h"
-#include "AudioManager.h"
-#include "MusicManager.h"
-#include "Frontend.h"
-#include "Timer.h"
+#include "audio_enums.h" //needs to be before AudioManager.h
+#include "vehicle_enums.h" //needs to be before AudioManager.h
 #include "crossplatform.h"
+#include "sampman.h"
+
+#include "AudioManager.h"
+#include "Frontend.h"
+#include "MusicManager.h"
+#include "Timer.h"
 
 #pragma comment( lib, "mss32.lib" )
 

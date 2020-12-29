@@ -1,22 +1,24 @@
 #include "common.h"
 
-#include "Vector.h"
-#include "PlayerPed.h"
-#include "Entity.h"
-#include "PointLights.h"
-#include "Particle.h"
-#include "Timer.h"
-#include "Vehicle.h"
-#include "Shadows.h"
+#include "vehicle_enums.h" //needs to be before Vehicle.h
+
 #include "Automobile.h"
-#include "World.h"
-#include "General.h"
-#include "EventList.h"
+#include "CarAI.h"
 #include "DamageManager.h"
-#include "Ped.h"
+#include "Entity.h"
+#include "EventList.h"
 #include "Fire.h"
 #include "GameLogic.h"
-#include "CarAI.h"
+#include "General.h"
+#include "Particle.h"
+#include "Ped.h"
+#include "PlayerPed.h"
+#include "PointLights.h"
+#include "Shadows.h"
+#include "Timer.h"
+#include "Vector.h"
+#include "Vehicle.h"
+#include "World.h"
 
 // --MIAMI: file done
 

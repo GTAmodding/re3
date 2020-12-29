@@ -1,9 +1,10 @@
 #pragma once
 
+#include "ParticleType.h"
+
 #include "Pools.h"
 #include "World.h"
 #include "WeaponEffects.h"
-#include "ParticleType.h"
 
 #ifdef FIX_BUGS
 #ifndef DONT_FIX_REPLAY_BUGS

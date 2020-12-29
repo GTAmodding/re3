@@ -1,9 +1,11 @@
 #pragma once
 
-#include "Vehicle.h"
+#include "vehicle_enums.h" //needs to be before Vehicle.h
+
 #include "DamageManager.h"
 #include "Door.h"
 #include "Skidmarks.h"
+#include "Vehicle.h"
 
 class CObject;
 

@@ -2,24 +2,26 @@
 
 #include "Weather.h"
 
+#include "vehicle_enums.h" //needs to be before Vehicle.h
+
 #include "Camera.h"
 #include "Clock.h"
 #include "CutsceneMgr.h"
 #include "DMAudio.h"
 #include "General.h"
 #include "Pad.h"
-#include "PlayerPed.h"
 #include "Particle.h"
+#include "PlayerPed.h"
 #include "RenderBuffer.h"
-#include "Stats.h"
+#include "Replay.h"
 #include "Shadows.h"
+#include "SpecialFX.h"
+#include "Stats.h"
 #include "Timecycle.h"
 #include "Timer.h"
 #include "Vehicle.h"
 #include "World.h"
 #include "ZoneCull.h"
-#include "SpecialFX.h"
-#include "Replay.h"
 
 //--MIAMI: file done
 

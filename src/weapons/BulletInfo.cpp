@@ -2,28 +2,31 @@
 
 #include "BulletInfo.h"
 
+#include "vehicle_enums.h" //needs to be before Vehicle.h
+
+#include "Vehicle.h"
+
 #include "AnimBlendAssociation.h"
-#include "DMAudio.h"
 #include "AudioScriptObject.h"
+#include "DMAudio.h"
 #ifdef FIX_BUGS
 #include "Collision.h"
 #endif
-#include "RpAnimBlend.h"
 #include "Entity.h"
 #include "EventList.h"
 #include "Fire.h"
 #include "Glass.h"
+#include "Heli.h"
+#include "Object.h"
 #include "Particle.h"
 #include "Ped.h"
-#include "Object.h"
+#include "RpAnimBlend.h"
 #include "Stats.h"
+#include "SurfaceTable.h"
 #include "Timer.h"
-#include "Vehicle.h"
 #include "Weapon.h"
 #include "WeaponInfo.h"
 #include "World.h"
-#include "SurfaceTable.h"
-#include "Heli.h"
 
 // --MIAMI: file done
 

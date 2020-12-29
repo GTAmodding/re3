@@ -2,12 +2,17 @@
 
 #include <ctype.h>
 
+
+#include "vehicle_enums.h" //needs to be before Vehicle.h
+
+#include "Vehicle.h"
+
 #include "Zones.h"
 
 #include "Clock.h"
 #include "Text.h"
-#include "World.h"
 #include "Timer.h"
+#include "World.h"
 
 //--MIAMI: file done
 

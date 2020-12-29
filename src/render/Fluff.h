@@ -1,5 +1,5 @@
 #pragma once
-#include "common.h"
+
 #include "Vector.h"
 #include "Object.h"
 #include "Plane.h"

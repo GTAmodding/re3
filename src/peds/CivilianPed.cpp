@@ -1,18 +1,21 @@
 #include "common.h"
 
-#include "CivilianPed.h"
-#include "Phones.h"
-#include "General.h"
-#include "PlayerPed.h"
-#include "Wanted.h"
-#include "DMAudio.h"
-#include "World.h"
+#include "vehicle_enums.h" //needs to be before Vehicle.h
+
 #include "Vehicle.h"
-#include "SurfaceTable.h"
-#include "Weather.h"
-#include "PedAttractor.h"
-#include "Object.h"
+
 #include "CarCtrl.h"
+#include "CivilianPed.h"
+#include "DMAudio.h"
+#include "General.h"
+#include "Object.h"
+#include "PedAttractor.h"
+#include "Phones.h"
+#include "PlayerPed.h"
+#include "SurfaceTable.h"
+#include "Wanted.h"
+#include "Weather.h"
+#include "World.h"
 
 #ifndef _WIN32
 #include <float.h>

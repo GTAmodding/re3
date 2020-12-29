@@ -1,35 +1,40 @@
 #include "common.h"
-#include "main.h"
-#include "FileMgr.h"
-#include "FileLoader.h"
-#include "TxdStore.h"
-#include "Timer.h"
-#include "Weather.h"
-#include "Camera.h"
+
+#include "vehicle_enums.h" //needs to be before Vehicle.h
+
 #include "Vehicle.h"
-#include "PlayerPed.h"
+
 #include "Boat.h"
-#include "World.h"
-#include "General.h"
-#include "Timecycle.h"
-#include "ZoneCull.h"
+#include "Camera.h"
+#include "CdStream.h"
 #include "Clock.h"
+#include "ColStore.h"
+#include "FileLoader.h"
+#include "FileMgr.h"
+#include "General.h"
+#include "Occlusion.h"
+#include "Pad.h"
 #include "Particle.h"
 #include "ParticleMgr.h"
+#include "PlayerPed.h"
+#include "RenderBuffer.h"
+#include "Replay.h"
 #include "RwHelper.h"
 #include "Streaming.h"
-#include "ColStore.h"
-#include "CdStream.h"
-#include "Pad.h"
-#include "RenderBuffer.h"
-#include <rwcore.h>
-#include <rpworld.h>
-#include <rpmatfx.h>
-#include "Occlusion.h"
-#include "Replay.h"
-#include "WaterLevel.h"
 #include "SurfaceTable.h"
+#include "Timecycle.h"
+#include "Timer.h"
+#include "TxdStore.h"
 #include "WaterCreatures.h"
+#include "WaterLevel.h"
+#include "Weather.h"
+#include "World.h"
+#include "ZoneCull.h"
+#include "main.h"
+
+#include <rpmatfx.h>
+#include <rpworld.h>
+#include <rwcore.h>
 
 #define RwIm3DVertexSet_RGBA(vert, rgba) RwIm3DVertexSetRGBA(vert, rgba.red, rgba.green, rgba.blue, rgba.alpha) // (RwRGBAAssign(&(_dst)->color, &_src))
 
@@ -58,7 +63,7 @@ int32 CWaterLevel::m_nRenderWaterLayers;
 
 RpAtomic *CWaterLevel::ms_pWavyAtomic;
 RpAtomic *CWaterLevel::ms_pMaskAtomic;
-//"Custom" Don¥t Render Water Toggle
+//"Custom" Don≈Ωt Render Water Toggle
 bool gbDontRenderWater;
 
 
@@ -895,7 +900,7 @@ SectorRadius(float fSize)
 void
 CWaterLevel::RenderWater()
 {
-//"Custom" Don¥t Render Water Toggle
+//"Custom" Don≈Ωt Render Water Toggle
 #ifndef MASTER
 	if (gbDontRenderWater)
 		return;

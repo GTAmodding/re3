@@ -2,7 +2,6 @@
 
 #include "AnimBlendList.h"
 
-
 // TODO: put somewhere else
 struct AnimBlendFrameData
 {

@@ -1,12 +1,14 @@
 #include "common.h"
 
-#include "General.h"
-#include "FileMgr.h"	// only needed for empty function
+#include "vehicle_enums.h" //needs to be before Vehicle.h
+
 #include "Camera.h"
+#include "FileMgr.h" // only needed for empty function
+#include "General.h"
+#include "Lines.h" // for debug
+#include "PathFind.h"
 #include "Vehicle.h"
 #include "World.h"
-#include "Lines.h"	// for debug
-#include "PathFind.h"
 
 //--MIAMI: file done except mobile unused function
 

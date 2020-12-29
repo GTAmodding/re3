@@ -1,7 +1,5 @@
 ﻿#pragma once
 
-#include "common.h"
-
 enum eSfxSample
 {
 	SFX_CAR_HORN_JEEP = 0,

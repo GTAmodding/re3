@@ -1,10 +1,7 @@
-﻿#pragma once
+#pragma once
 
-#include "audio_enums.h"
 #include "AudioCollision.h"
 #include "PoliceRadio.h"
-#include "VehicleModelInfo.h"
-#include "Vehicle.h"
 
 class tSound
 {
@@ -82,23 +79,12 @@ public:
 	uint32 m_nDelayTimer;
 #endif
 
-	cPedComments()
-	{
-		for (int i = 0; i < NUM_PED_COMMENTS_SLOTS; i++)
-			for (int j = 0; j < NUM_PED_COMMENTS_BANKS; j++) {
-				m_asPedComments[j][i].m_nProcess = -1;
-				m_nIndexMap[j][i] = NUM_PED_COMMENTS_SLOTS;
-			}
-
-		for (int i = 0; i < NUM_PED_COMMENTS_BANKS; i++)
-			m_nCommentsInBank[i] = 0;
-		m_nActiveBank = 0;
-	}
+	cPedComments();
 	void Add(tPedComment *com); // done
 	void Process();             // done
 };
 
-VALIDATE_SIZE(cPedComments, 0x490);
+VALIDATE_SIZE(cPedComments, 1168);
 
 class CEntity;
 
@@ -119,7 +105,7 @@ public:
 	bool m_bIsPlayed[MISSION_AUDIO_SLOTS];
 	bool m_bIsMobile[MISSION_AUDIO_SLOTS];
 };
-VALIDATE_SIZE(cMissionAudio, 0x38);
+VALIDATE_SIZE(cMissionAudio, 56);
 
 // name made up
 class cAudioScriptObjectManager
@@ -128,8 +114,8 @@ public:
 	int32 m_anScriptObjectEntityIndices[NUM_SCRIPT_MAX_ENTITIES];
 	int32 m_nScriptObjectEntityTotal;
 
-	cAudioScriptObjectManager() { m_nScriptObjectEntityTotal = 0; }
-	~cAudioScriptObjectManager() { m_nScriptObjectEntityTotal = 0; }
+	cAudioScriptObjectManager();
+	~cAudioScriptObjectManager();
 };
 
 
@@ -145,12 +131,7 @@ public:
 	float m_fDistance;
 	CPed *m_pPed;
 
-	cPedParams()
-	{
-		m_bDistanceCalculated = false;
-		m_fDistance = 0.0f;
-		m_pPed = nil;
-	}
+	cPedParams();
 };
 
 class cVehicleParams
@@ -164,19 +145,10 @@ public:
 	int32 m_nIndex;
 	float m_fVelocityChange;
 
-	cVehicleParams()
-	{
-		m_VehicleType = -1;
-		m_bDistanceCalculated = false;
-		m_fDistance = 0.0f;
-		m_pVehicle = nil;
-		m_pTransmission = nil;
-		m_nIndex = 0;
-		m_fVelocityChange = 0.0f;
-	}
+	cVehicleParams();
 };
 
-VALIDATE_SIZE(cVehicleParams, 0x1C);
+VALIDATE_SIZE(cVehicleParams, 28);
 
 enum {
 	REFLECTION_NORTH = 0,
@@ -249,11 +221,11 @@ public:
 	~cAudioManager();
 
 	// getters
-	uint32 GetFrameCounter() const { return m_FrameCounter; } // done
-	float GetReflectionsDistance(int32 idx) const { return m_afReflectionsDistances[idx]; } // done
-	int32 GetRandomNumber(int32 idx) const { return m_anRandomTable[idx]; }
-	int32 GetRandomNumberInRange(int32 idx, int32 low, int32 high) const { return (m_anRandomTable[idx] % (high - low + 1)) + low; }
-	bool IsMissionAudioSamplePlaying(uint8 slot) const; // { return m_sMissionAudio.m_nPlayStatus == 1; }
+	uint32 GetFrameCounter() const;                // done
+	float GetReflectionsDistance(int32 idx) const; // done
+	int32 GetRandomNumber(int32 idx) const;
+	int32 GetRandomNumberInRange(int32 idx, int32 low, int32 high) const;
+	bool IsMissionAudioSamplePlaying(uint8 slot) const;
 	bool ShouldDuckMissionAudio(uint8 slot) const;
 
 	// "Should" be in alphabetic order, except "getXTalkSfx"
@@ -535,7 +507,7 @@ public:
 	void SetPedTalkingStatus(CPed *ped, uint8 status); // done
 	void SetPlayersMood(uint8 mood, uint32 time);      // done
 
-	float Sqrt(float v) const { return v <= 0.0f ? 0.0f : ::Sqrt(v); }
+	float Sqrt(float v) const;
 
 #ifdef GTA_PC
 	// only used in pc

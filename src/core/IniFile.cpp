@@ -2,10 +2,14 @@
 
 #include "IniFile.h"
 
+#include "vehicle_enums.h" //needs to be before Vehicle.h
+
+#include "Vehicle.h"
+
 #include "CarCtrl.h"
 #include "FileMgr.h"
-#include "main.h"
 #include "Population.h"
+#include "main.h"
 
 // --MIAMI: file done
 

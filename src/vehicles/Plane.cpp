@@ -683,6 +683,12 @@ CPlane::Render(void)
 		CEntity::Render();
 }
 
+void
+CPlane::FlagToDestroyWhenNextProcessed()
+{
+	bRemoveFromWorld = true;
+}
+
 #define CRUISE_SPEED (50.0f)
 #define TAXI_SPEED (5.0f)
 

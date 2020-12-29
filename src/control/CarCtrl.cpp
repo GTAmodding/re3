@@ -1,5 +1,9 @@
 #include "common.h"
 
+
+#include "vehicle_enums.h" //needs to be before Vehicle.h
+#include "Vehicle.h"
+
 #include "CarCtrl.h"
 
 #include "Accident.h"
@@ -11,8 +15,9 @@
 #include "Cranes.h"
 #include "Curves.h"
 #include "CutsceneMgr.h"
-#include "Gangs.h"
+#include "Fire.h"
 #include "Game.h"
+#include "Gangs.h"
 #include "Garages.h"
 #include "General.h"
 #include "IniFile.h"
@@ -21,17 +26,15 @@
 #include "Ped.h"
 #include "PlayerInfo.h"
 #include "PlayerPed.h"
-#include "Population.h"
-#include "Wanted.h"
 #include "Pools.h"
+#include "Population.h"
 #include "Renderer.h"
 #include "RoadBlocks.h"
+#include "Streaming.h"
 #include "Timer.h"
 #include "TrafficLights.h"
-#include "Streaming.h"
 #include "VisibilityPlugins.h"
-#include "Vehicle.h"
-#include "Fire.h"
+#include "Wanted.h"
 #include "WaterLevel.h"
 #include "World.h"
 #include "Zones.h"
@@ -2569,6 +2572,13 @@ void CCarCtrl::SteerAICarBlockingPlayerForwardAndBack(CVehicle* pVehicle, float*
 		*pAccel = Max(-1.0f, 0.1f * multiplier);
 		*pBrake = 0.0f;
 	}
+}
+
+float
+CCarCtrl::GetPositionAlongCurrentCurve(CVehicle *pVehicle)
+{
+	uint32 timeInCurve = CTimer::GetTimeInMilliseconds() - pVehicle->AutoPilot.m_nTimeEnteredCurve;
+	return (float)timeInCurve / pVehicle->AutoPilot.m_nTimeToSpendOnCurrentCurve;
 }
 
 void CCarCtrl::SteerAIBoatWithPhysicsHeadingForTarget(CVehicle* pVehicle, float targetX, float targetY, float* pSwerve, float* pAccel, float* pBrake)

@@ -1,7 +1,9 @@
 #pragma once
 
-#include "Vehicle.h"
 #include "Door.h"
+
+struct tBoatHandlingData;
+class CEntity;
 
 enum eBoatNodes
 {

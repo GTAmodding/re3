@@ -1,10 +1,13 @@
 #include "common.h"
 
-#include "DMAudio.h"
-#include "Entity.h"
+#include "audio_enums.h" //needs to be before AudioManager.h
+#include "vehicle_enums.h" //needs to be before AudioManager.h
+
 #include "AudioCollision.h"
 #include "AudioManager.h"
 #include "AudioSamples.h"
+#include "DMAudio.h"
+#include "Entity.h"
 #include "SurfaceTable.h"
 #include "sampman.h"
 

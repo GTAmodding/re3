@@ -1,15 +1,20 @@
 #include "common.h"
 
-#include "ParticleObject.h"
-#include "Timer.h"
-#include "General.h"
-#include "ParticleMgr.h"
-#include "Particle.h"
-#include "Camera.h"
-#include "Game.h"
-#include "DMAudio.h"
-#include "screendroplets.h"
+#include "audio_enums.h"   //needs to be before AudioManager.h
+#include "vehicle_enums.h" //needs to be before AudioManager.h
+#include "ParticleType.h"
 
+#include "AudioManager.h"
+#include "Camera.h"
+#include "DMAudio.h"
+#include "Game.h"
+#include "General.h"
+#include "Particle.h"
+#include "ParticleMgr.h"
+#include "ParticleObject.h"
+#include "Placeable.h"
+#include "Timer.h"
+#include "screendroplets.h"
 
 CParticleObject gPObjectArray[MAX_PARTICLEOBJECTS];
 
@@ -21,11 +26,12 @@ CAudioHydrant List[MAX_AUDIOHYDRANTS];
 
 CAudioHydrant *CAudioHydrant::Get(int n) { return &List[n]; }
 
+CAudioHydrant::CAudioHydrant() : AudioEntity(AEHANDLE_NONE), pParticleObject(nil) {}
+
 bool
 CAudioHydrant::Add(CParticleObject *particleobject)
 {
-	for ( int32 i = 0; i < MAX_AUDIOHYDRANTS; i++ )
-	{
+	for(int32 i = 0; i < MAX_AUDIOHYDRANTS; i++) {
 		if ( List[i].AudioEntity == AEHANDLE_NONE )
 		{
 			List[i].AudioEntity = DMAudio.CreateEntity(AUDIOTYPE_FIREHYDRANT, particleobject);
@@ -40,7 +46,7 @@ CAudioHydrant::Add(CParticleObject *particleobject)
 			return true;
 		}
 	}
-	
+
 	return false;
 }
 

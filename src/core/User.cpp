@@ -1,5 +1,7 @@
 #include "common.h"
 
+#include "vehicle_enums.h" //needs to be before Vehicle.h
+
 #include "GameLogic.h"
 #include "Hud.h"
 #include "PlayerPed.h"

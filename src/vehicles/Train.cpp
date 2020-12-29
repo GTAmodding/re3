@@ -1,19 +1,23 @@
 #include "common.h"
 #include "main.h"
 
-#include "Timer.h"
-#include "ModelIndices.h"
-#include "FileMgr.h"
-#include "Streaming.h"
-#include "Pad.h"
+#include "vehicle_enums.h" //needs to be before Vehicle.h
+
+#include "Vehicle.h"
+
+#include "AudioScriptObject.h"
 #include "Camera.h"
 #include "Coronas.h"
-#include "World.h"
-#include "Ped.h"
 #include "DMAudio.h"
+#include "FileMgr.h"
 #include "HandlingMgr.h"
+#include "ModelIndices.h"
+#include "Pad.h"
+#include "Ped.h"
+#include "Streaming.h"
+#include "Timer.h"
 #include "Train.h"
-#include "AudioScriptObject.h"
+#include "World.h"
 
 static CTrainNode* pTrackNodes;
 static int16 NumTrackNodes;

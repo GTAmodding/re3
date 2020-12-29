@@ -2,21 +2,23 @@
 
 #include "CarAI.h"
 
+#include "vehicle_enums.h" //needs to be before Vehicle.h
+#include "Vehicle.h"
+
 #include "Accident.h"
 #include "AutoPilot.h"
 #include "CarCtrl.h"
+#include "DMAudio.h"
+#include "Fire.h"
 #include "General.h"
 #include "HandlingMgr.h"
 #include "ModelIndices.h"
 #include "PlayerPed.h"
-#include "Wanted.h"
-#include "DMAudio.h"
-#include "Fire.h"
 #include "Pools.h"
 #include "Population.h"
 #include "Timer.h"
 #include "TrafficLights.h"
-#include "Vehicle.h"
+#include "Wanted.h"
 #include "World.h"
 #include "ZoneCull.h"
 

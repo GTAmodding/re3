@@ -1,17 +1,19 @@
 #include "common.h"
-#include "main.h"
 
-#include "General.h"
-#include "Timer.h"
-#include "Weather.h"
+#include "vehicle_enums.h" //needs to be before Vehicle.h
+
 #include "Camera.h"
-#include "World.h"
-#include "Vehicle.h"
-#include "ZoneCull.h"
-#include "Stats.h"
-#include "TxdStore.h"
+#include "General.h"
 #include "RenderBuffer.h"
 #include "Rubbish.h"
+#include "Stats.h"
+#include "Timer.h"
+#include "TxdStore.h"
+#include "Vehicle.h"
+#include "Weather.h"
+#include "World.h"
+#include "ZoneCull.h"
+#include "main.h"
 
 //--MIAMI: file done
 

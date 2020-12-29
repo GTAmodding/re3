@@ -1,7 +1,5 @@
 #pragma once
 
-#include "Vehicle.h"
-
 enum ePlaneNodes
 {
 #ifdef CPLANE_ROTORS
@@ -57,7 +55,7 @@ public:
 	void ProcessControl(void);
 	void PreRender(void);
 	void Render(void);
-	void FlagToDestroyWhenNextProcessed() { bRemoveFromWorld = true; }
+	void FlagToDestroyWhenNextProcessed();
 
 	static void InitPlanes(void);
 	static void Shutdown(void);

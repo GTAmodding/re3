@@ -1,11 +1,13 @@
-#include "WaterCreatures.h"
-#include "ModelIndices.h"
-#include "World.h"
-#include "WaterLevel.h"
+#include "common.h"
+
 #include "Camera.h"
-#include "PlayerPed.h"
-#include "config.h"
 #include "General.h"
+#include "ModelIndices.h"
+#include "PlayerPed.h"
+#include "WaterCreatures.h"
+#include "WaterLevel.h"
+#include "World.h"
+#include "config.h"
 
 int CWaterCreatures::nNumActiveSeaLifeForms;
 CWaterCreature CWaterCreatures::aWaterCreatures[NUM_WATER_CREATURES];

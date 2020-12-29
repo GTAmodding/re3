@@ -7,12 +7,7 @@ struct cAMCrime {
 	CVector position;
 	uint16 timer;
 
-	cAMCrime()
-	{
-		type = CRIME_NONE;
-		position = CVector(0.0f, 0.0f, 0.0f);
-		timer = 0;
-	}
+	cAMCrime();
 };
 
 VALIDATE_SIZE(cAMCrime, 20);
@@ -26,21 +21,9 @@ public:
 	uint8 policeChannelCounterSeconds;
 	cAMCrime crimes[10];
 
-	cPoliceRadioQueue()
-	{
-		policeChannelTimerSeconds = 0;
-		policeChannelCounterSeconds = 0;
-		policeChannelTimer = 0;
-	}
+	cPoliceRadioQueue();
 
-	void Add(uint32 sample)
-	{
-		if (policeChannelTimer != 60) {
-			crimesSamples[policeChannelTimerSeconds] = sample;
-			policeChannelTimer++;
-			policeChannelTimerSeconds = (policeChannelTimerSeconds + 1) % 60;
-		}
-	}
+	void Add(uint32 sample);
 };
 
-VALIDATE_SIZE(cPoliceRadioQueue, 0x1BC);
+VALIDATE_SIZE(cPoliceRadioQueue, 444);

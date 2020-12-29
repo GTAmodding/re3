@@ -1,25 +1,28 @@
 #include "common.h"
-#include <rpmatfx.h>
 
-#include "RwHelper.h"
-#include "General.h"
-#include "NodeName.h"
-#include "TxdStore.h"
-#include "Weather.h"
-#include "HandlingMgr.h"
-#include "VisibilityPlugins.h"
-#include "FileMgr.h"
-#include "World.h"
-#include "Vehicle.h"
+#include "vehicle_enums.h" //needs to be before Vehicle.h
+
 #include "Automobile.h"
-#include "Boat.h"
-#include "Train.h"
-#include "Plane.h"
-#include "Heli.h"
 #include "Bike.h"
+#include "Boat.h"
+#include "FileMgr.h"
+#include "General.h"
+#include "HandlingMgr.h"
+#include "Heli.h"
 #include "ModelIndices.h"
 #include "ModelInfo.h"
+#include "NodeName.h"
+#include "Plane.h"
+#include "RwHelper.h"
+#include "Train.h"
+#include "TxdStore.h"
+#include "Vehicle.h"
+#include "VisibilityPlugins.h"
+#include "Weather.h"
+#include "World.h"
 #include "custompipes.h"
+
+#include <rpmatfx.h>
 
 //--MIAMI: done
 

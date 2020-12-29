@@ -7,16 +7,18 @@
 #error "Need librw for SCREEN_DROPLETS"
 #endif
 
+#include "ParticleType.h"
+
+#include "Camera.h"
 #include "General.h"
-#include "main.h"
+#include "ParticleObject.h"
 #include "RwHelper.h"
 #include "Timer.h"
-#include "Camera.h"
+#include "Weather.h"
 #include "World.h"
 #include "ZoneCull.h"
-#include "Weather.h"
-#include "ParticleObject.h"
-	#include "Pad.h"
+#include "main.h"
+#include "Pad.h"
 #include "RenderBuffer.h"
 #include "custompipes.h"
 #include "postfx.h"

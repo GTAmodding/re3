@@ -1,25 +1,32 @@
 #include "common.h"
-#include <time.h>
-#include "soundlist.h"
-#include "MusicManager.h"
+
+#include "audio_enums.h" //needs to be before AudioManager.h
+#include "vehicle_enums.h" //needs to be before AudioManager.h
+
 #include "AudioManager.h"
-#include "ControllerConfig.h"
+
+#include "soundlist.h"
+
 #include "Camera.h"
+#include "ControllerConfig.h"
+#include "DMAudio.h"
 #include "Font.h"
+#include "GenericGameStorage.h"
 #include "Hud.h"
 #include "ModelIndices.h"
-#include "Replay.h"
+#include "MusicManager.h"
 #include "Pad.h"
+#include "Replay.h"
+#include "Script.h"
+#include "Stats.h"
 #include "Text.h"
 #include "Timer.h"
-#include "World.h"
-#include "sampman.h"
-#include "Stats.h"
-#include "Script.h"
-#include "ZoneCull.h"
 #include "Weather.h"
-#include "DMAudio.h"
-#include "GenericGameStorage.h"
+#include "World.h"
+#include "ZoneCull.h"
+#include "sampman.h"
+
+#include <time.h>
 
 cMusicManager MusicManager;
 int32 gNumRetunePresses;

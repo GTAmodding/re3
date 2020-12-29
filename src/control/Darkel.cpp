@@ -1,20 +1,23 @@
 #include "common.h"
 
-#include "main.h"
-#include "Darkel.h"
-#include "PlayerPed.h"
-#include "Wanted.h"
-#include "Timer.h"
+#include "vehicle_enums.h" //needs to be before Vehicle.h
+
+#include "Vehicle.h"
+
 #include "DMAudio.h"
+#include "Darkel.h"
+#include "Font.h"
+#include "GameLogic.h"
+#include "PlayerPed.h"
 #include "Population.h"
 #include "Replay.h"
+#include "Stats.h"
+#include "Text.h"
+#include "Timer.h"
+#include "Wanted.h"
 #include "Weapon.h"
 #include "World.h"
-#include "Stats.h"
-#include "Font.h"
-#include "Text.h"
-#include "Vehicle.h"
-#include "GameLogic.h"
+#include "main.h"
 
 //--MIAMI: file done
 

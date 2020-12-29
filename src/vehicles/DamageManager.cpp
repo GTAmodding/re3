@@ -1,9 +1,10 @@
 #include "common.h"
 
+#include "vehicle_enums.h" //needs to be before Vehicle.h
+
+#include "DamageManager.h"
 #include "General.h"
 #include "Vehicle.h"
-#include "DamageManager.h"
-
 
 float G_aComponentDamage[] = { 2.5f, 1.25f, 3.2f, 1.4f, 2.5f, 2.8f, 0.5f };
 

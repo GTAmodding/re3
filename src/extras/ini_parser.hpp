@@ -1,5 +1,5 @@
 /* 
- *  Copyright (c) 2013-2015 Denilson das Mercês Amorim <dma_2012@hotmail.com>
+ *  Copyright (c) 2013-2015 Denilson das MercÃªs Amorim <dma_2012@hotmail.com>
  *  
  *  This software is provided 'as-is', without any express or implied
  *  warranty. In no event will the authors be held liable for any damages

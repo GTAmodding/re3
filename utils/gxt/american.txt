@@ -3179,7 +3179,7 @@ Let's drive!!
 ~r~He's bailed out on us, cap his yellow ass!!!
 
 [YD2_G1]
-Hepburn Heights... Let's kill me some filthy Diablos...
+Hepburn Heights..Let's kill me some filthy Diablos...
 
 [YD2_G2]
 But remember, ~r~You don't leave this car!!
@@ -6179,7 +6179,7 @@ Collect the cargo from the debris and stash it!
 Oh you be careful now, OK baby?
 
 [AS3_K]
-Now try the chilli oil...
+Now try the chilli oil.....
 
 [RM2_F1]
 Those Colombians'll be here any minute!

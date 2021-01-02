@@ -235,6 +235,7 @@ enum Config {
 #ifdef DEBUGMENU
 #define MISSION_SWITCHER // from debug menu
 #endif
+//#define LOG_TO_FILE
 
 // Rendering/display
 //#define EXTRA_MODEL_FLAGS	// from mobile to optimize rendering

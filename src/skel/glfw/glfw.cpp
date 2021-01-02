@@ -1488,6 +1488,10 @@ WinMain(HINSTANCE instance,
 int
 main(int argc, char *argv[])
 {
+#ifdef LOG_TO_FILE
+	freopen("re3_log.txt", "w", stdout);
+	freopen("re3_errors.txt", "w", stderr);
+#endif
 #endif
 	RwV2d pos;
 	RwInt32 i;

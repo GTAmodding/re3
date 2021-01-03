@@ -9922,7 +9922,7 @@ cAudioManager::ProcessMissionAudioSlot(uint8 slot)
 				nCheckPlayingDelay[slot] = 0;
 				nFramesUntilFailedLoad[slot] = 0;
 			} else if (!m_nUserPause) {
-				if (++nFramesForPretendPlaying[slot] < 120) {
+				if (++nFramesForPretendPlaying[slot] < 90) {
 					m_sMissionAudio.m_nPlayStatus[slot] = PLAY_STATUS_PLAYING;
 				} else {
 					m_sMissionAudio.m_nPlayStatus[slot] = PLAY_STATUS_FINISHED;

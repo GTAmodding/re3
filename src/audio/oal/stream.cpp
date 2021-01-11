@@ -4,7 +4,7 @@
 #include "stream.h"
 #include "sampman.h"
 
-#ifdef _WIN32
+#if defined _MSC_VER && !defined RE3_NO_AUTOLINK
 #ifdef AUDIO_OAL_USE_SNDFILE
 #pragma comment( lib, "libsndfile-1.lib" )
 #endif

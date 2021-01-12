@@ -1,4 +1,4 @@
-name: re3_msvc_amd64
+name: re3 premake amd64
 
 on:
   pull_request:

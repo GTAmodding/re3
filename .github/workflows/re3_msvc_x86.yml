@@ -1,4 +1,4 @@
-name: re3_msvc_x86
+name: re3 premake x86
 
 on:
   pull_request:

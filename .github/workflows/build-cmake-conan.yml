@@ -1,4 +1,4 @@
-name: Build re3 using conan+cmake
+name: re3 conan+cmake
 on:
   pull_request:
   push:

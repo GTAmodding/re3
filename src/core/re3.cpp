@@ -426,6 +426,7 @@ void LoadINISettings()
 #endif
 
 #ifdef CUSTOM_FRONTEND_OPTIONS
+	bool migrate = cfg.category_size("FrontendOptions") != 0;
 	for (int i = 0; i < MENUPAGES; i++) {
 		for (int j = 0; j < NUM_MENUROWS; j++) {
 			CMenuScreenCustom::CMenuEntry &option = aScreens[i].m_aEntries[j];
@@ -435,7 +436,13 @@ void LoadINISettings()
 			// CFO check
 			if (option.m_Action < MENUACTION_NOTHING && option.m_CFO->save) {
 				// CFO only supports saving uint8 right now
-				ReadIniIfExists(option.m_CFO->saveCat, option.m_CFO->save, option.m_CFO->value);
+
+				// Migrate from old .ini to new .ini
+				if (migrate && ReadIniIfExists("FrontendOptions", option.m_CFO->save, option.m_CFO->value))
+					cfg.remove("FrontendOptions", option.m_CFO->save);
+				else
+					ReadIniIfExists(option.m_CFO->saveCat, option.m_CFO->save, option.m_CFO->value);
+
 				if (option.m_Action == MENUACTION_CFO_SELECT) {
 					option.m_CFOSelect->lastSavedValue = option.m_CFOSelect->displayedValue = *option.m_CFO->value;
 				}

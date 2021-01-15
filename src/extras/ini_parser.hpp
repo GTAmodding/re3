@@ -158,6 +158,25 @@ namespace linb
 
             /* Too lazy to continue this container... If you need more methods, just add it */
             
+            // re3
+            void remove(const string_type& sect, const key_type& key)
+            {
+                auto it = this->find(sect);
+                if(it != this->end())
+                {
+                    it->second.erase(key);
+                }
+            }
+
+            int category_size(const string_type& sect)
+            {
+                auto it = this->find(sect);
+                if(it != this->end())
+                {
+                    return it->second.size();
+                }
+                return 0;
+            }
 
 #if 1
             bool read_file(const char_type* filename)

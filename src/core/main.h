@@ -47,6 +47,8 @@ void TheModelViewer(void);
 #ifdef LOAD_INI_SETTINGS
 void LoadINISettings();
 void SaveINISettings();
+void LoadINIControllerSettings();
+void SaveINIControllerSettings();
 #endif
 
 #ifdef NEW_RENDERER

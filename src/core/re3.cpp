@@ -31,10 +31,9 @@
 #include "custompipes.h"
 #include "MemoryHeap.h"
 #include "FileMgr.h"
-
-#ifdef DONT_TRUST_RECOGNIZED_JOYSTICKS
+#include "Camera.h"
+#include "MBlur.h"
 #include "ControllerConfig.h"
-#endif
 
 #ifndef _WIN32
 #include "assert.h"
@@ -88,16 +87,16 @@ CustomFrontendOptionsPopulate(void)
 	if (fd) {
 #ifdef GRAPHICS_MENU_OPTIONS
 		FrontendOptionSetCursor(MENUPAGE_GRAPHICS_SETTINGS, -3, false);
-		FrontendOptionAddSelect("FED_VPL", vehPipelineNames, ARRAY_SIZE(vehPipelineNames), (int8*)&CustomPipes::VehiclePipeSwitch, false, nil, "VehiclePipeline");
-		FrontendOptionAddSelect("FED_PRM", off_on, 2, (int8*)&CustomPipes::RimlightEnable, false, nil, "NeoRimLight");
-		FrontendOptionAddSelect("FED_WLM", off_on, 2, (int8*)&CustomPipes::LightmapEnable, false, nil, "NeoLightMaps");
-		FrontendOptionAddSelect("FED_RGL", off_on, 2, (int8*)&CustomPipes::GlossEnable, false, nil, "NeoRoadGloss");
+		FrontendOptionAddSelect("FED_VPL", vehPipelineNames, ARRAY_SIZE(vehPipelineNames), (int8*)&CustomPipes::VehiclePipeSwitch, false, nil, "Graphics", "VehiclePipeline");
+		FrontendOptionAddSelect("FED_PRM", off_on, 2, (int8*)&CustomPipes::RimlightEnable, false, nil, "Graphics", "NeoRimLight");
+		FrontendOptionAddSelect("FED_WLM", off_on, 2, (int8*)&CustomPipes::LightmapEnable, false, nil, "Graphics", "NeoLightMaps");
+		FrontendOptionAddSelect("FED_RGL", off_on, 2, (int8*)&CustomPipes::GlossEnable, false, nil, "Graphics", "NeoRoadGloss");
 #else
 		FrontendOptionSetCursor(MENUPAGE_DISPLAY_SETTINGS, -3, false);
-		FrontendOptionAddSelect("FED_VPL", vehPipelineNames, ARRAY_SIZE(vehPipelineNames), (int8*)&CustomPipes::VehiclePipeSwitch, false, nil, "VehiclePipeline");
-		FrontendOptionAddSelect("FED_PRM", off_on, 2, (int8*)&CustomPipes::RimlightEnable, false, nil, "NeoRimLight");
-		FrontendOptionAddSelect("FED_WLM", off_on, 2, (int8*)&CustomPipes::LightmapEnable, false, nil, "NeoLightMaps");
-		FrontendOptionAddSelect("FED_RGL", off_on, 2, (int8*)&CustomPipes::GlossEnable, false, nil, "NeoRoadGloss");
+		FrontendOptionAddSelect("FED_VPL", vehPipelineNames, ARRAY_SIZE(vehPipelineNames), (int8*)&CustomPipes::VehiclePipeSwitch, false, nil, "Graphics", "VehiclePipeline");
+		FrontendOptionAddSelect("FED_PRM", off_on, 2, (int8*)&CustomPipes::RimlightEnable, false, nil, "Graphics", "NeoRimLight");
+		FrontendOptionAddSelect("FED_WLM", off_on, 2, (int8*)&CustomPipes::LightmapEnable, false, nil, "Graphics", "NeoLightMaps");
+		FrontendOptionAddSelect("FED_RGL", off_on, 2, (int8*)&CustomPipes::GlossEnable, false, nil, "Graphics", "NeoRoadGloss");
 #endif
 		CFileMgr::CloseFile(fd);
 	}
@@ -110,53 +109,293 @@ CustomFrontendOptionsPopulate(void)
 #include "ini_parser.hpp"
 
 linb::ini cfg;
-int CheckAndReadIniInt(const char *cat, const char *key, int original)
+bool ReadIniIfExists(const char *cat, const char *key, uint32 *out)
 {
-	std::string strval = cfg.get(cat, key, "");
+	std::string strval = cfg.get(cat, key, "\xBA");
 	const char *value = strval.c_str();
-	if (value && value[0] != '\0')
-		return atoi(value);
-
-	return original;
+	char *endPtr;
+	if (value && value[0] != '\xBA') {
+		*out = strtoul(value, &endPtr, 0);
+		return true;
+	}
+	return false;
 }
 
-float CheckAndReadIniFloat(const char *cat, const char *key, float original)
+bool ReadIniIfExists(const char *cat, const char *key, bool *out)
 {
-	std::string strval = cfg.get(cat, key, "");
+	std::string strval = cfg.get(cat, key, "\xBA");
 	const char *value = strval.c_str();
-	if (value && value[0] != '\0')
-		return atof(value);
-
-	return original;
+	char *endPtr;
+	if (value && value[0] != '\xBA') {
+		*out = strtoul(value, &endPtr, 0);
+		return true;
+	}
+	return false;
 }
 
-void CheckAndSaveIniInt(const char *cat, const char *key, int val, bool &changed)
+bool ReadIniIfExists(const char *cat, const char *key, int32 *out)
+{
+	std::string strval = cfg.get(cat, key, "\xBA");
+	const char *value = strval.c_str();
+	char *endPtr;
+	if (value && value[0] != '\xBA') {
+		*out = strtol(value, &endPtr, 0);
+		return true;
+	}
+	return false;
+}
+
+bool ReadIniIfExists(const char *cat, const char *key, int8 *out)
+{
+	std::string strval = cfg.get(cat, key, "\xBA");
+	const char *value = strval.c_str();
+	char *endPtr;
+	if (value && value[0] != '\xBA') {
+		*out = strtol(value, &endPtr, 0);
+		return true;
+	}
+	return false;
+}
+
+bool ReadIniIfExists(const char *cat, const char *key, float *out)
+{
+	std::string strval = cfg.get(cat, key, "\xBA");
+	const char *value = strval.c_str();
+	if (value && value[0] != '\xBA') {
+		*out = atof(value);
+		return true;
+	}
+	return false;
+}
+
+bool ReadIniIfExists(const char *cat, const char *key, char *out, int size)
+{
+	std::string strval = cfg.get(cat, key, "\xBA");
+	const char *value = strval.c_str();
+	if (value && value[0] != '\xBA') {
+		strncpy(out, value, size);
+		return true;
+	}
+	return false;
+}
+
+void StoreIni(const char *cat, const char *key, uint32 val)
 {
 	char temp[10];
-	if (atoi(cfg.get(cat, key, "xxx").c_str()) != val) { // if .ini doesn't have our key, compare with xxx and forcefully add it
-		changed = true;
-		sprintf(temp, "%u", val);
-		cfg.set(cat, key, temp);
+	sprintf(temp, "%u", val);
+	cfg.set(cat, key, temp);
+}
+
+void StoreIni(const char *cat, const char *key, uint8 val)
+{
+	char temp[10];
+	sprintf(temp, "%u", (uint32)val);
+	cfg.set(cat, key, temp);
+}
+
+void StoreIni(const char *cat, const char *key, int32 val)
+{
+	char temp[10];
+	sprintf(temp, "%d", val);
+	cfg.set(cat, key, temp);
+}
+
+void StoreIni(const char *cat, const char *key, int8 val)
+{
+	char temp[10];
+	sprintf(temp, "%d", (int32)val);
+	cfg.set(cat, key, temp);
+}
+
+void StoreIni(const char *cat, const char *key, float val)
+{
+	char temp[10];
+	sprintf(temp, "%f", val);
+	cfg.set(cat, key, temp);
+}
+
+void StoreIni(const char *cat, const char *key, char *val, int size)
+{
+	cfg.set(cat, key, val);
+}
+
+const char *iniControllerActions[] = { "PED_FIREWEAPON", "PED_CYCLE_WEAPON_RIGHT", "PED_CYCLE_WEAPON_LEFT", "GO_FORWARD", "GO_BACK", "GO_LEFT", "GO_RIGHT", "PED_SNIPER_ZOOM_IN",
+	"PED_SNIPER_ZOOM_OUT", "VEHICLE_ENTER_EXIT", "CAMERA_CHANGE_VIEW_ALL_SITUATIONS", "PED_JUMPING", "PED_SPRINT", "PED_LOOKBEHIND",
+#ifdef BIND_VEHICLE_FIREWEAPON
+	"VEHICLE_FIREWEAPON",
+#endif
+	"VEHICLE_ACCELERATE", "VEHICLE_BRAKE", "VEHICLE_CHANGE_RADIO_STATION", "VEHICLE_HORN", "TOGGLE_SUBMISSIONS", "VEHICLE_HANDBRAKE", "PED_1RST_PERSON_LOOK_LEFT",
+	"PED_1RST_PERSON_LOOK_RIGHT", "VEHICLE_LOOKLEFT", "VEHICLE_LOOKRIGHT", "VEHICLE_LOOKBEHIND", "VEHICLE_TURRETLEFT", "VEHICLE_TURRETRIGHT", "VEHICLE_TURRETUP", "VEHICLE_TURRETDOWN",
+	"PED_CYCLE_TARGET_LEFT", "PED_CYCLE_TARGET_RIGHT", "PED_CENTER_CAMERA_BEHIND_PLAYER", "PED_LOCK_TARGET", "NETWORK_TALK", "PED_1RST_PERSON_LOOK_UP", "PED_1RST_PERSON_LOOK_DOWN",
+	"_CONTROLLERACTION_36", "TOGGLE_DPAD", "SWITCH_DEBUG_CAM_ON", "TAKE_SCREEN_SHOT", "SHOW_MOUSE_POINTER_TOGGLE" };
+
+const char *iniControllerTypes[] = { "kbd:", "2ndKbd:", "mouse:", "joy:" };
+
+const char *iniMouseButtons[] = {"LEFT","MIDDLE","RIGHT","WHLUP","WHLDOWN","X1","X2"};
+
+const char *iniKeyboardButtons[] = {"ESC","F1","F2","F3","F4","F5","F6","F7","F8","F9","F10","F11","F12",
+	"INS","DEL","HOME","END","PGUP","PGDN","UP","DOWN","LEFT","RIGHT","DIVIDE","TIMES","PLUS","MINUS","PADDEL",
+	"PADEND","PADDOWN","PADPGDN","PADLEFT","PAD5","NUMLOCK","PADRIGHT","PADHOME","PADUP","PADPGUP","PADINS",
+	"PADENTER", "SCROLL","PAUSE","BACKSP","TAB","CAPSLK","ENTER","LSHIFT","RSHIFT","SHIFT","LCTRL","RCTRL","LALT",
+	"RALT", "LWIN", "RWIN", "APPS", "NULL"};
+
+void LoadINIControllerSettings()
+{
+	for (int32 i = 0; i < MAX_CONTROLLERACTIONS; i++) {
+		char value[128];
+		if (ReadIniIfExists("Bindings", iniControllerActions[i], value, 128)) {
+			for (int32 j = 0; j < MAX_CONTROLLERTYPES; j++){
+				ControlsManager.ClearSettingsAssociatedWithAction((e_ControllerAction)i, (eControllerType)j);
+			}
+
+			for (char *binding = strtok(value,", "); binding != nil; binding = strtok(nil, ", ")) {
+				int contType = -1;
+				for (int32 k = 0; k < ARRAY_SIZE(iniControllerTypes); k++) {
+					int len = strlen(iniControllerTypes[k]);
+					if (strncmp(binding, iniControllerTypes[k], len) == 0) {
+						contType = k;
+						binding += len;
+						break;
+					}
+				}
+				if (contType == -1)
+					continue;
+
+				int contKey;
+				if (contType == JOYSTICK) {
+					char *temp;
+					contKey = strtol(binding, &temp, 0);
+
+				} else if (contType == KEYBOARD || contType == OPTIONAL_EXTRA) {
+					if (strlen(binding) == 1) {
+						contKey = binding[0];
+					} else if(strcmp(binding, "SPC") == 0) {
+						contKey = ' ';
+					} else {
+						for (int32 k = 0; k < ARRAY_SIZE(iniKeyboardButtons); k++) {
+							if(strcmp(binding, iniKeyboardButtons[k]) == 0) {
+								contKey = 1000 + k;
+								break;
+							}
+						}
+					}
+				} else if (contType == MOUSE) {
+					for (int32 k = 0; k < ARRAY_SIZE(iniMouseButtons); k++) {
+						if(strcmp(binding, iniMouseButtons[k]) == 0) {
+							contKey = 1 + k;
+							break;
+						}
+					}
+				}
+				
+				ControlsManager.SetControllerKeyAssociatedWithAction((e_ControllerAction)i, contKey, (eControllerType)contType);
+			}
+		}
 	}
 }
 
-void CheckAndSaveIniFloat(const char *cat, const char *key, float val, bool &changed)
+void SaveINIControllerSettings()
 {
-	char temp[10];
-	if (atof(cfg.get(cat, key, "xxx").c_str()) != val) { // if .ini doesn't have our key, compare with xxx and forcefully add it
-		changed = true;
-		sprintf(temp, "%f", val);
-		cfg.set(cat, key, temp);
+	for (int32 i = 0; i < MAX_CONTROLLERACTIONS; i++) {
+		char value[128] = { '\0' };
+		
+		// upper limit should've been GetNumOfSettingsForAction(i), but sadly even R* doesn't use it's own system correctly, and there are gaps between orders.
+		for (int32 j = SETORDER_1; j < MAX_SETORDERS; j++){
+
+			// We respect the m_ContSetOrder, and join/implode/order the bindings according to that; using comma as seperator.
+			for (int32 k = 0; k < MAX_CONTROLLERTYPES; k++){
+				if (ControlsManager.m_aSettings[i][k].m_ContSetOrder == j) {
+					char next[32];
+					if (k == JOYSTICK) {
+						snprintf(next, 32, "%s%d,", iniControllerTypes[k], ControlsManager.m_aSettings[i][k].m_Key);
+
+					} else if (k == KEYBOARD || k == OPTIONAL_EXTRA) {
+						if (ControlsManager.m_aSettings[i][k].m_Key == ' ')
+							snprintf(next, 32, "%sSPC,", iniControllerTypes[k]);
+						else if (ControlsManager.m_aSettings[i][k].m_Key < 256)
+							snprintf(next, 32, "%s%c,", iniControllerTypes[k], ControlsManager.m_aSettings[i][k].m_Key);
+						else
+							snprintf(next, 32, "%s%s,", iniControllerTypes[k], iniKeyboardButtons[ControlsManager.m_aSettings[i][k].m_Key - 1000]);
+
+					} else if (k == MOUSE) {
+						snprintf(next, 32, "%s%s,", iniControllerTypes[k], iniMouseButtons[ControlsManager.m_aSettings[i][k].m_Key - 1]);
+					}
+					strcat(value, next);
+					break;
+				}
+			}
+		}
+		int len = strlen(value);
+		if (len > 0)
+			value[len - 1] = '\0'; // to remove comma
+
+		StoreIni("Bindings", iniControllerActions[i], value, 128);
 	}
+
+	cfg.write_file("re3.ini");
 }
 
 void LoadINISettings()
 {
 	cfg.load_file("re3.ini");
 
+#ifdef IMPROVED_VIDEOMODE
+	ReadIniIfExists("VideoMode", "Width", &FrontEndMenuManager.m_nPrefsWidth);
+	ReadIniIfExists("VideoMode", "Height", &FrontEndMenuManager.m_nPrefsHeight);
+	ReadIniIfExists("VideoMode", "Depth", &FrontEndMenuManager.m_nPrefsDepth);
+	ReadIniIfExists("VideoMode", "Subsystem", &FrontEndMenuManager.m_nPrefsSubsystem);
+	// Windowed mode is loaded below in CUSTOM_FRONTEND_OPTIONS section
+#else
+	ReadIniIfExists("Graphics", "VideoMode", &FrontEndMenuManager.m_nDisplayVideoMode);
+#endif
+	ReadIniIfExists("Controller", "HeadBob1stPerson", &TheCamera.m_bHeadBob);
+	ReadIniIfExists("Controller", "VerticalMouseSens", &TheCamera.m_fMouseAccelVertical);
+	ReadIniIfExists("Controller", "HorizantalMouseSens", &TheCamera.m_fMouseAccelHorzntl);
+	ReadIniIfExists("Controller", "InvertMouseVertically", &MousePointerStateHelper.bInvertVertically);
+	ReadIniIfExists("Controller", "DisableMouseSteering", &CVehicle::m_bDisableMouseSteering);
+	ReadIniIfExists("Audio", "SfxVolume", &FrontEndMenuManager.m_PrefsSfxVolume);
+	ReadIniIfExists("Audio", "MusicVolume", &FrontEndMenuManager.m_PrefsMusicVolume);
+	ReadIniIfExists("Audio", "Radio", &FrontEndMenuManager.m_PrefsRadioStation);
+	ReadIniIfExists("Audio", "SpeakerType", &FrontEndMenuManager.m_PrefsSpeakers);
+	ReadIniIfExists("Audio", "Provider", &FrontEndMenuManager.m_nPrefsAudio3DProviderIndex);
+	ReadIniIfExists("Audio", "DynamicAcoustics", &FrontEndMenuManager.m_PrefsDMA);
+	ReadIniIfExists("Display", "Brightness", &FrontEndMenuManager.m_PrefsBrightness);
+	ReadIniIfExists("Display", "DrawDistance", &FrontEndMenuManager.m_PrefsLOD);
+	ReadIniIfExists("Display", "Subtitles", &FrontEndMenuManager.m_PrefsShowSubtitles);
+	ReadIniIfExists("Graphics", "AspectRatio", &FrontEndMenuManager.m_PrefsUseWideScreen);
+	ReadIniIfExists("Graphics", "VSync", &FrontEndMenuManager.m_PrefsVsyncDisp);
+	ReadIniIfExists("Graphics", "FrameLimiter", &FrontEndMenuManager.m_PrefsFrameLimiter);
+	ReadIniIfExists("Graphics", "Trails", &CMBlur::BlurOn);
+	ReadIniIfExists("General", "SkinFile", FrontEndMenuManager.m_PrefsSkinFile, 256);
+	ReadIniIfExists("Controller", "Method", &FrontEndMenuManager.m_ControlMethod);
+	ReadIniIfExists("General", "Language", &FrontEndMenuManager.m_PrefsLanguage);
+
+#ifdef EXTENDED_COLOURFILTER
+	ReadIniIfExists("CustomPipesValues", "PostFXIntensity", &CPostFX::Intensity);
+#endif
+#ifdef EXTENDED_PIPELINES
+	ReadIniIfExists("CustomPipesValues", "NeoVehicleShininess", &CustomPipes::VehicleShininess);
+	ReadIniIfExists("CustomPipesValues", "NeoVehicleSpecularity", &CustomPipes::VehicleSpecularity);
+	ReadIniIfExists("CustomPipesValues", "RimlightMult", &CustomPipes::RimlightMult);
+	ReadIniIfExists("CustomPipesValues", "LightmapMult", &CustomPipes::LightmapMult);
+	ReadIniIfExists("CustomPipesValues", "GlossMult", &CustomPipes::GlossMult);
+#endif
+
+#ifdef PROPER_SCALING
+	ReadIniIfExists("Draw", "ProperScaling", &CDraw::ms_bProperScaling);	
+#endif
+#ifdef FIX_RADAR
+	ReadIniIfExists("Draw", "FixRadar", &CDraw::ms_bFixRadar);	
+#endif
+#ifdef FIX_SPRITES
+	ReadIniIfExists("Draw", "FixSprites", &CDraw::ms_bFixSprites);	
+#endif
+
 #ifdef DONT_TRUST_RECOGNIZED_JOYSTICKS
 	// Written by assuming the codes below will run after _InputInitialiseJoys().
-	strcpy(gSelectedJoystickName, cfg.get("DetectJoystick", "JoystickName", "").c_str());
+	std::string strval = cfg.get("Controller", "JoystickName", "");
+	const char *value = strval.c_str();
+	strcpy(gSelectedJoystickName, value);
 	
 	if(gSelectedJoystickName[0] != '\0') {
 		for (int i = 0; i <= GLFW_JOYSTICK_LAST; i++) {
@@ -179,6 +418,7 @@ void LoadINISettings()
 					CFileMgr::CloseFile(gta3set);
 				}
 				CFileMgr::SetDir("");
+				// We call LoadINIControllerSettings after this func., so calling here isn't needed
 				break;
 			}
 		}
@@ -195,7 +435,7 @@ void LoadINISettings()
 			// CFO check
 			if (option.m_Action < MENUACTION_NOTHING && option.m_CFO->save) {
 				// CFO only supports saving uint8 right now
-				*option.m_CFO->value = CheckAndReadIniInt("FrontendOptions", option.m_CFO->save, *option.m_CFO->value);
+				ReadIniIfExists(option.m_CFO->saveCat, option.m_CFO->save, option.m_CFO->value);
 				if (option.m_Action == MENUACTION_CFO_SELECT) {
 					option.m_CFOSelect->lastSavedValue = option.m_CFOSelect->displayedValue = *option.m_CFO->value;
 				}
@@ -203,38 +443,64 @@ void LoadINISettings()
 		}
 	}
 #endif
-
-#ifdef EXTENDED_COLOURFILTER
-	CPostFX::Intensity = CheckAndReadIniFloat("CustomPipesValues", "PostFXIntensity", CPostFX::Intensity);
-#endif
-#ifdef EXTENDED_PIPELINES
-	CustomPipes::VehicleShininess = CheckAndReadIniFloat("CustomPipesValues", "NeoVehicleShininess", CustomPipes::VehicleShininess);
-	CustomPipes::VehicleSpecularity = CheckAndReadIniFloat("CustomPipesValues", "NeoVehicleSpecularity", CustomPipes::VehicleSpecularity);
-	CustomPipes::RimlightMult = CheckAndReadIniFloat("CustomPipesValues", "RimlightMult", CustomPipes::RimlightMult);
-	CustomPipes::LightmapMult = CheckAndReadIniFloat("CustomPipesValues", "LightmapMult", CustomPipes::LightmapMult);
-	CustomPipes::GlossMult = CheckAndReadIniFloat("CustomPipesValues", "GlossMult", CustomPipes::GlossMult);
-#endif
-
-#ifdef PROPER_SCALING
-	CDraw::ms_bProperScaling = CheckAndReadIniInt("Draw", "ProperScaling", CDraw::ms_bProperScaling);	
-#endif
-#ifdef FIX_RADAR
-	CDraw::ms_bFixRadar      = CheckAndReadIniInt("Draw", "FixRadar", CDraw::ms_bFixRadar);	
-#endif
-#ifdef FIX_SPRITES
-	CDraw::ms_bFixSprites    = CheckAndReadIniInt("Draw", "FixSprites", CDraw::ms_bFixSprites);	
-#endif
 }
 
 void SaveINISettings()
 {
-	bool changed = false;
+#ifdef IMPROVED_VIDEOMODE
+	StoreIni("VideoMode", "Width", FrontEndMenuManager.m_nPrefsWidth);
+	StoreIni("VideoMode", "Height", FrontEndMenuManager.m_nPrefsHeight);
+	StoreIni("VideoMode", "Depth", FrontEndMenuManager.m_nPrefsDepth);
+	StoreIni("VideoMode", "Subsystem", FrontEndMenuManager.m_nPrefsSubsystem);
+	// Windowed mode is loaded below in CUSTOM_FRONTEND_OPTIONS section
+#else
+	StoreIni("Graphics", "VideoMode", FrontEndMenuManager.m_nDisplayVideoMode);
+#endif
+	StoreIni("Controller", "HeadBob1stPerson", TheCamera.m_bHeadBob);
+	StoreIni("Controller", "VerticalMouseSens", TheCamera.m_fMouseAccelVertical);
+	StoreIni("Controller", "HorizantalMouseSens", TheCamera.m_fMouseAccelHorzntl);
+	StoreIni("Controller", "InvertMouseVertically", MousePointerStateHelper.bInvertVertically);
+	StoreIni("Controller", "DisableMouseSteering", CVehicle::m_bDisableMouseSteering);
+	StoreIni("Audio", "SfxVolume", FrontEndMenuManager.m_PrefsSfxVolume);
+	StoreIni("Audio", "MusicVolume", FrontEndMenuManager.m_PrefsMusicVolume);
+	StoreIni("Audio", "Radio", FrontEndMenuManager.m_PrefsRadioStation);
+	StoreIni("Audio", "SpeakerType", FrontEndMenuManager.m_PrefsSpeakers);
+	StoreIni("Audio", "Provider", FrontEndMenuManager.m_nPrefsAudio3DProviderIndex);
+	StoreIni("Audio", "DynamicAcoustics", FrontEndMenuManager.m_PrefsDMA);
+	StoreIni("Display", "Brightness", FrontEndMenuManager.m_PrefsBrightness);
+	StoreIni("Display", "DrawDistance", FrontEndMenuManager.m_PrefsLOD);
+	StoreIni("Display", "Subtitles", FrontEndMenuManager.m_PrefsShowSubtitles);
+	StoreIni("Graphics", "AspectRatio", FrontEndMenuManager.m_PrefsUseWideScreen);
+	StoreIni("Graphics", "VSync", FrontEndMenuManager.m_PrefsVsyncDisp);
+	StoreIni("Graphics", "FrameLimiter", FrontEndMenuManager.m_PrefsFrameLimiter);
+	StoreIni("Graphics", "Trails", CMBlur::BlurOn);
+	StoreIni("General", "SkinFile", FrontEndMenuManager.m_PrefsSkinFile, 256);
+	StoreIni("Controller", "Method", FrontEndMenuManager.m_ControlMethod);
+	StoreIni("General", "Language", FrontEndMenuManager.m_PrefsLanguage);
+
+#ifdef EXTENDED_COLOURFILTER
+	StoreIni("CustomPipesValues", "PostFXIntensity", CPostFX::Intensity);
+#endif
+#ifdef EXTENDED_PIPELINES
+	StoreIni("CustomPipesValues", "NeoVehicleShininess", CustomPipes::VehicleShininess);
+	StoreIni("CustomPipesValues", "NeoVehicleSpecularity", CustomPipes::VehicleSpecularity);
+	StoreIni("CustomPipesValues", "RimlightMult", CustomPipes::RimlightMult);
+	StoreIni("CustomPipesValues", "LightmapMult", CustomPipes::LightmapMult);
+	StoreIni("CustomPipesValues", "GlossMult", CustomPipes::GlossMult);
+#endif
+
+#ifdef PROPER_SCALING	
+	StoreIni("Draw", "ProperScaling", CDraw::ms_bProperScaling);	
+#endif
+#ifdef FIX_RADAR
+	StoreIni("Draw", "FixRadar", CDraw::ms_bFixRadar);
+#endif
+#ifdef FIX_SPRITES
+	StoreIni("Draw", "FixSprites", CDraw::ms_bFixSprites);	
+#endif
 
 #ifdef DONT_TRUST_RECOGNIZED_JOYSTICKS
-	if (strncmp(cfg.get("DetectJoystick", "JoystickName", "").c_str(), gSelectedJoystickName, strlen(gSelectedJoystickName)) != 0) {
-		changed = true;
-		cfg.set("DetectJoystick", "JoystickName", gSelectedJoystickName);
-	}
+	StoreIni("Controller", "JoystickName", gSelectedJoystickName, 128);
 #endif
 #ifdef CUSTOM_FRONTEND_OPTIONS
 	for (int i = 0; i < MENUPAGES; i++) {
@@ -245,35 +511,13 @@ void SaveINISettings()
 				
 			if (option.m_Action < MENUACTION_NOTHING && option.m_CFO->save) {
 				// Beware: CFO only supports saving uint8 right now
-				CheckAndSaveIniInt("FrontendOptions", option.m_CFO->save, *option.m_CFO->value, changed);
+				StoreIni(option.m_CFO->saveCat, option.m_CFO->save, *option.m_CFO->value);
 			}
 		}
 	}
 #endif
 
-#ifdef EXTENDED_COLOURFILTER
-	CheckAndSaveIniFloat("CustomPipesValues", "PostFXIntensity", CPostFX::Intensity, changed);
-#endif
-#ifdef EXTENDED_PIPELINES
-	CheckAndSaveIniFloat("CustomPipesValues", "NeoVehicleShininess", CustomPipes::VehicleShininess, changed);
-	CheckAndSaveIniFloat("CustomPipesValues", "NeoVehicleSpecularity", CustomPipes::VehicleSpecularity, changed);
-	CheckAndSaveIniFloat("CustomPipesValues", "RimlightMult", CustomPipes::RimlightMult, changed);
-	CheckAndSaveIniFloat("CustomPipesValues", "LightmapMult", CustomPipes::LightmapMult, changed);
-	CheckAndSaveIniFloat("CustomPipesValues", "GlossMult", CustomPipes::GlossMult, changed);
-#endif
-
-#ifdef PROPER_SCALING	
-	CheckAndSaveIniInt("Draw", "ProperScaling", CDraw::ms_bProperScaling, changed);	
-#endif
-#ifdef FIX_RADAR
-	CheckAndSaveIniInt("Draw", "FixRadar", CDraw::ms_bFixRadar, changed);
-#endif
-#ifdef FIX_SPRITES
-	CheckAndSaveIniInt("Draw", "FixSprites", CDraw::ms_bFixSprites, changed);	
-#endif
-
-	if (changed)
-		cfg.write_file("re3.ini");
+	cfg.write_file("re3.ini");
 }
 
 #endif

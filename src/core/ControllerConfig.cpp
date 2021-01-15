@@ -2801,7 +2801,7 @@ void CControllerConfigManager::ResetSettingOrder(e_ControllerAction action)
 			for (int32 k = 0; k < MAX_CONTROLLERTYPES; k++)
 			{
 				int32 setorder = m_aSettings[action][k].m_ContSetOrder;
-				if (setorder > i && setorder != KEYBOARD)
+				if (setorder > i && setorder != 0)
 				{
 					if (init)
 					{

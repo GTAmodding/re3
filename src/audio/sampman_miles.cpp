@@ -1,8 +1,5 @@
-#include "common.h"
-
 #ifdef AUDIO_MSS
-#include <windows.h>
-#include <shobjidl.h>
+#include <shlobj.h>
 #include <shlguid.h>
 
 #include <time.h>
@@ -11,6 +8,7 @@
 #include "eax-util.h"
 #include "mss.h"
 
+#include "common.h"
 #include "sampman.h"
 #include "AudioManager.h"
 #include "MusicManager.h"

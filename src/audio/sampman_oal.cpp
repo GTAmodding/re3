@@ -1,16 +1,10 @@
 //#define JUICY_OAL
 
 #ifdef AUDIO_OAL
-#include "sampman.h"
-
 #include <time.h>
 
 #include "eax.h"
 #include "eax-util.h"
-
-#define WITHWINDOWS
-#include "common.h"
-#include "crossplatform.h"
 
 #ifdef _WIN32
 #include <io.h>
@@ -19,7 +13,21 @@
 #include <AL/alext.h>
 #include <AL/efx.h>
 #include <AL/efx-presets.h>
+
+#pragma comment(lib, "OpenAL32.lib")
+
+// for user MP3s
+#include <direct.h>
+#include <shlobj.h>
+#include <shlguid.h>
+#else
+#define _getcwd getcwd
 #endif
+
+#include "common.h"
+#include "crossplatform.h"
+
+#include "sampman.h"
 
 #include "oal/oal_utils.h"
 #include "oal/aldlist.h"
@@ -37,19 +45,6 @@
 //TODO: fix eax3 reverb
 //TODO: max channels
 //TODO: loop count
-
-#ifdef _WIN32
-#pragma comment( lib, "OpenAL32.lib" )
-#endif
-
-// for user MP3s
-#ifdef _WIN32
-#include <direct.h>
-#include <shobjidl.h>
-#include <shlguid.h>
-#else
-#define _getcwd getcwd
-#endif
 
 cSampleManager SampleManager;
 bool _bSampmanInitialised = false;

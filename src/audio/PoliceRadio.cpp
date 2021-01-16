@@ -13,6 +13,7 @@
 #include "World.h"
 #include "Zones.h"
 #include "sampman.h"
+#include "Wanted.h"
 
 const int channels = ARRAY_SIZE(cAudioManager::m_asActiveSamples);
 const int policeChannel = channels + 1;

@@ -9,6 +9,7 @@
 #include "Physical.h"
 #include "Weapon.h"
 #include "WeaponInfo.h"
+#include "Collision.h"
 
 #define FEET_OFFSET	1.04f
 #define CHECK_NEARBY_THINGS_MAX_DIST	15.0f

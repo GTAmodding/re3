@@ -31,6 +31,7 @@
 #include "ParticleObject.h"
 #include "Floater.h"
 #include "Range2D.h"
+#include "Wanted.h"
 
 CPed *gapTempPedList[50];
 uint16 gnNumTempPedList;

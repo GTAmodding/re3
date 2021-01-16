@@ -126,7 +126,7 @@ CDarkel::DrawMessages()
 #if defined(PS2_HUD) || defined(FIX_BUGS)
 	#ifdef FIX_BUGS
 					CFont::PrintString(SCREEN_SCALE_FROM_RIGHT(34.0f - 1.0f), SCREEN_SCALE_Y(108.0f + 1.0f), gUString);
-	#else                                                  -
+	#else
 					CFont::PrintString(SCREEN_WIDTH-(34.0f - 1.0f), 108.0f + 1.0f, gUString);
 	#endif
 #else

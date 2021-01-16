@@ -1,11 +1,7 @@
-#if defined RW_D3D9 || defined RWLIBS
-#define DIRECTINPUT_VERSION 0x0800
-#include <dinput.h>
-#endif
-
+#define WITHDINPUT
 #include "common.h"
 #include "platform.h"
-#include "crossplatform.h" // for Windows version
+#include "crossplatform.h"
 #include "ControllerConfig.h"
 #include "Pad.h"
 #include "FileMgr.h"

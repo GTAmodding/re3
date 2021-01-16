@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Collision.h"
+#include "ColModel.h"
 
 class CTempColModels
 {

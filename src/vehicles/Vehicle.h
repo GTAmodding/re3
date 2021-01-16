@@ -3,8 +3,9 @@
 #include "Physical.h"
 #include "AutoPilot.h"
 #include "ModelIndices.h"
-#include "AnimManager.h"
-#include "Weapon.h"
+#include "AnimationId.h"
+#include "WeaponType.h"
+#include "Collision.h"
 
 class CPed;
 class CFire;

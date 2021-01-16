@@ -1,11 +1,10 @@
 #pragma once
-#include "Automobile.h"
 #include "audio_enums.h"
 #include "Camera.h"
 #include "config.h"
+#include "Lists.h"
 
 class CVehicle;
-class CCamera;
 
 enum eGarageState
 {

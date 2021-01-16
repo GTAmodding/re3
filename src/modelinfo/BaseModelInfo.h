@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Collision.h"
+struct CColModel;
 
 #define MAX_MODEL_NAME (24)
 

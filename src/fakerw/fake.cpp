@@ -1,5 +1,5 @@
 #define _CRT_SECURE_NO_WARNINGS
-#define WITH_D3D
+#define WITH_D3D // not WITHD3D, so it's librw define
 #include <rwcore.h>
 #include <rpworld.h>
 #include <rpmatfx.h>

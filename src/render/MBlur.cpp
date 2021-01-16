@@ -1,4 +1,3 @@
-#define WITHWINDOWS
 #ifndef LIBRW
 #define WITHD3D
 #endif

@@ -1,7 +1,5 @@
 #pragma once
-#include "common.h"
 #include "Font.h"
-#include "Ped.h"
 #include "PedType.h"
 #include "Text.h"
 #include "Sprite2d.h"
@@ -36,9 +34,11 @@ void FlushLog();
 #define SPHERE_MARKER_PULSE_FRACTION (0.1f)
 
 #ifdef USE_PRECISE_MEASUREMENT_CONVERTION
+#define MILES_IN_METER (0.000621371192f)
 #define METERS_IN_FOOT (0.3048f)
 #define FEET_IN_METER (3.28084f)
 #else
+#define MILES_IN_METER (1 / 1670.f)
 #define METERS_IN_FOOT (0.3f)
 #define FEET_IN_METER (3.33f)
 #endif

@@ -10,6 +10,7 @@
 #include "VehicleModelInfo.h"
 #include "XtraCompsModelInfo.h"
 #include "Instance.h"
+#include "Game.h"
 
 class CModelInfo
 {

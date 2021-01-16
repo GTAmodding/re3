@@ -1,10 +1,6 @@
-#if defined RW_D3D9 || defined RWLIBS
-#define DIRECTINPUT_VERSION 0x0800
-#include <dinput.h>
-#endif
-
 #define FORCE_PC_SCALING
 #define WITHWINDOWS
+#define WITHDINPUT
 #include "common.h"
 #ifndef PS2_MENU
 #include "crossplatform.h"
@@ -143,14 +139,6 @@ int8 CMenuManager::m_nDisplayMSAALevel = 0;
 
 #ifdef NO_ISLAND_LOADING
 int8 CMenuManager::m_PrefsIslandLoading = ISLAND_LOADING_LOW;
-#endif
-
-#ifdef USE_PRECISE_MEASUREMENT_CONVERTION
-#define MILES_IN_METER 0.000621371192f
-#define FEET_IN_METER 3.28084f
-#else
-#define MILES_IN_METER (1 / 1670.f)
-#define FEET_IN_METER 3.33f
 #endif
 
 int32 CMenuManager::OS_Language = LANG_ENGLISH;

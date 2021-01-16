@@ -1,7 +1,6 @@
 #include <csignal>
 #define WITHWINDOWS
 #include "common.h"
-#include "crossplatform.h"
 #include "Renderer.h"
 #include "Credits.h"
 #include "Camera.h"
@@ -34,6 +33,10 @@
 
 #ifdef DONT_TRUST_RECOGNIZED_JOYSTICKS
 #include "ControllerConfig.h"
+#endif
+
+#ifdef DONT_TRUST_RECOGNIZED_JOYSTICKS
+#include "crossplatform.h"
 #endif
 
 #ifndef _WIN32

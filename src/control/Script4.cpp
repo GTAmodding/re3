@@ -38,6 +38,7 @@
 #include "WaterLevel.h"
 #include "World.h"
 #include "Zones.h"
+#include "Wanted.h"
 
 int8 CRunningScript::ProcessCommands800To899(int32 command)
 {

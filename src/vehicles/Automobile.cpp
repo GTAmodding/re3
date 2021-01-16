@@ -44,6 +44,7 @@
 #include "PlayerPed.h"
 #include "Object.h"
 #include "Automobile.h"
+#include "Wanted.h"
 
 bool bAllCarCheat;	// unused
 

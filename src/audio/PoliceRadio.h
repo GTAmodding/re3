@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Wanted.h"
+#include "Crime.h"
 
 struct cAMCrime {
 	int32 type;

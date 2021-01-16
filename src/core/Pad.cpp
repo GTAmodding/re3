@@ -1,11 +1,4 @@
-#pragma warning( push )
-#pragma warning( disable : 4005)
-#if defined RW_D3D9 || defined RWLIBS
-#define DIRECTINPUT_VERSION 0x0800
-#include <dinput.h>
-#endif
-#pragma warning( pop )
-
+#define WITHDINPUT
 #include "common.h"
 #include "crossplatform.h"
 #include "platform.h"

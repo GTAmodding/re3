@@ -4,7 +4,7 @@
 #include "TxdStore.h"
 #include "2dEffect.h"
 #include "BaseModelInfo.h"
-
+#include "ColModel.h"
 
 CBaseModelInfo::CBaseModelInfo(ModelInfoType type)
 {

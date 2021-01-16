@@ -32,6 +32,7 @@
 #include "WaterLevel.h"
 #include "Weather.h"
 #include "Zones.h"
+#include "Wanted.h"
 
 int8 CRunningScript::ProcessCommands500To599(int32 command)
 {

@@ -14,6 +14,7 @@
 #include "MusicManager.h"
 #include "Frontend.h"
 #include "Timer.h"
+#include "relocatable.h"
 
 
 #pragma comment( lib, "mss32.lib" )
@@ -369,7 +370,7 @@ _ResolveLink(char const *path, char *out)
 		{
 			WCHAR wpath[MAX_PATH];
 			
-			MultiByteToWideChar(CP_ACP, 0, path, -1, wpath, MAX_PATH);
+			MultiByteToWideChar(CP_ACP, 0, reloc_realpath(path), -1, wpath, MAX_PATH);
 			
 			if (SUCCEEDED(ppf->Load(wpath, STGM_READ)))
 			{
@@ -378,7 +379,7 @@ _ResolveLink(char const *path, char *out)
 				{
 					strcpy(filepath, path);
 					
-					if (SUCCEEDED(psl->GetPath(filepath, MAX_PATH, &fd, SLGP_UNCPRIORITY)))
+					if (SUCCEEDED(psl->GetPath(reloc_realpath(filepath), MAX_PATH, &fd, SLGP_UNCPRIORITY)))
 					{
 						OutputDebugString(fd.cFileName);
 						
@@ -429,7 +430,7 @@ _FindMP3s(void)
 	
 	strcat(path, "*");
 	
-	hFind = FindFirstFile(path, &fd);
+	hFind = reloc_FindFirstFile(path, &fd);
 	
 	if ( hFind == INVALID_HANDLE_VALUE ) 
 	{
@@ -444,7 +445,7 @@ _FindMP3s(void)
 	
 	if ( filepathlen <= 0)
 	{
-		FindClose(hFind);
+		reloc_FindClose(hFind);
 		return;
 	}
 	
@@ -479,7 +480,7 @@ _FindMP3s(void)
 			bShortcut = false;
 	}
 	
-	mp3Stream[0] = AIL_open_stream(DIG, filepath, 0);
+	mp3Stream[0] = AIL_open_stream(DIG, reloc_realpath(filepath), 0);
 	if ( mp3Stream[0] )
 	{
 		AIL_stream_ms_position(mp3Stream[0], &total_ms, NULL);
@@ -493,7 +494,7 @@ _FindMP3s(void)
 		
 		if ( _pMP3List == NULL )
 		{
-			FindClose(hFind);
+			reloc_FindClose(hFind);
 			
 			if ( f )
 				fclose(f);
@@ -538,7 +539,7 @@ _FindMP3s(void)
 	
 	while ( true )
 	{
-		if ( !FindNextFile(hFind, &fd) )
+		if ( !reloc_FindNextFile(hFind, &fd) )
 			break;
 		
 		if ( bInitFirstEntry )
@@ -583,7 +584,7 @@ _FindMP3s(void)
 					}
 				}
 				
-				mp3Stream[0] = AIL_open_stream(DIG, filepath, 0);
+				mp3Stream[0] = AIL_open_stream(DIG, reloc_realpath(filepath), 0);
 				if ( mp3Stream[0] )
 				{
 					AIL_stream_ms_position(mp3Stream[0], &total_ms, NULL);
@@ -665,7 +666,7 @@ _FindMP3s(void)
 					}
 				}
 				
-				mp3Stream[0] = AIL_open_stream(DIG, filepath, 0);
+				mp3Stream[0] = AIL_open_stream(DIG, reloc_realpath(filepath), 0);
 				if ( mp3Stream[0] )
 				{
 					AIL_stream_ms_position(mp3Stream[0], &total_ms, NULL);
@@ -719,7 +720,7 @@ _FindMP3s(void)
 		fclose(f);
 	}
 	
-	FindClose(hFind);
+	reloc_FindClose(hFind);
 }
 
 static void
@@ -959,7 +960,7 @@ cSampleManager::Initialise(void)
 	
 #ifdef AUDIO_CACHE
 	TRACE("cache");
-	FILE *cacheFile = fopen("audio\\sound.cache", "rb");
+	FILE *cacheFile = reloc_fopen("audio\\sound.cache", "rb");
 	if (cacheFile) {
 		fread(nStreamLength, sizeof(uint32), TOTAL_STREAMED_SOUNDS, cacheFile);
 		fclose(cacheFile);
@@ -993,7 +994,7 @@ cSampleManager::Initialise(void)
 					strcpy(filepath, m_szCDRomRootPath);
 					strcat(filepath, StreamedNameTable[0]);
 					
-					FILE *f = fopen(filepath, "rb");
+					FILE *f = reloc_fopen(filepath, "rb");
 					
 					if ( f )
 					{
@@ -1006,7 +1007,7 @@ cSampleManager::Initialise(void)
 							strcpy(filepath, m_szCDRomRootPath);
 							strcat(filepath, StreamedNameTable[i]);
 							
-							mp3Stream[0] = AIL_open_stream(DIG, filepath, 0);
+							mp3Stream[0] = AIL_open_stream(DIG, reloc_realpath(filepath), 0);
 							
 							if ( mp3Stream[0] )
 							{
@@ -1076,7 +1077,7 @@ cSampleManager::Initialise(void)
 		strcpy(_aHDDPath, m_szCDRomRootPath);
 		rootpath[0] = '\0';
 		
-		FILE *f = fopen(StreamedNameTable[0], "rb");
+		FILE *f = reloc_fopen(StreamedNameTable[0], "rb");
 		
 		if ( f )
 		{
@@ -1087,7 +1088,7 @@ cSampleManager::Initialise(void)
 				strcpy(filepath, rootpath);
 				strcat(filepath, StreamedNameTable[i]);
 				
-				mp3Stream[0] = AIL_open_stream(DIG, filepath, 0);
+				mp3Stream[0] = AIL_open_stream(DIG, reloc_realpath(filepath), 0);
 				
 				if ( mp3Stream[0] )
 				{
@@ -1123,7 +1124,7 @@ cSampleManager::Initialise(void)
 	}
 #endif
 #ifdef AUDIO_CACHE
-	cacheFile = fopen("audio\\sound.cache", "wb");
+	cacheFile = reloc_fopen("audio\\sound.cache", "wb");
 	fwrite(nStreamLength, sizeof(uint32), TOTAL_STREAMED_SOUNDS, cacheFile);
 	fclose(cacheFile);
 	}
@@ -1309,7 +1310,7 @@ cSampleManager::CheckForAnAudioFileOnCD(void)
 
 	strcat(filepath, StreamedNameTable[AudioManager.GetRandomNumber(1) % TOTAL_STREAMED_SOUNDS]);
 	
-	FILE *f = fopen(filepath, "rb");
+	FILE *f = reloc_fopen(filepath, "rb");
 	
 	if ( f )
 	{
@@ -2009,7 +2010,7 @@ cSampleManager::PreloadStreamedFile(uint8 nFile, uint8 nStream)
 			strcpy(filepath, m_szCDRomRootPath);
 			strcat(filepath, StreamedNameTable[nFile]);
 			
-			mp3Stream[nStream] = AIL_open_stream(DIG, filepath, 0);
+			mp3Stream[nStream] = AIL_open_stream(DIG, reloc_realpath(filepath), 0);
 	
 			if ( mp3Stream[nStream] )
 			{
@@ -2289,11 +2290,11 @@ cSampleManager::InitialiseSampleBanks(void)
 {
 	int32 nBank = SFX_BANK_0;
 	
-	fpSampleDescHandle = fopen(SampleBankDescFilename, "rb");
+	fpSampleDescHandle = reloc_fopen(SampleBankDescFilename, "rb");
 	if ( fpSampleDescHandle == NULL )
 		return false;
 	
-	fpSampleDataHandle = fopen(SampleBankDataFilename, "rb");
+	fpSampleDataHandle = reloc_fopen(SampleBankDataFilename, "rb");
 	if ( fpSampleDataHandle == NULL )
 	{
 		fclose(fpSampleDescHandle);

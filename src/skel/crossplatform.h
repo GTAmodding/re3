@@ -1,3 +1,4 @@
+#pragma once
 #include <time.h>
 
 // This is the common include for platform/renderer specific skeletons(glfw.cpp, win.cpp etc.) and using cross platform things (like Windows directories wrapper, platform specific global arrays etc.) 

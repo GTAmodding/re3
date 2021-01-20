@@ -24,9 +24,9 @@ STYLE DS_MODALFRAME | DS_CENTER | DS_CENTERMOUSE | WS_POPUP | WS_CAPTION |
 CAPTION "Device Selection"
 FONT 8, "MS Sans Serif"
 BEGIN
-    COMBOBOX        IDC_DEVICESEL,7,25,172,33,CBS_DROPDOWNLIST | WS_VSCROLL | 
+    COMBOBOX        IDC_DEVICESEL,7,25,172,33,CBS_DROPDOWNLIST | WS_VSCROLL |
                     WS_TABSTOP
-    COMBOBOX        IDC_VIDMODE,7,46,172,74,CBS_DROPDOWNLIST | WS_VSCROLL | 
+    COMBOBOX        IDC_VIDMODE,7,46,172,74,CBS_DROPDOWNLIST | WS_VSCROLL |
                     WS_TABSTOP
     DEFPUSHBUTTON   "EXIT",IDEXIT,103,69,52,14
     DEFPUSHBUTTON   "OK",IDOK,28,69,50,14
@@ -42,6 +42,6 @@ END
 
 // Icon with lowest ID value placed first to ensure application icon
 // remains consistent on all systems.
-IDI_MAIN_ICON           ICON    DISCARDABLE     "gta3.ico"
+IDI_MAIN_ICON           ICON    DISCARDABLE     "re3.ico"
 
 /////////////////////////////////////////////////////////////////////////////

@@ -7,9 +7,9 @@
 #include <rpskin.h>
 #include <assert.h>
 #include <string.h>
-#ifndef _WIN32
+
 #include "crossplatform.h"
-#endif
+#include "relocatable.h"
 
 using namespace rw;
 
@@ -337,10 +337,6 @@ const RwTexDictionary *RwTexDictionaryStreamWrite(const RwTexDictionary *texDict
 	return texDict;
 }
 
-
-
-
-
 RwStream *RwStreamOpen(RwStreamType type, RwStreamAccessType accessType, const void *pData) {
 	StreamFile *file;
 	StreamMemory *mem;
@@ -361,9 +357,9 @@ RwStream *RwStreamOpen(RwStreamType type, RwStreamAccessType accessType, const v
 		file = rwNewT(StreamFile, 1, 0);
 		memcpy(file, &fakefile, sizeof(StreamFile));
 #ifndef _WIN32
-		char *r = casepath((char*)pData);
+		char *r = reloc_casepath((char*)pData);
 		if (r) {
-			if (file->open((char*)r, mode)) {
+			if (file->open(r, mode)) {
 				free(r);
 				return file;
 			}
@@ -371,7 +367,7 @@ RwStream *RwStreamOpen(RwStreamType type, RwStreamAccessType accessType, const v
 		} else
 #endif
 		{
-			if (file->open((char*)pData, mode))
+			if (file->open((const char *)pData, mode))
 				return file;
 		}
 		rwFree(file);
@@ -913,7 +909,7 @@ RwImage *
 RtBMPImageWrite(RwImage *image, const RwChar *imageName)
 {
 #ifndef _WIN32
-	char *r = casepath(imageName);
+	char *r = reloc_casepath(imageName);
 	if (r) {
 		rw::writeBMP(image, r);
 		free(r);
@@ -931,7 +927,7 @@ RtBMPImageRead(const RwChar *imageName)
 {
 #ifndef _WIN32
 	RwImage *image;
-	char *r = casepath(imageName);
+	char *r = reloc_casepath(imageName);
 	if (r) {
 		image = rw::readBMP(r);
 		free(r);

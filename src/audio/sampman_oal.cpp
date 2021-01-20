@@ -14,7 +14,9 @@
 #include <AL/efx.h>
 #include <AL/efx-presets.h>
 
+#ifdef _MSC_VER
 #pragma comment(lib, "OpenAL32.lib")
+#endif
 
 // for user MP3s
 #include <direct.h>
@@ -24,8 +26,10 @@
 #define _getcwd getcwd
 #endif
 
+#define WITHWINDOWS
 #include "common.h"
 #include "crossplatform.h"
+#include "relocatable.h"
 
 #include "sampman.h"
 
@@ -562,7 +566,7 @@ _FindMP3s(void)
 	
 	strcat(path, "*");
 	
-	hFind = FindFirstFile(path, &fd);
+	hFind = reloc_FindFirstFile(path, &fd);
 	
 	if ( hFind == INVALID_HANDLE_VALUE ) 
 	{
@@ -576,7 +580,7 @@ _FindMP3s(void)
 	
 	if ( filepathlen <= 0)
 	{
-		FindClose(hFind);
+		reloc_FindClose(hFind);
 		return;
 	}
 
@@ -964,7 +968,7 @@ cSampleManager::Initialise(void)
 		add_providers();
 
 #ifdef AUDIO_CACHE
-	FILE *cacheFile = fcaseopen("audio\\sound.cache", "rb");
+	FILE *cacheFile = reloc_fcaseopen("audio\\sound.cache", "rb");  // FIXME: was fcaseopen
 	if (cacheFile) {
 		debug("Loadind audio cache (If game crashes around here, then your cache is corrupted, remove audio/sound.cache)\n");
 		fread(nStreamLength, sizeof(uint32), TOTAL_STREAMED_SOUNDS, cacheFile);
@@ -987,7 +991,13 @@ cSampleManager::Initialise(void)
 				USERERROR("Can't open '%s'\n", StreamedNameTable[i]);
 		}
 #ifdef AUDIO_CACHE
-		cacheFile = fcaseopen("audio\\sound.cache", "wb");
+		// FIXME: cross platform mkdir!!!
+#ifdef _MSC_VER
+		::mkdir("audio");
+#else
+		::mkdir("audio", S_IREAD | S_IWRITE | S_IEXEC | S_IXGRP | S_IXOTH);
+#endif
+		cacheFile = reloc_fcaseopen("audio\\sound.cache", "wb");
 		if(cacheFile) {
 			debug("Saving audio cache\n");
 			fwrite(nStreamLength, sizeof(uint32), TOTAL_STREAMED_SOUNDS, cacheFile);
@@ -1970,11 +1980,11 @@ cSampleManager::InitialiseSampleBanks(void)
 {
 	int32 nBank = SFX_BANK_0;
 	
-	fpSampleDescHandle = fcaseopen(SampleBankDescFilename, "rb");
+	fpSampleDescHandle = reloc_fcaseopen(SampleBankDescFilename, "rb");
 	if ( fpSampleDescHandle == NULL )
 		return false;
 #ifndef OPUS_SFX
-	fpSampleDataHandle = fcaseopen(SampleBankDataFilename, "rb");
+	fpSampleDataHandle = reloc_fcaseopen(SampleBankDataFilename, "rb");
 	if ( fpSampleDataHandle == NULL )
 	{
 		fclose(fpSampleDescHandle);

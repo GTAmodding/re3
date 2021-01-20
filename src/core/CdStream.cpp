@@ -6,9 +6,10 @@
 #include "rwcore.h"
 #include "RwHelper.h"
 #include "MemoryMgr.h"
+#include "relocatable.h"
 
 #define CDDEBUG(f, ...)   debug ("%s: " f "\n", "cdvd_stream", ## __VA_ARGS__)
-#define CDTRACE(f, ...)   printf("%s: " f "\n", "cdvd_stream", ## __VA_ARGS__)
+#define CDTRACE(f, ...)   re3_trace(__FILE__, __LINE__, __FUNCTION__, "cdvd_stream: " f "\n", ## __VA_ARGS__)
 
 struct CdReadInfo
 {
@@ -472,18 +473,16 @@ CdStreamAddImage(char const *path)
 	ASSERT(path != nil);
 	ASSERT(gNumImages < MAX_CDIMAGES);
 	
-	SetLastError(0);
-	
-	gImgFiles[gNumImages] = CreateFile(path,
+	gImgFiles[gNumImages] = CreateFile(reloc_realpath(path),
 	                                   GENERIC_READ,
 	                                   FILE_SHARE_READ,
 	                                   nil,
 	                                   OPEN_EXISTING,
 	                                   _gdwCdStreamFlags | FILE_FLAG_RANDOM_ACCESS | FILE_ATTRIBUTE_READONLY,
 	                                   nil);
-	
-	ASSERT( gImgFiles[gNumImages] != nil );
-	if ( gImgFiles[gNumImages] == NULL )
+
+	ASSERT( gImgFiles[gNumImages] != INVALID_HANDLE_VALUE );
+	if ( gImgFiles[gNumImages] == INVALID_HANDLE_VALUE )
 		return false;
 	
 	strcpy(gCdImageNames[gNumImages], path);

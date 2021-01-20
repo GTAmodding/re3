@@ -67,9 +67,6 @@ class Re3Conan(ConanFile):
     def validate(self):
         if self.options["librw"].platform == "gl3" and self.options["librw"].gl3_gfxlib != "glfw":
             raise ConanInvalidConfiguration("Only `glfw` is supported as gl3_gfxlib.")
-        #if not self.options.with_opus:
-        #    if not self.options["libsndfile"].with_external_libs:
-        #        raise ConanInvalidConfiguration("re3 with opus support requires a libsndfile built with external libs (=ogg/flac/opus/vorbis)")
 
     @property
     def _re3_audio(self):
@@ -107,18 +104,24 @@ class Re3Conan(ConanFile):
                            """
                            cmake_minimum_required(VERSION 3.0)
                            project(cmake_wrapper)
+
+                           # FIXME: remove and move to main cmake script once conan CMakeToolchain is fully functional.
+                           set_property(DIRECTORY PROPERTY VS_STARTUP_PROJECT {})
     
                            include("{}/conanbuildinfo.cmake")
                            conan_basic_setup(TARGETS NO_OUTPUT_DIRS)
     
                            add_subdirectory("{}" re3)
-                           """).format(self.install_folder.replace("\\", "/"),
+                           """).format(
+                                       self.name,
+                                       self.install_folder.replace("\\", "/"),
                                        self.source_folder.replace("\\", "/")))
         except FileNotFoundError:
             pass
         cmake = CMake(self)
         cmake.definitions["RE3_AUDIO"] = self._re3_audio
         cmake.definitions["RE3_WITH_OPUS"] = self.options.with_opus
+        cmake.definitions["RE3_WITH_LIBSNDFILE"] = self.options.with_libsndfile
         cmake.definitions["RE3_INSTALL"] = True
         cmake.definitions["RE3_VENDORED_LIBRW"] = False
         env = {}

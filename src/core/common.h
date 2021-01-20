@@ -1,11 +1,13 @@
 #pragma once
 
+#ifdef _MSC_VER
 #define _CRT_SECURE_NO_WARNINGS
 #define _USE_MATH_DEFINES
 #pragma warning(disable: 4244)	// int to float
 #pragma warning(disable: 4800)	// int to bool
 #pragma warning(disable: 4838)  // narrowing conversion
 #pragma warning(disable: 4996)  // POSIX names
+#endif
 
 #include <stdint.h>
 #include <string.h>
@@ -305,7 +307,7 @@ void re3_usererror(const char *format, ...);
 #endif
 
 #define debug(f, ...) re3_debug("[DBG]: " f, ## __VA_ARGS__)
-#define TRACE(f, ...) re3_trace(__FILE__, __LINE__, __FUNCTION__, f, ## __VA_ARGS__)
+#define TRACE(f, ...) re3_trace(__FILE__, __LINE__, __FUNCTION__, f "\n", ## __VA_ARGS__)
 #define Error(f, ...) re3_debug("[ERROR]: " f, ## __VA_ARGS__)
 #define USERERROR(f, ...) re3_usererror(f, ## __VA_ARGS__)
 

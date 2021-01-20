@@ -1,7 +1,9 @@
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
 
-file(GLOB_RECURSE ${PROJECT}_SOURCES "*.cpp" "*.h" "*.rc")
+file(GLOB_RECURSE RE3_SOURCES "*.cpp" "*.h" "*.rc")
+
+source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}" FILES ${RE3_SOURCES})
 
 function(header_directories RETURN_LIST)
     file(GLOB_RECURSE ALL_SRCS *.h *.cpp *.c)
@@ -15,10 +17,10 @@ function(header_directories RETURN_LIST)
     set(${RETURN_LIST} ${RELDIRS} PARENT_SCOPE)
 endfunction()
 
-header_directories(${PROJECT}_INCLUDES)
+header_directories(RE3_INCLUDES)
 
 add_executable(${EXECUTABLE} WIN32
-    ${${PROJECT}_SOURCES}
+    ${RE3_SOURCES}
 )
 
 target_link_libraries(${EXECUTABLE} PRIVATE
@@ -29,15 +31,22 @@ target_link_libraries(${EXECUTABLE} PRIVATE
 target_include_directories(${EXECUTABLE}
     PRIVATE
         $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}>
-        $<BUILD_INTERFACE:${${PROJECT}_INCLUDES}>
+        $<BUILD_INTERFACE:${RE3_INCLUDES}>
 )
 
 target_compile_definitions(${EXECUTABLE}
     PRIVATE
         $<IF:$<CONFIG:DEBUG>,DEBUG,NDEBUG>
         LIBRW
-        ${PROJECT}_NO_AUTOLINK
+        RE3_NO_AUTOLINK
+        RELOCATABLE
 )
+if(STEAMID)
+    target_compile_definitions(${EXECUTABLE}
+        PRIVATE
+            STEAMID=${STEAMID}
+    )
+endif()
 
 if(LIBRW_PLATFORM_D3D9)
     target_compile_definitions(${EXECUTABLE}
@@ -46,13 +55,13 @@ if(LIBRW_PLATFORM_D3D9)
     )
 endif()
 
-if(${PROJECT}_AUDIO STREQUAL "OAL")
+if(RE3_AUDIO STREQUAL "OAL")
     find_package(OpenAL REQUIRED)
     target_include_directories(${EXECUTABLE} PRIVATE ${OPENAL_INCLUDE_DIR})
     target_link_libraries(${EXECUTABLE} PRIVATE ${OPENAL_LIBRARY})
     target_compile_definitions(${EXECUTABLE} PRIVATE ${OPENAL_DEFINITIONS})
     target_compile_definitions(${EXECUTABLE} PRIVATE AUDIO_OAL)
-elseif(${PROJECT}_AUDIO STREQUAL "MSS")
+elseif(RE3_AUDIO STREQUAL "MSS")
     find_package(MilesSDK REQUIRED)
     target_compile_definitions(${EXECUTABLE} PRIVATE AUDIO_MSS)
     target_link_libraries(${EXECUTABLE} PRIVATE MilesSDK::MilesSDK)
@@ -62,14 +71,14 @@ find_package(mpg123 REQUIRED)
 target_link_libraries(${EXECUTABLE} PRIVATE
     MPG123::libmpg123
 )
-if(${PROJECT}_WITH_OPUS)
+if(RE3_WITH_OPUS)
     find_package(opusfile REQUIRED)
     target_link_libraries(${EXECUTABLE} PRIVATE
         opusfile::opusfile
     )
     target_compile_definitions(${EXECUTABLE} PRIVATE AUDIO_OPUS)
 endif()
-if(${PROJECT}_WITH_LIBSNDFILE)
+if(RE3_WITH_LIBSNDFILE)
     find_package(SndFile REQUIRED)
     target_link_libraries(${EXECUTABLE} PRIVATE
         SndFile::SndFile
@@ -107,15 +116,23 @@ set_target_properties(${EXECUTABLE}
         CXX_STANDARD 11
         CXX_EXTENSIONS OFF
         CXX_STANDARD_REQUIRED ON
+        VS_DEBUGGER_ENVIRONMENT "GTA3DIR=$<SHELL_PATH:${PROJECT_SOURCE_DIR}/gamefiles>"
+        VS_DEBUGGER_COMMAND_ARGUMENTS "-console"
+        VS_JUST_MY_CODE_DEBUGGING ON
 )
 
-if(${PROJECT}_INSTALL)
+if(RE3_INSTALL)
     install(
         TARGETS ${EXECUTABLE}
         EXPORT ${EXECUTABLE}-targets
         RUNTIME DESTINATION "."
+        COMPONENT comp1_core
     )
     if(MSVC)
-        install(FILES $<TARGET_PDB_FILE:${EXECUTABLE}> DESTINATION "." OPTIONAL)
+        install(
+            FILES $<TARGET_PDB_FILE:${EXECUTABLE}>
+            DESTINATION "." OPTIONAL
+            COMPONENT comp4_debug
+        )
     endif()
 endif()

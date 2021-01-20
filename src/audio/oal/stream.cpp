@@ -1,8 +1,10 @@
+#ifdef AUDIO_OAL
 #include "common.h"
 
-#ifdef AUDIO_OAL
 #include "stream.h"
 #include "sampman.h"
+
+#include "relocatable.h"
 
 #if defined _MSC_VER && !defined RE3_NO_AUTOLINK
 #ifdef AUDIO_OAL_USE_SNDFILE
@@ -213,7 +215,7 @@ class CWavFile : public IDecoder
 public:
 	CWavFile(const char* path) : m_bIsOpen(false), m_DataStartOffset(0), m_nSampleCount(0), m_nSamplesPerBlock(0), m_pAdpcmBuffer(nil), m_ppPcmBuffers(nil), m_pAdpcmDecoders(nil)
 	{
-		m_pFile = fopen(path, "rb");
+		m_pFile = reloc_fopen(path, "rb");
 		if (!m_pFile) return;
 
 #define CLOSE_ON_ERROR(op)\
@@ -402,7 +404,7 @@ public:
 		m_pfSound(nil)
 	{
 		memset(&m_soundInfo, 0, sizeof(m_soundInfo));
-		m_pfSound = sf_open(path, SFM_READ, &m_soundInfo);
+		m_pfSound = sf_open(reloc_realpath(path), SFM_READ, &m_soundInfo);
 	}
 	
 	~CSndFile()
@@ -489,8 +491,8 @@ public:
 			long rate = 0;
 			int channels = 0;
 			int encoding = 0;
-			
-			m_bOpened = mpg123_open(m_pMH, path) == MPG123_OK
+
+			m_bOpened = mpg123_open(m_pMH, reloc_realpath(path)) == MPG123_OK
 				&& mpg123_getformat(m_pMH, &rate, &channels, &encoding) == MPG123_OK;
 			m_nRate = rate;
 			m_nChannels = channels;
@@ -669,7 +671,7 @@ public:
 	CVbFile(const char* path, uint32 nSampleRate = 32000, uint8 nChannels = 2) : m_nSampleRate(nSampleRate), m_nChannels(nChannels), m_pVagDecoders(nil), m_ppVagBuffers(nil), m_ppPcmBuffers(nil),
 		m_FileSize(0), m_nNumberOfBlocks(0), m_bBlockRead(false), m_LineInBlock(0), m_CurrentBlock(0)
 	{
-		m_pFile = fopen(path, "rb");
+		m_pFile = reloc_fopen(path, "rb");
 		if (!m_pFile) return;
 
 		fseek(m_pFile, 0, SEEK_END);
@@ -819,7 +821,7 @@ public:
 		m_nChannels(0)
 	{
 		int ret;
-		m_FileH = op_open_file(path, &ret);
+		m_FileH = op_open_file(reloc_realpath(path), &ret);
 
 		if (m_FileH) {
 			m_nChannels = op_head(m_FileH, 0)->channel_count;
@@ -915,7 +917,7 @@ void CStream::Terminate()
 #endif
 }
 
-CStream::CStream(char *filename, ALuint *sources, ALuint (&buffers)[NUM_STREAMBUFFERS], uint32 overrideSampleRate) :
+CStream::CStream(const char *filename, ALuint *sources, ALuint (&buffers)[NUM_STREAMBUFFERS], uint32 overrideSampleRate) :
 	m_pAlSources(sources),
 	m_alBuffers(buffers),
 	m_pBuffer(nil),
@@ -930,7 +932,7 @@ CStream::CStream(char *filename, ALuint *sources, ALuint (&buffers)[NUM_STREAMBU
 {
 // Be case-insensitive on linux (from https://github.com/OneSadCookie/fcaseopen/)
 #if !defined(_WIN32)
-	char *real = casepath(filename);
+	char *real = reloc_casepath(filename);
 	if (real) {
 		strcpy(m_aFilename, real);
 		free(real);
@@ -940,7 +942,7 @@ CStream::CStream(char *filename, ALuint *sources, ALuint (&buffers)[NUM_STREAMBU
 #endif
 		strcpy(m_aFilename, filename);
 	}
-		
+
 	DEV("Stream %s\n", m_aFilename);
 
 	if (!strcasecmp(&m_aFilename[strlen(m_aFilename) - strlen(".wav")], ".wav"))

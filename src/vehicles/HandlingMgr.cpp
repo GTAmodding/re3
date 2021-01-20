@@ -97,7 +97,10 @@ cHandlingDataMgr::LoadHandlingData(void)
 	tHandlingData *handling;
 
 	CFileMgr::SetDir("DATA");
-	CFileMgr::LoadFile(HandlingFilename, work_buff, sizeof(work_buff), "r");
+	ssize_t nbBytesRead = CFileMgr::LoadFile(HandlingFilename, work_buff, sizeof(work_buff), "r");
+	if(nbBytesRead < 0) {
+		USERERROR("Cannot open %s\n", HandlingFilename);
+	}
 	CFileMgr::SetDir("");
 
 	start = (char*)work_buff;

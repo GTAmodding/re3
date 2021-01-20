@@ -5,6 +5,7 @@
 #endif
 #include "common.h"
 #include "crossplatform.h"
+#include "relocatable.h"
 
 #include "FileMgr.h"
 
@@ -27,23 +28,21 @@ struct myFILE
 #define NUMFILES 20
 static myFILE myfiles[NUMFILES];
 
-
 #if !defined(_WIN32)
 #include <dirent.h>
 #include <errno.h>
 #include <unistd.h>
 #define _getcwd getcwd
-
 // Case-insensitivity on linux (from https://github.com/OneSadCookie/fcaseopen)
 void mychdir(char const *path)
 {
-	char* r = casepath(path, false);
-    if (r) {
-        chdir(r);
+	char *r = reloc_casepath(path, false);
+	if(r) {
+		chdir(r);
 		free(r);
-    } else {
-        errno = ENOENT;
-    }
+	} else {
+		errno = ENOENT;
+	}
 }
 #else
 #define mychdir chdir
@@ -70,9 +69,9 @@ found:
 			mode++;
 	*p++ = 'b';
 	*p = '\0';
-	
-	myfiles[fd].file = fcaseopen(filename, realmode);
-	if(myfiles[fd].file == nil)
+
+	myfiles[fd].file = reloc_fcaseopen(filename, realmode);
+	if (myfiles[fd].file == nil)
 		return 0;
 	return fd;
 }
@@ -200,24 +199,30 @@ char CFileMgr::ms_dirName[128];
 void
 CFileMgr::Initialise(void)
 {
+	strcpy(ms_dirName, "");
+#ifdef RELOCATABLE
+	strcpy(ms_rootDirName, "");
+#else
 	_getcwd(ms_rootDirName, 128);
 	strcat(ms_rootDirName, "\\");
+#endif
+	reloc_initialize();
 }
 
 void
 CFileMgr::ChangeDir(const char *dir)
 {
-	if(*dir == '\\'){
-		strcpy(ms_dirName, ms_rootDirName);
-		dir++;
-	}
-	if(*dir != '\0'){
-		strcat(ms_dirName, dir);
+	strcpy(ms_dirName, dir);
+	if (*dir != '\0'){
 		// BUG in the game it seems, it's off by one
-		if(dir[strlen(dir)-1] != '\\')
+		if (dir[strlen(dir)-1] != '\\') {
 			strcat(ms_dirName, "\\");
+		}
 	}
+#ifndef RELOCATABLE
+	mychdir(ms_rootDirName);
 	mychdir(ms_dirName);
+#endif
 }
 
 void
@@ -230,14 +235,19 @@ CFileMgr::SetDir(const char *dir)
 		if(dir[strlen(dir)-1] != '\\')
 			strcat(ms_dirName, "\\");
 	}
+#ifndef RELOCATABLE
 	mychdir(ms_dirName);
+#endif
 }
 
 void
 CFileMgr::SetDirMyDocuments(void)
 {
 	SetDir("");	// better start at the root if user directory is relative
+	//FIXME: When using USE_MY_DOCUMENTS, the returned path is absolute.
+#ifndef RELOCATABLE
 	mychdir(_psGetUserFilesFolder());
+#endif
 }
 
 ssize_t

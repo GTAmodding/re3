@@ -33,6 +33,7 @@ long _dwOperatingSystemVersion;
 #include "skeleton.h"
 #include "platform.h"
 #include "crossplatform.h"
+#include "relocatable.h"
 
 #include "main.h"
 #include "FileMgr.h"
@@ -860,7 +861,7 @@ void _InputInitialiseJoys()
 
 	// Load our gamepad mappings.
 #define SDL_GAMEPAD_DB_PATH "gamecontrollerdb.txt"
-	FILE *f = fopen(SDL_GAMEPAD_DB_PATH, "rb");
+	FILE *f = reloc_fopen(SDL_GAMEPAD_DB_PATH, "rb");
 	if (f) {
 		fseek(f, 0, SEEK_END);
 		size_t fsize = ftell(f);
@@ -936,7 +937,7 @@ void psPostRWinit(void)
 	// Make sure all keys are released
 	CPad::GetPad(0)->Clear(true);
 	CPad::GetPad(1)->Clear(true);
-}
+	}
 
 /*
  *****************************************************************************
@@ -1469,6 +1470,10 @@ WinMain(HINSTANCE instance,
 	if (strstr(cmdLine, "-console"))
 	{
 		AllocConsole();
+		SetConsoleTitle("GTA3 Debug Console");
+		// Set default big history (to enable scrolling back)
+		CONSOLE_HISTORY_INFO historyInfo = {sizeof(CONSOLE_HISTORY_INFO), 9999, 4, 0};
+		SetConsoleHistoryInfo(&historyInfo);
 		freopen("CONIN$", "r", stdin);
 		freopen("CONOUT$", "w", stdout);
 		freopen("CONOUT$", "w", stderr);

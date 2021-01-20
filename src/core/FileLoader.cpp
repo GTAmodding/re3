@@ -69,7 +69,7 @@ CFileLoader::LoadLevel(const char *filename)
 	assert(fd > 0);
 
 	for(line = LoadLine(fd); line; line = LoadLine(fd)){
-		if(*line == '#')
+		if((*line == '#') || (*line == '\0'))
 			continue;
 
 #ifdef FIX_BUGS
@@ -167,9 +167,12 @@ CFileLoader::LoadLine(int fd)
 
 	if(CFileMgr::ReadLine(fd, ms_line, 256) == false)
 		return nil;
-	for(i = 0; ms_line[i] != '\0'; i++)
-		if(ms_line[i] < ' ' || ms_line[i] == ',')
+	for(i = 0; ms_line[i] != '\0'; i++) {
+		if(ms_line[i] == '\n')
+			ms_line[i] = '\0';
+		else if(ms_line[i] < ' ' || ms_line[i] == ',')
 			ms_line[i] = ' ';
+	}
 	for(line = ms_line; *line <= ' ' && *line != '\0'; line++);
 	return line;
 }

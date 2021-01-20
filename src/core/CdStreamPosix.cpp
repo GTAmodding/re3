@@ -1,6 +1,7 @@
 #ifndef _WIN32
 #include "common.h"
 #include "crossplatform.h"
+#include "relocatable.h"
 #include <pthread.h>
 #include <signal.h>
 #include <semaphore.h>
@@ -19,7 +20,7 @@
 #include "MemoryMgr.h"
 
 #define CDDEBUG(f, ...)   debug ("%s: " f "\n", "cdvd_stream", ## __VA_ARGS__)
-#define CDTRACE(f, ...)   printf("%s: " f "\n", "cdvd_stream", ## __VA_ARGS__)
+#define CDTRACE(f, ...)   TRACE ("cddvd_stream: " f "\n", ## __VA_ARGS__)
 
 // #define ONE_THREAD_PER_CHANNEL // Don't use if you're not on SSD/Flash. (Also you may want to benefit from this via using all channels in Streaming.cpp)
 
@@ -145,7 +146,7 @@ CdStreamInit(int32 numChannels)
 {
 	struct statvfs fsInfo;
 
-	if((statvfs("models/gta3.img", &fsInfo)) < 0)
+	if((statvfs(reloc_realpath("models/gta3.img"), &fsInfo)) < 0)
 	{
 		CDTRACE("can't get filesystem info");
 		ASSERT(0);
@@ -192,7 +193,7 @@ GetGTA3ImgSize(void)
 	realpath(gImgNames[0], path);
 	if (stat(path, &statbuf) == -1) {
 		// Try case-insensitivity
-		char* real = casepath(gImgNames[0], false);
+		char* real = reloc_casepath(gImgNames[0], false);
 		if (real)
 		{
 			realpath(real, path);
@@ -483,11 +484,11 @@ CdStreamAddImage(char const *path)
 	ASSERT(path != nil);
 	ASSERT(gNumImages < MAX_CDIMAGES);
 
-	gImgFiles[gNumImages] = open(path, _gdwCdStreamFlags);
+	gImgFiles[gNumImages] = open(reloc_realpath(path), _gdwCdStreamFlags);
 
 	// Fix case sensitivity and backslashes.
 	if (gImgFiles[gNumImages] == -1) {
-		char* real = casepath(path, false);
+		char* real = reloc_casepath(path, false);
 		if (real)
 		{
 			gImgFiles[gNumImages] = open(real, _gdwCdStreamFlags);

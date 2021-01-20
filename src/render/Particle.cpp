@@ -233,11 +233,11 @@ TWEAKFUNC(CParticle::ReloadConfig);
 
 void CParticle::ReloadConfig()
 {
-	debug("Initialising CParticleMgr...");
+	debug("Initialising CParticleMgr...\n");
 	
 	mod_ParticleSystemManager.Initialise();
 	
-	debug("Initialising CParticle...");
+	debug("Initialising CParticle...\n");
 	
 	m_pUnusedListHead = gParticleArray;
 	
@@ -622,7 +622,7 @@ CEntity::AddSteamsFromGround(CVector *unused)
 
 void CParticle::Shutdown()
 {
-	debug("Shutting down CParticle...");
+	debug("Shutting down CParticle...\n");
 
 	for ( int32 i = 0; i < MAX_SMOKE_FILES; i++ )
 	{

@@ -86,7 +86,7 @@ public:
 	static void Initialise();
 	static void Terminate();
 	
-	CStream(char *filename, ALuint *sources, ALuint (&buffers)[NUM_STREAMBUFFERS], uint32 overrideSampleRate = 32000);
+	CStream(const char *filename, ALuint *sources, ALuint (&buffers)[NUM_STREAMBUFFERS], uint32 overrideSampleRate = 32000);
 	~CStream();
 	void   Delete();
 	

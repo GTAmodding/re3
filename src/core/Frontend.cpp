@@ -4,6 +4,7 @@
 #include "common.h"
 #ifndef PS2_MENU
 #include "crossplatform.h"
+#include "relocatable.h"
 #include "platform.h"
 #include "Frontend.h"
 #include "Font.h"
@@ -3081,8 +3082,8 @@ CMenuManager::DrawPlayerSetupScreen()
 
 		WIN32_FIND_DATA FindFileData;
 		SYSTEMTIME SystemTime;
-		HANDLE handle = FindFirstFile("skins\\*.bmp", &FindFileData);
-		for (int i = 1; handle != INVALID_HANDLE_VALUE && i; i = FindNextFile(handle, &FindFileData)) {
+		HANDLE handle = reloc_FindFirstFile("skins\\*.bmp", &FindFileData);
+		for (int i = 1; handle != INVALID_HANDLE_VALUE && i; i = reloc_FindNextFile(handle, &FindFileData)) {
 			if (strcmp(FindFileData.cFileName, DEFAULT_SKIN_NAME) != 0) {
 				m_pSelectedSkin->nextSkin = new tSkinInfo;
 				m_pSelectedSkin = m_pSelectedSkin->nextSkin;
@@ -3095,7 +3096,7 @@ CMenuManager::DrawPlayerSetupScreen()
 				m_pSelectedSkin->nextSkin = nil;
 			}
 		}
-		FindClose(handle);
+		reloc_FindClose(handle);
 		m_nSkinsTotal = nextSkinId;
 		char nameTemp[256];
 		for (m_pSelectedSkin = m_pSkinListHead.nextSkin; m_pSelectedSkin; m_pSelectedSkin = m_pSelectedSkin->nextSkin) {
@@ -3686,7 +3687,7 @@ CMenuManager::LoadSettings()
 				m_nPrefsWidth = 0;
 				m_nPrefsHeight = 0;
 				m_nPrefsDepth = 0;
-				m_nPrefsWindowed = 0;
+				m_nPrefsWindowed =0;
 				m_nPrefsSubsystem = 0;
 			}
 			m_nSelectedScreenMode = m_nPrefsWindowed;
@@ -3756,14 +3757,14 @@ CMenuManager::LoadSettings()
 	WIN32_FIND_DATA FindFileData;
 	char skinfile[256+16];	// Stack analysis shows 16 bits gap, but I don't trust it. It may very well be MAX_PATH(260).
 	bool SkinFound = false;
-	HANDLE handle = FindFirstFile("skins\\*.bmp", &FindFileData);
-	for (int i = 1; handle != INVALID_HANDLE_VALUE && i; i = FindNextFile(handle, &FindFileData)) {
+	HANDLE handle = reloc_FindFirstFile("skins\\*.bmp", &FindFileData);
+	for (int i = 1; handle != INVALID_HANDLE_VALUE && i; i = reloc_FindNextFile(handle, &FindFileData)) {
 		strcpy(skinfile, m_PrefsSkinFile);
 		strcat(skinfile, ".bmp");
 		if (strcmp(FindFileData.cFileName, skinfile) == 0)
 			SkinFound = true;
 	}
-	FindClose(handle);
+	reloc_FindClose(handle);
 
 	if (!SkinFound) {
 		OutputDebugString("Default skin set as no other skins are available OR saved skin not found!");

@@ -1,5 +1,6 @@
 #pragma once
 
+
 class CFileMgr
 {
 	static char ms_rootDirName[128];
@@ -20,4 +21,5 @@ public:
 	static int CloseFile(int fd);
 	static int GetErrorReadWrite(int fd);
 	static char *GetRootDirName() { return ms_rootDirName; }
+	static const char *GetWorkingDir() { return ms_dirName; }
 };

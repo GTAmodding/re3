@@ -101,6 +101,7 @@ jobs:
       - name: "Build re3 (conan build)"
         run: |
           conan build ${{ github.workspace }} -if build -bf build -pf package
+          cmake build -DRE3_INSTALL_NSIS=ON
       - name: "Package re3 (conan package)"
         run: |
           conan package ${{ github.workspace }} -if build -bf build -pf package
@@ -108,9 +109,10 @@ jobs:
         working-directory: ./build
         run: |
           cpack -C RelWithDebInfo
+          cmake -E rm -rf dist/_CPack_Packages
       - name: "Archive binary package (github artifacts)"
         uses: actions/upload-artifact@v2
         with:
           name: "${{ matrix.os }}-${{ matrix.platform }}"
-          path: build/*.tar.xz
+          path: build/dist/*
           if-no-files-found: error

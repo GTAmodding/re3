@@ -497,4 +497,5 @@ enum Config {
 #undef FREE_CAM
 #undef RADIO_SCROLL_TO_PREV_STATION
 #undef BIG_IMG
+#undef ALWAYS_ACCURATE_PI
 #endif

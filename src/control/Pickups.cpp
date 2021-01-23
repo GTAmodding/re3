@@ -1350,7 +1350,7 @@ CPacManPickups::Render()
 					aPMPickUps[i].m_pObject->GetMatrix().UpdateRW();
 					aPMPickUps[i].m_pObject->UpdateRwFrame();
 				}
-				float fsin = Sin((CTimer::GetTimeInMilliseconds() % 1024) * 6.28f / 1024.0f); // yes, it is 6.28f when it was TWOPI just now...
+				float fsin = Sin((CTimer::GetTimeInMilliseconds() % 1024) * 2 * PI_3_14 / 1024.0f); // yes, it is 6.28f when it was TWOPI just now...
 				CSprite::RenderOneXLUSprite(pos.x, pos.y, pos.z, 0.8f * w * fsin, 0.8f * h, 100, 50, 5, 255, 1.0f / pos.z, 255);
 			}
 			break;
@@ -1507,7 +1507,7 @@ CPed::CreateDeadPedWeaponPickups(void)
 		// pickup must be on ground and line to its edge must be clear
 		if (!found || CWorld::GetIsLineOfSightClear(pickupPos2, pedPos, true, false, false, false, false, false, false)) {
 			// otherwise try another position (but disregard second check apparently)
-			angleToPed += 3.14f;
+			angleToPed += PI_3_14;
 			pickupPos = GetPosition();
 			pickupPos.x += 1.5f * Sin(angleToPed);
 			pickupPos.y += 1.5f * Cos(angleToPed);

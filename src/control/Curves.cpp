@@ -19,7 +19,7 @@ void CCurves::CalcCurvePoint(CVector* pPos1, CVector* pPos2, CVector* pDir1, CVe
 	float actualFactor = CalcSpeedScaleFactor(pPos1, pPos2, pDir1->x, pDir1->y, pDir2->x, pDir2->y);
 	CVector2D dir1 = *pDir1 * actualFactor;
 	CVector2D dir2 = *pDir2 * actualFactor;
-	float curveCoef = 0.5f - 0.5f * Cos(3.1415f * between);
+	float curveCoef = 0.5f - 0.5f * Cos(PI_3_1415 * between);
 	*pOutPos = CVector(
 		(pPos1->x + between * dir1.x) * (1.0f - curveCoef) + (pPos2->x - (1 - between) * dir2.x) * curveCoef,
 		(pPos1->y + between * dir1.y) * (1.0f - curveCoef) + (pPos2->y - (1 - between) * dir2.y) * curveCoef,

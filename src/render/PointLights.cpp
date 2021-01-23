@@ -219,7 +219,7 @@ CPointLights::RenderFogEffect(void)
 								intensity *= 1.0f - sq(Sqrt(linedistsq) / FOG_AREA_WIDTH);
 
 								if(CSprite::CalcScreenCoors(fogcoors, &spriteCoors, &spritew, &spriteh, true)){
-									float rotation = (CTimer::GetTimeInMilliseconds()&0x1FFF) * 2*3.14f / 0x2000;
+									float rotation = (CTimer::GetTimeInMilliseconds()&0x1FFF) * 2 * PI_3_14 / 0x2000;
 									float size = FogSizes[r>>1];
 									CSprite::RenderOneXLUSprite_Rotate_Aspect(spriteCoors.x, spriteCoors.y, spriteCoors.z,
 										spritew * size, spriteh * size,
@@ -268,7 +268,7 @@ CPointLights::RenderFogEffect(void)
 
 								CVector fogcoors(xi, yi, point.point.z + 1.6f);
 								if(CSprite::CalcScreenCoors(fogcoors, &spriteCoors, &spritew, &spriteh, true)){
-									float rotation = (CTimer::GetTimeInMilliseconds()&0x3FFF) * 2*3.14f / 0x4000;
+									float rotation = (CTimer::GetTimeInMilliseconds()&0x3FFF) * 2 * PI_3_14 / 0x4000;
 									float size = FogSizes[r>>1];
 									CSprite::RenderOneXLUSprite_Rotate_Aspect(spriteCoors.x, spriteCoors.y, spriteCoors.z,
 										spritew * size, spriteh * size,

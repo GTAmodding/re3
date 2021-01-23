@@ -230,7 +230,7 @@ CRubbish::Update(void)
 		spawnDist = (CGeneral::GetRandomNumber()&0xFF)/256.0f + RUBBISH_MAX_DIST;
 		uint8 r = CGeneral::GetRandomNumber();
 		if(r&1)
-			spawnAngle = (CGeneral::GetRandomNumber()&0xFF)/256.0f * 6.28f;
+			spawnAngle = (CGeneral::GetRandomNumber()&0xFF)/256.0f * 2 * PI_3_14;
 		else
 			spawnAngle = (r-128)/160.0f + TheCamera.Orientation;
 		sheet->m_basePos.x = TheCamera.GetPosition().x + spawnDist*Sin(spawnAngle);
@@ -238,7 +238,7 @@ CRubbish::Update(void)
 		sheet->m_basePos.z = CWorld::FindGroundZFor3DCoord(sheet->m_basePos.x, sheet->m_basePos.y, TheCamera.GetPosition().z, &foundGround) + 0.1f;
 		if(foundGround){
 			// Found ground, so add to statics list
-			sheet->m_angle = (CGeneral::GetRandomNumber()&0xFF)/256.0f * 6.28f;
+			sheet->m_angle = (CGeneral::GetRandomNumber()&0xFF)/256.0f * 2 * PI_3_14;
 			sheet->m_state = 1;
 			if(CCullZones::FindAttributesForCoors(sheet->m_basePos, nil) & ATTRZONE_NORAIN)
 				sheet->m_isVisible = false;
@@ -266,8 +266,8 @@ CRubbish::Update(void)
 			sheet->m_animatedPos.y = sheet->m_basePos.y + fxy*sheet->m_yDist;
 			sheet->m_animatedPos.z = (1.0f-t)*sheet->m_basePos.z + t*sheet->m_targetZ + fz*sheet->m_animHeight;
 			sheet->m_angle += CTimer::GetTimeStep()*0.04f;
-			if(sheet->m_angle > 6.28f)
-				sheet->m_angle -= 6.28f;
+			if(sheet->m_angle > 2 * PI_3_14)
+				sheet->m_angle -= 2 * PI_3_14;
 			sheet = sheet->m_next;
 		}else{
 			// End of animation, back into statics list

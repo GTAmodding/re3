@@ -400,8 +400,8 @@ CHeli::ProcessControl(void)
 		targetAngularSpeed = 0.0f;
 	else{
 		float rotationDiff = CGeneral::GetATanOfXY(vTargetDist.x, vTargetDist.y) - m_fRotation;
-		while(rotationDiff < -3.14f) rotationDiff += 6.28f;
-		while(rotationDiff > 3.14f) rotationDiff -= 6.28f;
+		while(rotationDiff < -PI_3_14) rotationDiff += 2 * PI_3_14;
+		while(rotationDiff > PI_3_14) rotationDiff -= 2 * PI_3_14;
 		if(Abs(rotationDiff) > 0.4f){
 			if(rotationDiff < 0.0f)
 				targetAngularSpeed = -0.2f;
@@ -628,9 +628,9 @@ CHeli::Render(void)
 	mat.Translate(pos);
 	mat.UpdateRW();
 
-	m_fRotorRotation += 3.14f/6.5f;
-	if(m_fRotorRotation > 6.28f)
-		m_fRotorRotation -= 6.28f;
+	m_fRotorRotation += PI_3_14 / 6.5f;
+	if(m_fRotorRotation > 2 * PI_3_14)
+		m_fRotorRotation -= 2 * PI_3_14;
 
 	mat.Attach(RwFrameGetMatrix(m_aHeliNodes[HELI_BACKROTOR]));
 	pos = mat.GetPosition();
@@ -807,7 +807,7 @@ CHeli::GenerateHeli(bool catalina)
 		heliPos = CVector(-224.0f, 201.0f, 83.0f);
 	else{
 		heliPos = FindPlayerCoors();
-		float angle = (float)(CGeneral::GetRandomNumber() & 0xFF)/0x100 * 6.28f;
+		float angle = (float)(CGeneral::GetRandomNumber() & 0xFF)/0x100 * 2 * PI_3_14;
 		heliPos.x += 250.0f*Sin(angle);
 		heliPos.y += 250.0f*Cos(angle);
 		if(heliPos.x < -2000.0f || heliPos.x > 2000.0f || heliPos.y < -2000.0f || heliPos.y > 2000.0f){

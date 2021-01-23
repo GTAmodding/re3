@@ -299,7 +299,7 @@ const char* FindDigitalClockMessage()
 	else
 	{
 		// they didn't use rad2deg here because of 3.14
-		int temperature = 13.0f - 6.0f * Cos((CClock::GetMinutes() + 60.0f * CClock::GetHours()) / (4.0f * 180.0f / 3.14f) - 1.0f);
+		int temperature = 13.0f - 6.0f * Cos((CClock::GetMinutes() + 60.0f * CClock::GetHours()) / (4.0f * 180.0f / PI_3_14) - 1.0f);
 		String_DigitalClock[0] = '0' + temperature / 10;
 		if (String_DigitalClock[0] == '0')
 			String_DigitalClock[0] = ' ';

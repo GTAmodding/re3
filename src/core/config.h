@@ -237,6 +237,15 @@ enum Config {
 #define COMPATIBLE_SAVES // this allows changing structs while keeping saves compatible
 #define LOAD_INI_SETTINGS // as the name suggests. fundamental for CUSTOM_FRONTEND_OPTIONS
 
+#define ALWAYS_ACCURATE_PI
+#ifdef ALWAYS_ACCURATE_PI
+#define PI_3_14 (float)M_PI
+#define PI_3_1415 (float)M_PI
+#else
+#define PI_3_14 3.14f
+#define PI_3_1415 3.1415f
+#endif
+
 #if defined(__LP64__) || defined(_WIN64)
 #define FIX_BUGS_64 // Must have fixes to be able to run 64 bit build
 #endif

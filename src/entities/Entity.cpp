@@ -622,12 +622,12 @@ CEntity::ModifyMatrixForTreeInWind(void)
 	}else if(CWeather::Wind >= 0.2){
 		t = (uintptr)this + CTimer::GetTimeInMilliseconds();
 		f = (t & 0xFFF)/(float)0x1000;
-		flutter = Sin(f * 6.28f);
+		flutter = Sin(f * 2 * PI_3_14);
 		strength = 0.008f;
 	}else{
 		t = (uintptr)this + CTimer::GetTimeInMilliseconds();
 		f = (t & 0xFFF)/(float)0x1000;
-		flutter = Sin(f * 6.28f);
+		flutter = Sin(f * 2 * PI_3_14);
 		strength = 0.005f;
 	}
 

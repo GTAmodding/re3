@@ -48,14 +48,22 @@ jobs:
     - name: Build
       run: |
         msbuild -m build/re3.sln /property:Configuration=${{matrix.buildtype}} /property:Platform=${{matrix.platform}}
-    - name: Pack artifacts
+    # - name: Pack artifacts
+      # run: |
+        # 7z a re3_${{matrix.buildtype}}_${{matrix.platform}}.zip ./bin/${{matrix.platform}}/${{matrix.buildtype}}/*
+        # 7z a re3_${{matrix.buildtype}}_${{matrix.platform}}.zip ./gamefiles/*
+    - name: Move binaries to root
       run: |
-        7z a re3_${{matrix.buildtype}}_${{matrix.platform}}.zip ./bin/${{matrix.platform}}/${{matrix.buildtype}}/*
+        mv ./bin/${{matrix.platform}}/${{matrix.buildtype}}/re3.exe ./re3.exe
+        mv ./bin/${{matrix.platform}}/${{matrix.buildtype}}/re3.pdb ./re3.pdb
     - name: Upload artifact to actions
       uses: actions/upload-artifact@v2
       with:
         name: re3_${{matrix.buildtype}}_${{matrix.platform}}
-        path: re3_${{matrix.buildtype}}_${{matrix.platform}}.zip
+        path: |
+          ./re3.exe
+          ./re3.pdb
+          ./gamefiles/*
 #    - name: Upload artifact to Bintray
 #      uses: hpcsc/upload-bintray-docker-action@v1
 #      with:

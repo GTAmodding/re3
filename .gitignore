@@ -358,3 +358,5 @@ sdk/
 codewarrior/re3_Data/
 codewarrior/Release/
 codewarrior/Debug/
+
+version.h

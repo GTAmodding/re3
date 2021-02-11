@@ -287,6 +287,7 @@ project "re3"
 	includedirs { "src/vehicles" }
 	includedirs { "src/weapons" }
 	includedirs { "src/extras" }
+	includedirs { "" } -- for version.h
 	
 	if _OPTIONS["with-opus"] then
 		includedirs { "vendor/ogg/include" }
@@ -313,7 +314,7 @@ project "re3"
 	
 	filter {}
 	if(os.getenv("GTA_III_RE_DIR")) then
-		setpaths("$(GTA_III_RE_DIR)/", "%(cfg.buildtarget.name)")
+		setpaths(os.getenv("GTA_III_RE_DIR") .. "/", "%(cfg.buildtarget.name)")
 	end
 	
 	filter "platforms:win*"
@@ -327,6 +328,10 @@ project "re3"
 			-- external librw is dynamic
 			staticruntime "on"
 		end
+		prebuildcommands { '"%{prj.location}..\\printHash.bat" "%{prj.location}..\\version.h"' }
+		
+	filter "platforms:not win*"
+		prebuildcommands { "./printHash.sh" }
 
 	filter "platforms:win*glfw*"
 		staticruntime "off"

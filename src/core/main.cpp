@@ -70,6 +70,9 @@
 #include "custompipes.h"
 #include "screendroplets.h"
 #include "MemoryHeap.h"
+#ifdef TOGGLEABLE_DEBUG_INFO
+#include "version.h"
+#endif
 
 GlobalScene Scene;
 
@@ -85,6 +88,9 @@ bool gbPrintShite = false;
 bool gbModelViewer;
 #ifdef TIMEBARS
 bool gbShowTimebars;
+#endif
+#ifdef TOGGLEABLE_DEBUG_INFO
+bool gDrawDebugInfo;
 #endif
 
 volatile int32 frameCount;
@@ -1089,13 +1095,49 @@ DisplayGameDebugText()
 
 #ifdef DRAW_GAME_VERSION_TEXT
 	wchar ver[200];
-	
+
+#ifdef TOGGLEABLE_DEBUG_INFO // Our addition for bug reports etc.
+	if(gDrawDebugInfo)
+	{
+		char verA[200];
+		sprintf(verA,
+#if defined RW_D3D9
+		        "Win32 D3D9 "
+#elif defined RWLIBS
+		        "Win32 D3D8 "
+#elif defined __linux__
+		        "Linux "
+#elif defined __APPLE__
+		        "Mac OS X "
+#elif defined __FreeBSD__
+		        "FreeBSD "
+#else
+		        "Posix-compliant "
+#endif
+#if defined RW_GL3
+		        "OpenGL "
+#endif
+#if defined AUDIO_OAL
+		        "OAL "
+#elif defined AUDIO_MSS
+		        "MSS "
+#endif
+#if defined _DEBUG | defined DEBUG
+		        "DEBUG "
+#endif
+		        "%s",
+		        headCommitHash);
+		AsciiToUnicode(verA, ver);
+		CFont::SetScale(SCREEN_SCALE_X(0.5f), SCREEN_SCALE_Y(0.7f));
+#else
 	AsciiToUnicode(version_name, ver);
+	{
+	CFont::SetScale(SCREEN_SCALE_X(0.5f), SCREEN_SCALE_Y(0.5f));
+#endif
 
 	CFont::SetPropOn();
 	CFont::SetBackgroundOff();
 	CFont::SetFontStyle(FONT_BANK);
-	CFont::SetScale(SCREEN_SCALE_X(0.5f), SCREEN_SCALE_Y(0.5f));
 	CFont::SetCentreOff();
 	CFont::SetRightJustifyOff();
 	CFont::SetWrapx(SCREEN_WIDTH);
@@ -1107,6 +1149,7 @@ DisplayGameDebugText()
 #else
 	CFont::PrintString(10.0f, 10.0f, ver);
 #endif
+	}
 #endif // #ifdef DRAW_GAME_VERSION_TEXT
 
 	FrameSamples++;

@@ -183,7 +183,10 @@ enum Config {
 
 // those infamous texts
 #define DRAW_GAME_VERSION_TEXT
-#define DRAW_MENU_VERSION_TEXT
+#ifdef DRAW_GAME_VERSION_TEXT
+	#define TOGGLEABLE_DEBUG_INFO // Our addition, if you disable this then game will fetch version peds.col, as R* did while in development
+#endif
+//#define DRAW_MENU_VERSION_TEXT
 
 // Memory allocation and compression
 // #define USE_CUSTOM_ALLOCATOR		// use CMemoryHeap for allocation. use with care, not finished yet

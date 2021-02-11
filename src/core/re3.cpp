@@ -508,6 +508,10 @@ bool LoadINISettings()
 #ifdef FIX_SPRITES
 	ReadIniIfExists("Draw", "FixSprites", &CDraw::ms_bFixSprites);	
 #endif
+#ifdef TOGGLEABLE_DEBUG_INFO
+	extern bool gDrawDebugInfo;
+	ReadIniIfExists("General", "DrawDebugInfo", &gDrawDebugInfo);
+#endif
 
 #ifdef CUSTOM_FRONTEND_OPTIONS
 	bool migrate = cfg.category_size("FrontendOptions") != 0;
@@ -594,6 +598,10 @@ void SaveINISettings()
 #endif
 #ifdef FIX_SPRITES
 	StoreIni("Draw", "FixSprites", CDraw::ms_bFixSprites);	
+#endif
+#ifdef TOGGLEABLE_DEBUG_INFO
+	extern bool gDrawDebugInfo;
+	StoreIni("General", "DrawDebugInfo", gDrawDebugInfo);
 #endif
 #ifdef CUSTOM_FRONTEND_OPTIONS
 	for (int i = 0; i < MENUPAGES; i++) {
@@ -985,7 +993,10 @@ extern bool gbRenderWorld2;
 #endif
 
 		
-
+#ifdef TOGGLEABLE_DEBUG_INFO
+		extern bool gDrawDebugInfo;
+		DebugMenuAddVarBool8("Debug", "Debug Info", &gDrawDebugInfo, nil);
+#endif
 #ifndef FINAL
 		DebugMenuAddVarBool8("Debug", "Print Memory Usage", &gbPrintMemoryUsage, nil);
 #ifdef USE_CUSTOM_ALLOCATOR

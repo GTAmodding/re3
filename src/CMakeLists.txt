@@ -1,5 +1,5 @@
-set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
+set(THREADS_PREFER_PTHREAD_FLAG ON)
 
 file(GLOB_RECURSE ${PROJECT}_SOURCES "*.cpp" "*.h" "*.rc")
 
@@ -16,6 +16,9 @@ function(header_directories RETURN_LIST)
 endfunction()
 
 header_directories(${PROJECT}_INCLUDES)
+
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/extras/GitSHA1.cpp.in" "${CMAKE_CURRENT_BINARY_DIR}/extras/GitSHA1.cpp" @ONLY)
+list(APPEND ${PROJECT}_SOURCES "${CMAKE_CURRENT_BINARY_DIR}/extras/GitSHA1.cpp")
 
 add_executable(${EXECUTABLE} WIN32
     ${${PROJECT}_SOURCES}
@@ -45,6 +48,8 @@ if(LIBRW_PLATFORM_D3D9)
             USE_D3D9
     )
 endif()
+
+target_compile_definitions(${EXECUTABLE} PRIVATE CMAKE_BUILD)
 
 if(${PROJECT}_AUDIO STREQUAL "OAL")
     find_package(OpenAL REQUIRED)

@@ -6,6 +6,10 @@ set(PROJECT RE3)
 project(${EXECUTABLE} C CXX)
 list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake")
 
+include(GetGitRevisionDescription)
+get_git_head_revision(GIT_REFSPEC GIT_SHA1)
+message(STATUS "Building ${CMAKE_PROJECT_NAME} GIT SHA1: ${GIT_SHA1}")
+
 if(WIN32)
     set(${PROJECT}_AUDIOS "OAL" "MSS")
 else()

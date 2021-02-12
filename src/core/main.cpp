@@ -71,7 +71,9 @@
 #include "screendroplets.h"
 #include "MemoryHeap.h"
 #ifdef TOGGLEABLE_DEBUG_INFO
+#ifndef CMAKE_BUILD
 #include "version.h"
+#endif
 #endif
 
 GlobalScene Scene;
@@ -1074,6 +1076,10 @@ return;
 	y += 12.0f;
 }
 
+#ifdef CMAKE_BUILD
+#include "GitSHA1.h"
+#endif
+
 void
 DisplayGameDebugText()
 {
@@ -1125,8 +1131,13 @@ DisplayGameDebugText()
 #if defined _DEBUG | defined DEBUG
 		        "DEBUG "
 #endif
-		        "%s",
-		        headCommitHash);
+		        "%.8s", // we wanna trunkcate to 8 chars
+#ifdef CMAKE_BUILD
+		        g_GIT_SHA1
+#else
+		        headCommitHash
+#endif
+		);
 		AsciiToUnicode(verA, ver);
 		CFont::SetScale(SCREEN_SCALE_X(0.5f), SCREEN_SCALE_Y(0.7f));
 #else

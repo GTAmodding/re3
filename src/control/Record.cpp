@@ -391,15 +391,17 @@ void CRecordDataForChase::ProcessControlCars(void)
 	}
 }
 
-#if (defined(GTA_PS2) || defined(FIX_BUGS))
 bool CRecordDataForChase::ShouldThisPadBeLeftAlone(uint8 pad)
 {
 	// may be wrong
-	if (Status == STATE_NONE || Status == STATE_PLAYBACK)
+	if (Status == STATE_PLAYBACK_INIT) // this is useless but ps2 def checks if it's STATE_PLAYBACK_INIT
 		return false;
-	return pad != 0;
+
+	if (Status == STATE_RECORD)
+		return pad != 0;
+
+	return false;
 }
-#endif
 
 void CRecordDataForChase::GiveUsACar(int32 mi, CVector pos, float angle, CAutomobile** ppCar, uint8 colour1, uint8 colour2)
 {

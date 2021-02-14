@@ -1,4 +1,4 @@
-#define WITH_D3D
+#define WITHD3D
 #include "common.h"
 
 #ifdef SCREEN_DROPLETS
@@ -8,11 +8,11 @@
 #endif
 
 #include "General.h"
-#include "Main.h"
+#include "main.h"
 #include "RwHelper.h"
-#include "Main.h"
 #include "Timer.h"
 #include "Camera.h"
+#include "World.h"
 #include "ZoneCull.h"
 #include "Weather.h"
 #include "ParticleObject.h"
@@ -76,25 +76,50 @@ ScreenDroplets::Initialise(void)
 	ms_splashObject = nil;
 }
 
+// Create white circle mask for rain drops
+static RwTexture*
+CreateDropMask(int32 size)
+{
+	RwImage *img = RwImageCreate(size, size, 32);
+	RwImageAllocatePixels(img);
+
+	uint8 *pixels = RwImageGetPixels(img);
+	int32 stride = RwImageGetStride(img);
+
+	for(int y = 0; y < size; y++){
+		float yf = ((y + 0.5f)/size - 0.5f)*2.0f;
+		for(int x = 0; x < size; x++){
+			float xf = ((x + 0.5f)/size - 0.5f)*2.0f;
+			memset(&pixels[y*stride + x*4], xf*xf + yf*yf < 1.0f ? 0xFF : 0x00, 4);
+		}
+	}
+
+	int32 width, height, depth, format;
+	RwImageFindRasterFormat(img, rwRASTERTYPETEXTURE, &width, &height, &depth, &format);
+	RwRaster *ras = RwRasterCreate(width, height, depth, format);
+	RwRasterSetFromImage(ras, img);
+	RwImageDestroy(img);
+	return RwTextureCreate(ras);
+}
+
 void
 ScreenDroplets::InitDraw(void)
 {
-	if(CustomPipes::neoTxd)
-		ms_maskTex = CustomPipes::neoTxd->find("dropmask");
+	ms_maskTex = CreateDropMask(64);
 
 	ms_screenTex = RwTextureCreate(nil);
 	RwTextureSetFilterMode(ms_screenTex, rwFILTERLINEAR);
 
 	openim2d_uv2();
 #ifdef RW_D3D9
-#include "shaders/screenDroplet_PS.inc"
+#include "shaders/obj/screenDroplet_PS.inc"
 	screenDroplet_PS = rw::d3d::createPixelShader(screenDroplet_PS_cso);
 #endif
 #ifdef RW_GL3
 	using namespace rw::gl3;
 	{
-#include "shaders/im2d_UV2_gl.inc"
-#include "shaders/screenDroplet_fs_gl.inc"
+#include "shaders/obj/im2d_UV2_vert.inc"
+#include "shaders/obj/screenDroplet_frag.inc"
 	const char *vs[] = { shaderDecl, header_vert_src, im2d_UV2_vert_src, nil };
 	const char *fs[] = { shaderDecl, header_frag_src, screenDroplet_frag_src, nil };
 	screenDroplet = Shader::create(vs, fs);
@@ -366,7 +391,7 @@ void
 ScreenDroplets::RegisterSplash(CParticleObject *pobj)
 {
 	CVector dist = pobj->GetPosition() - ms_prevCamPos;
-	if(dist.MagnitudeSqr() < 20.0f){
+	if(dist.MagnitudeSqr() < 50.0f){	// 20 originally
 		ms_splashDuration = 14;
 		ms_splashObject = pobj;
 	}
@@ -384,15 +409,16 @@ ScreenDroplets::ProcessCameraMovement(void)
 	ms_prevCamUp = camUp;
 	ms_prevCamPos = camPos;
 
-	ms_screenMoveDelta.x = -RwV3dDotProduct(&camMat->right, (RwV3d*)&ms_camMoveDelta);
-	ms_screenMoveDelta.y = RwV3dDotProduct(&camMat->up, (RwV3d*)&ms_camMoveDelta);
-	ms_screenMoveDelta.z = RwV3dDotProduct(&camMat->at, (RwV3d*)&ms_camMoveDelta);
+	ms_screenMoveDelta.x = -RwV3dDotProduct(&camMat->right, &ms_camMoveDelta);
+	ms_screenMoveDelta.y = RwV3dDotProduct(&camMat->up, &ms_camMoveDelta);
+	ms_screenMoveDelta.z = RwV3dDotProduct(&camMat->at, &ms_camMoveDelta);
 	ms_screenMoveDelta *= 10.0f;
 	ms_screenMoveDist = ms_screenMoveDelta.Magnitude2D();
 
 	uint16 mode = TheCamera.Cams[TheCamera.ActiveCam].Mode;
 	bool isTopDown = mode == CCam::MODE_TOPDOWN || mode == CCam::MODE_GTACLASSIC || mode == CCam::MODE_TOP_DOWN_PED;
-	bool isLookingInDirection = CPad::GetPad(0)->GetLookBehindForCar() || CPad::GetPad(0)->GetLookLeft() || CPad::GetPad(0)->GetLookRight();
+	bool isLookingInDirection = FindPlayerVehicle() && mode == CCam::MODE_1STPERSON &&
+		(CPad::GetPad(0)->GetLookBehindForCar() || CPad::GetPad(0)->GetLookLeft() || CPad::GetPad(0)->GetLookRight());
 	ms_enabled = !isTopDown && !isLookingInDirection;
 	ms_movingEnabled = !isTopDown && !isLookingInDirection;
 

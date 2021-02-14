@@ -913,7 +913,7 @@ int8 CRunningScript::ProcessCommands400To499(int32 command)
 			if (strcmp(m_abScriptName, "camera") == 0){
 				pPlayer->m_pPed->SetMoveSpeed(0.0f, 0.0f, 0.0f);
 				pPlayer->m_pPed->SetTurnSpeed(0.0f, 0.0f, 0.0f);
-				CAnimManager::BlendAnimation((RpClump*)pPlayer->m_pPed->m_rwObject, pPlayer->m_pPed->m_animGroup, ANIM_IDLE_STANCE, 1000.0f);
+				CAnimManager::BlendAnimation((RpClump*)pPlayer->m_pPed->m_rwObject, pPlayer->m_pPed->m_animGroup, ANIM_STD_IDLE, 1000.0f);
 			}
 		}
 		return 0;
@@ -1033,7 +1033,7 @@ int8 CRunningScript::ProcessCommands400To499(int32 command)
 		CollectParameters(&m_nIp, 1);
 		CPlayerPed* pPed = CWorld::Players[ScriptParams[0]].m_pPed;
 		script_assert(pPed);
-		ScriptParams[0] = pPed->m_pWanted->m_nWantedLevel;
+		ScriptParams[0] = pPed->m_pWanted->GetWantedLevel();
 		StoreParameters(&m_nIp, 1);
 		return 0;
 	}
@@ -1051,7 +1051,7 @@ int8 CRunningScript::ProcessCommands400To499(int32 command)
 		CPed* pPed = CPools::GetPedPool()->GetAt(ScriptParams[0]);
 		CTheScripts::CleanUpThisPed(pPed);
 		if (m_bIsMissionScript)
-			CTheScripts::MissionCleanup.RemoveEntityFromList(ScriptParams[0], CLEANUP_CHAR);
+			CTheScripts::MissionCleanUp.RemoveEntityFromList(ScriptParams[0], CLEANUP_CHAR);
 		return 0;
 	}
 	case COMMAND_MARK_CAR_AS_NO_LONGER_NEEDED:
@@ -1060,7 +1060,7 @@ int8 CRunningScript::ProcessCommands400To499(int32 command)
 		CVehicle* pVehicle = CPools::GetVehiclePool()->GetAt(ScriptParams[0]);
 		CTheScripts::CleanUpThisVehicle(pVehicle);
 		if (m_bIsMissionScript)
-			CTheScripts::MissionCleanup.RemoveEntityFromList(ScriptParams[0], CLEANUP_CAR);
+			CTheScripts::MissionCleanUp.RemoveEntityFromList(ScriptParams[0], CLEANUP_CAR);
 		return 0;
 	}
 	case COMMAND_MARK_OBJECT_AS_NO_LONGER_NEEDED:
@@ -1069,7 +1069,7 @@ int8 CRunningScript::ProcessCommands400To499(int32 command)
 		CObject* pObject = CPools::GetObjectPool()->GetAt(ScriptParams[0]);
 		CTheScripts::CleanUpThisObject(pObject);
 		if (m_bIsMissionScript)
-			CTheScripts::MissionCleanup.RemoveEntityFromList(ScriptParams[0], CLEANUP_OBJECT);
+			CTheScripts::MissionCleanUp.RemoveEntityFromList(ScriptParams[0], CLEANUP_OBJECT);
 		return 0;
 	}
 	case COMMAND_DONT_REMOVE_CHAR:
@@ -1077,7 +1077,7 @@ int8 CRunningScript::ProcessCommands400To499(int32 command)
 		CollectParameters(&m_nIp, 1);
 		CPed* pPed = CPools::GetPedPool()->GetAt(ScriptParams[0]);
 		script_assert(pPed);
-		CTheScripts::MissionCleanup.RemoveEntityFromList(ScriptParams[0], CLEANUP_CHAR);
+		CTheScripts::MissionCleanUp.RemoveEntityFromList(ScriptParams[0], CLEANUP_CHAR);
 		return 0;
 	}
 	case COMMAND_DONT_REMOVE_CAR:
@@ -1085,7 +1085,7 @@ int8 CRunningScript::ProcessCommands400To499(int32 command)
 		CollectParameters(&m_nIp, 1);
 		CVehicle* pVehicle = CPools::GetVehiclePool()->GetAt(ScriptParams[0]);
 		script_assert(pVehicle);
-		CTheScripts::MissionCleanup.RemoveEntityFromList(ScriptParams[0], CLEANUP_CAR);
+		CTheScripts::MissionCleanUp.RemoveEntityFromList(ScriptParams[0], CLEANUP_CAR);
 		return 0;
 	}
 	case COMMAND_DONT_REMOVE_OBJECT:
@@ -1093,7 +1093,7 @@ int8 CRunningScript::ProcessCommands400To499(int32 command)
 		CollectParameters(&m_nIp, 1);
 		CObject* pObject = CPools::GetObjectPool()->GetAt(ScriptParams[0]);
 		script_assert(pObject);
-		CTheScripts::MissionCleanup.RemoveEntityFromList(ScriptParams[0], CLEANUP_OBJECT);
+		CTheScripts::MissionCleanUp.RemoveEntityFromList(ScriptParams[0], CLEANUP_OBJECT);
 		return 0;
 	}
 	case COMMAND_CREATE_CHAR_AS_PASSENGER:
@@ -1156,7 +1156,7 @@ int8 CRunningScript::ProcessCommands400To499(int32 command)
 #ifdef FIX_BUGS
 		AnimationId anim = pVehicle->GetDriverAnim();
 #else
-		AnimationId anim = pVehicle->bLowVehicle ? ANIM_CAR_LSIT : ANIM_CAR_SIT;
+		AnimationId anim = pVehicle->bLowVehicle ? ANIM_STD_CAR_SIT_LO : ANIM_STD_CAR_SIT;
 #endif
 		pPed->m_pVehicleAnim = CAnimManager::BlendAnimation(pPed->GetClump(), ASSOCGRP_STD, anim, 100.0f);
 		pPed->StopNonPartialAnims();
@@ -1165,7 +1165,7 @@ int8 CRunningScript::ProcessCommands400To499(int32 command)
 		ScriptParams[0] = CPools::GetPedPool()->GetIndex(pPed);
 		StoreParameters(&m_nIp, 1);
 		if (m_bIsMissionScript)
-			CTheScripts::MissionCleanup.AddEntityToList(ScriptParams[0], CLEANUP_CHAR);
+			CTheScripts::MissionCleanUp.AddEntityToList(ScriptParams[0], CLEANUP_CHAR);
 		return 0;
 	}
 	case COMMAND_SET_CHAR_OBJ_KILL_CHAR_ON_FOOT:

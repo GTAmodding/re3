@@ -102,7 +102,7 @@ CPools::CheckPoolsEmpty()
 void
 CPools::MakeSureSlotInObjectPoolIsEmpty(int32 slot)
 {
-	if (ms_pObjectPool->IsFreeSlot(slot)) return;
+	if (ms_pObjectPool->GetIsFree(slot)) return;
 
 	CObject *object = ms_pObjectPool->GetSlot(slot);
 	if (object->ObjectCreatedBy == TEMP_OBJECT) {
@@ -485,7 +485,7 @@ INITSAVEBUF
 #endif
 			CopyToBuf(buf, CWanted::MaximumWantedLevel);
 			CopyToBuf(buf, CWanted::nMaximumWantedLevel);
-			memcpy(buf, CModelInfo::GetModelInfo(pPed->GetModelIndex())->GetName(), MAX_MODEL_NAME);
+			memcpy(buf, CModelInfo::GetModelInfo(pPed->GetModelIndex())->GetModelName(), MAX_MODEL_NAME);
 			SkipSaveBuf(buf, MAX_MODEL_NAME);
 		}
 	}

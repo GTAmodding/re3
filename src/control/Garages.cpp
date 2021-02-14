@@ -111,6 +111,8 @@ const int32 gaCarsToCollectInCraigsGarages[TOTAL_COLLECTCARS_GARAGES][TOTAL_COLL
 	{ MI_LANDSTAL, MI_LANDSTAL, MI_LANDSTAL, MI_LANDSTAL, MI_LANDSTAL, MI_LANDSTAL, MI_LANDSTAL, MI_LANDSTAL, MI_LANDSTAL, MI_LANDSTAL, MI_LANDSTAL, MI_CHEETAH,  MI_TAXI,     MI_ESPERANT, MI_SENTINEL, MI_IDAHO    }
 };
 
+const int32 gaCarsToCollectIn60Seconds[] = { MI_CHEETAH, MI_TAXI, MI_ESPERANT, MI_SENTINEL, MI_IDAHO };
+
 int32 CGarages::BankVansCollected;
 bool CGarages::BombsAreFree;
 bool CGarages::RespraysAreFree;
@@ -158,7 +160,7 @@ void CGarages::Init(void)
 		aCarsInSafeHouse3[i].Init();
 	hGarages = DMAudio.CreateEntity(AUDIOTYPE_GARAGE, (void*)1);
 	if (hGarages >= 0)
-		DMAudio.SetEntityStatus(hGarages, 1);
+		DMAudio.SetEntityStatus(hGarages, true);
 	AddOne(
 		CVector(CRUSHER_GARAGE_X1, CRUSHER_GARAGE_Y1, CRUSHER_GARAGE_Z1),
 		CVector(CRUSHER_GARAGE_X2, CRUSHER_GARAGE_Y2, CRUSHER_GARAGE_Z2),
@@ -179,10 +181,8 @@ void CGarages::Shutdown(void)
 void CGarages::Update(void)
 {
 	static int GarageToBeTidied = 0;
-#ifndef GTA_PS2
 	if (CReplay::IsPlayingBack())
 		return;
-#endif
 	bCamShouldBeOutisde = false;
 	TheCamera.pToGarageWeAreIn = nil;
 	TheCamera.pToGarageWeAreInForHackAvoidFirstPerson = nil;
@@ -202,7 +202,7 @@ void CGarages::Update(void)
 		aGarages[GarageToBeTidied].TidyUpGarage();
 }
 
-int16 CGarages::AddOne(CVector p1, CVector p2, eGarageType type, int32 targetId)
+int16 CGarages::AddOne(CVector p1, CVector p2, uint8 type, int32 targetId)
 {
 	if (NumGarages >= NUM_GARAGES) {
 		assert(0);
@@ -285,7 +285,7 @@ int16 CGarages::AddOne(CVector p1, CVector p2, eGarageType type, int32 targetId)
 	return NumGarages++;
 }
 
-void CGarages::ChangeGarageType(int16 garage, eGarageType type, int32 mi)
+void CGarages::ChangeGarageType(int16 garage, uint8 type, int32 mi)
 {
 	CGarage* pGarage = &aGarages[garage];
 	pGarage->m_eGarageType = type;
@@ -389,7 +389,7 @@ void CGarage::Update()
 				m_eGarageState = GS_OPENING;
 				DMAudio.PlayFrontEndSound(SOUND_GARAGE_OPENING, 1);
 				bool bTakeMoney = false;
-				if (FindPlayerPed()->m_pWanted->m_nWantedLevel != 0)
+				if (FindPlayerPed()->m_pWanted->GetWantedLevel() != 0)
 					bTakeMoney = true;
 				FindPlayerPed()->m_pWanted->Reset();
 				CPad::GetPad(0)->SetEnablePlayerControls(PLAYERCONTROL_GARAGE);
@@ -1046,8 +1046,8 @@ void CGarage::Update()
 			// Close car doors either if player is far, or if he is in vehicle and garage is full,
 			// or if player is very very far so that we can remove whatever is blocking garage door without him noticing
 			if ((distance > SQR(DISTANCE_TO_CLOSE_HIDEOUT_GARAGE_IN_CAR) ||
-				!FindPlayerVehicle() && distance > SQR(DISTANCE_TO_CLOSE_HIDEOUT_GARAGE_ON_FOOT) &&
-				!IsAnyCarBlockingDoor()))
+				!FindPlayerVehicle() && distance > SQR(DISTANCE_TO_CLOSE_HIDEOUT_GARAGE_ON_FOOT)) &&
+				!IsAnyCarBlockingDoor())
 				m_eGarageState = GS_CLOSING;
 			else if (FindPlayerVehicle() &&
 				CountCarsWithCenterPointWithinGarage(FindPlayerVehicle()) >=
@@ -1399,16 +1399,24 @@ void CGarage::RemoveCarsBlockingDoorNotInside()
 void CGarages::PrintMessages()
 {
 	if (CTimer::GetTimeInMilliseconds() > MessageStartTime && CTimer::GetTimeInMilliseconds() < MessageEndTime) {
-		CFont::SetScale(SCREEN_SCALE_X(1.2f), SCREEN_SCALE_Y(1.5f)); // BUG: game doesn't use macro here.
+#ifdef FIX_BUGS
+		CFont::SetScale(SCREEN_SCALE_X(1.2f), SCREEN_SCALE_Y(1.5f));
+#else
+		CFont::SetScale(1.2f, 1.5f);
+#endif
 		CFont::SetPropOn();
 		CFont::SetJustifyOff();
 		CFont::SetBackgroundOff();
-		CFont::SetCentreSize(SCREEN_SCALE_X(590.0f));
+#ifdef FIX_BUGS
+		CFont::SetCentreSize(SCREEN_SCALE_X(DEFAULT_SCREEN_WIDTH - 50));
+#else
+		CFont::SetCentreSize(SCREEN_WIDTH - 50);
+#endif
 		CFont::SetCentreOn();
 		CFont::SetFontStyle(FONT_LOCALE(FONT_BANK));
 		CFont::SetColor(CRGBA(0, 0, 0, 255));
 
-#if defined(GTA_PS2) || defined (FIX_BUGS)
+#if defined(PS2_HUD) || defined (FIX_BUGS)
 		float y_offset = SCREEN_HEIGHT / 3; // THIS is PS2 calculation
 #else
 		float y_offset = SCREEN_HEIGHT / 2 - SCREEN_SCALE_Y(84.0f); // This is PC and results in text being written over some HUD elements
@@ -1416,22 +1424,40 @@ void CGarages::PrintMessages()
 
 		if (MessageNumberInString2 >= 0) {
 			CMessages::InsertNumberInString(TheText.Get(MessageIDString), MessageNumberInString, MessageNumberInString2, -1, -1, -1, -1, gUString);
+#ifdef FIX_BUGS
 			CFont::PrintString(SCREEN_WIDTH / 2 + SCREEN_SCALE_X(2.0f), y_offset - SCREEN_SCALE_Y(40.0f) + SCREEN_SCALE_Y(2.0f), gUString);
-
+#else
+			CFont::PrintString(SCREEN_WIDTH / 2 + 2.0f, y_offset - 40.0f + 2.0f, gUString);
+#endif
 			CFont::SetColor(CRGBA(89, 115, 150, 255));
+#ifdef FIX_BUGS
 			CFont::PrintString(SCREEN_WIDTH / 2, y_offset - SCREEN_SCALE_Y(40.0f), gUString);
+#else
+			CFont::PrintString(SCREEN_WIDTH / 2, y_offset - 40.0f, gUString);
+#endif
 		}
 		else if (MessageNumberInString >= 0) {
 			CMessages::InsertNumberInString(TheText.Get(MessageIDString), MessageNumberInString, -1, -1, -1, -1, -1, gUString);
-
+#ifdef FIX_BUGS
 			CFont::PrintString(SCREEN_WIDTH / 2 + SCREEN_SCALE_X(2.0f), y_offset - SCREEN_SCALE_Y(40.0f) + SCREEN_SCALE_Y(2.0f), gUString);
+#else
+			CFont::PrintString(SCREEN_WIDTH / 2 + 2.0f, y_offset - 40.0f + 2.0f, gUString);
+#endif
 
 			CFont::SetColor(CRGBA(89, 115, 150, 255));
+				
+#ifdef FIX_BUGS
 			CFont::PrintString(SCREEN_WIDTH / 2, y_offset - SCREEN_SCALE_Y(40.0f), gUString);
+#else
+			CFont::PrintString(SCREEN_WIDTH / 2, y_offset - 40.0f, gUString);
+#endif
 		}
 		else {
+#ifdef FIX_BUGS
 			CFont::PrintString(SCREEN_WIDTH / 2 - SCREEN_SCALE_X(2.0f), y_offset - SCREEN_SCALE_Y(2.0f), TheText.Get(MessageIDString));
-
+#else
+			CFont::PrintString(SCREEN_WIDTH / 2 - 2.0f, y_offset - 2.0f, TheText.Get(MessageIDString));
+#endif
 			CFont::SetColor(CRGBA(89, 115, 150, 255));
 			CFont::PrintString(SCREEN_WIDTH / 2, y_offset, TheText.Get(MessageIDString));
 		}
@@ -1515,7 +1541,7 @@ void CGarage::RefreshDoorPointers(bool bCreate)
 	m_bRecreateDoorOnNextRefresh = false;
 	if (m_pDoor1) {
 		if (m_bDoor1IsDummy) {
-			if (CPools::GetDummyPool()->IsFreeSlot(CPools::GetDummyPool()->GetJustIndex_NoFreeAssert((CDummy*)m_pDoor1)))
+			if (CPools::GetDummyPool()->GetIsFree(CPools::GetDummyPool()->GetJustIndex_NoFreeAssert((CDummy*)m_pDoor1)))
 				bNeedToFindDoorEntities = true;
 			else {
 				if (m_bDoor1PoolIndex != (CPools::GetDummyPool()->GetIndex((CDummy*)m_pDoor1) & 0x7F))
@@ -1525,7 +1551,7 @@ void CGarage::RefreshDoorPointers(bool bCreate)
 			}
 		}
 		else {
-			if (CPools::GetObjectPool()->IsFreeSlot(CPools::GetObjectPool()->GetJustIndex_NoFreeAssert((CObject*)m_pDoor1)))
+			if (CPools::GetObjectPool()->GetIsFree(CPools::GetObjectPool()->GetJustIndex_NoFreeAssert((CObject*)m_pDoor1)))
 				bNeedToFindDoorEntities = true;
 			else {
 				if (m_bDoor1PoolIndex != (CPools::GetObjectPool()->GetIndex((CObject*)m_pDoor1) & 0x7F))
@@ -1537,7 +1563,7 @@ void CGarage::RefreshDoorPointers(bool bCreate)
 	}
 	if (m_pDoor2) {
 		if (m_bDoor2IsDummy) {
-			if (CPools::GetDummyPool()->IsFreeSlot(CPools::GetDummyPool()->GetJustIndex_NoFreeAssert((CDummy*)m_pDoor2)))
+			if (CPools::GetDummyPool()->GetIsFree(CPools::GetDummyPool()->GetJustIndex_NoFreeAssert((CDummy*)m_pDoor2)))
 				bNeedToFindDoorEntities = true;
 			else {
 				if (m_bDoor2PoolIndex != (CPools::GetDummyPool()->GetIndex((CDummy*)m_pDoor2) & 0x7F))
@@ -1547,7 +1573,7 @@ void CGarage::RefreshDoorPointers(bool bCreate)
 			}
 		}
 		else {
-			if (CPools::GetObjectPool()->IsFreeSlot(CPools::GetObjectPool()->GetJustIndex_NoFreeAssert((CObject*)m_pDoor2)))
+			if (CPools::GetObjectPool()->GetIsFree(CPools::GetObjectPool()->GetJustIndex_NoFreeAssert((CObject*)m_pDoor2)))
 				bNeedToFindDoorEntities = true;
 			else {
 				if (m_bDoor2PoolIndex != (CPools::GetObjectPool()->GetIndex((CObject*)m_pDoor2) & 0x7F))
@@ -2008,7 +2034,11 @@ float CGarages::FindDoorHeightForMI(int32 mi)
 void CGarage::TidyUpGarage()
 {
 	uint32 i = CPools::GetVehiclePool()->GetSize();
+#ifdef FIX_BUGS
 	while (i--) {
+#else
+	while (--i) {
+#endif
 		CVehicle* pVehicle = CPools::GetVehiclePool()->GetSlot(i);
 		if (!pVehicle || !pVehicle->IsCar())
 			continue;
@@ -2026,7 +2056,11 @@ void CGarage::TidyUpGarage()
 void CGarage::TidyUpGarageClose()
 {
 	uint32 i = CPools::GetVehiclePool()->GetSize();
+#ifdef FIX_BUGS
 	while (i--) {
+#else
+	while (--i) {
+#endif
 		CVehicle* pVehicle = CPools::GetVehiclePool()->GetSlot(i);
 		if (!pVehicle || !pVehicle->IsCar())
 			continue;
@@ -2172,7 +2206,7 @@ void CGarages::CloseHideOutGaragesBeforeSave()
 	}
 }
 
-int32 CGarages::CountCarsInHideoutGarage(eGarageType type)
+int32 CGarages::CountCarsInHideoutGarage(uint8 type)
 {
 	int32 total = 0;
 	for (int i = 0; i < NUM_GARAGE_STORED_CARS; i++) {
@@ -2192,7 +2226,7 @@ int32 CGarages::CountCarsInHideoutGarage(eGarageType type)
 	return total;
 }
 
-int32 CGarages::FindMaxNumStoredCarsForGarage(eGarageType type)
+int32 CGarages::FindMaxNumStoredCarsForGarage(uint8 type)
 {
 	switch (type) {
 	case GARAGE_HIDEOUT_ONE:
@@ -2399,4 +2433,42 @@ CGarages::IsModelIndexADoor(uint32 id)
 		id == MI_GARAGEDOOR32 ||
 		id == MI_CRUSHERBODY ||
 		id == MI_CRUSHERLID;
+}
+
+void CGarages::StopCarFromBlowingUp(CAutomobile* pCar)
+{
+	pCar->m_fFireBlowUpTimer = 0.0f;
+	pCar->m_fHealth = Max(pCar->m_fHealth, 300.0f);
+	pCar->Damage.SetEngineStatus(Max(pCar->Damage.GetEngineStatus(), 275));
+}
+
+bool CGarage::Does60SecondsNeedThisCarAtAll(int mi)
+{
+	for (int i = 0; i < ARRAY_SIZE(gaCarsToCollectIn60Seconds); i++) {
+		if (gaCarsToCollectIn60Seconds[i] == mi)
+			return true;
+	}
+	return false;
+}
+
+bool CGarage::Does60SecondsNeedThisCar(int mi)
+{
+	for (int i = 0; i < ARRAY_SIZE(gaCarsToCollectIn60Seconds); i++) {
+		if (gaCarsToCollectIn60Seconds[i] == mi)
+			return m_bCollectedCarsState & BIT(i);
+	}
+	return false;
+}
+
+void CGarage::MarkThisCarAsCollectedFor60Seconds(int mi)
+{
+	for (int i = 0; i < ARRAY_SIZE(gaCarsToCollectIn60Seconds); i++) {
+		if (gaCarsToCollectIn60Seconds[i] == mi)
+			m_bCollectedCarsState |= BIT(i);
+	}
+}
+
+bool CGarage::IsPlayerEntirelyInsideGarage()
+{
+	return IsEntityEntirelyInside3D(FindPlayerVehicle() ? (CEntity*)FindPlayerVehicle() : (CEntity*)FindPlayerPed(), 0.0f);
 }

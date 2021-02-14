@@ -6,7 +6,7 @@
 struct CReference;
 class CPtrList;
 
-enum eEntityType : uint8
+enum eEntityType
 {
 	ENTITY_TYPE_NOTHING = 0,
 	ENTITY_TYPE_BUILDING,
@@ -16,7 +16,7 @@ enum eEntityType : uint8
 	ENTITY_TYPE_DUMMY,
 };
 
-enum eEntityStatus : uint8
+enum eEntityStatus
 {
 	STATUS_PLAYER,
 	STATUS_PLAYER_PLAYBACKFROMBUFFER,
@@ -92,10 +92,10 @@ public:
 	CReference *m_pFirstReference;
 
 public:
-	eEntityType GetType() const { return (eEntityType)m_type; }
-	void SetType(eEntityType type) { m_type = type; }
-	eEntityStatus GetStatus() const { return (eEntityStatus)m_status; }
-	void SetStatus(eEntityStatus status) { m_status = status; }
+	uint8 GetType() const { return m_type; }
+	void SetType(uint8 type) { m_type = type; }
+	uint8 GetStatus() const { return m_status; }
+	void SetStatus(uint8 status) { m_status = status; }
 	CColModel *GetColModel(void) { return CModelInfo::GetModelInfo(m_modelIndex)->GetColModel(); }
 	bool GetIsStatic(void) const { return bIsStatic; }
 	void SetIsStatic(bool state) { bIsStatic = state; }
@@ -111,8 +111,8 @@ public:
 
 	virtual void Add(void);
 	virtual void Remove(void);
-	virtual void SetModelIndex(uint32 id) { m_modelIndex = id; CreateRwObject(); }
-	virtual void SetModelIndexNoCreate(uint32 id) { m_modelIndex = id; }
+	virtual void SetModelIndex(uint32 id);
+	virtual void SetModelIndexNoCreate(uint32 id);
 	virtual void CreateRwObject(void);
 	virtual void DeleteRwObject(void);
 	virtual CRect GetBoundRect(void);
@@ -123,7 +123,7 @@ public:
 	virtual void PreRender(void);
 	virtual void Render(void);
 	virtual bool SetupLighting(void);
-	virtual void RemoveLighting(bool) {}
+	virtual void RemoveLighting(bool);
 	virtual void FlagToDestroyWhenNextProcessed(void) {}
 
 	bool IsBuilding(void) { return m_type == ENTITY_TYPE_BUILDING; }
@@ -142,14 +142,14 @@ public:
 	}
 
 	void GetBoundCentre(CVector &out);
-	CVector GetBoundCentre(void) { CVector v; GetBoundCentre(v); return v; }
-	float GetBoundRadius(void) { return CModelInfo::GetModelInfo(m_modelIndex)->GetColModel()->boundingSphere.radius; }
-	float GetDistanceFromCentreOfMassToBaseOfModel(void) { return -CModelInfo::GetModelInfo(m_modelIndex)->GetColModel()->boundingBox.min.z; }
+	CVector GetBoundCentre(void);
+	float GetBoundRadius(void);
+	float GetDistanceFromCentreOfMassToBaseOfModel(void);
 	bool GetIsTouching(CVector const &center, float r);
 	bool GetIsOnScreen(void);
 	bool GetIsOnScreenComplex(void);
-	bool IsVisible(void) { return m_rwObject && bIsVisible && GetIsOnScreen(); }
-	bool IsVisibleComplex(void) { return m_rwObject && bIsVisible && GetIsOnScreenComplex(); }
+	bool IsVisible(void);
+	bool IsVisibleComplex(void);
 	int16 GetModelIndex(void) const { return m_modelIndex; }
 	void UpdateRwFrame(void);
 	void SetupBigBuilding(void);
@@ -170,8 +170,6 @@ public:
 	void ModifyMatrixForTreeInWind(void);
 	void ModifyMatrixForBannerInWind(void);
 	void ProcessLightsForEntity(void);
-
-	static void AddSteamsFromGround(CPtrList& list);
 };
 
 VALIDATE_SIZE(CEntity, 0x64);

@@ -5,7 +5,8 @@ enum eLevelName {
 	LEVEL_GENERIC = 0,
 	LEVEL_INDUSTRIAL,
 	LEVEL_COMMERCIAL,
-	LEVEL_SUBURBAN
+	LEVEL_SUBURBAN,
+	NUM_LEVELS
 };
 
 class CGame
@@ -29,7 +30,11 @@ public:
 	static void ShutdownRenderWare(void);
 	static bool InitialiseOnceAfterRW(void);
 	static void FinalShutdown(void);
+#if GTA_VERSION <= GTA3_PS2_160
+	static bool Initialise(void);
+#else
 	static bool Initialise(const char *datFile);
+#endif
 	static bool ShutDown(void);
 	static void ReInitGameObjectVariables(void);
 	static void ReloadIPLs(void);

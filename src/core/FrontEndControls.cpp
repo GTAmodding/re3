@@ -7,7 +7,7 @@
 #include "FrontEndControls.h"
 
 #define X SCREEN_SCALE_X
-#define Y(x) SCREEN_SCALE_Y(float(x)*(float(DEFAULT_SCREEN_HEIGHT)/float(DEFAULT_SCREEN_HEIGHT_PAL)))
+#define Y(x) SCREEN_SCALE_Y(float(x)*(float(DEFAULT_SCREEN_HEIGHT)/float(SCREEN_HEIGHT_PAL)))
 
 void
 CPlaceableShText::Draw(float x, float y)

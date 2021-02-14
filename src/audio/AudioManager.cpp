@@ -13,16 +13,19 @@
 
 cAudioManager AudioManager;
 
-const int channels = ARRAY_SIZE(cAudioManager::m_asActiveSamples);
+const int channels = ARRAY_SIZE(AudioManager.m_asActiveSamples);
 const int policeChannel = channels + 1;
 const int allChannels = channels + 2;
+
+#define SPEED_OF_SOUND 343.f
+#define TIME_SPENT 50
 
 cAudioManager::cAudioManager()
 {
 	m_bIsInitialised = false;
-	field_1 = 1;
-	m_fSpeedOfSound = 6.86f;
-	m_nTimeSpent = 50;
+	m_bReverb = true;
+	m_fSpeedOfSound = SPEED_OF_SOUND / TIME_SPENT;
+	m_nTimeSpent = TIME_SPENT;
 	m_nActiveSamples = NUM_SOUNDS_SAMPLES_SLOTS;
 	m_nActiveSampleQueue = 1;
 	ClearRequestedQueue();
@@ -128,7 +131,7 @@ cAudioManager::CreateEntity(eAudioType type, void *entity)
 	for (uint32 i = 0; i < ARRAY_SIZE(m_asAudioEntities); i++) {
 		if (!m_asAudioEntities[i].m_bIsUsed) {
 			m_asAudioEntities[i].m_bIsUsed = true;
-			m_asAudioEntities[i].m_nStatus = 0;
+			m_asAudioEntities[i].m_bStatus = false;
 			m_asAudioEntities[i].m_nType = type;
 			m_asAudioEntities[i].m_pEntity = entity;
 			m_asAudioEntities[i].m_awAudioEvent[0] = SOUND_NO_SOUND;
@@ -163,7 +166,7 @@ void
 cAudioManager::SetEntityStatus(int32 id, uint8 status)
 {
 	if (m_bIsInitialised && id >= 0 && id < NUM_AUDIOENTITIES && m_asAudioEntities[id].m_bIsUsed)
-		m_asAudioEntities[id].m_nStatus = status;
+		m_asAudioEntities[id].m_bStatus = status;
 }
 
 void
@@ -945,7 +948,7 @@ cAudioManager::ClearActiveSamples()
 		m_asActiveSamples[i].m_nCalculatedVolume = 0;
 		m_asActiveSamples[i].m_nReleasingVolumeDivider = 0;
 		m_asActiveSamples[i].m_nVolumeChange = -1;
-		m_asActiveSamples[i].m_vecPos = {0.0f, 0.0f, 0.0f};
+		m_asActiveSamples[i].m_vecPos = CVector(0.0f, 0.0f, 0.0f);
 		m_asActiveSamples[i].m_bReverbFlag = false;
 		m_asActiveSamples[i].m_nLoopsRemaining = 0;
 		m_asActiveSamples[i].m_bRequireReflection = false;

@@ -3,6 +3,7 @@
 #include "General.h"
 #include "Timer.h"
 #include "TxdStore.h"
+#include "Entity.h"
 #include "Sprite.h"
 #include "Camera.h"
 #include "Collision.h"
@@ -388,9 +389,11 @@ void CParticle::Initialise()
 
 	gpFlame5Tex = RwTextureRead("flame5", nil);
 	
-#ifdef FIX_BUGS
+//#ifdef FIX_BUGS
+#if 0
 	gpFlame5Raster = RwTextureGetRaster(gpFlame5Tex);
 #else
+	// this seems to have become more of a design choice
 	gpFlame5Raster = RwTextureGetRaster(gpFlame1Tex);	// copy-paste bug ?
 #endif
 
@@ -581,6 +584,40 @@ void CParticle::Initialise()
 	}
 
 	debug("CParticle ready");
+}
+
+void
+CEntity::AddSteamsFromGround(CVector *unused)
+{
+	int i, n;
+	C2dEffect *effect;
+	CVector pos;
+
+	n = CModelInfo::GetModelInfo(GetModelIndex())->GetNum2dEffects();
+	for(i = 0; i < n; i++){
+		effect = CModelInfo::GetModelInfo(GetModelIndex())->Get2dEffect(i);
+		if(effect->type != EFFECT_PARTICLE)
+			continue;
+
+		pos = GetMatrix() * effect->pos;
+		switch(effect->particle.particleType){
+		case 0:
+			CParticleObject::AddObject(POBJECT_PAVEMENT_STEAM, pos, effect->particle.dir, effect->particle.scale, false);
+			break;
+		case 1:
+			CParticleObject::AddObject(POBJECT_WALL_STEAM, pos, effect->particle.dir, effect->particle.scale, false);
+			break;
+		case 2:
+			CParticleObject::AddObject(POBJECT_DRY_ICE, pos, effect->particle.scale, false);
+			break;
+		case 3:
+			CParticleObject::AddObject(POBJECT_SMALL_FIRE, pos, effect->particle.dir, effect->particle.scale, false);
+			break;
+		case 4:
+			CParticleObject::AddObject(POBJECT_DARK_SMOKE, pos, effect->particle.dir, effect->particle.scale, false);
+			break;
+		}
+	}
 }
 
 void CParticle::Shutdown()
@@ -1570,7 +1607,7 @@ void CParticle::Render()
 				float w;
 				float h;
 
-				if ( CSprite::CalcScreenCoors(particle->m_vecPosition, coors, &w, &h, true) )
+				if ( CSprite::CalcScreenCoors(particle->m_vecPosition, &coors, &w, &h, true) )
 				{
 #ifdef PC_PARTICLE
 					if ( (!particleBanned || SCREEN_WIDTH * fParticleScaleLimit >= w)
@@ -1650,7 +1687,7 @@ void CParticle::Render()
 							float fRotation;
 							float fTrailLength;
 							
-							if ( CSprite::CalcScreenCoors(vecPrevPos, particle->m_vecScreenPosition, &fTrailLength, &fRotation, true) )
+							if ( CSprite::CalcScreenCoors(vecPrevPos, &particle->m_vecScreenPosition, &fTrailLength, &fRotation, true) )
 							{
 								CVector2D vecDist
 								(
@@ -1802,9 +1839,9 @@ void CParticle::AddJetExplosion(CVector const &vecPos, float fPower, float fSize
 					vecStepPos,
 					CVector
 					(
-						CGeneral::GetRandomNumberInRange(-0.2f, 0.2f),
-						CGeneral::GetRandomNumberInRange(-0.2f, 0.2f),
-						CGeneral::GetRandomNumberInRange(-0.2f, 0.0f)
+						CGeneral::GetRandomNumberInRange(-0.02f, 0.02f),
+						CGeneral::GetRandomNumberInRange(-0.02f, 0.02f),
+						CGeneral::GetRandomNumberInRange(-0.02f, 0.0f)
 					),
 					nil,
 					fSize, color, 0, 0, 0, 0);

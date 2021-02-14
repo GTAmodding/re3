@@ -264,17 +264,13 @@ CCivilianPed::ProcessControl(void)
 					m_pNextPathNode = nil;
 #ifdef PEDS_REPORT_CRIMES_ON_PHONE
 				} else if (bRunningToPhone && m_objective < OBJECTIVE_FLEE_ON_FOOT_TILL_SAFE) {
-					if (!isPhoneAvailable(m_phoneId)) {
+					if (crimeReporters[m_phoneId] != this) {
 						RestorePreviousState();
-						if (crimeReporters[m_phoneId] == this)
-							crimeReporters[m_phoneId] = nil;
-
 						m_phoneId = -1;
 						bRunningToPhone = false;
 					} else {
-						crimeReporters[m_phoneId] = this;
 						m_facePhoneStart = true;
-						m_nPedState = PED_FACE_PHONE;
+						SetPedState(PED_FACE_PHONE);
 					}
 #else
 				} else if (bRunningToPhone) {
@@ -283,7 +279,7 @@ CCivilianPed::ProcessControl(void)
 						m_phoneId = -1;
 					} else {
 						gPhoneInfo.m_aPhones[m_phoneId].m_nState = PHONE_STATE_REPORTING_CRIME;
-						m_nPedState = PED_FACE_PHONE;
+						SetPedState(PED_FACE_PHONE);
 					}
 #endif
 				} else if (m_objective != OBJECTIVE_KILL_CHAR_ANY_MEANS && m_objective != OBJECTIVE_KILL_CHAR_ON_FOOT) {
@@ -305,7 +301,7 @@ CCivilianPed::ProcessControl(void)
 			break;
 		case PED_FACE_PHONE:
 			if (FacePhone())
-				m_nPedState = PED_MAKE_CALL;
+				SetPedState(PED_MAKE_CALL);
 			break;
 		case PED_MAKE_CALL:
 			if (MakePhonecall())
@@ -331,7 +327,7 @@ CCivilianPed::ProcessControl(void)
 				for (int j = 0; j < m_numNearPeds; ++j) {
 					CPed *nearPed = m_nearPeds[j];
 					if (nearPed->m_nPedType == m_nPedType && nearPed->m_nPedState == PED_WANDER_PATH) {
-						nearPed->m_nPedState = PED_UNKNOWN;
+						nearPed->SetPedState(PED_UNKNOWN);
 					}
 				}
 			}
@@ -431,7 +427,8 @@ CPed::RunToReportCrime(eCrimeType crimeToReport)
 {
 #ifdef PEDS_REPORT_CRIMES_ON_PHONE
 	if (bRunningToPhone) {
-		if (!isPhoneAvailable(m_phoneId)) {
+		if (!isPhoneAvailable(m_phoneId) && crimeReporters[m_phoneId] != this) {
+			crimeReporters[m_phoneId] = nil;
 			m_phoneId = -1;
 			bIsRunning = false;
 			ClearSeek(); // clears bRunningToPhone
@@ -456,6 +453,8 @@ CPed::RunToReportCrime(eCrimeType crimeToReport)
 #ifndef PEDS_REPORT_CRIMES_ON_PHONE
 	if (phone->m_nState != PHONE_STATE_FREE)
 		return false;
+#else
+	crimeReporters[phoneId] = this;
 #endif
 
 	bRunningToPhone = true;

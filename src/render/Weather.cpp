@@ -114,7 +114,7 @@ void CWeather::Init(void)
 	ForcedWeatherType = WEATHER_RANDOM;
 	SoundHandle = DMAudio.CreateEntity(AUDIOTYPE_WEATHER, (void*)1);
 	if (SoundHandle >= 0)
-		DMAudio.SetEntityStatus(SoundHandle, 1);
+		DMAudio.SetEntityStatus(SoundHandle, true);
 }
 
 void CWeather::Update(void)
@@ -202,6 +202,7 @@ void CWeather::Update(void)
 	}
 
 	// Rain
+#ifndef VC_RAIN_NERF
 	float fNewRain;
 	if (NewWeatherType == WEATHER_RAINY) {
 		// if raining for >1 hour, values: 0, 0.33, 0.66, 0.99, switching every ~16.5s
@@ -223,6 +224,25 @@ void CWeather::Update(void)
 		else
 			Rain = Max(fNewRain, Rain - RAIN_CHANGE_SPEED * CTimer::GetTimeStep());
 	}
+#else
+	float fNewRain;
+	if (NewWeatherType == WEATHER_RAINY) {
+		// if raining for >1 hour, values: 0, 0.33, switching every ~16.5s
+		fNewRain = (((uint16)CTimer::GetTimeInMilliseconds() >> 14) & 1) * 0.33f;
+		if (OldWeatherType != WEATHER_RAINY) {
+			if (InterpolationValue < 0.4f)
+				// if rain has just started (<24 minutes), always 0.5
+				fNewRain = 0.5f;
+			else
+				// if rain is ongoing for >24 minutes, values: 0.25, 0.5, switching every ~16.5s
+				fNewRain = 0.25f + (((uint16)CTimer::GetTimeInMilliseconds() >> 14) & 1) * 0.25f;
+		}
+		fNewRain = Max(fNewRain, 0.5f);
+	}
+	else
+		fNewRain = 0.0f;
+	Rain = fNewRain;
+#endif
 
 	// Clouds
 	if (OldWeatherType != WEATHER_SUNNY)
@@ -359,7 +379,7 @@ void CWeather::AddRain()
 		RwCameraGetFarClipPlane(TheCamera.m_pRwCamera) / (RwCameraGetFarClipPlane(TheCamera.m_pRwCamera) * *(CVector2D*)RwCameraGetViewWindow(TheCamera.m_pRwCamera)).Magnitude();
 	splash_points[3] = 4.0f * CVector(RwCameraGetViewWindow(TheCamera.m_pRwCamera)->x, RwCameraGetViewWindow(TheCamera.m_pRwCamera)->y, 1.0f) *
 		RwCameraGetFarClipPlane(TheCamera.m_pRwCamera) / (RwCameraGetFarClipPlane(TheCamera.m_pRwCamera) * *(CVector2D*)RwCameraGetViewWindow(TheCamera.m_pRwCamera)).Magnitude();
-	RwV3dTransformPoints((RwV3d*)splash_points, (RwV3d*)splash_points, 4, RwFrameGetMatrix(RwCameraGetFrame(TheCamera.m_pRwCamera)));
+	RwV3dTransformPoints(splash_points, splash_points, 4, RwFrameGetMatrix(RwCameraGetFrame(TheCamera.m_pRwCamera)));
 	CVector fp = (splash_points[0] + splash_points[1] + splash_points[2] + splash_points[3]) / 4;
 	for (int i = 0; i < num_splash_attempts; i++) {
 		CColPoint point;

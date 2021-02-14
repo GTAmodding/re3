@@ -7,9 +7,6 @@
 #include "RwHelper.h"
 #include "MemoryMgr.h"
 
-#define CDDEBUG(f, ...)   debug ("%s: " f "\n", "cdvd_stream", ## __VA_ARGS__)
-#define CDTRACE(f, ...)   printf("%s: " f "\n", "cdvd_stream", ## __VA_ARGS__)
-
 struct CdReadInfo
 {
 	uint32 nSectorOffset;
@@ -60,7 +57,7 @@ CdStreamInitThread(void)
 			
 			if ( gpReadInfo[i].hSemaphore == nil )
 			{
-				CDTRACE("failed to create sync semaphore");
+				printf("%s: failed to create sync semaphore\n", "cdvd_stream");
 				ASSERT(0);
 				return;
 			}
@@ -73,11 +70,15 @@ CdStreamInitThread(void)
 	gChannelRequestQ.size = gNumChannels + 1;
 	ASSERT(gChannelRequestQ.items != nil );
 	
+#ifdef FIX_BUGS
+	gCdStreamSema = CreateSemaphore(nil, 0, 5, nil);
+#else
 	gCdStreamSema = CreateSemaphore(nil, 0, 5, "CdStream");
+#endif
 	
 	if ( gCdStreamSema == nil )
 	{
-		CDTRACE("failed to create stream semaphore");
+		printf("%s: failed to create stream semaphore\n", "cdvd_stream");
 		ASSERT(0);
 		return;
 	}
@@ -86,7 +87,7 @@ CdStreamInitThread(void)
 	
 	if ( _gCdStreamThread == nil )
 	{
-		CDTRACE("failed to create streaming thread");
+		printf("%s: failed to create streaming thread\n", "cdvd_stream");
 		ASSERT(0);
 		return;
 	}
@@ -134,7 +135,7 @@ CdStreamInit(int32 numChannels)
 	gpReadInfo = (CdReadInfo *)LocalAlloc(LMEM_ZEROINIT, sizeof(CdReadInfo) * numChannels);
 	ASSERT( gpReadInfo != nil );
 	
-	CDDEBUG("read info %p", gpReadInfo);
+	debug("%s: read info %p\n", "cdvd_stream", gpReadInfo);
 	
 	CdStreamAddImage("MODELS\\GTA3.IMG");
 	

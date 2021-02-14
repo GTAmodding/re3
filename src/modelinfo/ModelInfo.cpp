@@ -26,15 +26,15 @@ CModelInfo::Initialise(void)
 
 	for(i = 0; i < MODELINFOSIZE; i++)
 		ms_modelInfoPtrs[i] = nil;
-	ms_2dEffectStore.clear();
-	ms_mloInstanceStore.clear();
-	ms_xtraCompsModelStore.clear();
-	ms_simpleModelStore.clear();
-	ms_timeModelStore.clear();
-	ms_mloModelStore.clear();
-	ms_clumpModelStore.clear();
-	ms_pedModelStore.clear();
-	ms_vehicleModelStore.clear();
+	ms_2dEffectStore.Clear();
+	ms_mloInstanceStore.Clear();
+	ms_xtraCompsModelStore.Clear();
+	ms_simpleModelStore.Clear();
+	ms_timeModelStore.Clear();
+	ms_mloModelStore.Clear();
+	ms_clumpModelStore.Clear();
+	ms_pedModelStore.Clear();
+	ms_vehicleModelStore.Clear();
 
 	m = AddSimpleModel(MI_CAR_DOOR);
 	m->SetColModel(&CTempColModels::ms_colModelDoor1);
@@ -108,22 +108,22 @@ CModelInfo::ShutDown(void)
 	for(i = 0; i < ms_2dEffectStore.allocPtr; i++)
 		ms_2dEffectStore.store[i].Shutdown();
 
-	ms_2dEffectStore.clear();
-	ms_simpleModelStore.clear();
-	ms_mloInstanceStore.clear();
-	ms_mloModelStore.clear();
-	ms_xtraCompsModelStore.clear();
-	ms_timeModelStore.clear();
-	ms_pedModelStore.clear();
-	ms_clumpModelStore.clear();
-	ms_vehicleModelStore.clear();
+	ms_2dEffectStore.Clear();
+	ms_simpleModelStore.Clear();
+	ms_mloInstanceStore.Clear();
+	ms_mloModelStore.Clear();
+	ms_xtraCompsModelStore.Clear();
+	ms_timeModelStore.Clear();
+	ms_pedModelStore.Clear();
+	ms_clumpModelStore.Clear();
+	ms_vehicleModelStore.Clear();
 }
 
 CSimpleModelInfo*
 CModelInfo::AddSimpleModel(int id)
 {
 	CSimpleModelInfo *modelinfo;
-	modelinfo = CModelInfo::ms_simpleModelStore.alloc();
+	modelinfo = CModelInfo::ms_simpleModelStore.Alloc();
 	CModelInfo::ms_modelInfoPtrs[id] = modelinfo;
 	modelinfo->Init();
 	return modelinfo;
@@ -133,7 +133,7 @@ CMloModelInfo *
 CModelInfo::AddMloModel(int id)
 {
 	CMloModelInfo *modelinfo;
-	modelinfo = CModelInfo::ms_mloModelStore.alloc();
+	modelinfo = CModelInfo::ms_mloModelStore.Alloc();
 	CModelInfo::ms_modelInfoPtrs[id] = modelinfo;
 	modelinfo->m_clump = nil;
 	modelinfo->firstInstance = 0;
@@ -145,7 +145,7 @@ CTimeModelInfo*
 CModelInfo::AddTimeModel(int id)
 {
 	CTimeModelInfo *modelinfo;
-	modelinfo = CModelInfo::ms_timeModelStore.alloc();
+	modelinfo = CModelInfo::ms_timeModelStore.Alloc();
 	CModelInfo::ms_modelInfoPtrs[id] = modelinfo;
 	modelinfo->Init();
 	return modelinfo;
@@ -155,7 +155,7 @@ CClumpModelInfo*
 CModelInfo::AddClumpModel(int id)
 {
 	CClumpModelInfo *modelinfo;
-	modelinfo = CModelInfo::ms_clumpModelStore.alloc();
+	modelinfo = CModelInfo::ms_clumpModelStore.Alloc();
 	CModelInfo::ms_modelInfoPtrs[id] = modelinfo;
 	modelinfo->m_clump = nil;
 	return modelinfo;
@@ -165,7 +165,7 @@ CPedModelInfo*
 CModelInfo::AddPedModel(int id)
 {
 	CPedModelInfo *modelinfo;
-	modelinfo = CModelInfo::ms_pedModelStore.alloc();
+	modelinfo = CModelInfo::ms_pedModelStore.Alloc();
 	CModelInfo::ms_modelInfoPtrs[id] = modelinfo;
 	modelinfo->m_clump = nil;
 	return modelinfo;
@@ -175,7 +175,7 @@ CVehicleModelInfo*
 CModelInfo::AddVehicleModel(int id)
 {
 	CVehicleModelInfo *modelinfo;
-	modelinfo = CModelInfo::ms_vehicleModelStore.alloc();
+	modelinfo = CModelInfo::ms_vehicleModelStore.Alloc();
 	CModelInfo::ms_modelInfoPtrs[id] = modelinfo;
 	modelinfo->m_clump = nil;
 	modelinfo->m_vehicleType = -1;
@@ -192,7 +192,7 @@ CModelInfo::GetModelInfo(const char *name, int *id)
 	CBaseModelInfo *modelinfo;
 	for(int i = 0; i < MODELINFOSIZE; i++){
 		modelinfo = CModelInfo::ms_modelInfoPtrs[i];
-	 	if(modelinfo && !CGeneral::faststricmp(modelinfo->GetName(), name)){
+	 	if(modelinfo && !CGeneral::faststricmp(modelinfo->GetModelName(), name)){
 			if(id)
 				*id = i;
 			return modelinfo;
@@ -245,7 +245,7 @@ CModelInfo::ConstructMloClumps()
 void
 CModelInfo::ReInit2dEffects()
 {
-	ms_2dEffectStore.clear();
+	ms_2dEffectStore.Clear();
 
 	for (int i = 0; i < MODELINFOSIZE; i++) {
 		if (ms_modelInfoPtrs[i])

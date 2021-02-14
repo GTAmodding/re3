@@ -16,9 +16,10 @@ CAnimBlendSequence::CAnimBlendSequence(void)
 
 CAnimBlendSequence::~CAnimBlendSequence(void)
 {
-	assert(keyFramesCompressed == nil);
 	if(keyFrames)
 		RwFree(keyFrames);
+	if(keyFramesCompressed)
+		RwFree(keyFramesCompressed);
 }
 
 void

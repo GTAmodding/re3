@@ -1,4 +1,11 @@
-﻿[1000]
+﻿{
+    New strings are at the bottom of file.
+    Do not change the order of strings.
+    You can fix the typos of existing translation but please refrain from
+    unnecessary edits like rephasing because you think it suits better for your taste.
+}
+
+[1000]
 ТЫ ПОКОЙНИК
 
 [1001]
@@ -2029,11 +2036,11 @@ Double Clef FM
 [DODO_FT]
 Вы были в воздухе ~1~ секунд!
 
-[DRIVE_A]
-Садясь в машину, возьми в руки Узи. Посмотри вправо или влево и нажми ~h~~k~~PED_FIREWEAPON~~w~ для выстрела.
+[DRIVE_A] { re3 change }
+Садясь в машину, возьми в руки Узи. Посмотри вправо или влево и нажми ~h~~k~~VEHICLE_FIREWEAPON~~w~ для выстрела.
 
-[DRIVE_B]
-Садясь в машину, возьми в руки Узи. Посмотри вправо или влево и нажми ~h~~k~~PED_FIREWEAPON~~w~ для выстрела.
+[DRIVE_B] { re3 change }
+Садясь в машину, возьми в руки Узи. Посмотри вправо или влево и нажми ~h~~k~~VEHICLE_FIREWEAPON~~w~ для выстрела.
 
 [DSPLAY]
 Экран
@@ -2425,29 +2432,11 @@ FLASHBACK 95.6
 [FEC_CAW]
 Оружие в машине
 
-[FEC_CCF]
-Конфигурация:
-
 [FEC_CCM]
 Поставить камеру сзади игрока.
 
-[FEC_CDP]
-Показ контроллера:
-
 [FEC_CEN]
 Центровка камеры
-
-[FEC_CF1]
-Setup1
-
-[FEC_CF2]
-Setup2
-
-[FEC_CF3]
-Setup3
-
-[FEC_CF4]
-Setup4
 
 [FEC_CLE]
 Прокрутка оружия влево
@@ -2568,9 +2557,6 @@ HOME
 
 [FEC_IBT]
 -
-
-[FEC_INC]
-В машине
 
 [FEC_IRT]
 INS
@@ -2743,8 +2729,6 @@ NUMLOCK
 [FEC_OMS]
 Для действия можно задать лишь одну кнопку мыши
 
-[FEC_ONF]
-Пешком
 
 [FEC_ORR]
 или
@@ -2961,9 +2945,6 @@ Toggle Pad Game/Debug
 
 [FEC_VES]
 Управление машиной
-
-[FEC_VIB]
-Vibration:
 
 [FEC_WAR]
 Внимание!
@@ -3692,7 +3673,7 @@ No Memory Card (PS2) in MEMORY CARD slot 1.
 УДАЛЕНИЕ ИГРЫ
 
 [FET_DIS]
-НАСТРОЙКА ГРАФИКИ
+НАСТРОЙКА ДИСПЛЕЯ
 
 [FET_DSN]
 Обычная}одежда.bmp
@@ -3705,9 +3686,6 @@ No Memory Card (PS2) in MEMORY CARD slot 1.
 
 [FET_FIL]
 Фильтр
-
-[FET_GFX]
-НАСТРОЙКА ГРАФИКИ
 
 [FET_GT]
 ТИП ИГРЫ
@@ -4309,17 +4287,17 @@ FormatMemCard 1 (teststuff)
 [GA_5]
 Я уже поставил в бомбу в эту тачку.
 
-[GA_6]
-Припаркуй тачку на место, нажми ~h~~k~~PED_FIREWEAPON~~w~ и ДЕЛАЙ НОГИ!
+[GA_6] { re3 change }
+Припаркуй тачку на место, нажми ~h~~k~~VEHICLE_FIREWEAPON~~w~ и ДЕЛАЙ НОГИ!
 
-[GA_6B]
-Припаркуй тачку на место, нажми ~h~~k~~PED_FIREWEAPON~~w~ и ДЕЛАЙ НОГИ!
+[GA_6B] { re3 change }
+Припаркуй тачку на место, нажми ~h~~k~~VEHICLE_FIREWEAPON~~w~ и ДЕЛАЙ НОГИ!
 
-[GA_7]
-Включи бомбу, нажав на ~h~~k~~PED_FIREWEAPON~~w~. Бомба взорвется как только заведется мотор.
+[GA_7] { re3 change }
+Включи бомбу, нажав на ~h~~k~~VEHICLE_FIREWEAPON~~w~. Бомба взорвется как только заведется мотор.
 
-[GA_7B]
-Включи бомбу, нажав на ~h~~k~~PED_FIREWEAPON~~w~. Бомба взорвется как только заведется мотор.
+[GA_7B] { re3 change }
+Включи бомбу, нажав на ~h~~k~~VEHICLE_FIREWEAPON~~w~. Бомба взорвется как только заведется мотор.
 
 [GA_8]
 Взорви бомбу с помощью детонатора.
@@ -4666,11 +4644,11 @@ Pull the ~h~right analog stick~w~ back to ~h~brake~w~, or to ~h~reverse~w~ if th
 [HM1_H]
 Сделай так, чтобы этих Девяток здесь не было!
 
-[HM2_1]
-Используй радоуправляемые машинки, чтобы подорвать броневики. Взрыв бомбы - ~h~~k~~PED_FIREWEAPON~~w~.
+[HM2_1] { re3 change }
+Используй радоуправляемые машинки, чтобы подорвать броневики. Взрыв бомбы - ~h~~k~~VEHICLE_FIREWEAPON~~w~.
 
-[HM2_1A]
-Используй радоуправляемые машинки, чтобы подорвать броневики. Взрыв бомбы - ~h~~k~~PED_FIREWEAPON~~w~.
+[HM2_1A] { re3 change }
+Используй радоуправляемые машинки, чтобы подорвать броневики. Взрыв бомбы - ~h~~k~~VEHICLE_FIREWEAPON~~w~.
 
 [HM2_2]
 ~r~Ты так и не смог подорвать все броневики!
@@ -5272,11 +5250,11 @@ Italian
 [KM1_7]
 ~g~Проезд только для полицейских!
 
-[KM1_8A]
-Чтобы ~h~подорвать бомбу~w~, нажми ~h~~k~~PED_FIREWEAPON~~w~, но не забудь отойти подальше от машины.
+[KM1_8A] { re3 change }
+Чтобы ~h~подорвать бомбу~w~, нажми ~h~~k~~VEHICLE_FIREWEAPON~~w~, но не забудь отойти подальше от машины.
 
-[KM1_8D]
-Чтобы ~h~подорвать бомбу~w~, нажми ~h~~k~~PED_FIREWEAPON~~w~, но не забудь отойти подальше от машины.
+[KM1_8D] { re3 change }
+Чтобы ~h~подорвать бомбу~w~, нажми ~h~~k~~VEHICLE_FIREWEAPON~~w~, но не забудь отойти подальше от машины.
 
 [KM1_9]
 ~r~Установленной в машине бомбой ты должен был взорвать стену!
@@ -6520,11 +6498,11 @@ Parse Heap
 [PAUSED]
 ИГРА ОСТАНОВЛЕНА
 
-[PBOAT_1]
-Чтобы выстрелить из орудия катера нажми ~h~~k~~PED_FIREWEAPON~~w~.
+[PBOAT_1] { re3 change }
+Чтобы выстрелить из орудия катера нажми ~h~~k~~VEHICLE_FIREWEAPON~~w~.
 
-[PBOAT_2]
-Чтобы выстрелить из орудия катера нажми ~h~~k~~PED_FIREWEAPON~~w~.
+[PBOAT_2] { re3 change }
+Чтобы выстрелить из орудия катера нажми ~h~~k~~VEHICLE_FIREWEAPON~~w~.
 
 [PCLOAD]
 Loading File Data
@@ -6700,11 +6678,11 @@ Quit Options
 [RCBANDT]
 Багги Бандит
 
-[RCHELP]
-Чтобы подорвать машинку, нажми ~k~~PED_FIREWEAPON~, или врежься в колесо жертвы.
+[RCHELP] { re3 change }
+Чтобы подорвать машинку, нажми ~k~~VEHICLE_FIREWEAPON~, или врежься в колесо жертвы.
 
-[RCHELPA]
-Чтобы подорвать машинку, нажми ~k~~PED_FIREWEAPON~, или врежься в колесо жертвы.
+[RCHELPA] { re3 change }
+Чтобы подорвать машинку, нажми ~k~~VEHICLE_FIREWEAPON~, или врежься в колесо жертвы.
 
 [RC_1]
 У тебя 2 минуты, чтобы подорвать как можно больше машин Дьяволов!
@@ -7144,11 +7122,11 @@ Speeder
 [SPRAY1]
 В мастерской твою тачку  ~h~отремонтируют~w~ и ~h~перекрасят~w~. Копы тебя больше ~h~не узнают~w~. Стоимость - ~h~$1000~w~. Первый раз это бесплатно.
 
-[SPRAY_1]
-Чтобы включить брандспойт, нажми на ~h~~k~~PED_FIREWEAPON~~w~.
+[SPRAY_1] { re3 change }
+Чтобы включить брандспойт, нажми на ~h~~k~~VEHICLE_FIREWEAPON~~w~.
 
-[SPRAY_4]
-Чтобы включить брандспойт, нажми на ~h~~k~~PED_FIREWEAPON~~w~.
+[SPRAY_4] { re3 change }
+Чтобы включить брандспойт, нажми на ~h~~k~~VEHICLE_FIREWEAPON~~w~.
 
 [STADIUM]
 Аспатрия
@@ -7957,6 +7935,9 @@ PS: УМРИ, ПАРШИВЫЙ ПЕС, УМРИ!
 РУССКИЙ
 
 { new display menus }
+[FET_GFX]
+НАСТРОЙКА ГРАФИКИ
+
 [FED_MIP]
 МИП-МАППИНГ
 
@@ -7971,6 +7952,155 @@ PS: УМРИ, ПАРШИВЫЙ ПЕС, УМРИ!
 
 [FED_TRL]
 ТРИЛИНЕЙНАЯ
+
+[FED_WND]
+ОКОННЫЙ
+
+[FED_FLS]
+ПОЛНОЭКРАННЫЙ
+
+[FEM_CSB]
+CUTSCENE BORDERS
+
+[FEM_SCF]
+ФОРМАТ ОКНА
+
+[FEM_ISL]
+MAP MEMORY USAGE
+
+[FEM_LOW]
+LOW
+
+[FEM_MED]
+MEDIUM
+
+[FEM_HIG]
+HIGH
+
+[FEM_2PR]
+PS2 ALPHA TEST
+
+[FEC_FRC]
+СВОБОДНАЯ КАМЕРА
+
+{ Linux joy detection }
+[FEC_JOD]
+DETECT JOYSTICK
+
+[FEC_JPR]
+Press any key on the joystick of your choice that you want to use on the game, and it will be selected.
+
+[FEC_JDE]
+Detected joystick
+
+{ mission restart }
+[FET_RMS]
+ПОВТОРИТЬ ЗАДАНИЕ
+
+[FESZ_RM]
+НАЧАТЬ ЗАНОВО?
+
+{ more graphics }
+[FED_VPL]
+VEHICLE PIPELINE
+
+[FED_PRM]
+PED RIM LIGHT
+
+[FED_RGL]
+ROAD GLOSS
+
+[FED_CLF]
+COLOUR FILTER
+
+[FED_WLM]
+WORLD LIGHTMAPS
+
+[FED_MBL]
+MOTION BLUR
+
+[FEM_SIM]
+SIMPLE
+
+[FEM_NRM]
+NORMAL
+
+[FEM_MOB]
+MOBILE
+
+[FED_MFX]
+MATFX
+
+[FED_NEO]
+NEO
+
+[FEM_PS2]
+PS2
+
+[FEM_XBX]
+XBOX
+
+[FEM_AUT] { aspect ratio related }
+АВТО
+
+{ controls }
+[FEC_IVP]
+ИНВЕРТИРОВАТЬ ВЕРТИКАЛЬНУЮ ОСЬ
+
+{ map }
+[FEM_TWP]
+Поставить метку
+
+[FEA_FMN]
+РАДИО ВЫКЛ
+
+[FEC_DS2]
+DUALSHOCK 2
+
+[FEC_DS3]
+DUALSHOCK 3
+
+[FEC_DS4]
+DUALSHOCK 4
+
+[FEC_360]
+КОНТРОЛЛЕР XBOX 360
+
+[FEC_ONE]
+КОНТРОЛЛЕР XBOX ONE
+
+[FEC_TYP]
+ГЕЙМПАД
+
+[FEC_CCF]
+КОНФИГУРАЦИЯ
+
+[FEC_CF1]
+СХЕМА 1
+
+[FEC_CF2]
+СХЕМА 2
+
+[FEC_CF3]
+СХЕМА 3
+
+[FEC_CF4]
+СХЕМА 4
+
+[FEC_CDP]
+ТИП УПРАВЛЕНИЯ
+
+[FEC_ONF]
+ПЕШКОМ
+
+[FEC_INC]
+В МАШИНЕ
+
+[FEC_VIB]
+ВИБРАЦИЯ
+
+[FET_AGS]
+НАСТРОЙКИ ГЕЙМПАДА
 
 { end of file }
 

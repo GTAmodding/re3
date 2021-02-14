@@ -3,9 +3,22 @@
 #include "AnimationId.h"
 #include "WeaponType.h"
 
+enum
+{
+	WEAPONFLAG_USE_GRAVITY = 1,
+	WEAPONFLAG_SLOWS_DOWN = 1 << 1,
+	WEAPONFLAG_DISSIPATES = 1 << 2,
+	WEAPONFLAG_RAND_SPEED = 1 << 3,
+	WEAPONFLAG_EXPANDS = 1 << 4,
+	WEAPONFLAG_EXPLODES = 1 << 5,
+	WEAPONFLAG_CANAIM = 1 << 6,
+	WEAPONFLAG_CANAIM_WITHARM = 1 << 7,
+	WEAPONFLAG_1ST_PERSON = 1 << 8,
+	WEAPONFLAG_HEAVY = 1 << 9,
+	WEAPONFLAG_THROW = 1 << 10,
+};
+
 class CWeaponInfo {
-//	static CWeaponInfo(&ms_apWeaponInfos)[14];
-	static CWeaponInfo ms_apWeaponInfos[WEAPONTYPE_LAST_WEAPONTYPE];
 public:
 	eWeaponFire m_eWeaponFire;
 	float m_fRange;
@@ -25,18 +38,7 @@ public:
 	float m_fAnimFrameFire;
 	float m_fAnim2FrameFire;
 	int32 m_nModelId;
-	// flags
-	uint8 m_bUseGravity : 1;
-	uint8 m_bSlowsDown : 1;
-	uint8 m_bDissipates : 1;
-	uint8 m_bRandSpeed : 1;
-	uint8 m_bExpands : 1;
-	uint8 m_bExplodes : 1;
-	uint8 m_bCanAim : 1;
-	uint8 m_bCanAimWithArm : 1;
-	uint8 m_b1stPerson : 1;
-	uint8 m_bHeavy : 1;
-	uint8 m_bThrow : 1;
+	uint32 m_Flags;
 
 	static void Initialise(void);
 	static void LoadWeaponData(void);
@@ -44,6 +46,7 @@ public:
 	static eWeaponFire FindWeaponFireType(char *name);
 	static eWeaponType FindWeaponType(char *name);
 	static void Shutdown(void);
+	bool IsFlagSet(uint32 flag) const { return (m_Flags & flag) != 0; }
 };
 
 VALIDATE_SIZE(CWeaponInfo, 0x54);

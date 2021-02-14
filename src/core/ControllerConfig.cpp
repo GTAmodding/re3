@@ -1,11 +1,7 @@
-#if defined RW_D3D9 || defined RWLIBS
-#define DIRECTINPUT_VERSION 0x0800
-#include <dinput.h>
-#endif
-
+#define WITHDINPUT
 #include "common.h"
 #include "platform.h"
-#include "crossplatform.h" // for Windows version
+#include "crossplatform.h"
 #include "ControllerConfig.h"
 #include "Pad.h"
 #include "FileMgr.h"
@@ -35,6 +31,9 @@ CControllerConfigManager::CControllerConfigManager()
 
 void CControllerConfigManager::MakeControllerActionsBlank()
 {
+#ifdef LOAD_INI_SETTINGS
+	ms_padButtonsInited = 0;
+#endif
 	for (int32 i = 0; i < MAX_CONTROLLERTYPES; i++)
 	{
 		for (int32 j = 0; j < MAX_CONTROLLERACTIONS; j++)
@@ -132,6 +131,10 @@ void CControllerConfigManager::LoadSettings(int32 file)
 {
 	bool bValid = true;
 
+#ifdef BIND_VEHICLE_FIREWEAPON
+	bool skipVehicleFireWeapon = false;
+#endif
+
 	if (file)
 	{
 		char buff[29];
@@ -139,18 +142,55 @@ void CControllerConfigManager::LoadSettings(int32 file)
 
 		if (!strncmp(buff, TopLineEmptyFile, sizeof(TopLineEmptyFile)-1))
 			bValid = false;
-		else
+		else {
 			CFileMgr::Seek(file, 0, 0);
+			
+#ifdef BIND_VEHICLE_FIREWEAPON
+			// HACK!
+			// All of this is hacky as fuck.
+			// We are checking the file size to read the .set file correctly.
+			// But because .set file is opened in text mode we have to read
+			// the WHOLE file to get the size we should be working with.
+			// Joy, ain't it?
+			char tempBuf[0x1000];
+			size_t fileSize = 0, blockSize;
+			do
+			{
+				blockSize = CFileMgr::Read(file, tempBuf, sizeof(tempBuf));
+				fileSize += blockSize;
+			} while (blockSize == sizeof(tempBuf));
+
+			CFileMgr::Seek(file, 0, 0);
+
+			if (fileSize == 0x671)
+				skipVehicleFireWeapon = true;
+#endif
+		}
 	}
 
 	if (bValid)
 	{
 		ControlsManager.MakeControllerActionsBlank();
 
+#ifdef BIND_VEHICLE_FIREWEAPON
+		// Set the default settings of VEHICLE_FIREWEAPON
+		if (skipVehicleFireWeapon) {
+			SetControllerKeyAssociatedWithAction(VEHICLE_FIREWEAPON, rsPADINS, KEYBOARD);
+			SetControllerKeyAssociatedWithAction(VEHICLE_FIREWEAPON, rsLCTRL, OPTIONAL_EXTRA);
+			if (m_bMouseAssociated)
+				SetMouseButtonAssociatedWithAction(VEHICLE_FIREWEAPON, 1);
+		}
+#endif
+
 		for (int32 i = 0; i < MAX_CONTROLLERTYPES; i++)
 		{
 			for (int32 j = 0; j < MAX_CONTROLLERACTIONS; j++)
 			{
+#ifdef BIND_VEHICLE_FIREWEAPON
+				// Skip file read
+				if (skipVehicleFireWeapon && j == VEHICLE_FIREWEAPON)
+					continue;
+#endif
 				CFileMgr::Read(file, (char *)&ControlsManager.m_aSettings[j][i], sizeof(tControllerConfigBind));
 			}
 		}
@@ -308,13 +348,38 @@ void CControllerConfigManager::InitDefaultControlConfigMouse(CMouseControllerSta
 	}
 }
 
+#ifdef LOAD_INI_SETTINGS
+uint32 CControllerConfigManager::ms_padButtonsInited = 0;
+#endif
+
 void CControllerConfigManager::InitDefaultControlConfigJoyPad(uint32 buttons)
 {
+#ifdef XINPUT
+	// No manual bindings for you, honey.
+	return;
+#endif
+
 	m_bFirstCapture = true;
 
 	uint32 btn = buttons;
 	if (buttons > 16)
 		btn = 16;
+
+#ifdef LOAD_INI_SETTINGS
+	uint32 buttonMin = ms_padButtonsInited;
+	if (buttonMin >= btn)
+		return;
+
+	ms_padButtonsInited = btn;
+
+	#define IF_BTN_IN_RANGE(n) \
+		case n: \
+		if (n <= buttonMin) \
+			return;
+#else
+	#define IF_BTN_IN_RANGE(n) \
+		case n:
+#endif
 
 	// Now we use SDL Game Controller DB
 #if defined RW_D3D9 || defined RWLIBS
@@ -328,49 +393,49 @@ void CControllerConfigManager::InitDefaultControlConfigJoyPad(uint32 buttons)
 
 		switch (btn)
 		{
-		case 16:
+		IF_BTN_IN_RANGE(16)
 			SetControllerKeyAssociatedWithAction(GO_LEFT,                           16, JOYSTICK);
-		case 15:											                        
+		IF_BTN_IN_RANGE(15)											                        
 			SetControllerKeyAssociatedWithAction(GO_BACK,                           15, JOYSTICK);
-		case 14:											                        
+		IF_BTN_IN_RANGE(14)											                        
 			SetControllerKeyAssociatedWithAction(GO_RIGHT,                          14, JOYSTICK);
-		case 13:											                        
+		IF_BTN_IN_RANGE(13)											                        
 			SetControllerKeyAssociatedWithAction(GO_FORWARD,                        13, JOYSTICK);
-		case 12:													                
-		case 11:													                
+		IF_BTN_IN_RANGE(12)													                
+		IF_BTN_IN_RANGE(11)													                
 			SetControllerKeyAssociatedWithAction(PED_LOOKBEHIND,                    11, JOYSTICK);
 			SetControllerKeyAssociatedWithAction(TOGGLE_SUBMISSIONS,                11, JOYSTICK);
-		case 10:
+		IF_BTN_IN_RANGE(10)
 			SetControllerKeyAssociatedWithAction(VEHICLE_HORN,                      10, JOYSTICK);
-		case 9:
+		IF_BTN_IN_RANGE(9)
 			SetControllerKeyAssociatedWithAction(CAMERA_CHANGE_VIEW_ALL_SITUATIONS,  9, JOYSTICK);
-		case 8:
+		IF_BTN_IN_RANGE(8)
 			SetControllerKeyAssociatedWithAction(VEHICLE_HANDBRAKE,                  8, JOYSTICK);
 			SetControllerKeyAssociatedWithAction(PED_LOCK_TARGET,                    8, JOYSTICK);
-		case 7:
+		IF_BTN_IN_RANGE(7)
 			SetControllerKeyAssociatedWithAction(PED_CENTER_CAMERA_BEHIND_PLAYER,    7, JOYSTICK);
 			SetControllerKeyAssociatedWithAction(VEHICLE_CHANGE_RADIO_STATION,       7, JOYSTICK);
-		case 6:
+		IF_BTN_IN_RANGE(6)
 			SetControllerKeyAssociatedWithAction(PED_CYCLE_WEAPON_RIGHT,             6, JOYSTICK);
 			SetControllerKeyAssociatedWithAction(VEHICLE_LOOKRIGHT,                  6, JOYSTICK);
-		case 5:
+		IF_BTN_IN_RANGE(5)
 			SetControllerKeyAssociatedWithAction(PED_CYCLE_WEAPON_LEFT,              5, JOYSTICK);
 			SetControllerKeyAssociatedWithAction(VEHICLE_LOOKLEFT,                   5, JOYSTICK);
 		/*******************************************************************************************/
-		case 4:
+		IF_BTN_IN_RANGE(4)
 			SetControllerKeyAssociatedWithAction(VEHICLE_BRAKE,                      4, JOYSTICK);
 			SetControllerKeyAssociatedWithAction(PED_JUMPING,                        4, JOYSTICK);
 			SetControllerKeyAssociatedWithAction(PED_SNIPER_ZOOM_IN,                 4, JOYSTICK);
-		case 3:
+		IF_BTN_IN_RANGE(3)
 			SetControllerKeyAssociatedWithAction(VEHICLE_ACCELERATE,                 3, JOYSTICK);
 			SetControllerKeyAssociatedWithAction(PED_SPRINT,                         3, JOYSTICK);
 			SetControllerKeyAssociatedWithAction(PED_SNIPER_ZOOM_OUT,                3, JOYSTICK);
-		case 2:
+		IF_BTN_IN_RANGE(2)
 			SetControllerKeyAssociatedWithAction(PED_FIREWEAPON,                     2, JOYSTICK);
 #ifdef BIND_VEHICLE_FIREWEAPON	
 			SetControllerKeyAssociatedWithAction(VEHICLE_FIREWEAPON,                 2, JOYSTICK);
 #endif
-		case 1:
+		IF_BTN_IN_RANGE(1)
 			SetControllerKeyAssociatedWithAction(VEHICLE_ENTER_EXIT,                 1, JOYSTICK);
 		/*******************************************************************************************/
 		}
@@ -379,46 +444,46 @@ void CControllerConfigManager::InitDefaultControlConfigJoyPad(uint32 buttons)
 	{
 		switch (btn)
 		{
-		case 16:
+		IF_BTN_IN_RANGE(16)
 			SetControllerKeyAssociatedWithAction(GO_LEFT,                           16, JOYSTICK);
-		case 15:
+		IF_BTN_IN_RANGE(15)
 			SetControllerKeyAssociatedWithAction(GO_BACK,                           15, JOYSTICK);
-		case 14:
+		IF_BTN_IN_RANGE(14)
 			SetControllerKeyAssociatedWithAction(GO_RIGHT,                          14, JOYSTICK);
-		case 13:
+		IF_BTN_IN_RANGE(13)
 			SetControllerKeyAssociatedWithAction(GO_FORWARD,                        13, JOYSTICK);
-		case 12:
-		case 11:
+		IF_BTN_IN_RANGE(12)
+		IF_BTN_IN_RANGE(11)
 			SetControllerKeyAssociatedWithAction(PED_LOOKBEHIND,                    11, JOYSTICK);
 			SetControllerKeyAssociatedWithAction(TOGGLE_SUBMISSIONS,                11, JOYSTICK);
-		case 10:
+		IF_BTN_IN_RANGE(10)
 			SetControllerKeyAssociatedWithAction(VEHICLE_HORN,                      10, JOYSTICK);
-		case 9:
+		IF_BTN_IN_RANGE(9)
 			SetControllerKeyAssociatedWithAction(CAMERA_CHANGE_VIEW_ALL_SITUATIONS,  9, JOYSTICK);
-		case 8:
+		IF_BTN_IN_RANGE(8)
 			SetControllerKeyAssociatedWithAction(VEHICLE_HANDBRAKE,                  8, JOYSTICK);
 			SetControllerKeyAssociatedWithAction(PED_LOCK_TARGET,                    8, JOYSTICK);
-		case 7:
+		IF_BTN_IN_RANGE(7)
 			SetControllerKeyAssociatedWithAction(PED_CENTER_CAMERA_BEHIND_PLAYER,    7, JOYSTICK);
 			SetControllerKeyAssociatedWithAction(VEHICLE_CHANGE_RADIO_STATION,       7, JOYSTICK);
-		case 6:
+		IF_BTN_IN_RANGE(6)
 			SetControllerKeyAssociatedWithAction(PED_CYCLE_WEAPON_RIGHT,             6, JOYSTICK);
 			SetControllerKeyAssociatedWithAction(VEHICLE_LOOKRIGHT,                  6, JOYSTICK);
-		case 5:
+		IF_BTN_IN_RANGE(5)
 			SetControllerKeyAssociatedWithAction(PED_CYCLE_WEAPON_LEFT,              5, JOYSTICK);
 			SetControllerKeyAssociatedWithAction(VEHICLE_LOOKLEFT,                   5, JOYSTICK);
 		/*******************************************************************************************/
-		case 4:
+		IF_BTN_IN_RANGE(4)
 			SetControllerKeyAssociatedWithAction(VEHICLE_ENTER_EXIT,                 4, JOYSTICK);
-		case 3:
+		IF_BTN_IN_RANGE(3)
 			SetControllerKeyAssociatedWithAction(VEHICLE_BRAKE,                      3, JOYSTICK);
 			SetControllerKeyAssociatedWithAction(PED_JUMPING,                        3, JOYSTICK);
 			SetControllerKeyAssociatedWithAction(PED_SNIPER_ZOOM_IN,                 3, JOYSTICK);
-		case 2:
+		IF_BTN_IN_RANGE(2)
 			SetControllerKeyAssociatedWithAction(VEHICLE_ACCELERATE,                 2, JOYSTICK);
 			SetControllerKeyAssociatedWithAction(PED_SPRINT,                         2, JOYSTICK);
 			SetControllerKeyAssociatedWithAction(PED_SNIPER_ZOOM_OUT,                2, JOYSTICK);
-		case 1:
+		IF_BTN_IN_RANGE(1)
 			SetControllerKeyAssociatedWithAction(PED_FIREWEAPON,                     1, JOYSTICK);
 #ifdef BIND_VEHICLE_FIREWEAPON
 			SetControllerKeyAssociatedWithAction(VEHICLE_FIREWEAPON,                 1, JOYSTICK);
@@ -1718,6 +1783,52 @@ void CControllerConfigManager::DeleteMatching1rstPersonControls(e_ControllerActi
 
 #undef CLEAR_ACTION_IF_NEEDED
 
+#ifdef RADIO_SCROLL_TO_PREV_STATION
+#define CHECK_ACTION(action) \
+if (key == GetControllerKeyAssociatedWithAction(action, type))\
+	return true;
+
+bool CControllerConfigManager::IsAnyVehicleActionAssignedToMouseKey(int32 key)
+{
+	const eControllerType type = MOUSE;
+	if (!GetIsKeyBlank(key, type))
+	{
+#ifdef BIND_VEHICLE_FIREWEAPON
+		CHECK_ACTION(VEHICLE_FIREWEAPON);
+#endif
+		CHECK_ACTION(VEHICLE_LOOKBEHIND);
+		CHECK_ACTION(VEHICLE_LOOKLEFT);
+		CHECK_ACTION(VEHICLE_LOOKRIGHT);
+		CHECK_ACTION(VEHICLE_LOOKBEHIND); // note: duplicate
+		CHECK_ACTION(VEHICLE_HORN);
+		CHECK_ACTION(VEHICLE_HANDBRAKE);
+		CHECK_ACTION(VEHICLE_ACCELERATE);
+		CHECK_ACTION(VEHICLE_BRAKE);
+		CHECK_ACTION(VEHICLE_CHANGE_RADIO_STATION);
+		CHECK_ACTION(TOGGLE_SUBMISSIONS);
+		CHECK_ACTION(VEHICLE_TURRETLEFT);
+		CHECK_ACTION(VEHICLE_TURRETRIGHT);
+		CHECK_ACTION(VEHICLE_TURRETUP);
+		CHECK_ACTION(VEHICLE_TURRETDOWN);
+		CHECK_ACTION(VEHICLE_ENTER_EXIT);
+		CHECK_ACTION(CAMERA_CHANGE_VIEW_ALL_SITUATIONS);
+#ifndef BIND_VEHICLE_FIREWEAPON
+		CHECK_ACTION(PED_FIREWEAPON);
+#endif
+		CHECK_ACTION(GO_LEFT);
+		CHECK_ACTION(GO_RIGHT);
+		CHECK_ACTION(NETWORK_TALK);
+		CHECK_ACTION(SWITCH_DEBUG_CAM_ON);
+		CHECK_ACTION(TOGGLE_DPAD);
+		CHECK_ACTION(TAKE_SCREEN_SHOT);
+		CHECK_ACTION(SHOW_MOUSE_POINTER_TOGGLE);
+	}
+	return false;
+}
+
+#undef CHECK_ACTION
+#endif
+
 void CControllerConfigManager::DeleteMatchingActionInitiators(e_ControllerAction action, int32 key, eControllerType type)
 {
 	if (!GetIsKeyBlank(key, type))
@@ -2513,11 +2624,6 @@ const char *XboxButtons[][MAX_CONTROLLERACTIONS] = CONTROLLER_BUTTONS("~T~", "~O
 #define PS2_CIRCLE "|"
 #define PS2_CROSS "/"
 #define PS2_SQUARE "^"
-#elif defined(BUTTON_ICONS)
-#define PS2_TRIANGLE "~T~"
-#define PS2_CIRCLE "~O~"
-#define PS2_CROSS "~X~"
-#define PS2_SQUARE "~Q~"
 #else
 #define PS2_TRIANGLE "TRIANGLE"
 #define PS2_CIRCLE "CIRCLE"
@@ -2530,7 +2636,7 @@ const char *PlayStationButtons_noIcons[][MAX_CONTROLLERACTIONS] =
 
 #ifdef BUTTON_ICONS
 const char *PlayStationButtons[][MAX_CONTROLLERACTIONS] =
-    CONTROLLER_BUTTONS(PS2_TRIANGLE, PS2_CIRCLE, PS2_CROSS, PS2_SQUARE, "~K~", "~M~", "~A~", "~J~", "~V~", "~C~", "SELECT");
+    CONTROLLER_BUTTONS("~T~", "~O~", "~X~", "~Q~", "~K~", "~M~", "~A~", "~J~", "~V~", "~C~", "SELECT");
 #endif
 
 #undef PS2_TRIANGLE
@@ -2547,11 +2653,36 @@ void CControllerConfigManager::GetWideStringOfCommandKeys(uint16 action, wchar *
 	if (CPad::GetPad(0)->IsAffectedByController) {
 		wchar wstr[16];
 
-		// TODO: INI and/or menu setting for Xbox/PS switch 
+		const char* (*Buttons)[MAX_CONTROLLERACTIONS];
+
 #ifdef BUTTON_ICONS
-		const char *(*Buttons)[MAX_CONTROLLERACTIONS] = CFont::ButtonsSlot != -1 ? XboxButtons : XboxButtons_noIcons;
+	#ifdef GAMEPAD_MENU
+		switch (FrontEndMenuManager.m_PrefsControllerType)
+		{
+		case CMenuManager::CONTROLLER_DUALSHOCK2:
+		case CMenuManager::CONTROLLER_DUALSHOCK3:
+		case CMenuManager::CONTROLLER_DUALSHOCK4:
+			Buttons = CFont::ButtonsSlot != -1 ? PlayStationButtons : PlayStationButtons_noIcons;
+			break;
+		default:
+	#endif
+			Buttons = CFont::ButtonsSlot != -1 ? XboxButtons : XboxButtons_noIcons;
+	#ifdef GAMEPAD_MENU
+			break;
+		}
+	#endif
 #else
-		const char *(*Buttons)[MAX_CONTROLLERACTIONS] = XboxButtons_noIcons;
+		switch (FrontEndMenuManager.m_PrefsControllerType)
+		{
+		case CMenuManager::CONTROLLER_DUALSHOCK2:
+		case CMenuManager::CONTROLLER_DUALSHOCK3:
+		case CMenuManager::CONTROLLER_DUALSHOCK4:
+			Buttons = PlayStationButtons_noIcons;
+			break;
+		default:
+			Buttons = XboxButtons_noIcons;
+			break;
+		}
 #endif
 
 		assert(Buttons[CPad::GetPad(0)->Mode][action] != nil); // we cannot use these
@@ -2678,9 +2809,10 @@ wchar *CControllerConfigManager::GetButtonComboText(e_ControllerAction action)
 void CControllerConfigManager::SetControllerKeyAssociatedWithAction(e_ControllerAction action, int32 key, eControllerType type)
 {
 	ResetSettingOrder(action);
+	int numOfSettings = GetNumOfSettingsForAction(action);
 	
 	m_aSettings[action][type].m_Key = key;
-	m_aSettings[action][type].m_ContSetOrder = GetNumOfSettingsForAction(action) + 1;
+	m_aSettings[action][type].m_ContSetOrder = numOfSettings + 1;
 }
 
 int32 CControllerConfigManager::GetMouseButtonAssociatedWithAction(e_ControllerAction action)
@@ -2690,8 +2822,10 @@ int32 CControllerConfigManager::GetMouseButtonAssociatedWithAction(e_ControllerA
 
 void CControllerConfigManager::SetMouseButtonAssociatedWithAction(e_ControllerAction action, int32 button)
 {
+	int numOfSettings = GetNumOfSettingsForAction(action);
+	
 	m_aSettings[action][MOUSE].m_Key = button;
-	m_aSettings[action][MOUSE].m_ContSetOrder = GetNumOfSettingsForAction(action) + 1;
+	m_aSettings[action][MOUSE].m_ContSetOrder = numOfSettings + 1;
 }
 
 void CControllerConfigManager::ResetSettingOrder(e_ControllerAction action)
@@ -2714,7 +2848,7 @@ void CControllerConfigManager::ResetSettingOrder(e_ControllerAction action)
 			for (int32 k = 0; k < MAX_CONTROLLERTYPES; k++)
 			{
 				int32 setorder = m_aSettings[action][k].m_ContSetOrder;
-				if (setorder > i && setorder != KEYBOARD)
+				if (setorder > i && setorder != 0)
 				{
 					if (init)
 					{

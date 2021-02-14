@@ -37,6 +37,7 @@ public:
 	int32 NumOfHelisRequired();
 	void SetWantedLevel(int32);
 	void SetWantedLevelNoDrop(int32 level);
+	int32 GetWantedLevel() { return m_nWantedLevel; }
 	void RegisterCrime(eCrimeType type, const CVector &coors, uint32 id, bool policeDoesntCare);
 	void RegisterCrime_Immediately(eCrimeType type, const CVector &coors, uint32 id, bool policeDoesntCare);
 	void ClearQdCrimes();

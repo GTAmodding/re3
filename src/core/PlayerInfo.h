@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Collision.h"
+#include "ColModel.h"
 
 enum eWastedBustedState
 {
@@ -54,14 +54,13 @@ public:
 	bool m_bFastReload;
 	bool m_bGetOutOfJailFree;
 	bool m_bGetOutOfHospitalFree;
+#ifdef GTA_PC
 	char m_aSkinName[32];
 	RwTexture *m_pSkinTexture;
+#endif
 
 	void MakePlayerSafe(bool);
-	void LoadPlayerSkin();
-	void DeletePlayerSkin();
 	void AwardMoneyForExplosion(CVehicle *vehicle);	
-	void SetPlayerSkin(char* skin);
 	const CVector &GetPos();
 	void Process(void);
 	void KillPlayer(void);
@@ -78,7 +77,21 @@ public:
 	void SavePlayerInfo(uint8 *buf, uint32* size);
 	void FindClosestCarSectorList(CPtrList&, CPed*, float, float, float, float, float*, CVehicle**);
 
-	~CPlayerInfo() { };
+#ifdef GTA_PC
+	void LoadPlayerSkin();
+	void SetPlayerSkin(const char *skin);
+	void DeletePlayerSkin();
+#endif
 };
+
+CPlayerPed *FindPlayerPed(void);
+CVehicle *FindPlayerVehicle(void);
+CVehicle *FindPlayerTrain(void);
+CEntity *FindPlayerEntity(void);
+CVector FindPlayerCoors(void);
+const CVector &FindPlayerSpeed(void);
+const CVector &FindPlayerCentreOfWorld(int32 player);
+const CVector &FindPlayerCentreOfWorld_NoSniperShift(void);
+float FindPlayerHeading(void);
 
 VALIDATE_SIZE(CPlayerInfo, 0x13C);

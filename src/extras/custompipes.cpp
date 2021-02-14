@@ -1,4 +1,4 @@
-#define WITH_D3D
+#define WITHD3D
 #include "common.h"
 
 #ifdef EXTENDED_PIPELINES
@@ -133,7 +133,11 @@ EnvMapRender(void)
 	EnvMapCam->getFrame()->matrix.pos = camPos;
 	EnvMapCam->getFrame()->transform(&EnvMapCam->getFrame()->matrix, rw::COMBINEREPLACE);
 
-	rw::RGBA skycol = { CTimeCycle::GetSkyBottomRed(), CTimeCycle::GetSkyBottomGreen(), CTimeCycle::GetSkyBottomBlue(), 255 };
+	rw::RGBA skycol;
+	skycol.red = CTimeCycle::GetSkyBottomRed();
+	skycol.green = CTimeCycle::GetSkyBottomGreen();
+	skycol.blue = CTimeCycle::GetSkyBottomBlue();
+	skycol.alpha = 255;
 	EnvMapCam->clear(&skycol, rwCAMERACLEARZ|rwCAMERACLEARIMAGE);
 	RwCameraBeginUpdate(EnvMapCam);
 	bRenderingEnvMap = true;

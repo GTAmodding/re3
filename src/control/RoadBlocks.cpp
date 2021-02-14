@@ -46,8 +46,8 @@ CRoadBlocks::Init(void)
 void
 CRoadBlocks::GenerateRoadBlockCopsForCar(CVehicle* pVehicle, int32 roadBlockType, int16 roadBlockNode)
 {
-	static const CVector vecRoadBlockOffets[6] = { {-1.5, 1.8f, 0.0f}, {-1.5f, -1.8f, 0.0f}, {1.5f, 1.8f, 0.0f},
-	{1.5f, -1.8f, 0.0f}, {-1.5f, 0.0f, 0.0f}, {1.5, 0.0, 0.0} };
+	static const CVector vecRoadBlockOffets[6] = { CVector(-1.5, 1.8f, 0.0f), CVector(-1.5f, -1.8f, 0.0f), CVector(1.5f, 1.8f, 0.0f),
+	CVector(1.5f, -1.8f, 0.0f), CVector(-1.5f, 0.0f, 0.0f), CVector(1.5, 0.0, 0.0) };
 	CEntity* pEntityToAttack = (CEntity*)FindPlayerVehicle();
 	if (!pEntityToAttack)
 		pEntityToAttack = (CEntity*)FindPlayerPed();
@@ -90,8 +90,7 @@ CRoadBlocks::GenerateRoadBlockCopsForCar(CVehicle* pVehicle, int32 roadBlockType
 		pCopPed->m_nRoadblockNode = roadBlockNode;
 		pCopPed->bCrouchWhenShooting = roadBlockType != 2;
 		if (pEntityToAttack) {
-			pCopPed->m_pPointGunAt = pEntityToAttack;
-			pEntityToAttack->RegisterReference(&pCopPed->m_pPointGunAt);
+			pCopPed->SetWeaponLockOnTarget(pEntityToAttack);
 			pCopPed->SetAttack(pEntityToAttack);
 		}
 		pCopPed->m_pMyVehicle = pVehicle;

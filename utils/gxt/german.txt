@@ -1,4 +1,11 @@
-﻿[LETTER1]
+﻿{
+    New strings are at the bottom of file.
+    Do not change the order of strings.
+    You can fix the typos of existing translation but please refrain from
+    unnecessary edits like rephasing because you think it suits better for your taste.
+}
+
+[LETTER1]
 abcdefghijklmnopqrstuvwxyz ABCDEFGHIJKLMNOPQRSTUVWXYZ 0123456789"$,.'-?!!SDBF
 
 [DEFNAM]
@@ -2084,7 +2091,7 @@ Die Yakuza werden das als Kriegserklãrung des Kartells auffassen.
 ~r~Die Yakuza haben dich erkannt!
 
 [LOVE2_6]
-~r~ Du hast alle Zeugen aus dem Weg gerãumt!!
+~r~Du hast alle Zeugen aus dem Weg gerãumt!!
 
 [LOVE3_A]
 In scheinheiligen Zeiten wie diesen sind bestimmte wertvolle Waren schwer zu importieren.
@@ -2269,11 +2276,11 @@ Autobomben kosten $1000 pro Stück.
 [GA_5]
 In deinem Wagen ist schon eine Autobombe.
 
-[GA_6]
-Park die Karre, mach sie durch Drücken der ~h~~k~~PED_FIREWEAPON~-Taste~w~ scharf, und dann nichts wie weg!
+[GA_6] { re3 change }
+Park die Karre, mach sie durch Drücken der ~h~~k~~VEHICLE_FIREWEAPON~-Taste~w~ scharf, und dann nichts wie weg!
 
-[GA_7]
-Mach die Bombe mit der ~h~~k~~PED_FIREWEAPON~-Taste~w~ scharf. Dann geht sie hoch, wenn der Wagen angelassen wird.
+[GA_7] { re3 change }
+Mach die Bombe mit der ~h~~k~~VEHICLE_FIREWEAPON~-Taste~w~ scharf. Dann geht sie hoch, wenn der Wagen angelassen wird.
 
 [GA_8]
 Benutze den Zünder, um die Bombe hochgehen zu lassen.
@@ -2487,33 +2494,6 @@ Beschleunigen
 
 [FEC_SMT]
 Spezialmission aktivieren
-
-[FEC_CCF]
-Konfiguration:
-
-[FEC_CF1]
-Konfig1
-
-[FEC_CF2]
-Konfig2
-
-[FEC_CF3]
-Konfig3
-
-[FEC_CF4]
-Konfig4
-
-[FEC_CDP]
-Controller-Anzeige:
-
-[FEC_ONF]
-Zu Fuß
-
-[FEC_INC]
-Im Auto
-
-[FEC_VIB]
-Vibration:
 
 [FEA_OUT]
 Tonausgabe:
@@ -3245,7 +3225,7 @@ Wollen sehen, ob du so gut bist, wie du sagst.
 ~w~Hepburn Heights. Knöpf dir ein paar Diablos vor.
 
 [YD2_G2]
-~w~ Aber denk dran, ~r~du steigst nicht aus dem Wagen!!
+~w~Aber denk dran, ~r~du steigst nicht aus dem Wagen!!
 
 [YD2_H]
 ~w~Okay, fahr uns zurück auf Yardie-Gebiet! LOS, LOS, LOS!!
@@ -3655,11 +3635,11 @@ Okay?
 [JM6_1]
 Fahr zu der Bank auf dem Boulevard.
 
-[GA_6B]
-Park die Karre, mach sie durch Drücken der ~h~~k~~PED_FIREWEAPON~-Taste~w~ scharf, und dann HAU AB!
+[GA_6B] { re3 change }
+Park die Karre, mach sie durch Drücken der ~h~~k~~VEHICLE_FIREWEAPON~-Taste~w~ scharf, und dann HAU AB!
 
-[GA_7B]
-Mach die Bombe mit der ~h~~k~~PED_FIREWEAPON~-Taste~w~ scharf. Sie geht hoch, wenn der Wagen angelassen wird.
+[GA_7B] { re3 change }
+Mach die Bombe mit der ~h~~k~~VEHICLE_FIREWEAPON~-Taste~w~ scharf. Sie geht hoch, wenn der Wagen angelassen wird.
 
 [BAT1]
 ~g~Nimm dir den Schlãger!
@@ -4093,11 +4073,11 @@ Fahre deinen Wagen in die Lackiererei, um deinen ~h~Fahndungslevel~w~ loszuwerde
 [HM1_1]
 ~g~Fertige 20 Purple Nines in 2 Min. 30 Sek. ab.
 
-[KM1_8A]
-Drücke die~h~ ~k~~PED_FIREWEAPON~-Taste~w~ zum ~h~Zünden der Bombe~w~. Aber geh vorher in Deckung!
+[KM1_8A] { re3 change }
+Drücke die~h~ ~k~~VEHICLE_FIREWEAPON~-Taste~w~ zum ~h~Zünden der Bombe~w~. Aber geh vorher in Deckung!
 
-[KM1_8D]
-Drücke die~h~ ~k~~PED_FIREWEAPON~-Taste~w~ zum ~h~Zünden der Bombe~w~. Aber geh vorher in Deckung!
+[KM1_8D] { re3 change }
+Drücke die~h~ ~k~~VEHICLE_FIREWEAPON~-Taste~w~ zum ~h~Zünden der Bombe~w~. Aber geh vorher in Deckung!
 
 [KM1_12]
 ~g~Bring ihm zum Dojo, aber hãng vorher die Cops ab!
@@ -4234,11 +4214,11 @@ Auf den Ausweis verzichte ich. Du siehst vertrauenswürdig aus.
 [DETON]
 DETONATION:
 
-[DRIVE_A]
-Halt eine Uzi im Anschlag, wenn du in ein Fahrzeug steigst. Schau dann nach links oder rechts und drücke die ~h~~k~~PED_FIREWEAPON~-Taste~w~, um zu feuern.
+[DRIVE_A] { re3 change }
+Halt eine Uzi im Anschlag, wenn du in ein Fahrzeug steigst. Schau dann nach links oder rechts und drücke die ~h~~k~~VEHICLE_FIREWEAPON~-Taste~w~, um zu feuern.
 
-[DRIVE_B]
-Halt eine Uzi im Anschlag, wenn du in ein Fahrzeug steigst. Schau dann nach links oder rechts und drücke die ~h~~k~~PED_FIREWEAPON~-Taste~w~, um zu feuern.
+[DRIVE_B] { re3 change }
+Halt eine Uzi im Anschlag, wenn du in ein Fahrzeug steigst. Schau dann nach links oder rechts und drücke die ~h~~k~~VEHICLE_FIREWEAPON~-Taste~w~, um zu feuern.
 
 [RECORD]
 ~g~NEUER REKORD!!
@@ -4246,11 +4226,11 @@ Halt eine Uzi im Anschlag, wenn du in ein Fahrzeug steigst. Schau dann nach link
 [NRECORD]
 ~r~KEIN NEUER REKORD!
 
-[RCHELP]
-Drücke die ~k~~PED_FIREWEAPON~-Taste oder fahre das ferngesteuerte Auto in die Rãder eines Fahrzeugs, um es zu sprengen.
+[RCHELP] { re3 change }
+Drücke die ~k~~VEHICLE_FIREWEAPON~-Taste oder fahre das ferngesteuerte Auto in die Rãder eines Fahrzeugs, um es zu sprengen.
 
-[RCHELPA]
-Drücke die ~k~~PED_FIREWEAPON~-Taste oder fahre das ferngesteuerte Auto in die Rãder eines Fahrzeugs, um es zu sprengen.
+[RCHELPA] { re3 change }
+Drücke die ~k~~VEHICLE_FIREWEAPON~-Taste oder fahre das ferngesteuerte Auto in die Rãder eines Fahrzeugs, um es zu sprengen.
 
 [RC_1]
 Du hast 2 Minuten, um so viele Diablo-Autos wie möglich zu sprengen!
@@ -4750,11 +4730,11 @@ LOVES VERSCHWINDEN
 [RM5_6]
 ~g~Er ist abgehauen! Zerstöre seine Panzerung mit einem Auto oder einer Explosion!!
 
-[PBOAT_1]
-Drücke die ~h~~k~~PED_FIREWEAPON~-Taste~w~, um die Bordkanonen abzufeuern.
+[PBOAT_1] { re3 change }
+Drücke die ~h~~k~~VEHICLE_FIREWEAPON~-Taste~w~, um die Bordkanonen abzufeuern.
 
-[PBOAT_2]
-Drücke die ~h~~k~~PED_FIREWEAPON~-Taste~w~, um die Bordkanonen abzufeuern.
+[PBOAT_2] { re3 change }
+Drücke die ~h~~k~~VEHICLE_FIREWEAPON~-Taste~w~, um die Bordkanonen abzufeuern.
 
 [DIAB1_B]
 Hier El Burro, von den Diablos.
@@ -4768,11 +4748,11 @@ Bei der alten Schulhalle nahe der Callahan Bridge findet ein Rennen statt.
 [DIAB1_F]
 Besorg dir 'nen fahrbaren Untersatz. Wer als erster alle Checkpoints abfãhrt, ist Sieger.
 
-[HM2_1]
-Zerstöre die gepanzerten Fahrzeuge mit den Buggies. Zur Zündung drücke die ~h~~k~~PED_FIREWEAPON~-Taste~w~.
+[HM2_1] { re3 change }
+Zerstöre die gepanzerten Fahrzeuge mit den Buggies. Zur Zündung drücke die ~h~~k~~VEHICLE_FIREWEAPON~-Taste~w~.
 
-[HM2_1A]
-Zerstöre die gepanzerten Fahrzeuge mit den Buggies. Zur Zündung drücke die ~h~~k~~PED_FIREWEAPON~-Taste~w~.
+[HM2_1A] { re3 change }
+Zerstöre die gepanzerten Fahrzeuge mit den Buggies. Zur Zündung drücke die ~h~~k~~VEHICLE_FIREWEAPON~-Taste~w~.
 
 [HM2_2]
 ~r~Du hast nicht alle gepanzerten Fahrzeuge zerstört!
@@ -5054,7 +5034,7 @@ Und stiehl ein paar Sachen, damit ich die Versicherung kassieren kann.
 ~w~Ah, mein Junge!
 
 [TM3_N2]
-~w~ Hallo, Paps.
+~w~Hallo, Paps.
 
 [TM3_O]
 ~w~Hast du endlich eine Frau gefunden?
@@ -5198,13 +5178,13 @@ Du bist eine sichere Bank. So etwas ist selten in diesen schlechten Zeiten.
 ~w~Okay, Fiffi, lass uns 'nen Abgang machen. Huuh!
 
 [FM1_Q]
-~w~ Hey, Maria! Meine Traumfrau!
+~w~Hey, Maria! Meine Traumfrau!
 
 [FM1_S1]
 ~w~Vielleicht solltest du mal die Party in der Lagerhalle am Ostende von Atlantic Quays auschecken.
 
 [FM1_U]
-~w~ Gracias. Und viel Spaß. Ist gutes Zeug.
+~w~Gracias. Und viel Spaß. Ist gutes Zeug.
 
 [FM1_V]
 ~w~Na los, Fiffi, sehen wir uns mal die Party an!
@@ -6263,7 +6243,7 @@ Die Kolumbianer müssen jeden Moment hier sein!
 Verdammt, da sind sie!! LOS, LADEN!!
 
 [LOVE2_7]
-~g~ Jetzt lass den Wagen stehen!
+~g~Jetzt lass den Wagen stehen!
 
 [LOVE2_8]
 ~g~Jetzt verschwinde aus Newport!
@@ -6595,11 +6575,11 @@ Diese Memory Card (PS2) ist bereits formatiert.
 [FEDSAS4]
 ;=<> - AUSWAHL ÃNDERN
 
-[SPRAY_4]
-~h~~k~~PED_FIREWEAPON~-Taste ~w~benutzen, um die Wasserkanone abzufeuern.
+[SPRAY_4] { re3 change }
+~h~~k~~VEHICLE_FIREWEAPON~-Taste ~w~benutzen, um die Wasserkanone abzufeuern.
 
-[SPRAY_1]
-~h~~k~~PED_FIREWEAPON~-Taste ~w~benutzen, um die Wasserkanone abzufeuern.
+[SPRAY_1] { re3 change }
+~h~~k~~VEHICLE_FIREWEAPON~-Taste ~w~benutzen, um die Wasserkanone abzufeuern.
 
 [LITTLE]
 LITTLE T
@@ -7327,9 +7307,6 @@ VERBINDUNG
 [FET_AUD]
 AUDIO-SETUP
 
-[FET_GFX]
-GRAFIK-SETUP
-
 [FET_DIS]
 ANZEIGEN-SETUP
 
@@ -8022,6 +7999,185 @@ HARDWARE NICHT VERFÜGBAR - ORIGINAL-EINSTELLG. WIEDERHERGESTELLT
 
 [CRED270]
 MIKE HONG
+
+{ re3 updates }
+{ new languages }
+[FEL_JAP]
+JAPANISCH
+
+[FEL_POL]
+POLNISCH
+
+[FEL_RUS]
+RUSSISCH
+
+{ new display menus }
+[FET_GFX]
+GRAFIK-SETUP
+
+[FED_MIP]
+MIP MAPPING
+
+[FED_AAS]
+ANTI ALIASING
+
+[FED_FIL]
+TEXTURE FILTERING
+
+[FED_BIL]
+BILINEAR
+
+[FED_TRL]
+TRILINEAR
+
+[FED_WND]
+WINDOWED
+
+[FED_FLS]
+FULLSCREEN
+
+[FEM_CSB]
+CUTSCENE BORDERS
+
+[FEM_SCF]
+SCREEN FORMAT
+
+[FEM_ISL]
+MAP MEMORY USAGE
+
+[FEM_LOW]
+LOW
+
+[FEM_MED]
+MEDIUM
+
+[FEM_HIG]
+HIGH
+
+[FEM_2PR]
+PS2 ALPHA TEST
+
+[FEC_FRC]
+FREE CAM
+
+{ Linux joy detection }
+[FEC_JOD]
+DETECT JOYSTICK
+
+[FEC_JPR]
+Press any key on the joystick of your choice that you want to use on the game, and it will be selected.
+
+[FEC_JDE]
+Detected joystick
+
+{ mission restart }
+[FET_RMS]
+MISSION WIEDERHOLEN
+
+[FESZ_RM]
+WIEDERHOLEN?
+
+{ more graphics }
+[FED_VPL]
+VEHICLE PIPELINE
+
+[FED_PRM]
+PED RIM LIGHT
+
+[FED_RGL]
+ROAD GLOSS
+
+[FED_CLF]
+COLOUR FILTER
+
+[FED_WLM]
+WORLD LIGHTMAPS
+
+[FED_MBL]
+MOTION BLUR
+
+[FEM_SIM]
+SIMPLE
+
+[FEM_NRM]
+NORMAL
+
+[FEM_MOB]
+MOBILE
+
+[FED_MFX]
+MATFX
+
+[FED_NEO]
+NEO
+
+[FEM_PS2]
+PS2
+
+[FEM_XBX]
+XBOX
+
+[FEM_AUT] { aspect ratio related }
+AUTO
+
+{ controls }
+[FEC_IVP]
+INVERT PAD VERTICALLY
+
+{ map }
+[FEM_TWP]
+Toggle Waypoint
+
+[FEA_FMN]
+RADIO AUS
+
+[FEC_DS2]
+DUALSHOCK 2
+
+[FEC_DS3]
+DUALSHOCK 3
+
+[FEC_DS4]
+DUALSHOCK 4
+
+[FEC_360]
+XBOX 360 CONTROLLER
+
+[FEC_ONE]
+XBOX ONE CONTROLLER
+
+[FEC_TYP]
+GAMEPAD TYPE
+
+[FEC_CCF]
+KONFIGURATION
+
+[FEC_CF1]
+KONFIGURATION 1
+
+[FEC_CF2]
+KONFIGURATION 2
+
+[FEC_CF3]
+KONFIGURATION 3
+
+[FEC_CF4]
+KONFIGURATION 4
+
+[FEC_CDP]
+CONTROLLER-ANZEIGE
+
+[FEC_ONF]
+ZU FUß
+
+[FEC_INC]
+IM AUTO
+
+[FEC_VIB]
+VIBRATION
+
+[FET_AGS]
+GAMEPAD SETTINGS
 
 [DUMMY]
 THIS LABEL NEEDS TO BE HERE !!!

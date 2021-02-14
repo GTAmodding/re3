@@ -3,6 +3,7 @@
 #include "Game.h"
 #include "Lists.h"
 #include "PlayerInfo.h"
+#include "Collision.h"
 
 /* Sectors span from -2000 to 2000 in x and y.
  * With 100x100 sectors, each is 40x40 units. */
@@ -48,14 +49,9 @@ public:
 
 VALIDATE_SIZE(CSector, 0x28);
 
-class CEntity;
-struct CColPoint;
-struct CColLine;
-struct CStoredCollPoly;
-
 class CWorld
 {
-	static CPtrList ms_bigBuildingsList[4];
+	static CPtrList ms_bigBuildingsList[NUM_LEVELS];
 	static CPtrList ms_listMovingEntityPtrs;
 	static CSector ms_aSectors[NUMSECTORS_Y][NUMSECTORS_X];
 	static uint16 ms_nCurrentScanCode;
@@ -157,14 +153,3 @@ public:
 
 extern CColPoint gaTempSphereColPoints[MAX_COLLISION_POINTS];
 
-class CPlayerPed;
-class CVehicle;
-CPlayerPed *FindPlayerPed(void);
-CVehicle *FindPlayerVehicle(void);
-CVehicle *FindPlayerTrain(void);
-CEntity *FindPlayerEntity(void);
-CVector FindPlayerCoors(void);
-CVector &FindPlayerSpeed(void);
-const CVector &FindPlayerCentreOfWorld(int32 player);
-const CVector &FindPlayerCentreOfWorld_NoSniperShift(void);
-float FindPlayerHeading(void);

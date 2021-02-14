@@ -1,8 +1,13 @@
 #include "common.h"
+#include <time.h>
 #include "rpmatfx.h"
 #include "rphanim.h"
 #include "rpskin.h"
 #include "rtbmp.h"
+#include "rtpng.h"
+#ifdef ANISOTROPIC_FILTERING
+#include "rpanisot.h"
+#endif
 
 #include "main.h"
 #include "CdStream.h"
@@ -66,8 +71,10 @@
 #include "postfx.h"
 #include "custompipes.h"
 #include "screendroplets.h"
-#include "frontendoption.h"
 #include "MemoryHeap.h"
+#ifdef USE_OUR_VERSIONING
+#include "GitSHA1.h"
+#endif
 
 GlobalScene Scene;
 
@@ -84,8 +91,11 @@ bool gbModelViewer;
 #ifdef TIMEBARS
 bool gbShowTimebars;
 #endif
+#ifdef DRAW_GAME_VERSION_TEXT
+bool gDrawVersionText; // Our addition, we think it was always enabled on !MASTER builds
+#endif
 
-int32 frameCount;
+volatile int32 frameCount;
 
 RwRGBA gColourTop;
 
@@ -120,6 +130,31 @@ bool gbPrintMemoryUsage;
 #else
 #define WANT_TO_LOAD FrontEndMenuManager.m_bWantToLoad
 #define FOUND_GAME_TO_LOAD b_FoundRecentSavedGameWantToLoad
+#endif
+
+#ifdef NEW_RENDERER
+bool gbNewRenderer;
+#define CLEARMODE (rwCAMERACLEARZ | rwCAMERACLEARSTENCIL)
+#else
+#define CLEARMODE (rwCAMERACLEARZ)
+#endif
+
+#ifdef __MWERKS__
+void
+debug(char *fmt, ...)
+{
+#ifndef MASTER
+	// TODO put something here
+#endif
+}
+
+void
+Error(char *fmt, ...)
+{
+#ifndef MASTER
+	// TODO put something here
+#endif
+}
 #endif
 
 void
@@ -169,11 +204,14 @@ DoRWStuffStartOfFrame(int16 TopRed, int16 TopGreen, int16 TopBlue, int16 BottomR
 	CameraSize(Scene.camera, nil, SCREEN_VIEWWINDOW, SCREEN_ASPECT_RATIO);
 #endif
 	CVisibilityPlugins::SetRenderWareCamera(Scene.camera);
-	RwCameraClear(Scene.camera, &TopColor.rwRGBA, rwCAMERACLEARZ);
+	RwCameraClear(Scene.camera, &TopColor.rwRGBA, CLEARMODE);
 
 	if(!RsCameraBeginUpdate(Scene.camera))
 		return false;
 
+#ifdef FIX_BUGS
+	CSprite2d::SetRecipNearClip();
+#endif
 	CSprite2d::InitPerFrame();
 
 	if(Alpha != 0)
@@ -191,7 +229,7 @@ DoRWStuffStartOfFrame_Horizon(int16 TopRed, int16 TopGreen, int16 TopBlue, int16
 	CameraSize(Scene.camera, nil, SCREEN_VIEWWINDOW, SCREEN_ASPECT_RATIO);
 #endif
 	CVisibilityPlugins::SetRenderWareCamera(Scene.camera);
-	RwCameraClear(Scene.camera, &gColourTop, rwCAMERACLEARZ);
+	RwCameraClear(Scene.camera, &gColourTop, CLEARMODE);
 
 	if(!RsCameraBeginUpdate(Scene.camera))
 		return false;
@@ -324,7 +362,11 @@ RwGrabScreen(RwCamera *camera, RwChar *filename)
 	strcpy(temp, CFileMgr::GetRootDirName());
 	strcat(temp, filename);
 
+#ifndef LIBRW
 	if (RtBMPImageWrite(pImage, &temp[0]) == nil)
+#else
+	if (RtPNGImageWrite(pImage, &temp[0]) == nil)
+#endif
 		result = false;
 	RwImageDestroy(pImage);
 	return result;
@@ -343,6 +385,7 @@ DoRWStuffEndOfFrame(void)
 	RsCameraShowRaster(Scene.camera);
 #ifndef MASTER
 	char s[48];
+#ifdef THIS_IS_STUPID
 	if (CPad::GetPad(1)->GetLeftShockJustDown()) {
 		// try using both controllers for this thing... crazy bastards
 		if (CPad::GetPad(0)->GetRightStickY() > 0) {
@@ -354,6 +397,12 @@ DoRWStuffEndOfFrame(void)
 			RwGrabScreen(Scene.camera, s);
 		}
 	}
+#else
+	if (CPad::GetPad(1)->GetLeftShockJustDown() || CPad::GetPad(0)->GetFJustDown(11)) {
+		sprintf(s, "screen_%11lld.png", time(nil));
+		RwGrabScreen(Scene.camera, s);
+	}
+#endif
 #endif // !MASTER
 }
 
@@ -408,12 +457,72 @@ PluginAttach(void)
 		
 		return FALSE;
 	}
+#ifdef ANISOTROPIC_FILTERING
+	RpAnisotPluginAttach();
+#endif
 #ifdef EXTENDED_PIPELINES
 	CustomPipes::CustomPipeRegister();
 #endif
 
 	return TRUE;
 }
+
+#ifdef GTA_PS2
+#define NUM_PREALLOC_ATOMICS 3245
+#define NUM_PREALLOC_CLUMPS 101
+#define NUM_PREALLOC_FRAMES 2821
+#define NUM_PREALLOC_GEOMETRIES 1404
+#define NUM_PREALLOC_TEXDICTS 106
+#define NUM_PREALLOC_TEXTURES 1900
+#define NUM_PREALLOC_MATERIALS 3300
+bool preAlloc;
+
+void
+PreAllocateRwObjects(void)
+{
+	int i;
+	void **tmp = new void*[0x8000];
+	preAlloc = true;
+
+	for(i = 0; i < NUM_PREALLOC_ATOMICS; i++)
+		tmp[i] = RpAtomicCreate();
+	for(i = 0; i < NUM_PREALLOC_ATOMICS; i++)
+		RpAtomicDestroy((RpAtomic*)tmp[i]);
+
+	for(i = 0; i < NUM_PREALLOC_CLUMPS; i++)
+		tmp[i] = RpClumpCreate();
+	for(i = 0; i < NUM_PREALLOC_CLUMPS; i++)
+		RpClumpDestroy((RpClump*)tmp[i]);
+
+	for(i = 0; i < NUM_PREALLOC_FRAMES; i++)
+		tmp[i] = RwFrameCreate();
+	for(i = 0; i < NUM_PREALLOC_FRAMES; i++)
+		RwFrameDestroy((RwFrame*)tmp[i]);
+
+	for(i = 0; i < NUM_PREALLOC_GEOMETRIES; i++)
+		tmp[i] = RpGeometryCreate(0, 0, 0);
+	for(i = 0; i < NUM_PREALLOC_GEOMETRIES; i++)
+		RpGeometryDestroy((RpGeometry*)tmp[i]);
+
+	for(i = 0; i < NUM_PREALLOC_TEXDICTS; i++)
+		tmp[i] = RwTexDictionaryCreate();
+	for(i = 0; i < NUM_PREALLOC_TEXDICTS; i++)
+		RwTexDictionaryDestroy((RwTexDictionary*)tmp[i]);
+
+	for(i = 0; i < NUM_PREALLOC_TEXTURES; i++)
+		tmp[i] = RwTextureCreate(RwRasterCreate(0, 0, 0, 0));
+	for(i = 0; i < NUM_PREALLOC_TEXDICTS; i++)
+		RwTextureDestroy((RwTexture*)tmp[i]);
+
+	for(i = 0; i < NUM_PREALLOC_MATERIALS; i++)
+		tmp[i] = RpMaterialCreate();
+	for(i = 0; i < NUM_PREALLOC_MATERIALS; i++)
+		RpMaterialDestroy((RpMaterial*)tmp[i]);
+
+	delete[] tmp;
+	preAlloc = false;
+}
+#endif
 
 static RwBool 
 Initialise3D(void *param)
@@ -424,21 +533,7 @@ Initialise3D(void *param)
 		DebugMenuInit();
 		DebugMenuPopulate();
 #endif // !DEBUGMENU
-#ifdef CUSTOM_FRONTEND_OPTIONS
-	// Apparently this func. can be run multiple times at the start.
-	if (numCustomFrontendOptions == 0 && numCustomFrontendScreens == 0) {
-		// needs stored language and TheText to be loaded, and last TheText reload is at the start of here
-		CustomFrontendOptionsPopulate();
-	}
-#endif
-		bool ret = CGame::InitialiseRenderWare();
-#ifdef EXTENDED_PIPELINES
-		CustomPipes::CustomPipeInit();	// need Scene.world for this
-#endif
-#ifdef SCREEN_DROPLETS
-		ScreenDroplets::InitDraw();
-#endif
-		return ret;
+		return CGame::InitialiseRenderWare();
 	}
 
 	return (FALSE);
@@ -447,12 +542,6 @@ Initialise3D(void *param)
 static void 
 Terminate3D(void)
 {
-#ifdef SCREEN_DROPLETS
-	ScreenDroplets::Shutdown();
-#endif
-#ifdef EXTENDED_PIPELINES
-	CustomPipes::CustomPipeShutdown();
-#endif
 	CGame::ShutdownRenderWare();
 #ifdef DEBUGMENU
 	DebugMenuShutdown();
@@ -577,7 +666,12 @@ LoadingScreen(const char *str1, const char *str2, const char *splashscreen)
 		return;
 #endif
 
-	if(DoRWStuffStartOfFrame(0, 0, 0, 0, 0, 0, 255)){
+#ifndef GTA_PS2
+	if(DoRWStuffStartOfFrame(0, 0, 0, 0, 0, 0, 255))
+#else
+	DoRWStuffStartOfFrame(0, 0, 0, 0, 0, 0, 255);
+#endif
+	{
 		CSprite2d::SetRecipNearClip();
 		CSprite2d::InitPerFrame();
 		CFont::InitPerFrame();
@@ -616,8 +710,10 @@ LoadingScreen(const char *str1, const char *str2, const char *splashscreen)
 			AsciiToUnicode(str1, tmpstr);
 			CFont::PrintString(hpos, vpos, tmpstr);
 			vpos += 22*yscale;
-			AsciiToUnicode(str2, tmpstr);
-			CFont::PrintString(hpos, vpos, tmpstr);
+			if (str2) {
+				AsciiToUnicode(str2, tmpstr);
+				CFont::PrintString(hpos, vpos, tmpstr);
+			}
 #endif
 		}
 
@@ -637,8 +733,13 @@ LoadingIslandScreen(const char *levelName)
 
 	splash = LoadSplash(nil);
 	name = TheText.Get(levelName);
+	
+#ifndef GTA_PS2
 	if(!DoRWStuffStartOfFrame(0, 0, 0, 0, 0, 0, 255))
 		return;
+#else
+	DoRWStuffStartOfFrame(0, 0, 0, 0, 0, 0, 255);
+#endif
 
 	CSprite2d::SetRecipNearClip();
 	CSprite2d::InitPerFrame();
@@ -647,23 +748,61 @@ LoadingIslandScreen(const char *levelName)
 	col = CRGBA(255, 255, 255, 255);
 	splash->Draw(CRect(0.0f, 0.0f, SCREEN_WIDTH, SCREEN_HEIGHT), col, col, col, col);
 	CFont::SetBackgroundOff();
+#ifdef FIX_BUGS
+	CFont::SetScale(SCREEN_SCALE_X(1.5f), SCREEN_SCALE_Y(1.5f));
+#else
 	CFont::SetScale(1.5f, 1.5f);
+#endif
 	CFont::SetPropOn();
 	CFont::SetRightJustifyOn();
+#ifdef FIX_BUGS
 	CFont::SetRightJustifyWrap(SCREEN_SCALE_X(150.0f));
+#else
+	CFont::SetRightJustifyWrap(150.0f);
+#endif
 	CFont::SetFontStyle(FONT_HEADING);
 	sprintf(str, "WELCOME TO");
 	AsciiToUnicode(str, wstr);
 	CFont::SetDropColor(CRGBA(0, 0, 0, 255));
 	CFont::SetDropShadowPosition(3);
 	CFont::SetColor(CRGBA(243, 237, 71, 255));
+#if !defined(PS2_HUD) && defined(GTA_PC)
 	CFont::SetScale(SCREEN_SCALE_X(1.2f), SCREEN_SCALE_Y(1.2f));
-	CFont::PrintString(SCREEN_SCALE_FROM_RIGHT(20.0f), SCREEN_STRETCH_FROM_BOTTOM(110.0f), TheText.Get("WELCOME"));
+#endif
+
+#ifdef PS2_HUD
+	#ifdef FIX_BUGS
+	CFont::PrintString(SCREEN_SCALE_FROM_RIGHT(20.0f), SCREEN_SCALE_FROM_BOTTOM(140.0f), TheText.Get("WELCOME"));
+	#else
+	CFont::PrintString(SCREEN_WIDTH - 20, SCREEN_HEIGHT - 140, TheText.Get("WELCOME"));
+	#endif
+#else
+	#ifdef FIX_BUGS
+	CFont::PrintString(SCREEN_SCALE_FROM_RIGHT(20.0f), SCREEN_SCALE_FROM_BOTTOM(110.0f), TheText.Get("WELCOME"));
+	#else
+	CFont::PrintString(SCREEN_WIDTH - 20, SCREEN_SCALE_FROM_BOTTOM(110.0f), TheText.Get("WELCOME"));
+	#endif
+#endif
 	TextCopy(wstr, name);
 	TheText.UpperCase(wstr);
 	CFont::SetColor(CRGBA(243, 237, 71, 255));
+#if !defined(PS2_HUD) && defined(GTA_PC)
 	CFont::SetScale(SCREEN_SCALE_X(1.2f), SCREEN_SCALE_Y(1.2f));
-	CFont::PrintString(SCREEN_SCALE_FROM_RIGHT(20.0f), SCREEN_STRETCH_FROM_BOTTOM(80.0f), wstr);
+#endif
+
+#ifdef PS2_HUD
+	#ifdef FIX_BUGS
+		CFont::PrintString(SCREEN_SCALE_FROM_RIGHT(20.0f), SCREEN_SCALE_FROM_BOTTOM(110.0f), wstr);
+	#else
+		CFont::PrintString(SCREEN_WIDTH-20, SCREEN_HEIGHT - 110, wstr);
+	#endif
+#else
+	#ifdef FIX_BUGS
+		CFont::PrintString(SCREEN_SCALE_FROM_RIGHT(20.0f), SCREEN_SCALE_FROM_BOTTOM(80.0f), wstr);
+	#else
+		CFont::PrintString(SCREEN_WIDTH-20, SCREEN_SCALE_FROM_BOTTOM(80.0f), wstr);
+	#endif
+#endif
 	CFont::DrawFonts();
 	DoRWStuffEndOfFrame();
 }
@@ -764,6 +903,7 @@ ProcessSlowMode(void)
 float FramesPerSecondCounter;
 int32 FrameSamples;
 
+#ifndef MASTER
 struct tZonePrint
 {
   char name[12];
@@ -783,8 +923,6 @@ tZonePrint ZonePrint[] =
 	{ "industse", CRect( 1070.3f, -473.0f,   1918.1f, -1331.5f) },
 	{ "no zone",  CRect( 0.0f,     0.0f,     0.0f,    0.0f)     }
 };
-
-#ifndef MASTER
 
 void
 PrintMemoryUsage(void)
@@ -956,7 +1094,7 @@ DisplayGameDebugText()
 	static bool bDisplayRate = false;
 #ifndef FINAL
 	{
-		SETTWEAKPATH("GameDebugText");
+		SETTWEAKPATH("Debug");
 		TWEAKBOOL(bDisplayPosn);
 		TWEAKBOOL(bDisplayRate);
 	}
@@ -970,25 +1108,78 @@ DisplayGameDebugText()
 
 #ifdef DRAW_GAME_VERSION_TEXT
 	wchar ver[200];
-	
+
+	if(gDrawVersionText) // This realtime switch is our thing
+	{
+
+#ifdef USE_OUR_VERSIONING
+	char verA[200];
+	sprintf(verA,
+#if defined _WIN32
+			"Win "
+#elif defined __linux__
+		    "Linux "
+#elif defined __APPLE__
+		    "Mac OS X "
+#elif defined __FreeBSD__
+		    "FreeBSD "
+#else
+		    "Posix-compliant "
+#endif
+#if defined __LP64__ || defined _WIN64
+			"64-bit "
+#else
+			"32-bit "
+#endif
+#if defined RW_D3D9
+		    "D3D9 "
+#elif defined RWLIBS
+		    "D3D8 "
+#elif defined RW_GL3
+		    "OpenGL "
+#endif
+#if defined AUDIO_OAL
+		    "OAL "
+#elif defined AUDIO_MSS
+		    "MSS "
+#endif
+#if defined _DEBUG || defined DEBUG
+		    "DEBUG "
+#endif
+		    "%.8s",
+		    g_GIT_SHA1);
+	AsciiToUnicode(verA, ver);
+	CFont::SetScale(SCREEN_SCALE_X(0.5f), SCREEN_SCALE_Y(0.7f));
+#else
 	AsciiToUnicode(version_name, ver);
+	CFont::SetScale(SCREEN_SCALE_X(0.5f), SCREEN_SCALE_Y(0.5f));
+#endif
 
 	CFont::SetPropOn();
 	CFont::SetBackgroundOff();
 	CFont::SetFontStyle(FONT_BANK);
-	CFont::SetScale(SCREEN_SCALE_X(0.5f), SCREEN_SCALE_Y(0.5f));
 	CFont::SetCentreOff();
 	CFont::SetRightJustifyOff();
 	CFont::SetWrapx(SCREEN_WIDTH);
 	CFont::SetJustifyOff();
 	CFont::SetBackGroundOnlyTextOff();
 	CFont::SetColor(CRGBA(255, 108, 0, 255));
+#ifdef FIX_BUGS
 	CFont::PrintString(SCREEN_SCALE_X(10.0f), SCREEN_SCALE_Y(10.0f), ver);
+#else
+	CFont::PrintString(10.0f, 10.0f, ver);
 #endif
+	}
+#endif // #ifdef DRAW_GAME_VERSION_TEXT
 
 	FrameSamples++;
+#ifdef FIX_BUGS
+	FramesPerSecondCounter += frameTime / 1000.f; // convert to seconds
+	FramesPerSecond = FrameSamples / FramesPerSecondCounter;
+#else
 	FramesPerSecondCounter += 1000.0f / (CTimer::GetTimeStepNonClippedInSeconds() * 1000.0f);	
 	FramesPerSecond = FramesPerSecondCounter / FrameSamples;
+#endif
 	
 	if ( FrameSamples > 30 )
 	{
@@ -1035,29 +1226,161 @@ DisplayGameDebugText()
 		
 		AsciiToUnicode(str, ustr);
 		
-		// Let's not scale those numbers, they look better that way :eyes:
 		CFont::SetPropOff();
 		CFont::SetBackgroundOff();
+#ifdef FIX_BUGS
+		CFont::SetScale(SCREEN_SCALE_X(0.7f), SCREEN_SCALE_Y(1.5f));
+#else
 		CFont::SetScale(0.7f, 1.5f);
+#endif
 		CFont::SetCentreOff();
 		CFont::SetRightJustifyOff();
 		CFont::SetJustifyOff();
 		CFont::SetBackGroundOnlyTextOff();
+#ifdef FIX_BUGS
 		CFont::SetWrapx(SCREEN_STRETCH_X(DEFAULT_SCREEN_WIDTH));
+#else
+		CFont::SetWrapx(DEFAULT_SCREEN_WIDTH);
+#endif
 		CFont::SetFontStyle(FONT_HEADING);
 		
 		CFont::SetColor(CRGBA(0, 0, 0, 255));
-		CFont::PrintString(42.0f, 42.0f, ustr);
+#ifdef FIX_BUGS
+		CFont::PrintString(SCREEN_SCALE_X(40.0f+2.0f), SCREEN_SCALE_Y(40.0f+2.0f), ustr);
+#else
+		CFont::PrintString(40.0f+2.0f, 40.0f+2.0f, ustr);
+#endif
 		
 		CFont::SetColor(CRGBA(255, 108, 0, 255));
+#ifdef FIX_BUGS
+		CFont::PrintString(SCREEN_SCALE_X(40.0f), SCREEN_SCALE_Y(40.0f), ustr);
+#else
 		CFont::PrintString(40.0f, 40.0f, ustr);
+#endif
 	}
+}
+#endif
+
+#ifdef NEW_RENDERER
+bool gbRenderRoads = true;
+bool gbRenderEverythingBarRoads = true;
+//bool gbRenderFadingInUnderwaterEntities = true;
+bool gbRenderFadingInEntities = true;
+bool gbRenderWater = true;
+bool gbRenderBoats = true;
+bool gbRenderVehicles = true;
+bool gbRenderWorld0 = true;
+bool gbRenderWorld1 = true;
+bool gbRenderWorld2 = true;
+
+void
+MattRenderScene(void)
+{
+	// this calls CMattRenderer::Render
+	/// CWorld::AdvanceCurrentScanCode();
+	// CMattRenderer::ResetRenderStates
+	/// CRenderer::ClearForFrame();		// before ConstructRenderList
+	// CClock::CalcEnvMapTimeMultiplicator
+if(gbRenderWater)
+	CRenderer::RenderWater();	// actually CMattRenderer::RenderWater
+	// CClock::ms_EnvMapTimeMultiplicator = 1.0f;
+	// cWorldStream::ClearDynamics
+	/// CRenderer::ConstructRenderList();	// before PreRender
+if(gbRenderWorld0)
+	CRenderer::RenderWorld(0);	// roads
+	// CMattRenderer::ResetRenderStates
+	/// CRenderer::PreRender();	// has to be called before BeginUpdate because of cutscene shadows
+	CCoronas::RenderReflections();
+if(gbRenderWorld1)
+	CRenderer::RenderWorld(1);	// opaque
+if(gbRenderRoads)
+	CRenderer::RenderRoads();
+
+	CRenderer::RenderPeds();
+
+if(gbRenderBoats)
+	CRenderer::RenderBoats();
+//if(gbRenderFadingInUnderwaterEntities)
+//	CRenderer::RenderFadingInUnderwaterEntities();
+
+if(gbRenderEverythingBarRoads)
+	CRenderer::RenderEverythingBarRoads();
+	// seam fixer
+	// moved this:
+	// CRenderer::RenderFadingInEntities();
+}
+
+void
+RenderScene_new(void)
+{
+	CClouds::Render();
+	DoRWRenderHorizon();
+
+	MattRenderScene();
+	DefinedState();
+	// CMattRenderer::ResetRenderStates
+	// moved CRenderer::RenderBoats to before transparent water
+}
+
+// TODO
+bool FredIsInFirstPersonCam(void) { return false; }
+void
+RenderEffects_new(void)
+{
+	CShadows::RenderStaticShadows();
+	// CRenderer::GenerateEnvironmentMap
+	CShadows::RenderStoredShadows();
+	CSkidmarks::Render();
+	CRubbish::Render();
+
+	// these aren't really effects
+	DefinedState();
+	if(FredIsInFirstPersonCam()){
+		DefinedState();
+		C3dMarkers::Render();	// normally rendered in CSpecialFX::Render()
+if(gbRenderWorld2)
+		CRenderer::RenderWorld(2);	// transparent
+if(gbRenderVehicles)
+		CRenderer::RenderVehicles();
+	}else{
+		// flipped these two, seems to give the best result
+if(gbRenderWorld2)
+		CRenderer::RenderWorld(2);	// transparent
+if(gbRenderVehicles)
+		CRenderer::RenderVehicles();
+	}
+	// better render these after transparent world
+if(gbRenderFadingInEntities)
+	CRenderer::RenderFadingInEntities();
+
+	// actual effects here
+	CGlass::Render();
+	// CMattRenderer::ResetRenderStates
+	DefinedState();
+	CWeather::RenderRainStreaks();
+	// CWeather::AddSnow
+	CWaterCannons::Render();
+	CAntennas::Render();
+	CSpecialFX::Render();
+	CCoronas::Render();
+	CParticle::Render();
+	CPacManPickups::Render();
+	CWeaponEffects::Render();
+	CPointLights::RenderFogEffect();
+	CMovingThings::Render();
+	CRenderer::RenderFirstPersonVehicle();
 }
 #endif
 
 void
 RenderScene(void)
 {
+#ifdef NEW_RENDERER
+	if(gbNewRenderer){
+		RenderScene_new();
+		return;
+	}
+#endif
 	CClouds::Render();
 	DoRWRenderHorizon();
 	CRenderer::RenderRoads();
@@ -1090,6 +1413,12 @@ RenderDebugShit(void)
 void
 RenderEffects(void)
 {
+#ifdef NEW_RENDERER
+	if(gbNewRenderer){
+		RenderEffects_new();
+		return;
+	}
+#endif
 	CGlass::Render();
 	CWaterCannons::Render();
 	CSpecialFX::Render();
@@ -1273,8 +1602,8 @@ Idle(void *arg)
 	if((!FrontEndMenuManager.m_bMenuActive || FrontEndMenuManager.m_bRenderGameInMenu) &&
 	   TheCamera.GetScreenFadeStatus() != FADE_2)
 	{
+#if defined(GTA_PC) && !defined(RW_GL3) && defined(FIX_BUGS)
 		// This is from SA, but it's nice for windowed mode
-#if defined(GTA_PC) && !defined(RW_GL3)
 		if (!FrontEndMenuManager.m_bRenderGameInMenu) {
 			RwV2d pos;
 			pos.x = SCREEN_WIDTH / 2.0f;
@@ -1285,6 +1614,12 @@ Idle(void *arg)
 
 		PUSH_MEMID(MEMID_RENDERLIST);
 		tbStartTimer(0, "CnstrRenderList");
+#ifdef NEW_RENDERER
+		if(gbNewRenderer){
+			CWorld::AdvanceCurrentScanCode();	// don't think this is even necessary
+			CRenderer::ClearForFrame();
+		}
+#endif
 		CRenderer::ConstructRenderList();
 		tbEndTimer("CnstrRenderList");
 
@@ -1352,7 +1687,7 @@ Idle(void *arg)
 		CameraSize(Scene.camera, nil, SCREEN_VIEWWINDOW, DEFAULT_ASPECT_RATIO);
 #endif
 		CVisibilityPlugins::SetRenderWareCamera(Scene.camera);
-		RwCameraClear(Scene.camera, &gColourTop, rwCAMERACLEARZ);
+		RwCameraClear(Scene.camera, &gColourTop, CLEARMODE);
 		if(!RsCameraBeginUpdate(Scene.camera))
 			goto popret;
 	}
@@ -1418,7 +1753,7 @@ FrontendIdle(void)
 	CameraSize(Scene.camera, nil, SCREEN_VIEWWINDOW, DEFAULT_ASPECT_RATIO);
 #endif
 	CVisibilityPlugins::SetRenderWareCamera(Scene.camera);
-	RwCameraClear(Scene.camera, &gColourTop, rwCAMERACLEARZ);
+	RwCameraClear(Scene.camera, &gColourTop, CLEARMODE);
 	if(!RsCameraBeginUpdate(Scene.camera))
 		return;
 
@@ -1513,15 +1848,6 @@ AppEventHandler(RsEvent event, void *param)
 			return rsEVENTPROCESSED;
 		}
 
-#ifndef MASTER
-		case rsANIMVIEWER:
-		{
-			TheModelViewer();
-
-			return rsEVENTPROCESSED;
-		}
-#endif
-
 		default:
 		{
 			return rsEVENTNOTPROCESSED;
@@ -1536,8 +1862,11 @@ TheModelViewer(void)
 #if (defined(GTA_PS2) || defined(GTA_XBOX))
 	//TODO
 #else
+	// This is III Mobile code. III Xbox code run it like main function, which is impossible to implement on PC's state machine implementation.
+	// Also we want 2D things initialized in here to print animation ids etc., our additions for that marked with X
+
 #ifdef ASPECT_RATIO_SCALE
-	CDraw::SetAspectRatio(CDraw::FindAspectRatio());
+	CDraw::SetAspectRatio(CDraw::FindAspectRatio()); // X
 #endif
 	CAnimViewer::Update();
 	CTimer::Update();
@@ -1547,12 +1876,12 @@ TheModelViewer(void)
 		CTimeCycle::GetSkyBottomRed(), CTimeCycle::GetSkyBottomGreen(), CTimeCycle::GetSkyBottomBlue(),
 		255);
 
-	CSprite2d::InitPerFrame();
-	CFont::InitPerFrame();
+	CSprite2d::InitPerFrame(); // X
+	CFont::InitPerFrame(); // X
 	DefinedState();
 	CVisibilityPlugins::InitAlphaEntityList();
 	CAnimViewer::Render();
-	Render2dStuff();
+	Render2dStuff(); // X
 	DoRWStuffEndOfFrame();
 #endif
 }
@@ -1568,7 +1897,7 @@ void TheGame(void)
 
 	CTimer::Initialise();
 
-#ifdef GTA_PS2
+#if GTA_VERSION <= GTA3_PS2_160
 	CGame::Initialise();
 #else
 	CGame::Initialise("DATA\\GTA3.DAT");
@@ -1638,7 +1967,7 @@ void TheGame(void)
 
 			PUSH_MEMID(MEMID_RENDER);
 
-			if (!FrontEndMenuManager.m_bMenuActive || FrontEndMenuManager.m_bRenderGameInMenu == true && TheCamera.GetScreenFadeStatus() != FADE_2 )
+			if ((!FrontEndMenuManager.m_bMenuActive || FrontEndMenuManager.m_bRenderGameInMenu == true) && TheCamera.GetScreenFadeStatus() != FADE_2 )
 			{
 
 				PUSH_MEMID(MEMID_RENDERLIST);
@@ -1646,14 +1975,22 @@ void TheGame(void)
 				CRenderer::PreRender();
 				POP_MEMID();
 
+#ifdef FIX_BUGS
+				// This has to be done BEFORE RwCameraBeginUpdate
+				RwCameraSetFarClipPlane(Scene.camera, CTimeCycle::GetFarClip());
+				RwCameraSetFogDistance(Scene.camera, CTimeCycle::GetFogStart());
+#endif
+
 				if (CWeather::LightningFlash && !CCullZones::CamNoRain())
 					DoRWStuffStartOfFrame_Horizon(255, 255, 255, 255, 255, 255, 255);
 				else
 					DoRWStuffStartOfFrame_Horizon(CTimeCycle::GetSkyTopRed(), CTimeCycle::GetSkyTopGreen(), CTimeCycle::GetSkyTopBlue(), CTimeCycle::GetSkyBottomRed(), CTimeCycle::GetSkyBottomGreen(), CTimeCycle::GetSkyBottomBlue(), 255);
 
 				DefinedState();
+#ifndef FIX_BUGS
 				RwCameraSetFarClipPlane(Scene.camera, CTimeCycle::GetFarClip());
 				RwCameraSetFogDistance(Scene.camera, CTimeCycle::GetFogStart());
+#endif
 
 				RenderScene();
 				RenderDebugShit();
@@ -1667,11 +2004,14 @@ void TheGame(void)
 			}
 			else
 			{
-				CameraSize(Scene.camera, NULL, SCREEN_VIEWWINDOW, SCREEN_ASPECT_RATIO);
+#ifdef ASPECT_RATIO_SCALE
+				CameraSize(Scene.camera, nil, SCREEN_VIEWWINDOW, SCREEN_ASPECT_RATIO);
+#else
+				CameraSize(Scene.camera, nil, SCREEN_VIEWWINDOW, DEFAULT_ASPECT_RATIO);
+#endif
 				CVisibilityPlugins::SetRenderWareCamera(Scene.camera);
-				RwCameraClear(Scene.camera, &gColourTop, rwCAMERACLEARZ);
-				if (!RsCameraBeginUpdate(Scene.camera))
-					break;
+				RwCameraClear(Scene.camera, &gColourTop, CLEARMODE);
+				RsCameraBeginUpdate(Scene.camera);
 			}
 
 			RenderMenus();
@@ -1857,6 +2197,20 @@ void SystemInit()
 #endif
 }
 
+int VBlankCounter(int ca)
+{
+	frameCount++;
+	ExitHandler();
+	return 0;
+}
+
+// linked against by RW!
+extern "C" void WaitVBlank(void)
+{
+	int32 startFrame = frameCount;
+	while(startFrame == frameCount);
+}
+
 void GameInit()
 {
 	if ( !gameAlreadyInitialised )
@@ -1900,11 +2254,16 @@ void GameInit()
 			"\\MODELS\\MISC.TXD;1",
 			"\\MODELS\\GENERIC.TXD;1",
 			"\\MODELS\\GTA3.DIR;1",
+			// TODO: japanese?
+#ifdef GTA_PAL
 			"\\TEXT\\ENGLISH.GXT;1",
 			"\\TEXT\\FRENCH.GXT;1",
 			"\\TEXT\\GERMAN.GXT;1",
 			"\\TEXT\\ITALIAN.GXT;1",
 			"\\TEXT\\SPANISH.GXT;1",
+#else
+			"\\TEXT\\AMERICAN.GXT;1",
+#endif
 			"\\TXD\\LOADSC0.TXD;1",
 			"\\TXD\\LOADSC1.TXD;1",
 			"\\TXD\\LOADSC2.TXD;1",
@@ -2018,6 +2377,36 @@ void GameInit()
 	}
 }
 
+void PlayIntroMPEGs()
+{
+#ifdef GTA_PS2
+	if (gameAlreadyInitialised)
+		RpSkySuspend();
+
+	InitMPEGPlayer();
+
+#ifdef GTA_PAL
+	PlayMPEG("cdrom0:\\MOVIES\\DMAPAL.PSS;1", false);
+
+	if (CGame::frenchGame || CGame::germanGame)
+		PlayMPEG("cdrom0:\\MOVIES\\INTROPAF.PSS;1", true);
+	else
+		PlayMPEG("cdrom0:\\MOVIES\\INTROPAL.PSS;1", true);
+#else
+	PlayMPEG("cdrom0:\\MOVIES\\DMANTSC.PSS;1", false);
+
+	PlayMPEG("cdrom0:\\MOVIES\\INTRNTSC.PSS;1", true);
+#endif
+
+	ShutdownMPEGPlayer();
+
+	if ( gameAlreadyInitialised )
+		RpSkyResume();
+#else
+	//TODO
+#endif
+}
+
 int
 main(int argc, char *argv[])
 {
@@ -2044,35 +2433,8 @@ main(int argc, char *argv[])
 		// eh?
 	}
 #endif
-	
-#ifdef GTA_PS2
-	{
-		if (gameAlreadyInitialised)
-			RpSkySuspend();
 
-		InitMPEGPlayer();
-
-#ifdef GTA_PAL
-		PlayMPEG("cdrom0:\\MOVIES\\DMAPAL.PSS;1", false);
-
-		if (CGame::frenchGame || CGame::germanGame)
-			PlayMPEG("cdrom0:\\MOVIES\\INTROPAF.PSS;1", true);
-		else
-			PlayMPEG("cdrom0:\\MOVIES\\INTROPAL.PSS;1", true);
-#else
-		PlayMPEG("cdrom0:\\MOVIES\\DMANTSC.PSS;1", false);
-
-		PlayMPEG("cdrom0:\\MOVIES\\INTRNTSC.PSS;1", true);
-#endif
-
-		ShutdownMPEGPlayer();
-
-		if ( gameAlreadyInitialised )
-			RpSkyResume();
-	}
-#else
-	//TODO
-#endif
+	PlayIntroMPEGs();
 
 	GameInit();
 

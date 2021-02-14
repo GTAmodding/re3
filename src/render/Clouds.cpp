@@ -133,7 +133,7 @@ CClouds::Render(void)
 	CSprite::InitSpriteBuffer();
 
 	int minute = CClock::GetHours()*60 + CClock::GetMinutes();
-	RwV3d campos = *(RwV3d*)&TheCamera.GetPosition();
+	RwV3d campos = TheCamera.GetPosition();
 
 	// Moon
 	int moonfadeout = Abs(minute - 180);	// fully visible at 3AM
@@ -273,8 +273,8 @@ CClouds::Render(void)
 
 		for(i = 0; i < 37; i++){
 			RwV3d pos = { 2.0f*CoorsOffsetX[i], 2.0f*CoorsOffsetY[i], 40.0f*CoorsOffsetZ[i] + 40.0f };
-			worldpos.x = campos.x*rot_cos + campos.y*rot_sin + pos.x;
-			worldpos.y = campos.x*rot_sin + campos.y*rot_cos + pos.y;
+			worldpos.x = pos.x*rot_cos + pos.y*rot_sin + campos.x;
+			worldpos.y = pos.x*rot_sin - pos.y*rot_cos + campos.y;
 			worldpos.z = pos.z;
 			if(bCloudOnScreen[i] && CSprite::CalcScreenCoors(worldpos, &screenpos, &szx, &szy, false)){
 				// BUG: this is stupid....would have to do this for each cloud individually

@@ -7,7 +7,7 @@ void TextCopy(wchar *dst, const wchar *src);
 
 struct CKeyEntry
 {
-#ifdef FIX_BUGS
+#if defined(FIX_BUGS) || defined(FIX_BUGS_64)
 	uint32 valueOffset;
 #else
 	wchar *value;
@@ -26,11 +26,11 @@ public:
 
 	CKeyArray(void) : entries(nil), numEntries(0) {}
 	~CKeyArray(void) { Unload(); }
-	void Load(size_t length, uint8 *data, intptr_t *offset);
+	void Load(size_t length, uint8 *data, ssize_t *offset);
 	void Unload(void);
 	void Update(wchar *chars);
 	CKeyEntry *BinarySearch(const char *key, CKeyEntry *entries, int16 low, int16 high);
-#ifdef FIX_BUGS
+#if defined (FIX_BUGS) || defined(FIX_BUGS_64)
 	wchar *Search(const char *key, wchar *data);
 #else
 	wchar *Search(const char *key);
@@ -45,7 +45,7 @@ public:
 
 	CData(void) : chars(nil), numChars(0) {}
 	~CData(void) { Unload(); }
-	void Load(size_t length, uint8 *data, intptr_t *offset);
+	void Load(size_t length, uint8 *data, ssize_t *offset);
 	void Unload(void);
 };
 

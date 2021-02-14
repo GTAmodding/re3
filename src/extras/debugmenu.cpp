@@ -5,7 +5,7 @@
 #include "ControllerConfig.h"
 #include "Timer.h"
 #include "rtcharse.h"
-#include "inttypes.h"
+#include "re3_inttypes.h"
 #include "debugmenu.h"
 #include <new>
 

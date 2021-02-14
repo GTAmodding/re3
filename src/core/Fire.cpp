@@ -43,7 +43,7 @@ CFire::ProcessFire(void)
 	float fDamagePlayer;
 	float fDamagePeds;
 	float fDamageVehicle;
-	int8 nRandNumber;
+	int16 nRandNumber;
 	float fGreen;
 	float fRed;
 	CVector lightpos;
@@ -90,7 +90,11 @@ CFire::ProcessFire(void)
 			}
 		}
 	}
-	if (!FindPlayerVehicle() && !FindPlayerPed()->m_pFire && !(FindPlayerPed()->bFireProof)
+	if (!FindPlayerVehicle() &&
+#ifdef FIX_BUGS
+		FindPlayerPed() && 
+#endif
+		!FindPlayerPed()->m_pFire && !(FindPlayerPed()->bFireProof)
 		&& ((FindPlayerPed()->GetPosition() - m_vecPos).MagnitudeSqr() < 2.0f)) {
 		FindPlayerPed()->DoStuffToGoOnFire();
 		gFireManager.StartFire(FindPlayerPed(), m_pSource, 0.8f, 1);
@@ -131,11 +135,10 @@ CFire::ProcessFire(void)
 			CShadows::StoreStaticShadow((uintptr)this, SHADOWTYPE_ADDITIVE, gpShadowExplosionTex, &lightpos, 7.0f, 0.0f, 0.0f, -7.0f, 0, nRandNumber / 2,
 			                            nRandNumber / 2, 0, 10.0f, 1.0f, 40.0f, 0, 0.0f);
 		}
-		fGreen = nRandNumber / 128;
-		fRed = nRandNumber / 128;
+		fGreen = nRandNumber / 128.f;
+		fRed = nRandNumber / 128.f;
 
-		CPointLights::AddLight(0, m_vecPos, CVector(0.0f, 0.0f, 0.0f),
-			12.0f, fRed, fGreen, 0, 0, 0);
+		CPointLights::AddLight(CPointLights::LIGHT_POINT, m_vecPos, CVector(0.0f, 0.0f, 0.0f), 12.0f, fRed, fGreen, 0, 0, 0);
 	} else {
 		Extinguish();
 	}
@@ -224,7 +227,7 @@ CFireManager::StartFire(CEntity *entityOnFire, CEntity *fleeFrom, float strength
 				ped->bDrawLast = false;
 				ped->SetMoveState(PEDMOVE_SPRINT);
 				ped->SetMoveAnim();
-				ped->m_nPedState = PED_ON_FIRE;
+				ped->SetPedState(PED_ON_FIRE);
 			}
 			if (fleeFrom) {
 				if (ped->m_nPedType == PEDTYPE_COP) {
@@ -397,7 +400,7 @@ CFireManager::StartScriptFire(const CVector &pos, CEntity *target, float strengt
 				CVector2D pos = target->GetPosition();
 				ped->SetFlee(pos, 10000);
 				ped->SetMoveAnim();
-				ped->m_nPedState = PED_ON_FIRE;
+				ped->SetPedState(PED_ON_FIRE);
 			}
 		} else if (target->IsVehicle()) {
 			veh->m_pCarFire = fire;

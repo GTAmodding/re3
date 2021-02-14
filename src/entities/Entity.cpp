@@ -4,31 +4,24 @@
 #include "RwHelper.h"
 #include "ModelIndices.h"
 #include "Timer.h"
-#include "Placeable.h"
 #include "Entity.h"
 #include "Object.h"
-#include "ParticleObject.h"
-#include "Lights.h"
 #include "World.h"
 #include "Camera.h"
 #include "Glass.h"
-#include "Clock.h"
 #include "Weather.h"
 #include "Timecycle.h"
-#include "Bridge.h"
 #include "TrafficLights.h"
 #include "Coronas.h"
 #include "PointLights.h"
 #include "Shadows.h"
 #include "Pickups.h"
 #include "SpecialFX.h"
-#include "References.h"
 #include "TxdStore.h"
 #include "Zones.h"
+#include "MemoryHeap.h"
 #include "Bones.h"
 #include "Debug.h"
-#include "Renderer.h"
-#include "MemoryHeap.h"
 
 int gBuildings;
 
@@ -90,15 +83,318 @@ CEntity::~CEntity(void)
 }
 
 void
+CEntity::SetModelIndex(uint32 id)
+{
+	m_modelIndex = id;
+	CreateRwObject();
+}
+
+void
+CEntity::SetModelIndexNoCreate(uint32 id)
+{
+	m_modelIndex = id;
+}
+
+void
+CEntity::CreateRwObject(void)
+{
+	CBaseModelInfo *mi;
+
+	mi = CModelInfo::GetModelInfo(m_modelIndex);
+
+	PUSH_MEMID(MEMID_WORLD);
+	m_rwObject = mi->CreateInstance();
+	POP_MEMID();
+
+	if(m_rwObject){
+		if(IsBuilding())
+			gBuildings++;
+		if(RwObjectGetType(m_rwObject) == rpATOMIC)
+			m_matrix.AttachRW(RwFrameGetMatrix(RpAtomicGetFrame((RpAtomic*)m_rwObject)), false);
+		else if(RwObjectGetType(m_rwObject) == rpCLUMP)
+			m_matrix.AttachRW(RwFrameGetMatrix(RpClumpGetFrame((RpClump*)m_rwObject)), false);
+		mi->AddRef();
+	}
+}
+
+void
+CEntity::AttachToRwObject(RwObject *obj)
+{
+	m_rwObject = obj;
+	if(m_rwObject){
+		if(RwObjectGetType(m_rwObject) == rpATOMIC)
+			m_matrix.Attach(RwFrameGetMatrix(RpAtomicGetFrame((RpAtomic*)m_rwObject)), false);
+		else if(RwObjectGetType(m_rwObject) == rpCLUMP)
+			m_matrix.Attach(RwFrameGetMatrix(RpClumpGetFrame((RpClump*)m_rwObject)), false);
+		CModelInfo::GetModelInfo(m_modelIndex)->AddRef();
+	}
+}
+
+void
+CEntity::DetachFromRwObject(void)
+{
+	if(m_rwObject)
+		CModelInfo::GetModelInfo(m_modelIndex)->RemoveRef();
+	m_rwObject = nil;
+	m_matrix.Detach();
+}
+
+#ifdef PED_SKIN
+RpAtomic*
+AtomicRemoveAnimFromSkinCB(RpAtomic *atomic, void *data)
+{
+	if(RpSkinGeometryGetSkin(RpAtomicGetGeometry(atomic))){
+		RpHAnimHierarchy *hier = RpSkinAtomicGetHAnimHierarchy(atomic);
+#ifdef LIBRW
+		if(hier && hier->interpolator->currentAnim){
+			RpHAnimAnimationDestroy(hier->interpolator->currentAnim);
+			hier->interpolator->currentAnim = nil;
+		}
+#else
+		if(hier && hier->pCurrentAnim){
+			RpHAnimAnimationDestroy(hier->pCurrentAnim);
+			hier->pCurrentAnim = nil;
+		}
+#endif
+	}
+	return atomic;
+}
+#endif
+
+void
+CEntity::DeleteRwObject(void)
+{
+	RwFrame *f;
+
+	m_matrix.Detach();
+	if(m_rwObject){
+		if(RwObjectGetType(m_rwObject) == rpATOMIC){
+			f = RpAtomicGetFrame((RpAtomic*)m_rwObject);
+			RpAtomicDestroy((RpAtomic*)m_rwObject);
+			RwFrameDestroy(f);
+		}else if(RwObjectGetType(m_rwObject) == rpCLUMP){
+#ifdef PED_SKIN
+			if(IsClumpSkinned((RpClump*)m_rwObject))
+				RpClumpForAllAtomics((RpClump*)m_rwObject, AtomicRemoveAnimFromSkinCB, nil);
+#endif
+			RpClumpDestroy((RpClump*)m_rwObject);
+		}
+		m_rwObject = nil;
+		CModelInfo::GetModelInfo(m_modelIndex)->RemoveRef();
+		if(IsBuilding())
+			gBuildings--;
+	}
+}
+
+CRect
+CEntity::GetBoundRect(void)
+{
+	CRect rect;
+	CVector v;
+	CColModel *col = CModelInfo::GetModelInfo(m_modelIndex)->GetColModel();
+
+	rect.ContainPoint(m_matrix * col->boundingBox.min);
+	rect.ContainPoint(m_matrix * col->boundingBox.max);
+
+	v = col->boundingBox.min;
+	v.x = col->boundingBox.max.x;
+	rect.ContainPoint(m_matrix * v);
+
+	v = col->boundingBox.max;
+	v.x = col->boundingBox.min.x;
+	rect.ContainPoint(m_matrix * v);
+
+	return rect;
+}
+
+CVector
+CEntity::GetBoundCentre(void)
+{
+	CVector v;
+	GetBoundCentre(v);
+	return v;
+}
+
+void
 CEntity::GetBoundCentre(CVector &out)
 {
 	out = m_matrix * CModelInfo::GetModelInfo(m_modelIndex)->GetColModel()->boundingSphere.center;
-};
+}
+
+float
+CEntity::GetBoundRadius(void)
+{
+	return CModelInfo::GetModelInfo(m_modelIndex)->GetColModel()->boundingSphere.radius;
+}
+
+void
+CEntity::UpdateRwFrame(void)
+{
+	if(m_rwObject)
+		RwFrameUpdateObjects((RwFrame*)rwObjectGetParent(m_rwObject));
+}
+
+#ifdef PED_SKIN
+void
+CEntity::UpdateRpHAnim(void)
+{
+	RpHAnimHierarchy *hier = GetAnimHierarchyFromSkinClump(GetClump());
+	RpHAnimHierarchyUpdateMatrices(hier);
+
+#if 0
+	int i;
+	char buf[256];
+	if(this == (CEntity*)FindPlayerPed())
+	for(i = 0; i < hier->numNodes; i++){
+		RpHAnimStdInterpFrame *kf = (RpHAnimStdInterpFrame*)rpHANIMHIERARCHYGETINTERPFRAME(hier, i);
+		sprintf(buf, "%6.3f %6.3f %6.3f %6.3f  %6.3f %6.3f %6.3f  %d %s",
+			kf->q.imag.x, kf->q.imag.y, kf->q.imag.z, kf->q.real,
+			kf->t.x, kf->t.y, kf->t.z,
+			HIERNODEID(hier, i),
+			ConvertBoneTag2BoneName(HIERNODEID(hier, i)));
+		CDebug::PrintAt(buf, 10, 1+i*3);
+
+		RwMatrix *m = &RpHAnimHierarchyGetMatrixArray(hier)[i];
+		sprintf(buf, "%6.3f %6.3f %6.3f %6.3f",
+			m->right.x, m->up.x, m->at.x, m->pos.x);
+		CDebug::PrintAt(buf, 80, 1+i*3+0);
+		sprintf(buf, "%6.3f %6.3f %6.3f %6.3f",
+			m->right.y, m->up.y, m->at.y, m->pos.y);
+		CDebug::PrintAt(buf, 80, 1+i*3+1);
+		sprintf(buf, "%6.3f %6.3f %6.3f %6.3f",
+			m->right.z, m->up.z, m->at.z, m->pos.z);
+		CDebug::PrintAt(buf, 80, 1+i*3+2);
+	}
+
+	void RenderSkeleton(RpHAnimHierarchy *hier);
+	RenderSkeleton(hier);
+#endif
+}
+#endif
+
+void
+CEntity::PreRender(void)
+{
+	switch(m_type){
+	case ENTITY_TYPE_BUILDING:
+		if(GetModelIndex() == MI_RAILTRACKS){
+			CShadows::StoreShadowForPole(this, 0.0f, -10.949f, 5.0f, 8.0f, 1.0f, 0);
+			CShadows::StoreShadowForPole(this, 0.0f, 10.949f, 5.0f, 8.0f, 1.0f, 1);
+		}else if(IsTreeModel(GetModelIndex())){
+			CShadows::StoreShadowForTree(this);
+			ModifyMatrixForTreeInWind();
+		}else if(IsBannerModel(GetModelIndex())){
+			ModifyMatrixForBannerInWind();
+		}
+		break;
+	case ENTITY_TYPE_OBJECT:
+		if(GetModelIndex() == MI_COLLECTABLE1){
+			CPickups::DoCollectableEffects(this);
+			GetMatrix().UpdateRW();
+			UpdateRwFrame();
+		}else if(GetModelIndex() == MI_MONEY){
+			CPickups::DoMoneyEffects(this);
+			GetMatrix().UpdateRW();
+			UpdateRwFrame();
+		}else if(GetModelIndex() == MI_NAUTICALMINE ||
+		         GetModelIndex() == MI_CARMINE ||
+		         GetModelIndex() == MI_BRIEFCASE){
+			if(((CObject*)this)->bIsPickup){
+				CPickups::DoMineEffects(this);
+				GetMatrix().UpdateRW();
+				UpdateRwFrame();
+			}
+		}else if(IsPickupModel(GetModelIndex())){
+			if(((CObject*)this)->bIsPickup){
+				CPickups::DoPickUpEffects(this);
+				GetMatrix().UpdateRW();
+				UpdateRwFrame();
+			}else if(GetModelIndex() == MI_GRENADE){
+				CMotionBlurStreaks::RegisterStreak((uintptr)this,
+					100, 100, 100,
+					GetPosition() - 0.07f*TheCamera.GetRight(),
+					GetPosition() + 0.07f*TheCamera.GetRight());
+			}else if(GetModelIndex() == MI_MOLOTOV){
+				CMotionBlurStreaks::RegisterStreak((uintptr)this,
+					0, 100, 0,
+					GetPosition() - 0.07f*TheCamera.GetRight(),
+					GetPosition() + 0.07f*TheCamera.GetRight());
+			}
+		}else if(GetModelIndex() == MI_MISSILE){
+			CVector pos = GetPosition();
+			float flicker = (CGeneral::GetRandomNumber() & 0xF)/(float)0x10;
+			CShadows::StoreShadowToBeRendered(SHADOWTYPE_ADDITIVE,
+				gpShadowExplosionTex, &pos,
+				8.0f, 0.0f, 0.0f, -8.0f,
+				255, 200.0f*flicker, 160.0f*flicker, 120.0f*flicker,
+				20.0f, false, 1.0f);
+			CPointLights::AddLight(CPointLights::LIGHT_POINT,
+				pos, CVector(0.0f, 0.0f, 0.0f),
+				8.0f,
+				1.0f*flicker,
+				0.8f*flicker,
+				0.6f*flicker,
+				CPointLights::FOG_NONE, true);
+			CCoronas::RegisterCorona((uintptr)this,
+				255.0f*flicker, 220.0f*flicker, 190.0f*flicker, 255,
+				pos, 6.0f*flicker, 80.0f, gpCoronaTexture[CCoronas::TYPE_STAR],
+				CCoronas::FLARE_NONE, CCoronas::REFLECTION_ON,
+				CCoronas::LOSCHECK_OFF, CCoronas::STREAK_OFF, 0.0f);
+		}else if(IsGlass(GetModelIndex())){
+			PreRenderForGlassWindow();
+		}
+		// fall through
+	case ENTITY_TYPE_DUMMY:
+		if(GetModelIndex() == MI_TRAFFICLIGHTS){
+			CTrafficLights::DisplayActualLight(this);
+			CShadows::StoreShadowForPole(this, 2.957f, 0.147f, 0.0f, 16.0f, 0.4f, 0);
+		}else if(GetModelIndex() == MI_SINGLESTREETLIGHTS1)
+			CShadows::StoreShadowForPole(this, 0.744f, 0.0f, 0.0f, 16.0f, 0.4f, 0);
+		else if(GetModelIndex() == MI_SINGLESTREETLIGHTS2)
+			CShadows::StoreShadowForPole(this, 0.043f, 0.0f, 0.0f, 16.0f, 0.4f, 0);
+		else if(GetModelIndex() == MI_SINGLESTREETLIGHTS3)
+			CShadows::StoreShadowForPole(this, 1.143f, 0.145f, 0.0f, 16.0f, 0.4f, 0);
+		else if(GetModelIndex() == MI_DOUBLESTREETLIGHTS)
+			CShadows::StoreShadowForPole(this, 0.0f, -0.048f, 0.0f, 16.0f, 0.4f, 0);
+		else if(GetModelIndex() == MI_STREETLAMP1 ||
+		        GetModelIndex() == MI_STREETLAMP2)
+			CShadows::StoreShadowForPole(this, 0.0f, 0.0f, 0.0f, 16.0f, 0.4f, 0);
+		break;
+	}
+
+	if (CModelInfo::GetModelInfo(GetModelIndex())->GetNum2dEffects() != 0)
+		ProcessLightsForEntity();
+}
+
+void
+CEntity::Render(void)
+{
+	if(m_rwObject){
+		bImBeingRendered = true;
+		if(RwObjectGetType(m_rwObject) == rpATOMIC)
+			RpAtomicRender((RpAtomic*)m_rwObject);
+		else
+			RpClumpRender((RpClump*)m_rwObject);
+		bImBeingRendered = false;
+	}
+}
 
 bool
 CEntity::GetIsTouching(CVector const &center, float radius)
 {
 	return sq(GetBoundRadius()+radius) > (GetBoundCentre()-center).MagnitudeSqr();
+}
+
+bool
+CEntity::IsVisible(void)
+{
+	return m_rwObject && bIsVisible && GetIsOnScreen();
+}
+
+bool
+CEntity::IsVisibleComplex(void)
+{
+	return m_rwObject && bIsVisible && GetIsOnScreenComplex();
 }
 
 bool
@@ -111,7 +407,11 @@ CEntity::GetIsOnScreen(void)
 bool
 CEntity::GetIsOnScreenComplex(void)
 {
-	RwV3d boundBox[8];
+#ifdef GTA_PS2
+	CVuVector boundBox[8];
+#else
+	CVector boundBox[8];
+#endif
 
 	if(TheCamera.IsPointVisible(GetBoundCentre(), &TheCamera.GetCameraMatrix()))
 		return true;
@@ -269,62 +569,10 @@ CEntity::Remove(void)
 		}
 }
 
-void
-CEntity::CreateRwObject(void)
+float
+CEntity::GetDistanceFromCentreOfMassToBaseOfModel(void)
 {
-	CBaseModelInfo *mi;
-
-	mi = CModelInfo::GetModelInfo(m_modelIndex);
-
-	PUSH_MEMID(MEMID_WORLD);
-	m_rwObject = mi->CreateInstance();
-	POP_MEMID();
-
-	if(m_rwObject){
-		if(IsBuilding())
-			gBuildings++;
-		if(RwObjectGetType(m_rwObject) == rpATOMIC)
-			m_matrix.AttachRW(RwFrameGetMatrix(RpAtomicGetFrame((RpAtomic*)m_rwObject)), false);
-		else if(RwObjectGetType(m_rwObject) == rpCLUMP)
-			m_matrix.AttachRW(RwFrameGetMatrix(RpClumpGetFrame((RpClump*)m_rwObject)), false);
-		mi->AddRef();
-	}
-}
-
-void
-CEntity::DeleteRwObject(void)
-{
-	RwFrame *f;
-
-	m_matrix.Detach();
-	if(m_rwObject){
-		if(RwObjectGetType(m_rwObject) == rpATOMIC){
-			f = RpAtomicGetFrame((RpAtomic*)m_rwObject);
-			RpAtomicDestroy((RpAtomic*)m_rwObject);
-			RwFrameDestroy(f);
-		}else if(RwObjectGetType(m_rwObject) == rpCLUMP){
-#ifdef PED_SKIN
-			if(IsClumpSkinned((RpClump*)m_rwObject))
-				RpClumpForAllAtomics((RpClump*)m_rwObject, AtomicRemoveAnimFromSkinCB, nil);
-#endif
-			RpClumpDestroy((RpClump*)m_rwObject);
-		}
-		m_rwObject = nil;
-		CModelInfo::GetModelInfo(m_modelIndex)->RemoveRef();
-		if(IsBuilding())
-			gBuildings--;
-	}
-}
-
-void
-CEntity::UpdateRwFrame(void)
-{
-	if(m_rwObject){
-		if(RwObjectGetType(m_rwObject) == rpATOMIC)
-			RwFrameUpdateObjects(RpAtomicGetFrame((RpAtomic*)m_rwObject));
-		else if(RwObjectGetType(m_rwObject) == rpCLUMP)
-			RwFrameUpdateObjects(RpClumpGetFrame((RpClump*)m_rwObject));
-	}
+	return -CModelInfo::GetModelInfo(m_modelIndex)->GetColModel()->boundingBox.min.z;
 }
 
 void
@@ -340,495 +588,11 @@ CEntity::SetupBigBuilding(void)
 	if(m_level == LEVEL_GENERIC){
 		if(mi->GetTxdSlot() != CTxdStore::FindTxdSlot("generic")){
 			mi->SetTexDictionary("generic");
-			printf("%d:%s txd has been set to generic\n", m_modelIndex, mi->GetName());
+			printf("%d:%s txd has been set to generic\n", m_modelIndex, mi->GetModelName());
 		}
 	}
 	if(mi->m_lodDistances[0] > 2000.0f)
 		m_level = LEVEL_GENERIC;
-}
-
-CRect
-CEntity::GetBoundRect(void)
-{
-	CRect rect;
-	CVector v;
-	CColModel *col = CModelInfo::GetModelInfo(m_modelIndex)->GetColModel();
-
-	rect.ContainPoint(m_matrix * col->boundingBox.min);
-	rect.ContainPoint(m_matrix * col->boundingBox.max);
-
-	v = col->boundingBox.min;
-	v.x = col->boundingBox.max.x;
-	rect.ContainPoint(m_matrix * v);
-
-	v = col->boundingBox.max;
-	v.x = col->boundingBox.min.x;
-	rect.ContainPoint(m_matrix * v);
-
-	return rect;
-}
-
-void
-CEntity::PreRender(void)
-{
-	switch(m_type){
-	case ENTITY_TYPE_BUILDING:
-		if(GetModelIndex() == MI_RAILTRACKS){
-			CShadows::StoreShadowForPole(this, 0.0f, -10.949f, 5.0f, 8.0f, 1.0f, 0);
-			CShadows::StoreShadowForPole(this, 0.0f, 10.949f, 5.0f, 8.0f, 1.0f, 1);
-		}else if(IsTreeModel(GetModelIndex())){
-			CShadows::StoreShadowForTree(this);
-			ModifyMatrixForTreeInWind();
-		}else if(IsBannerModel(GetModelIndex())){
-			ModifyMatrixForBannerInWind();
-		}
-		break;
-	case ENTITY_TYPE_OBJECT:
-		if(GetModelIndex() == MI_COLLECTABLE1){
-			CPickups::DoCollectableEffects(this);
-			GetMatrix().UpdateRW();
-			UpdateRwFrame();
-		}else if(GetModelIndex() == MI_MONEY){
-			CPickups::DoMoneyEffects(this);
-			GetMatrix().UpdateRW();
-			UpdateRwFrame();
-		}else if(GetModelIndex() == MI_NAUTICALMINE ||
-		         GetModelIndex() == MI_CARMINE ||
-		         GetModelIndex() == MI_BRIEFCASE){
-			if(((CObject*)this)->bIsPickup){
-				CPickups::DoMineEffects(this);
-				GetMatrix().UpdateRW();
-				UpdateRwFrame();
-			}
-		}else if(IsPickupModel(GetModelIndex())){
-			if(((CObject*)this)->bIsPickup){
-				CPickups::DoPickUpEffects(this);
-				GetMatrix().UpdateRW();
-				UpdateRwFrame();
-			}else if(GetModelIndex() == MI_GRENADE){
-				CMotionBlurStreaks::RegisterStreak((uintptr)this,
-					100, 100, 100,
-					GetPosition() - 0.07f*TheCamera.GetRight(),
-					GetPosition() + 0.07f*TheCamera.GetRight());
-			}else if(GetModelIndex() == MI_MOLOTOV){
-				CMotionBlurStreaks::RegisterStreak((uintptr)this,
-					0, 100, 0,
-					GetPosition() - 0.07f*TheCamera.GetRight(),
-					GetPosition() + 0.07f*TheCamera.GetRight());
-			}
-		}else if(GetModelIndex() == MI_MISSILE){
-			CVector pos = GetPosition();
-			float flicker = (CGeneral::GetRandomNumber() & 0xF)/(float)0x10;
-			CShadows::StoreShadowToBeRendered(SHADOWTYPE_ADDITIVE,
-				gpShadowExplosionTex, &pos,
-				8.0f, 0.0f, 0.0f, -8.0f,
-				255, 200.0f*flicker, 160.0f*flicker, 120.0f*flicker,
-				20.0f, false, 1.0f);
-			CPointLights::AddLight(CPointLights::LIGHT_POINT,
-				pos, CVector(0.0f, 0.0f, 0.0f),
-				8.0f,
-				1.0f*flicker,
-				0.8f*flicker,
-				0.6f*flicker,
-				CPointLights::FOG_NONE, true);
-			CCoronas::RegisterCorona((uintptr)this,
-				255.0f*flicker, 220.0f*flicker, 190.0f*flicker, 255,
-				pos, 6.0f*flicker, 80.0f, gpCoronaTexture[CCoronas::TYPE_STAR],
-				CCoronas::FLARE_NONE, CCoronas::REFLECTION_ON,
-				CCoronas::LOSCHECK_OFF, CCoronas::STREAK_OFF, 0.0f);
-		}else if(IsGlass(GetModelIndex())){
-			PreRenderForGlassWindow();
-		}
-		// fall through
-	case ENTITY_TYPE_DUMMY:
-		if(GetModelIndex() == MI_TRAFFICLIGHTS){
-			CTrafficLights::DisplayActualLight(this);
-			CShadows::StoreShadowForPole(this, 2.957f, 0.147f, 0.0f, 16.0f, 0.4f, 0);
-		}else if(GetModelIndex() == MI_SINGLESTREETLIGHTS1)
-			CShadows::StoreShadowForPole(this, 0.744f, 0.0f, 0.0f, 16.0f, 0.4f, 0);
-		else if(GetModelIndex() == MI_SINGLESTREETLIGHTS2)
-			CShadows::StoreShadowForPole(this, 0.043f, 0.0f, 0.0f, 16.0f, 0.4f, 0);
-		else if(GetModelIndex() == MI_SINGLESTREETLIGHTS3)
-			CShadows::StoreShadowForPole(this, 1.143f, 0.145f, 0.0f, 16.0f, 0.4f, 0);
-		else if(GetModelIndex() == MI_DOUBLESTREETLIGHTS)
-			CShadows::StoreShadowForPole(this, 0.0f, -0.048f, 0.0f, 16.0f, 0.4f, 0);
-		else if(GetModelIndex() == MI_STREETLAMP1 ||
-		        GetModelIndex() == MI_STREETLAMP2)
-			CShadows::StoreShadowForPole(this, 0.0f, 0.0f, 0.0f, 16.0f, 0.4f, 0);
-		break;
-	}
-
-	if (CModelInfo::GetModelInfo(GetModelIndex())->GetNum2dEffects() != 0)
-		ProcessLightsForEntity();
-}
-
-void
-CEntity::PreRenderForGlassWindow(void)
-{
-	CGlass::AskForObjectToBeRenderedInGlass(this);
-	bIsVisible = false;
-}
-
-void
-CEntity::Render(void)
-{
-	if(m_rwObject){
-		bImBeingRendered = true;
-		if(RwObjectGetType(m_rwObject) == rpATOMIC)
-			RpAtomicRender((RpAtomic*)m_rwObject);
-		else
-			RpClumpRender((RpClump*)m_rwObject);
-		bImBeingRendered = false;
-	}
-}
-
-bool
-CEntity::SetupLighting(void)
-{
-	DeActivateDirectional();
-	SetAmbientColours();
-	return false;
-}
-
-void
-CEntity::AttachToRwObject(RwObject *obj)
-{
-	m_rwObject = obj;
-	if(m_rwObject){
-		if(RwObjectGetType(m_rwObject) == rpATOMIC)
-			m_matrix.Attach(RwFrameGetMatrix(RpAtomicGetFrame((RpAtomic*)m_rwObject)), false);
-		else if(RwObjectGetType(m_rwObject) == rpCLUMP)
-			m_matrix.Attach(RwFrameGetMatrix(RpClumpGetFrame((RpClump*)m_rwObject)), false);
-		CModelInfo::GetModelInfo(m_modelIndex)->AddRef();
-	}
-}
-
-void
-CEntity::DetachFromRwObject(void)
-{
-	if(m_rwObject)
-		CModelInfo::GetModelInfo(m_modelIndex)->RemoveRef();
-	m_rwObject = nil;
-	m_matrix.Detach();
-}
-
-void
-CEntity::RegisterReference(CEntity **pent)
-{
-	if(IsBuilding())
-		return;
-	CReference *ref;
-	// check if already registered
-	for(ref = m_pFirstReference; ref; ref = ref->next)
-		if(ref->pentity == pent)
-			return;
-	// have to allocate new reference
-	ref = CReferences::pEmptyList;
-	if(ref){
-		CReferences::pEmptyList = ref->next;
-
-		ref->pentity = pent;
-		ref->next = m_pFirstReference;
-		m_pFirstReference = ref;
-		return;
-	}
-	return;
-}
-
-// Clear all references to this entity
-void
-CEntity::ResolveReferences(void)
-{
-	CReference *ref;
-	// clear pointers to this entity
-	for(ref = m_pFirstReference; ref; ref = ref->next)
-		if(*ref->pentity == this)
-			*ref->pentity = nil;
-	// free list
-	if(m_pFirstReference){
-		for(ref = m_pFirstReference; ref->next; ref = ref->next)
-			;
-		ref->next = CReferences::pEmptyList;
-		CReferences::pEmptyList = m_pFirstReference;
-		m_pFirstReference = nil;
-	}
-}
-
-// Free all references that no longer point to this entity
-void
-CEntity::PruneReferences(void)
-{
-	CReference *ref, *next, **lastnextp;
-	lastnextp = &m_pFirstReference;
-	for(ref = m_pFirstReference; ref; ref = next){
-		next = ref->next;
-		if(*ref->pentity == this)
-			lastnextp = &ref->next;
-		else{
-			*lastnextp = ref->next;
-			ref->next = CReferences::pEmptyList;
-			CReferences::pEmptyList = ref;
-		}
-	}
-}
-
-#ifdef PED_SKIN
-void
-CEntity::UpdateRpHAnim(void)
-{
-	RpHAnimHierarchy *hier = GetAnimHierarchyFromSkinClump(GetClump());
-	RpHAnimHierarchyUpdateMatrices(hier);
-
-#if 0
-	int i;
-	char buf[256];
-	if(this == (CEntity*)FindPlayerPed())
-	for(i = 0; i < hier->numNodes; i++){
-		RpHAnimStdInterpFrame *kf = (RpHAnimStdInterpFrame*)rpHANIMHIERARCHYGETINTERPFRAME(hier, i);
-		sprintf(buf, "%6.3f %6.3f %6.3f %6.3f  %6.3f %6.3f %6.3f  %d %s",
-			kf->q.imag.x, kf->q.imag.y, kf->q.imag.z, kf->q.real,
-			kf->t.x, kf->t.y, kf->t.z,
-			HIERNODEID(hier, i),
-			ConvertBoneTag2BoneName(HIERNODEID(hier, i)));
-		CDebug::PrintAt(buf, 10, 1+i*3);
-
-		RwMatrix *m = &RpHAnimHierarchyGetMatrixArray(hier)[i];
-		sprintf(buf, "%6.3f %6.3f %6.3f %6.3f",
-			m->right.x, m->up.x, m->at.x, m->pos.x);
-		CDebug::PrintAt(buf, 80, 1+i*3+0);
-		sprintf(buf, "%6.3f %6.3f %6.3f %6.3f",
-			m->right.y, m->up.y, m->at.y, m->pos.y);
-		CDebug::PrintAt(buf, 80, 1+i*3+1);
-		sprintf(buf, "%6.3f %6.3f %6.3f %6.3f",
-			m->right.z, m->up.z, m->at.z, m->pos.z);
-		CDebug::PrintAt(buf, 80, 1+i*3+2);
-	}
-
-	void RenderSkeleton(RpHAnimHierarchy *hier);
-	RenderSkeleton(hier);
-#endif
-}
-#endif
-
-void
-CEntity::AddSteamsFromGround(CVector *unused)
-{
-	int i, n;
-	C2dEffect *effect;
-	CVector pos;
-
-	n = CModelInfo::GetModelInfo(GetModelIndex())->GetNum2dEffects();
-	for(i = 0; i < n; i++){
-		effect = CModelInfo::GetModelInfo(GetModelIndex())->Get2dEffect(i);
-		if(effect->type != EFFECT_PARTICLE)
-			continue;
-
-		pos = GetMatrix() * effect->pos;
-		switch(effect->particle.particleType){
-		case 0:
-			CParticleObject::AddObject(POBJECT_PAVEMENT_STEAM, pos, effect->particle.dir, effect->particle.scale, false);
-			break;
-		case 1:
-			CParticleObject::AddObject(POBJECT_WALL_STEAM, pos, effect->particle.dir, effect->particle.scale, false);
-			break;
-		case 2:
-			CParticleObject::AddObject(POBJECT_DRY_ICE, pos, effect->particle.scale, false);
-			break;
-		case 3:
-			CParticleObject::AddObject(POBJECT_SMALL_FIRE, pos, effect->particle.dir, effect->particle.scale, false);
-			break;
-		case 4:
-			CParticleObject::AddObject(POBJECT_DARK_SMOKE, pos, effect->particle.dir, effect->particle.scale, false);
-			break;
-		}
-	}
-}
-
-void
-CEntity::ProcessLightsForEntity(void)
-{
-	int i, n;
-	C2dEffect *effect;
-	CVector pos;
-	bool lightOn, lightFlickering;
-	uint32 flashTimer1, flashTimer2, flashTimer3;
-
-	if(bRenderDamaged || !bIsVisible || GetUp().z < 0.96f)
-		return;
-
-	flashTimer1 = 0;
-	flashTimer2 = 0;
-	flashTimer3 = 0;
-
-	n = CModelInfo::GetModelInfo(GetModelIndex())->GetNum2dEffects();
-	for(i = 0; i < n; i++, flashTimer1 += 0x80, flashTimer2 += 0x100, flashTimer3 += 0x200){
-		effect = CModelInfo::GetModelInfo(GetModelIndex())->Get2dEffect(i);
-
-		if(effect->type != EFFECT_LIGHT)
-			continue;
-
-		pos = GetMatrix() * effect->pos;
-
-		lightOn = false;
-		lightFlickering = false;
-		switch(effect->light.lightType){
-		case LIGHT_ON:
-			lightOn = true;
-			break;
-		case LIGHT_ON_NIGHT:
-			if(CClock::GetHours() > 18 || CClock::GetHours() < 7)
-				lightOn = true;
-			break;
-		case LIGHT_FLICKER:
-			if((CTimer::GetTimeInMilliseconds() ^ m_randomSeed) & 0x60)
-				lightOn = true;
-			else
-				lightFlickering = true;
-			if((CTimer::GetTimeInMilliseconds()>>11 ^ m_randomSeed) & 3)
-				lightOn = true;
-			break;
-		case LIGHT_FLICKER_NIGHT:
-			if(CClock::GetHours() > 18 || CClock::GetHours() < 7 || CWeather::WetRoads > 0.5f){
-				if((CTimer::GetTimeInMilliseconds() ^ m_randomSeed) & 0x60)
-					lightOn = true;
-				else
-					lightFlickering = true;
-				if((CTimer::GetTimeInMilliseconds()>>11 ^ m_randomSeed) & 3)
-					lightOn = true;
-			}
-			break;
-		case LIGHT_FLASH1:
-			if((CTimer::GetTimeInMilliseconds() + flashTimer1) & 0x200)
-				lightOn = true;
-			break;
-		case LIGHT_FLASH1_NIGHT:
-			if(CClock::GetHours() > 18 || CClock::GetHours() < 7)
-				if((CTimer::GetTimeInMilliseconds() + flashTimer1) & 0x200)
-					lightOn = true;
-			break;
-		case LIGHT_FLASH2:
-			if((CTimer::GetTimeInMilliseconds() + flashTimer2) & 0x400)
-				lightOn = true;
-			break;
-		case LIGHT_FLASH2_NIGHT:
-			if(CClock::GetHours() > 18 || CClock::GetHours() < 7)
-				if((CTimer::GetTimeInMilliseconds() + flashTimer2) & 0x400)
-					lightOn = true;
-			break;
-		case LIGHT_FLASH3:
-			if((CTimer::GetTimeInMilliseconds() + flashTimer3) & 0x800)
-				lightOn = true;
-			break;
-		case LIGHT_FLASH3_NIGHT:
-			if(CClock::GetHours() > 18 || CClock::GetHours() < 7)
-				if((CTimer::GetTimeInMilliseconds() + flashTimer3) & 0x800)
-					lightOn = true;
-			break;
-		case LIGHT_RANDOM_FLICKER:
-			if(m_randomSeed > 16)
-				lightOn = true;
-			else{
-				if((CTimer::GetTimeInMilliseconds() ^ m_randomSeed*8) & 0x60)
-					lightOn = true;
-				else
-					lightFlickering = true;
-				if((CTimer::GetTimeInMilliseconds()>>11 ^ m_randomSeed*8) & 3)
-					lightOn = true;
-			}
-			break;
-		case LIGHT_RANDOM_FLICKER_NIGHT:
-			if(CClock::GetHours() > 18 || CClock::GetHours() < 7){
-				if(m_randomSeed > 16)
-					lightOn = true;
-				else{
-					if((CTimer::GetTimeInMilliseconds() ^ m_randomSeed*8) & 0x60)
-						lightOn = true;
-					else
-						lightFlickering = true;
-					if((CTimer::GetTimeInMilliseconds()>>11 ^ m_randomSeed*8) & 3)
-						lightOn = true;
-				}
-			}
-			break;
-		case LIGHT_BRIDGE_FLASH1:
-			if(CBridge::ShouldLightsBeFlashing() && CTimer::GetTimeInMilliseconds() & 0x200)
-				lightOn = true;
-			break;
-		case LIGHT_BRIDGE_FLASH2:
-			if(CBridge::ShouldLightsBeFlashing() && (CTimer::GetTimeInMilliseconds() & 0x1FF) < 60)
-				lightOn = true;
-			break;
-		}
-
-		// Corona
-		if(lightOn)
-			CCoronas::RegisterCorona((uintptr)this + i,
-				effect->col.r, effect->col.g, effect->col.b, 255,
-				pos, effect->light.size, effect->light.dist,
-				effect->light.corona, effect->light.flareType, effect->light.roadReflection,
-				effect->light.flags&LIGHTFLAG_LOSCHECK, CCoronas::STREAK_OFF, 0.0f);
-		else if(lightFlickering)
-			CCoronas::RegisterCorona((uintptr)this + i,
-				0, 0, 0, 255,
-				pos, effect->light.size, effect->light.dist,
-				effect->light.corona, effect->light.flareType, effect->light.roadReflection,
-				effect->light.flags&LIGHTFLAG_LOSCHECK, CCoronas::STREAK_OFF, 0.0f);
-
-		// Pointlight
-		if(effect->light.flags & LIGHTFLAG_FOG_ALWAYS){
-			CPointLights::AddLight(CPointLights::LIGHT_FOGONLY_ALWAYS,
-				pos, CVector(0.0f, 0.0f, 0.0f),
-				effect->light.range,
-				effect->col.r/255.0f, effect->col.g/255.0f, effect->col.b/255.0f,
-				CPointLights::FOG_ALWAYS, true);
-		}else if(effect->light.flags & LIGHTFLAG_FOG_NORMAL && lightOn && effect->light.range == 0.0f){
-			CPointLights::AddLight(CPointLights::LIGHT_FOGONLY,
-				pos, CVector(0.0f, 0.0f, 0.0f),
-				effect->light.range,
-				effect->col.r/255.0f, effect->col.g/255.0f, effect->col.b/255.0f,
-				CPointLights::FOG_NORMAL, true);
-		}else if(lightOn && effect->light.range != 0.0f){
-			if(effect->col.r == 0 && effect->col.g == 0 && effect->col.b == 0){
-				CPointLights::AddLight(CPointLights::LIGHT_POINT,
-					pos, CVector(0.0f, 0.0f, 0.0f),
-					effect->light.range,
-					0.0f, 0.0f, 0.0f,
-					CPointLights::FOG_NONE, true);
-			}else{
-				CPointLights::AddLight(CPointLights::LIGHT_POINT,
-					pos, CVector(0.0f, 0.0f, 0.0f),
-					effect->light.range,
-					effect->col.r*CTimeCycle::GetSpriteBrightness()/255.0f,
-					effect->col.g*CTimeCycle::GetSpriteBrightness()/255.0f,
-					effect->col.b*CTimeCycle::GetSpriteBrightness()/255.0f,
-					// half-useless because LIGHTFLAG_FOG_ALWAYS can't be on
-					(effect->light.flags & LIGHTFLAG_FOG) >> 1,
-					true);
-			}
-		}
-
-		// Light shadow
-		if(effect->light.shadowSize != 0.0f){
-			if(lightOn){
-				CShadows::StoreStaticShadow((uintptr)this + i, SHADOWTYPE_ADDITIVE,
-					effect->light.shadow, &pos,
-					effect->light.shadowSize, 0.0f,
-					0.0f, -effect->light.shadowSize,
-					128,
-					effect->col.r*CTimeCycle::GetSpriteBrightness()*effect->light.shadowIntensity/255.0f,
-					effect->col.g*CTimeCycle::GetSpriteBrightness()*effect->light.shadowIntensity/255.0f,
-					effect->col.b*CTimeCycle::GetSpriteBrightness()*effect->light.shadowIntensity/255.0f,
-					15.0f, 1.0f, 40.0f, false, 0.0f);
-			}else if(lightFlickering){
-				CShadows::StoreStaticShadow((uintptr)this + i, SHADOWTYPE_ADDITIVE,
-					effect->light.shadow, &pos,
-					effect->light.shadowSize, 0.0f,
-					0.0f, -effect->light.shadowSize,
-					0, 0.0f, 0.0f, 0.0f,
-					15.0f, 1.0f, 40.0f, false, 0.0f);
-			}
-		}
-	}
 }
 
 float WindTabel[] = {
@@ -917,14 +681,11 @@ CEntity::ModifyMatrixForBannerInWind(void)
 	UpdateRwFrame();
 }
 
-void 
-CEntity::AddSteamsFromGround(CPtrList& list) 
+void
+CEntity::PreRenderForGlassWindow(void)
 {
-	CPtrNode *pNode = list.first;
-	while (pNode) {
-		((CEntity*)pNode->item)->AddSteamsFromGround(nil);
-		pNode = pNode->next;
-	}
+	CGlass::AskForObjectToBeRenderedInGlass(this);
+	bIsVisible = false;
 }
 
 #ifdef COMPATIBLE_SAVES

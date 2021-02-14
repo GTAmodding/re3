@@ -3,6 +3,14 @@
 
 #ifdef AUDIO_OAL
 
+/*
+ * When linking to a static openal-soft library,
+ * the extension function inside the openal library conflict with the variables here.
+ * Therefore declare these re3 owned symbols in a private namespace.
+ */
+
+namespace re3_openal {
+
 LPALGENEFFECTS alGenEffects;
 LPALDELETEEFFECTS alDeleteEffects;
 LPALISEFFECT alIsEffect;
@@ -37,6 +45,9 @@ LPALGETFILTERIV alGetFilteriv;
 LPALGETFILTERF alGetFilterf;
 LPALGETFILTERFV alGetFilterfv;
 
+}
+
+using namespace re3_openal;
 
 void EFXInit()
 {

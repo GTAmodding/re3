@@ -11,7 +11,7 @@ class CBuilding;
 class CCrane
 {
 public:
-	enum CraneState : uint8 {
+	enum CraneState {
 		IDLE = 0,
 		GOING_TOWARDS_TARGET = 1,
 		LIFTING_TARGET = 2,
@@ -19,7 +19,7 @@ public:
 		ROTATING_TARGET = 4,
 		DROPPING_TARGET = 5
 	};
-	enum CraneStatus : uint8 {
+	enum CraneStatus {
 		NONE = 0,
 		ACTIVATED = 1,
 		DEACTIVATED = 2
@@ -47,8 +47,8 @@ public:
 	CVector2D m_vecHookVelocity;
 	CVehicle *m_pVehiclePickedUp;
 	uint32 m_nTimeForNextCheck;
-	CraneStatus m_nCraneStatus;
-	CraneState m_nCraneState;
+	uint8 m_nCraneStatus;
+	uint8 m_nCraneState;
 	uint8 m_nVehiclesCollected;
 	bool m_bIsCrusher;
 	bool m_bIsMilitaryCrane;
@@ -89,7 +89,7 @@ public:
 	static bool IsThisCarBeingCarriedByAnyCrane(CVehicle* pVehicle);
 	static bool IsThisCarBeingTargettedByAnyCrane(CVehicle* pVehicle);
 	static void Save(uint8* buf, uint32* size);
-	static void Load(uint8* buf, uint32 size); // on mobile it's CranesLoad outside of the class
+	static void Load(uint8* buf, uint32 size); // out of class in III PC and later because of SecuROM
 
 	static uint32 CarsCollectedMilitaryCrane;
 	static int32 NumCranes;

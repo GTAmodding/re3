@@ -22,6 +22,66 @@ CReferences::Init(void)
 }
 
 void
+CEntity::RegisterReference(CEntity **pent)
+{
+	if(IsBuilding())
+		return;
+	CReference *ref;
+	// check if already registered
+	for(ref = m_pFirstReference; ref; ref = ref->next)
+		if(ref->pentity == pent)
+			return;
+	// have to allocate new reference
+	ref = CReferences::pEmptyList;
+	if(ref){
+		CReferences::pEmptyList = ref->next;
+
+		ref->pentity = pent;
+		ref->next = m_pFirstReference;
+		m_pFirstReference = ref;
+		return;
+	}
+	return;
+}
+
+// Clear all references to this entity
+void
+CEntity::ResolveReferences(void)
+{
+	CReference *ref;
+	// clear pointers to this entity
+	for(ref = m_pFirstReference; ref; ref = ref->next)
+		if(*ref->pentity == this)
+			*ref->pentity = nil;
+	// free list
+	if(m_pFirstReference){
+		for(ref = m_pFirstReference; ref->next; ref = ref->next)
+			;
+		ref->next = CReferences::pEmptyList;
+		CReferences::pEmptyList = m_pFirstReference;
+		m_pFirstReference = nil;
+	}
+}
+
+// Free all references that no longer point to this entity
+void
+CEntity::PruneReferences(void)
+{
+	CReference *ref, *next, **lastnextp;
+	lastnextp = &m_pFirstReference;
+	for(ref = m_pFirstReference; ref; ref = next){
+		next = ref->next;
+		if(*ref->pentity == this)
+			lastnextp = &ref->next;
+		else{
+			*lastnextp = ref->next;
+			ref->next = CReferences::pEmptyList;
+			CReferences::pEmptyList = ref;
+		}
+	}
+}
+
+void
 CReferences::RemoveReferencesToPlayer(void)
 {
 	if(FindPlayerVehicle())

@@ -18,7 +18,7 @@ public:
 	uint8 Flags;
 	float fEngineAcceleration;
 	float fMaxVelocity;
-	float fUnkMaxVelocity;
+	float fMaxCruiseVelocity;
 	float fMaxReverseVelocity;
 	float fCurVelocity;
 

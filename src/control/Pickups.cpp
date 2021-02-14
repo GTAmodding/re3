@@ -129,7 +129,7 @@ CPickup::CanBePickedUp(CPlayerPed *player)
 	bool cannotBePickedUp =
 		(m_pObject->GetModelIndex() == MI_PICKUP_BODYARMOUR && player->m_fArmour > 99.5f)
 		|| (m_pObject->GetModelIndex() == MI_PICKUP_HEALTH && player->m_fHealth > 99.5f)
-		|| (m_pObject->GetModelIndex() == MI_PICKUP_BRIBE && player->m_pWanted->m_nWantedLevel == 0)
+		|| (m_pObject->GetModelIndex() == MI_PICKUP_BRIBE && player->m_pWanted->GetWantedLevel() == 0)
 		|| (m_pObject->GetModelIndex() == MI_PICKUP_KILLFRENZY && (CTheScripts::IsPlayerOnAMission() || CDarkel::FrenzyOnGoing() || !CGame::nastyGame));
 	return !cannotBePickedUp;
 }
@@ -456,7 +456,7 @@ CPickups::GivePlayerGoodiesWithPickUpMI(int16 modelIndex, int playerIndex)
 		DMAudio.PlayFrontEndSound(SOUND_PICKUP_BONUS, 0);
 		return true;
 	} else if (modelIndex == MI_PICKUP_BRIBE) {
-		int32 level = FindPlayerPed()->m_pWanted->m_nWantedLevel - 1;
+		int32 level = FindPlayerPed()->m_pWanted->GetWantedLevel() - 1;
 		if (level < 0) level = 0;
 		player->SetWantedLevel(level);
 		DMAudio.PlayFrontEndSound(SOUND_PICKUP_BONUS, 0);
@@ -535,7 +535,7 @@ CPickups::GenerateNewOne(CVector pos, uint32 modelIndex, uint8 type, uint32 quan
 
 	if (slot >= NUMPICKUPS) return -1;
 
-	aPickUps[slot].m_eType = (ePickupType)type;
+	aPickUps[slot].m_eType = type;
 	aPickUps[slot].m_bRemoved = false;
 	aPickUps[slot].m_nQuantity = quantity;
 	if (type == PICKUP_ONCE_TIMEOUT)
@@ -964,7 +964,11 @@ CPickups::RenderPickUpText()
 		float fScaleX = aMessages[i].m_dist.x / 100.0f;
 		if (fScaleX > MAX_SCALE) fScaleX = MAX_SCALE;
 
+#ifdef FIX_BUGS
+		CFont::SetScale(SCREEN_SCALE_X(fScaleX), SCREEN_SCALE_Y(fScaleY));
+#else
 		CFont::SetScale(fScaleX, fScaleY);
+#endif
 		CFont::SetCentreOn();
 		CFont::SetCentreSize(SCREEN_WIDTH);
 		CFont::SetJustifyOff();

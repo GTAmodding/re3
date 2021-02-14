@@ -12,6 +12,11 @@ public:
 	float MagnitudeSqr(void) const { return x*x + y*y + z*z + w*w; }
 	void Normalise(void);
 	void Multiply(const CQuaternion &q1, const CQuaternion &q2);
+	void Invert(void){	// Conjugate would have been a better name
+		x = -x;
+		y = -y;
+		z = -z;
+	}
 
 	const CQuaternion &operator+=(CQuaternion const &right) {
 		x += right.x;

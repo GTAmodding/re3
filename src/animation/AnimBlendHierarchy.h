@@ -15,7 +15,7 @@ public:
 	char name[24];
 	CAnimBlendSequence *sequences;
 	int16 numSequences;
-	int16 compressed;	// not really used
+	int16 compressed;
 	float totalLength;
 	CLink<CAnimBlendHierarchy*> *linkPtr;
 

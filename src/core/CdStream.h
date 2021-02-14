@@ -43,6 +43,6 @@ char *CdStreamGetImageName(int32 cd);
 void CdStreamRemoveImages(void);
 int32 CdStreamGetNumImages(void);
 
-#ifndef _WIN32
+#ifdef FLUSHABLE_STREAMING
 extern bool flushStream[MAX_CDCHANNELS];
 #endif

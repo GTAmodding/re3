@@ -54,6 +54,7 @@ public:
 	virtual bool IsComponentPresent(int32 component) { return true; }
 	virtual void BlowUpCar(CEntity *ent);
 	
+	void RenderWaterOutPolys(void);
 	void ApplyWaterResistance(void);
 	void SetupModelNodes();
 	void PruneWakeTrail(void);

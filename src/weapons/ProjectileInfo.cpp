@@ -128,8 +128,12 @@ CProjectileInfo::AddProjectile(CEntity *entity, eWeaponType weapon, CVector pos,
 	}
 
 	int i = 0;
+#ifdef FIX_BUGS
+	while (i < ARRAY_SIZE(gaProjectileInfo) && gaProjectileInfo[i].m_bInUse) i++;
+#else
+	// array overrun is UB
 	while (gaProjectileInfo[i].m_bInUse && i < ARRAY_SIZE(gaProjectileInfo)) i++;
-
+#endif
 	if (i == ARRAY_SIZE(gaProjectileInfo))
 		return false;
 

@@ -7,21 +7,47 @@
 #pragma warning(disable: 4838)  // narrowing conversion
 #pragma warning(disable: 4996)  // POSIX names
 
+#ifdef __MWERKS__
+#define __STDC_LIMIT_MACROS // so we get UINT32_MAX etc
+#endif
+
 #include <stdint.h>
 #include <string.h>
 #include <math.h>
 
-#if defined _WIN32 && defined WITHWINDOWS 
+#ifdef __MWERKS__
+#define AUDIO_MSS
+#define RWLIBS // codewarrior doesn't support project level defines - so not even this is enough, but still catches most ifdefs
+#endif
+
+#if !defined RW_D3D9 && defined LIBRW
+#undef WITHD3D
+#undef WITHDINPUT
+#endif
+
+#if (defined WITHD3D && !defined LIBRW)
+#define WITHWINDOWS
+#endif
+
+#if defined _WIN32 && defined WITHWINDOWS && !defined _INC_WINDOWS
 #include <windows.h>
 #endif
 
-#if defined _WIN32 && defined WITHD3D
-#include <windows.h>
-#ifndef USE_D3D9
-#include <d3d8types.h>
-#else
-#include <d3d9types.h>
+#ifdef WITHD3D
+	#ifdef LIBRW
+		#define WITH_D3D // librw includes d3d9 itself via this right now
+	#else
+		#ifndef USE_D3D9
+		#include <d3d8.h>
+		#else
+		#include <d3d9.h>
+		#endif
+	#endif
 #endif
+
+#ifdef WITHDINPUT
+#define DIRECTINPUT_VERSION 0x0800
+#include <dinput.h>
 #endif
 
 #include <rwcore.h>
@@ -52,14 +78,6 @@
 
 #define rwVENDORID_ROCKSTAR 0x0253F2
 
-// Get rid of bullshit windows definitions, we're not running on an 8086
-#ifdef far
-#undef far
-#endif
-#ifdef near
-#undef near
-#endif
-
 #define Max(a,b) ((a) > (b) ? (a) : (b))
 #define Min(a,b) ((a) < (b) ? (a) : (b))
 
@@ -70,13 +88,27 @@ typedef uint8_t uint8;
 typedef int8_t int8;
 typedef uint16_t uint16;
 typedef int16_t int16;
+#ifndef __MWERKS__
 typedef uint32_t uint32;
 typedef int32_t int32;
+#else
+typedef unsigned int uint32;
+typedef int int32;
+#endif
 typedef uintptr_t uintptr;
+typedef intptr_t intptr;
 typedef uint64_t uint64;
 typedef int64_t int64;
 // hardcode ucs-2
 typedef uint16_t wchar;
+
+typedef uint8 bool8;
+typedef uint16 bool16;
+typedef uint32 bool32;
+
+#if defined(_MSC_VER) || defined (__MWERKS__)
+typedef ptrdiff_t ssize_t;
+#endif
 
 #ifndef nil
 #define nil NULL
@@ -116,17 +148,43 @@ inline uint32 ldb(uint32 p, uint32 s, uint32 w)
 #include "skeleton.h"
 #include "Draw.h"
 
-#define DEFAULT_SCREEN_WIDTH (640)
-#define DEFAULT_SCREEN_HEIGHT (448)
-#define DEFAULT_SCREEN_HEIGHT_PAL (512)
-#define DEFAULT_SCREEN_HEIGHT_NTSC (448)
+#if defined(PROPER_SCALING) || defined(PS2_HUD)
+	#ifdef FORCE_PC_SCALING
+		#define DEFAULT_SCREEN_WIDTH  (640)
+		#define DEFAULT_SCREEN_HEIGHT (448)
+	#else
+		#define DEFAULT_SCREEN_WIDTH  (640)
+		#define DEFAULT_SCREEN_HEIGHT (480)
+	#endif
+#elif defined(GTA_PS2)
+		#define DEFAULT_SCREEN_WIDTH  (640)
+		#define DEFAULT_SCREEN_HEIGHT (480)
+#else //elif defined(GTA_PC)
+		#define DEFAULT_SCREEN_WIDTH  (640)
+		#define DEFAULT_SCREEN_HEIGHT (448)
+#endif
+
 #define DEFAULT_ASPECT_RATIO (4.0f/3.0f)
 #define DEFAULT_VIEWWINDOW (0.7f)
 
 // game uses maximumWidth/Height, but this probably won't work
 // with RW windowed mode
-#define SCREEN_WIDTH ((float)RsGlobal.width)
+#ifdef GTA_PS2
+	#ifdef GTA_PAL
+		#define SCREEN_WIDTH  ((float)640)
+		#define SCREEN_HEIGHT ((float)512)
+	#else
+		#define SCREEN_WIDTH  ((float)640)
+		#define SCREEN_HEIGHT ((float)448)
+	#endif
+#else
+#define SCREEN_WIDTH  ((float)RsGlobal.width)
 #define SCREEN_HEIGHT ((float)RsGlobal.height)
+#endif
+
+#define SCREEN_HEIGHT_PAL ((float)512)
+#define SCREEN_HEIGHT_NTSC ((float)448)
+
 #define SCREEN_ASPECT_RATIO (CDraw::GetAspectRatio())
 #define SCREEN_VIEWWINDOW (Tan(DEGTORAD(CDraw::GetScaledFOV() * 0.5f)))
 
@@ -144,8 +202,13 @@ inline uint32 ldb(uint32 p, uint32 s, uint32 w)
 
 #ifdef ASPECT_RATIO_SCALE
 #define SCREEN_SCALE_AR(a) ((a) * DEFAULT_ASPECT_RATIO / SCREEN_ASPECT_RATIO)
-extern float ScaleAndCenterX(float x);
-#define SCALE_AND_CENTER_X(x) ScaleAndCenterX(x)
+#define SCALE_AND_CENTER_X(x) ((SCREEN_WIDTH == DEFAULT_SCREEN_WIDTH) ? (x) : (SCREEN_WIDTH - SCREEN_SCALE_X(DEFAULT_SCREEN_WIDTH)) / 2 + SCREEN_SCALE_X((x)))
+#ifdef PROPER_SCALING
+	#ifndef FORCE_PC_SCALING			
+		#undef SCREEN_SCALE_Y	
+		#define SCREEN_SCALE_Y(a) CDraw::ScaleY(SCREEN_STRETCH_Y(a))	
+	#endif
+#endif
 #else
 #define SCREEN_SCALE_AR(a) (a)
 #define SCALE_AND_CENTER_X(x) SCREEN_STRETCH_X(x)
@@ -226,6 +289,22 @@ extern wchar *AllocUnicode(const char*src);
 inline float sq(float x) { return x*x; }
 #define SQR(x) ((x) * (x))
 
+#ifdef __MWERKS__
+#define M_E        2.71828182845904523536   // e
+#define M_LOG2E    1.44269504088896340736   // log2(e)
+#define M_LOG10E   0.434294481903251827651  // log10(e)
+#define M_LN2      0.693147180559945309417  // ln(2)
+#define M_LN10     2.30258509299404568402   // ln(10)
+#define M_PI       3.14159265358979323846   // pi
+#define M_PI_2     1.57079632679489661923   // pi/2
+#define M_PI_4     0.785398163397448309616  // pi/4
+#define M_1_PI     0.318309886183790671538  // 1/pi
+#define M_2_PI     0.636619772367581343076  // 2/pi
+#define M_2_SQRTPI 1.12837916709551257390   // 2/sqrt(pi)
+#define M_SQRT2    1.41421356237309504880   // sqrt(2)
+#define M_SQRT1_2  0.707106781186547524401  // 1/sqrt(2)
+#endif
+
 #define PI (float)M_PI
 #define TWOPI (PI*2)
 #define HALFPI (PI/2)
@@ -248,20 +327,49 @@ void re3_usererror(const char *format, ...);
 
 #define DEBUGBREAK() __debugbreak();
 
-#define debug(f, ...) re3_debug("[DBG]: " f, ## __VA_ARGS__)
+// Switch to enable development messages.
+#if 1 
+#define DEV(f, ...)
+#else
 #define DEV(f, ...)   re3_debug("[DEV]: " f, ## __VA_ARGS__)
-#define TRACE(f, ...) re3_trace(__FILE__, __LINE__, __FUNCTION__, f, ## __VA_ARGS__)
-#define Error(f, ...) re3_debug("[ERROR]: " f, ## __VA_ARGS__)
-#define USERERROR(f, ...) re3_usererror(f, ## __VA_ARGS__)
+#endif
 
+#ifdef __MWERKS__
+void debug(char *f, ...);
+void Error(char *f, ...);
+__inline__ void TRACE(char *f, ...) { } // this is re3 only, and so the function needs to be inline - this way no call actually gets placed
+// USERERROR only gets used in oal builds ... once
+#else
+#define debug(f, ...) re3_debug("[DBG]: " f, ## __VA_ARGS__)
+#define Error(f, ...) re3_debug("[ERROR]: " f, ## __VA_ARGS__)
+#ifndef MASTER
+#define TRACE(f, ...) re3_trace(__FILE__, __LINE__, __FUNCTION__, f, ## __VA_ARGS__)
+#define USERERROR(f, ...) re3_usererror(f, ## __VA_ARGS__)
+#else
+#define TRACE(f, ...)
+#define USERERROR(f, ...)
+#endif
+#endif
+
+#ifndef MASTER
 #define assert(_Expression) (void)( (!!(_Expression)) || (re3_assert(#_Expression, __FILE__, __LINE__, __FUNCTION__), 0) )
+#else
+#define assert(_Expression) (_Expression)
+#endif
 #define ASSERT assert
+
+#ifdef __MWERKS__
+#define static_assert(bool_constexpr, message)
+#endif
 
 #define _TODO(x)
 #define _TODOCONST(x) (x)
 
-#ifdef CHECK_STRUCT_SIZES 
-#define VALIDATE_SIZE(struc, size) static_assert(sizeof(struc) == size, "Invalid structure size of " #struc)
+#ifdef CHECK_STRUCT_SIZES
+template<int s, int t> struct check_size {
+	static_assert(s == t, "Invalid structure size");
+};
+#define VALIDATE_SIZE(struc, size) check_size<sizeof(struc), size> struc ## Check
 #else
 #define VALIDATE_SIZE(struc, size)
 #endif
@@ -280,6 +388,7 @@ void re3_usererror(const char *format, ...);
 #define CONCAT_(x,y) x##y
 #define CONCAT(x,y) CONCAT_(x,y)
 
+#ifdef DEBUGMENU
 // Tweaking stuff for debugmenu
 #define TWEAKPATH                                   ___tw___TWEAKPATH
 #define SETTWEAKPATH(path)	                        static const char *___tw___TWEAKPATH = path;
@@ -393,6 +502,7 @@ _TWEEKCLASS(CTweakUInt32, uint32);
 _TWEEKCLASS(CTweakFloat, float);
 
 #undef _TWEEKCLASS
+#endif
 
 #ifdef VALIDATE_SAVE_SIZE
 extern int32 _saveBufCount;

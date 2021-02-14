@@ -128,7 +128,7 @@ cTransmission::CalculateDriveAcceleration(const float &gasPedal, uint8 &gear, fl
 		else
 			fCheat = 1.0f;
 		float targetVelocity = Gears[gear].fMaxVelocity*speedMul*fCheat;
-		float accel = fEngineAcceleration*accelMul * (targetVelocity - fVelocity)/Abs(targetVelocity);
+		float accel = (targetVelocity - fVelocity) * (fEngineAcceleration*accelMul) / Abs(targetVelocity);
 		if(Abs(fVelocity) < Abs(Gears[gear].fMaxVelocity*fCheat))
 			fAcceleration = gasPedal * accel * CTimer::GetTimeStep();
 		else

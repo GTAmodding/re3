@@ -52,8 +52,8 @@ void CAutoPilot::Save(uint8*& buf)
 	WriteSaveBuf<int32>(buf, m_nCurrentRouteNode);
 	WriteSaveBuf<int32>(buf, m_nNextRouteNode);
 	WriteSaveBuf<int32>(buf, m_nPrevRouteNode);
-	WriteSaveBuf<uint32>(buf, m_nTimeEnteredCurve);
-	WriteSaveBuf<uint32>(buf, m_nTimeToSpendOnCurrentCurve);
+	WriteSaveBuf<int32>(buf, m_nTimeEnteredCurve);
+	WriteSaveBuf<int32>(buf, m_nTimeToSpendOnCurrentCurve);
 	WriteSaveBuf<uint32>(buf, m_nCurrentPathNodeInfo);
 	WriteSaveBuf<uint32>(buf, m_nNextPathNodeInfo);
 	WriteSaveBuf<uint32>(buf, m_nPreviousPathNodeInfo);
@@ -91,8 +91,8 @@ void CAutoPilot::Load(uint8*& buf)
 	m_nCurrentRouteNode = ReadSaveBuf<int32>(buf);
 	m_nNextRouteNode = ReadSaveBuf<int32>(buf);
 	m_nPrevRouteNode = ReadSaveBuf<int32>(buf);
-	m_nTimeEnteredCurve = ReadSaveBuf<uint32>(buf);
-	m_nTimeToSpendOnCurrentCurve = ReadSaveBuf<uint32>(buf);
+	m_nTimeEnteredCurve = ReadSaveBuf<int32>(buf);
+	m_nTimeToSpendOnCurrentCurve = ReadSaveBuf<int32>(buf);
 	m_nCurrentPathNodeInfo = ReadSaveBuf<uint32>(buf);
 	m_nNextPathNodeInfo = ReadSaveBuf<uint32>(buf);
 	m_nPreviousPathNodeInfo = ReadSaveBuf<uint32>(buf);
@@ -103,9 +103,9 @@ void CAutoPilot::Load(uint8*& buf)
 	m_nNextDirection = ReadSaveBuf<int8>(buf);
 	m_nCurrentLane = ReadSaveBuf<int8>(buf);
 	m_nNextLane = ReadSaveBuf<int8>(buf);
-	m_nDrivingStyle = (eCarDrivingStyle)ReadSaveBuf<uint8>(buf);
-	m_nCarMission = (eCarMission)ReadSaveBuf<uint8>(buf);
-	m_nTempAction = (eCarTempAction)ReadSaveBuf<uint8>(buf);
+	m_nDrivingStyle = ReadSaveBuf<uint8>(buf);
+	m_nCarMission = ReadSaveBuf<uint8>(buf);
+	m_nTempAction = ReadSaveBuf<uint8>(buf);
 	m_nTimeTempAction = ReadSaveBuf<uint32>(buf);
 	m_fMaxTrafficSpeed = ReadSaveBuf<float>(buf);
 	m_nCruiseSpeed = ReadSaveBuf<uint8>(buf);

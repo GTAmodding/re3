@@ -38,6 +38,7 @@
 #include "WaterLevel.h"
 #include "World.h"
 #include "Zones.h"
+#include "Wanted.h"
 
 int8 CRunningScript::ProcessCommands800To899(int32 command)
 {
@@ -67,7 +68,7 @@ int8 CRunningScript::ProcessCommands800To899(int32 command)
 			pPed->ApplyHeadShot(WEAPONTYPE_SNIPERRIFLE, pPed->GetNodePosition(PED_HEAD), true);
 		}
 		else {
-			pPed->SetDie(ANIM_KO_SHOT_FRONT1, 4.0f, 0.0f);
+			pPed->SetDie(ANIM_STD_KO_FRONT, 4.0f, 0.0f);
 		}
 		return 0;
 	}
@@ -80,7 +81,7 @@ int8 CRunningScript::ProcessCommands800To899(int32 command)
 			pPed->ApplyHeadShot(WEAPONTYPE_SNIPERRIFLE, pPed->GetNodePosition(PED_HEAD), true);
 		}
 		else {
-			pPed->SetDie(ANIM_KO_SHOT_FRONT1, 4.0f, 0.0f);
+			pPed->SetDie(ANIM_STD_KO_FRONT, 4.0f, 0.0f);
 		}
 		return 0;
 	}
@@ -89,7 +90,7 @@ int8 CRunningScript::ProcessCommands800To899(int32 command)
 		CollectParameters(&m_nIp, 2);
 		CBoat* pBoat = (CBoat*)CPools::GetVehiclePool()->GetAt(ScriptParams[0]);
 		script_assert(pBoat && pBoat->m_vehType == VEHICLE_TYPE_BOAT);
-		pBoat->m_bIsAnchored = (ScriptParams[1] == 0);
+		pBoat->m_bIsAnchored = (ScriptParams[1] != 0);
 		return 0;
 	}
 	case COMMAND_SET_ZONE_GROUP:
@@ -148,7 +149,7 @@ int8 CRunningScript::ProcessCommands800To899(int32 command)
 			++CCarCtrl::NumMissionCars;
 			--CCarCtrl::NumRandomCars;
 			if (m_bIsMissionScript)
-				CTheScripts::MissionCleanup.AddEntityToList(handle, CLEANUP_CAR);
+				CTheScripts::MissionCleanUp.AddEntityToList(handle, CLEANUP_CAR);
 		}
 		ScriptParams[0] = handle;
 		StoreParameters(&m_nIp, 1);
@@ -180,7 +181,7 @@ int8 CRunningScript::ProcessCommands800To899(int32 command)
 			++CCarCtrl::NumMissionCars;
 			--CCarCtrl::NumRandomCars;
 			if (m_bIsMissionScript)
-				CTheScripts::MissionCleanup.AddEntityToList(handle, CLEANUP_CAR);
+				CTheScripts::MissionCleanUp.AddEntityToList(handle, CLEANUP_CAR);
 		}
 		ScriptParams[0] = handle;
 		StoreParameters(&m_nIp, 1);
@@ -244,7 +245,12 @@ int8 CRunningScript::ProcessCommands800To899(int32 command)
 		pPed->SetObjective(OBJECTIVE_CATCH_TRAIN);
 		return 0;
 	}
-	//case COMMAND_SET_COLL_OBJ_CATCH_TRAIN:
+#ifdef GTA_SCRIPT_COLLECTIVE
+	case COMMAND_SET_COLL_OBJ_CATCH_TRAIN:
+		CollectParameters(&m_nIp, 1);
+		CTheScripts::SetObjectiveForAllPedsInCollective(ScriptParams[0], OBJECTIVE_CATCH_TRAIN);
+		return 0;
+#endif
 	case COMMAND_SET_PLAYER_NEVER_GETS_TIRED:
 	{
 		CollectParameters(&m_nIp, 2);
@@ -589,7 +595,7 @@ int8 CRunningScript::ProcessCommands800To899(int32 command)
 			}
 		}
 		if (m_bIsMissionScript)
-			CTheScripts::MissionCleanup.RemoveEntityFromList(ScriptParams[0], CLEANUP_CHAR);
+			CTheScripts::MissionCleanUp.RemoveEntityFromList(ScriptParams[0], CLEANUP_CHAR);
 		return 0;
 	}
 	case COMMAND_SET_CHAR_STAY_IN_SAME_PLACE:
@@ -787,7 +793,7 @@ int8 CRunningScript::ProcessCommands800To899(int32 command)
 		pPed->m_pVehicleAnim = nil;
 		pPed->RestartNonPartialAnims();
 		pPed->SetMoveState(PEDMOVE_NONE);
-		CAnimManager::BlendAnimation(pPed->GetClump(), pPed->m_animGroup, ANIM_IDLE_STANCE, 100.0f);
+		CAnimManager::BlendAnimation(pPed->GetClump(), pPed->m_animGroup, ANIM_STD_IDLE, 100.0f);
 		pos.z += pPed->GetDistanceFromCentreOfMassToBaseOfModel();
 		pPed->Teleport(pos);
 		CTheScripts::ClearSpaceForMissionEntity(pos, pPed);
@@ -997,7 +1003,7 @@ int8 CRunningScript::ProcessCommands800To899(int32 command)
 		ScriptParams[0] = CPools::GetPedPool()->GetIndex(ped);
 		StoreParameters(&m_nIp, 1);
 		if (m_bIsMissionScript)
-			CTheScripts::MissionCleanup.AddEntityToList(ScriptParams[0], CLEANUP_CHAR);
+			CTheScripts::MissionCleanUp.AddEntityToList(ScriptParams[0], CLEANUP_CHAR);
 		return 0;
 	}
 	case COMMAND_SET_CHAR_OBJ_STEAL_ANY_CAR:
@@ -1090,7 +1096,12 @@ int8 CRunningScript::ProcessCommands800To899(int32 command)
 	case COMMAND_GIVE_PLAYER_DETONATOR:
 		CGarages::GivePlayerDetonator();
 		return 0;
-	//case COMMAND_SET_COLL_OBJ_STEAL_ANY_CAR:
+#ifdef GTA_SCRIPT_COLLECTIVE
+	case COMMAND_SET_COLL_OBJ_STEAL_ANY_CAR:
+		CollectParameters(&m_nIp, 1);
+		CTheScripts::SetObjectiveForAllPedsInCollective(ScriptParams[0], OBJECTIVE_STEAL_ANY_CAR);
+		return 0;
+#endif
 	case COMMAND_SET_OBJECT_VELOCITY:
 	{
 		CollectParameters(&m_nIp, 4);
@@ -1407,7 +1418,7 @@ int8 CRunningScript::ProcessCommands900To999(int32 command)
 		CVehicle* pVehicle = CPools::GetVehiclePool()->GetAt(ScriptParams[0]);
 		script_assert(pVehicle);
 		const CVector& pos = pVehicle->GetPosition();
-		float heading = CGeneral::GetATanOfXY(pos.y - *(float*)&ScriptParams[2], pos.x - *(float*)&ScriptParams[1]) + HALFPI;
+		float heading = CGeneral::GetATanOfXY(pos.x - *(float*)&ScriptParams[1], pos.y - *(float*)&ScriptParams[2]) + HALFPI;
 		if (heading > TWOPI)
 			heading -= TWOPI;
 		pVehicle->SetHeading(heading);
@@ -1436,7 +1447,7 @@ int8 CRunningScript::ProcessCommands900To999(int32 command)
 		CollectParameters(&m_nIp, 2);
 		CVehicle* pVehicle = CPools::GetVehiclePool()->GetAt(ScriptParams[0]);
 		script_assert(pVehicle);
-		pVehicle->SetStatus((eEntityStatus)ScriptParams[1]);
+		pVehicle->SetStatus(ScriptParams[1]);
 		return 0;
 	}
 	case COMMAND_IS_CHAR_MALE:
@@ -1459,7 +1470,7 @@ int8 CRunningScript::ProcessCommands900To999(int32 command)
 	case COMMAND_CHANGE_GARAGE_TYPE_WITH_CAR_MODEL:
 	{
 		CollectParameters(&m_nIp, 3);
-		CGarages::ChangeGarageType(ScriptParams[0], (eGarageType)ScriptParams[1], ScriptParams[2]);
+		CGarages::ChangeGarageType(ScriptParams[0], ScriptParams[1], ScriptParams[2]);
 		return 0;
 	}
 	case COMMAND_FIND_DRUG_PLANE_COORDINATES:
@@ -2002,10 +2013,10 @@ int8 CRunningScript::ProcessCommands900To999(int32 command)
 	case COMMAND_PRINT_HELP:
 	{
 		if (CCamera::m_bUseMouse3rdPerson && (
-			strncmp((char*)&CTheScripts::ScriptSpace[m_nIp], "HELP15", 7) == 0 ||
-			strncmp((char*)&CTheScripts::ScriptSpace[m_nIp], "GUN_2A", 7) == 0 ||
-			strncmp((char*)&CTheScripts::ScriptSpace[m_nIp], "GUN_3A", 7) == 0 ||
-			strncmp((char*)&CTheScripts::ScriptSpace[m_nIp], "GUN_4A", 7) == 0)) {
+			strcmp((char*)&CTheScripts::ScriptSpace[m_nIp], "HELP15") == 0 ||
+			strcmp((char*)&CTheScripts::ScriptSpace[m_nIp], "GUN_2A") == 0 ||
+			strcmp((char*)&CTheScripts::ScriptSpace[m_nIp], "GUN_3A") == 0 ||
+			strcmp((char*)&CTheScripts::ScriptSpace[m_nIp], "GUN_4A") == 0)) {
 			m_nIp += KEY_LENGTH_IN_SCRIPT;
 			return 0;
 		}
@@ -2024,4 +2035,144 @@ int8 CRunningScript::ProcessCommands900To999(int32 command)
 		script_assert(0);
 	}
 	return -1;
+}
+
+int32 CTheScripts::GetNewUniqueScriptSphereIndex(int32 index)
+{
+	if (ScriptSphereArray[index].m_Index >= UINT16_MAX - 1)
+		ScriptSphereArray[index].m_Index = 1;
+	else
+		ScriptSphereArray[index].m_Index++;
+	return (uint16)index | ScriptSphereArray[index].m_Index << 16;
+}
+
+int32 CTheScripts::GetActualScriptSphereIndex(int32 index)
+{
+	if (index == -1)
+		return -1;
+	uint16 check = (uint32)index >> 16;
+	uint16 array_idx = index & (0xFFFF);
+	script_assert(array_idx < ARRAY_SIZE(ScriptSphereArray));
+	if (check != ScriptSphereArray[array_idx].m_Index)
+		return -1;
+	return array_idx;
+}
+
+void CTheScripts::DrawScriptSpheres()
+{
+	for (int i = 0; i < MAX_NUM_SCRIPT_SPHERES; i++) {
+		if (ScriptSphereArray[i].m_bInUse)
+			C3dMarkers::PlaceMarkerSet(ScriptSphereArray[i].m_Id, MARKERTYPE_CYLINDER, ScriptSphereArray[i].m_vecCenter, ScriptSphereArray[i].m_fRadius,
+				SPHERE_MARKER_R, SPHERE_MARKER_G, SPHERE_MARKER_B, SPHERE_MARKER_A, SPHERE_MARKER_PULSE_PERIOD, SPHERE_MARKER_PULSE_FRACTION, 0);
+	}
+}
+
+int32 CTheScripts::AddScriptSphere(int32 id, CVector pos, float radius)
+{
+	int16 i = 0;
+	for (i = 0; i < MAX_NUM_SCRIPT_SPHERES; i++) {
+		if (!ScriptSphereArray[i].m_bInUse)
+			break;
+	}
+#ifdef FIX_BUGS
+	if (i == MAX_NUM_SCRIPT_SPHERES)
+		return -1;
+#endif
+	ScriptSphereArray[i].m_bInUse = true;
+	ScriptSphereArray[i].m_Id = id;
+	ScriptSphereArray[i].m_vecCenter = pos;
+	ScriptSphereArray[i].m_fRadius = radius;
+	return GetNewUniqueScriptSphereIndex(i);
+}
+
+void CTheScripts::RemoveScriptSphere(int32 index)
+{
+	index = GetActualScriptSphereIndex(index);
+	if (index == -1)
+		return;
+	ScriptSphereArray[index].m_bInUse = false;
+	ScriptSphereArray[index].m_Id = 0;
+}
+
+void CTheScripts::AddToBuildingSwapArray(CBuilding* pBuilding, int32 old_model, int32 new_model)
+{
+	int i = 0;
+	bool found = false;
+	while (i < MAX_NUM_BUILDING_SWAPS && !found) {
+		if (BuildingSwapArray[i].m_pBuilding == pBuilding)
+			found = true;
+		else
+			i++;
+	}
+	if (found) {
+		if (BuildingSwapArray[i].m_nOldModel == new_model) {
+			BuildingSwapArray[i].m_pBuilding = nil;
+			BuildingSwapArray[i].m_nOldModel = BuildingSwapArray[i].m_nNewModel = -1;
+		}
+		else {
+			BuildingSwapArray[i].m_nNewModel = new_model;
+		}
+	}
+	else {
+		i = 0;
+		while (i < MAX_NUM_BUILDING_SWAPS && !found) {
+			if (BuildingSwapArray[i].m_pBuilding == nil)
+				found = true;
+			else
+				i++;
+		}
+		if (found) {
+			BuildingSwapArray[i].m_pBuilding = pBuilding;
+			BuildingSwapArray[i].m_nNewModel = new_model;
+			BuildingSwapArray[i].m_nOldModel = old_model;
+		}
+	}
+}
+
+void CTheScripts::AddToInvisibilitySwapArray(CEntity* pEntity, bool remove)
+{
+	int i = 0;
+	bool found = false;
+	while (i < MAX_NUM_INVISIBILITY_SETTINGS && !found) {
+		if (InvisibilitySettingArray[i] == pEntity)
+			found = true;
+		else
+			i++;
+	}
+	if (found) {
+		if (remove)
+			InvisibilitySettingArray[i] = nil;
+	}
+	else if (!remove) {
+		i = 0;
+		while (i < MAX_NUM_INVISIBILITY_SETTINGS && !found) {
+			if (InvisibilitySettingArray[i] == nil)
+				found = true;
+			else
+				i++;
+		}
+		if (found)
+			InvisibilitySettingArray[i] = pEntity;
+	}
+}
+
+void CTheScripts::UndoBuildingSwaps()
+{
+	for (int i = 0; i < MAX_NUM_BUILDING_SWAPS; i++) {
+		if (BuildingSwapArray[i].m_pBuilding) {
+			BuildingSwapArray[i].m_pBuilding->ReplaceWithNewModel(BuildingSwapArray[i].m_nOldModel);
+			BuildingSwapArray[i].m_pBuilding = nil;
+			BuildingSwapArray[i].m_nOldModel = BuildingSwapArray[i].m_nNewModel = -1;
+		}
+	}
+}
+
+void CTheScripts::UndoEntityInvisibilitySettings()
+{
+	for (int i = 0; i < MAX_NUM_INVISIBILITY_SETTINGS; i++) {
+		if (InvisibilitySettingArray[i]) {
+			InvisibilitySettingArray[i]->bIsVisible = true;
+			InvisibilitySettingArray[i] = nil;
+		}
+	}
 }

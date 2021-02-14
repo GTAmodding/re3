@@ -1,9 +1,7 @@
-#define WITH_D3D
+#define WITHD3D
 #include "common.h"
 
 #ifdef RW_D3D9
-#ifdef EXTENDED_PIPELINES
-
 #include "main.h"
 #include "RwHelper.h"
 #include "Lights.h"
@@ -15,6 +13,8 @@
 #include "Renderer.h"
 #include "World.h"
 #include "custompipes.h"
+
+#ifdef EXTENDED_PIPELINES
 
 #ifndef LIBRW
 #error "Need librw for EXTENDED_PIPELINES"
@@ -89,6 +89,7 @@ vehicleRenderCB(rw::Atomic *atomic, rw::d3d9::InstanceDataHeader *header)
 	}
 
 	int vsBits;
+	rw::uint32 flags = atomic->geometry->flags;
 	setStreamSource(0, header->vertexStream[0].vertexBuffer, 0, header->vertexStream[0].stride);
 	setIndices(header->indexBuffer);
 	setVertexDeclaration(header->vertexDeclaration);
@@ -120,7 +121,7 @@ vehicleRenderCB(rw::Atomic *atomic, rw::d3d9::InstanceDataHeader *header)
 		reflProps[3] = m->surfaceProps.specular == 0.0f ? 0.0f : VehicleSpecularity;
 		d3ddevice->SetVertexShaderConstantF(VSLOC_reflProps, reflProps, 1);
 
-		setMaterial(m->color, m->surfaceProps);
+		setMaterial(flags, m->color, m->surfaceProps);
 
 		if(m->texture)
 			d3d::setTexture(0, m->texture);
@@ -139,7 +140,7 @@ vehicleRenderCB(rw::Atomic *atomic, rw::d3d9::InstanceDataHeader *header)
 void
 CreateVehiclePipe(void)
 {
-	if(CFileMgr::LoadFile("neo/carTweakingTable.dat", work_buff, sizeof(work_buff), "r") == 0)
+	if(CFileMgr::LoadFile("neo/carTweakingTable.dat", work_buff, sizeof(work_buff), "r") <= 0)
 		printf("Error: couldn't open 'neo/carTweakingTable.dat'\n");
 	else{
 		char *fp = (char*)work_buff;
@@ -149,11 +150,11 @@ CreateVehiclePipe(void)
 		fp = ReadTweakValueTable(fp, SpecColor);
 	}
 
-#include "shaders/neoVehicle_VS.inc"
+#include "shaders/obj/neoVehicle_VS.inc"
 	neoVehicle_VS = rw::d3d::createVertexShader(neoVehicle_VS_cso);
 	assert(neoVehicle_VS);
 
-#include "shaders/neoVehicle_PS.inc"
+#include "shaders/obj/neoVehicle_PS.inc"
 	neoVehicle_PS = rw::d3d::createPixelShader(neoVehicle_PS_cso);
 	assert(neoVehicle_PS);
 
@@ -170,6 +171,9 @@ DestroyVehiclePipe(void)
 {
 	rw::d3d::destroyVertexShader(neoVehicle_VS);
 	neoVehicle_VS = nil;
+
+	rw::d3d::destroyPixelShader(neoVehicle_PS);
+	neoVehicle_PS = nil;
 
 	((rw::d3d9::ObjPipeline*)vehiclePipe)->destroy();
 	vehiclePipe = nil;
@@ -245,21 +249,22 @@ worldRenderCB(rw::Atomic *atomic, rw::d3d9::InstanceDataHeader *header)
 		drawInst(header, inst);
 		inst++;
 	}
+	d3d::setTexture(1, nil);
 }
 
 void
 CreateWorldPipe(void)
 {
-	if(CFileMgr::LoadFile("neo/worldTweakingTable.dat", work_buff, sizeof(work_buff), "r") == 0)
+	if(CFileMgr::LoadFile("neo/worldTweakingTable.dat", work_buff, sizeof(work_buff), "r") <= 0)
 		printf("Error: couldn't open 'neo/worldTweakingTable.dat'\n");
 	else
 		ReadTweakValueTable((char*)work_buff, WorldLightmapBlend);
 
-#include "shaders/default_UV2_VS.inc"
+#include "shaders/obj/default_UV2_VS.inc"
 	neoWorld_VS = rw::d3d::createVertexShader(default_UV2_VS_cso);
 	assert(neoWorld_VS);
 
-#include "shaders/neoWorldIII_PS.inc"
+#include "shaders/obj/neoWorldIII_PS.inc"
 	neoWorldIII_PS = rw::d3d::createPixelShader(neoWorldIII_PS_cso);
 	assert(neoWorldIII_PS);
 
@@ -342,11 +347,11 @@ glossRenderCB(rw::Atomic *atomic, rw::d3d9::InstanceDataHeader *header)
 void
 CreateGlossPipe(void)
 {
-#include "shaders/neoGloss_VS.inc"
+#include "shaders/obj/neoGloss_VS.inc"
 	neoGloss_VS = rw::d3d::createVertexShader(neoGloss_VS_cso);
 	assert(neoGloss_VS);
 
-#include "shaders/neoGloss_PS.inc"
+#include "shaders/obj/neoGloss_PS.inc"
 	neoGloss_PS = rw::d3d::createPixelShader(neoGloss_PS_cso);
 	assert(neoGloss_PS);
 
@@ -361,6 +366,12 @@ CreateGlossPipe(void)
 void
 DestroyGlossPipe(void)
 {
+	rw::d3d::destroyVertexShader(neoGloss_VS);
+	neoGloss_VS = nil;
+
+	rw::d3d::destroyPixelShader(neoGloss_PS);
+	neoGloss_PS = nil;
+
 	((rw::d3d9::ObjPipeline*)glossPipe)->destroy();
 	glossPipe = nil;
 }
@@ -410,6 +421,7 @@ rimRenderCB(rw::Atomic *atomic, rw::d3d9::InstanceDataHeader *header)
 	}
 
 	int vsBits;
+	rw::uint32 flags = atomic->geometry->flags;
 	setStreamSource(0, header->vertexStream[0].vertexBuffer, 0, header->vertexStream[0].stride);
 	setIndices(header->indexBuffer);
 	setVertexDeclaration(header->vertexDeclaration);
@@ -427,7 +439,7 @@ rimRenderCB(rw::Atomic *atomic, rw::d3d9::InstanceDataHeader *header)
 
 		SetRenderState(VERTEXALPHA, inst->vertexAlpha || m->color.alpha != 255);
 
-		setMaterial(m->color, m->surfaceProps);
+		setMaterial(flags, m->color, m->surfaceProps);
 
 		if(m->texture){
 			d3d::setTexture(0, m->texture);
@@ -453,7 +465,7 @@ rimSkinRenderCB(rw::Atomic *atomic, rw::d3d9::InstanceDataHeader *header)
 	}
 
 	int vsBits;
-
+	rw::uint32 flags = atomic->geometry->flags;
 	setStreamSource(0, (IDirect3DVertexBuffer9*)header->vertexStream[0].vertexBuffer,
 	                           0, header->vertexStream[0].stride);
 	setIndices((IDirect3DIndexBuffer9*)header->indexBuffer);
@@ -474,7 +486,7 @@ rimSkinRenderCB(rw::Atomic *atomic, rw::d3d9::InstanceDataHeader *header)
 
 		SetRenderState(VERTEXALPHA, inst->vertexAlpha || m->color.alpha != 255);
 
-		setMaterial(m->color, m->surfaceProps);
+		setMaterial(flags, m->color, m->surfaceProps);
 
 		if(inst->material->texture){
 			d3d::setTexture(0, m->texture);
@@ -490,7 +502,7 @@ rimSkinRenderCB(rw::Atomic *atomic, rw::d3d9::InstanceDataHeader *header)
 void
 CreateRimLightPipes(void)
 {
-	if(CFileMgr::LoadFile("neo/rimTweakingTable.dat", work_buff, sizeof(work_buff), "r") == 0)
+	if(CFileMgr::LoadFile("neo/rimTweakingTable.dat", work_buff, sizeof(work_buff), "r") <= 0)
 		printf("Error: couldn't open 'neo/rimTweakingTable.dat'\n");
 	else{
 		char *fp = (char*)work_buff;
@@ -502,11 +514,11 @@ CreateRimLightPipes(void)
 	}
 
 
-#include "shaders/neoRim_VS.inc"
+#include "shaders/obj/neoRim_VS.inc"
 	neoRim_VS = rw::d3d::createVertexShader(neoRim_VS_cso);
 	assert(neoRim_VS);
 
-#include "shaders/neoRimSkin_VS.inc"
+#include "shaders/obj/neoRimSkin_VS.inc"
 	neoRimSkin_VS = rw::d3d::createVertexShader(neoRimSkin_VS_cso);
 	assert(neoRimSkin_VS);
 
@@ -543,4 +555,169 @@ DestroyRimLightPipes(void)
 }
 
 #endif
+
+#ifdef NEW_RENDERER
+#ifndef LIBRW
+#error "Need librw for NEW_PIPELINES"
+#endif
+
+namespace WorldRender
+{
+
+struct BuildingInst
+{
+	rw::RawMatrix combinedMat;
+	rw::d3d9::InstanceDataHeader *instHeader;
+	uint8 fadeAlpha;
+	bool lighting;
+};
+BuildingInst blendInsts[3][2000];
+int numBlendInsts[3];
+
+static RwRGBAReal black;
+
+static void
+SetMatrix(BuildingInst *building, rw::Matrix *worldMat)
+{
+	using namespace rw;
+	RawMatrix world, worldview;
+	Camera *cam = engine->currentCamera;
+	convMatrix(&world, worldMat);
+	RawMatrix::mult(&worldview, &world, &cam->devView);
+	RawMatrix::mult(&building->combinedMat, &worldview, &cam->devProj);
+}
+
+static bool
+IsTextureTransparent(RwTexture *tex)
+{
+	if(tex == nil || tex->raster == nil)
+		return false;
+	return PLUGINOFFSET(rw::d3d::D3dRaster, tex->raster, rw::d3d::nativeRasterOffset)->hasAlpha;
+}
+
+// Render all opaque meshes and put atomics that needs blending
+// into the deferred list.
+void
+AtomicFirstPass(RpAtomic *atomic, int pass)
+{
+	using namespace rw;
+	using namespace rw::d3d;
+	using namespace rw::d3d9;
+
+	BuildingInst *building = &blendInsts[pass][numBlendInsts[pass]];
+
+	atomic->getPipeline()->instance(atomic);
+	building->instHeader = (d3d9::InstanceDataHeader*)atomic->geometry->instData;
+	assert(building->instHeader != nil);
+	assert(building->instHeader->platform == PLATFORM_D3D9);
+	building->fadeAlpha = 255;
+	building->lighting = !!(atomic->geometry->flags & rw::Geometry::LIGHT);
+	rw::uint32 flags = atomic->geometry->flags;
+
+	bool setupDone = false;
+	bool defer = false;
+	SetMatrix(building, atomic->getFrame()->getLTM());
+
+	InstanceData *inst = building->instHeader->inst;
+	for(rw::uint32 i = 0; i < building->instHeader->numMeshes; i++, inst++){
+		Material *m = inst->material;
+
+		if(inst->vertexAlpha || m->color.alpha != 255 ||
+		   IsTextureTransparent(m->texture)){
+			defer = true;
+			continue;
+		}
+
+		// alright we're rendering this atomic
+		if(!setupDone){
+			setStreamSource(0, building->instHeader->vertexStream[0].vertexBuffer, 0, building->instHeader->vertexStream[0].stride);
+			setIndices(building->instHeader->indexBuffer);
+			setVertexDeclaration(building->instHeader->vertexDeclaration);
+			setVertexShader(default_amb_VS);
+			d3ddevice->SetVertexShaderConstantF(VSLOC_combined, (float*)&building->combinedMat, 4);
+			if(building->lighting)
+				setAmbient(pAmbient->color);
+			else
+				setAmbient(black);
+			setupDone = true;
+		}
+
+		setMaterial(flags, m->color, m->surfaceProps);
+
+		if(m->texture){
+			d3d::setTexture(0, m->texture);
+			setPixelShader(default_tex_PS);
+		}else
+			setPixelShader(default_PS);
+
+		drawInst(building->instHeader, inst);
+	}
+	if(defer)
+		numBlendInsts[pass]++;
+}
+
+void
+AtomicFullyTransparent(RpAtomic *atomic, int pass, int fadeAlpha)
+{
+	using namespace rw;
+	using namespace rw::d3d;
+	using namespace rw::d3d9;
+
+	BuildingInst *building = &blendInsts[pass][numBlendInsts[pass]];
+
+	atomic->getPipeline()->instance(atomic);
+	building->instHeader = (d3d9::InstanceDataHeader*)atomic->geometry->instData;
+	assert(building->instHeader != nil);
+	assert(building->instHeader->platform == PLATFORM_D3D9);
+	building->fadeAlpha = fadeAlpha;
+	building->lighting = !!(atomic->geometry->flags & rw::Geometry::LIGHT);
+	SetMatrix(building, atomic->getFrame()->getLTM());
+	numBlendInsts[pass]++;
+}
+
+void
+RenderBlendPass(int pass)
+{
+	using namespace rw;
+	using namespace rw::d3d;
+	using namespace rw::d3d9;
+
+	setVertexShader(default_amb_VS);
+
+	int i;
+	for(i = 0; i < numBlendInsts[pass]; i++){
+		BuildingInst *building = &blendInsts[pass][i];
+
+		setStreamSource(0, building->instHeader->vertexStream[0].vertexBuffer, 0, building->instHeader->vertexStream[0].stride);
+		setIndices(building->instHeader->indexBuffer);
+		setVertexDeclaration(building->instHeader->vertexDeclaration);
+		d3ddevice->SetVertexShaderConstantF(VSLOC_combined, (float*)&building->combinedMat, 4);
+		if(building->lighting)
+			setAmbient(pAmbient->color);
+		else
+			setAmbient(black);
+
+		InstanceData *inst = building->instHeader->inst;
+		for(rw::uint32 j = 0; j < building->instHeader->numMeshes; j++, inst++){
+			Material *m = inst->material;
+			if(!inst->vertexAlpha && m->color.alpha == 255 && !IsTextureTransparent(m->texture) && building->fadeAlpha == 255)
+				continue;	// already done this one
+
+			rw::RGBA color = m->color;
+			color.alpha = (color.alpha * building->fadeAlpha)/255;
+			setMaterial(color, m->surfaceProps);	// always modulate here
+
+			if(m->texture){
+				d3d::setTexture(0, m->texture);
+				setPixelShader(default_tex_PS);
+			}else
+				setPixelShader(default_PS);
+
+			drawInst(building->instHeader, inst);
+		}
+	}
+}
+}
+#endif
+
 #endif

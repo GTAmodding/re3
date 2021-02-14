@@ -240,21 +240,24 @@ CFileMgr::SetDirMyDocuments(void)
 	mychdir(_psGetUserFilesFolder());
 }
 
-size_t
-CFileMgr::LoadFile(const char *file, uint8 *buf, int unused, const char *mode)
+ssize_t
+CFileMgr::LoadFile(const char *file, uint8 *buf, int maxlen, const char *mode)
 {
 	int fd;
-	size_t n, len;
+	ssize_t n, len;
 
 	fd = myfopen(file, mode);
 	if(fd == 0)
-		return 0;
+		return -1;
 	len = 0;
 	do{
 		n = myfread(buf + len, 1, 0x4000, fd);
-		if(n < 0)
+#ifndef FIX_BUGS
+		if (n < 0)
 			return -1;
+#endif
 		len += n;
+		assert(len < maxlen);
 	}while(n == 0x4000);
 	buf[len] = 0;
 	myfclose(fd);
@@ -274,13 +277,13 @@ CFileMgr::OpenFileForWriting(const char *file)
 }
 
 size_t
-CFileMgr::Read(int fd, const char *buf, int len)
+CFileMgr::Read(int fd, const char *buf, ssize_t len)
 {
 	return myfread((void*)buf, 1, len, fd);
 }
 
 size_t
-CFileMgr::Write(int fd, const char *buf, int len)
+CFileMgr::Write(int fd, const char *buf, ssize_t len)
 {
 	return myfwrite((void*)buf, 1, len, fd);
 }

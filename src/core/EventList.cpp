@@ -120,7 +120,7 @@ CEventList::RegisterEvent(eEventType type, eEventEntity entityType, CEntity *ent
 	}
 
 	if(criminal == FindPlayerPed())
-		ReportCrimeForEvent(type, (uintptr)ent, copsDontCare);
+		ReportCrimeForEvent(type, (intptr)ent, copsDontCare);
 }
 
 void
@@ -198,7 +198,7 @@ CEventList::FindClosestEvent(eEventType type, CVector posn, int32 *event)
 }
 
 void
-CEventList::ReportCrimeForEvent(eEventType type, int32 crimeId, bool copsDontCare)
+CEventList::ReportCrimeForEvent(eEventType type, intptr crimeId, bool copsDontCare)
 {
 	eCrimeType crime;
 	switch(type){

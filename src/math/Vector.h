@@ -1,23 +1,22 @@
 #pragma once
 
-class CVector
+class CVector : public RwV3d
 {
 public:
-	float x, y, z;
 	CVector(void) {}
-	CVector(float x, float y, float z) : x(x), y(y), z(z) {}
-#ifdef RWCORE_H
-	CVector(const RwV3d &v) : x(v.x), y(v.y), z(v.z) {}
+	CVector(float x, float y, float z)
+	{
+		this->x = x;
+		this->y = y;
+		this->z = z;
+	}
 
-	operator RwV3d (void) const {
-		RwV3d vecRw = { this->x, this->y, this->z };
-		return vecRw;
+	CVector(const RwV3d &v)
+	{
+		x = v.x;
+		y = v.y;
+		z = v.z;
 	}
-	
-	operator RwV3d *(void) {
-		return (RwV3d*)this;
-	}
-#endif
 	// (0,1,0) means no rotation. So get right vector and its atan
 	float Heading(void) const { return Atan2(-x, y); }
 	float Magnitude(void) const { return Sqrt(x*x + y*y + z*z); }

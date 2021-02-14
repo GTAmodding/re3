@@ -1,5 +1,6 @@
 #pragma once
 #include "Sprite2d.h"
+#include "Draw.h"
 
 enum eBlipType
 {
@@ -86,9 +87,33 @@ VALIDATE_SIZE(sRadarTrace, 0x30);
 
 // Values for screen space
 #define RADAR_LEFT (40.0f)
+#ifdef PS2_HUD
+#define RADAR_BOTTOM (44.0f)
+#else
 #define RADAR_BOTTOM (47.0f)
+#endif
+
+#ifdef FIX_RADAR
+/*
+	The values are from an early screenshot taken before R* broke radar
+		#define RADAR_WIDTH (82.0f)
+		#define RADAR_HEIGHT (82.0f)
+*/
+#define RADAR_WIDTH ((CDraw::ms_bFixRadar)  ? (82.0f) : (94.0f))	
+#define RADAR_HEIGHT ((CDraw::ms_bFixRadar) ? (82.0f) : (76.0f))
+#else
+/*
+	broken since forever, someone tried to fix size for 640x512(PAL)
+		http://aap.rockstarvision.com/pics/gta3/ps2screens/gta3_interface.jpg
+	but failed:
+		http://aap.rockstarvision.com/pics/gta3/artwork/gta3_artwork_16.jpg
+	most likely the guy used something like this:
+		int y = 82 * (640.0/512.0)/(640.0/480.0);
+		int x = y * (640.0/512.0);
+*/
 #define RADAR_WIDTH (94.0f)
 #define RADAR_HEIGHT (76.0f)
+#endif
 
 class CRadar
 {

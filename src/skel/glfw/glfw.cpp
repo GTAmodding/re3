@@ -1,22 +1,30 @@
 #if defined RW_GL3 && !defined LIBRW_SDL2
 
 #ifdef _WIN32
-#include <windows.h>
+#include <shlobj.h>
+#include <basetsd.h>
 #include <mmsystem.h>
+#include <regstr.h>
 #include <shellapi.h>
 #include <windowsx.h>
-#include <basetsd.h>
-#include <regstr.h>
-#include <shlobj.h>
+
+DWORD _dwOperatingSystemVersion;
+#include "resource.h"
+#else
+long _dwOperatingSystemVersion;
+#ifndef __APPLE__
+#include <sys/sysinfo.h>
+#else
+#include <mach/mach_host.h>
+#include <sys/sysctl.h>
+#endif
+#include <errno.h>
+#include <locale.h>
+#include <signal.h>
+#include <stddef.h>
 #endif
 
-#define WITHWINDOWS
 #include "common.h"
-
-#pragma warning( push )
-#pragma warning( disable : 4005)
-#pragma warning( pop )
-
 #if (defined(_MSC_VER))
 #include <tchar.h>
 #endif /* (defined(_MSC_VER)) */
@@ -44,6 +52,11 @@
 
 #define MAX_SUBSYSTEMS		(16)
 
+#ifdef _WIN32
+#define GLFW_EXPOSE_NATIVE_WIN32
+#include <GLFW/glfw3native.h>
+#endif
+
 
 rw::EngineOpenParams openParams;
 
@@ -70,30 +83,10 @@ static psGlobalType PsGlobal;
 
 #define PSGLOBAL(var) (((psGlobalType *)(RsGlobal.ps))->var)
 
-#undef MAKEPOINTS
-#define MAKEPOINTS(l)		(*((POINTS /*FAR*/ *)&(l)))
-
 size_t _dwMemAvailPhys;
 RwUInt32 gGameState;
 
-#ifdef _WIN32
-DWORD _dwOperatingSystemVersion;
-#include "resource.h"
-#else
-long _dwOperatingSystemVersion;
-#ifndef __APPLE__
-#include <sys/sysinfo.h>
-#else
-#include <mach/mach_host.h>
-#include <sys/sysctl.h>
-#endif
-#include <stddef.h>
-#include <locale.h>
-#include <signal.h>
-#include <errno.h>
-#endif
-
-#ifdef DONT_TRUST_RECOGNIZED_JOYSTICKS
+#ifdef DETECT_JOYSTICK_MENU
 char gSelectedJoystickName[128] = "";
 #endif
 
@@ -214,6 +207,11 @@ psGrabScreen(RwCamera *pCamera)
 		RwImageSetFromRaster(pImage, pRaster);
 		return pImage;
 	}
+#else
+	rw::Image *image = RwCameraGetRaster(pCamera)->toImage();
+	image->removeMask();
+	if(image)
+		return image;
 #endif
 	return nil;
 }
@@ -849,7 +847,7 @@ void joysChangeCB(int jid, int event);
 
 bool IsThisJoystickBlacklisted(int i)
 {
-#ifndef DONT_TRUST_RECOGNIZED_JOYSTICKS
+#ifndef DETECT_JOYSTICK_MENU
 	return false;
 #else
 	if (glfwJoystickIsGamepad(i))
@@ -870,6 +868,36 @@ void _InputInitialiseJoys()
 	PSGLOBAL(joy1id) = -1;
 	PSGLOBAL(joy2id) = -1;
 
+	// Load our gamepad mappings.
+#define SDL_GAMEPAD_DB_PATH "gamecontrollerdb.txt"
+	FILE *f = fopen(SDL_GAMEPAD_DB_PATH, "rb");
+	if (f) {
+		fseek(f, 0, SEEK_END);
+		size_t fsize = ftell(f);
+		fseek(f, 0, SEEK_SET);
+
+		char *db = (char*)malloc(fsize + 1);
+		if (fread(db, 1, fsize, f) == fsize) {
+			db[fsize] = '\0';
+
+			if (glfwUpdateGamepadMappings(db) == GLFW_FALSE)
+				Error("glfwUpdateGamepadMappings didn't succeed, check " SDL_GAMEPAD_DB_PATH ".\n");
+		} else
+			Error("fread on " SDL_GAMEPAD_DB_PATH " wasn't successful.\n");
+
+		free(db);
+		fclose(f);
+	} else
+		printf("You don't seem to have copied " SDL_GAMEPAD_DB_PATH " file from re3/gamefiles to GTA3 directory. Some gamepads may not be recognized.\n");
+
+#undef SDL_GAMEPAD_DB_PATH
+
+	// But always overwrite it with the one in SDL_GAMECONTROLLERCONFIG.
+	char const* EnvControlConfig = getenv("SDL_GAMECONTROLLERCONFIG");
+	if (EnvControlConfig != nil) {
+		glfwUpdateGamepadMappings(EnvControlConfig);
+	}
+
 	for (int i = 0; i <= GLFW_JOYSTICK_LAST; i++) {
 		if (glfwJoystickPresent(i) && !IsThisJoystickBlacklisted(i)) {
 			if (PSGLOBAL(joy1id) == -1)
@@ -884,7 +912,7 @@ void _InputInitialiseJoys()
 	if (PSGLOBAL(joy1id) != -1) {
 		int count;
 		glfwGetJoystickButtons(PSGLOBAL(joy1id), &count);
-#ifdef DONT_TRUST_RECOGNIZED_JOYSTICKS
+#ifdef DETECT_JOYSTICK_MENU
 		strcpy(gSelectedJoystickName, glfwGetJoystickName(PSGLOBAL(joy1id)));
 #endif
 		ControlsManager.InitDefaultControlConfigJoyPad(count);
@@ -1175,15 +1203,15 @@ void InitialiseLanguage()
 		}
 	}
 
-	TheText.Unload();
-	TheText.Load();
-
 #ifndef _WIN32
 	// TODO this is needed for strcasecmp to work correctly across all languages, but can these cause other problems??
 	setlocale(LC_CTYPE, "C");
 	setlocale(LC_COLLATE, "C");
 	setlocale(LC_NUMERIC, "C");
 #endif
+
+	TheText.Unload();
+	TheText.Load();
 }
 
 /*
@@ -1217,10 +1245,11 @@ void terminateHandler(int sig, siginfo_t *info, void *ucontext) {
 	RsGlobal.quit = TRUE;
 }
 
+#ifdef FLUSHABLE_STREAMING
 void dummyHandler(int sig){
 	// Don't kill the app pls
 }
-
+#endif
 #endif
 
 void resizeCB(GLFWwindow* window, int width, int height) {
@@ -1230,17 +1259,11 @@ void resizeCB(GLFWwindow* window, int width, int height) {
 	* memory things don't work.
 	*/
 	/* redraw window */
-#ifndef MASTER
-	if (RwInitialised && (gGameState == GS_PLAYING_GAME || gGameState == GS_ANIMVIEWER))
-	{
-		RsEventHandler((gGameState == GS_PLAYING_GAME ? rsIDLE : rsANIMVIEWER), (void *)TRUE);
-	}
-#else
+
 	if (RwInitialised && gGameState == GS_PLAYING_GAME)
 	{
 		RsEventHandler(rsIDLE, (void *)TRUE);
 	}
-#endif
 
 	if (RwInitialised && height > 0 && width > 0) {
 		RwRect r;
@@ -1399,7 +1422,7 @@ bool rshiftStatus = false;
 void
 keypressCB(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
-	if (key >= 0 && key <= GLFW_KEY_LAST) {
+	if (key >= 0 && key <= GLFW_KEY_LAST && action != GLFW_REPEAT) {
 		RsKeyCodes ks = (RsKeyCodes)keymap[key];
 
 		if (key == GLFW_KEY_LEFT_SHIFT)
@@ -1410,7 +1433,6 @@ keypressCB(GLFWwindow* window, int key, int scancode, int action, int mods)
 
 		if (action == GLFW_RELEASE) RsKeyboardEventHandler(rsKEYUP, &ks);
 		else if (action == GLFW_PRESS) RsKeyboardEventHandler(rsKEYDOWN, &ks);
-		else if (action == GLFW_REPEAT) RsKeyboardEventHandler(rsKEYDOWN, &ks);
 	}
 }
 
@@ -1480,11 +1502,13 @@ main(int argc, char *argv[])
 	act.sa_sigaction = terminateHandler;
 	act.sa_flags = SA_SIGINFO;
 	sigaction(SIGTERM, &act, NULL);
+#ifdef FLUSHABLE_STREAMING
 	struct sigaction sa;
 	sigemptyset(&sa.sa_mask);
 	sa.sa_handler = dummyHandler;
 	sa.sa_flags = 0;
-	sigaction(SIGUSR1, &sa, NULL); // Needed for CdStreamPosix
+	sigaction(SIGUSR1, &sa, NULL);
+#endif
 #endif
 
 	/* 
@@ -1541,6 +1565,15 @@ main(int argc, char *argv[])
 		return 0;
 	}
 
+#ifdef _WIN32
+	HWND wnd = glfwGetWin32Window(PSGLOBAL(window));
+
+	HICON icon = LoadIcon(instance, MAKEINTRESOURCE(IDI_MAIN_ICON));
+
+	SendMessage(wnd, WM_SETICON, ICON_BIG, (LPARAM)icon);
+	SendMessage(wnd, WM_SETICON, ICON_SMALL, (LPARAM)icon);
+#endif
+
 	psPostRWinit();
 
 	ControlsManager.InitDefaultControlConfigMouse(MousePointerStateHelper.GetMouseSetUp());
@@ -1589,6 +1622,13 @@ main(int argc, char *argv[])
 	{
 		CFileMgr::SetDirMyDocuments();
 		
+#ifdef LOAD_INI_SETTINGS
+		// At this point InitDefaultControlConfigJoyPad must have set all bindings to default and ms_padButtonsInited to number of detected buttons.
+		// We will load stored bindings below, but let's cache ms_padButtonsInited before LoadINIControllerSettings and LoadSettings clears it,
+		// so we can add new joy bindings **on top of** stored bindings.
+		int connectedPadButtons = ControlsManager.ms_padButtonsInited;
+#endif
+
 		int32 gta3set = CFileMgr::OpenFile("gta3.set", "r");
 		
 		if ( gta3set )
@@ -1598,6 +1638,14 @@ main(int argc, char *argv[])
 		}
 		
 		CFileMgr::SetDir("");
+
+#ifdef LOAD_INI_SETTINGS
+		LoadINIControllerSettings();
+		if (connectedPadButtons != 0) {
+			ControlsManager.InitDefaultControlConfigJoyPad(connectedPadButtons);
+			SaveINIControllerSettings();
+		}
+#endif
 	}
 	
 #ifdef _WIN32
@@ -1619,18 +1667,6 @@ main(int argc, char *argv[])
 		FrontEndMenuManager.DrawMemoryCardStartUpMenus();
 	}
 #endif
-
-	if (TurnOnAnimViewer)
-	{
-#ifndef MASTER
-		CAnimViewer::Initialise();
-#ifndef PS2_MENU
-		FrontEndMenuManager.m_bGameNotLoaded = false;
-#endif
-		gGameState = GS_ANIMVIEWER;
-		TurnOnAnimViewer = false;
-#endif
-	}
 	
 	initkeymap();
 
@@ -1650,6 +1686,18 @@ main(int argc, char *argv[])
 		* Enter the message processing loop...
 		*/
 
+#ifndef MASTER
+		if (gbModelViewer) {
+			// This is TheModelViewer in LCS, but not compiled on III Mobile.
+			LoadingScreen("Loading the ModelViewer", NULL, GetRandomSplashScreen());
+			CAnimViewer::Initialise();
+			CTimer::Update();
+#ifndef PS2_MENU
+			FrontEndMenuManager.m_bGameNotLoaded = false;
+#endif
+		}
+#endif
+
 #ifdef PS2_MENU
 		if (TheMemoryCard.m_bWantToLoad)
 			LoadSplash(GetLevelSplashScreen(CGame::currLevel));
@@ -1664,7 +1712,13 @@ main(int argc, char *argv[])
 #endif
 		{
 			glfwPollEvents();
-			if( ForegroundApp )
+#ifndef MASTER
+			if (gbModelViewer) {
+				// This is TheModelViewerCore in LCS, but TheModelViewer on other state-machine III-VCs.
+				TheModelViewer();
+			} else
+#endif
+			if ( ForegroundApp )
 			{
 				switch ( gGameState )
 				{
@@ -1867,18 +1921,6 @@ main(int argc, char *argv[])
 						}
 						break;
 					}
-#ifndef MASTER
-					case GS_ANIMVIEWER:
-					{
-						float ms = (float)CTimer::GetCurrentTimeInCycles() / (float)CTimer::GetCyclesPerMillisecond();
-						if (RwInitialised)
-						{
-							if (!CMenuManager::m_PrefsFrameLimiter || (1000.0f / (float)RsGlobal.maxFPS) < ms)
-								RsEventHandler(rsANIMVIEWER, (void*)TRUE);
-						}
-						break;
-					}
-#endif
 				}
 			}
 			else
@@ -1950,12 +1992,13 @@ main(int argc, char *argv[])
 		}
 		else
 		{
+#ifndef MASTER
+			if ( gbModelViewer )
+				CAnimViewer::Shutdown();
+			else
+#endif
 			if ( gGameState == GS_PLAYING_GAME )
 				CGame::ShutDown();
-#ifndef MASTER
-			else if ( gGameState == GS_ANIMVIEWER )
-				CAnimViewer::Shutdown();
-#endif
 			
 			CTimer::Stop();
 			
@@ -1977,12 +2020,13 @@ main(int argc, char *argv[])
 	}
 	
 
+#ifndef MASTER
+	if ( gbModelViewer )
+		CAnimViewer::Shutdown();
+	else
+#endif
 	if ( gGameState == GS_PLAYING_GAME )
 		CGame::ShutDown();
-#ifndef MASTER
-	else if ( gGameState == GS_ANIMVIEWER )
-		CAnimViewer::Shutdown();
-#endif
 
 	DMAudio.Terminate();
 	
@@ -2040,22 +2084,30 @@ void CapturePad(RwInt32 padID)
 	const float *axes = glfwGetJoystickAxes(glfwPad, &numAxes);
 	GLFWgamepadstate gamepadState;
 
-	if (ControlsManager.m_bFirstCapture == false)
-	{
+	if (ControlsManager.m_bFirstCapture == false) {
 		memcpy(&ControlsManager.m_OldState, &ControlsManager.m_NewState, sizeof(ControlsManager.m_NewState));
+	} else {
+		// In case connected gamepad doesn't have L-R trigger axes.
+		ControlsManager.m_NewState.mappedButtons[15] = ControlsManager.m_NewState.mappedButtons[16] = 0;
 	}
 
 	ControlsManager.m_NewState.buttons = (uint8*)buttons;
 	ControlsManager.m_NewState.numButtons = numButtons;
 	ControlsManager.m_NewState.id = glfwPad;
-	ControlsManager.m_NewState.isGamepad = glfwJoystickIsGamepad(glfwPad);
+	ControlsManager.m_NewState.isGamepad = glfwGetGamepadState(glfwPad, &gamepadState);
 	if (ControlsManager.m_NewState.isGamepad) {
-		glfwGetGamepadState(glfwPad, &gamepadState);
 		memcpy(&ControlsManager.m_NewState.mappedButtons, gamepadState.buttons, sizeof(gamepadState.buttons));
-		ControlsManager.m_NewState.mappedButtons[15] = gamepadState.axes[4] > -0.8f;
-		ControlsManager.m_NewState.mappedButtons[16] = gamepadState.axes[5] > -0.8f;
+		float lt = gamepadState.axes[GLFW_GAMEPAD_AXIS_LEFT_TRIGGER], rt = gamepadState.axes[GLFW_GAMEPAD_AXIS_RIGHT_TRIGGER];
+
+		// glfw returns 0.0 for non-existent axises(which is bullocks) so we treat it as deadzone, and keep value of previous frame.
+		// otherwise if this axis is present, -1 = released, 1 = pressed
+		if (lt != 0.0f)
+			ControlsManager.m_NewState.mappedButtons[15] = lt > -0.8f;
+
+		if (rt != 0.0f)
+			ControlsManager.m_NewState.mappedButtons[16] = rt > -0.8f;
 	}
-	// TODO I'm not sure how to find/what to do with L2-R2, if joystick isn't registered in SDL database.
+	// TODO? L2-R2 axes(not buttons-that's fine) on joysticks that don't have SDL gamepad mapping AREN'T handled, and I think it's impossible to do without mapping.
 
 	if (ControlsManager.m_bFirstCapture == true) {
 		memcpy(&ControlsManager.m_OldState, &ControlsManager.m_NewState, sizeof(ControlsManager.m_NewState));
@@ -2069,12 +2121,13 @@ void CapturePad(RwInt32 padID)
 	RsPadEventHandler(rsPADBUTTONUP, (void *)&bs);
 	
 	// Gamepad axes are guaranteed to return 0.0f if that particular gamepad doesn't have that axis.
+	// And that's really good for sticks, because gamepads return 0.0 for them when sticks are in released state.
 	if ( glfwPad != -1 ) {
-		leftStickPos.x = ControlsManager.m_NewState.isGamepad ? gamepadState.axes[0] : numAxes >= 1 ? axes[0] : 0.0f;
-		leftStickPos.y = ControlsManager.m_NewState.isGamepad ? gamepadState.axes[1] : numAxes >= 2 ? axes[1] : 0.0f;
+		leftStickPos.x = ControlsManager.m_NewState.isGamepad ? gamepadState.axes[GLFW_GAMEPAD_AXIS_LEFT_X] : numAxes >= 1 ? axes[0] : 0.0f;
+		leftStickPos.y = ControlsManager.m_NewState.isGamepad ? gamepadState.axes[GLFW_GAMEPAD_AXIS_LEFT_Y] : numAxes >= 2 ? axes[1] : 0.0f;
 
-		rightStickPos.x = ControlsManager.m_NewState.isGamepad ? gamepadState.axes[2] : numAxes >= 3 ? axes[2] : 0.0f;
-		rightStickPos.y = ControlsManager.m_NewState.isGamepad ? gamepadState.axes[3] : numAxes >= 4 ? axes[3] : 0.0f;
+		rightStickPos.x = ControlsManager.m_NewState.isGamepad ? gamepadState.axes[GLFW_GAMEPAD_AXIS_RIGHT_X] : numAxes >= 3 ? axes[2] : 0.0f;
+		rightStickPos.y = ControlsManager.m_NewState.isGamepad ? gamepadState.axes[GLFW_GAMEPAD_AXIS_RIGHT_Y] : numAxes >= 4 ? axes[3] : 0.0f;
 	}
 	
 	{
@@ -2112,8 +2165,14 @@ void joysChangeCB(int jid, int event)
 	if (event == GLFW_CONNECTED && !IsThisJoystickBlacklisted(jid)) {
 		if (PSGLOBAL(joy1id) == -1) {
 			PSGLOBAL(joy1id) = jid;
-#ifdef DONT_TRUST_RECOGNIZED_JOYSTICKS
+#ifdef DETECT_JOYSTICK_MENU
 			strcpy(gSelectedJoystickName, glfwGetJoystickName(jid));
+#endif
+			// This is behind LOAD_INI_SETTINGS, because otherwise the Init call below will destroy/overwrite your bindings.
+#ifdef LOAD_INI_SETTINGS
+			int count;
+			glfwGetJoystickButtons(PSGLOBAL(joy1id), &count);
+			ControlsManager.InitDefaultControlConfigJoyPad(count);
 #endif
 		} else if (PSGLOBAL(joy2id) == -1)
 			PSGLOBAL(joy2id) = jid;

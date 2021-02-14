@@ -1,7 +1,7 @@
 #pragma once
 #include "Weapon.h"
 
-enum ePickupType : uint8
+enum ePickupType
 {
 	PICKUP_NONE = 0,
 	PICKUP_IN_SHOP,
@@ -29,7 +29,7 @@ class CPlayerPed;
 class CPickup
 {
 public:
-	ePickupType m_eType;
+	uint8 m_eType;
 	bool m_bRemoved;
 	uint16 m_nQuantity;
 	CObject *m_pObject;
@@ -120,7 +120,7 @@ public:
 
 class CPacManPickups
 {
-	friend CPacManPickup;
+	friend class CPacManPickup;
 
 	static CPacManPickup aPMPickUps[NUMPACMANPICKUPS];
 	static CVector LastPickUpCoors;

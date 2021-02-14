@@ -46,7 +46,7 @@ public:
 	eAudioType m_nType;
 	void *m_pEntity;
 	bool m_bIsUsed;
-	uint8 m_nStatus;
+	uint8 m_bStatus;
 	int16 m_awAudioEvent[NUM_AUDIOENTITY_EVENTS];
 	float m_afVolume[NUM_AUDIOENTITY_EVENTS];
 	uint8 m_AudioEvents;
@@ -132,6 +132,13 @@ public:
 	bool m_bDistanceCalculated;
 	float m_fDistance;
 	CPed *m_pPed;
+
+	cPedParams()
+	{
+		m_bDistanceCalculated = false;
+		m_fDistance = 0.0f;
+		m_pPed = nil;
+	}
 };
 
 class cVehicleParams
@@ -143,6 +150,16 @@ public:
 	cTransmission *m_pTransmission;
 	int32 m_nIndex;
 	float m_fVelocityChange;
+
+	cVehicleParams()
+	{
+		m_bDistanceCalculated = false;
+		m_fDistance = 0.0f;
+		m_pVehicle = nil;
+		m_pTransmission = nil;
+		m_nIndex = 0;
+		m_fVelocityChange = 0.0f;
+	}
 };
 
 VALIDATE_SIZE(cVehicleParams, 0x18);
@@ -168,7 +185,7 @@ class cAudioManager
 {
 public:
 	bool m_bIsInitialised;
-	uint8 field_1; // unused
+	bool m_bReverb; // unused
 	bool m_bFifthFrameFlag;
 	uint8 m_nActiveSamples;
 	uint8 field_4; // unused

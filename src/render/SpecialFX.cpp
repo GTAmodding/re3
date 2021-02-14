@@ -141,6 +141,9 @@ CSpecialFX::Render(void)
 	CBrightLights::Render();
 	CShinyTexts::Render();
 	CMoneyMessages::Render();
+#ifdef NEW_RENDERER
+	if(!(gbNewRenderer && FredIsInFirstPersonCam()))
+#endif
 	C3dMarkers::Render();
 }
 
@@ -584,7 +587,7 @@ C3dMarkers::PlaceMarker(uint32 identifier, uint16 type, CVector &pos, float size
 				pMarker->m_Color.alpha = (float)a * 0.4f * someSin + a;
 		}
 		if (pMarker->m_nRotateRate) {
-			RwV3d pos = pMarker->m_Matrix.m_matrix.pos;
+			CVector pos = pMarker->m_Matrix.GetPosition();
 			pMarker->m_Matrix.RotateZ(DEGTORAD(pMarker->m_nRotateRate * CTimer::GetTimeStep()));
 			pMarker->m_Matrix.GetPosition() = pos;
 		}
@@ -721,6 +724,9 @@ CBrightLights::Render(void)
 	RwRenderStateSet(rwRENDERSTATESRCBLEND, (void*)rwBLENDSRCALPHA);
 	RwRenderStateSet(rwRENDERSTATEDESTBLEND, (void*)rwBLENDINVSRCALPHA);
 	RwRenderStateSet(rwRENDERSTATETEXTURERASTER, nil);
+
+	TempBufferVerticesStored = 0;
+	TempBufferIndicesStored = 0;
 
 	for(i = 0; i < NumBrightLights; i++){
 		if(TempBufferIndicesStored > TEMPBUFFERINDEXSIZE-40 || TempBufferVerticesStored > TEMPBUFFERVERTSIZE-40)
@@ -1048,15 +1054,19 @@ CMoneyMessage::Render()
 		RwV3d vecOut;
 		float fDistX, fDistY;
 		if (CSprite::CalcScreenCoors(m_vecPosition + CVector(0.0f, 0.0f, fLifeTime), &vecOut, &fDistX, &fDistY, true)) {
-			fDistX *= (0.7 * fLifeTime + 2.0) * m_fSize;
-			fDistY *= (0.7 * fLifeTime + 2.0) * m_fSize;
+			fDistX *= (0.7f * fLifeTime + 2.0f) * m_fSize;
+			fDistY *= (0.7f * fLifeTime + 2.0f) * m_fSize;
 			CFont::SetPropOn();
 			CFont::SetBackgroundOff();
 
 			float fScaleY = Min(fDistY / 100.0f, MAX_SCALE);
 			float fScaleX = Min(fDistX / 100.0f, MAX_SCALE);
 
-			CFont::SetScale(fScaleX, fScaleY); // maybe use SCREEN_SCALE_X and SCREEN_SCALE_Y here?
+#ifdef FIX_BUGS
+			CFont::SetScale(SCREEN_SCALE_X(fScaleX), SCREEN_SCALE_Y(fScaleY));
+#else
+			CFont::SetScale(fScaleX, fScaleY);
+#endif
 			CFont::SetCentreOn();
 			CFont::SetCentreSize(SCREEN_WIDTH);
 			CFont::SetJustifyOff();
@@ -1087,25 +1097,29 @@ CMoneyMessages::Render()
 void
 CMoneyMessages::RegisterOne(CVector vecPos, const char *pText, uint8 bRed, uint8 bGreen, uint8 bBlue, float fSize, float fOpacity)
 {
-	uint32 nIndex = 0;
-	while (aMoneyMessages[nIndex].m_nTimeRegistered != 0) {
-		if (++nIndex >= NUMMONEYMESSAGES) return;
+	uint32 i;
+#ifdef FIX_BUGS
+	for(i = 0; i < NUMMONEYMESSAGES && aMoneyMessages[i].m_nTimeRegistered != 0; i++);
+#else
+	for(i = 0; aMoneyMessages[i].m_nTimeRegistered != 0 && i < NUMMONEYMESSAGES; i++);
+#endif
+
+	if(i < NUMMONEYMESSAGES) {
+		// Add data of this money message to the array
+		AsciiToUnicode(pText, aMoneyMessages[i].m_aText);
+
+		aMoneyMessages[i].m_nTimeRegistered = CTimer::GetTimeInMilliseconds();
+		aMoneyMessages[i].m_vecPosition = vecPos;
+		aMoneyMessages[i].m_Colour.red = bRed;
+		aMoneyMessages[i].m_Colour.green = bGreen;
+		aMoneyMessages[i].m_Colour.blue = bBlue;
+		aMoneyMessages[i].m_fSize = fSize;
+		aMoneyMessages[i].m_fOpacity = fOpacity;
 	}
-
-	// Add data of this money message to the array
-	AsciiToUnicode(pText, aMoneyMessages[nIndex].m_aText);
-
-	aMoneyMessages[nIndex].m_nTimeRegistered = CTimer::GetTimeInMilliseconds();
-	aMoneyMessages[nIndex].m_vecPosition = vecPos;
-	aMoneyMessages[nIndex].m_Colour.red = bRed;
-	aMoneyMessages[nIndex].m_Colour.green = bGreen;
-	aMoneyMessages[nIndex].m_Colour.blue = bBlue;
-	aMoneyMessages[nIndex].m_fSize = fSize;
-	aMoneyMessages[nIndex].m_fOpacity = fOpacity;
 }
 
 CRGBA FoamColour(255, 255, 255, 255);
-unsigned int CSpecialParticleStuff::BoatFromStart;
+uint32 CSpecialParticleStuff::BoatFromStart;
 
 void
 CSpecialParticleStuff::CreateFoamAroundObject(CMatrix* pMatrix, float innerFw, float innerRg, float innerUp, int32 particles)

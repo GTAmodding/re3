@@ -21,8 +21,8 @@
 #include "Shadows.h"
 
 #ifdef DEBUGMENU
-SETTWEAKPATH("Shadows");
-TWEAKBOOL(gbPrintShite);
+//SETTWEAKPATH("Shadows");
+//TWEAKBOOL(gbPrintShite);
 #endif
 
 RwImVertexIndex ShadowIndexList[24];

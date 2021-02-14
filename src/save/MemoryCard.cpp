@@ -1,6 +1,7 @@
 #define WITHWINDOWS
 #include "common.h"
 #ifdef PS2_MENU
+#include "crossplatform.h"
 #include "MemoryCard.h"
 #include "main.h"
 #include "DMAudio.h"

@@ -137,28 +137,28 @@ CPedIK::RotateTorso(AnimBlendFrameData *node, LimbOrientation *limb, bool change
 }
 
 void
-CPedIK::GetComponentPosition(RwV3d *pos, uint32 node)
+CPedIK::GetComponentPosition(RwV3d &pos, uint32 node)
 {
 	RwFrame *f;
 	RwMatrix *mat;
 
 #ifdef PED_SKIN
 	if(IsClumpSkinned(m_ped->GetClump())){
-		pos->x = 0.0f;
-		pos->y = 0.0f;
-		pos->z = 0.0f;
+		pos.x = 0.0f;
+		pos.y = 0.0f;
+		pos.z = 0.0f;
 		mat = GetComponentMatrix(m_ped, node);
 		// could just copy the position out of the matrix...
-		RwV3dTransformPoints(pos, pos, 1, mat);
+		RwV3dTransformPoints(&pos, &pos, 1, mat);
 	}else
 #endif
 	{
 		f = m_ped->m_pFrames[node]->frame;
 		mat = RwFrameGetMatrix(f);
-		*pos = mat->pos;
+		pos = mat->pos;
 
 		for (f = RwFrameGetParent(f); f; f = RwFrameGetParent(f))
-			RwV3dTransformPoints(pos, pos, 1, RwFrameGetMatrix(f));
+			RwV3dTransformPoints(&pos, &pos, 1, RwFrameGetMatrix(f));
 	}
 }
 

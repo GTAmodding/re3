@@ -649,7 +649,7 @@ CTheZones::SaveAllZones(uint8 *buffer, uint32 *size)
 
 	WriteSaveHeader(buffer, 'Z', 'N', 'S', '\0', *size - SAVE_HEADER_SIZE);
 
-	WriteSaveBuf(buffer, GetIndexForZonePointer(m_pPlayersZone));
+	WriteSaveBuf(buffer, (int32)GetIndexForZonePointer(m_pPlayersZone));
 	WriteSaveBuf(buffer, m_CurrLevel);
 	WriteSaveBuf(buffer, FindIndex);
 	WriteSaveBuf(buffer, (int16)0); // padding

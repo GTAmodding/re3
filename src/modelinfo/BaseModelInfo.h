@@ -1,10 +1,10 @@
 #pragma once
 
-#include "Collision.h"
+struct CColModel;
 
 #define MAX_MODEL_NAME (24)
 
-enum ModelInfoType : uint8
+enum ModelInfoType
 {
 	MITYPE_NA        = 0,
 	MITYPE_SIMPLE    = 1,
@@ -15,7 +15,6 @@ enum ModelInfoType : uint8
 	MITYPE_PED       = 6,
 	MITYPE_XTRACOMPS = 7,
 };
-VALIDATE_SIZE(ModelInfoType, 1);
 
 class C2dEffect;
 
@@ -28,7 +27,7 @@ protected:
 	int16        m_objectId;
 	uint16       m_refCount;
 	int16        m_txdSlot;
-	ModelInfoType m_type;
+	uint8        m_type;
 	uint8        m_num2dEffects;
 	bool         m_bOwnsColModel;
 #ifdef EXTRA_MODEL_FLAGS
@@ -45,18 +44,18 @@ public:
 	virtual ~CBaseModelInfo() {}
 	virtual void Shutdown(void);
 	virtual void DeleteRwObject(void) = 0;
-	virtual RwObject *CreateInstance(RwMatrix *) = 0;
 	virtual RwObject *CreateInstance(void) = 0;
+	virtual RwObject *CreateInstance(RwMatrix *) = 0;
 	virtual RwObject *GetRwObject(void) = 0;
 
 	// one day it becomes virtual
-	ModelInfoType GetModelType() const { return m_type; }
+	uint8 GetModelType() const { return m_type; }
 	bool IsSimple(void) { return m_type == MITYPE_SIMPLE || m_type == MITYPE_TIME; }
 	bool IsClump(void) { return m_type == MITYPE_CLUMP || m_type == MITYPE_PED || m_type == MITYPE_VEHICLE ||
 		m_type == MITYPE_MLO || m_type == MITYPE_XTRACOMPS;	// unused but what the heck
 	}
-	char *GetName(void) { return m_name; }
-	void SetName(const char *name) { strncpy(m_name, name, MAX_MODEL_NAME); }
+	char *GetModelName(void) { return m_name; }
+	void SetModelName(const char *name) { strncpy(m_name, name, MAX_MODEL_NAME); }
 	void SetColModel(CColModel *col, bool owns = false){
 		m_colModel = col; m_bOwnsColModel = owns; }
 	CColModel *GetColModel(void) { return m_colModel; }

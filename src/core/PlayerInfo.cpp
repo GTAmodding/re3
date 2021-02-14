@@ -3,6 +3,7 @@
 #include "Automobile.h"
 #include "Bridge.h"
 #include "Camera.h"
+#include "CarCtrl.h"
 #include "Cranes.h"
 #include "Darkel.h"
 #include "Explosion.h"
@@ -31,83 +32,6 @@
 #include "ZoneCull.h"
 #include "main.h"
 
-void
-CPlayerInfo::SetPlayerSkin(char *skin)
-{
-	strncpy(m_aSkinName, skin, 32);
-	LoadPlayerSkin();
-}
-
-const CVector &
-CPlayerInfo::GetPos()
-{
-#ifdef FIX_BUGS
-	if (!m_pPed)
-		return TheCamera.GetPosition();
-#endif
-	if (m_pPed->InVehicle())
-		return m_pPed->m_pMyVehicle->GetPosition();
-	return m_pPed->GetPosition();
-}
-
-void
-CPlayerInfo::LoadPlayerSkin()
-{
-	DeletePlayerSkin();
-
-	m_pSkinTexture = CPlayerSkin::GetSkinTexture(m_aSkinName);
-	if (!m_pSkinTexture)
-		m_pSkinTexture = CPlayerSkin::GetSkinTexture(DEFAULT_SKIN_NAME);
-}
-
-void
-CPlayerInfo::DeletePlayerSkin()
-{
-	if (m_pSkinTexture) {
-		RwTextureDestroy(m_pSkinTexture);
-		m_pSkinTexture = nil;
-	}
-}
-
-void
-CPlayerInfo::KillPlayer()
-{
-	if (m_WBState != WBSTATE_PLAYING) return;
-
-	m_WBState = WBSTATE_WASTED;
-	m_nWBTime = CTimer::GetTimeInMilliseconds();
-	CDarkel::ResetOnPlayerDeath();
-	CMessages::AddBigMessage(TheText.Get("DEAD"), 4000, 2);
-	CStats::TimesDied++;
-}
-
-void
-CPlayerInfo::ArrestPlayer()
-{
-	if (m_WBState != WBSTATE_PLAYING) return;
-
-	m_WBState = WBSTATE_BUSTED;
-	m_nWBTime = CTimer::GetTimeInMilliseconds();
-	CDarkel::ResetOnPlayerDeath();
-	CMessages::AddBigMessage(TheText.Get("BUSTED"), 5000, 2);
-	CStats::TimesArrested++;
-}
-
-bool
-CPlayerInfo::IsPlayerInRemoteMode()
-{
-	return m_pRemoteVehicle || m_bInRemoteMode;
-}
-
-void
-CPlayerInfo::PlayerFailedCriticalMission()
-{
-	if (m_WBState != WBSTATE_PLAYING)
-		return;
-	m_WBState = WBSTATE_FAILED_CRITICAL_MISSION;
-	m_nWBTime = CTimer::GetTimeInMilliseconds();
-	CDarkel::ResetOnPlayerDeath();
-}
 
 void
 CPlayerInfo::Clear(void)
@@ -144,197 +68,6 @@ CPlayerInfo::Clear(void)
 	m_bGetOutOfHospitalFree = false;
 	m_nPreviousTimeRewardedForExplosion = 0;
 	m_nExplosionsSinceLastReward = 0;
-}
-
-void
-CPlayerInfo::BlowUpRCBuggy(void)
-{
-	if (!m_pRemoteVehicle || m_pRemoteVehicle->bRemoveFromWorld)
-		return;
-
-	CRemote::TakeRemoteControlledCarFromPlayer();
-	m_pRemoteVehicle->BlowUpCar(FindPlayerPed());
-}
-
-void
-CPlayerInfo::CancelPlayerEnteringCars(CVehicle *car)
-{
-	if (!car || car == m_pPed->m_pMyVehicle) {
-		if (m_pPed->EnteringCar())
-			m_pPed->QuitEnteringCar();
-	}
-	if (m_pPed->m_objective == OBJECTIVE_ENTER_CAR_AS_PASSENGER || m_pPed->m_objective == OBJECTIVE_ENTER_CAR_AS_DRIVER)
-		m_pPed->ClearObjective();
-}
-
-void
-CPlayerInfo::MakePlayerSafe(bool toggle)
-{
-	if (toggle) {
-		CTheScripts::ResetCountdownToMakePlayerUnsafe();
-		m_pPed->m_pWanted->m_bIgnoredByEveryone = true;
-		CWorld::StopAllLawEnforcersInTheirTracks();
-		CPad::GetPad(0)->SetDisablePlayerControls(PLAYERCONTROL_PLAYERINFO);
-		CPad::StopPadsShaking();
-		m_pPed->bBulletProof = true;
-		m_pPed->bFireProof = true;
-		m_pPed->bCollisionProof = true;
-		m_pPed->bMeleeProof = true;
-		m_pPed->bOnlyDamagedByPlayer = true;
-		m_pPed->bExplosionProof = true;
-		m_pPed->m_bCanBeDamaged = false;
-		((CPlayerPed*)m_pPed)->ClearAdrenaline();
-		CancelPlayerEnteringCars(nil);
-		gFireManager.ExtinguishPoint(GetPos(), 4000.0f);
-		CExplosion::RemoveAllExplosionsInArea(GetPos(), 4000.0f);
-		CProjectileInfo::RemoveAllProjectiles();
-		CWorld::SetAllCarsCanBeDamaged(false);
-		CWorld::ExtinguishAllCarFiresInArea(GetPos(), 4000.0f);
-		CReplay::DisableReplays();
-
-	} else if (!CGame::playingIntro && !CTheScripts::IsCountdownToMakePlayerUnsafeOn()) {
-		m_pPed->m_pWanted->m_bIgnoredByEveryone = false;
-		CPad::GetPad(0)->SetEnablePlayerControls(PLAYERCONTROL_PLAYERINFO);
-		m_pPed->bBulletProof = false;
-		m_pPed->bFireProof = false;
-		m_pPed->bCollisionProof = false;
-		m_pPed->bMeleeProof = false;
-		m_pPed->bOnlyDamagedByPlayer = false;
-		m_pPed->bExplosionProof = false;
-		m_pPed->m_bCanBeDamaged = true;
-		CWorld::SetAllCarsCanBeDamaged(true);
-		CReplay::EnableReplays();
-	}
-}
-
-bool
-CPlayerInfo::IsRestartingAfterDeath()
-{
-	return m_WBState == WBSTATE_WASTED;
-}
-
-bool
-CPlayerInfo::IsRestartingAfterArrest()
-{
-	return m_WBState == WBSTATE_BUSTED;
-}
-
-// lastCloseness is passed to other calls of this function
-void
-CPlayerInfo::EvaluateCarPosition(CEntity *carToTest, CPed *player, float carBoundCentrePedDist, float *lastCloseness, CVehicle **closestCarOutput)
-{
-	// This dist used for determining the angle to face
-	CVector2D dist(carToTest->GetPosition() - player->GetPosition());
-	float neededTurn = CGeneral::GetATanOfXY(player->GetForward().x, player->GetForward().y) - CGeneral::GetATanOfXY(dist.x, dist.y);
-	while (neededTurn >= PI) {
-		neededTurn -= 2 * PI;
-	}
-
-	while (neededTurn < -PI) {
-		neededTurn += 2 * PI;
-	}
-
-	// This dist used for evaluating cars' distances, weird...
-	// Accounts inverted needed turn (or needed turn in long way) and car dist.
-	float closeness = (1.0f - Abs(neededTurn) / TWOPI) * (10.0f - carBoundCentrePedDist);
-	if (closeness > *lastCloseness) {
-		*lastCloseness = closeness;
-		*closestCarOutput = (CVehicle*)carToTest;
-	}
-}
-
-// There is something unfinished in here... Sadly all IDBs we have have it unfinished.
-void
-CPlayerInfo::AwardMoneyForExplosion(CVehicle *wreckedCar)
-{
-	if (CTimer::GetTimeInMilliseconds() - m_nPreviousTimeRewardedForExplosion < 6000)
-		++m_nExplosionsSinceLastReward;
-	else
-		m_nExplosionsSinceLastReward = 1;
-
-	m_nPreviousTimeRewardedForExplosion = CTimer::GetTimeInMilliseconds();
-	int award = wreckedCar->pHandling->nMonetaryValue * 0.002f;
-	sprintf(gString, "$%d", award);
-#ifdef MONEY_MESSAGES
-	// This line is a leftover from PS2, I don't know what it was meant to be.
-	// CVector sth(TheCamera.GetPosition() * 4.0f);
-
-	CMoneyMessages::RegisterOne(wreckedCar->GetPosition() + CVector(0.0f, 0.0f, 2.0f), gString, 0, 255, 0, 2.0f, 0.5f);
-#endif
-	CWorld::Players[CWorld::PlayerInFocus].m_nMoney += award;
-
-	for (int i = m_nExplosionsSinceLastReward; i > 1; --i) {
-		CGeneral::GetRandomNumber();
-		CWorld::Players[CWorld::PlayerInFocus].m_nMoney += award;
-	}
-}
-
-void
-CPlayerInfo::SavePlayerInfo(uint8 *buf, uint32 *size)
-{
-	// Interesting
-	*size = sizeof(CPlayerInfo);
-
-#define CopyToBuf(buf, data) memcpy(buf, &data, sizeof(data)); buf += sizeof(data);
-	CopyToBuf(buf, CWorld::Players[CWorld::PlayerInFocus].m_nMoney);
-	CopyToBuf(buf, CWorld::Players[CWorld::PlayerInFocus].m_WBState);
-	CopyToBuf(buf, CWorld::Players[CWorld::PlayerInFocus].m_nWBTime);
-	CopyToBuf(buf, CWorld::Players[CWorld::PlayerInFocus].m_nTrafficMultiplier);
-	CopyToBuf(buf, CWorld::Players[CWorld::PlayerInFocus].m_fRoadDensity);
-	CopyToBuf(buf, CWorld::Players[CWorld::PlayerInFocus].m_nVisibleMoney);
-	CopyToBuf(buf, CWorld::Players[CWorld::PlayerInFocus].m_nCollectedPackages);
-	CopyToBuf(buf, CWorld::Players[CWorld::PlayerInFocus].m_nTotalPackages);
-	CopyToBuf(buf, CWorld::Players[CWorld::PlayerInFocus].m_bInfiniteSprint);
-	CopyToBuf(buf, CWorld::Players[CWorld::PlayerInFocus].m_bFastReload);
-	CopyToBuf(buf, CWorld::Players[CWorld::PlayerInFocus].m_bGetOutOfJailFree);
-	CopyToBuf(buf, CWorld::Players[CWorld::PlayerInFocus].m_bGetOutOfHospitalFree);
-	CopyToBuf(buf, CWorld::Players[CWorld::PlayerInFocus].m_aPlayerName);
-#undef CopyToBuf
-}
-
-void
-CPlayerInfo::LoadPlayerInfo(uint8 *buf, uint32 size)
-{
-#define CopyFromBuf(buf, data) memcpy(&data, buf, sizeof(data)); buf += sizeof(data);
-	CopyFromBuf(buf, CWorld::Players[CWorld::PlayerInFocus].m_nMoney);
-	CopyFromBuf(buf, CWorld::Players[CWorld::PlayerInFocus].m_WBState);
-	CopyFromBuf(buf, CWorld::Players[CWorld::PlayerInFocus].m_nWBTime);
-	CopyFromBuf(buf, CWorld::Players[CWorld::PlayerInFocus].m_nTrafficMultiplier);
-	CopyFromBuf(buf, CWorld::Players[CWorld::PlayerInFocus].m_fRoadDensity);
-	CopyFromBuf(buf, CWorld::Players[CWorld::PlayerInFocus].m_nVisibleMoney);
-	CopyFromBuf(buf, CWorld::Players[CWorld::PlayerInFocus].m_nCollectedPackages);
-	CopyFromBuf(buf, CWorld::Players[CWorld::PlayerInFocus].m_nTotalPackages);
-	CopyFromBuf(buf, CWorld::Players[CWorld::PlayerInFocus].m_bInfiniteSprint);
-	CopyFromBuf(buf, CWorld::Players[CWorld::PlayerInFocus].m_bFastReload);
-	CopyFromBuf(buf, CWorld::Players[CWorld::PlayerInFocus].m_bGetOutOfJailFree);
-	CopyFromBuf(buf, CWorld::Players[CWorld::PlayerInFocus].m_bGetOutOfHospitalFree);
-	CopyFromBuf(buf, CWorld::Players[CWorld::PlayerInFocus].m_aPlayerName)
-#undef CopyFromBuf
-}
-
-void
-CPlayerInfo::FindClosestCarSectorList(CPtrList& carList, CPed* ped, float unk1, float unk2, float unk3, float unk4, float* lastCloseness, CVehicle** closestCarOutput)
-{
-	for (CPtrNode* node = carList.first; node; node = node->next) {
-		CVehicle *car = (CVehicle*)node->item;
-		if(car->m_scanCode != CWorld::GetCurrentScanCode()) {
-			if (!car->bUsesCollision || !car->IsVehicle())
-				continue;
-
-			car->m_scanCode = CWorld::GetCurrentScanCode();
-			if (car->GetStatus() != STATUS_WRECKED && car->GetStatus() != STATUS_TRAIN_MOVING
-				&& (car->GetUp().z > 0.3f || (car->IsVehicle() && ((CVehicle*)car)->m_vehType == VEHICLE_TYPE_BIKE))) {
-				CVector carCentre = car->GetBoundCentre();
-
-				if (Abs(ped->GetPosition().z - carCentre.z) < 2.0f) {
-					float dist = (ped->GetPosition() - carCentre).Magnitude2D();
-					if (dist <= 10.0f && !CCranes::IsThisCarBeingCarriedByAnyCrane(car)) {
-						EvaluateCarPosition(car, ped, dist, lastCloseness, closestCarOutput);
-					}
-				}
-			}
-		}
-	}
 }
 
 void
@@ -419,11 +152,11 @@ CPlayerInfo::Process(void)
 
 							if (found)
 								sth.z = 1.0f + groundZ;
-							m_pPed->m_nPedState = PED_IDLE;
+							m_pPed->SetPedState(PED_IDLE);
 							m_pPed->SetMoveState(PEDMOVE_STILL);
 							CPed::PedSetOutCarCB(0, m_pPed);
-							CAnimManager::BlendAnimation(m_pPed->GetClump(), m_pPed->m_animGroup, ANIM_IDLE_STANCE, 100.0f);
-							CAnimManager::BlendAnimation(m_pPed->GetClump(), ASSOCGRP_STD, ANIM_FALL_LAND, 100.0f);
+							CAnimManager::BlendAnimation(m_pPed->GetClump(), m_pPed->m_animGroup, ANIM_STD_IDLE, 100.0f);
+							CAnimManager::BlendAnimation(m_pPed->GetClump(), ASSOCGRP_STD, ANIM_STD_FALL_LAND, 100.0f);
 							m_pPed->SetPosition(sth);
 							m_pPed->SetMoveState(PEDMOVE_STILL);
 							m_pPed->m_vecMoveSpeed = veh->m_vecMoveSpeed;
@@ -489,8 +222,8 @@ CPlayerInfo::Process(void)
 						m_pPed->SetObjective(OBJECTIVE_ENTER_CAR_AS_PASSENGER, carBelow);
 					} else if (carBelow->IsBoat()) {
 						if (!carBelow->pDriver) {
-							m_pPed->m_vehEnterType = 0;
-							m_pPed->SetEnterCar(carBelow, m_pPed->m_vehEnterType);
+							m_pPed->m_vehDoor = 0;
+							m_pPed->SetEnterCar(carBelow, m_pPed->m_vehDoor);
 						}
 					} else {
 						m_pPed->SetObjective(OBJECTIVE_ENTER_CAR_AS_DRIVER, carBelow);
@@ -503,13 +236,13 @@ CPlayerInfo::Process(void)
 		uint32 timeWithoutRemoteCar = CTimer::GetTimeInMilliseconds() - m_nTimeLostRemoteCar;
 		if (CTimer::GetPreviousTimeInMilliseconds() - m_nTimeLostRemoteCar < 1000 && timeWithoutRemoteCar >= 1000 && m_WBState == WBSTATE_PLAYING) {
 			TheCamera.SetFadeColour(0, 0, 0);
-			TheCamera.Fade(1.0f, 0);
+			TheCamera.Fade(1.0f, FADE_OUT);
 		}
 		if (timeWithoutRemoteCar > 2000) {
 			if (m_WBState == WBSTATE_PLAYING) {
 				TheCamera.RestoreWithJumpCut();
 				TheCamera.SetFadeColour(0, 0, 0);
-				TheCamera.Fade(1.0f, 1);
+				TheCamera.Fade(1.0f, FADE_IN);
 				TheCamera.Process();
 				CTimer::Stop();
 				CCullZones::ForceCullZoneCoors(TheCamera.GetPosition());
@@ -560,3 +293,370 @@ CPlayerInfo::Process(void)
 		CStats::DistanceTravelledOnFoot += FindPlayerPed()->m_fDistanceTravelled;
 	}
 }
+
+bool
+CPlayerInfo::IsPlayerInRemoteMode()
+{
+	return m_pRemoteVehicle || m_bInRemoteMode;
+}
+
+void
+CPlayerInfo::SavePlayerInfo(uint8 *buf, uint32 *size)
+{
+	// Interesting
+	*size = sizeof(CPlayerInfo);
+
+#define CopyToBuf(buf, data) memcpy(buf, &data, sizeof(data)); buf += sizeof(data);
+	CopyToBuf(buf, CWorld::Players[CWorld::PlayerInFocus].m_nMoney);
+	CopyToBuf(buf, CWorld::Players[CWorld::PlayerInFocus].m_WBState);
+	CopyToBuf(buf, CWorld::Players[CWorld::PlayerInFocus].m_nWBTime);
+	CopyToBuf(buf, CWorld::Players[CWorld::PlayerInFocus].m_nTrafficMultiplier);
+	CopyToBuf(buf, CWorld::Players[CWorld::PlayerInFocus].m_fRoadDensity);
+	CopyToBuf(buf, CWorld::Players[CWorld::PlayerInFocus].m_nVisibleMoney);
+	CopyToBuf(buf, CWorld::Players[CWorld::PlayerInFocus].m_nCollectedPackages);
+	CopyToBuf(buf, CWorld::Players[CWorld::PlayerInFocus].m_nTotalPackages);
+	CopyToBuf(buf, CWorld::Players[CWorld::PlayerInFocus].m_bInfiniteSprint);
+	CopyToBuf(buf, CWorld::Players[CWorld::PlayerInFocus].m_bFastReload);
+	CopyToBuf(buf, CWorld::Players[CWorld::PlayerInFocus].m_bGetOutOfJailFree);
+	CopyToBuf(buf, CWorld::Players[CWorld::PlayerInFocus].m_bGetOutOfHospitalFree);
+	CopyToBuf(buf, CWorld::Players[CWorld::PlayerInFocus].m_aPlayerName);
+#undef CopyToBuf
+}
+
+void
+CPlayerInfo::LoadPlayerInfo(uint8 *buf, uint32 size)
+{
+#define CopyFromBuf(buf, data) memcpy(&data, buf, sizeof(data)); buf += sizeof(data);
+	CopyFromBuf(buf, CWorld::Players[CWorld::PlayerInFocus].m_nMoney);
+	CopyFromBuf(buf, CWorld::Players[CWorld::PlayerInFocus].m_WBState);
+	CopyFromBuf(buf, CWorld::Players[CWorld::PlayerInFocus].m_nWBTime);
+	CopyFromBuf(buf, CWorld::Players[CWorld::PlayerInFocus].m_nTrafficMultiplier);
+	CopyFromBuf(buf, CWorld::Players[CWorld::PlayerInFocus].m_fRoadDensity);
+	CopyFromBuf(buf, CWorld::Players[CWorld::PlayerInFocus].m_nVisibleMoney);
+	CopyFromBuf(buf, CWorld::Players[CWorld::PlayerInFocus].m_nCollectedPackages);
+	CopyFromBuf(buf, CWorld::Players[CWorld::PlayerInFocus].m_nTotalPackages);
+	CopyFromBuf(buf, CWorld::Players[CWorld::PlayerInFocus].m_bInfiniteSprint);
+	CopyFromBuf(buf, CWorld::Players[CWorld::PlayerInFocus].m_bFastReload);
+	CopyFromBuf(buf, CWorld::Players[CWorld::PlayerInFocus].m_bGetOutOfJailFree);
+	CopyFromBuf(buf, CWorld::Players[CWorld::PlayerInFocus].m_bGetOutOfHospitalFree);
+	CopyFromBuf(buf, CWorld::Players[CWorld::PlayerInFocus].m_aPlayerName)
+#undef CopyFromBuf
+}
+
+void
+CPlayerInfo::FindClosestCarSectorList(CPtrList& carList, CPed* ped, float unk1, float unk2, float unk3, float unk4, float* lastCloseness, CVehicle** closestCarOutput)
+{
+	for (CPtrNode* node = carList.first; node; node = node->next) {
+		CVehicle *car = (CVehicle*)node->item;
+		if(car->m_scanCode != CWorld::GetCurrentScanCode()) {
+			if (!car->bUsesCollision || !car->IsVehicle())
+				continue;
+
+			car->m_scanCode = CWorld::GetCurrentScanCode();
+			if (car->GetStatus() != STATUS_WRECKED && car->GetStatus() != STATUS_TRAIN_MOVING
+				&& (car->GetUp().z > 0.3f || (car->IsVehicle() && ((CVehicle*)car)->m_vehType == VEHICLE_TYPE_BIKE))) {
+				CVector carCentre = car->GetBoundCentre();
+
+				if (Abs(ped->GetPosition().z - carCentre.z) < 2.0f) {
+					float dist = (ped->GetPosition() - carCentre).Magnitude2D();
+					if (dist <= 10.0f && !CCranes::IsThisCarBeingCarriedByAnyCrane(car)) {
+						EvaluateCarPosition(car, ped, dist, lastCloseness, closestCarOutput);
+					}
+				}
+			}
+		}
+	}
+}
+
+// lastCloseness is passed to other calls of this function
+void
+CPlayerInfo::EvaluateCarPosition(CEntity *carToTest, CPed *player, float carBoundCentrePedDist, float *lastCloseness, CVehicle **closestCarOutput)
+{
+	// This dist used for determining the angle to face
+	CVector2D dist(carToTest->GetPosition() - player->GetPosition());
+	float neededTurn = CGeneral::GetATanOfXY(player->GetForward().x, player->GetForward().y) - CGeneral::GetATanOfXY(dist.x, dist.y);
+	while (neededTurn >= PI) {
+		neededTurn -= 2 * PI;
+	}
+
+	while (neededTurn < -PI) {
+		neededTurn += 2 * PI;
+	}
+
+	// This dist used for evaluating cars' distances, weird...
+	// Accounts inverted needed turn (or needed turn in long way) and car dist.
+	float closeness = (1.0f - Abs(neededTurn) / TWOPI) * (10.0f - carBoundCentrePedDist);
+	if (closeness > *lastCloseness) {
+		*lastCloseness = closeness;
+		*closestCarOutput = (CVehicle*)carToTest;
+	}
+}
+
+const CVector &
+CPlayerInfo::GetPos()
+{
+#ifdef FIX_BUGS
+	if (!m_pPed)
+		return TheCamera.GetPosition();
+#endif
+	if (m_pPed->InVehicle())
+		return m_pPed->m_pMyVehicle->GetPosition();
+	return m_pPed->GetPosition();
+}
+
+CVector
+FindPlayerCoors(void)
+{
+#ifdef FIX_BUGS
+	if (CReplay::IsPlayingBack())
+		return TheCamera.GetPosition();
+#endif
+	CPlayerPed *ped = FindPlayerPed();
+	if(ped->InVehicle())
+		return ped->m_pMyVehicle->GetPosition();
+	else
+		return ped->GetPosition();
+}
+
+const CVector &
+FindPlayerSpeed(void)
+{
+#ifdef FIX_BUGS
+	static CVector vecTmpVector(0.0f, 0.0f, 0.0f);
+	if (CReplay::IsPlayingBack())
+		return vecTmpVector;
+#endif
+	CPlayerPed *ped = FindPlayerPed();
+	if(ped->InVehicle())
+		return ped->m_pMyVehicle->m_vecMoveSpeed;
+	else
+		return ped->m_vecMoveSpeed;
+}
+
+CVehicle *
+FindPlayerVehicle(void)
+{
+	CPlayerPed *ped = FindPlayerPed();
+	if(ped && ped->InVehicle()) return ped->m_pMyVehicle;
+	return nil;
+}
+
+CEntity *
+FindPlayerEntity(void)
+{
+	CPlayerPed *ped = FindPlayerPed();
+	if(ped->InVehicle())
+		return ped->m_pMyVehicle;
+	else
+		return ped;
+}
+
+CVehicle *
+FindPlayerTrain(void)
+{
+	if(FindPlayerVehicle() && FindPlayerVehicle()->IsTrain())
+		return FindPlayerVehicle();
+	else
+		return nil;
+}
+
+CPlayerPed *
+FindPlayerPed(void)
+{
+	return CWorld::Players[CWorld::PlayerInFocus].m_pPed;
+}
+
+const CVector &
+FindPlayerCentreOfWorld(int32 player)
+{
+#ifdef FIX_BUGS
+	if(CReplay::IsPlayingBack()) return TheCamera.GetPosition();
+#endif
+	if(CCarCtrl::bCarsGeneratedAroundCamera) return TheCamera.GetPosition();
+	if(CWorld::Players[player].m_pRemoteVehicle) return CWorld::Players[player].m_pRemoteVehicle->GetPosition();
+	if(FindPlayerVehicle()) return FindPlayerVehicle()->GetPosition();
+	return CWorld::Players[player].m_pPed->GetPosition();
+}
+
+const CVector &
+FindPlayerCentreOfWorld_NoSniperShift(void)
+{
+#ifdef FIX_BUGS
+	if (CReplay::IsPlayingBack()) return TheCamera.GetPosition();
+#endif
+	if(CCarCtrl::bCarsGeneratedAroundCamera) return TheCamera.GetPosition();
+	if(CWorld::Players[CWorld::PlayerInFocus].m_pRemoteVehicle)
+		return CWorld::Players[CWorld::PlayerInFocus].m_pRemoteVehicle->GetPosition();
+	if(FindPlayerVehicle()) return FindPlayerVehicle()->GetPosition();
+	return FindPlayerPed()->GetPosition();
+}
+
+float
+FindPlayerHeading(void)
+{
+	if(CWorld::Players[CWorld::PlayerInFocus].m_pRemoteVehicle)
+		return CWorld::Players[CWorld::PlayerInFocus].m_pRemoteVehicle->GetForward().Heading();
+	if(FindPlayerVehicle()) return FindPlayerVehicle()->GetForward().Heading();
+	return FindPlayerPed()->GetForward().Heading();
+}
+
+bool
+CPlayerInfo::IsRestartingAfterDeath()
+{
+	return m_WBState == WBSTATE_WASTED;
+}
+
+bool
+CPlayerInfo::IsRestartingAfterArrest()
+{
+	return m_WBState == WBSTATE_BUSTED;
+}
+
+void
+CPlayerInfo::KillPlayer()
+{
+	if (m_WBState != WBSTATE_PLAYING) return;
+
+	m_WBState = WBSTATE_WASTED;
+	m_nWBTime = CTimer::GetTimeInMilliseconds();
+	CDarkel::ResetOnPlayerDeath();
+	CMessages::AddBigMessage(TheText.Get("DEAD"), 4000, 2);
+	CStats::TimesDied++;
+}
+
+void
+CPlayerInfo::ArrestPlayer()
+{
+	if (m_WBState != WBSTATE_PLAYING) return;
+
+	m_WBState = WBSTATE_BUSTED;
+	m_nWBTime = CTimer::GetTimeInMilliseconds();
+	CDarkel::ResetOnPlayerDeath();
+	CMessages::AddBigMessage(TheText.Get("BUSTED"), 5000, 2);
+	CStats::TimesArrested++;
+}
+
+void
+CPlayerInfo::PlayerFailedCriticalMission()
+{
+	if (m_WBState != WBSTATE_PLAYING)
+		return;
+	m_WBState = WBSTATE_FAILED_CRITICAL_MISSION;
+	m_nWBTime = CTimer::GetTimeInMilliseconds();
+	CDarkel::ResetOnPlayerDeath();
+}
+
+void
+CPlayerInfo::CancelPlayerEnteringCars(CVehicle *car)
+{
+	if (!car || car == m_pPed->m_pMyVehicle) {
+		if (m_pPed->EnteringCar())
+			m_pPed->QuitEnteringCar();
+	}
+	if (m_pPed->m_objective == OBJECTIVE_ENTER_CAR_AS_PASSENGER || m_pPed->m_objective == OBJECTIVE_ENTER_CAR_AS_DRIVER)
+		m_pPed->ClearObjective();
+}
+
+void
+CPlayerInfo::MakePlayerSafe(bool toggle)
+{
+	if (toggle) {
+		CTheScripts::ResetCountdownToMakePlayerUnsafe();
+		m_pPed->m_pWanted->m_bIgnoredByEveryone = true;
+		CWorld::StopAllLawEnforcersInTheirTracks();
+		CPad::GetPad(0)->SetDisablePlayerControls(PLAYERCONTROL_PLAYERINFO);
+		CPad::StopPadsShaking();
+		m_pPed->bBulletProof = true;
+		m_pPed->bFireProof = true;
+		m_pPed->bCollisionProof = true;
+		m_pPed->bMeleeProof = true;
+		m_pPed->bOnlyDamagedByPlayer = true;
+		m_pPed->bExplosionProof = true;
+		m_pPed->m_bCanBeDamaged = false;
+		((CPlayerPed*)m_pPed)->ClearAdrenaline();
+		CancelPlayerEnteringCars(nil);
+		gFireManager.ExtinguishPoint(GetPos(), 4000.0f);
+		CExplosion::RemoveAllExplosionsInArea(GetPos(), 4000.0f);
+		CProjectileInfo::RemoveAllProjectiles();
+		CWorld::SetAllCarsCanBeDamaged(false);
+		CWorld::ExtinguishAllCarFiresInArea(GetPos(), 4000.0f);
+		CReplay::DisableReplays();
+
+	} else if (!CGame::playingIntro && !CTheScripts::IsCountdownToMakePlayerUnsafeOn()) {
+		m_pPed->m_pWanted->m_bIgnoredByEveryone = false;
+		CPad::GetPad(0)->SetEnablePlayerControls(PLAYERCONTROL_PLAYERINFO);
+		m_pPed->bBulletProof = false;
+		m_pPed->bFireProof = false;
+		m_pPed->bCollisionProof = false;
+		m_pPed->bMeleeProof = false;
+		m_pPed->bOnlyDamagedByPlayer = false;
+		m_pPed->bExplosionProof = false;
+		m_pPed->m_bCanBeDamaged = true;
+		CWorld::SetAllCarsCanBeDamaged(true);
+		CReplay::EnableReplays();
+	}
+}
+
+void
+CPlayerInfo::BlowUpRCBuggy(void)
+{
+	if (!m_pRemoteVehicle || m_pRemoteVehicle->bRemoveFromWorld)
+		return;
+
+	CRemote::TakeRemoteControlledCarFromPlayer();
+	m_pRemoteVehicle->BlowUpCar(FindPlayerPed());
+}
+
+// There is something unfinished in here... Sadly all IDBs we have have it unfinished.
+void
+CPlayerInfo::AwardMoneyForExplosion(CVehicle *wreckedCar)
+{
+	if (CTimer::GetTimeInMilliseconds() - m_nPreviousTimeRewardedForExplosion < 6000)
+		++m_nExplosionsSinceLastReward;
+	else
+		m_nExplosionsSinceLastReward = 1;
+
+	m_nPreviousTimeRewardedForExplosion = CTimer::GetTimeInMilliseconds();
+	int award = wreckedCar->pHandling->nMonetaryValue * 0.002f;
+	sprintf(gString, "$%d", award);
+#ifdef MONEY_MESSAGES
+	// This line is a leftover from PS2, I don't know what it was meant to be.
+	// CVector sth(TheCamera.GetPosition() * 4.0f);
+
+	CMoneyMessages::RegisterOne(wreckedCar->GetPosition() + CVector(0.0f, 0.0f, 2.0f), gString, 0, 255, 0, 2.0f, 0.5f);
+#endif
+	CWorld::Players[CWorld::PlayerInFocus].m_nMoney += award;
+
+	for (int i = m_nExplosionsSinceLastReward; i > 1; --i) {
+		CGeneral::GetRandomNumber();
+		CWorld::Players[CWorld::PlayerInFocus].m_nMoney += award;
+	}
+}
+
+#ifdef GTA_PC
+void
+CPlayerInfo::SetPlayerSkin(const char *skin)
+{
+	strncpy(m_aSkinName, skin, 32);
+	LoadPlayerSkin();
+}
+
+void
+CPlayerInfo::LoadPlayerSkin()
+{
+	DeletePlayerSkin();
+
+	m_pSkinTexture = CPlayerSkin::GetSkinTexture(m_aSkinName);
+	if (!m_pSkinTexture)
+		m_pSkinTexture = CPlayerSkin::GetSkinTexture(DEFAULT_SKIN_NAME);
+}
+
+void
+CPlayerInfo::DeletePlayerSkin()
+{
+	if (m_pSkinTexture) {
+		RwTextureDestroy(m_pSkinTexture);
+		m_pSkinTexture = nil;
+	}
+}
+#endif

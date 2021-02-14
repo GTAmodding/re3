@@ -10,13 +10,10 @@
 
 #include "skeleton.h"
 #include "platform.h"
+#include "main.h"
 #include "MemoryHeap.h"
 
-
-
 static RwBool               DefaultVideoMode = TRUE;
-
-bool TurnOnAnimViewer = false;
 
 RsGlobalType                RsGlobal;
 
@@ -162,7 +159,7 @@ rsPreInitCommandLine(RwChar *arg)
 #ifndef MASTER
 	if (!strcmp(arg, RWSTRING("-animviewer")))
 	{
-		TurnOnAnimViewer = TRUE;
+		gbModelViewer = TRUE;
 
 		return TRUE;
 	}

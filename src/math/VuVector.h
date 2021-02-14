@@ -8,18 +8,7 @@ public:
 	CVuVector(float x, float y, float z) : CVector(x, y, z) {}
 	CVuVector(float x, float y, float z, float w) : CVector(x, y, z), w(w) {}
 	CVuVector(const CVector &v) : CVector(v.x, v.y, v.z) {}
-#ifdef RWCORE_H
-	CVuVector(const RwV3d &v) : CVector(v.x, v.y, v.z) {}
-
-	operator RwV3d (void) const {
-		RwV3d vecRw = { this->x, this->y, this->z };
-		return vecRw;
-	}
-	
-	operator RwV3d *(void) {
-		return (RwV3d*)this;
-	}
-#endif
+	CVuVector(const RwV3d &v) : CVector(v) {}
 /*
 	void Normalise(void) {
 		float sq = MagnitudeSqr();

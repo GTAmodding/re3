@@ -2,10 +2,9 @@
 
 #include "General.h"
 #include "Camera.h"
+#include "Renderer.h"
 #include "ModelInfo.h"
 #include "custompipes.h"
-
-#define LOD_DISTANCE (300.0f)
 
 void
 CSimpleModelInfo::DeleteRwObject(void)
@@ -143,7 +142,7 @@ CSimpleModelInfo::FindRelatedModel(void)
 	for(i = 0; i < MODELINFOSIZE; i++){
 		mi = CModelInfo::GetModelInfo(i);
 		if(mi && mi != this &&
-		   !CGeneral::faststrcmp(GetName()+3, mi->GetName()+3)){
+		   !CGeneral::faststrcmp(GetModelName()+3, mi->GetModelName()+3)){
 			assert(mi->IsSimple());
 			this->SetRelatedModel((CSimpleModelInfo*)mi);
 			return;

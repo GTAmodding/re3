@@ -4,7 +4,7 @@
 class CVehicle;
 struct CPathNode;
 
-enum eCarMission : uint8
+enum eCarMission
 {
 	MISSION_NONE,
 	MISSION_CRUISE,
@@ -28,7 +28,7 @@ enum eCarMission : uint8
 	MISSION_BLOCKCAR_HANDBRAKESTOP,
 };
 
-enum eCarTempAction : uint8
+enum eCarTempAction
 {
 	TEMPACT_NONE,
 	TEMPACT_WAIT,
@@ -43,7 +43,7 @@ enum eCarTempAction : uint8
 	TEMPACT_SWERVERIGHT
 };
 
-enum eCarDrivingStyle : uint8
+enum eCarDrivingStyle
 {
 	DRIVINGSTYLE_STOP_FOR_CARS,
 	DRIVINGSTYLE_SLOW_DOWN_FOR_CARS,
@@ -57,8 +57,8 @@ public:
 	int32 m_nCurrentRouteNode;
 	int32 m_nNextRouteNode;
 	int32 m_nPrevRouteNode;
-	uint32 m_nTimeEnteredCurve;
-	uint32 m_nTimeToSpendOnCurrentCurve;
+	int32 m_nTimeEnteredCurve;
+	int32 m_nTimeToSpendOnCurrentCurve;
 	uint32 m_nCurrentPathNodeInfo;
 	uint32 m_nNextPathNodeInfo;
 	uint32 m_nPreviousPathNodeInfo;
@@ -69,9 +69,9 @@ public:
 	int8 m_nNextDirection;
 	int8 m_nCurrentLane;
 	int8 m_nNextLane;
-	eCarDrivingStyle m_nDrivingStyle;
-	eCarMission m_nCarMission;
-	eCarTempAction m_nTempAction;
+	uint8 m_nDrivingStyle;
+	uint8 m_nCarMission;
+	uint8 m_nTempAction;
 	uint32 m_nTimeTempAction;
 	float m_fMaxTrafficSpeed;
 	uint8 m_nCruiseSpeed;

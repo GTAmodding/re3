@@ -43,7 +43,7 @@ void DoRWStuffEndOfFrame(void);
 #define X SCREEN_SCALE_X
 #define Y SCREEN_SCALE_Y
 
-#define YF(x) Y(float(x)*(float(DEFAULT_SCREEN_HEIGHT)/float(DEFAULT_SCREEN_HEIGHT_PAL)))
+#define YF(x) Y(float(x)*(float(DEFAULT_SCREEN_HEIGHT)/float(SCREEN_HEIGHT_PAL)))
 //#define X(x) ((x)/640.0f*SCRW)
 //#define Y(y) ((y)/448.0f*SCRH)
 

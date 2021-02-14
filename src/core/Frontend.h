@@ -25,14 +25,17 @@
 #define MENUSLIDER_X 256.0f
 #define MENUSLIDER_UNK 256.0f
 
-#define BIGTEXT_X_SCALE 0.75f
+#define BIGTEXT_X_SCALE 0.75f // For FONT_HEADING
 #define BIGTEXT_Y_SCALE 0.9f
-#define MEDIUMTEXT_X_SCALE 0.55f
+#define MEDIUMTEXT_X_SCALE 0.55f // For FONT_HEADING
 #define MEDIUMTEXT_Y_SCALE 0.8f
-#define SMALLTEXT_X_SCALE 0.45f
+#define SMALLTEXT_X_SCALE 0.45f // used for FONT_HEADING and FONT_BANK, but looks off for HEADING 
 #define SMALLTEXT_Y_SCALE 0.7f
-#define SMALLESTTEXT_X_SCALE 0.4f
+#define SMALLESTTEXT_X_SCALE 0.4f // used for both FONT_HEADING and FONT_BANK
 #define SMALLESTTEXT_Y_SCALE 0.6f
+
+#define HELPER_TEXT_LEFT_MARGIN 320.0f
+#define HELPER_TEXT_BOTTOM_MARGIN 120.0f
 
 #define PLAYERSETUP_LIST_TOP 28.0f
 #define PLAYERSETUP_LIST_BOTTOM 125.0f
@@ -45,8 +48,6 @@
 #endif
 #define PLAYERSETUP_SCROLLBUTTON_HEIGHT 17.0f
 #define PLAYERSETUP_SCROLLBUTTON_TXD_DIMENSION 64
-#define PLAYERSETUP_ROW_TEXT_X_SCALE 0.4f
-#define PLAYERSETUP_ROW_TEXT_Y_SCALE 0.6f
 #define PLAYERSETUP_SKIN_COLUMN_LEFT 220.0f
 #define PLAYERSETUP_DATE_COLUMN_RIGHT 56.0f
 #define PLAYERSETUP_LIST_BODY_TOP 47
@@ -234,17 +235,15 @@ enum eMenuScreen
 	MENUPAGE_KEYBOARD_CONTROLS = 55,
 	MENUPAGE_MOUSE_CONTROLS = 56,
 	MENUPAGE_MISSION_RETRY = 57,
+#ifdef CUSTOM_FRONTEND_OPTIONS
+
 #ifdef MENU_MAP
 	MENUPAGE_MAP = 58,
 #endif
-#ifdef CUSTOM_FRONTEND_OPTIONS
-
 #ifdef GRAPHICS_MENU_OPTIONS
 	MENUPAGE_GRAPHICS_SETTINGS,
-#else
-	MENUPAGE_ADVANCED_DISPLAY_SETTINGS,
 #endif
-#ifdef DONT_TRUST_RECOGNIZED_JOYSTICKS
+#ifdef DETECT_JOYSTICK_MENU
 	MENUPAGE_DETECT_JOYSTICK,
 #endif
 
@@ -495,6 +494,7 @@ struct CCustomScreenLayout {
 struct CCFO
 {
 	int8 *value;
+	const char *saveCat;
 	const char *save;
 };
 
@@ -506,18 +506,21 @@ struct CCFOSelect : CCFO
 	int8 displayedValue; // only if onlyApplyOnEnter enabled for now
 	int8 lastSavedValue; // only if onlyApplyOnEnter enabled
 	ChangeFunc changeFunc;
+	bool disableIfGameLoaded;
 
 	CCFOSelect() {};
-	CCFOSelect(int8* value, const char* save, const char** rightTexts, int8 numRightTexts, bool onlyApplyOnEnter, ChangeFunc changeFunc){
+	CCFOSelect(int8* value, const char* saveCat, const char* save, const char** rightTexts, int8 numRightTexts, bool onlyApplyOnEnter, ChangeFunc changeFunc = nil, bool disableIfGameLoaded = false){
 		this->value = value;
 		if (value)
 			this->lastSavedValue = this->displayedValue = *value;
 
+		this->saveCat = saveCat;
 		this->save = save;
 		this->rightTexts = (char**)rightTexts;
 		this->numRightTexts = numRightTexts;
 		this->onlyApplyOnEnter = onlyApplyOnEnter;
 		this->changeFunc = changeFunc;
+		this->disableIfGameLoaded = disableIfGameLoaded;
 	}
 };
 
@@ -527,8 +530,9 @@ struct CCFODynamic : CCFO
 	ButtonPressFunc buttonPressFunc;
 
 	CCFODynamic() {};
-	CCFODynamic(int8* value, const char* save, DrawFunc drawFunc, ButtonPressFunc buttonPressFunc){
+	CCFODynamic(int8* value, const char* saveCat, const char* save, DrawFunc drawFunc, ButtonPressFunc buttonPressFunc){
 		this->value = value;
+		this->saveCat = saveCat;
 		this->save = save;
 		this->drawFunc = drawFunc;
 		this->buttonPressFunc = buttonPressFunc;
@@ -697,8 +701,6 @@ public:
 
 #ifdef MENU_MAP
 	static bool bMenuMapActive;
-	static bool bMapMouseShownOnce;
-	static bool bMapLoaded;
 	static float fMapSize;
 	static float fMapCenterY;
 	static float fMapCenterX;
@@ -721,6 +723,19 @@ public:
 #else
 	#define ISLAND_LOADING_IS(p)
 	#define ISLAND_LOADING_ISNT(p)
+#endif
+
+#ifdef GAMEPAD_MENU
+	enum
+	{
+		CONTROLLER_DUALSHOCK2 = 0,
+		CONTROLLER_DUALSHOCK3,
+		CONTROLLER_DUALSHOCK4,
+		CONTROLLER_XBOX360,
+		CONTROLLER_XBOXONE,
+	};
+
+	static int8 m_PrefsControllerType;
 #endif
 
 public:
@@ -782,6 +797,9 @@ public:
 	void PageDownList(bool);
 	int8 GetPreviousPageOption();
 	void ProcessList(bool &goBack, bool &optionSelected);
+#ifdef GAMEPAD_MENU
+	void LoadController(int8 type);
+#endif
 };
 
 #ifndef IMPROVED_VIDEOMODE

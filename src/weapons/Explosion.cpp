@@ -104,7 +104,12 @@ CExplosion::AddExplosion(CEntity *explodingEntity, CEntity *culprit, eExplosionT
 #endif
 
 	int n = 0;
+#ifdef FIX_BUGS
+	while (n < ARRAY_SIZE(gaExplosion) && gaExplosion[n].m_nIteration != 0)
+#else
+	// array overrun is UB
 	while (gaExplosion[n].m_nIteration != 0 && n < ARRAY_SIZE(gaExplosion))
+#endif
 		n++;
 	if (n == ARRAY_SIZE(gaExplosion))
 		return false;

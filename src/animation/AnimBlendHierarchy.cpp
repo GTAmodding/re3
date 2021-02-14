@@ -52,8 +52,7 @@ CAnimBlendHierarchy::RemoveQuaternionFlips(void)
 void
 CAnimBlendHierarchy::RemoveAnimSequences(void)
 {
-	if(sequences)
-		delete[] sequences;
+	delete[] sequences;
 	numSequences = 0;
 }
 

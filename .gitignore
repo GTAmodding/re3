@@ -352,3 +352,11 @@ MigrationBackup/
 vendor/glew-2.1.0/
 vendor/glfw-3.3.2.bin.WIN32/
 vendor/glfw-3.3.2.bin.WIN64/
+
+sdk/
+
+codewarrior/re3_Data/
+codewarrior/Release/
+codewarrior/Debug/
+
+src/extras/GitSHA1.cpp

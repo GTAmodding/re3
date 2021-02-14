@@ -23,24 +23,24 @@ CVector
 Multiply3x3(const CMatrix &mat, const CVector &vec)
 {
 	// TODO: VU0 code
-	return CVector(mat.m_matrix.right.x * vec.x + mat.m_matrix.up.x * vec.y + mat.m_matrix.at.x * vec.z,
-	               mat.m_matrix.right.y * vec.x + mat.m_matrix.up.y * vec.y + mat.m_matrix.at.y * vec.z,
-	               mat.m_matrix.right.z * vec.x + mat.m_matrix.up.z * vec.y + mat.m_matrix.at.z * vec.z);
+	return CVector(mat.rx * vec.x + mat.fx * vec.y + mat.ux * vec.z,
+	               mat.ry * vec.x + mat.fy * vec.y + mat.uy * vec.z,
+	               mat.rz * vec.x + mat.fz * vec.y + mat.uz * vec.z);
 }
 
 CVector
 Multiply3x3(const CVector &vec, const CMatrix &mat)
 {
-	return CVector(mat.m_matrix.right.x * vec.x + mat.m_matrix.right.y * vec.y + mat.m_matrix.right.z * vec.z,
-	               mat.m_matrix.up.x * vec.x + mat.m_matrix.up.y * vec.y + mat.m_matrix.up.z * vec.z,
-	               mat.m_matrix.at.x * vec.x + mat.m_matrix.at.y * vec.y + mat.m_matrix.at.z * vec.z);
+	return CVector(mat.rx * vec.x + mat.ry * vec.y + mat.rz * vec.z,
+	               mat.fx * vec.x + mat.fy * vec.y + mat.fz * vec.z,
+	               mat.ux * vec.x + mat.uy * vec.y + mat.uz * vec.z);
 }
 
 CVector
 operator*(const CMatrix &mat, const CVector &vec)
 {
 	// TODO: VU0 code
-	return CVector(mat.m_matrix.right.x * vec.x + mat.m_matrix.up.x * vec.y + mat.m_matrix.at.x * vec.z + mat.m_matrix.pos.x,
-	               mat.m_matrix.right.y * vec.x + mat.m_matrix.up.y * vec.y + mat.m_matrix.at.y * vec.z + mat.m_matrix.pos.y,
-	               mat.m_matrix.right.z * vec.x + mat.m_matrix.up.z * vec.y + mat.m_matrix.at.z * vec.z + mat.m_matrix.pos.z);
+	return CVector(mat.rx * vec.x + mat.fx * vec.y + mat.ux * vec.z + mat.px,
+	               mat.ry * vec.x + mat.fy * vec.y + mat.uy * vec.z + mat.py,
+	               mat.rz * vec.x + mat.fz * vec.y + mat.uz * vec.z + mat.pz);
 }

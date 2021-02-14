@@ -3,8 +3,9 @@
 #include "Physical.h"
 #include "AutoPilot.h"
 #include "ModelIndices.h"
-#include "AnimManager.h"
-#include "Weapon.h"
+#include "AnimationId.h"
+#include "WeaponType.h"
+#include "Collision.h"
 
 class CPed;
 class CFire;
@@ -55,14 +56,6 @@ enum eLights
 	VEHLIGHT_FRONT_RIGHT,
 	VEHLIGHT_REAR_LEFT,
 	VEHLIGHT_REAR_RIGHT,
-};
-
-enum eWheels
-{
-	VEHWHEEL_FRONT_LEFT,
-	VEHWHEEL_FRONT_RIGHT,
-	VEHWHEEL_REAR_LEFT,
-	VEHWHEEL_REAR_RIGHT,
 };
 
 enum
@@ -189,7 +182,7 @@ public:
 	float m_fMapObjectHeightBehind;	// rear Z?
 	eCarLock m_nDoorLock;
 	int8 m_nLastWeaponDamage; // see eWeaponType, -1 if no damage
-	int8 m_nRadioStation;
+	uint8 m_nRadioStation;
 	uint8 m_bRainAudioCounter;
 	uint8 m_bRainSamplesCounter;
 	uint8 m_nCarHornTimer;
@@ -283,7 +276,7 @@ public:
 #endif
 	CVehicleModelInfo* GetModelInfo() { return (CVehicleModelInfo*)CModelInfo::GetModelInfo(GetModelIndex()); }
 	bool IsTaxi(void) { return GetModelIndex() == MI_TAXI || GetModelIndex() == MI_CABBIE || GetModelIndex() == MI_BORGNINE; }
-	AnimationId GetDriverAnim(void) { return IsCar() && bLowVehicle ? ANIM_CAR_LSIT : (IsBoat() && GetModelIndex() != MI_SPEEDER ? ANIM_DRIVE_BOAT : ANIM_CAR_SIT); }
+	AnimationId GetDriverAnim(void) { return IsCar() && bLowVehicle ? ANIM_STD_CAR_SIT_LO : (IsBoat() && GetModelIndex() != MI_SPEEDER ? ANIM_STD_BOAT_DRIVE : ANIM_STD_CAR_SIT); }
 
 	static bool bWheelsOnlyCheat;
 	static bool bAllDodosCheat;

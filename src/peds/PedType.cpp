@@ -45,7 +45,7 @@ CPedType::LoadPedData(void)
 	char *buf;
 	char line[256];
 	char word[32];
-	size_t bp, buflen;
+	ssize_t bp, buflen;
 	int lp, linelen;
 	int type;
 	uint32 flags;
@@ -54,9 +54,9 @@ CPedType::LoadPedData(void)
 	type = NUM_PEDTYPES;
 	buf = new char[16 * 1024];
 
-        CFileMgr::SetDir("DATA");
-        buflen = CFileMgr::LoadFile("PED.DAT", (uint8*)buf, 16 * 1024, "r");
-        CFileMgr::SetDir("");
+	CFileMgr::SetDir("DATA");
+	buflen = CFileMgr::LoadFile("PED.DAT", (uint8*)buf, 16 * 1024, "r");
+	CFileMgr::SetDir("");
 
 	for(bp = 0; bp < buflen; ){
 		// read file line by line
@@ -79,7 +79,7 @@ CPedType::LoadPedData(void)
 		// Game uses just "line" here since sscanf already trims whitespace, but this is safer
 		sscanf(&line[lp], "%s", word);
 
-		if(strncmp(word, "Threat", 7) == 0){
+		if(strcmp(word, "Threat") == 0){
 			flags = 0;
 			lp += 7;
 			while(sscanf(&line[lp], "%s", word) == 1 && lp <= linelen){
@@ -92,7 +92,7 @@ CPedType::LoadPedData(void)
 					lp++;
 			}
 			ms_apPedType[type]->m_threats = flags;
-		}else if(strncmp(word, "Avoid", 6) == 0){
+		}else if(strcmp(word, "Avoid") == 0){
 			flags = 0;
 			lp += 6;
 			while(sscanf(&line[lp], "%s", word) == 1 && lp <= linelen){
@@ -246,19 +246,18 @@ CPedStats::LoadPedStats(void)
 	char *buf;
 	char line[256];
 	char name[32];
-	size_t bp, buflen;
+	ssize_t bp, buflen;
 	int lp, linelen;
 	int type;
 	float fleeDist, headingChangeRate, attackStrength, defendWeakness;
 	int fear, temper, lawfullness, sexiness, flags;
 
-
 	type = 0;
 	buf = new char[16 * 1024];
 
-        CFileMgr::SetDir("DATA");
-        buflen = CFileMgr::LoadFile("PEDSTATS.DAT", (uint8*)buf, 16 * 1024, "r");
-        CFileMgr::SetDir("");
+	CFileMgr::SetDir("DATA");
+	buflen = CFileMgr::LoadFile("PEDSTATS.DAT", (uint8*)buf, 16 * 1024, "r");
+	CFileMgr::SetDir("");
 
 	for(bp = 0; bp < buflen; ){
 		// read file line by line

@@ -18,8 +18,8 @@ public:
 	bool m_bIsInitialised;
 	bool m_bDisabled;
 	uint8 m_nMusicMode;
-	uint8 m_nCurrentStreamedSound;
-	uint8 m_nPreviousStreamedSound;
+	uint8 m_nNextTrack;
+	uint8 m_nPlayingTrack;
 	bool m_bFrontendTrackFinished;
 	bool m_bPlayInFrontend;
 	bool m_bSetNextStation;
@@ -34,9 +34,9 @@ public:
 	uint32 m_nTimer;
 	bool m_bDoTrackService;
 	bool m_bIgnoreTimeDelay;
-	bool m_bDontServiceAmbienceTrack;
+	bool m_bVerifyAmbienceTrackStartedToPlay;
 	bool m_bRadioSetByScript;
-	uint8 m_nRadioStation;
+	uint8 m_nRadioStationScript;
 	int32 m_nRadioPosition;
 	uint8 m_nRadioInCar;
 
@@ -44,7 +44,7 @@ public:
 	cMusicManager();
 	bool IsInitialised() { return m_bIsInitialised; }
 	uint32 GetMusicMode() { return m_nMusicMode; }
-	uint8 GetCurrentTrack() { return m_nCurrentStreamedSound; }
+	uint8 GetNextTrack() { return m_nNextTrack; }
 
 	bool Initialise();
 	void Terminate();

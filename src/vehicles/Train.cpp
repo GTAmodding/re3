@@ -373,7 +373,7 @@ CTrain::TrainHitStuff(CPtrList &list)
 void
 CTrain::AddPassenger(CPed *ped)
 {
-	int i = ped->m_vehEnterType;
+	int i = ped->m_vehDoor;
 	if((i == TRAIN_POS_LEFT_ENTRY || i == TRAIN_POS_MID_ENTRY || i == TRAIN_POS_RIGHT_ENTRY) && pPassengers[i] == nil){
 		pPassengers[i] = ped;
 		m_nNumPassengers++;

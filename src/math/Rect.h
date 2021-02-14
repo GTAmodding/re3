@@ -42,11 +42,28 @@ public:
 		bottom += y;
 		top += y;
 	}
-	void Grow(float r){
+
+	void Grow(float r) {
 		left -= r;
 		right += r;
 		top -= r;
 		bottom += r;
+	}
+
+	void Grow(float l, float r)
+	{
+		left -= l;
+		top -= l;
+		right += r;
+		bottom += r;
+	}
+
+	void Grow(float l, float r, float t, float b)
+	{
+		left -= l;
+		top -= t;
+		right += r;
+		bottom += b;
 	}
 
 	float GetWidth(void) { return right - left; }

@@ -72,13 +72,21 @@ CDarkel::DrawMessages()
 		{
 			CFont::SetJustifyOff();
 			CFont::SetBackgroundOff();
-			CFont::SetCentreSize(SCREEN_SCALE_X(610.0f));
+#ifdef FIX_BUGS
+			CFont::SetCentreSize(SCREEN_SCALE_X(DEFAULT_SCREEN_WIDTH - 30));
+#else
+			CFont::SetCentreSize(SCREEN_WIDTH - 30);
+#endif
 			CFont::SetCentreOn();
 			CFont::SetPropOn();
 			uint32 timePassedSinceStart = CTimer::GetTimeInMilliseconds() - CDarkel::TimeOfFrenzyStart;
 			if (CDarkel::bStandardSoundAndMessages) {
 				if (timePassedSinceStart >= 3000 && timePassedSinceStart < 11000) {
+#ifdef FIX_BUGS
 					CFont::SetScale(SCREEN_SCALE_X(1.3f), SCREEN_SCALE_Y(1.3f));
+#else
+					CFont::SetScale(1.3f, 1.3f);
+#endif
 					CFont::SetJustifyOff();
 					CFont::SetColor(CRGBA(255, 255, 128, CalcFade(timePassedSinceStart, 3000, 11000)));
 					CFont::SetFontStyle(FONT_BANK);
@@ -88,7 +96,11 @@ CDarkel::DrawMessages()
 				}
 			} else {
 				if (timePassedSinceStart < 8000) {
+#ifdef FIX_BUGS
 					CFont::SetScale(SCREEN_SCALE_X(1.3f), SCREEN_SCALE_Y(1.3f));
+#else
+					CFont::SetScale(1.3f, 1.3f);
+#endif
 					CFont::SetJustifyOff();
 					CFont::SetColor(CRGBA(255, 255, 128, CalcFade(timePassedSinceStart, 0, 8000)));
 					CFont::SetFontStyle(FONT_BANK);
@@ -97,7 +109,11 @@ CDarkel::DrawMessages()
 					}
 				}
 			}
+#ifdef FIX_BUGS
 			CFont::SetScale(SCREEN_SCALE_X(0.75f), SCREEN_SCALE_Y(1.5f));
+#else
+			CFont::SetScale(0.75f, 1.5f);
+#endif
 			CFont::SetCentreOff();
 			CFont::SetRightJustifyOn();
 			CFont::SetFontStyle(FONT_HEADING);
@@ -107,7 +123,15 @@ CDarkel::DrawMessages()
 				AsciiToUnicode(gString, gUString);
 				if (timeLeft > 4000 || CTimer::GetFrameCounter() & 1) {
 					CFont::SetColor(CRGBA(0, 0, 0, 255));
-					CFont::PrintString(SCREEN_SCALE_FROM_RIGHT(35.0f), SCREEN_SCALE_Y(109.0f), gUString);
+#if defined(PS2_HUD) || defined(FIX_BUGS)
+	#ifdef FIX_BUGS
+					CFont::PrintString(SCREEN_SCALE_FROM_RIGHT(34.0f - 1.0f), SCREEN_SCALE_Y(108.0f + 1.0f), gUString);
+	#else
+					CFont::PrintString(SCREEN_WIDTH-(34.0f - 1.0f), 108.0f + 1.0f, gUString);
+	#endif
+#else
+					CFont::PrintString(SCREEN_SCALE_FROM_RIGHT(34.0f + 1.0f), SCREEN_SCALE_Y(108.0f + 1.0f), gUString);
+#endif
 					CFont::SetColor(CRGBA(150, 100, 255, 255));
 					CFont::PrintString(SCREEN_SCALE_FROM_RIGHT(34.0f), SCREEN_SCALE_Y(108.0f), gUString);
 				}
@@ -120,7 +144,16 @@ CDarkel::DrawMessages()
 #else
 #define DARKEL_COUNTER_HEIGHT 128.0f
 #endif
-		    CFont::PrintString(SCREEN_SCALE_FROM_RIGHT(35.0f), SCREEN_SCALE_Y(DARKEL_COUNTER_HEIGHT + 1.0f), gUString);
+
+#if defined(PS2_HUD) || defined(FIX_BUGS)
+	#ifdef FIX_BUGS
+		    CFont::PrintString(SCREEN_SCALE_FROM_RIGHT(34.0f - 1.0f), SCREEN_SCALE_Y(DARKEL_COUNTER_HEIGHT + 1.0f), gUString);
+	#else
+		    CFont::PrintString(SCREEN_WIDTH-(34.0f - 1.0f), DARKEL_COUNTER_HEIGHT + 1.0f, gUString);
+	#endif
+#else
+		    CFont::PrintString(SCREEN_SCALE_FROM_RIGHT(34.0f + 1.0f), SCREEN_SCALE_Y(DARKEL_COUNTER_HEIGHT + 1.0f), gUString);
+#endif
 			CFont::SetColor(CRGBA(255, 128, 128, 255));
 		    CFont::PrintString(SCREEN_SCALE_FROM_RIGHT(34.0f), SCREEN_SCALE_Y(DARKEL_COUNTER_HEIGHT), gUString);
 #undef DARKEL_COUNTER_HEIGHT
@@ -132,13 +165,25 @@ CDarkel::DrawMessages()
 				uint32 timePassedSinceStart = CTimer::GetTimeInMilliseconds() - CDarkel::TimeOfFrenzyStart;
 				if (CTimer::GetTimeInMilliseconds() - CDarkel::TimeOfFrenzyStart < 5000) {
 					CFont::SetBackgroundOff();
-					CFont::SetCentreSize(SCREEN_SCALE_X(620.0f));
+#ifdef FIX_BUGS
+					CFont::SetCentreSize(SCREEN_SCALE_X(DEFAULT_SCREEN_WIDTH - 20));
+#else
+					CFont::SetCentreSize(SCREEN_WIDTH - 20);
+#endif
 					CFont::SetCentreOn();
+#ifdef FIX_BUGS
 					CFont::SetScale(SCREEN_SCALE_X(1.5f), SCREEN_SCALE_Y(1.5f));
+#else
+					CFont::SetScale(1.5f, 1.5f);
+#endif
 					CFont::SetJustifyOff();
 					CFont::SetColor(CRGBA(128, 255, 128, CalcFade(timePassedSinceStart, 0, 5000)));
 					CFont::SetFontStyle(FONT_BANK);
+#ifdef FIX_BUGS
 					int y = SCREEN_HEIGHT / 2 + SCREEN_SCALE_Y(25.0f - timePassedSinceStart * 0.01f);
+#else
+					int y = (SCREEN_HEIGHT / 2 + 25) - (timePassedSinceStart * 0.01f);
+#endif
 					CFont::PrintString(SCREEN_WIDTH / 2, y, TheText.Get("KF_3"));
 				}
 			}

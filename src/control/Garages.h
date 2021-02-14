@@ -1,13 +1,12 @@
 #pragma once
-#include "Automobile.h"
 #include "audio_enums.h"
 #include "Camera.h"
 #include "config.h"
+#include "Lists.h"
 
 class CVehicle;
-class CCamera;
 
-enum eGarageState : int8
+enum eGarageState
 {
 	GS_FULLYCLOSED,
 	GS_OPENED,
@@ -18,7 +17,7 @@ enum eGarageState : int8
 	GS_AFTERDROPOFF,
 };
 
-enum eGarageType : int8
+enum eGarageType
 {
 	GARAGE_NONE,
 	GARAGE_MISSION,
@@ -81,8 +80,9 @@ VALIDATE_SIZE(CStoredCar, 0x28);
 
 class CGarage
 {
-	eGarageType m_eGarageType;
-	eGarageState m_eGarageState;
+public:
+	uint8 m_eGarageType;
+	uint8 m_eGarageState;
 	bool field_2; // unused
 	bool m_bClosingWithoutTargetCar;
 	bool m_bDeactivated;
@@ -166,10 +166,11 @@ class CGarage
 	void FindDoorsEntities();
 	void FindDoorsEntitiesSectorList(CPtrList&, bool);
 	void PlayerArrestedOrDied();
+	bool Does60SecondsNeedThisCarAtAll(int mi);
+	bool Does60SecondsNeedThisCar(int mi);
+	void MarkThisCarAsCollectedFor60Seconds(int mi);
+	bool IsPlayerEntirelyInsideGarage();
 
-	friend class CGarages;
-	friend class cAudioManager;
-	friend class CCamera;
 };
 
 VALIDATE_SIZE(CGarage, 140);
@@ -179,6 +180,7 @@ class CGarages
 	enum {
 		MESSAGE_LENGTH = 8
 	};
+public:
 	static int32 BankVansCollected;
 	static bool BombsAreFree;
 	static bool RespraysAreFree;
@@ -200,15 +202,14 @@ class CGarages
 	static CStoredCar aCarsInSafeHouse3[NUM_GARAGE_STORED_CARS];
 	static bool bCamShouldBeOutisde;
 
-public:
 	static void Init(void);
 #ifndef PS2
 	static void Shutdown(void);
 #endif
 	static void Update(void);
 
-	static int16 AddOne(CVector pos1, CVector pos2, eGarageType type, int32 targetId);
-	static void ChangeGarageType(int16, eGarageType, int32);
+	static int16 AddOne(CVector pos1, CVector pos2, uint8 type, int32 targetId);
+	static void ChangeGarageType(int16, uint8, int32);
 	static void PrintMessages(void);
 	static void TriggerMessage(const char* text, int16, uint16 time, int16);
 	static void SetTargetCarForMissonGarage(int16, CVehicle*);
@@ -239,16 +240,14 @@ public:
 	static bool IsModelIndexADoor(uint32 id);
 	static void SetFreeBombs(bool bValue) { BombsAreFree = bValue; }
 	static void SetFreeResprays(bool bValue) { RespraysAreFree = bValue; }
+	static void StopCarFromBlowingUp(CAutomobile*);
 
-private:
 	static bool IsCarSprayable(CVehicle*);
 	static float FindDoorHeightForMI(int32);
 	static void CloseHideOutGaragesBeforeSave(void);
-	static int32 CountCarsInHideoutGarage(eGarageType);
-	static int32 FindMaxNumStoredCarsForGarage(eGarageType);
-	static int32 GetBombTypeForGarageType(eGarageType type) { return type - GARAGE_BOMBSHOP1 + 1; }
-	static int32 GetCarsCollectedIndexForGarageType(eGarageType type) { return type - GARAGE_COLLECTCARS_1; }
+	static int32 CountCarsInHideoutGarage(uint8);
+	static int32 FindMaxNumStoredCarsForGarage(uint8);
+	static int32 GetBombTypeForGarageType(uint8 type) { return type - GARAGE_BOMBSHOP1 + 1; }
+	static int32 GetCarsCollectedIndexForGarageType(uint8 type) { return type - GARAGE_COLLECTCARS_1; }
 
-	friend class cAudioManager;
-	friend class CGarage;
 };

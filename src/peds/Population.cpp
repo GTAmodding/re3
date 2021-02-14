@@ -22,6 +22,7 @@
 #include "DummyObject.h"
 #include "Script.h"
 #include "Shadows.h"
+#include "Bike.h"
 
 #define MIN_CREATION_DIST		40.0f // not for start of the game (look at the GeneratePedsAtStartOfGame)
 #define CREATION_RANGE			10.0f // added over the MIN_CREATION_DIST.
@@ -31,22 +32,22 @@
 
 // Transition areas between zones
 const RegenerationPoint aSafeZones[] = {
-	{ LEVEL_INDUSTRIAL, LEVEL_COMMERCIAL, 400.0f, 814.0f, -954.0f, -903.0f, 30.0f, 100.0f,
-		CVector(790.0f, -917.0f, 39.0f), CVector(775.0f, -921.0f, 39.0f), CVector(424.0f, -942.0f, 38.0f), CVector(439.0f, -938.0f, 38.0f) },
-	{ LEVEL_INDUSTRIAL, LEVEL_COMMERCIAL, 555.0f, 711.0f, 118.0f, 186.0f, -30.0f, -10.0f,
-		CVector(698.0f,  182.0f, -20.0f), CVector(681.0f,  178.0f, -20.0f), CVector(586.0f,  144.0f, -20.0f), CVector(577.0f,  135.0f, -20.0f) },
-	{ LEVEL_INDUSTRIAL, LEVEL_COMMERCIAL, 626.0f, 744.0f, -124.0f, -87.0f, -20.0f, -6.0f,
-		CVector(736.0f, -117.0f, -13.0f), CVector(730.0f, -115.0f, -13.0f), CVector(635.0f, -93.0f, -12.5f), CVector(650.0f, -89.0f, -12.5f) },
-	{ LEVEL_INDUSTRIAL, LEVEL_COMMERCIAL, 645.0f, 734.0f, -780.0f, -750.0f, -25.0f, -6.0f,
-		CVector(729.0f, -764.0f, -18.0f), CVector(720.0f, -769.0f, -17.0f), CVector(652.0f, -774.0f, -10.5f), CVector(659.0f, -770.0f, -10.5f) },
-	{ LEVEL_COMMERCIAL, LEVEL_SUBURBAN, -532.0f, -136.0f, -668.0f, -599.0f, 34.0f, 60.0f,
-		CVector(-172.0f, -619.0f,  44.0f), CVector(-183.0f, -623.0f,  44.0f), CVector(-511.0f, -645.0f,  41.0f), CVector(-493.0f, -639.0f,  41.5f) },
-	{ LEVEL_COMMERCIAL, LEVEL_SUBURBAN, -325.0f, -175.0f, 27.0f, 75.0f, -30.0f, -10.0f,
-		CVector(-185.0f,  40.8f, -20.5f), CVector(-202.0f,  37.0f, -20.5f), CVector(-315.0f,  65.5f, -20.5f), CVector(-306.0f,  62.4f, -20.5f) },
-	{ LEVEL_COMMERCIAL, LEVEL_SUBURBAN, -410.0f, -310.0f, -1055.0f, -1030.0f, -20.0f, -6.0f,
-		CVector(-321.0f, -1043.0f, -13.2f), CVector(-328.0f, -1045.0f, -13.2f), CVector(-398.0f, -1044.0f, -13.5f), CVector(-390.0f, -1040.5f, -13.5f) },
-	{ LEVEL_COMMERCIAL, LEVEL_SUBURBAN, -425.0f, -280.0f, -471.0f, -447.0f, -20.0f, -5.0f,
-		CVector(-292.0f, -457.0f, -11.6f), CVector(-310.0f, -461.0f, -11.6f), CVector(-413.0f, -461.0f, -11.5f), CVector(-399.0f, -457.0f, -11.3f) }
+	LEVEL_INDUSTRIAL, LEVEL_COMMERCIAL, 400.0f, 814.0f, -954.0f, -903.0f, 30.0f, 100.0f,
+		790.0f, -917.0f, 39.0f, 775.0f, -921.0f, 39.0f, 424.0f, -942.0f, 38.0f, 439.0f, -938.0f, 38.0f,
+	LEVEL_INDUSTRIAL, LEVEL_COMMERCIAL, 555.0f, 711.0f, 118.0f, 186.0f, -30.0f, -10.0f,
+		CVector(698.0f,  182.0f, -20.0f), CVector(681.0f,  178.0f, -20.0f), CVector(586.0f,  144.0f, -20.0f), CVector(577.0f,  135.0f, -20.0f),
+	LEVEL_INDUSTRIAL, LEVEL_COMMERCIAL, 626.0f, 744.0f, -124.0f, -87.0f, -20.0f, -6.0f,
+		CVector(736.0f, -117.0f, -13.0f), CVector(730.0f, -115.0f, -13.0f), CVector(635.0f, -93.0f, -12.5f), CVector(650.0f, -89.0f, -12.5f),
+	LEVEL_INDUSTRIAL, LEVEL_COMMERCIAL, 645.0f, 734.0f, -780.0f, -750.0f, -25.0f, -6.0f,
+		CVector(729.0f, -764.0f, -18.0f), CVector(720.0f, -769.0f, -17.0f), CVector(652.0f, -774.0f, -10.5f), CVector(659.0f, -770.0f, -10.5f),
+	LEVEL_COMMERCIAL, LEVEL_SUBURBAN, -532.0f, -136.0f, -668.0f, -599.0f, 34.0f, 60.0f,
+		CVector(-172.0f, -619.0f,  44.0f), CVector(-183.0f, -623.0f,  44.0f), CVector(-511.0f, -645.0f,  41.0f), CVector(-493.0f, -639.0f,  41.5f),
+	LEVEL_COMMERCIAL, LEVEL_SUBURBAN, -325.0f, -175.0f, 27.0f, 75.0f, -30.0f, -10.0f,
+		CVector(-185.0f,  40.8f, -20.5f), CVector(-202.0f,  37.0f, -20.5f), CVector(-315.0f,  65.5f, -20.5f), CVector(-306.0f,  62.4f, -20.5f),
+	LEVEL_COMMERCIAL, LEVEL_SUBURBAN, -410.0f, -310.0f, -1055.0f, -1030.0f, -20.0f, -6.0f,
+		CVector(-321.0f, -1043.0f, -13.2f), CVector(-328.0f, -1045.0f, -13.2f), CVector(-398.0f, -1044.0f, -13.5f), CVector(-390.0f, -1040.5f, -13.5f),
+	LEVEL_COMMERCIAL, LEVEL_SUBURBAN, -425.0f, -280.0f, -471.0f, -447.0f, -20.0f, -5.0f,
+		CVector(-292.0f, -457.0f, -11.6f), CVector(-310.0f, -461.0f, -11.6f), CVector(-413.0f, -461.0f, -11.5f), CVector(-399.0f, -457.0f, -11.3f)
 };
 
 PedGroup CPopulation::ms_pPedGroups[NUMPEDGROUPS];
@@ -76,7 +77,7 @@ uint32 CPopulation::ms_nNumGang7;
 uint32 CPopulation::ms_nNumGang8;
 CVector CPopulation::RegenerationPoint_a;
 CVector CPopulation::RegenerationPoint_b;
-CVector CPopulation::RegenerationForward;
+CVector CPopulation::RegenerationFront;
 
 void
 CPopulation::Initialise()
@@ -369,13 +370,13 @@ CPopulation::DealWithZoneChange(eLevelName oldLevel, eLevelName newLevel, bool f
 	if (aSafeZones[safeZone].srcLevel == newLevel) {
 		CPopulation::RegenerationPoint_a = aSafeZones[safeZone].srcPosA;
 		CPopulation::RegenerationPoint_b = aSafeZones[safeZone].srcPosB;
-		CPopulation::RegenerationForward = aSafeZones[safeZone].destPosA - aSafeZones[safeZone].srcPosA;
-		RegenerationForward.Normalise();
+		CPopulation::RegenerationFront = aSafeZones[safeZone].destPosA - aSafeZones[safeZone].srcPosA;
+		RegenerationFront.Normalise();
 	} else if (aSafeZones[safeZone].destLevel == newLevel) {
 		CPopulation::RegenerationPoint_a = aSafeZones[safeZone].destPosA;
 		CPopulation::RegenerationPoint_b = aSafeZones[safeZone].destPosB;
-		CPopulation::RegenerationForward = aSafeZones[safeZone].srcPosA - aSafeZones[safeZone].destPosA;
-		RegenerationForward.Normalise();
+		CPopulation::RegenerationFront = aSafeZones[safeZone].srcPosA - aSafeZones[safeZone].destPosA;
+		RegenerationFront.Normalise();
 	}
 }
 
@@ -581,7 +582,7 @@ CPopulation::AddToPopulation(float minDist, float maxDist, float minDistOffScree
 	CVector playerCentreOfWorld = FindPlayerCentreOfWorld(CWorld::PlayerInFocus);
 	CTheZones::GetZoneInfoForTimeOfDay(&playerCentreOfWorld, &zoneInfo);
 	CWanted *wantedInfo = playerInfo->m_pPed->m_pWanted;
-	if (wantedInfo->m_nWantedLevel > 2) {
+	if (wantedInfo->GetWantedLevel() > 2) {
 		if (ms_nNumCop < wantedInfo->m_MaxCops && !playerInfo->m_pPed->bInVehicle
 			&& (CCarCtrl::NumLawEnforcerCars >= wantedInfo->m_MaximumLawEnforcerVehicles
 				|| CCarCtrl::NumRandomCars >= playerInfo->m_nTrafficMultiplier * CCarCtrl::CarDensityMultiplier
@@ -718,10 +719,10 @@ CPopulation::AddToPopulation(float minDist, float maxDist, float minDistOffScree
 			if (i != 0) {
 				// Gang member
 				newPed->SetLeader(gangLeader);
-#ifndef FIX_BUGS
+#if !defined(FIX_BUGS) && GTA_VERSION >= GTA3_PC_10
 				// seems to be a miami leftover (this code is not on PS2) but gang peds end up just being frozen
-				newPed->m_nPedState = PED_UNKNOWN;
-				gangLeader->m_nPedState = PED_UNKNOWN;
+				newPed->SetPedState(PED_UNKNOWN);
+				gangLeader->SetPedState(PED_UNKNOWN);
 				newPed->m_fRotationCur = CGeneral::GetRadianAngleBetweenPoints(
 					gangLeader->GetPosition().x, gangLeader->GetPosition().y,
 					newPed->GetPosition().x, newPed->GetPosition().y);
@@ -833,11 +834,11 @@ CPopulation::AddPedInCar(CVehicle* car)
 		newPed->SetCurrentWeapon(WEAPONTYPE_COLT45);
 		newPed->RemoveWeaponModel(CWeaponInfo::GetWeaponInfo(newPed->GetWeapon()->m_eWeaponType)->m_nModelId);
 	}
-	/*
+	
 	// Miami leftover
 	if (car->m_vehType == VEHICLE_TYPE_BIKE) {
-		newPed->m_pVehicleAnim = CAnimManager::BlendAnimation(newPed->GetClump(), ASSOCGRP_STD, *((CBike*)car + 308h), 100.0f);
-	} else */
+		newPed->m_pVehicleAnim = CAnimManager::BlendAnimation(newPed->GetClump(), ASSOCGRP_STD, ((CBike*)car)->m_bikeSitAnimation, 100.0f);
+	} else 
 
 	// FIX: Make peds comfortable while driving car/boat
 #ifdef FIX_BUGS
@@ -846,7 +847,7 @@ CPopulation::AddPedInCar(CVehicle* car)
 	}
 #else
 	{
-		newPed->m_pVehicleAnim = CAnimManager::BlendAnimation(newPed->GetClump(), ASSOCGRP_STD, ANIM_CAR_SIT, 100.0f);
+		newPed->m_pVehicleAnim = CAnimManager::BlendAnimation(newPed->GetClump(), ASSOCGRP_STD, ANIM_STD_CAR_SIT, 100.0f);
 	}
 #endif
 	
@@ -894,7 +895,7 @@ CPopulation::MoveCarsAndPedsOutOfAbandonedZones()
 									break;
 							}
 							veh->GetMatrix().GetPosition().z += (movedVehicleCount / 4) * 7.0f;
-							veh->GetMatrix().GetForward() = RegenerationForward;
+							veh->GetMatrix().GetForward() = RegenerationFront;
 							((CAutomobile*)veh)->PlaceOnRoadProperly();
 							CCarCtrl::JoinCarWithRoadSystem(veh);
 							CTheScripts::ClearSpaceForMissionEntity(veh->GetPosition(), veh);

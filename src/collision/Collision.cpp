@@ -477,8 +477,16 @@ CCollision::TestLineTriangle(const CColLine &line, const CompressedVector *verts
 	if(plane.CalcPoint(line.p0) * plane.CalcPoint(line.p1) > 0.0f)
 		return false;
 
+	float p0dist = DotProduct(line.p1 - line.p0, normal);
+
+#ifdef FIX_BUGS
+	// line lines in the plane, assume no collision
+	if (p0dist == 0.0f)
+		return false;
+#endif
+
 	// intersection parameter on line
-	t = -plane.CalcPoint(line.p0) / DotProduct(line.p1 - line.p0, normal);
+	t = -plane.CalcPoint(line.p0) / p0dist;
 	// find point of intersection
 	CVector p = line.p0 + (line.p1-line.p0)*t;
 
@@ -665,7 +673,7 @@ CCollision::TestLineOfSight(const CColLine &line, const CMatrix &matrix, CColMod
 	// transform line to model space
 	Invert(matrix, matTransform);
 	CVuVector newline[2];
-	TransformPoints(newline, 2, matTransform, (RwV3d*)&line.p0, sizeof(CColLine)/2);
+	TransformPoints(newline, 2, matTransform, &line.p0, sizeof(CColLine)/2);
 
 	// If we don't intersect with the bounding box, no chance on the rest
 	if(!TestLineBox(*(CColLine*)newline, model.boundingBox))
@@ -1286,8 +1294,17 @@ CCollision::ProcessLineTriangle(const CColLine &line,
 	if(plane.CalcPoint(line.p0) * plane.CalcPoint(line.p1) > 0.0f)
 		return false;
 
+	float p0dist = DotProduct(line.p1 - line.p0, normal);
+
+#ifdef FIX_BUGS
+	// line lines in the plane, assume no collision
+	if (p0dist == 0.0f)
+		return false;
+#endif
+
 	// intersection parameter on line
-	t = -plane.CalcPoint(line.p0) / DotProduct(line.p1 - line.p0, normal);
+	t = -plane.CalcPoint(line.p0) / p0dist;
+
 	// early out if we're beyond the mindist
 	if(t >= mindist)
 		return false;
@@ -1474,7 +1491,7 @@ CCollision::ProcessLineOfSight(const CColLine &line,
 	// transform line to model space
 	Invert(matrix, matTransform);
 	CVuVector newline[2];
-	TransformPoints(newline, 2, matTransform, (RwV3d*)&line.p0, sizeof(CColLine)/2);
+	TransformPoints(newline, 2, matTransform, &line.p0, sizeof(CColLine)/2);
 
 	if(mindist < 1.0f)
 		newline[1] = newline[0] + (newline[1] - newline[0])*mindist;
@@ -1606,7 +1623,7 @@ CCollision::ProcessVerticalLine(const CColLine &line,
 	// transform line to model space
 	Invert(matrix, matTransform);
 	CVuVector newline[2];
-	TransformPoints(newline, 2, matTransform, (RwV3d*)&line.p0, sizeof(CColLine)/2);
+	TransformPoints(newline, 2, matTransform, &line.p0, sizeof(CColLine)/2);
 
 	if(mindist < 1.0f)
 		newline[1] = newline[0] + (newline[1] - newline[0])*mindist;
@@ -1806,16 +1823,16 @@ CCollision::ProcessColModels(const CMatrix &matrixA, CColModel &modelA,
 	matAB *= matrixA;
 
 	CVuVector bsphereAB;	// bounding sphere of A in B space
-	TransformPoint(bsphereAB, matAB, *(RwV3d*)modelA.boundingSphere.center);	// inlined
+	TransformPoint(bsphereAB, matAB, modelA.boundingSphere.center);	// inlined
 	bsphereAB.w = modelA.boundingSphere.radius;
 	if(!TestSphereBox(*(CColSphere*)&bsphereAB, modelB.boundingBox))
 		return 0;
 
 	// transform modelA's spheres and lines to B space
-	TransformPoints(aSpheresA, modelA.numSpheres, matAB, (RwV3d*)&modelA.spheres->center, sizeof(CColSphere));
+	TransformPoints(aSpheresA, modelA.numSpheres, matAB, &modelA.spheres->center, sizeof(CColSphere));
 	for(i = 0; i < modelA.numSpheres; i++)
 		aSpheresA[i].w = modelA.spheres[i].radius;
-	TransformPoints(aLinesA, modelA.numLines*2, matAB, (RwV3d*)&modelA.lines->p0, sizeof(CColLine)/2);
+	TransformPoints(aLinesA, modelA.numLines*2, matAB, &modelA.lines->p0, sizeof(CColLine)/2);
 
 	// Test them against model B's bounding volumes
 	int numSpheresA = 0;
@@ -1832,7 +1849,7 @@ CCollision::ProcessColModels(const CMatrix &matrixA, CColModel &modelA,
 	matBA *= matrixB;
 
 	// transform modelB's spheres to A space
-	TransformPoints(aSpheresB, modelB.numSpheres, matBA, (RwV3d*)&modelB.spheres->center, sizeof(CColSphere));
+	TransformPoints(aSpheresB, modelB.numSpheres, matBA, &modelB.spheres->center, sizeof(CColSphere));
 	for(i = 0; i < modelB.numSpheres; i++)
 		aSpheresB[i].w = modelB.spheres[i].radius;
 
@@ -2245,12 +2262,12 @@ CCollision::DistToLine(const CVector *l0, const CVector *l1, const CVector *poin
 	float dot = DotProduct(*point - *l0, *l1 - *l0);
 	// Between 0 and len we're above the line.
 	// if not, calculate distance to endpoint
-	if(dot <= 0.0f)
-		return (*point - *l0).Magnitude();
-	if(dot >= lensq)
-		return (*point - *l1).Magnitude();
+	if(dot <= 0.0f) return (*point - *l0).Magnitude();
+	if(dot >= lensq) return (*point - *l1).Magnitude();
 	// distance to line
-	return Sqrt((*point - *l0).MagnitudeSqr() - dot*dot/lensq);
+	float distSqr = (*point - *l0).MagnitudeSqr() - dot * dot / lensq;
+	if(distSqr <= 0.f) return 0.f;
+	return Sqrt(distSqr);
 }
 
 // same as above but also return the point on the line

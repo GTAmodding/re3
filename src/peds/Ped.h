@@ -9,6 +9,7 @@
 #include "Physical.h"
 #include "Weapon.h"
 #include "WeaponInfo.h"
+#include "Collision.h"
 
 #define FEET_OFFSET	1.04f
 #define CHECK_NEARBY_THINGS_MAX_DIST	15.0f
@@ -43,7 +44,7 @@ enum eFormation
 	FORMATION_FRONT
 };
 
-enum FightState : int8 {
+enum FightState {
 	FIGHTSTATE_MOVE_FINISHED = -2,
 	FIGHTSTATE_JUST_ATTACKED,
 	FIGHTSTATE_NO_MOVE,
@@ -153,7 +154,7 @@ enum eWaitState {
 	WAITSTATE_FINISH_FLEE
 };
 
-enum eObjective : uint32 {
+enum eObjective {
 	OBJECTIVE_NONE,
 	OBJECTIVE_WAIT_ON_FOOT,
 	OBJECTIVE_FLEE_ON_FOOT_TILL_SAFE,
@@ -212,7 +213,7 @@ enum PedOnGroundState {
 	PED_DEAD_ON_THE_FLOOR
 };
 
-enum PointBlankNecessity : uint8 {
+enum PointBlankNecessity {
 	NO_POINT_BLANK_PED,
 	POINT_BLANK_FOR_WANTED_PED,
 	POINT_BLANK_FOR_SOMEONE_ELSE
@@ -443,7 +444,7 @@ public:
 	float m_fRotationCur;
 	float m_fRotationDest;
 	float m_headingRate;
-	uint16 m_vehEnterType;
+	uint16 m_vehDoor;
 	int16 m_walkAroundType;
 	CPhysical *m_pCurrentPhysSurface;
 	CVector m_vecOffsetFromPhysSurface;
@@ -484,7 +485,7 @@ public:
 	CVector m_vecHitLastPos;
 	uint32 m_curFightMove;
 	uint8 m_fightButtonPressure;
-	FightState m_fightState;
+	int8 m_fightState;
 	bool m_takeAStepAfterAttack;
 	CFire *m_pFire;
 	CEntity *m_pLookTarget;
@@ -493,10 +494,10 @@ public:
 	uint32 m_leaveCarTimer;
 	uint32 m_getUpTimer;
 	uint32 m_lookTimer;
-	uint32 m_standardTimer;
+	uint32 m_chatTimer;
 	uint32 m_attackTimer;
 	uint32 m_shootTimer; // shooting is a part of attack
-	uint32 m_hitRecoverTimer;
+	uint32 m_carJackTimer;
 	uint32 m_objectiveTimer;
 	uint32 m_duckTimer;
 	uint32 m_duckAndCoverTimer;
@@ -598,7 +599,7 @@ public:
 #endif
 	bool CheckForExplosions(CVector2D &area);
 	CPed *CheckForGunShots(void);
-	PointBlankNecessity CheckForPointBlankPeds(CPed*);
+	uint8 CheckForPointBlankPeds(CPed*);
 	bool CheckIfInTheAir(void);
 	void ClearAll(void);
 	void SetPointGunAt(CEntity*);
@@ -863,6 +864,13 @@ public:
 			SetMoveState(PEDMOVE_WALK);
 	}
 
+	inline void SetWeaponLockOnTarget(CEntity *target)
+	{
+		m_pPointGunAt = (CPed *)target;
+		if(target)
+			((CEntity *)target)->RegisterReference(&m_pPointGunAt);
+	}
+
 	// Using this to abstract nodes of skinned and non-skinned meshes
 	CVector GetNodePosition(int32 node)
 	{
@@ -891,13 +899,13 @@ public:
 			RpHAnimHierarchy *hier = GetAnimHierarchyFromSkinClump(GetClump());
 			int32 idx = RpHAnimIDGetIndex(hier, m_pFrames[node]->nodeID);
 			RwMatrix *mats = RpHAnimHierarchyGetMatrixArray(hier);
-			RwV3dTransformPoints((RwV3d*)&pos, (RwV3d*)&pos, 1, &mats[idx]);
+			RwV3dTransformPoints(&pos, &pos, 1, &mats[idx]);
 		}else
 #endif
 		{
 			RwFrame *frame;
 			for (frame = m_pFrames[node]->frame; frame; frame = RwFrameGetParent(frame))
-				RwV3dTransformPoints((RwV3d*)&pos, (RwV3d*)&pos, 1, RwFrameGetMatrix(frame));
+				RwV3dTransformPoints(&pos, &pos, 1, RwFrameGetMatrix(frame));
 		}
 	}
 

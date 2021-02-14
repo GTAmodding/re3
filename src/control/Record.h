@@ -57,9 +57,7 @@ public:
 	static void RestoreInfoForMatrix(CMatrix&, CCarStateEachFrame*);
 	static void RestoreInfoForCar(CAutomobile*, CCarStateEachFrame*, bool);
 	static void ProcessControlCars(void);
-#if (defined(GTA_PS2) || defined(FIX_BUGS))
 	static bool ShouldThisPadBeLeftAlone(uint8 pad);
-#endif
 	static void GiveUsACar(int32, CVector, float, CAutomobile**, uint8, uint8);
 	static void StartChaseScene(float);
 	static void CleanUpChaseScene(void);

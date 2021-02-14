@@ -100,7 +100,7 @@ CEmergencyPed::FiremanAI(void)
 		case EMERGENCY_PED_READY:
 			nearestFire = gFireManager.FindNearestFire(GetPosition(), &fireDist);
 			if (nearestFire) {
-				m_nPedState = PED_NONE;
+				SetPedState(PED_NONE);
 				SetSeek(nearestFire->m_vecPos, 1.0f);
 				SetMoveState(PEDMOVE_RUN);
 				m_nEmergencyPedState = EMERGENCY_PED_DETERMINE_NEXT_STATE;
@@ -114,7 +114,7 @@ CEmergencyPed::FiremanAI(void)
 		case EMERGENCY_PED_DETERMINE_NEXT_STATE:
 			nearestFire = gFireManager.FindNearestFire(GetPosition(), &fireDist);
 			if (nearestFire && nearestFire != m_pAttendedFire) {
-				m_nPedState = PED_NONE;
+				SetPedState(PED_NONE);
 				SetSeek(nearestFire->m_vecPos, 1.0f);
 				SetMoveState(PEDMOVE_RUN);
 #ifdef FIX_BUGS
@@ -160,7 +160,7 @@ CEmergencyPed::FiremanAI(void)
 #endif
 				--m_pAttendedFire->m_nFiremenPuttingOut;
 
-			m_nPedState = PED_NONE;
+			SetPedState(PED_NONE);
 			SetWanderPath(CGeneral::GetRandomNumber() & 7);
 			m_pAttendedFire = nil;
 			m_nEmergencyPedState = EMERGENCY_PED_READY;
@@ -234,8 +234,8 @@ CEmergencyPed::MedicAI(void)
 				if (nearestAccident) {
 					m_pRevivedPed = nearestAccident->m_pVictim;
 					m_pRevivedPed->RegisterReference((CEntity**)&m_pRevivedPed);
-					m_pRevivedPed->m_pedIK.GetComponentPosition((RwV3d*)&midPos, PED_MID);
-					m_pRevivedPed->m_pedIK.GetComponentPosition((RwV3d*)&headPos, PED_HEAD);
+					m_pRevivedPed->m_pedIK.GetComponentPosition(midPos, PED_MID);
+					m_pRevivedPed->m_pedIK.GetComponentPosition(headPos, PED_HEAD);
 					SetSeek((headPos + midPos) * 0.5f, 1.0f);
 					SetObjective(OBJECTIVE_NONE);
 					bIsRunning = true;
@@ -274,8 +274,8 @@ CEmergencyPed::MedicAI(void)
 							m_nEmergencyPedState = EMERGENCY_PED_STOP;
 							break;
 						}
-						m_pRevivedPed->m_pedIK.GetComponentPosition((RwV3d*)&midPos, PED_MID);
-						m_pRevivedPed->m_pedIK.GetComponentPosition((RwV3d*)&headPos, PED_HEAD);
+						m_pRevivedPed->m_pedIK.GetComponentPosition(midPos, PED_MID);
+						m_pRevivedPed->m_pedIK.GetComponentPosition(headPos, PED_HEAD);
 						SetSeek((headPos + midPos) * 0.5f, nearestAccident->m_nMedicsPerformingCPR * 0.5f + 1.0f);
 						SetObjective(OBJECTIVE_NONE);
 						bIsRunning = true;
@@ -307,7 +307,7 @@ CEmergencyPed::MedicAI(void)
 				} else {
 					m_pRevivedPed->m_bloodyFootprintCountOrDeathTime = CTimer::GetTimeInMilliseconds();
 					SetMoveState(PEDMOVE_STILL);
-					m_nPedState = PED_CPR;
+					SetPedState(PED_CPR);
 					m_nLastPedState = PED_CPR;
 					SetLookFlag(m_pRevivedPed, 0);
 					SetLookTimer(500);
@@ -317,7 +317,7 @@ CEmergencyPed::MedicAI(void)
 						m_nEmergencyPedState = EMERGENCY_PED_STAND_STILL;
 					} else {
 						m_nEmergencyPedState = EMERGENCY_PED_FACE_TO_PATIENT;
-						m_pVehicleAnim = CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ANIM_CPR, 4.0f);
+						m_pVehicleAnim = CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ANIM_MEDIC_CPR, 4.0f);
 						bIsDucking = true;
 					}
 					SetLookTimer(2000);
@@ -329,8 +329,8 @@ CEmergencyPed::MedicAI(void)
 				if (!m_pRevivedPed || m_pRevivedPed->m_fHealth > 0.0f)
 					m_nEmergencyPedState = EMERGENCY_PED_DETERMINE_NEXT_STATE;
 				else {
-					m_pRevivedPed->m_pedIK.GetComponentPosition((RwV3d*)&midPos, PED_MID);
-					m_pRevivedPed->m_pedIK.GetComponentPosition((RwV3d*)&headPos, PED_HEAD);
+					m_pRevivedPed->m_pedIK.GetComponentPosition(midPos, PED_MID);
+					m_pRevivedPed->m_pedIK.GetComponentPosition(headPos, PED_HEAD);
 					midPos = (headPos + midPos) * 0.5f;
 					m_fRotationDest = CGeneral::GetRadianAngleBetweenPoints(
 						midPos.x, midPos.y,
@@ -351,8 +351,8 @@ CEmergencyPed::MedicAI(void)
 					m_nEmergencyPedState = EMERGENCY_PED_DETERMINE_NEXT_STATE;
 					break;
 				}
-				m_pRevivedPed->m_pedIK.GetComponentPosition((RwV3d*)&midPos, PED_MID);
-				m_pRevivedPed->m_pedIK.GetComponentPosition((RwV3d*)&headPos, PED_HEAD);
+				m_pRevivedPed->m_pedIK.GetComponentPosition(midPos, PED_MID);
+				m_pRevivedPed->m_pedIK.GetComponentPosition(headPos, PED_HEAD);
 				midPos = (headPos + midPos) * 0.5f;
 				m_fRotationDest = CGeneral::GetRadianAngleBetweenPoints(
 					midPos.x, midPos.y,
@@ -366,12 +366,12 @@ CEmergencyPed::MedicAI(void)
 					break;
 				}
 				m_nEmergencyPedState = EMERGENCY_PED_STOP_CPR;
-				m_nPedState = PED_NONE;
+				SetPedState(PED_NONE);
 				SetMoveState(PEDMOVE_WALK);
 				m_pVehicleAnim = nil;
 				if (!m_pRevivedPed->bBodyPartJustCameOff) {
 					m_pRevivedPed->m_fHealth = 100.0f;
-					m_pRevivedPed->m_nPedState = PED_NONE;
+					m_pRevivedPed->SetPedState(PED_NONE);
 					m_pRevivedPed->m_nLastPedState = PED_WANDER_PATH;
 					m_pRevivedPed->SetGetUp();
 					m_pRevivedPed->bUsesCollision = true;
@@ -400,7 +400,7 @@ CEmergencyPed::MedicAI(void)
 				break;
 			case EMERGENCY_PED_STOP:
 				m_bStartedToCPR = false;
-				m_nPedState = PED_NONE;
+				SetPedState(PED_NONE);
 				if (m_pAttendedAccident) {
 					m_pAttendedAccident->m_pVictim = nil;
 					--m_pAttendedAccident->m_nMedicsAttending;

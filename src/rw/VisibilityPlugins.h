@@ -22,6 +22,9 @@ public:
 
 	static CLinkList<AlphaObjectInfo> m_alphaList;
 	static CLinkList<AlphaObjectInfo> m_alphaEntityList;
+#ifdef NEW_RENDERER
+	static CLinkList<AlphaObjectInfo> m_alphaBuildingList;
+#endif
 	static RwCamera *ms_pCamera;
 	static RwV3d *ms_pCameraPosn;
 	static float ms_cullCompsDist;
@@ -103,10 +106,10 @@ public:
 	struct FrameExt
 	{
 		// BUG: this is abused to hold a pointer by SetClumpModelInfo
-		uintptr id;
+		intptr id;
 	};
-	static void SetFrameHierarchyId(RwFrame *frame, uintptr id);
-	static uintptr GetFrameHierarchyId(RwFrame *frame);
+	static void SetFrameHierarchyId(RwFrame *frame, intptr id);
+	static intptr GetFrameHierarchyId(RwFrame *frame);
 
 	static void *FrameConstructor(void *object, int32 offset, int32 len);
 	static void *FrameDestructor(void *object, int32 offset, int32 len);

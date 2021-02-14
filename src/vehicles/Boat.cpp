@@ -1,5 +1,6 @@
 #include "common.h"
 
+#include "main.h"
 #include "General.h"
 #include "Timecycle.h"
 #include "HandlingMgr.h"
@@ -21,14 +22,14 @@
 
 #define INVALID_ORIENTATION (-9999.99f)
 
-float fShapeLength = 0.4f;
-float fShapeTime = 0.05f;
-float fRangeMult = 0.75f; //0.6f; // 0.75f gta 3
-float fTimeMult;
-
 float MAX_WAKE_LENGTH = 50.0f;
 float MIN_WAKE_INTERVAL = 1.0f;
 float WAKE_LIFETIME = 400.0f;
+
+float fShapeLength = 0.4f;
+float fShapeTime = 0.05f;
+float fRangeMult = 0.75f;
+float fTimeMult = 1.0f/WAKE_LIFETIME;
 
 CBoat *CBoat::apFrameWakeGeneratingBoats[4];
 
@@ -719,6 +720,15 @@ CBoat::Render()
 	((CVehicleModelInfo*)CModelInfo::GetModelInfo(GetModelIndex()))->SetVehicleColour(m_currentColour1, m_currentColour2);
 	if (!CVehicle::bWheelsOnlyCheat)
 		CEntity::Render();
+#ifdef NEW_RENDERER
+	if(!gbNewRenderer)
+#endif
+	RenderWaterOutPolys();	// not separate function in III
+}
+
+void
+CBoat::RenderWaterOutPolys(void)
+{
 	KeepWaterOutIndices[0] = 0;
 	KeepWaterOutIndices[1] = 2;
 	KeepWaterOutIndices[2] = 1;
@@ -758,18 +768,28 @@ CBoat::Render()
 	KeepWaterOutVertices[2].v = 1.0f;
 	KeepWaterOutVertices[3].u = 1.0f;
 	KeepWaterOutVertices[3].v = 1.0f;
+#ifdef NEW_RENDERER
+	if(!gbNewRenderer)
+#endif
+{
 	RwRenderStateSet(rwRENDERSTATETEXTURERASTER, gpWaterRaster);
 	RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)TRUE);
 	RwRenderStateSet(rwRENDERSTATEFOGENABLE, (void*)FALSE);
 	RwRenderStateSet(rwRENDERSTATESRCBLEND, (void*)rwBLENDZERO);
 	RwRenderStateSet(rwRENDERSTATEDESTBLEND, (void*)rwBLENDONE);
+}
 	if (!CVehicle::bWheelsOnlyCheat && RwIm3DTransform(KeepWaterOutVertices, 4, GetMatrix().m_attachment, rwIM3D_VERTEXUV)) {
 		RwIm3DRenderIndexedPrimitive(rwPRIMTYPETRILIST, KeepWaterOutIndices, 6);
 		RwIm3DEnd();
 	}
+#ifdef NEW_RENDERER
+	if(!gbNewRenderer)
+#endif
+{
 	RwRenderStateSet(rwRENDERSTATEFOGENABLE, (void*)TRUE);
 	RwRenderStateSet(rwRENDERSTATESRCBLEND, (void*)rwBLENDSRCALPHA);
 	RwRenderStateSet(rwRENDERSTATEDESTBLEND, (void*)rwBLENDINVSRCALPHA);
+}
 }
 
 void

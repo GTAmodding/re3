@@ -108,12 +108,12 @@ enum RwCorePluginID
 
 //struct RwObject;
 typedef rw::Object RwObject;
+typedef rw::Frame RwFrame;
 
 typedef RwObject *(*RwObjectCallBack)(RwObject *object, void *data);
 
 RwUInt8 RwObjectGetType(const RwObject *obj);
-
-
+RwFrame* rwObjectGetParent(const RwObject *obj);
 
 #define rwsprintf   sprintf
 #define rwvsprintf  vsprintf

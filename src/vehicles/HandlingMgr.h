@@ -65,7 +65,7 @@ enum tVehicleType
 	NUMHANDLINGS
 };
 
-enum tField : uint32 // most likely a handling field enum, never used so :shrug:
+enum tField // most likely a handling field enum, never used so :shrug:
 {
 
 };
@@ -108,7 +108,7 @@ struct tHandlingData
 	float fSteeringLock;
 	float fTractionLoss;
 	float fTractionBias;
-	float fABS; // should be VC leftover
+	float fUnused;
 	float fSuspensionForceLevel;
 	float fSuspensionDampingLevel;
 	float fSuspensionUpperLimit;
@@ -149,8 +149,8 @@ public:
 	void DisplayHandlingData(CVehicle *, tHandlingData *, uint8, bool);
 	int32 GetHandlingId(const char *name);
 	tHandlingData *GetHandlingData(tVehicleType id) { return &HandlingData[id]; }
-	bool HasRearWheelDrive(tVehicleType id) { return HandlingData[id].Transmission.nDriveType == 'R'; }
-	bool HasFrontWheelDrive(tVehicleType id) { return HandlingData[id].Transmission.nDriveType == 'F'; }
+	bool HasRearWheelDrive(tVehicleType id) { return HandlingData[id].Transmission.nDriveType != 'F'; }
+	bool HasFrontWheelDrive(tVehicleType id) { return HandlingData[id].Transmission.nDriveType != 'R'; }
 };
 VALIDATE_SIZE(cHandlingDataMgr, 0x3030);
 extern cHandlingDataMgr mod_HandlingManager;

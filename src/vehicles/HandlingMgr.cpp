@@ -2,6 +2,7 @@
 
 #include "main.h"
 #include "FileMgr.h"
+#include "Physical.h"
 #include "HandlingMgr.h"
 
 cHandlingDataMgr mod_HandlingManager;
@@ -115,7 +116,7 @@ cHandlingDataMgr::LoadHandlingData(void)
 		end = start+1;
 
 		// yeah, this is kinda crappy
-		if(strncmp(line, ";the end", 9) == 0)
+		if(strcmp(line, ";the end") == 0)
 			keepGoing = 0;
 		else if(line[0] != ';'){
 			field = 0;
@@ -142,7 +143,7 @@ cHandlingDataMgr::LoadHandlingData(void)
 				case 11: handling->fTractionBias = strtod(word, nil); break;
 				case 12: handling->Transmission.nNumberOfGears = atoi(word); break;
 				case 13: handling->Transmission.fMaxVelocity = strtod(word, nil); break;
-				case 14: handling->Transmission.fEngineAcceleration = strtod(word, nil) * 0.4f; break;
+				case 14: handling->Transmission.fEngineAcceleration = strtod(word, nil) * 0.4; break;
 				case 15: handling->Transmission.nDriveType = word[0]; break;
 				case 16: handling->Transmission.nEngineType = word[0]; break;
 				case 17: handling->fBrakeDeceleration = strtod(word, nil); break;
@@ -189,33 +190,39 @@ cHandlingDataMgr::FindExactWord(const char *word, const char *words, int wordLen
 void
 cHandlingDataMgr::ConvertDataToGameUnits(tHandlingData *handling)
 {
-	// TODO: figure out what exactly is being converted here
-	float velocity, a, b, specificVolume;
+	// acceleration is in ms^-2, but we need mf^-2 where f is one frame time (50fps)
+	float velocity, a, b;
 
-	handling->Transmission.fEngineAcceleration /= 2500.0f;
-	handling->Transmission.fMaxVelocity /= 180.0f;
-	handling->fBrakeDeceleration /= 2500.0f;
+	handling->Transmission.fEngineAcceleration *= 1.0f/(50.0f*50.0f);
+	handling->Transmission.fMaxVelocity *= 1000.0f/(60.0f*60.0f * 50.0f);
+	handling->fBrakeDeceleration *= 1.0f/(50.0f*50.0f);
 	handling->fTurnMass = (sq(handling->Dimension.x) + sq(handling->Dimension.y)) * handling->fMass / 12.0f;
 	if(handling->fTurnMass < 10.0f)
 		handling->fTurnMass *= 5.0f;
 	handling->fInvMass = 1.0f/handling->fMass;
-	handling->fBuoyancy = 100.0f/handling->nPercentSubmerged * 0.008f*handling->fMass;
+	handling->fBuoyancy = 100.0f/handling->nPercentSubmerged * GRAVITY*handling->fMass;
 
-	// What the hell is going on here?
-	specificVolume = handling->Dimension.x*handling->Dimension.z*0.5f / handling->fMass;	// ?
+	// Don't quite understand this. What seems to be going on is that
+	// we calculate a drag (air resistance) deceleration for a given velocity and
+	// find the intersection between that and the max engine acceleration.
+	// at that point the car cannot accelerate any further and we've found the max velocity.
 	a = 0.0f;
 	b = 100.0f;
 	velocity = handling->Transmission.fMaxVelocity;
 	while(a < b && velocity > 0.0f){
 		velocity -= 0.01f;
+		// what's the 1/6?
 		a = handling->Transmission.fEngineAcceleration/6.0f;
-		b = -velocity * (1.0f/(specificVolume * sq(velocity) + 1.0f) - 1.0f);
+		// no density or drag coefficient here...
+		float a_drag = 0.5f*SQR(velocity) * handling->Dimension.x*handling->Dimension.z / handling->fMass;
+		// can't make sense of this... maybe  v - v/(drag + 1)  ? but that doesn't make so much sense either
+		b = -velocity * (1.0f/(a_drag + 1.0f) - 1.0f);
 	}
 
 	if(handling->nIdentifier == HANDLING_RCBANDIT){
-		handling->Transmission.fUnkMaxVelocity = handling->Transmission.fMaxVelocity;
+		handling->Transmission.fMaxCruiseVelocity = handling->Transmission.fMaxVelocity;
 	}else{
-		handling->Transmission.fUnkMaxVelocity = velocity;
+		handling->Transmission.fMaxCruiseVelocity = velocity;
 		handling->Transmission.fMaxVelocity = velocity * 1.2f;
 	}
 	handling->Transmission.fMaxReverseVelocity = -0.2f;

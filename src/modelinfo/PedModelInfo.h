@@ -1,6 +1,7 @@
 #pragma once
 
 #include "ClumpModelInfo.h"
+#include "ColModel.h"
 #include "PedType.h"
 
 enum PedNode {

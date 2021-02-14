@@ -19,7 +19,10 @@ class CChannel
 	float  Distances[2];
 	int32  LoopCount;
 	ALint  LoopPoints[2];
+	ALint  LastProcessedOffset;
 public:
+	static int32 channelsThatNeedService;
+
 	static void InitChannels();
 	static void DestroyChannels();
 
@@ -37,7 +40,7 @@ public:
 	void SetVolume(int32 vol);
 	void SetSampleData(void *_data, size_t _DataSize, int32 freq);
 	void SetCurrentFreq(uint32 freq);
-	void SetLoopCount(int32 loopCount); // fake
+	void SetLoopCount(int32 count);
 	void SetLoopPoints(ALint start, ALint end);
 	void SetPosition(float x, float y, float z);
 	void SetDistances(float max, float min);
@@ -45,6 +48,7 @@ public:
 	void ClearBuffer();
 	void SetReverbMix(ALuint slot, float mix);
 	void UpdateReverb(ALuint slot);
+	bool Update();
 };
 
 #endif

@@ -121,7 +121,7 @@ void CBulletInfo::Update(void)
 					if (pPed->DoesLOSBulletHitPed(point)) {
 						if (pPed->IsPedInControl() && !pPed->bIsDucking) {
 							pPed->ClearAttackByRemovingAnim();
-							CAnimBlendAssociation* pAnim = CAnimManager::AddAnimation(pPed->GetClump(), ASSOCGRP_STD, ANIM_SHOT_FRONT_PARTIAL);
+							CAnimBlendAssociation* pAnim = CAnimManager::AddAnimation(pPed->GetClump(), ASSOCGRP_STD, ANIM_STD_HITBYGUN_FRONT);
 							pAnim->SetBlend(0.0f, 8.0f);
 						}
 						pPed->InflictDamage(pBullet->m_pSource, pBullet->m_eWeaponType, pBullet->m_nDamage, (ePedPieceTypes)point.pieceB, pPed->GetLocalDirection(pPed->GetPosition() - point.point));
@@ -146,9 +146,9 @@ void CBulletInfo::Update(void)
 					if (pPed->GetPedState() == PED_DEAD) {
 						CAnimBlendAssociation* pAnim;
 						if (RpAnimBlendClumpGetFirstAssociation(pPed->GetClump(), ASSOC_FRONTAL))
-							pAnim = CAnimManager::BlendAnimation(pPed->GetClump(), ASSOCGRP_STD, ANIM_FLOOR_HIT_F, 8.0f);
+							pAnim = CAnimManager::BlendAnimation(pPed->GetClump(), ASSOCGRP_STD, ANIM_STD_HIT_FLOOR_FRONT, 8.0f);
 						else
-							pAnim = CAnimManager::BlendAnimation(pPed->GetClump(), ASSOCGRP_STD, ANIM_FLOOR_HIT, 8.0f);
+							pAnim = CAnimManager::BlendAnimation(pPed->GetClump(), ASSOCGRP_STD, ANIM_STD_HIT_FLOOR, 8.0f);
 						if (pAnim) {
 							pAnim->SetCurrentTime(0.0f);
 							pAnim->flags |= ASSOC_RUNNING;

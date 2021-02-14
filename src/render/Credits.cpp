@@ -39,11 +39,20 @@ CCredits::PrintCreditSpace(float space, uint32 &line)
 void
 CCredits::PrintCreditText(float scaleX, float scaleY, wchar *text, uint32 &lineoffset, float scrolloffset)
 {
+#ifdef FIX_BUGS
 	float start = DEFAULT_SCREEN_HEIGHT + 50.0f;
+#else
+	float start = SCREEN_HEIGHT + 50.0f;
+#endif
 	float y = lineoffset + start - scrolloffset;
 	if(y > -50.0f && y < start){
+#ifdef FIX_BUGS
 		CFont::SetScale(SCREEN_SCALE_X(scaleX), SCREEN_SCALE_Y(scaleY));
 		CFont::PrintString(SCREEN_WIDTH/2.0f, SCREEN_SCALE_Y(y), (uint16*)text);
+#else
+		CFont::SetScale(scaleX, scaleY);
+		CFont::PrintString(SCREEN_WIDTH/2.0f, y, (uint16*)text);
+#endif
 	}
 	lineoffset += scaleY*25.0f;
 }
@@ -62,7 +71,11 @@ CCredits::Render(void)
 	scrolloffset = (CTimer::GetTimeInMilliseconds() - CreditsStartTime) / 24.0f;
 	CFont::SetJustifyOff();
 	CFont::SetBackgroundOff();
+#ifdef FIX_BUGS
 	CFont::SetCentreSize(SCREEN_SCALE_X(DEFAULT_SCREEN_WIDTH - 20));
+#else
+	CFont::SetCentreSize(SCREEN_WIDTH - 20);
+#endif
 	CFont::SetCentreOn();
 	CFont::SetPropOn();
 	CFont::SetColor(CRGBA(220, 220, 220, 220));
@@ -489,8 +502,14 @@ CCredits::Render(void)
 	if(TheCamera.m_WideScreenOn)
 		TheCamera.DrawBordersForWideScreen();
 
+#ifdef FIX_BUGS
 	if(lineoffset + DEFAULT_SCREEN_HEIGHT - scrolloffset < -10.0f)
+#else
+	if(lineoffset + SCREEN_HEIGHT - scrolloffset < -10.0f)
+#endif
+	{
 		bCreditsGoing = false;
+	}
 }
 
 bool CCredits::AreCreditsDone(void)

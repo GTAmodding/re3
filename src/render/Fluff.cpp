@@ -655,7 +655,7 @@ void CScrollBar::Render()
 	RwRenderStateSet(rwRENDERSTATEZTESTENABLE,       (void*)TRUE);
 
 	CVector coronaCoord, screenCoord;
-	float   screenW, screenH;
+	float screenW, screenH;
 	for (int i = 1; i < ARRAY_SIZE(m_MessageBar); ++i)
 	{
 		for (int j = 0; j < 5; ++j)
@@ -667,7 +667,7 @@ void CScrollBar::Render()
 			// Render main coronas
 			if (m_MessageBar[i] & (1 << j))
 			{
-				if (CSprite::CalcScreenCoors(coronaCoord, screenCoord, &screenW, &screenH, true))
+				if (CSprite::CalcScreenCoors(coronaCoord, &screenCoord, &screenW, &screenH, true))
 				{
 					CSprite::RenderBufferedOneXLUSprite(
 						screenCoord.x, screenCoord.y, screenCoord.z,
@@ -679,7 +679,7 @@ void CScrollBar::Render()
 			// Render smaller and faded coronas for a trailing effect
 			else if (m_MessageBar[i - 1] & (1 << j))
 			{
-				if (CSprite::CalcScreenCoors(coronaCoord, screenCoord, &screenW, &screenH, true))
+				if (CSprite::CalcScreenCoors(coronaCoord, &screenCoord, &screenW, &screenH, true))
 				{
 					CSprite::RenderBufferedOneXLUSprite(
 						screenCoord.x, screenCoord.y, screenCoord.z,
@@ -834,7 +834,7 @@ void CDigitalClock::Render()
 		const char* clockMessage = FindDigitalClockMessage();
 
 		CVector coronaCoord, screenCoord;
-		float   screenW, screenH;
+		float screenW, screenH;
 		for (int c = 0; c < 5; ++c) // for each char to be displayed
 		{
 			for (int i = 0; i < 5; ++i) // for each column of coronas
@@ -847,7 +847,7 @@ void CDigitalClock::Render()
 						coronaCoord.y = m_Position.y + (8 * c + i) * m_Size.y * m_fScale / 8.0f;
 						coronaCoord.z = m_Position.z + j * m_fScale / 8.0f;
 
-						if (CSprite::CalcScreenCoors(coronaCoord, screenCoord, &screenW, &screenH, true))
+						if (CSprite::CalcScreenCoors(coronaCoord, &screenCoord, &screenW, &screenH, true))
 						{
 							CSprite::RenderBufferedOneXLUSprite(
 								screenCoord.x, screenCoord.y, screenCoord.z,

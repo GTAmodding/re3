@@ -155,8 +155,8 @@ CPlayerInfo::Process(void)
 							m_pPed->SetPedState(PED_IDLE);
 							m_pPed->SetMoveState(PEDMOVE_STILL);
 							CPed::PedSetOutCarCB(0, m_pPed);
-							CAnimManager::BlendAnimation(m_pPed->GetClump(), m_pPed->m_animGroup, ANIM_IDLE_STANCE, 100.0f);
-							CAnimManager::BlendAnimation(m_pPed->GetClump(), ASSOCGRP_STD, ANIM_FALL_LAND, 100.0f);
+							CAnimManager::BlendAnimation(m_pPed->GetClump(), m_pPed->m_animGroup, ANIM_STD_IDLE, 100.0f);
+							CAnimManager::BlendAnimation(m_pPed->GetClump(), ASSOCGRP_STD, ANIM_STD_FALL_LAND, 100.0f);
 							m_pPed->SetPosition(sth);
 							m_pPed->SetMoveState(PEDMOVE_STILL);
 							m_pPed->m_vecMoveSpeed = veh->m_vecMoveSpeed;
@@ -222,8 +222,8 @@ CPlayerInfo::Process(void)
 						m_pPed->SetObjective(OBJECTIVE_ENTER_CAR_AS_PASSENGER, carBelow);
 					} else if (carBelow->IsBoat()) {
 						if (!carBelow->pDriver) {
-							m_pPed->m_vehEnterType = 0;
-							m_pPed->SetEnterCar(carBelow, m_pPed->m_vehEnterType);
+							m_pPed->m_vehDoor = 0;
+							m_pPed->SetEnterCar(carBelow, m_pPed->m_vehDoor);
 						}
 					} else {
 						m_pPed->SetObjective(OBJECTIVE_ENTER_CAR_AS_DRIVER, carBelow);

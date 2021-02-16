@@ -13,7 +13,7 @@
 
 cAudioManager AudioManager;
 
-const int channels = ARRAY_SIZE(cAudioManager::m_asActiveSamples);
+const int channels = ARRAY_SIZE(AudioManager.m_asActiveSamples);
 const int policeChannel = channels + 1;
 const int allChannels = channels + 2;
 
@@ -948,7 +948,7 @@ cAudioManager::ClearActiveSamples()
 		m_asActiveSamples[i].m_nCalculatedVolume = 0;
 		m_asActiveSamples[i].m_nReleasingVolumeDivider = 0;
 		m_asActiveSamples[i].m_nVolumeChange = -1;
-		m_asActiveSamples[i].m_vecPos = {0.0f, 0.0f, 0.0f};
+		m_asActiveSamples[i].m_vecPos = CVector(0.0f, 0.0f, 0.0f);
 		m_asActiveSamples[i].m_bReverbFlag = false;
 		m_asActiveSamples[i].m_nLoopsRemaining = 0;
 		m_asActiveSamples[i].m_bRequireReflection = false;

@@ -34,7 +34,7 @@ UnicodeStrlen(const wchar *str)
 }
 
 CFontDetails CFont::Details;
-int16 CFont::NewLine;
+bool16 CFont::NewLine;
 CSprite2d CFont::Sprite[MAX_FONTS];
 
 #ifdef MORE_LANGUAGES
@@ -348,11 +348,26 @@ CFont::Initialise(void)
 	SetDropShadowPosition(0);
 	CTxdStore::PopCurrentTxd();
 
+#if !defined(GAMEPAD_MENU) && defined(BUTTON_ICONS)
+	// loaded in CMenuManager with GAMEPAD_MENU defined
+	LoadButtons("MODELS/X360BTNS.TXD");
+#endif
+}
+
 #ifdef BUTTON_ICONS
-	if (int file = CFileMgr::OpenFile("MODELS/X360BTNS.TXD")) {
+void
+CFont::LoadButtons(const char* txdPath)
+{
+	if (int file = CFileMgr::OpenFile(txdPath)) {
 		CFileMgr::CloseFile(file);
-		ButtonsSlot = CTxdStore::AddTxdSlot("buttons");
-		CTxdStore::LoadTxd(ButtonsSlot, "MODELS/X360BTNS.TXD");
+		if (ButtonsSlot == -1)
+			ButtonsSlot = CTxdStore::AddTxdSlot("buttons");
+		else {
+			for (int i = 0; i < MAX_BUTTON_ICONS; i++)
+				ButtonSprite[i].Delete();
+			CTxdStore::RemoveTxd(ButtonsSlot);
+		}
+		CTxdStore::LoadTxd(ButtonsSlot, txdPath);
 		CTxdStore::AddRef(ButtonsSlot);
 		CTxdStore::PushCurrentTxd();
 		CTxdStore::SetCurrentTxd(ButtonsSlot);
@@ -374,8 +389,16 @@ CFont::Initialise(void)
 		ButtonSprite[BUTTON_R3].SetTexture("r3");
 		CTxdStore::PopCurrentTxd();
 	}
-#endif // BUTTON_ICONS
+	else {
+		if (ButtonsSlot != -1) {
+			for (int i = 0; i < MAX_BUTTON_ICONS; i++)
+				ButtonSprite[i].Delete();
+			CTxdStore::RemoveTxdSlot(ButtonsSlot);
+			ButtonsSlot = -1;
+		}
+	}
 }
+#endif // BUTTON_ICONS
 
 #ifdef MORE_LANGUAGES
 void
@@ -428,6 +451,7 @@ CFont::Shutdown(void)
 		for (int i = 0; i < MAX_BUTTON_ICONS; i++)
 			ButtonSprite[i].Delete();
 		CTxdStore::RemoveTxdSlot(ButtonsSlot);
+		ButtonsSlot = -1;
 	}
 #endif
 	Sprite[0].Delete();
@@ -454,7 +478,7 @@ CFont::InitPerFrame(void)
 		CSprite2d::GetBank(15, Sprite[3].m_pTexture);
 #endif
 	SetDropShadowPosition(0);
-	NewLine = 0;
+	NewLine = false;
 #ifdef BUTTON_ICONS
 	PS2Symbol = BUTTON_NONE;
 #endif
@@ -1048,7 +1072,6 @@ CFont::PrintString(float x, float y, wchar *start, wchar *end, float spwidth)
 }
 #endif
 
-#ifdef XBOX_SUBTITLES
 void
 CFont::PrintStringFromBottom(float x, float y, wchar *str)
 {
@@ -1061,6 +1084,7 @@ CFont::PrintStringFromBottom(float x, float y, wchar *str)
 	PrintString(x, y, str);
 }
 
+#ifdef XBOX_SUBTITLES
 void
 CFont::PrintOutlinedString(float x, float y, wchar *str, float outlineStrength, bool fromBottom, CRGBA outlineColor)
 {
@@ -1263,7 +1287,6 @@ CFont::GetStringWidth(wchar *s, bool spaces)
 	return w;
 }
 
-
 #ifdef MORE_LANGUAGES
 float
 CFont::GetStringWidth_Jap(wchar* s)
@@ -1384,7 +1407,7 @@ CFont::ParseToken(wchar *s, wchar*)
 		switch(*s){
 		case 'N':
 		case 'n':
-			NewLine = 1;
+			NewLine = true;
 			break;
 		case 'b': SetColor(CRGBA(128, 167, 243, 255)); break;
 		case 'g': SetColor(CRGBA(95, 160, 106, 255)); break;
@@ -1430,14 +1453,6 @@ CFont::DrawFonts(void)
 #endif
 }
 
-wchar
-CFont::character_code(uint8 c)
-{
-	if(c < 128)
-		return c;
-	return foreign_table[c-128];
-}
-
 
 void
 CFont::SetScale(float x, float y)
@@ -1453,9 +1468,16 @@ CFont::SetScale(float x, float y)
 }
 
 void
-CFont::SetBackgroundColor(CRGBA col)
+CFont::SetSlantRefPoint(float x, float y)
 {
-	Details.backgroundColor = col;
+	Details.slantRefX = x;
+	Details.slantRefY = y;
+}
+
+void
+CFont::SetSlant(float s)
+{
+	Details.slant = s;
 }
 
 void
@@ -1467,9 +1489,140 @@ CFont::SetColor(CRGBA col)
 }
 
 void
+CFont::SetJustifyOn(void)
+{
+	Details.justify = true;
+	Details.centre = false;
+	Details.rightJustify = false;
+}
+
+void
+CFont::SetJustifyOff(void)
+{
+	Details.justify = false;
+	Details.rightJustify = false;
+}
+
+void
+CFont::SetCentreOn(void)
+{
+	Details.centre = true;
+	Details.justify = false;
+	Details.rightJustify = false;
+}
+
+void
+CFont::SetCentreOff(void)
+{
+	Details.centre = false;
+}
+
+void
+CFont::SetWrapx(float x)
+{
+	Details.wrapX = x;
+}
+
+void
+CFont::SetCentreSize(float s)
+{
+	Details.centreSize = s;
+}
+
+void
+CFont::SetBackgroundOn(void)
+{
+	Details.background = true;
+}
+
+void
+CFont::SetBackgroundOff(void)
+{
+	Details.background = false;
+}
+
+void
+CFont::SetBackgroundColor(CRGBA col)
+{
+	Details.backgroundColor = col;
+}
+
+void
+CFont::SetBackGroundOnlyTextOn(void)
+{
+	Details.backgroundOnlyText = true;
+}
+
+void
+CFont::SetBackGroundOnlyTextOff(void)
+{
+	Details.backgroundOnlyText = false;
+}
+
+void
+CFont::SetRightJustifyOn(void)
+{
+	Details.rightJustify = true;
+	Details.justify = false;
+	Details.centre = false;
+}
+
+void
+CFont::SetRightJustifyOff(void)
+{
+	Details.rightJustify = false;
+	Details.justify = false;
+	Details.centre = false;
+}
+
+void
+CFont::SetPropOn(void)
+{
+	Details.proportional = true;
+}
+
+void
+CFont::SetPropOff(void)
+{
+	Details.proportional = false;
+}
+
+void
+CFont::SetFontStyle(int16 style)
+{
+	Details.style = style;
+}
+
+void
+CFont::SetRightJustifyWrap(float wrap)
+{
+	Details.rightJustifyWrap = wrap;
+}
+
+void
+CFont::SetAlphaFade(float fade)
+{
+	Details.alphaFade = fade;
+}
+
+void
 CFont::SetDropColor(CRGBA col)
 {
 	Details.dropColor = col;
 	if (Details.alphaFade < 255.0f)
 		Details.dropColor.a *= Details.alphaFade / 255.0f;
+}
+
+void
+CFont::SetDropShadowPosition(int16 pos)
+{
+	Details.dropShadowPosition = pos;
+}
+
+wchar
+CFont::character_code(uint8 c)
+{
+	if(c < 128)
+		return c;
+	return foreign_table[c-128];
 }

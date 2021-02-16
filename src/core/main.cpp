@@ -1,8 +1,13 @@
 #include "common.h"
+#include <time.h>
 #include "rpmatfx.h"
 #include "rphanim.h"
 #include "rpskin.h"
 #include "rtbmp.h"
+#include "rtpng.h"
+#ifdef ANISOTROPIC_FILTERING
+#include "rpanisot.h"
+#endif
 
 #include "main.h"
 #include "CdStream.h"
@@ -67,6 +72,9 @@
 #include "custompipes.h"
 #include "screendroplets.h"
 #include "MemoryHeap.h"
+#ifdef USE_OUR_VERSIONING
+#include "GitSHA1.h"
+#endif
 
 GlobalScene Scene;
 
@@ -82,6 +90,9 @@ bool gbPrintShite = false;
 bool gbModelViewer;
 #ifdef TIMEBARS
 bool gbShowTimebars;
+#endif
+#ifdef DRAW_GAME_VERSION_TEXT
+bool gDrawVersionText; // Our addition, we think it was always enabled on !MASTER builds
 #endif
 
 volatile int32 frameCount;
@@ -119,6 +130,31 @@ bool gbPrintMemoryUsage;
 #else
 #define WANT_TO_LOAD FrontEndMenuManager.m_bWantToLoad
 #define FOUND_GAME_TO_LOAD b_FoundRecentSavedGameWantToLoad
+#endif
+
+#ifdef NEW_RENDERER
+bool gbNewRenderer;
+#define CLEARMODE (rwCAMERACLEARZ | rwCAMERACLEARSTENCIL)
+#else
+#define CLEARMODE (rwCAMERACLEARZ)
+#endif
+
+#ifdef __MWERKS__
+void
+debug(char *fmt, ...)
+{
+#ifndef MASTER
+	// TODO put something here
+#endif
+}
+
+void
+Error(char *fmt, ...)
+{
+#ifndef MASTER
+	// TODO put something here
+#endif
+}
 #endif
 
 void
@@ -168,11 +204,14 @@ DoRWStuffStartOfFrame(int16 TopRed, int16 TopGreen, int16 TopBlue, int16 BottomR
 	CameraSize(Scene.camera, nil, SCREEN_VIEWWINDOW, SCREEN_ASPECT_RATIO);
 #endif
 	CVisibilityPlugins::SetRenderWareCamera(Scene.camera);
-	RwCameraClear(Scene.camera, &TopColor.rwRGBA, rwCAMERACLEARZ);
+	RwCameraClear(Scene.camera, &TopColor.rwRGBA, CLEARMODE);
 
 	if(!RsCameraBeginUpdate(Scene.camera))
 		return false;
 
+#ifdef FIX_BUGS
+	CSprite2d::SetRecipNearClip();
+#endif
 	CSprite2d::InitPerFrame();
 
 	if(Alpha != 0)
@@ -190,7 +229,7 @@ DoRWStuffStartOfFrame_Horizon(int16 TopRed, int16 TopGreen, int16 TopBlue, int16
 	CameraSize(Scene.camera, nil, SCREEN_VIEWWINDOW, SCREEN_ASPECT_RATIO);
 #endif
 	CVisibilityPlugins::SetRenderWareCamera(Scene.camera);
-	RwCameraClear(Scene.camera, &gColourTop, rwCAMERACLEARZ);
+	RwCameraClear(Scene.camera, &gColourTop, CLEARMODE);
 
 	if(!RsCameraBeginUpdate(Scene.camera))
 		return false;
@@ -323,7 +362,11 @@ RwGrabScreen(RwCamera *camera, RwChar *filename)
 	strcpy(temp, CFileMgr::GetRootDirName());
 	strcat(temp, filename);
 
+#ifndef LIBRW
 	if (RtBMPImageWrite(pImage, &temp[0]) == nil)
+#else
+	if (RtPNGImageWrite(pImage, &temp[0]) == nil)
+#endif
 		result = false;
 	RwImageDestroy(pImage);
 	return result;
@@ -342,6 +385,7 @@ DoRWStuffEndOfFrame(void)
 	RsCameraShowRaster(Scene.camera);
 #ifndef MASTER
 	char s[48];
+#ifdef THIS_IS_STUPID
 	if (CPad::GetPad(1)->GetLeftShockJustDown()) {
 		// try using both controllers for this thing... crazy bastards
 		if (CPad::GetPad(0)->GetRightStickY() > 0) {
@@ -353,6 +397,12 @@ DoRWStuffEndOfFrame(void)
 			RwGrabScreen(Scene.camera, s);
 		}
 	}
+#else
+	if (CPad::GetPad(1)->GetLeftShockJustDown() || CPad::GetPad(0)->GetFJustDown(11)) {
+		sprintf(s, "screen_%11lld.png", time(nil));
+		RwGrabScreen(Scene.camera, s);
+	}
+#endif
 #endif // !MASTER
 }
 
@@ -407,6 +457,9 @@ PluginAttach(void)
 		
 		return FALSE;
 	}
+#ifdef ANISOTROPIC_FILTERING
+	RpAnisotPluginAttach();
+#endif
 #ifdef EXTENDED_PIPELINES
 	CustomPipes::CustomPipeRegister();
 #endif
@@ -850,6 +903,7 @@ ProcessSlowMode(void)
 float FramesPerSecondCounter;
 int32 FrameSamples;
 
+#ifndef MASTER
 struct tZonePrint
 {
   char name[12];
@@ -869,8 +923,6 @@ tZonePrint ZonePrint[] =
 	{ "industse", CRect( 1070.3f, -473.0f,   1918.1f, -1331.5f) },
 	{ "no zone",  CRect( 0.0f,     0.0f,     0.0f,    0.0f)     }
 };
-
-#ifndef MASTER
 
 void
 PrintMemoryUsage(void)
@@ -1042,7 +1094,7 @@ DisplayGameDebugText()
 	static bool bDisplayRate = false;
 #ifndef FINAL
 	{
-		SETTWEAKPATH("GameDebugText");
+		SETTWEAKPATH("Debug");
 		TWEAKBOOL(bDisplayPosn);
 		TWEAKBOOL(bDisplayRate);
 	}
@@ -1056,13 +1108,56 @@ DisplayGameDebugText()
 
 #ifdef DRAW_GAME_VERSION_TEXT
 	wchar ver[200];
-	
+
+	if(gDrawVersionText) // This realtime switch is our thing
+	{
+
+#ifdef USE_OUR_VERSIONING
+	char verA[200];
+	sprintf(verA,
+#if defined _WIN32
+			"Win "
+#elif defined __linux__
+		    "Linux "
+#elif defined __APPLE__
+		    "Mac OS X "
+#elif defined __FreeBSD__
+		    "FreeBSD "
+#else
+		    "Posix-compliant "
+#endif
+#if defined __LP64__ || defined _WIN64
+			"64-bit "
+#else
+			"32-bit "
+#endif
+#if defined RW_D3D9
+		    "D3D9 "
+#elif defined RWLIBS
+		    "D3D8 "
+#elif defined RW_GL3
+		    "OpenGL "
+#endif
+#if defined AUDIO_OAL
+		    "OAL "
+#elif defined AUDIO_MSS
+		    "MSS "
+#endif
+#if defined _DEBUG || defined DEBUG
+		    "DEBUG "
+#endif
+		    "%.8s",
+		    g_GIT_SHA1);
+	AsciiToUnicode(verA, ver);
+	CFont::SetScale(SCREEN_SCALE_X(0.5f), SCREEN_SCALE_Y(0.7f));
+#else
 	AsciiToUnicode(version_name, ver);
+	CFont::SetScale(SCREEN_SCALE_X(0.5f), SCREEN_SCALE_Y(0.5f));
+#endif
 
 	CFont::SetPropOn();
 	CFont::SetBackgroundOff();
 	CFont::SetFontStyle(FONT_BANK);
-	CFont::SetScale(SCREEN_SCALE_X(0.5f), SCREEN_SCALE_Y(0.5f));
 	CFont::SetCentreOff();
 	CFont::SetRightJustifyOff();
 	CFont::SetWrapx(SCREEN_WIDTH);
@@ -1074,11 +1169,17 @@ DisplayGameDebugText()
 #else
 	CFont::PrintString(10.0f, 10.0f, ver);
 #endif
+	}
 #endif // #ifdef DRAW_GAME_VERSION_TEXT
 
 	FrameSamples++;
+#ifdef FIX_BUGS
+	FramesPerSecondCounter += frameTime / 1000.f; // convert to seconds
+	FramesPerSecond = FrameSamples / FramesPerSecondCounter;
+#else
 	FramesPerSecondCounter += 1000.0f / (CTimer::GetTimeStepNonClippedInSeconds() * 1000.0f);	
 	FramesPerSecond = FramesPerSecondCounter / FrameSamples;
+#endif
 	
 	if ( FrameSamples > 30 )
 	{
@@ -1160,9 +1261,126 @@ DisplayGameDebugText()
 }
 #endif
 
+#ifdef NEW_RENDERER
+bool gbRenderRoads = true;
+bool gbRenderEverythingBarRoads = true;
+//bool gbRenderFadingInUnderwaterEntities = true;
+bool gbRenderFadingInEntities = true;
+bool gbRenderWater = true;
+bool gbRenderBoats = true;
+bool gbRenderVehicles = true;
+bool gbRenderWorld0 = true;
+bool gbRenderWorld1 = true;
+bool gbRenderWorld2 = true;
+
+void
+MattRenderScene(void)
+{
+	// this calls CMattRenderer::Render
+	/// CWorld::AdvanceCurrentScanCode();
+	// CMattRenderer::ResetRenderStates
+	/// CRenderer::ClearForFrame();		// before ConstructRenderList
+	// CClock::CalcEnvMapTimeMultiplicator
+if(gbRenderWater)
+	CRenderer::RenderWater();	// actually CMattRenderer::RenderWater
+	// CClock::ms_EnvMapTimeMultiplicator = 1.0f;
+	// cWorldStream::ClearDynamics
+	/// CRenderer::ConstructRenderList();	// before PreRender
+if(gbRenderWorld0)
+	CRenderer::RenderWorld(0);	// roads
+	// CMattRenderer::ResetRenderStates
+	/// CRenderer::PreRender();	// has to be called before BeginUpdate because of cutscene shadows
+	CCoronas::RenderReflections();
+if(gbRenderWorld1)
+	CRenderer::RenderWorld(1);	// opaque
+if(gbRenderRoads)
+	CRenderer::RenderRoads();
+
+	CRenderer::RenderPeds();
+
+if(gbRenderBoats)
+	CRenderer::RenderBoats();
+//if(gbRenderFadingInUnderwaterEntities)
+//	CRenderer::RenderFadingInUnderwaterEntities();
+
+if(gbRenderEverythingBarRoads)
+	CRenderer::RenderEverythingBarRoads();
+	// seam fixer
+	// moved this:
+	// CRenderer::RenderFadingInEntities();
+}
+
+void
+RenderScene_new(void)
+{
+	CClouds::Render();
+	DoRWRenderHorizon();
+
+	MattRenderScene();
+	DefinedState();
+	// CMattRenderer::ResetRenderStates
+	// moved CRenderer::RenderBoats to before transparent water
+}
+
+// TODO
+bool FredIsInFirstPersonCam(void) { return false; }
+void
+RenderEffects_new(void)
+{
+	CShadows::RenderStaticShadows();
+	// CRenderer::GenerateEnvironmentMap
+	CShadows::RenderStoredShadows();
+	CSkidmarks::Render();
+	CRubbish::Render();
+
+	// these aren't really effects
+	DefinedState();
+	if(FredIsInFirstPersonCam()){
+		DefinedState();
+		C3dMarkers::Render();	// normally rendered in CSpecialFX::Render()
+if(gbRenderWorld2)
+		CRenderer::RenderWorld(2);	// transparent
+if(gbRenderVehicles)
+		CRenderer::RenderVehicles();
+	}else{
+		// flipped these two, seems to give the best result
+if(gbRenderWorld2)
+		CRenderer::RenderWorld(2);	// transparent
+if(gbRenderVehicles)
+		CRenderer::RenderVehicles();
+	}
+	// better render these after transparent world
+if(gbRenderFadingInEntities)
+	CRenderer::RenderFadingInEntities();
+
+	// actual effects here
+	CGlass::Render();
+	// CMattRenderer::ResetRenderStates
+	DefinedState();
+	CWeather::RenderRainStreaks();
+	// CWeather::AddSnow
+	CWaterCannons::Render();
+	CAntennas::Render();
+	CSpecialFX::Render();
+	CCoronas::Render();
+	CParticle::Render();
+	CPacManPickups::Render();
+	CWeaponEffects::Render();
+	CPointLights::RenderFogEffect();
+	CMovingThings::Render();
+	CRenderer::RenderFirstPersonVehicle();
+}
+#endif
+
 void
 RenderScene(void)
 {
+#ifdef NEW_RENDERER
+	if(gbNewRenderer){
+		RenderScene_new();
+		return;
+	}
+#endif
 	CClouds::Render();
 	DoRWRenderHorizon();
 	CRenderer::RenderRoads();
@@ -1195,6 +1413,12 @@ RenderDebugShit(void)
 void
 RenderEffects(void)
 {
+#ifdef NEW_RENDERER
+	if(gbNewRenderer){
+		RenderEffects_new();
+		return;
+	}
+#endif
 	CGlass::Render();
 	CWaterCannons::Render();
 	CSpecialFX::Render();
@@ -1390,6 +1614,12 @@ Idle(void *arg)
 
 		PUSH_MEMID(MEMID_RENDERLIST);
 		tbStartTimer(0, "CnstrRenderList");
+#ifdef NEW_RENDERER
+		if(gbNewRenderer){
+			CWorld::AdvanceCurrentScanCode();	// don't think this is even necessary
+			CRenderer::ClearForFrame();
+		}
+#endif
 		CRenderer::ConstructRenderList();
 		tbEndTimer("CnstrRenderList");
 
@@ -1457,7 +1687,7 @@ Idle(void *arg)
 		CameraSize(Scene.camera, nil, SCREEN_VIEWWINDOW, DEFAULT_ASPECT_RATIO);
 #endif
 		CVisibilityPlugins::SetRenderWareCamera(Scene.camera);
-		RwCameraClear(Scene.camera, &gColourTop, rwCAMERACLEARZ);
+		RwCameraClear(Scene.camera, &gColourTop, CLEARMODE);
 		if(!RsCameraBeginUpdate(Scene.camera))
 			goto popret;
 	}
@@ -1523,7 +1753,7 @@ FrontendIdle(void)
 	CameraSize(Scene.camera, nil, SCREEN_VIEWWINDOW, DEFAULT_ASPECT_RATIO);
 #endif
 	CVisibilityPlugins::SetRenderWareCamera(Scene.camera);
-	RwCameraClear(Scene.camera, &gColourTop, rwCAMERACLEARZ);
+	RwCameraClear(Scene.camera, &gColourTop, CLEARMODE);
 	if(!RsCameraBeginUpdate(Scene.camera))
 		return;
 
@@ -1780,7 +2010,7 @@ void TheGame(void)
 				CameraSize(Scene.camera, nil, SCREEN_VIEWWINDOW, DEFAULT_ASPECT_RATIO);
 #endif
 				CVisibilityPlugins::SetRenderWareCamera(Scene.camera);
-				RwCameraClear(Scene.camera, &gColourTop, rwCAMERACLEARZ);
+				RwCameraClear(Scene.camera, &gColourTop, CLEARMODE);
 				RsCameraBeginUpdate(Scene.camera);
 			}
 

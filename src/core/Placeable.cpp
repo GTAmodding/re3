@@ -7,7 +7,9 @@ CPlaceable::CPlaceable(void)
 	m_matrix.SetScale(1.0f);
 }
 
-CPlaceable::~CPlaceable(void) = default;
+CPlaceable::~CPlaceable(void)
+{
+}
 
 void
 CPlaceable::SetHeading(float angle)

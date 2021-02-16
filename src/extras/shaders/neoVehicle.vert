@@ -42,7 +42,7 @@ main(void)
 	v_tex1 = uv2.xy*0.5 + 0.5;
 	float b = 1.0 - clamp(dot(viewVec, Normal), 0.0, 1.0);
 	v_reflcolor = vec4(0.0, 0.0, 0.0, 1.0);
-	v_reflcolor.a = mix(b*b*b*b*b, 1.0f, fresnel)*shininess;
+	v_reflcolor.a = mix(b*b*b*b*b, 1.0, fresnel)*shininess;
 
 	for(int i = 0; i < 5; i++)
 		v_reflcolor.rgb += DoDirLightSpec(u_specDir[i].xyz, u_specColor[i].rgb, Normal, viewVec, u_specDir[i].w)*specularity*lightStrength;

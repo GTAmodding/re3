@@ -2221,11 +2221,11 @@ Car bombs are $1000 each
 [GA_5]
 Your car is already fitted with a bomb.
 
-[GA_6]
-Park it, prime it by pressing the ~h~~k~~PED_FIREWEAPON~ button~w~ and LEG IT!
+[GA_6] { re3 change }
+Park it, prime it by pressing the ~h~~k~~VEHICLE_FIREWEAPON~ button~w~ and LEG IT!
 
-[GA_7]
-Arm with ~h~~k~~PED_FIREWEAPON~ button~w~. Bomb will go off when engine is started.
+[GA_7] { re3 change }
+Arm with ~h~~k~~VEHICLE_FIREWEAPON~ button~w~. Bomb will go off when engine is started.
 
 [GA_8]
 Use the detonator to activate the bomb.
@@ -2439,33 +2439,6 @@ Accelerate
 
 [FEC_SMT]
 Special mission trigger
-
-[FEC_CCF]
-Configuration:
-
-[FEC_CF1]
-Setup1
-
-[FEC_CF2]
-Setup2
-
-[FEC_CF3]
-Setup3
-
-[FEC_CF4]
-Setup4
-
-[FEC_CDP]
-Controller Display:
-
-[FEC_ONF]
-On Foot
-
-[FEC_INC]
-In Car
-
-[FEC_VIB]
-Vibration:
 
 [FEA_OUT]
 Output:
@@ -3592,11 +3565,11 @@ Alright?
 [JM6_1]
 Get to the bank on the main drag.
 
-[GA_6B]
-Park it, prime it by pressing the ~h~~k~~PED_FIREWEAPON~ button~w~ and LEG IT!
+[GA_6B] { re3 change }
+Park it, prime it by pressing the ~h~~k~~VEHICLE_FIREWEAPON~ button~w~ and LEG IT!
 
-[GA_7B]
-Arm with ~h~~k~~PED_FIREWEAPON~ button~w~. Bomb will go off when engine is started.
+[GA_7B] { re3 change }
+Arm with ~h~~k~~VEHICLE_FIREWEAPON~ button~w~. Bomb will go off when engine is started.
 
 [BAT1]
 ~g~Pick up the bat!
@@ -4027,11 +4000,11 @@ Drive your vehicle into the spray shop to lose your ~h~wanted level~w~, ~h~repai
 [HM1_1]
 ~g~Ice 20 Purple Nines in 2 minutes 30 seconds.
 
-[KM1_8A]
-Press the~h~ ~k~~PED_FIREWEAPON~ button~w~ to ~h~activate the bomb,~w~ remember to get out of the way.
+[KM1_8A] { re3 change }
+Press the~h~ ~k~~VEHICLE_FIREWEAPON~ button~w~ to ~h~activate the bomb,~w~ remember to get out of the way.
 
-[KM1_8D]
-Press the~h~ ~k~~PED_FIREWEAPON~ button~w~ to ~h~activate the bomb,~w~ remember to get out of the way.
+[KM1_8D] { re3 change }
+Press the~h~ ~k~~VEHICLE_FIREWEAPON~ button~w~ to ~h~activate the bomb,~w~ remember to get out of the way.
 
 [KM1_12]
 ~g~Get him to the dojo but get rid of the cops first!
@@ -4168,11 +4141,11 @@ I don't need to see any I.D. you look trustworthy.
 [DETON]
 DETONATION:
 
-[DRIVE_A]
-Have an Uzi selected when entering a vehicle then look left or right and press the ~h~~k~~PED_FIREWEAPON~ button~w~ to fire.
+[DRIVE_A] { re3 change }
+Have an Uzi selected when entering a vehicle then look left or right and press the ~h~~k~~VEHICLE_FIREWEAPON~ button~w~ to fire.
 
-[DRIVE_B]
-Have an Uzi selected when entering a vehicle then look left or right and press the ~h~~k~~PED_FIREWEAPON~ button~w~ to fire.
+[DRIVE_B] { re3 change }
+Have an Uzi selected when entering a vehicle then look left or right and press the ~h~~k~~VEHICLE_FIREWEAPON~ button~w~ to fire.
 
 [RECORD]
 ~g~NEW RECORD!!
@@ -4180,11 +4153,11 @@ Have an Uzi selected when entering a vehicle then look left or right and press t
 [NRECORD]
 ~r~NO NEW RECORD!
 
-[RCHELP]
-Press ~k~~PED_FIREWEAPON~, or drive the RC car into a vehicle's wheels to detonate.
+[RCHELP] { re3 change }
+Press ~k~~VEHICLE_FIREWEAPON~, or drive the RC car into a vehicle's wheels to detonate.
 
-[RCHELPA]
-Press the ~k~~PED_FIREWEAPON~ button, or drive the RC car into a vehicle's wheels to detonate.
+[RCHELPA] { re3 change }
+Press the ~k~~VEHICLE_FIREWEAPON~ button, or drive the RC car into a vehicle's wheels to detonate.
 
 [RC_1]
 You have 2 minutes to blow up as many Diablo Gang Cars as possible!
@@ -4684,11 +4657,11 @@ LOVE'S DISAPPEARANCE
 [RM5_6]
 ~g~He's bailed out!! Smash his bodycast with a vehicle or an explosion!!
 
-[PBOAT_1]
-Press the ~h~~k~~PED_FIREWEAPON~ button~w~ to fire the boat cannons.
+[PBOAT_1] { re3 change }
+Press the ~h~~k~~VEHICLE_FIREWEAPON~ button~w~ to fire the boat cannons.
 
-[PBOAT_2]
-Press the ~h~~k~~PED_FIREWEAPON~ button~w~ to fire the boat cannons.
+[PBOAT_2] { re3 change }
+Press the ~h~~k~~VEHICLE_FIREWEAPON~ button~w~ to fire the boat cannons.
 
 [DIAB1_B]
 This is El Burro of the Diablos.
@@ -4702,11 +4675,11 @@ There's a street race starting by the old school hall near the Callahan Bridge.
 [DIAB1_F]
 Get yourself some wheels and first through all the checkpoints wins the prize.
 
-[HM2_1]
-Use the RC buggies to destroy the armored cars. Press the ~h~~k~~PED_FIREWEAPON~ button ~w~to detonate.
+[HM2_1] { re3 change }
+Use the RC buggies to destroy the armored cars. Press the ~h~~k~~VEHICLE_FIREWEAPON~ button ~w~to detonate.
 
-[HM2_1A]
-Use the RC buggies to destroy the armored cars. Press the ~h~~k~~PED_FIREWEAPON~ button ~w~to detonate.
+[HM2_1A] { re3 change }
+Use the RC buggies to destroy the armored cars. Press the ~h~~k~~VEHICLE_FIREWEAPON~ button ~w~to detonate.
 
 [HM2_2]
 ~r~You failed to destroy all the armored cars!
@@ -6188,7 +6161,7 @@ Those Colombians'll be here any minute!
 Goddam they're here!! LOCK'N'LOAD!!
 
 [LOVE2_7]
-~g~ Now dump the car!
+~g~Now dump the car!
 
 [LOVE2_8]
 ~g~Now get out of Newport!
@@ -6517,11 +6490,11 @@ This Memory Card (PS2) is already formatted.
 [FEDSAS4]
 ;=<> - CHANGE SELECTION
 
-[SPRAY_4]
-Use the ~h~~k~~PED_FIREWEAPON~ button ~w~to fire the water cannon.
+[SPRAY_4] { re3 change }
+Use the ~h~~k~~VEHICLE_FIREWEAPON~ button ~w~to fire the water cannon.
 
-[SPRAY_1]
-Use the ~h~~k~~PED_FIREWEAPON~ button ~w~to fire the water cannon.
+[SPRAY_1] { re3 change }
+Use the ~h~~k~~VEHICLE_FIREWEAPON~ button ~w~to fire the water cannon.
 
 [LITTLE]
 LITTLE T
@@ -7243,9 +7216,6 @@ CONNECTION
 [FET_AUD]
 AUDIO SETUP
 
-[FET_GFX]
-GFX SETUP
-
 [FET_DIS]
 DISPLAY SETUP
 
@@ -7957,7 +7927,7 @@ POLISH
 RUSSIAN
 
 { new display menus }
-[FET_GRA]
+[FET_GFX]
 GRAPHICS SETUP
 
 [FED_MIP]
@@ -8022,6 +7992,7 @@ REPLAY MISSION
 [FESZ_RM]
 RETRY?
 
+{ more graphics }
 [FED_VPL]
 VEHICLE PIPELINE
 
@@ -8061,11 +8032,67 @@ PS2
 [FEM_XBX]
 XBOX
 
+[FEM_AUT] { aspect ratio related }
+AUTO
+
+{ controls }
 [FEC_IVP]
 INVERT PAD VERTICALLY
 
+{ map }
 [FEM_TWP]
 Toggle Waypoint
+
+[FEA_FMN]
+RADIO OFF
+
+[FEC_DS2]
+DUALSHOCK 2
+
+[FEC_DS3]
+DUALSHOCK 3
+
+[FEC_DS4]
+DUALSHOCK 4
+
+[FEC_360]
+XBOX 360 CONTROLLER
+
+[FEC_ONE]
+XBOX ONE CONTROLLER
+
+[FEC_TYP]
+GAMEPAD TYPE
+
+[FEC_CCF]
+CONFIGURATION
+
+[FEC_CF1]
+SETUP 1
+
+[FEC_CF2]
+SETUP 2
+
+[FEC_CF3]
+SETUP 3
+
+[FEC_CF4]
+SETUP 4
+
+[FEC_CDP]
+CONTROLLER DISPLAY
+
+[FEC_ONF]
+ON FOOT
+
+[FEC_INC]
+IN CAR
+
+[FEC_VIB]
+VIBRATION
+
+[FET_AGS]
+GAMEPAD SETTINGS
 
 { end of file }
 

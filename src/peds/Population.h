@@ -24,10 +24,10 @@ struct RegenerationPoint
 	float y2;
 	float z1;
 	float z2;
-	CVector destPosA;
-	CVector destPosB;
-	CVector srcPosA;
-	CVector srcPosB;
+	RwV3d destPosA;
+	RwV3d destPosB;
+	RwV3d srcPosA;
+	RwV3d srcPosB;
 };
 
 class CPopulation
@@ -60,7 +60,7 @@ public:
 	static uint32 ms_nNumGang8;
 	static CVector RegenerationPoint_a;
 	static CVector RegenerationPoint_b;
-	static CVector RegenerationForward;
+	static CVector RegenerationFront;
 
 	static void Initialise();
 	static void Update(void);

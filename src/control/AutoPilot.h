@@ -57,8 +57,8 @@ public:
 	int32 m_nCurrentRouteNode;
 	int32 m_nNextRouteNode;
 	int32 m_nPrevRouteNode;
-	uint32 m_nTimeEnteredCurve;
-	uint32 m_nTimeToSpendOnCurrentCurve;
+	int32 m_nTimeEnteredCurve;
+	int32 m_nTimeToSpendOnCurrentCurve;
 	uint32 m_nCurrentPathNodeInfo;
 	uint32 m_nNextPathNodeInfo;
 	uint32 m_nPreviousPathNodeInfo;

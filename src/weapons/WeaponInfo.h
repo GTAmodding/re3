@@ -19,7 +19,6 @@ enum
 };
 
 class CWeaponInfo {
-	static CWeaponInfo ms_apWeaponInfos[WEAPONTYPE_LAST_WEAPONTYPE];
 public:
 	eWeaponFire m_eWeaponFire;
 	float m_fRange;

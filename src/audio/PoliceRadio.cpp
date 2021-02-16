@@ -13,8 +13,9 @@
 #include "World.h"
 #include "Zones.h"
 #include "sampman.h"
+#include "Wanted.h"
 
-const int channels = ARRAY_SIZE(cAudioManager::m_asActiveSamples);
+const int channels = ARRAY_SIZE(AudioManager.m_asActiveSamples);
 const int policeChannel = channels + 1;
 
 struct tPoliceRadioZone {
@@ -160,7 +161,7 @@ cAudioManager::ServicePoliceRadio()
 		if(CReplay::IsPlayingBack() || !FindPlayerPed() || !FindPlayerPed()->m_pWanted)
 			return;
 #endif
-		wantedLevel = FindPlayerPed()->m_pWanted->m_nWantedLevel;
+		wantedLevel = FindPlayerPed()->m_pWanted->GetWantedLevel();
 		if(!crimeReport) {
 			if(wantedLevel != 0) {
 				if(nLastSeen != 0) {
@@ -678,7 +679,7 @@ void
 cAudioManager::ReportCrime(eCrimeType type, const CVector &pos)
 {
 	int32 lastCrime = ARRAY_SIZE(m_sPoliceRadioQueue.crimes);
-	if (m_bIsInitialised && MusicManager.m_nMusicMode != MUSICMODE_CUTSCENE && FindPlayerPed()->m_pWanted->m_nWantedLevel > 0 &&
+	if (m_bIsInitialised && MusicManager.m_nMusicMode != MUSICMODE_CUTSCENE && FindPlayerPed()->m_pWanted->GetWantedLevel() > 0 &&
 		(type > CRIME_NONE || type < NUM_CRIME_TYPES) && m_FrameCounter >= gMinTimeToNextReport[type]) {
 		for (int32 i = 0; i < ARRAY_SIZE(m_sPoliceRadioQueue.crimes); i++) {
 			if (m_sPoliceRadioQueue.crimes[i].type) {

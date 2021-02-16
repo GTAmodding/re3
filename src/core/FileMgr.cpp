@@ -241,7 +241,7 @@ CFileMgr::SetDirMyDocuments(void)
 }
 
 ssize_t
-CFileMgr::LoadFile(const char *file, uint8 *buf, int unused, const char *mode)
+CFileMgr::LoadFile(const char *file, uint8 *buf, int maxlen, const char *mode)
 {
 	int fd;
 	ssize_t n, len;
@@ -257,6 +257,7 @@ CFileMgr::LoadFile(const char *file, uint8 *buf, int unused, const char *mode)
 			return -1;
 #endif
 		len += n;
+		assert(len < maxlen);
 	}while(n == 0x4000);
 	buf[len] = 0;
 	myfclose(fd);

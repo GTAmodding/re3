@@ -1,5 +1,4 @@
-#define WITHWINDOWS
-#define WITH_D3D
+#define WITHD3D
 #include "common.h"
 
 #ifdef EXTENDED_COLOURFILTER
@@ -142,16 +141,16 @@ CPostFX::Open(RwCamera *cam)
 
 
 #ifdef RW_D3D9
-#include "shaders/colourfilterIII_PS.inc"
+#include "shaders/obj/colourfilterIII_PS.inc"
 	colourfilterIII_PS = rw::d3d::createPixelShader(colourfilterIII_PS_cso);
-#include "shaders/contrastPS.inc"
+#include "shaders/obj/contrastPS.inc"
 	contrast_PS = rw::d3d::createPixelShader(contrastPS_cso);
 #endif
 #ifdef RW_OPENGL
 	using namespace rw::gl3;
 	{
-#include "shaders/im2d_gl.inc"
-#include "shaders/colourfilterIII_fs_gl.inc"
+#include "shaders/obj/im2d_vert.inc"
+#include "shaders/obj/colourfilterIII_frag.inc"
 	const char *vs[] = { shaderDecl, header_vert_src, im2d_vert_src, nil };
 	const char *fs[] = { shaderDecl, header_frag_src, colourfilterIII_frag_src, nil };
 	colourFilterIII = Shader::create(vs, fs);
@@ -159,8 +158,8 @@ CPostFX::Open(RwCamera *cam)
 	}
 
 	{
-#include "shaders/im2d_gl.inc"
-#include "shaders/contrast_fs_gl.inc"
+#include "shaders/obj/im2d_vert.inc"
+#include "shaders/obj/contrast_frag.inc"
 	const char *vs[] = { shaderDecl, header_vert_src, im2d_vert_src, nil };
 	const char *fs[] = { shaderDecl, header_frag_src, contrast_frag_src, nil };
 	contrast = Shader::create(vs, fs);

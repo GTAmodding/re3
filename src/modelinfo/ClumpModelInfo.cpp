@@ -112,7 +112,7 @@ CClumpModelInfo::SetClump(RpClump *clump)
 		}
 		RpHAnimHierarchySetFlags(hier, (RpHAnimHierarchyFlag)(rpHANIMHIERARCHYUPDATEMODELLINGMATRICES|rpHANIMHIERARCHYUPDATELTMS));
 	}
-	if(strcmp(GetName(), "playerh") == 0){
+	if(strcmp(GetModelName(), "playerh") == 0){
 		// playerh is incompatible with the xbox player skin
 		// so check if player model is skinned and only apply skin to head if it isn't
 		CPedModelInfo *body = (CPedModelInfo*)CModelInfo::GetModelInfo(MI_PLAYER);
@@ -120,7 +120,7 @@ CClumpModelInfo::SetClump(RpClump *clump)
 			RpClumpForAllAtomics(clump, SetAtomicRendererCB, (void*)CVisibilityPlugins::RenderPlayerCB);
 	}
 #else
-	if(strcmp(GetName(), "playerh") == 0){
+	if(strcmp(GetModelName(), "playerh") == 0)
 		RpClumpForAllAtomics(clump, SetAtomicRendererCB, (void*)CVisibilityPlugins::RenderPlayerCB);
 #endif
 }

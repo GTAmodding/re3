@@ -7,7 +7,7 @@
 #include "AnimBlendAssociation.h"
 #include "Weapon.h"
 
-CWeaponInfo CWeaponInfo::ms_apWeaponInfos[WEAPONTYPE_TOTALWEAPONS];
+static CWeaponInfo aWeaponInfo[WEAPONTYPE_TOTALWEAPONS];
 
 static char ms_aWeaponNames[][32] = {
 	"Unarmed",
@@ -28,7 +28,7 @@ static char ms_aWeaponNames[][32] = {
 
 CWeaponInfo*
 CWeaponInfo::GetWeaponInfo(eWeaponType weaponType) {
-	return &CWeaponInfo::ms_apWeaponInfos[weaponType];
+	return &aWeaponInfo[weaponType];
 }
 
 void
@@ -36,10 +36,10 @@ CWeaponInfo::Initialise(void)
 {
 	debug("Initialising CWeaponInfo...\n");
 	for (int i = 0; i < WEAPONTYPE_TOTALWEAPONS; i++) {
-		ms_apWeaponInfos[i].m_eWeaponFire = WEAPON_FIRE_INSTANT_HIT;
-		ms_apWeaponInfos[i].m_AnimToPlay = ANIM_PUNCH_R;
-		ms_apWeaponInfos[i].m_Anim2ToPlay = NUM_ANIMS;
-		ms_apWeaponInfos[i].m_Flags = WEAPONFLAG_USE_GRAVITY | WEAPONFLAG_SLOWS_DOWN | WEAPONFLAG_RAND_SPEED | WEAPONFLAG_EXPANDS | WEAPONFLAG_EXPLODES;
+		aWeaponInfo[i].m_eWeaponFire = WEAPON_FIRE_INSTANT_HIT;
+		aWeaponInfo[i].m_AnimToPlay = ANIM_STD_PUNCH;
+		aWeaponInfo[i].m_Anim2ToPlay = ANIM_STD_NUM;
+		aWeaponInfo[i].m_Flags = WEAPONFLAG_USE_GRAVITY | WEAPONFLAG_SLOWS_DOWN | WEAPONFLAG_RAND_SPEED | WEAPONFLAG_EXPANDS | WEAPONFLAG_EXPLODES;
 	}
 	debug("Loading weapon data...\n");
 	LoadWeaponData();
@@ -96,7 +96,7 @@ CWeaponInfo::LoadWeaponData(void)
 		fireType[0] = '\0';
 		fireOffsetY = 0.0f;
 		fireOffsetZ = 0.0f;
-		animId = ANIM_WALK;
+		animId = ANIM_STD_WALK;
 		sscanf(
 			&line[lp],
 			"%s %s %f %d %d %d %d %f %f %f %f %f %f %f %s %s %f %f %f %f %d %d",
@@ -133,29 +133,29 @@ CWeaponInfo::LoadWeaponData(void)
 
 		if (strcmp(anim2ToPlay, "null") != 0) {
 			animAssoc = CAnimManager::GetAnimAssociation(ASSOCGRP_STD, anim2ToPlay);
-			ms_apWeaponInfos[weaponType].m_Anim2ToPlay = (AnimationId) animAssoc->animId;
+			aWeaponInfo[weaponType].m_Anim2ToPlay = (AnimationId) animAssoc->animId;
 		}
 
 		CVector vecFireOffset(fireOffsetX, fireOffsetY, fireOffsetZ);
 
-		ms_apWeaponInfos[weaponType].m_eWeaponFire = FindWeaponFireType(fireType);
-		ms_apWeaponInfos[weaponType].m_fRange = range;
-		ms_apWeaponInfos[weaponType].m_nFiringRate = firingRate;
-		ms_apWeaponInfos[weaponType].m_nReload = reload;
-		ms_apWeaponInfos[weaponType].m_nAmountofAmmunition = ammoAmount;
-		ms_apWeaponInfos[weaponType].m_nDamage = damage;
-		ms_apWeaponInfos[weaponType].m_fSpeed = speed;
-		ms_apWeaponInfos[weaponType].m_fRadius = radius;
-		ms_apWeaponInfos[weaponType].m_fLifespan = lifeSpan;
-		ms_apWeaponInfos[weaponType].m_fSpread = spread;
-		ms_apWeaponInfos[weaponType].m_vecFireOffset = vecFireOffset;
-		ms_apWeaponInfos[weaponType].m_AnimToPlay = animId;
-		ms_apWeaponInfos[weaponType].m_fAnimLoopStart = animLoopStart / 30.0f;
-		ms_apWeaponInfos[weaponType].m_fAnimLoopEnd = animLoopEnd / 30.0f;
-		ms_apWeaponInfos[weaponType].m_fAnimFrameFire = delayBetweenAnimAndFire / 30.0f;
-		ms_apWeaponInfos[weaponType].m_fAnim2FrameFire = delayBetweenAnim2AndFire / 30.0f;
-		ms_apWeaponInfos[weaponType].m_nModelId = modelId;
-		ms_apWeaponInfos[weaponType].m_Flags = flags;
+		aWeaponInfo[weaponType].m_eWeaponFire = FindWeaponFireType(fireType);
+		aWeaponInfo[weaponType].m_fRange = range;
+		aWeaponInfo[weaponType].m_nFiringRate = firingRate;
+		aWeaponInfo[weaponType].m_nReload = reload;
+		aWeaponInfo[weaponType].m_nAmountofAmmunition = ammoAmount;
+		aWeaponInfo[weaponType].m_nDamage = damage;
+		aWeaponInfo[weaponType].m_fSpeed = speed;
+		aWeaponInfo[weaponType].m_fRadius = radius;
+		aWeaponInfo[weaponType].m_fLifespan = lifeSpan;
+		aWeaponInfo[weaponType].m_fSpread = spread;
+		aWeaponInfo[weaponType].m_vecFireOffset = vecFireOffset;
+		aWeaponInfo[weaponType].m_AnimToPlay = animId;
+		aWeaponInfo[weaponType].m_fAnimLoopStart = animLoopStart / 30.0f;
+		aWeaponInfo[weaponType].m_fAnimLoopEnd = animLoopEnd / 30.0f;
+		aWeaponInfo[weaponType].m_fAnimFrameFire = delayBetweenAnimAndFire / 30.0f;
+		aWeaponInfo[weaponType].m_fAnim2FrameFire = delayBetweenAnim2AndFire / 30.0f;
+		aWeaponInfo[weaponType].m_nModelId = modelId;
+		aWeaponInfo[weaponType].m_Flags = flags;
 	}
 }
 

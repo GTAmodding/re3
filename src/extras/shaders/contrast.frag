@@ -12,7 +12,7 @@ main(void)
 	vec4 dst = texture(tex0, vec2(v_tex0.x, 1.0-v_tex0.y));
 	vec4 color;
 	color.rgb = dst.rgb*u_contrastMult + u_contrastAdd;
-	color.a = 1.0f;
+	color.a = 1.0;
 
 	FRAGCOLOR(color);
 }

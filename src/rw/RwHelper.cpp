@@ -1,7 +1,6 @@
-#if defined RW_D3D9 || defined RWLIBS
 #define WITHD3D
-#endif
 #include "common.h"
+#include <rpskin.h>
 
 #include "RwHelper.h"
 #include "Timecycle.h"
@@ -290,7 +289,8 @@ SkinGetBonePositionsToTable(RpClump *clump, RwV3d *boneTable)
 			parent = stack[sp--];
 		else
 			parent = i;
-		assert(parent >= 0 && parent < numBones);
+
+		//assert(parent >= 0 && parent < numBones);
 	}
 }
 
@@ -298,7 +298,7 @@ RpHAnimAnimation*
 HAnimAnimationCreateForHierarchy(RpHAnimHierarchy *hier)
 {
 	int i;
-#ifdef FIX_BUGS
+#if defined FIX_BUGS || defined LIBRW
 	int numNodes = hier->numNodes*2;	// you're supposed to have at least two KFs per node
 #else
 	int numNodes = hier->numNodes;
@@ -312,7 +312,7 @@ HAnimAnimationCreateForHierarchy(RpHAnimHierarchy *hier)
 		frame->q.real = 1.0f;
 		frame->q.imag.x = frame->q.imag.y = frame->q.imag.z = 0.0f;
 		frame->t.x = frame->t.y = frame->t.z = 0.0f;
-#ifdef FIX_BUGS
+#if defined FIX_BUGS || defined LIBRW
 		// times are subtracted and divided giving NaNs
 		// so they can't both be 0
 		frame->time = i/hier->numNodes;
@@ -400,7 +400,7 @@ CameraSize(RwCamera * camera, RwRect * rect,
 			RwRaster           *zRaster;
 
 			// BUG: game just changes camera raster's sizes, but this is a hack
-#ifdef FIX_BUGS
+#if defined FIX_BUGS || defined LIBRW
 			/*
 			 * Destroy rasters...
 			 */

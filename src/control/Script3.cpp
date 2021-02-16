@@ -32,6 +32,7 @@
 #include "WaterLevel.h"
 #include "Weather.h"
 #include "Zones.h"
+#include "Wanted.h"
 
 int8 CRunningScript::ProcessCommands500To599(int32 command)
 {
@@ -342,7 +343,7 @@ int8 CRunningScript::ProcessCommands500To599(int32 command)
 		CollectParameters(&m_nIp, 1);
 		CGarages::SetFreeBombs(ScriptParams[0] != 0);
 		return 0;
-#ifdef GTA_PS2
+#if GTA_VERSION <= GTA3_PS2_160
 	case COMMAND_SET_POWERPOINT:
 	{
 		CollectParameters(&m_nIp, 7);
@@ -376,7 +377,7 @@ int8 CRunningScript::ProcessCommands500To599(int32 command)
 
 		return 0;
 	}
-#endif // GTA_PS2
+#endif // GTA_VERSION <= GTA3_PS2_160
 	case COMMAND_SET_ALL_TAXI_LIGHTS:
 		CollectParameters(&m_nIp, 1);
 		CAutomobile::SetAllTaxiLights(ScriptParams[0] != 0);
@@ -416,7 +417,7 @@ int8 CRunningScript::ProcessCommands500To599(int32 command)
 				pPed->FlagToDestroyWhenNextProcessed();
 		}
 		else {
-			pPed->SetDie(ANIM_KO_SHOT_FRONT1, 4.0f, 0.0f);
+			pPed->SetDie(ANIM_STD_KO_FRONT, 4.0f, 0.0f);
 		}
 		return 0;
 	}
@@ -1263,7 +1264,7 @@ int8 CRunningScript::ProcessCommands600To699(int32 command)
 		ScriptParams[0] = CPools::GetObjectPool()->GetIndex(pObj);
 		StoreParameters(&m_nIp, 1);
 		if (m_bIsMissionScript)
-			CTheScripts::MissionCleanup.AddEntityToList(ScriptParams[0], CLEANUP_OBJECT);
+			CTheScripts::MissionCleanUp.AddEntityToList(ScriptParams[0], CLEANUP_OBJECT);
 		return 0;
 	}
 	case COMMAND_IS_BOAT:
@@ -1670,6 +1671,7 @@ int8 CRunningScript::ProcessCommands700To799(int32 command)
 		pBoat->AutoPilot.m_nCarMission = MISSION_GOTOCOORDS_ASTHECROWSWIMS;
 		pBoat->AutoPilot.m_vecDestinationCoors = pos;
 		pBoat->SetStatus(STATUS_PHYSICS);
+		pBoat->bEngineOn = true;
 		pBoat->AutoPilot.m_nCruiseSpeed = Max(6, pBoat->AutoPilot.m_nCruiseSpeed);
 		pBoat->AutoPilot.m_nAntiReverseTimer = CTimer::GetTimeInMilliseconds();
 		return 0;
@@ -1799,7 +1801,7 @@ int8 CRunningScript::ProcessCommands700To799(int32 command)
 			pPed->bRespondsToThreats = false;
 			++CPopulation::ms_nTotalMissionPeds;
 			if (m_bIsMissionScript)
-				CTheScripts::MissionCleanup.AddEntityToList(ped_handle, CLEANUP_CHAR);
+				CTheScripts::MissionCleanUp.AddEntityToList(ped_handle, CLEANUP_CHAR);
 		}
 		ScriptParams[0] = ped_handle;
 		StoreParameters(&m_nIp, 1);
@@ -1848,7 +1850,7 @@ int8 CRunningScript::ProcessCommands700To799(int32 command)
 			pPed->bRespondsToThreats = false;
 			++CPopulation::ms_nTotalMissionPeds;
 			if (m_bIsMissionScript)
-				CTheScripts::MissionCleanup.AddEntityToList(ped_handle, CLEANUP_CHAR);
+				CTheScripts::MissionCleanUp.AddEntityToList(ped_handle, CLEANUP_CHAR);
 		}
 		ScriptParams[0] = ped_handle;
 		StoreParameters(&m_nIp, 1);

@@ -32,8 +32,8 @@ HANDLE FindFirstFile(const char* pathname, WIN32_FIND_DATA* firstfile) {
 	char *folder = strtok(pathCopy, "*");
 	char *extension = strtok(NULL, "*");
 
-	// because strtok doesn't return NULL for last delimiter
-	if (extension - folder == strlen(pathname))
+	// because I remember like strtok might not return NULL for last delimiter
+	if (extension && extension - folder == strlen(pathname))
 		extension = nil;
 	
 	// Case-sensitivity and backslashes...
@@ -187,7 +187,7 @@ char* casepath(char const* path, bool checkPathFirst)
         rl = 1;
     }
 
-    bool cantProceed = false; // just convert slashes in what's left in string, not case sensitivity
+    bool cantProceed = false; // just convert slashes in what's left in string, don't correct case of letters(because we can't)
     bool mayBeTrailingSlash = false;
     char* c;
     while (c = strsep(&p, "/\\"))
@@ -251,7 +251,7 @@ char* casepath(char const* path, bool checkPathFirst)
     }
 
     if (rl > l + 2) {
-        printf("\n\ncasepath: Corrected path length is longer then original+2:\n\tOriginal: %s (%d chars)\n\tCorrected: %s (%d chars)\n\n", path, l, out, rl);
+        printf("\n\ncasepath: Corrected path length is longer then original+2:\n\tOriginal: %s (%zu chars)\n\tCorrected: %s (%zu chars)\n\n", path, l, out, rl);
     }
     return out;
 }

@@ -445,7 +445,7 @@ bool
 CFileLoader::StartLoadClumpFile(RwStream *stream, uint32 id)
 {
 	if(RwStreamFindChunk(stream, rwID_CLUMP, nil, nil)){
-		printf("Start loading %s\n", CModelInfo::GetModelInfo(id)->GetName());
+		printf("Start loading %s\n", CModelInfo::GetModelInfo(id)->GetModelName());
 		return RpClumpGtaStreamRead1(stream);
 	}else{
 		printf("FAILED\n");
@@ -459,7 +459,7 @@ CFileLoader::FinishLoadClumpFile(RwStream *stream, uint32 id)
 	RpClump *clump;
 	CClumpModelInfo *mi;
 
-	printf("Finish loading %s\n", CModelInfo::GetModelInfo(id)->GetName());
+	printf("Finish loading %s\n", CModelInfo::GetModelInfo(id)->GetModelName());
 	clump = RpClumpGtaStreamRead2(stream);
 
 	if(clump){
@@ -1075,9 +1075,9 @@ SetModelInfoFlags(CSimpleModelInfo *mi, uint32 flags)
 
 #ifdef HARDCODED_MODEL_FLAGS
 	// mobile sets these flags in CFileLoader::SetRelatedModelInfoCB, but that's stupid
-	if(MatchModelName(mi->GetName(), DoubleSidedNames)) mi->m_bIsDoubleSided = true;
-	if(MatchModelName(mi->GetName(), TreeNames)) mi->m_bIsTree = true;
-	if(MatchModelName(mi->GetName(), OptimizedNames)) mi->m_bCanBeIgnored = true;
+	if(MatchModelName(mi->GetModelName(), DoubleSidedNames)) mi->m_bIsDoubleSided = true;
+	if(MatchModelName(mi->GetModelName(), TreeNames)) mi->m_bIsTree = true;
+	if(MatchModelName(mi->GetModelName(), OptimizedNames)) mi->m_bCanBeIgnored = true;
 #endif
 
 #endif
@@ -1119,7 +1119,7 @@ CFileLoader::LoadObject(const char *line)
 	}
 
 	mi = CModelInfo::AddSimpleModel(id);
-	mi->SetName(model);
+	mi->SetModelName(model);
 	mi->SetNumAtomics(numObjs);
 	mi->SetLodDistances(dist);
 	SetModelInfoFlags(mi, flags);
@@ -1138,7 +1138,7 @@ CFileLoader::LoadMLO(const char *line)
 
 	sscanf(line, "%s %s %d %f", smth, name, &modelIndex, &someFloat);
 	CMloModelInfo *minfo = CModelInfo::AddMloModel(modelIndex);
-	minfo->SetName(name);
+	minfo->SetModelName(name);
 	minfo->field_34 = someFloat;
 	int instId = CModelInfo::GetMloInstanceStore().allocPtr;
 	minfo->firstInstance = instId;
@@ -1216,7 +1216,7 @@ CFileLoader::LoadTimeObject(const char *line)
 	}
 
 	mi = CModelInfo::AddTimeModel(id);
-	mi->SetName(model);
+	mi->SetModelName(model);
 	mi->SetNumAtomics(numObjs);
 	mi->SetLodDistances(dist);
 	SetModelInfoFlags(mi, flags);
@@ -1238,7 +1238,7 @@ CFileLoader::LoadClumpObject(const char *line)
 
 	if(sscanf(line, "%d %s %s", &id, model, txd) == 3){
 		mi = CModelInfo::AddClumpModel(id);
-		mi->SetName(model);
+		mi->SetModelName(model);
 		mi->SetTexDictionary(txd);
 		mi->SetColModel(&CTempColModels::ms_colModelBBox);
 	}
@@ -1262,7 +1262,7 @@ CFileLoader::LoadVehicleObject(const char *line)
 		&frequency, &level, &comprules, &misc, &wheelScale);
 
 	mi = CModelInfo::AddVehicleModel(id);
-	mi->SetName(model);
+	mi->SetModelName(model);
 	mi->SetTexDictionary(txd);
 	for(p = gamename; *p; p++)
 		if(*p == '_') *p = ' ';
@@ -1341,7 +1341,7 @@ CFileLoader::LoadPedObject(const char *line)
 		return;
 
 	mi = CModelInfo::AddPedModel(id);
-	mi->SetName(model);
+	mi->SetModelName(model);
 	mi->SetTexDictionary(txd);
 	mi->SetColModel(&CTempColModels::ms_colModelPed1);
 	mi->m_pedType = CPedType::FindPedType(pedType);
@@ -1815,7 +1815,7 @@ CFileLoader::ReloadObject(const char *line)
 #ifdef FIX_BUGS
 		mi &&
 #endif
-	    mi->GetModelType() == MITYPE_SIMPLE && !strcmp(mi->GetName(), model) && mi->m_numAtomics == numObjs) {
+	    mi->GetModelType() == MITYPE_SIMPLE && !strcmp(mi->GetModelName(), model) && mi->m_numAtomics == numObjs) {
 		mi->SetLodDistances(dist);
 		SetModelInfoFlags(mi, flags);
 	} else {

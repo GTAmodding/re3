@@ -12,8 +12,9 @@ enum eRadioStation
 	FLASHBACK,
 	CHATTERBOX,
 	USERTRACK,
-	POLICE_RADIO,
-	RADIO_OFF,
+	POLICE_RADIO = 10,
+	NUM_RADIOS = 10,
+	RADIO_OFF = 11,
 };
 
 enum eMusicMode

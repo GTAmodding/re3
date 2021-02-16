@@ -5,6 +5,10 @@
 #include "Camera.h"
 #include "Sprite.h"
 
+#ifdef ASPECT_RATIO_SCALE
+#include "Frontend.h"
+#endif
+
 float CSprite::m_f2DNearScreenZ;
 float CSprite::m_f2DFarScreenZ;
 float CSprite::m_fRecipNearClipPlane;
@@ -33,7 +37,11 @@ CSprite::CalcScreenCoors(const RwV3d &in, RwV3d *out, float *outw, float *outh, 
 	// this is used to scale correctly if you zoom in with sniper rifle
 	float fovScale = fov / CDraw::GetFOV();
 
+#ifdef FIX_SPRITES
+	*outw = CDraw::ms_bFixSprites ? (fovScale * recip * SCREEN_HEIGHT) : (fovScale * SCREEN_SCALE_AR(recip) * SCREEN_WIDTH);
+#else
 	*outw = fovScale * SCREEN_SCALE_AR(recip) * SCREEN_WIDTH;
+#endif
 	*outh = fovScale * recip * SCREEN_HEIGHT;
 
 	return true;

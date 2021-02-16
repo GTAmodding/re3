@@ -1,4 +1,4 @@
-﻿#include "common.h"
+#include "common.h"
 
 #include "Glass.h"
 #include "Timer.h"

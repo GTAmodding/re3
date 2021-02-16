@@ -1,4 +1,16 @@
-﻿{ Grand Theft Auto III Spanish (Spain) Translation }
+﻿{
+    New strings are at the bottom of file.
+    Do not change the order of strings.
+    You can fix the typos of existing translation but please refrain from
+    unnecessary edits like rephasing because you think it suits better for your taste.
+
+    SPANISH NOTE:
+    This is European Spanish, do not mix it with Latin American Spanish.
+    If you want the Latin American Spanish translation you'd have to create
+    a separate txt for it.
+}
+
+{ Grand Theft Auto III Spanish (Spain) Translation }
 { Contains some of the official fixes made by Rockstar for the iOS port }
 { Additional translation rewrites, corrections and fixes by IlDucci }
 
@@ -372,7 +384,7 @@ Playa de Portland
 Saint Mark's
 
 [REDLIGH]
-Barrio rojo
+Red Light District
 
 [TOWERS]
 Cerros de Hepburn
@@ -636,7 +648,7 @@ Puedes practicar disparando a estas dianas. Vuelve a la misión cuando hayas ter
 ~g~Busca un cliente.
 
 [FARE1]
-~g~Ve al ~w~club Sex Kitten Meeouch ~g~en el barrio rojo.
+~g~Ve al ~w~club Sex Kitten Meeouch ~g~en el Red Light District.
 
 [FARE2]
 ~g~Ve a ~w~Supa Save ~g~en Portland View.
@@ -648,13 +660,13 @@ Puedes practicar disparando a estas dianas. Vuelve a la misión cuando hayas ter
 ~g~Ve a la ~w~cafetería Greasy Joe ~g~en Callahan Point.
 
 [FARE5]
-~g~Ve a la ~w~tienda de armas Ammu-Nation ~g~en el barrio rojo.
+~g~Ve a la ~w~tienda de armas Ammu-Nation ~g~en el Red Light District.
 
 [FARE6]
 ~g~Ve a ~w~Easy Credit Autos ~g~en Saint Mark's.
 
 [FARE7]
-~g~Ve al ~w~bar de topless de Woody ~g~en el barrio rojo.
+~g~Ve al ~w~bar de topless de Woody ~g~en el Red Light District.
 
 [FARE8]
 ~g~Ve al ~w~restaurante Marcos ~g~en Saint Mark's.
@@ -756,7 +768,7 @@ Pulsa ~h~~k~~TOGGLE_SUBMISSIONS~~w~ para activar o desactivar las misiones del c
 ¡Has volado durante ~1~ segundos!
 
 [EBAL_A]
-Conozco un lugar en las afueras del barrio rojo donde podemos escondernos,
+Conozco un lugar en las afueras del Red Light District donde podemos escondernos,
 
 [EBAL_A1]
 pero mis manos están destrozadas, así que conduce tú, hermano.
@@ -1373,7 +1385,7 @@ Y si nos está vendiendo..., mátalo.
 Aquí viene nuestro amiguito. El señor Bocón en persona.
 
 [FM2_G]
-¿Te han seguido? Ya sabes que esto es nuestro secretito.
+¿Te siguieron? Ya sabes que esto es nuestro secretito.
 
 [FM2_H]
 No, no, no me han seguido. ¿Tienes lo mío?
@@ -1553,7 +1565,7 @@ Eso no es un masajeador.
 ~r~Muy bonito, ¡has asustado al objetivo! ¿Y te consideras un asesino?
 
 [AM1_5]
-~g~Ve al barrio rojo y espera a que Salvatore salga del club.
+~g~Ve al Red Light District y espera a que Salvatore salga del club.
 
 [AM1_7]
 ~r~Salvatore está en su casita, sano y salvo, tomándose un cóctel. ¡Nadie te va a llamar ''Chacal''!
@@ -2246,11 +2258,11 @@ Una bomba de coche vale 1.000 dólares.
 [GA_5]
 Tu coche ya tiene una bomba instalada.
 
-[GA_6]
-¡Apárcalo, actívala pulsando ~h~~k~~PED_FIREWEAPON~~w~ y SAL PITANDO!
+[GA_6] { re3 change }
+¡Apárcalo, actívala pulsando ~h~~k~~VEHICLE_FIREWEAPON~~w~ y SAL PITANDO!
 
-[GA_7]
-Activa la bomba pulsando ~h~~k~~PED_FIREWEAPON~~w~. Estallará cuando se arranque el motor.
+[GA_7] { re3 change }
+Activa la bomba pulsando ~h~~k~~VEHICLE_FIREWEAPON~~w~. Estallará cuando se arranque el motor.
 
 [GA_8]
 Utiliza el detonador para activar la bomba.
@@ -2465,33 +2477,6 @@ Acelerar
 
 [FEC_SMT]
 Activar misión especial
-
-[FEC_CCF]
-Configuración:
-
-[FEC_CF1]
-Ajuste1
-
-[FEC_CF2]
-Ajuste2
-
-[FEC_CF3]
-Ajuste3
-
-[FEC_CF4]
-Ajuste4
-
-[FEC_CDP]
-Controles a mostrar:
-
-[FEC_ONF]
-A pie
-
-[FEC_INC]
-En vehículos
-
-[FEC_VIB]
-Vibración:
 
 [FEA_OUT]
 Salida:
@@ -3633,11 +3618,11 @@ que tendré trabajo para ti.
 [JM6_1]
 Llévanos al banco de la avenida principal.
 
-[GA_6B]
-¡Apárcalo, actívala pulsando ~h~~k~~PED_FIREWEAPON~~w~ y SAL PITANDO!
+[GA_6B] { re3 change }
+¡Apárcalo, actívala pulsando ~h~~k~~VEHICLE_FIREWEAPON~~w~ y SAL PITANDO!
 
-[GA_7B]
-Activa la bomba pulsando ~h~~k~~PED_FIREWEAPON~~w~. Estallará cuando se arranque el motor.
+[GA_7B] { re3 change }
+Activa la bomba pulsando ~h~~k~~VEHICLE_FIREWEAPON~~w~. Estallará cuando se arranque el motor.
 
 [BAT1]
 ~g~¡Coge el bate!
@@ -4059,11 +4044,11 @@ Mete tu vehículo en el taller de pintura para perder tu ~h~nivel de búsqueda~w
 [HM1_1]
 ~g~Cepíllate a 20 Purple Nines en 2 minutos y 30 segundos.
 
-[KM1_8A]
-Pulsa ~h~~k~~PED_FIREWEAPON~~w~ para ~h~activar la bomba~w~. Acuérdate de alejarte de ella.
+[KM1_8A] { re3 change }
+Pulsa ~h~~k~~VEHICLE_FIREWEAPON~~w~ para ~h~activar la bomba~w~. Acuérdate de alejarte de ella.
 
-[KM1_8D]
-Pulsa ~h~~k~~PED_FIREWEAPON~~w~ para ~h~activar la bomba~w~. Acuérdate de alejarte de ella.
+[KM1_8D] { re3 change }
+Pulsa ~h~~k~~VEHICLE_FIREWEAPON~~w~ para ~h~activar la bomba~w~. Acuérdate de alejarte de ella.
 
 [KM1_12]
 ~g~¡Llévalo al dojo, pero deshazte primero de la policía!
@@ -4200,11 +4185,11 @@ No necesito tu documentación, pareces de fiar.
 [DETON]
 DETONACIÓN:
 
-[DRIVE_A]
-Ten una Uzi seleccionada cuando entres en un vehículo, luego mira a la izquierda o a la derecha y pulsa ~h~~k~~PED_FIREWEAPON~~w~ para disparar.
+[DRIVE_A] { re3 change }
+Ten una Uzi seleccionada cuando entres en un vehículo, luego mira a la izquierda o a la derecha y pulsa ~h~~k~~VEHICLE_FIREWEAPON~~w~ para disparar.
 
-[DRIVE_B]
-Ten una Uzi seleccionada cuando entres en un vehículo, luego mira a la izquierda o a la derecha y pulsa ~h~~k~~PED_FIREWEAPON~~w~ para disparar.
+[DRIVE_B] { re3 change }
+Ten una Uzi seleccionada cuando entres en un vehículo, luego mira a la izquierda o a la derecha y pulsa ~h~~k~~VEHICLE_FIREWEAPON~~w~ para disparar.
 
 [RECORD]
 ~g~¡NUEVO RÉCORD!
@@ -4212,11 +4197,11 @@ Ten una Uzi seleccionada cuando entres en un vehículo, luego mira a la izquierd
 [NRECORD]
 ~r~¡NO HAY UN NUEVO RÉCORD!
 
-[RCHELP]
-Pulsa ~k~~PED_FIREWEAPON~ o lleva el coche teledirigido hasta las ruedas de otro coche para detonarlo.
+[RCHELP] { re3 change }
+Pulsa ~k~~VEHICLE_FIREWEAPON~ o lleva el coche teledirigido hasta las ruedas de otro coche para detonarlo.
 
-[RCHELPA]
-Pulsa ~k~~PED_FIREWEAPON~ o lleva el coche teledirigido hasta las ruedas de otro coche para detonarlo.
+[RCHELPA] { re3 change }
+Pulsa ~k~~VEHICLE_FIREWEAPON~ o lleva el coche teledirigido hasta las ruedas de otro coche para detonarlo.
 
 [RC_1]
 ¡Tienes 2 minutos para destruir todos los coches de los Diablos que puedas!
@@ -4447,7 +4432,7 @@ tomándolos por el camino.
 ¡Cuando alcances a ese bandido espaciado con SPANK, chíngatelo!
 
 [DIAB4_H]
-Luego reparte mis revistas XXX por el barrio rojo.
+Luego reparte mis revistas XXX por el Red Light District.
 
 [DIAB4_1]
 ~g~Lleva la furgoneta a la parte de atrás de Revistas XXX.
@@ -4579,7 +4564,7 @@ si no les doy una parte.
 He dejado un coche dentro de la fábrica.
 
 [MEA2_G]
-Ve a recogerles con él en su territorio, en el barrio rojo.
+Ve a recogerles con él en su territorio, en el Red Light District.
 
 [MEA2_H]
 Luego tráelos a la fábrica para que conozcan la opinión de Marty.
@@ -4716,11 +4701,11 @@ Luigi dijo que eras de fiar, así que vuelve más tarde,
 [RM5_6]
 ~g~¡Ha salido de la ambulancia! ¡Cárgate su escayola con un vehículo o una explosión!
 
-[PBOAT_1]
-Pulsa ~h~~k~~PED_FIREWEAPON~~w~ para disparar los cañones de la lancha.
+[PBOAT_1] { re3 change }
+Pulsa ~h~~k~~VEHICLE_FIREWEAPON~~w~ para disparar los cañones de la lancha.
 
-[PBOAT_2]
-Pulsa ~h~~k~~PED_FIREWEAPON~~w~ para disparar los cañones de la lancha.
+[PBOAT_2] { re3 change }
+Pulsa ~h~~k~~VEHICLE_FIREWEAPON~~w~ para disparar los cañones de la lancha.
 
 [DIAB1_B]
 Al habla El Burro, de los Diablos.
@@ -4734,11 +4719,11 @@ Hay una carrera que empezará junto a la sala Clásica, cerca del puente Callaha
 [DIAB1_F]
 Consíguete un buen carro y el primero que pase por todos los puntos de control se llevará el premio.
 
-[HM2_1]
-Usa los coches teledirigidos para destruir los furgones blindados. Pulsa ~h~~k~~PED_FIREWEAPON~ ~w~para detonarlos.
+[HM2_1] { re3 change }
+Usa los coches teledirigidos para destruir los furgones blindados. Pulsa ~h~~k~~VEHICLE_FIREWEAPON~ ~w~para detonarlos.
 
-[HM2_1A]
-Usa los coches teledirigidos para destruir los furgones blindados. Pulsa ~h~~k~~PED_FIREWEAPON~ ~w~para detonarlos.
+[HM2_1A] { re3 change }
+Usa los coches teledirigidos para destruir los furgones blindados. Pulsa ~h~~k~~VEHICLE_FIREWEAPON~ ~w~para detonarlos.
 
 [HM2_2]
 ~r~¡No has destruido todos los furgones blindados!
@@ -6545,11 +6530,11 @@ Esta Memory Card (PS2) ya está formateada.
 [FEDSAS4]
 ;=<> - CAMBIAR SELECCIÓN
 
-[SPRAY_4]
-Pulsa ~h~~k~~PED_FIREWEAPON~~w~ para disparar el cañón de agua.
+[SPRAY_4] { re3 change }
+Pulsa ~h~~k~~VEHICLE_FIREWEAPON~~w~ para disparar el cañón de agua.
 
-[SPRAY_1]
-Pulsa ~h~~k~~PED_FIREWEAPON~~w~ para disparar el cañón de agua.
+[SPRAY_1] { re3 change }
+Pulsa ~h~~k~~VEHICLE_FIREWEAPON~~w~ para disparar el cañón de agua.
 
 [LITTLE]
 LITTLE T
@@ -7153,7 +7138,7 @@ Color del jugador
 Liberty City
 
 [FEM_MA1]
-Barrio rojo
+Red Light District
 
 [FEM_MA2]
 Chinatown
@@ -7304,9 +7289,6 @@ CONEXIÓN
 
 [FET_AUD]
 AJUSTES DE AUDIO
-
-[FET_GFX]
-AJUSTES GRÁFICOS
 
 [FET_DIS]
 AJUSTES DE PANTALLA
@@ -8015,7 +7997,7 @@ POLACO
 RUSO
 
 { new display menus }
-[FET_GRA]
+[FET_GFX]
 AJUSTES GRÁFICOS
 
 [FED_MIP]
@@ -8081,10 +8063,10 @@ REPETIR MISIÓN
 ¿REINTENTAR?
 
 [FED_VPL]
-FLUJO DE VEHÍCULOS
+RENDERIZADO DE VEHÍCULOS
 
 [FED_PRM]
-LUCES EN PEATONES
+ILUMINAR CONTORNOS DE PEATONES
 
 [FED_RGL]
 BRILLO DE CARRETERAS
@@ -8096,7 +8078,7 @@ FILTRO DE COLOR
 MAPAS DE LUZ DEL MUNDO
 
 [FED_MBL]
-DESENFOQ. MOVIMIENTO
+DESENFOQUE DE MOVIMIENTO
 
 [FEM_SIM]
 SIMPLE
@@ -8119,8 +8101,65 @@ PS2
 [FEM_XBX]
 XBOX
 
+[FEM_AUT]
+AUTOM.
+
 [FEC_IVP]
 INVERTIR VERTICALIDAD MANDO
+
+[FEM_TWP]
+Poner o quitar punto de referencia
+
+[FEA_FMN]
+RADIO APAGADA
+
+[FEC_DS2]
+DUALSHOCK 2
+
+[FEC_DS3]
+DUALSHOCK 3
+
+[FEC_DS4]
+DUALSHOCK 4
+
+[FEC_360]
+MANDO DE XBOX 360
+
+[FEC_ONE]
+MANDO DE XBOX ONE
+
+[FEC_TYP]
+TIPO DE MANDO
+
+[FEC_CCF]
+CONFIGURACIÓN
+
+[FEC_CF1]
+AJUSTE 1
+
+[FEC_CF2]
+AJUSTE 2
+
+[FEC_CF3]
+AJUSTE 3
+
+[FEC_CF4]
+AJUSTE 4
+
+[FEC_CDP]
+CONTROLES A MOSTRAR
+
+[FEC_ONF]
+A PIE
+
+[FEC_INC]
+EN VEHÍCULO
+
+[FEC_VIB]
+VIBRACIÓN
+
+[FET_AGS]
+AJUSTES DE MANDO
 
 { end of file }
 

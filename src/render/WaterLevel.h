@@ -79,7 +79,7 @@ class CWaterLevel
 	static int16       nGeomUsed;
 
 public:
-	static void    Initialise(Const char *pWaterDat);
+	static void    Initialise(Const char *pWaterDat); // out of class in III PC and later because of SecuROM
 	static void    Shutdown();
 	static void    CreateWavyAtomic();
 	static void    DestroyWavyAtomic();

@@ -52,7 +52,7 @@ VS_out main(in VS_in input)
 	output.TexCoord1 = uv2.xy*0.5 + 0.5;
 	float b = 1.0 - saturate(dot(viewVec, Normal));
 	output.ReflColor = float4(0.0, 0.0, 0.0, 1.0);
-	output.ReflColor.a = lerp(b*b*b*b*b, 1.0f, fresnel)*shininess;
+	output.ReflColor.a = lerp(b*b*b*b*b, 1.0, fresnel)*shininess;
 
 	//Light mainLight = lights[0];
 	for(i = 0; i < 5; i++)

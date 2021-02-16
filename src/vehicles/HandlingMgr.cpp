@@ -191,7 +191,7 @@ void
 cHandlingDataMgr::ConvertDataToGameUnits(tHandlingData *handling)
 {
 	// acceleration is in ms^-2, but we need mf^-2 where f is one frame time (50fps)
-	float velocity, a, b, specificVolume;
+	float velocity, a, b;
 
 	handling->Transmission.fEngineAcceleration *= 1.0f/(50.0f*50.0f);
 	handling->Transmission.fMaxVelocity *= 1000.0f/(60.0f*60.0f * 50.0f);

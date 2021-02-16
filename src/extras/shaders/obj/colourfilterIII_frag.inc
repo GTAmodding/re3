@@ -18,7 +18,7 @@ const char *colourfilterIII_frag_src =
 "	}\n"
 "	vec4 color;\n"
 "	color.rgb = prev.rgb;\n"
-"	color.a = 1.0f;\n"
+"	color.a = 1.0;\n"
 
 "	FRAGCOLOR(color);\n"
 "}\n"

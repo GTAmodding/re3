@@ -159,7 +159,7 @@ CGameLogic::Update()
 			pPlayerInfo.m_WBState = WBSTATE_PLAYING;
 			int takeMoney;
 
-			switch (pPlayerInfo.m_pPed->m_pWanted->m_nWantedLevel) {
+			switch (pPlayerInfo.m_pPed->m_pWanted->GetWantedLevel()) {
 			case 0:
 			case 1:
 				takeMoney = 100;

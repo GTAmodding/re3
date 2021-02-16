@@ -29,7 +29,7 @@ FrameUpdateCallBackNonSkinned(AnimBlendFrameData *frame, void *arg)
 	AnimBlendFrameUpdateData *updateData = (AnimBlendFrameUpdateData*)arg;
 
 	if(frame->flag & AnimBlendFrameData::VELOCITY_EXTRACTION &&
-	   gpAnimBlendClump->velocity){
+	   gpAnimBlendClump->velocity2d){
 		if(frame->flag & AnimBlendFrameData::VELOCITY_EXTRACTION_3D)
 			FrameUpdateCallBackWith3dVelocityExtractionNonSkinned(frame, arg);
 		else
@@ -138,11 +138,11 @@ FrameUpdateCallBackWithVelocityExtractionNonSkinned(AnimBlendFrameData *frame, v
 	}
 
 	if((frame->flag & AnimBlendFrameData::IGNORE_TRANSLATION) == 0){
-		gpAnimBlendClump->velocity->x = transx - curx;
-		gpAnimBlendClump->velocity->y = transy - cury;
+		gpAnimBlendClump->velocity2d->x = transx - curx;
+		gpAnimBlendClump->velocity2d->y = transy - cury;
 		if(looped){
-			gpAnimBlendClump->velocity->x += endx;
-			gpAnimBlendClump->velocity->y += endy;
+			gpAnimBlendClump->velocity2d->x += endx;
+			gpAnimBlendClump->velocity2d->y += endy;
 		}
 		mat->pos.x = pos.x - transx;
 		mat->pos.y = pos.y - transy;
@@ -218,9 +218,9 @@ FrameUpdateCallBackWith3dVelocityExtractionNonSkinned(AnimBlendFrameData *frame,
 	}
 
 	if((frame->flag & AnimBlendFrameData::IGNORE_TRANSLATION) == 0){
-		*gpAnimBlendClump->velocity = trans - cur;
+		*gpAnimBlendClump->velocity3d = trans - cur;
 		if(looped)
-			*gpAnimBlendClump->velocity += end;
+			*gpAnimBlendClump->velocity3d += end;
 		mat->pos.x = (pos - trans).x + frame->resetPos.x;
 		mat->pos.y = (pos - trans).y + frame->resetPos.y;
 		mat->pos.z = (pos - trans).z + frame->resetPos.z;
@@ -241,7 +241,7 @@ FrameUpdateCallBackSkinned(AnimBlendFrameData *frame, void *arg)
 	AnimBlendFrameUpdateData *updateData = (AnimBlendFrameUpdateData*)arg;
 
 	if(frame->flag & AnimBlendFrameData::VELOCITY_EXTRACTION &&
-	   gpAnimBlendClump->velocity){
+	   gpAnimBlendClump->velocity2d){
 		if(frame->flag & AnimBlendFrameData::VELOCITY_EXTRACTION_3D)
 			FrameUpdateCallBackWith3dVelocityExtractionSkinned(frame, arg);
 		else
@@ -353,11 +353,11 @@ FrameUpdateCallBackWithVelocityExtractionSkinned(AnimBlendFrameData *frame, void
 	}
 
 	if((frame->flag & AnimBlendFrameData::IGNORE_TRANSLATION) == 0){
-		gpAnimBlendClump->velocity->x = transx - curx;
-		gpAnimBlendClump->velocity->y = transy - cury;
+		gpAnimBlendClump->velocity2d->x = transx - curx;
+		gpAnimBlendClump->velocity2d->y = transy - cury;
 		if(looped){
-			gpAnimBlendClump->velocity->x += endx;
-			gpAnimBlendClump->velocity->y += endy;
+			gpAnimBlendClump->velocity2d->x += endx;
+			gpAnimBlendClump->velocity2d->y += endy;
 		}
 		xform->t.x = pos.x - transx;
 		xform->t.y = pos.y - transy;
@@ -433,9 +433,9 @@ FrameUpdateCallBackWith3dVelocityExtractionSkinned(AnimBlendFrameData *frame, vo
 	}
 
 	if((frame->flag & AnimBlendFrameData::IGNORE_TRANSLATION) == 0){
-		*gpAnimBlendClump->velocity = trans - cur;
+		*gpAnimBlendClump->velocity3d = trans - cur;
 		if(looped)
-			*gpAnimBlendClump->velocity += end;
+			*gpAnimBlendClump->velocity3d += end;
 		xform->t.x = (pos - trans).x + frame->resetPos.x;
 		xform->t.y = (pos - trans).y + frame->resetPos.y;
 		xform->t.z = (pos - trans).z + frame->resetPos.z;

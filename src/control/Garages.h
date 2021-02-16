@@ -1,11 +1,10 @@
 #pragma once
-#include "Automobile.h"
 #include "audio_enums.h"
 #include "Camera.h"
 #include "config.h"
+#include "Lists.h"
 
 class CVehicle;
-class CCamera;
 
 enum eGarageState
 {
@@ -81,6 +80,7 @@ VALIDATE_SIZE(CStoredCar, 0x28);
 
 class CGarage
 {
+public:
 	uint8 m_eGarageType;
 	uint8 m_eGarageState;
 	bool field_2; // unused
@@ -166,10 +166,11 @@ class CGarage
 	void FindDoorsEntities();
 	void FindDoorsEntitiesSectorList(CPtrList&, bool);
 	void PlayerArrestedOrDied();
+	bool Does60SecondsNeedThisCarAtAll(int mi);
+	bool Does60SecondsNeedThisCar(int mi);
+	void MarkThisCarAsCollectedFor60Seconds(int mi);
+	bool IsPlayerEntirelyInsideGarage();
 
-	friend class CGarages;
-	friend class cAudioManager;
-	friend class CCamera;
 };
 
 VALIDATE_SIZE(CGarage, 140);
@@ -179,6 +180,7 @@ class CGarages
 	enum {
 		MESSAGE_LENGTH = 8
 	};
+public:
 	static int32 BankVansCollected;
 	static bool BombsAreFree;
 	static bool RespraysAreFree;
@@ -200,7 +202,6 @@ class CGarages
 	static CStoredCar aCarsInSafeHouse3[NUM_GARAGE_STORED_CARS];
 	static bool bCamShouldBeOutisde;
 
-public:
 	static void Init(void);
 #ifndef PS2
 	static void Shutdown(void);
@@ -239,8 +240,8 @@ public:
 	static bool IsModelIndexADoor(uint32 id);
 	static void SetFreeBombs(bool bValue) { BombsAreFree = bValue; }
 	static void SetFreeResprays(bool bValue) { RespraysAreFree = bValue; }
+	static void StopCarFromBlowingUp(CAutomobile*);
 
-private:
 	static bool IsCarSprayable(CVehicle*);
 	static float FindDoorHeightForMI(int32);
 	static void CloseHideOutGaragesBeforeSave(void);
@@ -249,9 +250,4 @@ private:
 	static int32 GetBombTypeForGarageType(uint8 type) { return type - GARAGE_BOMBSHOP1 + 1; }
 	static int32 GetCarsCollectedIndexForGarageType(uint8 type) { return type - GARAGE_COLLECTCARS_1; }
 
-	friend class cAudioManager;
-	friend class CGarage;
-#ifdef FIX_BUGS
-	friend class CReplay;
-#endif
 };

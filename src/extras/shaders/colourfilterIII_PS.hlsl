@@ -10,6 +10,6 @@ float4 main(in float2 texcoord : TEXCOORD0) : COLOR0
 		float4 tmp = dst*(1-a) + prev*blurcol*a;
 		prev = saturate(tmp);
 	}
-	prev.a = 1.0f;
+	prev.a = 1.0;
 	return prev;
 }

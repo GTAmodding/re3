@@ -85,7 +85,11 @@ public:
 	static int32 ms_oldSectorX;
 	static int32 ms_oldSectorY;
 	static int32 ms_streamingBufferSize;
+#ifndef ONE_THREAD_PER_CHANNEL
 	static int8 *ms_pStreamingBuffer[2];
+#else
+	static int8 *ms_pStreamingBuffer[4];
+#endif
 	static size_t ms_memoryUsed;
 	static CStreamingChannel ms_channel[2];
 	static int32 ms_channelError;

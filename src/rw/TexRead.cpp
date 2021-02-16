@@ -1,7 +1,11 @@
 #pragma warning( push )
 #pragma warning( disable : 4005)
 #pragma warning( pop )
+#define FORCE_PC_SCALING
 #include "common.h"
+#ifdef ANISOTROPIC_FILTERING
+#include "rpanisot.h"
+#endif
 #include "crossplatform.h"
 #include "platform.h"
 
@@ -48,6 +52,12 @@ RwTextureGtaStreamRead(RwStream *stream)
 		texLoadTime = (texNumLoaded * texLoadTime + (float)CTimer::GetCurrentTimeInCycles() / (float)CTimer::GetCyclesPerMillisecond() - preloadTime) / (float)(texNumLoaded+1);
 		texNumLoaded++;
 	}
+
+#ifdef ANISOTROPIC_FILTERING
+	if(tex && RpAnisotGetMaxSupportedMaxAnisotropy() > 1)	// BUG? this was RpAnisotTextureGetMaxAnisotropy, but that doesn't make much sense
+		RpAnisotTextureSetMaxAnisotropy(tex, RpAnisotGetMaxSupportedMaxAnisotropy());
+#endif
+
 	return tex;
 }
 

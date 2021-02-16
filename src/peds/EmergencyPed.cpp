@@ -317,7 +317,7 @@ CEmergencyPed::MedicAI(void)
 						m_nEmergencyPedState = EMERGENCY_PED_STAND_STILL;
 					} else {
 						m_nEmergencyPedState = EMERGENCY_PED_FACE_TO_PATIENT;
-						m_pVehicleAnim = CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ANIM_CPR, 4.0f);
+						m_pVehicleAnim = CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ANIM_MEDIC_CPR, 4.0f);
 						bIsDucking = true;
 					}
 					SetLookTimer(2000);

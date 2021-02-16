@@ -794,13 +794,13 @@ CVehicle::ShufflePassengersToMakeSpace(void)
 		if (!pPassengers[2] && !(m_nGettingInFlags & CAR_DOOR_FLAG_RR)) {
 			pPassengers[2] = pPassengers[1];
 			pPassengers[1] = nil;
-			pPassengers[2]->m_vehEnterType = CAR_DOOR_RR;
+			pPassengers[2]->m_vehDoor = CAR_DOOR_RR;
 			return true;
 		}
 		if (!pPassengers[0] && !(m_nGettingInFlags & CAR_DOOR_FLAG_RF)) {
 			pPassengers[0] = pPassengers[1];
 			pPassengers[1] = nil;
-			pPassengers[0]->m_vehEnterType = CAR_DOOR_RF;
+			pPassengers[0]->m_vehDoor = CAR_DOOR_RF;
 			return true;
 		}
 		return false;
@@ -811,13 +811,13 @@ CVehicle::ShufflePassengersToMakeSpace(void)
 		if (!pPassengers[1] && !(m_nGettingInFlags & CAR_DOOR_FLAG_LR)) {
 			pPassengers[1] = pPassengers[2];
 			pPassengers[2] = nil;
-			pPassengers[1]->m_vehEnterType = CAR_DOOR_LR;
+			pPassengers[1]->m_vehDoor = CAR_DOOR_LR;
 			return true;
 		}
 		if (!pPassengers[0] && !(m_nGettingInFlags & CAR_DOOR_FLAG_RF)) {
 			pPassengers[0] = pPassengers[2];
 			pPassengers[2] = nil;
-			pPassengers[0]->m_vehEnterType = CAR_DOOR_RF;
+			pPassengers[0]->m_vehDoor = CAR_DOOR_RF;
 			return true;
 		}
 		return false;
@@ -828,13 +828,13 @@ CVehicle::ShufflePassengersToMakeSpace(void)
 		if (!pPassengers[1] && !(m_nGettingInFlags & CAR_DOOR_FLAG_LR)) {
 			pPassengers[1] = pPassengers[0];
 			pPassengers[0] = nil;
-			pPassengers[1]->m_vehEnterType = CAR_DOOR_LR;
+			pPassengers[1]->m_vehDoor = CAR_DOOR_LR;
 			return true;
 		}
 		if (!pPassengers[2] && !(m_nGettingInFlags & CAR_DOOR_FLAG_RR)) {
 			pPassengers[2] = pPassengers[0];
 			pPassengers[0] = nil;
-			pPassengers[2]->m_vehEnterType = CAR_DOOR_RR;
+			pPassengers[2]->m_vehDoor = CAR_DOOR_RR;
 			return true;
 		}
 		return false;

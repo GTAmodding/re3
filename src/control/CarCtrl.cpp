@@ -124,18 +124,18 @@ CCarCtrl::GenerateOneRandomCar()
 	CWanted* pWanted = pPlayer->m_pPed->m_pWanted;
 	int carClass;
 	int carModel;
-	if (pWanted->m_nWantedLevel > 1 && NumLawEnforcerCars < pWanted->m_MaximumLawEnforcerVehicles &&
+	if (pWanted->GetWantedLevel() > 1 && NumLawEnforcerCars < pWanted->m_MaximumLawEnforcerVehicles &&
 		pWanted->m_CurrentCops < pWanted->m_MaxCops && (
-			pWanted->m_nWantedLevel > 3 ||
-			pWanted->m_nWantedLevel > 2 && CTimer::GetTimeInMilliseconds() > LastTimeLawEnforcerCreated + 5000 ||
-			pWanted->m_nWantedLevel > 1 && CTimer::GetTimeInMilliseconds() > LastTimeLawEnforcerCreated + 8000)) {
-		/* Last pWanted->m_nWantedLevel > 1 is unnecessary but I added it for better readability. */
+			pWanted->GetWantedLevel() > 3 ||
+			pWanted->GetWantedLevel() > 2 && CTimer::GetTimeInMilliseconds() > LastTimeLawEnforcerCreated + 5000 ||
+			pWanted->GetWantedLevel() > 1 && CTimer::GetTimeInMilliseconds() > LastTimeLawEnforcerCreated + 8000)) {
+		/* Last pWanted->GetWantedLevel() > 1 is unnecessary but I added it for better readability. */
 		/* Wouldn't be surprised it was there originally but was optimized out. */
 		carClass = COPS;
 		carModel = ChoosePoliceCarModel();
 	}else{
 		carModel = ChooseModel(&zone, &vecTargetPos, &carClass);
-		if (carClass == COPS && pWanted->m_nWantedLevel >= 1)
+		if (carClass == COPS && pWanted->GetWantedLevel() >= 1)
 			/* All cop spawns with wanted level are handled by condition above. */
 			/* In particular it means that cop cars never spawn if player has wanted level of 1. */
 			return;
@@ -267,7 +267,7 @@ CCarCtrl::GenerateOneRandomCar()
 	}
 	if (!ThePaths.NewGenerateCarCreationCoors(vecTargetPos.x, vecTargetPos.y, frontX, frontY,
 		preferredDistance, angleLimit, invertAngleLimitTest, &spawnPosition, &curNodeId, &nextNodeId,
-		&positionBetweenNodes, carClass == COPS && pWanted->m_nWantedLevel >= 1))
+		&positionBetweenNodes, carClass == COPS && pWanted->GetWantedLevel() >= 1))
 		return;
 	int16 colliding;
 	CWorld::FindObjectsKindaColliding(spawnPosition, 10.0f, true, &colliding, 2, nil, false, true, true, false, false);
@@ -331,7 +331,7 @@ CCarCtrl::GenerateOneRandomCar()
 	}
 	case COPS:
 		pVehicle->AutoPilot.m_nTempAction = TEMPACT_NONE;
-		if (CWorld::Players[CWorld::PlayerInFocus].m_pPed->m_pWanted->m_nWantedLevel != 0){
+		if (CWorld::Players[CWorld::PlayerInFocus].m_pPed->m_pWanted->GetWantedLevel() != 0){
 			pVehicle->AutoPilot.m_nCruiseSpeed = CCarAI::FindPoliceCarSpeedForWantedLevel(pVehicle);
 			pVehicle->AutoPilot.m_fMaxTrafficSpeed = pVehicle->AutoPilot.m_nCruiseSpeed / 2;
 			pVehicle->AutoPilot.m_nCarMission = CCarAI::FindPoliceCarMissionForWantedLevel();
@@ -2415,7 +2415,7 @@ void CCarCtrl::SteerAICarWithPhysicsHeadingForTarget(CVehicle* pVehicle, CPhysic
 			*pHandbrake = true;
 	float maxAngle = FindMaxSteerAngle(pVehicle);
 	steerAngle = Min(maxAngle, Max(-maxAngle, steerAngle));
-	float speedMultiplier = FindSpeedMultiplier(angleToTarget - angleForward,
+	float speedMultiplier = FindSpeedMultiplier(CGeneral::GetATanOfXY(targetX - pVehicle->GetPosition().x, targetY - pVehicle->GetPosition().y) - angleForward,
 		MIN_ANGLE_FOR_SPEED_LIMITING, MAX_ANGLE_FOR_SPEED_LIMITING, MIN_LOWERING_SPEED_COEFFICIENT);
 	float speedTarget = pVehicle->AutoPilot.m_nCruiseSpeed * speedMultiplier;
 	float currentSpeed = pVehicle->GetMoveSpeed().Magnitude() * GAME_SPEED_TO_CARAI_SPEED;
@@ -2654,7 +2654,7 @@ void CCarCtrl::FindLinksToGoWithTheseNodes(CVehicle* pVehicle)
 
 void CCarCtrl::GenerateEmergencyServicesCar(void)
 {
-	if (FindPlayerPed()->m_pWanted->m_nWantedLevel > 3)
+	if (FindPlayerPed()->m_pWanted->GetWantedLevel() > 3)
 		return;
 	if (NumFiretrucksOnDuty + NumAmbulancesOnDuty + NumParkedCars + NumMissionCars +
 		NumLawEnforcerCars + NumRandomCars > MaxNumberOfCarsInUse)

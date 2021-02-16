@@ -1,4 +1,4 @@
-﻿#include "common.h"
+#include "common.h"
 
 #include "AudioManager.h"
 #include "audio_enums.h"
@@ -38,7 +38,7 @@
 #include "ZoneCull.h"
 #include "sampman.h"
 
-const int channels = ARRAY_SIZE(cAudioManager::m_asActiveSamples);
+const int channels = ARRAY_SIZE(AudioManager.m_asActiveSamples);
 const int policeChannel = channels + 1;
 const int allChannels = channels + 2;
 
@@ -3038,109 +3038,109 @@ cAudioManager::ProcessPedOneShots(cPedParams &params)
 		switch (sound) {
 		case SOUND_STEP_START:
 		case SOUND_STEP_END:
-			if (!params.m_pPed->bIsLooking) {
-				emittingVol = m_anRandomTable[3] % 15 + 45;
-				if (FindPlayerPed() != m_asAudioEntities[m_sQueueSample.m_nEntityIndex].m_pEntity)
-					emittingVol /= 2;
-				maxDist = 400.f;
-				switch (params.m_pPed->m_nSurfaceTouched) {
-				case SURFACE_GRASS:
-					sampleIndex = m_anRandomTable[1] % 5 + SFX_FOOTSTEP_GRASS_1;
-					break;
-				case SURFACE_GRAVEL:
-				case SURFACE_MUD_DRY:
-					sampleIndex = m_anRandomTable[4] % 5 + SFX_FOOTSTEP_GRAVEL_1;
-					break;
-				case SURFACE_CAR:
-				case SURFACE_GARAGE_DOOR:
-				case SURFACE_CAR_PANEL:
-				case SURFACE_THICK_METAL_PLATE:
-				case SURFACE_SCAFFOLD_POLE:
-				case SURFACE_LAMP_POST:
-				case SURFACE_FIRE_HYDRANT:
-				case SURFACE_GIRDER:
-				case SURFACE_METAL_CHAIN_FENCE:
-				case SURFACE_CONTAINER:
-				case SURFACE_NEWS_VENDOR:
-					sampleIndex = m_anRandomTable[0] % 5 + SFX_FOOTSTEP_METAL_1;
-					break;
-				case SURFACE_SAND:
-					sampleIndex = (m_anRandomTable[4] & 3) + SFX_FOOTSTEP_SAND_1;
-					break;
-				case SURFACE_WATER:
-					sampleIndex = (m_anRandomTable[3] & 3) + SFX_FOOTSTEP_WATER_1;
-					break;
-				case SURFACE_WOOD_CRATES:
-				case SURFACE_WOOD_BENCH:
-				case SURFACE_WOOD_SOLID:
-					sampleIndex = m_anRandomTable[2] % 5 + SFX_FOOTSTEP_WOOD_1;
-					break;
-				case SURFACE_HEDGE:
-					sampleIndex = m_anRandomTable[2] % 5 + SFX_COL_VEG_1;
-					break;
-				default:
-					sampleIndex = m_anRandomTable[2] % 5 + SFX_FOOTSTEP_CONCRETE_1;
-					break;
-				}
-				m_sQueueSample.m_nSampleIndex = sampleIndex;
-				m_sQueueSample.m_nBankIndex = SFX_BANK_0;
-				m_sQueueSample.m_nCounter = m_asAudioEntities[m_sQueueSample.m_nEntityIndex].m_awAudioEvent[i] - 28;
-				m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(m_sQueueSample.m_nSampleIndex);
-				m_sQueueSample.m_nFrequency += RandomDisplacement(m_sQueueSample.m_nFrequency / 17);
-				switch (params.m_pPed->m_nMoveState) {
-				case PEDMOVE_WALK:
-					emittingVol /= 4;
-					m_sQueueSample.m_nFrequency = 9 * m_sQueueSample.m_nFrequency / 10;
-					break;
-				case PEDMOVE_RUN:
-					emittingVol /= 2;
-					m_sQueueSample.m_nFrequency = 11 * m_sQueueSample.m_nFrequency / 10;
-					break;
-				case PEDMOVE_SPRINT:
-					m_sQueueSample.m_nFrequency = 12 * m_sQueueSample.m_nFrequency / 10;
-					break;
-				default:
-					break;
-				}
-				m_sQueueSample.m_nReleasingVolumeModificator = 5;
-				m_sQueueSample.m_fSpeedMultiplier = 0.0f;
-				m_sQueueSample.m_fSoundIntensity = 20.0f;
-				m_sQueueSample.m_nLoopCount = 1;
-				m_sQueueSample.m_nLoopStart = 0;
-				m_sQueueSample.m_nLoopEnd = -1;
-				m_sQueueSample.m_nEmittingVolume = emittingVol;
-				m_sQueueSample.m_bIs2D = false;
-				m_sQueueSample.m_bReleasingSoundFlag = true;
-				m_sQueueSample.m_bRequireReflection = true;
+			if (params.m_pPed->bIsInTheAir)
+				continue;
+			emittingVol = m_anRandomTable[3] % 15 + 45;
+			if (FindPlayerPed() != m_asAudioEntities[m_sQueueSample.m_nEntityIndex].m_pEntity)
+				emittingVol /= 2;
+			maxDist = 400.f;
+			switch (params.m_pPed->m_nSurfaceTouched) {
+			case SURFACE_GRASS:
+				sampleIndex = m_anRandomTable[1] % 5 + SFX_FOOTSTEP_GRASS_1;
+				break;
+			case SURFACE_GRAVEL:
+			case SURFACE_MUD_DRY:
+				sampleIndex = m_anRandomTable[4] % 5 + SFX_FOOTSTEP_GRAVEL_1;
+				break;
+			case SURFACE_CAR:
+			case SURFACE_GARAGE_DOOR:
+			case SURFACE_CAR_PANEL:
+			case SURFACE_THICK_METAL_PLATE:
+			case SURFACE_SCAFFOLD_POLE:
+			case SURFACE_LAMP_POST:
+			case SURFACE_FIRE_HYDRANT:
+			case SURFACE_GIRDER:
+			case SURFACE_METAL_CHAIN_FENCE:
+			case SURFACE_CONTAINER:
+			case SURFACE_NEWS_VENDOR:
+				sampleIndex = m_anRandomTable[0] % 5 + SFX_FOOTSTEP_METAL_1;
+				break;
+			case SURFACE_SAND:
+				sampleIndex = (m_anRandomTable[4] & 3) + SFX_FOOTSTEP_SAND_1;
+				break;
+			case SURFACE_WATER:
+				sampleIndex = (m_anRandomTable[3] & 3) + SFX_FOOTSTEP_WATER_1;
+				break;
+			case SURFACE_WOOD_CRATES:
+			case SURFACE_WOOD_BENCH:
+			case SURFACE_WOOD_SOLID:
+				sampleIndex = m_anRandomTable[2] % 5 + SFX_FOOTSTEP_WOOD_1;
+				break;
+			case SURFACE_HEDGE:
+				sampleIndex = m_anRandomTable[2] % 5 + SFX_COL_VEG_1;
+				break;
+			default:
+				sampleIndex = m_anRandomTable[2] % 5 + SFX_FOOTSTEP_CONCRETE_1;
+				break;
 			}
+			m_sQueueSample.m_nSampleIndex = sampleIndex;
+			m_sQueueSample.m_nBankIndex = SFX_BANK_0;
+			m_sQueueSample.m_nCounter = m_asAudioEntities[m_sQueueSample.m_nEntityIndex].m_awAudioEvent[i] - SOUND_STEP_START + 1;
+			m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(m_sQueueSample.m_nSampleIndex);
+			m_sQueueSample.m_nFrequency += RandomDisplacement(m_sQueueSample.m_nFrequency / 17);
+			switch (params.m_pPed->m_nMoveState) {
+			case PEDMOVE_WALK:
+				emittingVol /= 4;
+				m_sQueueSample.m_nFrequency = 9 * m_sQueueSample.m_nFrequency / 10;
+				break;
+			case PEDMOVE_RUN:
+				emittingVol /= 2;
+				m_sQueueSample.m_nFrequency = 11 * m_sQueueSample.m_nFrequency / 10;
+				break;
+			case PEDMOVE_SPRINT:
+				m_sQueueSample.m_nFrequency = 12 * m_sQueueSample.m_nFrequency / 10;
+				break;
+			default:
+				break;
+			}
+			m_sQueueSample.m_nReleasingVolumeModificator = 5;
+			m_sQueueSample.m_fSpeedMultiplier = 0.0f;
+			m_sQueueSample.m_fSoundIntensity = 20.0f;
+			m_sQueueSample.m_nLoopCount = 1;
+			m_sQueueSample.m_nLoopStart = 0;
+			m_sQueueSample.m_nLoopEnd = -1;
+			m_sQueueSample.m_nEmittingVolume = emittingVol;
+			m_sQueueSample.m_bIs2D = false;
+			m_sQueueSample.m_bReleasingSoundFlag = true;
+			m_sQueueSample.m_bRequireReflection = true;
 			break;
 		case SOUND_FALL_LAND:
 		case SOUND_FALL_COLLAPSE:
-			if (!ped->bIsLooking) {
-				maxDist = SQR(30);
-				emittingVol = m_anRandomTable[3] % 20 + 80;
-				if (ped->m_nSurfaceTouched == SURFACE_WATER) {
-					m_sQueueSample.m_nSampleIndex = (m_anRandomTable[3] & 3) + SFX_FOOTSTEP_WATER_1;
-				} else if (sound == SOUND_FALL_LAND) {
-					m_sQueueSample.m_nSampleIndex = SFX_BODY_LAND;
-				} else {
-					m_sQueueSample.m_nSampleIndex = SFX_BODY_LAND_AND_FALL;
-				}
-				m_sQueueSample.m_nBankIndex = SFX_BANK_0;
-				m_sQueueSample.m_nCounter = 1;
-				m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(m_sQueueSample.m_nSampleIndex);
-				m_sQueueSample.m_nFrequency += RandomDisplacement(m_sQueueSample.m_nFrequency / 17);
-				m_sQueueSample.m_nReleasingVolumeModificator = 2;
-				m_sQueueSample.m_fSpeedMultiplier = 0.0f;
-				m_sQueueSample.m_fSoundIntensity = 30.0f;
-				m_sQueueSample.m_nLoopCount = 1;
-				m_sQueueSample.m_nLoopStart = 0;
-				m_sQueueSample.m_nLoopEnd = -1;
-				m_sQueueSample.m_nEmittingVolume = emittingVol;
-				m_sQueueSample.m_bIs2D = false;
-				m_sQueueSample.m_bReleasingSoundFlag = true;
-				m_sQueueSample.m_bRequireReflection = true;
+			if (ped->bIsInTheAir)
+				continue;
+			maxDist = SQR(30);
+			emittingVol = m_anRandomTable[3] % 20 + 80;
+			if (ped->m_nSurfaceTouched == SURFACE_WATER) {
+				m_sQueueSample.m_nSampleIndex = (m_anRandomTable[3] & 3) + SFX_FOOTSTEP_WATER_1;
+			} else if (sound == SOUND_FALL_LAND) {
+				m_sQueueSample.m_nSampleIndex = SFX_BODY_LAND;
+			} else {
+				m_sQueueSample.m_nSampleIndex = SFX_BODY_LAND_AND_FALL;
 			}
+			m_sQueueSample.m_nBankIndex = SFX_BANK_0;
+			m_sQueueSample.m_nCounter = 1;
+			m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(m_sQueueSample.m_nSampleIndex);
+			m_sQueueSample.m_nFrequency += RandomDisplacement(m_sQueueSample.m_nFrequency / 17);
+			m_sQueueSample.m_nReleasingVolumeModificator = 2;
+			m_sQueueSample.m_fSpeedMultiplier = 0.0f;
+			m_sQueueSample.m_fSoundIntensity = 30.0f;
+			m_sQueueSample.m_nLoopCount = 1;
+			m_sQueueSample.m_nLoopStart = 0;
+			m_sQueueSample.m_nLoopEnd = -1;
+			m_sQueueSample.m_nEmittingVolume = emittingVol;
+			m_sQueueSample.m_bIs2D = false;
+			m_sQueueSample.m_bReleasingSoundFlag = true;
+			m_sQueueSample.m_bRequireReflection = true;
 			break;
 		case SOUND_FIGHT_PUNCH_33:
 			m_sQueueSample.m_nSampleIndex = SFX_FIGHT_1;
@@ -5788,7 +5788,7 @@ cAudioManager::GetCasualMaleOldTalkSfx(int16 sound)
 uint32
 cAudioManager::GetSpecialCharacterTalkSfx(int32 modelIndex, int32 sound)
 {
-	char *modelName = CModelInfo::GetModelInfo(modelIndex)->GetName();
+	char *modelName = CModelInfo::GetModelInfo(modelIndex)->GetModelName();
 	if (!CGeneral::faststricmp(modelName, "eight") || !CGeneral::faststricmp(modelName, "eight2")) {
 		return GetEightTalkSfx(sound);
 	}
@@ -7927,7 +7927,7 @@ cAudioManager::ProcessFrontEnd()
 			frontendBank = true;
 			stereo = true;
 			break;
-		case SOUND_FRONTEND_NO_RADIO:
+		case SOUND_FRONTEND_RADIO_TURN_OFF:
 		case SOUND_FRONTEND_RADIO_CHANGE:
 			m_sQueueSample.m_nSampleIndex = SFX_RADIO_CLICK;
 			break;

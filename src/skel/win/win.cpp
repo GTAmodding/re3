@@ -1,8 +1,7 @@
-#if defined RW_D3D9 || defined RWLIBS
+#if defined RW_D3D9 || defined RWLIBS || defined __MWERKS__
 
 #define _WIN32_WINDOWS 0x0500
 #define WINVER 0x0500
-#define DIRECTINPUT_VERSION 0x0800
 
 #include <winerror.h>
 #include <windows.h>
@@ -20,13 +19,11 @@
 #pragma warning( push )
 #pragma warning( disable : 4005)
 
-#ifdef USE_D3D9
-#include <d3d9.h>
-#else
-#include <d3d8.h>
+#ifdef __MWERKS__
+#define MAPVK_VK_TO_CHAR (2) // this is missing from codewarrior win32 headers - but it gets used ... how?
 #endif
+
 #include <ddraw.h>
-#include <dinput.h>
 #include <DShow.h>
 #pragma warning( pop )
 
@@ -41,6 +38,9 @@
 #pragma comment( lib, "strmiids.lib" )
 #pragma comment( lib, "dinput8.lib" )
 
+#define WITHD3D
+#define WITHDINPUT
+#include "common.h"
 #if (defined(_MSC_VER))
 #include <tchar.h>
 #endif /* (defined(_MSC_VER)) */
@@ -82,7 +82,6 @@ static psGlobalType PsGlobal;
 #define JIF(x) if (FAILED(hr=(x))) \
 	{debug(TEXT("FAILED(hr=0x%x) in ") TEXT(#x) TEXT("\n"), hr); return;}
 
-#include "common.h"
 #include "main.h"
 #include "FileMgr.h"
 #include "Text.h"
@@ -93,12 +92,14 @@ static psGlobalType PsGlobal;
 #include "Frontend.h"
 #include "Game.h"
 #include "PCSave.h"
-#include "MemoryCard.h"
-#include "Sprite2d.h"
 #include "AnimViewer.h"
-#include "Font.h"
 #include "MemoryMgr.h"
 
+#ifdef PS2_MENU
+#include "MemoryCard.h"
+#include "Font.h"
+#endif
+	
 VALIDATE_SIZE(psGlobalType, 0x28);
 
 // DirectShow interfaces
@@ -119,6 +120,10 @@ DWORD _dwOperatingSystemVersion;
 
 RwUInt32 gGameState;
 CJoySticks AllValidWinJoys;
+
+#ifdef DETECT_JOYSTICK_MENU
+char gSelectedJoystickName[128] = "";
+#endif
 
 // What is that for anyway?
 #ifndef IMPROVED_VIDEOMODE
@@ -252,6 +257,11 @@ psGrabScreen(RwCamera *pCamera)
 		RwImageSetFromRaster(pImage, pRaster);
 		return pImage;
 	}
+#else
+	rw::Image *image = RwCameraGetRaster(pCamera)->toImage();
+	image->removeMask();
+	if(image)
+		return image;
 #endif
 	return nil;
 }
@@ -651,7 +661,7 @@ psInitialize(void)
 	C_PcSave::SetSaveDirectory(_psGetUserFilesFolder());
 	
 	InitialiseLanguage();
-#if GTA_VERSION >= GTA3_PC_11
+#if GTA_VERSION < GTA3_PC_11
 	FrontEndMenuManager.LoadSettings();
 #endif
 
@@ -1320,7 +1330,11 @@ InitApplication(HANDLE instance)
 	windowClass.cbClsExtra = 0;
 	windowClass.cbWndExtra = 0;
 	windowClass.hInstance = (HINSTANCE)instance;
+#ifdef FIX_BUGS
+	windowClass.hIcon = LoadIcon((HINSTANCE)instance, MAKEINTRESOURCE(IDI_MAIN_ICON));
+#else
 	windowClass.hIcon = nil;
+#endif
 	windowClass.hCursor = LoadCursor(nil, IDC_ARROW);
 	windowClass.hbrBackground = nil;
 	windowClass.lpszMenuName = NULL;
@@ -2148,8 +2162,15 @@ WinMain(HINSTANCE instance,
 	{
 		CFileMgr::SetDirMyDocuments();
 		
+#ifdef LOAD_INI_SETTINGS
+		// At this point InitDefaultControlConfigJoyPad must have set all bindings to default and ms_padButtonsInited to number of detected buttons.
+		// We will load stored bindings below, but let's cache ms_padButtonsInited before LoadINIControllerSettings and LoadSettings clears it,
+		// so we can add new joy bindings **on top of** stored bindings.
+		int connectedPadButtons = ControlsManager.ms_padButtonsInited;
+#endif
+
 		int32 gta3set = CFileMgr::OpenFile("gta3.set", "r");
-		
+
 		if ( gta3set )
 		{
 			ControlsManager.LoadSettings(gta3set);
@@ -2157,6 +2178,14 @@ WinMain(HINSTANCE instance,
 		}
 		
 		CFileMgr::SetDir("");
+
+#ifdef LOAD_INI_SETTINGS
+		LoadINIControllerSettings();
+		if (connectedPadButtons != 0) {
+			ControlsManager.InitDefaultControlConfigJoyPad(connectedPadButtons);
+			SaveINIControllerSettings();
+		}
+#endif
 	}
 	
 	SetErrorMode(SEM_FAILCRITICALERRORS);

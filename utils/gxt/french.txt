@@ -1,4 +1,11 @@
-﻿[LETTER1]
+﻿{
+    New strings are at the bottom of file.
+    Do not change the order of strings.
+    You can fix the typos of existing translation but please refrain from
+    unnecessary edits like rephasing because you think it suits better for your taste.
+}
+
+[LETTER1]
 abcdefghijklmnopqrstuvwxyz ABCDEFGHIJKLMNOPQRSTUVWXYZ 0123456789"$,.'-?!!SDBF
 
 [DEFNAM]
@@ -2233,11 +2240,11 @@ Une voiture piégée coûte 1000$ pièce!
 [GA_5]
 Ta voiture est déjà équipée d'une bombe.
 
-[GA_6]
-Gare-la, arme la bombe avec la ~h~touche ~k~~PED_FIREWEAPON~~w~ et CASSE-TOI!
+[GA_6] { re3 change }
+Gare-la, arme la bombe avec la ~h~touche ~k~~VEHICLE_FIREWEAPON~~w~ et CASSE-TOI!
 
-[GA_7]
-Arme la bombe avec la ~h~touche ~k~~PED_FIREWEAPON~~w~. Elle explose au démarrage.
+[GA_7] { re3 change }
+Arme la bombe avec la ~h~touche ~k~~VEHICLE_FIREWEAPON~~w~. Elle explose au démarrage.
 
 [GA_8]
 Utilise le détonateur pour armer la bombe.
@@ -2451,33 +2458,6 @@ Accélérateur
 
 [FEC_SMT]
 Déclencheur de mission spéciale
-
-[FEC_CCF]
-Configuration:
-
-[FEC_CF1]
-Config1
-
-[FEC_CF2]
-Config2
-
-[FEC_CF3]
-Config3
-
-[FEC_CF4]
-Config4
-
-[FEC_CDP]
-Affichage de la manette:
-
-[FEC_ONF]
-A pied
-
-[FEC_INC]
-Dans un véhicule
-
-[FEC_VIB]
-Vibrations:
 
 [FEA_OUT]
 Sortie audio:
@@ -3511,11 +3491,11 @@ D'accord ?
 [JM6_1]
 Va à la banque par la rue principale.
 
-[GA_6B]
-Tu la gares, tu l'amorces en appuyant sur la ~h~touche ~k~~PED_FIREWEAPON~~w~ et tu te barres!
+[GA_6B] { re3 change }
+Tu la gares, tu l'amorces en appuyant sur la ~h~touche ~k~~VEHICLE_FIREWEAPON~~w~ et tu te barres!
 
-[GA_7B]
-Pour armer la bombe, appuie sur la ~h~touche ~k~~PED_FIREWEAPON~~w~. Elle explosera au démarrage.
+[GA_7B] { re3 change }
+Pour armer la bombe, appuie sur la ~h~touche ~k~~VEHICLE_FIREWEAPON~~w~. Elle explosera au démarrage.
 
 [BAT1]
 ~g~Ramasse la batte!
@@ -3653,7 +3633,7 @@ Port 1 Fichier Protégé.
 ~1~ sur 12!
 
 [T4X4_2C]
-~y~ Passe le premier point de passage pour déclencher le chrono. ~y~ Chaque point de passage te rapportera ~y~10 secondes~g~.
+~y~Passe le premier point de passage pour déclencher le chrono. ~y~ Chaque point de passage te rapportera ~y~10 secondes~g~.
 
 [T4X4_3A]
 ~g~Tu as ~y~5 minutes~g~ pour franchir ~y~20~g~ points de passage. ~g~Tu peux les franchir dans ~y~n'importe quel ordre.
@@ -3946,11 +3926,11 @@ Amène ton véhicule à l'atelier de peinture pour annuler ton ~h~indice de rech
 [HM1_1]
 ~G~Refroidis 20 Nines violets en 2 minutes et 30 secondes.
 
-[KM1_8A]
-Appuie sur la ~h~touche ~k~~PED_FIREWEAPON~~w~ pour ~h~activer la bombe~w~, n'oublie pas de t'éloigner.
+[KM1_8A] { re3 change }
+Appuie sur la ~h~touche ~k~~VEHICLE_FIREWEAPON~~w~ pour ~h~activer la bombe~w~, n'oublie pas de t'éloigner.
 
-[KM1_8D]
-Appuie sur la ~h~touche ~k~~PED_FIREWEAPON~~w~ pour ~h~activer la bombe~w~, n'oublie pas de t'éloigner.
+[KM1_8D] { re3 change }
+Appuie sur la ~h~touche ~k~~VEHICLE_FIREWEAPON~~w~ pour ~h~activer la bombe~w~, n'oublie pas de t'éloigner.
 
 [KM1_12]
 ~g~Amène-le au dojo mais débarrasse-toi des flics d'abord!
@@ -4087,11 +4067,11 @@ J'ai pas besoin de tes papiers d'identité. Je pense qu'on peut te faire confian
 [DETON]
 DETONATION :
 
-[DRIVE_A]
-Selectionne un Uzi quand tu montes dans la voiture, regarde à gauche ou à droite et appuie sur la ~h~touche ~k~~PED_FIREWEAPON~~w~ pour tirer.
+[DRIVE_A] { re3 change }
+Selectionne un Uzi quand tu montes dans la voiture, regarde à gauche ou à droite et appuie sur la ~h~touche ~k~~VEHICLE_FIREWEAPON~~w~ pour tirer.
 
-[DRIVE_B]
-Selectionne un Uzi quand tu montes dans la voiture, regarde à gauche ou à droite et appuie sur la ~h~touche ~k~~PED_FIREWEAPON~~w~ pour tirer.
+[DRIVE_B] { re3 change }
+Selectionne un Uzi quand tu montes dans la voiture, regarde à gauche ou à droite et appuie sur la ~h~touche ~k~~VEHICLE_FIREWEAPON~~w~ pour tirer.
 
 [RECORD]
 ~g~NOUVEAU RECORD!
@@ -4099,11 +4079,11 @@ Selectionne un Uzi quand tu montes dans la voiture, regarde à gauche ou à droi
 [NRECORD]
 ~r~PAS DE RECORD!
 
-[RCHELP]
-Appuie sur la ~h~touche ~k~~PED_FIREWEAPON~~w~ ou heurte une roue de voiture avec le véhicule télécommandé pour le faire exploser.
+[RCHELP] { re3 change }
+Appuie sur la ~h~touche ~k~~VEHICLE_FIREWEAPON~~w~ ou heurte une roue de voiture avec le véhicule télécommandé pour le faire exploser.
 
-[RCHELPA]
-Appuie sur la ~h~touche ~k~~PED_FIREWEAPON~~w~ ou heurte une roue de voiture avec le véhicule télécommandé pour le faire exploser.
+[RCHELPA] { re3 change }
+Appuie sur la ~h~touche ~k~~VEHICLE_FIREWEAPON~~w~ ou heurte une roue de voiture avec le véhicule télécommandé pour le faire exploser.
 
 [RC_1]
 Tu as 2 minutes pour faire péter autant de voitures de Diablo que tu peux!
@@ -4603,11 +4583,11 @@ LA DISPARITION DE LOVE
 [RM5_6]
 ~g~Il s'est enfui! Bousille-lui son plâtre avec une bagnole ou une explosion!
 
-[PBOAT_1]
-Appuie sur la ~h~touche ~k~~PED_FIREWEAPON~~w~ pour tirer avec les canons du bateau.
+[PBOAT_1] { re3 change }
+Appuie sur la ~h~touche ~k~~VEHICLE_FIREWEAPON~~w~ pour tirer avec les canons du bateau.
 
-[PBOAT_2]
-Appuie sur la ~h~touche ~k~~PED_FIREWEAPON~~w~ pour tirer avec les canons du bateau.
+[PBOAT_2] { re3 change }
+Appuie sur la ~h~touche ~k~~VEHICLE_FIREWEAPON~~w~ pour tirer avec les canons du bateau.
 
 [DIAB1_B]
 C'est El Burro des Diablos.
@@ -4621,11 +4601,11 @@ Il y a une course de bagnoles qui va partir de la vieille école près du pont d
 [DIAB1_F]
 Trouve-toi une caisse et le premier qui franchit tous les points de passage, gagne le gros lot.
 
-[HM2_1]
-Utilise les buggies télécommandés pour détruire les voitures blindées. Appuie sur la ~h~touche ~k~~PED_FIREWEAPON~~w~ pour les faire exploser.
+[HM2_1] { re3 change }
+Utilise les buggies télécommandés pour détruire les voitures blindées. Appuie sur la ~h~touche ~k~~VEHICLE_FIREWEAPON~~w~ pour les faire exploser.
 
-[HM2_1A]
-Utilise les buggies télécommandés pour détruire les voitures blindées. Appuie sur la ~h~touche ~k~~PED_FIREWEAPON~~w~ pour les faire exploser.
+[HM2_1A] { re3 change }
+Utilise les buggies télécommandés pour détruire les voitures blindées. Appuie sur la ~h~touche ~k~~VEHICLE_FIREWEAPON~~w~ pour les faire exploser.
 
 [HM2_2]
 ~r~T'as pas réussi à détruire toutes leurs voitures blindées!
@@ -5045,7 +5025,7 @@ Tu as prouvé que tu étais un bon investissement, ce qui est rare en ces jours 
 ~w~Merci Chico. A plus tard.
 
 [FM1_W]
-. ~w~Ok Fido, tu attends ici et tu surveilles la caisse pendant que je vais m'éclater.
+~w~Ok Fido, tu attends ici et tu surveilles la caisse pendant que je vais m'éclater.
 
 [FM1_X]
 ~w~Ok Fido, tirons-nous d'ici. Ouuulaa!
@@ -6637,11 +6617,11 @@ Cette memory card (PS2) est déjà formatée.
 [FEDSAS4]
 ;=<> - CHANGER SELECTION
 
-[SPRAY_4]
-Utilise la ~h~touche ~k~~PED_FIREWEAPON~~w~ pour tirer à l'aide du canon à eau.
+[SPRAY_4] { re3 change }
+Utilise la ~h~touche ~k~~VEHICLE_FIREWEAPON~~w~ pour tirer à l'aide du canon à eau.
 
-[SPRAY_1]
-Utilise la ~h~touche ~k~~PED_FIREWEAPON~~w~ pour tirer à l'aide du canon à eau.
+[SPRAY_1] { re3 change }
+Utilise la ~h~touche ~k~~VEHICLE_FIREWEAPON~~w~ pour tirer à l'aide du canon à eau.
 
 [AM1_10]
 ~g~Salvatore Leone partira de chez Luigi vers 0~1~:~1~.
@@ -7504,9 +7484,6 @@ CONNEXION
 [FET_AUD]
 CONFIG. AUDIO
 
-[FET_GFX]
-CONFIG. EFFETS SPECIAUX
-
 [FET_DIS]
 CONFIG. AFFICHAGE
 
@@ -8205,6 +8182,187 @@ MATERIEL INDISPONIBLE - PARAMETRE D'ORIGINE RETABLI
 
 [CRED270]
 MIKE HONG
+
+{ re3 updates }
+{ new languages }
+[FEL_JAP]
+JAPONAIS
+
+[FEL_POL]
+POLONAIS
+
+[FEL_RUS]
+RUSSE
+
+{ new display menus }
+[FET_GFX] { this probably needs to be retranslated }
+CONFIG. EFFETS SPECIAUX
+
+[FED_MIP]
+MIP MAPPING
+
+[FED_AAS]
+ANTI ALIASING
+
+[FED_FIL]
+TEXTURE FILTERING
+
+[FED_BIL]
+BILINEAR
+
+[FED_TRL]
+TRILINEAR
+
+[FED_WND]
+WINDOWED
+
+[FED_FLS]
+FULLSCREEN
+
+[FEM_CSB]
+CUTSCENE BORDERS
+
+[FEM_SCF]
+SCREEN FORMAT
+
+[FEM_ISL]
+MAP MEMORY USAGE
+
+[FEM_LOW]
+LOW
+
+[FEM_MED]
+MEDIUM
+
+[FEM_HIG]
+HIGH
+
+[FEM_2PR]
+PS2 ALPHA TEST
+
+[FEC_FRC]
+FREE CAM
+
+{ Linux joy detection }
+[FEC_JOD]
+DETECT JOYSTICK
+
+[FEC_JPR]
+Press any key on the joystick of your choice that you want to use on the game, and it will be selected.
+
+[FEC_JDE]
+Detected joystick
+
+{ mission restart }
+[FET_RMS]
+REJOUER MISSION
+
+[FESZ_RM]
+REJOUER?
+
+{ more graphics }
+[FED_VPL]
+VEHICLE PIPELINE
+
+[FED_PRM]
+PED RIM LIGHT
+
+[FED_RGL]
+ROAD GLOSS
+
+[FED_CLF]
+COLOUR FILTER
+
+[FED_WLM]
+WORLD LIGHTMAPS
+
+[FED_MBL]
+MOTION BLUR
+
+[FEM_SIM]
+SIMPLE
+
+[FEM_NRM]
+NORMAL
+
+[FEM_MOB]
+MOBILE
+
+[FED_MFX]
+MATFX
+
+[FED_NEO]
+NEO
+
+[FEM_PS2]
+PS2
+
+[FEM_XBX]
+XBOX
+
+[FEM_AUT] { aspect ratio related }
+AUTO
+
+{ controls }
+[FEC_IVP]
+INVERT PAD VERTICALLY
+
+{ map }
+[FEM_TWP]
+Toggle Waypoint
+
+[FEA_FMN]
+RADIO ETEINTE
+
+[FEC_DS2]
+DUALSHOCK 2
+
+[FEC_DS3]
+DUALSHOCK 3
+
+[FEC_DS4]
+DUALSHOCK 4
+
+[FEC_360]
+XBOX 360 CONTROLLER
+
+[FEC_ONE]
+XBOX ONE CONTROLLER
+
+[FEC_TYP]
+GAMEPAD TYPE
+
+[FEC_CCF]
+CONFIGURATION
+
+[FEC_CF1]
+CONFIGURATION 1
+
+[FEC_CF2]
+CONFIGURATION 2
+
+[FEC_CF3]
+CONFIGURATION 3
+
+[FEC_CF4]
+CONFIGURATION 4
+
+[FEC_CDP]
+AFFICHAGE DE LA MANETTE
+
+[FEC_ONF]
+A PIED
+
+[FEC_INC]
+DANS UN VÉHICULE
+
+[FEC_VIB]
+VIBRATIONS
+
+[FET_AGS]
+GAMEPAD SETTINGS
+
+{ end of file }
 
 [DUMMY]
 THIS LABEL NEEDS TO BE HERE !!!

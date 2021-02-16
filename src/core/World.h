@@ -3,6 +3,7 @@
 #include "Game.h"
 #include "Lists.h"
 #include "PlayerInfo.h"
+#include "Collision.h"
 
 /* Sectors span from -2000 to 2000 in x and y.
  * With 100x100 sectors, each is 40x40 units. */
@@ -47,11 +48,6 @@ public:
 };
 
 VALIDATE_SIZE(CSector, 0x28);
-
-class CEntity;
-struct CColPoint;
-struct CColLine;
-struct CStoredCollPoly;
 
 class CWorld
 {

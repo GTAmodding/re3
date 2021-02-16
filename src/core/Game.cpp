@@ -1,6 +1,3 @@
-#pragma warning( push )
-#pragma warning( disable : 4005)
-#pragma warning( pop )
 #include "common.h"
 #include "platform.h"
 
@@ -10,7 +7,6 @@
 #include "Accident.h"
 #include "Antennas.h"
 #include "Bridge.h"
-#include "Camera.h"
 #include "CarCtrl.h"
 #include "CarGen.h"
 #include "CdStream.h"
@@ -67,7 +63,6 @@
 #include "Shadows.h"
 #include "Skidmarks.h"
 #include "SpecialFX.h"
-#include "Sprite2d.h"
 #include "Stats.h"
 #include "Streaming.h"
 #include "SurfaceTable.h"
@@ -419,6 +414,11 @@ bool CGame::Initialise(const char* datFile)
 	CTxdStore::Create(gameTxdSlot);
 	CTxdStore::AddRef(gameTxdSlot);
 
+#ifdef EXTENDED_PIPELINES
+	// for generic fallback
+	CustomPipes::SetTxdFindCallback();
+#endif
+
 	LoadingScreen("Loading the Game", "Loading particles", nil);
 	int particleTxdSlot = CTxdStore::AddTxdSlot("particle");
 	CTxdStore::LoadTxd(particleTxdSlot, "MODELS/PARTICLE.TXD");
@@ -503,10 +503,6 @@ bool CGame::Initialise(const char* datFile)
 	CFileLoader::LoadLevel("GTA3.DAT");
 #endif
 
-#ifdef EXTENDED_PIPELINES
-	// for generic fallback
-	CustomPipes::SetTxdFindCallback();
-#endif
 	CWorld::AddParticles();
 	CVehicleModelInfo::LoadVehicleColours();
 	CVehicleModelInfo::LoadEnvironmentMaps();

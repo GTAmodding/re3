@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Game.h"
 #include "PCSave.h"
 
 #define SLOT_COUNT (8)

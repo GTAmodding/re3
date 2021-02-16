@@ -17,7 +17,11 @@ enum eWinVersion
 // As long as WITHWINDOWS isn't defined / <Windows.h> isn't included, we only need type definitions so let's include <IntSafe.h>.
 // NOTE: It's perfectly fine to include <Windows.h> here, but it can increase build size and time in *some* conditions, and maybe substantially in future if we'll use crossplatform.h more.
 #ifndef _INC_WINDOWS
-    #include <IntSafe.h>
+	#ifndef __MWERKS__
+		#include <IntSafe.h>
+	#else
+		#include <Windows.h>
+	#endif
 #endif
 #if defined RW_D3D9 || defined RWLIBS
 #include "win.h"
@@ -67,7 +71,7 @@ void CapturePad(RwInt32 padID);
 void joysChangeCB(int jid, int event);
 #endif
 
-#ifdef DONT_TRUST_RECOGNIZED_JOYSTICKS
+#ifdef DETECT_JOYSTICK_MENU
 extern char gSelectedJoystickName[128];
 #endif
 
@@ -128,7 +132,12 @@ void GetLocalTime_CP(SYSTEMTIME* out);
 
 typedef void* HANDLE;
 #define INVALID_HANDLE_VALUE NULL
-#define FindClose(h) closedir((DIR*)h)
+#define FindClose(h) \
+    do { \
+        if (h != nil) \
+            closedir((DIR*)h); \
+    } while(0)
+
 #define LOCALE_USER_DEFAULT 0
 #define DATE_SHORTDATE 0
 

@@ -1,4 +1,4 @@
-#define WITH_D3D
+#define WITHD3D
 #include "common.h"
 
 #ifdef EXTENDED_PIPELINES

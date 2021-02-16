@@ -1,16 +1,10 @@
 //#define JUICY_OAL
 
 #ifdef AUDIO_OAL
-#include "sampman.h"
-
 #include <time.h>
 
 #include "eax.h"
 #include "eax-util.h"
-
-#define WITHWINDOWS
-#include "common.h"
-#include "crossplatform.h"
 
 #ifdef _WIN32
 #include <io.h>
@@ -19,7 +13,23 @@
 #include <AL/alext.h>
 #include <AL/efx.h>
 #include <AL/efx-presets.h>
+
+// for user MP3s
+#include <direct.h>
+#include <shlobj.h>
+#include <shlguid.h>
+#else
+#define _getcwd getcwd
 #endif
+
+#if defined _MSC_VER && !defined CMAKE_NO_AUTOLINK
+#pragma comment( lib, "OpenAL32.lib" )
+#endif
+
+#include "common.h"
+#include "crossplatform.h"
+
+#include "sampman.h"
 
 #include "oal/oal_utils.h"
 #include "oal/aldlist.h"
@@ -30,26 +40,12 @@
 #include "MusicManager.h"
 #include "Frontend.h"
 #include "Timer.h"
-#ifdef AUDIO_OPUS
+#ifdef AUDIO_OAL_USE_OPUS
 #include <opusfile.h>
 #endif
 
 //TODO: fix eax3 reverb
 //TODO: max channels
-//TODO: loop count
-
-#ifdef _WIN32
-#pragma comment( lib, "OpenAL32.lib" )
-#endif
-
-// for user MP3s
-#ifdef _WIN32
-#include <direct.h>
-#include <shobjidl.h>
-#include <shlguid.h>
-#else
-#define _getcwd getcwd
-#endif
 
 cSampleManager SampleManager;
 bool _bSampmanInitialised = false;
@@ -83,7 +79,7 @@ char SampleBankDescFilename[] = "audio/sfx.SDT";
 char SampleBankDataFilename[] = "audio/sfx.RAW";
 
 FILE *fpSampleDescHandle;
-#ifdef AUDIO_OPUS
+#ifdef OPUS_SFX
 OggOpusFile *fpSampleDataHandle;
 #else
 FILE *fpSampleDataHandle;
@@ -102,7 +98,7 @@ CChannel aChannel[MAXCHANNELS+MAX2DCHANNELS];
 uint8 nChannelVolume[MAXCHANNELS+MAX2DCHANNELS];
 
 uint32 nStreamLength[TOTAL_STREAMED_SOUNDS];
-ALuint ALStreamSources[MAX_STREAMS];
+ALuint ALStreamSources[MAX_STREAMS][2];
 ALuint ALStreamBuffers[MAX_STREAMS][NUM_STREAMBUFFERS];
 
 struct tMP3Entry
@@ -122,7 +118,6 @@ char _mp3DirectoryPath[MAX_PATH];
 CStream    *aStream[MAX_STREAMS];
 uint8      nStreamPan   [MAX_STREAMS];
 uint8      nStreamVolume[MAX_STREAMS];
-uint8      nStreamLoopedFlag[MAX_STREAMS];
 uint32 _CurMP3Index;
 int32 _CurMP3Pos;
 bool _bIsMp3Active;
@@ -245,9 +240,9 @@ release_existing()
 		if (stream)
 			stream->ProviderTerm();
 		
-		alDeleteSources(1, &ALStreamSources[i]);
 		alDeleteBuffers(NUM_STREAMBUFFERS, ALStreamBuffers[i]);
 	}
+	alDeleteSources(MAX_STREAMS*2, ALStreamSources[0]);
 	
 	CChannel::DestroyChannels();
 	
@@ -287,7 +282,10 @@ set_new_provider(int index)
 		//TODO:
 		_maxSamples = MAXCHANNELS;
 		
-		ALCint attr[] = {ALC_FREQUENCY,MAX_FREQ,0};
+		ALCint attr[] = {ALC_FREQUENCY,MAX_FREQ,
+						ALC_MONO_SOURCES, MAX_STREAMS * 2 + MAXCHANNELS,
+						0,
+						};
 		
 		ALDevice  = alcOpenDevice(providers[index].id);
 		ASSERT(ALDevice != NULL);
@@ -319,11 +317,17 @@ set_new_provider(int index)
 			alGenAuxiliaryEffectSlots(1, &ALEffectSlot);
 			alGenEffects(1, &ALEffect);
 		}
-		
+
+		alGenSources(MAX_STREAMS*2, ALStreamSources[0]);
 		for ( int32 i = 0; i < MAX_STREAMS; i++ )
 		{
-			alGenSources(1, &ALStreamSources[i]);
-			alGenBuffers(NUM_STREAMBUFFERS, ALStreamBuffers[i]);
+			alGenBuffers(NUM_STREAMBUFFERS, ALStreamBuffers[i]); 
+			alSourcei(ALStreamSources[i][0], AL_SOURCE_RELATIVE, AL_TRUE);
+			alSource3f(ALStreamSources[i][0], AL_POSITION, 0.0f, 0.0f, 0.0f);
+			alSourcef(ALStreamSources[i][0], AL_GAIN, 1.0f);
+			alSourcei(ALStreamSources[i][1], AL_SOURCE_RELATIVE, AL_TRUE);
+			alSource3f(ALStreamSources[i][1], AL_POSITION, 0.0f, 0.0f, 0.0f);
+			alSourcef(ALStreamSources[i][1], AL_GAIN, 1.0f);
 			
 			CStream *stream = aStream[i];
 			if (stream)
@@ -382,6 +386,12 @@ set_new_provider(int index)
 	}
 	
 	return false;
+}
+
+static bool
+IsThisTrackAt16KHz(uint32 track)
+{
+	return track == STREAMED_SOUND_RADIO_CHAT;
 }
 
 cSampleManager::cSampleManager(void)
@@ -965,7 +975,7 @@ cSampleManager::Initialise(void)
 #endif
 
 		for(int32 i = 0; i < TOTAL_STREAMED_SOUNDS; i++) {
-			aStream[0] = new CStream(StreamedNameTable[i], ALStreamSources[0], ALStreamBuffers[0]);
+			aStream[0] = new CStream(StreamedNameTable[i], ALStreamSources[0], ALStreamBuffers[0], IsThisTrackAt16KHz(i) ? 16000 : 32000);
 
 			if(aStream[0] && aStream[0]->IsOpened()) {
 				uint32 tatalms = aStream[0]->GetLengthMS();
@@ -1203,7 +1213,7 @@ cSampleManager::LoadSampleBank(uint8 nBank)
 		return false;
 	}
 	
-#ifdef AUDIO_OPUS
+#ifdef OPUS_SFX
 	int samplesRead = 0;
 	int samplesSize = nSampleBankSize[nBank] / 2;
 	op_pcm_seek(fpSampleDataHandle, 0);
@@ -1308,7 +1318,7 @@ cSampleManager::LoadPedComment(uint32 nComment)
 			
 			case MUSICMODE_FRONTEND:
 			{
-				if ( MusicManager.GetCurrentTrack() == STREAMED_SOUND_GAME_COMPLETED )
+				if ( MusicManager.GetNextTrack() == STREAMED_SOUND_GAME_COMPLETED )
 					return false;
 
 				break;
@@ -1316,7 +1326,7 @@ cSampleManager::LoadPedComment(uint32 nComment)
 		}
 	}
 
-#ifdef AUDIO_OPUS
+#ifdef OPUS_SFX
 	int samplesRead = 0;
 	int samplesSize = m_aSamples[nComment].nSize / 2;
 	op_pcm_seek(fpSampleDataHandle, m_aSamples[nComment].nOffset / 2);
@@ -1523,8 +1533,8 @@ cSampleManager::SetChannelEmittingVolume(uint32 nChannel, uint32 nVolume)
 	
 	// reduce channel volume when JB.MP3 or S4_BDBD.MP3 playing
 	if (   MusicManager.GetMusicMode()    == MUSICMODE_CUTSCENE
-		&& MusicManager.GetCurrentTrack() != STREAMED_SOUND_NEWS_INTRO
-		&& MusicManager.GetCurrentTrack() != STREAMED_SOUND_CUTSCENE_SAL4_BDBD )
+		&& MusicManager.GetNextTrack() != STREAMED_SOUND_NEWS_INTRO
+		&& MusicManager.GetNextTrack() != STREAMED_SOUND_CUTSCENE_SAL4_BDBD )
 	{
 		nChannelVolume[nChannel] = vol / 4;
 	}
@@ -1565,8 +1575,8 @@ cSampleManager::SetChannelVolume(uint32 nChannel, uint32 nVolume)
 		
 		// reduce the volume for JB.MP3 and S4_BDBD.MP3
 		if (   MusicManager.GetMusicMode()    == MUSICMODE_CUTSCENE
-			&& MusicManager.GetCurrentTrack() != STREAMED_SOUND_NEWS_INTRO
-			&& MusicManager.GetCurrentTrack() != STREAMED_SOUND_CUTSCENE_SAL4_BDBD )
+			&& MusicManager.GetNextTrack() != STREAMED_SOUND_NEWS_INTRO
+			&& MusicManager.GetNextTrack() != STREAMED_SOUND_CUTSCENE_SAL4_BDBD )
 		{
 			nChannelVolume[nChannel] = vol / 4;
 		}
@@ -1652,11 +1662,11 @@ cSampleManager::PreloadStreamedFile(uint8 nFile, uint8 nStream)
 		
 		strcpy(filename, StreamedNameTable[nFile]);
 		
-		CStream *stream = new CStream(filename, ALStreamSources[nStream], ALStreamBuffers[nStream]);
+		CStream *stream = new CStream(filename, ALStreamSources[nStream], ALStreamBuffers[nStream], IsThisTrackAt16KHz(nFile) ? 16000 : 32000);
 		ASSERT(stream != NULL);
 		
 		aStream[nStream] = stream;
-		if ( !stream->IsOpened() )
+		if ( !stream->Setup() )
 		{
 			delete stream;
 			aStream[nStream] = NULL;
@@ -1686,7 +1696,7 @@ cSampleManager::StartPreloadedStreamedFile(uint8 nStream)
 	
 	if ( stream )
 	{
-		if ( stream->Setup() )
+		if ( stream->IsOpened() )
 		{
 			stream->Start();
 		}
@@ -1727,18 +1737,16 @@ cSampleManager::StartStreamedFile(uint8 nFile, uint32 nPos, uint8 nStream)
 							nFile = 0;
 							strcat(filename, StreamedNameTable[nFile]);
 
-							CStream* stream = new CStream(filename, ALStreamSources[nStream], ALStreamBuffers[nStream]);
+							CStream* stream = new CStream(filename, ALStreamSources[nStream], ALStreamBuffers[nStream], IsThisTrackAt16KHz(nFile) ? 16000 : 32000);
 							ASSERT(stream != NULL);
 
 							aStream[nStream] = stream;
 
-							if (stream->IsOpened()) {
-								if (stream->Setup()) {
-									if (position != 0)
-										stream->SetPosMS(position);
+							if (stream->Setup()) {
+								if (position != 0)
+									stream->SetPosMS(position);
 
-									stream->Start();
-								}
+								stream->Start();
 
 								return true;
 							} else {
@@ -1751,18 +1759,16 @@ cSampleManager::StartStreamedFile(uint8 nFile, uint32 nPos, uint8 nStream)
 					}
 
 					if (mp3->pLinkPath != NULL)
-						aStream[nStream] = new CStream(mp3->pLinkPath, ALStreamSources[nStream], ALStreamBuffers[nStream]);
+						aStream[nStream] = new CStream(mp3->pLinkPath, ALStreamSources[nStream], ALStreamBuffers[nStream], IsThisTrackAt16KHz(nFile) ? 16000 : 32000);
 					else {
 						strcpy(filename, _mp3DirectoryPath);
 						strcat(filename, mp3->aFilename);
 
-						aStream[nStream] = new CStream(filename, ALStreamSources[nStream], ALStreamBuffers[nStream]);
+						aStream[nStream] = new CStream(filename, ALStreamSources[nStream], ALStreamBuffers[nStream], IsThisTrackAt16KHz(nFile) ? 16000 : 32000);
 					}
 
-					if (aStream[nStream]->IsOpened()) {
-						if (aStream[nStream]->Setup()) {
-							aStream[nStream]->Start();
-						}
+					if (aStream[nStream]->Setup()) {
+						aStream[nStream]->Start();
 
 						return true;
 					} else {
@@ -1783,18 +1789,16 @@ cSampleManager::StartStreamedFile(uint8 nFile, uint32 nPos, uint8 nStream)
 					{
 						nFile = 0;
 						strcat(filename, StreamedNameTable[nFile]);
-						CStream* stream = new CStream(filename, ALStreamSources[nStream], ALStreamBuffers[nStream]);
+						CStream* stream = new CStream(filename, ALStreamSources[nStream], ALStreamBuffers[nStream], IsThisTrackAt16KHz(nFile) ? 16000 : 32000);
 						ASSERT(stream != NULL);
 
 						aStream[nStream] = stream;
 
-						if (stream->IsOpened()) {
-							if (stream->Setup()) {
-								if (position != 0)
-									stream->SetPosMS(position);
+						if (stream->Setup()) {
+							if (position != 0)
+								stream->SetPosMS(position);
 
-								stream->Start();
-							}
+							stream->Start();
 
 							return true;
 						} else {
@@ -1807,7 +1811,7 @@ cSampleManager::StartStreamedFile(uint8 nFile, uint32 nPos, uint8 nStream)
 				}
 
 				if (e->pLinkPath != NULL)
-					aStream[nStream] = new CStream(e->pLinkPath, ALStreamSources[nStream], ALStreamBuffers[nStream]);
+					aStream[nStream] = new CStream(e->pLinkPath, ALStreamSources[nStream], ALStreamBuffers[nStream], IsThisTrackAt16KHz(nFile) ? 16000 : 32000);
 				else {
 					strcpy(filename, _mp3DirectoryPath);
 					strcat(filename, e->aFilename);
@@ -1815,13 +1819,11 @@ cSampleManager::StartStreamedFile(uint8 nFile, uint32 nPos, uint8 nStream)
 					aStream[nStream] = new CStream(filename, ALStreamSources[nStream], ALStreamBuffers[nStream]);
 				}
 
-				if (aStream[nStream]->IsOpened()) {
-					if (aStream[nStream]->Setup()) {
-						if (position != 0)
-							aStream[nStream]->SetPosMS(position);
+				if (aStream[nStream]->Setup()) {
+					if (position != 0)
+						aStream[nStream]->SetPosMS(position);
 
-						aStream[nStream]->Start();
-					}
+					aStream[nStream]->Start();
 
 					_bIsMp3Active = true;
 					return true;
@@ -1840,18 +1842,16 @@ cSampleManager::StartStreamedFile(uint8 nFile, uint32 nPos, uint8 nStream)
 
 		strcpy(filename, StreamedNameTable[nFile]);
 		
-		CStream *stream = new CStream(filename, ALStreamSources[nStream], ALStreamBuffers[nStream]);
+		CStream *stream = new CStream(filename, ALStreamSources[nStream], ALStreamBuffers[nStream], IsThisTrackAt16KHz(nFile) ? 16000 : 32000);
 		ASSERT(stream != NULL);
 
 		aStream[nStream] = stream;
 		
-		if ( stream->IsOpened() ) {
-			if ( stream->Setup() ) {
-				if (position != 0)
-					stream->SetPosMS(position);	
+		if ( stream->Setup() ) {
+			if (position != 0)
+				stream->SetPosMS(position);	
 
-				stream->Start();
-			}
+			stream->Start();
 			
 			return true;
 		} else {
@@ -1874,6 +1874,9 @@ cSampleManager::StopStreamedFile(uint8 nStream)
 	{
 		delete stream;
 		aStream[nStream] = NULL;
+
+		if ( nStream == 0 )
+			_bIsMp3Active = false;
 	}
 }
 
@@ -1886,7 +1889,21 @@ cSampleManager::GetStreamedFilePosition(uint8 nStream)
 	
 	if ( stream )
 	{
-		return stream->GetPosMS();
+		if ( _bIsMp3Active )
+		{
+			tMP3Entry *mp3 = _GetMP3EntryByIndex(_CurMP3Index);
+			
+			if ( mp3 != NULL )
+			{
+				return stream->GetPosMS() + mp3->nTrackStreamPos;
+			}
+			else
+				return 0;
+		}
+		else
+		{
+			return stream->GetPosMS();
+		}
 	}
 	
 	return 0;
@@ -1953,6 +1970,12 @@ cSampleManager::Service(void)
 		if ( stream )
 			stream->Update();
 	}
+	int refCount = CChannel::channelsThatNeedService;
+	for ( int32 i = 0; refCount && i < MAXCHANNELS+MAX2DCHANNELS; i++ )
+	{
+		if ( aChannel[i].Update() )
+			refCount--;
+	}
 }
 
 bool
@@ -1963,7 +1986,7 @@ cSampleManager::InitialiseSampleBanks(void)
 	fpSampleDescHandle = fcaseopen(SampleBankDescFilename, "rb");
 	if ( fpSampleDescHandle == NULL )
 		return false;
-#ifndef AUDIO_OPUS
+#ifndef OPUS_SFX
 	fpSampleDataHandle = fcaseopen(SampleBankDataFilename, "rb");
 	if ( fpSampleDataHandle == NULL )
 	{
@@ -1981,7 +2004,7 @@ cSampleManager::InitialiseSampleBanks(void)
 	fpSampleDataHandle = op_open_file(SampleBankDataFilename, &e);
 #endif
 	fread(m_aSamples, sizeof(tSample), TOTAL_AUDIO_SAMPLES, fpSampleDescHandle);
-#ifdef AUDIO_OPUS
+#ifdef OPUS_SFX
 	int32 _nSampleDataEndOffset = m_aSamples[TOTAL_AUDIO_SAMPLES - 1].nOffset + m_aSamples[TOTAL_AUDIO_SAMPLES - 1].nSize;
 #endif
 	fclose(fpSampleDescHandle);

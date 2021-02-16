@@ -127,7 +127,7 @@ void CWaterCannon::Render(void)
 	int16 pointA = m_nCur % NUM_SEGMENTPOINTS;
 	
 	int16 pointB = pointA - 1;
-	if ( (pointA - 1) < 0 )
+	if ( pointB < 0 )
 		pointB += NUM_SEGMENTPOINTS;
 
 	bool bInit = false;
@@ -231,7 +231,7 @@ void CWaterCannon::PushPeds(void)
 							ped->m_vecMoveSpeed.x = (0.6f * m_avecVelocity[j].x + ped->m_vecMoveSpeed.x) * 0.5f;
 							ped->m_vecMoveSpeed.y = (0.6f * m_avecVelocity[j].y + ped->m_vecMoveSpeed.y) * 0.5f;
 							
-							ped->SetFall(2000, AnimationId(ANIM_KO_SKID_FRONT + localDir), 0);
+							ped->SetFall(2000, AnimationId(ANIM_STD_HIGHIMPACT_FRONT + localDir), 0);
 							
 							CFire *fire = ped->m_pFire;
 							if ( fire )

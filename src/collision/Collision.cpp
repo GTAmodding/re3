@@ -477,8 +477,16 @@ CCollision::TestLineTriangle(const CColLine &line, const CompressedVector *verts
 	if(plane.CalcPoint(line.p0) * plane.CalcPoint(line.p1) > 0.0f)
 		return false;
 
+	float p0dist = DotProduct(line.p1 - line.p0, normal);
+
+#ifdef FIX_BUGS
+	// line lines in the plane, assume no collision
+	if (p0dist == 0.0f)
+		return false;
+#endif
+
 	// intersection parameter on line
-	t = -plane.CalcPoint(line.p0) / DotProduct(line.p1 - line.p0, normal);
+	t = -plane.CalcPoint(line.p0) / p0dist;
 	// find point of intersection
 	CVector p = line.p0 + (line.p1-line.p0)*t;
 
@@ -1286,8 +1294,17 @@ CCollision::ProcessLineTriangle(const CColLine &line,
 	if(plane.CalcPoint(line.p0) * plane.CalcPoint(line.p1) > 0.0f)
 		return false;
 
+	float p0dist = DotProduct(line.p1 - line.p0, normal);
+
+#ifdef FIX_BUGS
+	// line lines in the plane, assume no collision
+	if (p0dist == 0.0f)
+		return false;
+#endif
+
 	// intersection parameter on line
-	t = -plane.CalcPoint(line.p0) / DotProduct(line.p1 - line.p0, normal);
+	t = -plane.CalcPoint(line.p0) / p0dist;
+
 	// early out if we're beyond the mindist
 	if(t >= mindist)
 		return false;
@@ -2245,12 +2262,12 @@ CCollision::DistToLine(const CVector *l0, const CVector *l1, const CVector *poin
 	float dot = DotProduct(*point - *l0, *l1 - *l0);
 	// Between 0 and len we're above the line.
 	// if not, calculate distance to endpoint
-	if(dot <= 0.0f)
-		return (*point - *l0).Magnitude();
-	if(dot >= lensq)
-		return (*point - *l1).Magnitude();
+	if(dot <= 0.0f) return (*point - *l0).Magnitude();
+	if(dot >= lensq) return (*point - *l1).Magnitude();
 	// distance to line
-	return Sqrt((*point - *l0).MagnitudeSqr() - dot*dot/lensq);
+	float distSqr = (*point - *l0).MagnitudeSqr() - dot * dot / lensq;
+	if(distSqr <= 0.f) return 0.f;
+	return Sqrt(distSqr);
 }
 
 // same as above but also return the point on the line

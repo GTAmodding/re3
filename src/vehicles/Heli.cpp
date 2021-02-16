@@ -474,7 +474,7 @@ CHeli::ProcessControl(void)
 			// Shoot
 			int shootTimeout;
 			if (m_heliType == HELI_TYPE_RANDOM) {
-				switch (FindPlayerPed()->m_pWanted->m_nWantedLevel) {
+				switch (FindPlayerPed()->m_pWanted->GetWantedLevel()) {
 				case 0:
 				case 1:
 				case 2: shootTimeout = 999999; break;
@@ -785,7 +785,7 @@ CHeli::InitHelis(void)
 }
 
 CHeli*
-GenerateHeli(bool catalina)
+CHeli::GenerateHeli(bool catalina)
 {
 	CHeli *heli;
 	CVector heliPos;
@@ -830,7 +830,7 @@ GenerateHeli(bool catalina)
 		id++;
 		found = true;
 		for(i = 0; i < 4; i++)
-			if(CHeli::pHelis[i] && CHeli::pHelis[i]->m_nHeliId == id)
+			if(pHelis[i] && pHelis[i]->m_nHeliId == id)
 				found = false;
 	}
 	heli->m_nHeliId = id;

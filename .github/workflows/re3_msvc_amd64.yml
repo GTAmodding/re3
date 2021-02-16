@@ -1,4 +1,4 @@
-name: re3_msvc_amd64
+name: re3 premake amd64
 
 on:
   pull_request:
@@ -20,7 +20,7 @@ jobs:
     strategy:
       matrix:
         platform: [win-amd64-librw_d3d9-oal, win-amd64-librw_gl3_glfw-oal]
-        buildtype: [Debug, Release]
+        buildtype: [Debug, Release, Vanilla]
     steps:
     - name: Add msbuild to PATH
       uses: microsoft/setup-msbuild@v1.0.2
@@ -48,14 +48,22 @@ jobs:
     - name: Build
       run: |
         msbuild -m build/re3.sln /property:Configuration=${{matrix.buildtype}} /property:Platform=${{matrix.platform}}
-    - name: Pack artifacts
+    # - name: Pack artifacts
+      # run: |
+        # 7z a re3_${{matrix.buildtype}}_${{matrix.platform}}.zip ./bin/${{matrix.platform}}/${{matrix.buildtype}}/*
+    - name: Move binaries to gamefiles
       run: |
-        7z a re3_${{matrix.buildtype}}_${{matrix.platform}}.zip ./bin/${{matrix.platform}}/${{matrix.buildtype}}/*
+        mv ./bin/${{matrix.platform}}/${{matrix.buildtype}}/re3.exe ./gamefiles/
+        mv ./bin/${{matrix.platform}}/${{matrix.buildtype}}/re3.pdb ./gamefiles/
+    - name: Move dynamic dependencies to gamefiles
+      run: |
+        mv ./vendor/mpg123/dist/Win64/libmpg123-0.dll ./gamefiles/
+        mv ./vendor/openal-soft/dist/Win64/OpenAL32.dll ./gamefiles/
     - name: Upload artifact to actions
       uses: actions/upload-artifact@v2
       with:
         name: re3_${{matrix.buildtype}}_${{matrix.platform}}
-        path: ./bin/${{matrix.platform}}/${{matrix.buildtype}}
+        path: ./gamefiles/*
 #    - name: Upload artifact to Bintray
 #      uses: hpcsc/upload-bintray-docker-action@v1
 #      with:

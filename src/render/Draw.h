@@ -4,10 +4,14 @@ enum eAspectRatio
 {
 	// Make sure these work the same as FrontEndMenuManager.m_PrefsUseWideScreen
 	// without widescreen support
-	AR_4_3,
-	AR_16_9,
-
 	AR_AUTO,
+	AR_4_3,
+	AR_5_4,
+	AR_16_10,
+	AR_16_9,
+	AR_21_9,
+	
+	AR_MAX,
 };
 
 class CDraw
@@ -30,6 +34,16 @@ public:
 	static uint8 FadeRed;
 	static uint8 FadeGreen;
 	static uint8 FadeBlue;
+	
+#ifdef PROPER_SCALING	
+	static bool ms_bProperScaling;
+#endif
+#ifdef FIX_RADAR
+	static bool ms_bFixRadar;	
+#endif
+#ifdef FIX_SPRITES
+	static bool ms_bFixSprites;	
+#endif
 
 	static void SetNearClipZ(float nearclip) { ms_fNearClipZ = nearclip; }
 	static float GetNearClipZ(void) { return ms_fNearClipZ; }
@@ -52,4 +66,8 @@ public:
 #else
 	static float GetAspectRatio(void) { return FindAspectRatio(); }
 #endif
+	
+#ifdef PROPER_SCALING	
+	static float ScaleY(float y);
+#endif 
 };

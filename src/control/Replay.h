@@ -61,8 +61,6 @@ struct CStoredDetailedAnimationState
 	uint16 aFlags2[NUM_PARTIAL_ANIMS_IN_REPLAY];
 };
 
-void PlayReplayFromHD(void);
-
 #ifdef GTA_REPLAY
 #define REPLAY_STUB
 #else
@@ -323,11 +321,9 @@ private:
 	static void EmptyAllPools(void);
 	static void MarkEverythingAsNew(void);
 	static void SaveReplayToHD(void);
+	static void PlayReplayFromHD(void); // out of class in III PC and later because of SecuROM
 	static void FindFirstFocusCoordinate(CVector *coord);
 	static void ProcessLookAroundCam(void);
 	static size_t FindSizeOfPacket(uint8);
-
-	/* Absolute nonsense, but how could this function end up being outside of class? */
-	friend void PlayReplayFromHD(void); 
 #endif
 };

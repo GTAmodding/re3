@@ -1839,9 +1839,9 @@ void CParticle::AddJetExplosion(CVector const &vecPos, float fPower, float fSize
 					vecStepPos,
 					CVector
 					(
-						CGeneral::GetRandomNumberInRange(-0.2f, 0.2f),
-						CGeneral::GetRandomNumberInRange(-0.2f, 0.2f),
-						CGeneral::GetRandomNumberInRange(-0.2f, 0.0f)
+						CGeneral::GetRandomNumberInRange(-0.02f, 0.02f),
+						CGeneral::GetRandomNumberInRange(-0.02f, 0.02f),
+						CGeneral::GetRandomNumberInRange(-0.02f, 0.0f)
 					),
 					nil,
 					fSize, color, 0, 0, 0, 0);

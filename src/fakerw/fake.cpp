@@ -1,5 +1,5 @@
 #define _CRT_SECURE_NO_WARNINGS
-#define WITH_D3D
+#define WITH_D3D // not WITHD3D, so it's librw define
 #include <rwcore.h>
 #include <rpworld.h>
 #include <rpmatfx.h>
@@ -945,6 +945,43 @@ RtBMPImageRead(const RwChar *imageName)
 #endif
 }
 
+
+RwImage *
+RtPNGImageWrite(RwImage *image, const RwChar *imageName)
+{
+#ifndef _WIN32
+	char *r = casepath(imageName);
+	if (r) {
+		rw::writePNG(image, r);
+		free(r);
+	} else {
+		rw::writePNG(image, imageName);
+	}
+	
+#else
+	rw::writePNG(image, imageName);
+#endif
+	return image;
+}
+RwImage *
+RtPNGImageRead(const RwChar *imageName)
+{
+#ifndef _WIN32
+	RwImage *image;
+	char *r = casepath(imageName);
+	if (r) {
+		image = rw::readPNG(r);
+		free(r);
+	} else {
+		image = rw::readPNG(imageName);
+	}
+	return image;
+
+#else
+	return rw::readPNG(imageName);
+#endif
+}
+
 #include "rtquat.h"
 
 RtQuat *RtQuatRotate(RtQuat * quat, const RwV3d * axis, RwReal angle, RwOpCombineType combineOp) { return (RtQuat*)((rw::Quat*)quat)->rotate(axis, angle/180.0f*3.14159f, (CombineOp)combineOp); }
@@ -962,3 +999,12 @@ RtCharset   *RtCharsetSetColors(RtCharset * charSet, const RwRGBA * foreGround, 
 RtCharset   *RtCharsetGetDesc(RtCharset * charset, RtCharsetDesc * desc) { *desc = charset->desc; return charset; }
 RtCharset   *RtCharsetCreate(const RwRGBA * foreGround, const RwRGBA * backGround) { return Charset::create(foreGround, backGround); }
 RwBool       RtCharsetDestroy(RtCharset * charSet) { charSet->destroy(); return true; }
+
+
+
+#include <rpanisot.h>
+
+RwInt8      RpAnisotGetMaxSupportedMaxAnisotropy(void) { return rw::getMaxSupportedMaxAnisotropy(); }
+RwTexture    *RpAnisotTextureSetMaxAnisotropy(RwTexture *tex, RwInt8 val) { tex->setMaxAnisotropy(val); return tex; }
+RwInt8       RpAnisotTextureGetMaxAnisotropy(RwTexture *tex) { return tex->getMaxAnisotropy(); }
+RwBool       RpAnisotPluginAttach(void) { rw::registerAnisotropyPlugin(); return true; }

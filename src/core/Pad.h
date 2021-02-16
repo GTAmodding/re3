@@ -263,6 +263,8 @@ public:
 	static int32 *EditCodesForControls(int32 *pRsKeys, int32 nSize);
 
 #ifdef XINPUT
+	static int XInputJoy1;
+	static int XInputJoy2;
 	void AffectFromXinput(uint32 pad);
 #endif
 

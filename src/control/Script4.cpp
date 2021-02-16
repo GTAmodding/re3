@@ -38,6 +38,7 @@
 #include "WaterLevel.h"
 #include "World.h"
 #include "Zones.h"
+#include "Wanted.h"
 
 int8 CRunningScript::ProcessCommands800To899(int32 command)
 {
@@ -67,7 +68,7 @@ int8 CRunningScript::ProcessCommands800To899(int32 command)
 			pPed->ApplyHeadShot(WEAPONTYPE_SNIPERRIFLE, pPed->GetNodePosition(PED_HEAD), true);
 		}
 		else {
-			pPed->SetDie(ANIM_KO_SHOT_FRONT1, 4.0f, 0.0f);
+			pPed->SetDie(ANIM_STD_KO_FRONT, 4.0f, 0.0f);
 		}
 		return 0;
 	}
@@ -80,7 +81,7 @@ int8 CRunningScript::ProcessCommands800To899(int32 command)
 			pPed->ApplyHeadShot(WEAPONTYPE_SNIPERRIFLE, pPed->GetNodePosition(PED_HEAD), true);
 		}
 		else {
-			pPed->SetDie(ANIM_KO_SHOT_FRONT1, 4.0f, 0.0f);
+			pPed->SetDie(ANIM_STD_KO_FRONT, 4.0f, 0.0f);
 		}
 		return 0;
 	}
@@ -148,7 +149,7 @@ int8 CRunningScript::ProcessCommands800To899(int32 command)
 			++CCarCtrl::NumMissionCars;
 			--CCarCtrl::NumRandomCars;
 			if (m_bIsMissionScript)
-				CTheScripts::MissionCleanup.AddEntityToList(handle, CLEANUP_CAR);
+				CTheScripts::MissionCleanUp.AddEntityToList(handle, CLEANUP_CAR);
 		}
 		ScriptParams[0] = handle;
 		StoreParameters(&m_nIp, 1);
@@ -180,7 +181,7 @@ int8 CRunningScript::ProcessCommands800To899(int32 command)
 			++CCarCtrl::NumMissionCars;
 			--CCarCtrl::NumRandomCars;
 			if (m_bIsMissionScript)
-				CTheScripts::MissionCleanup.AddEntityToList(handle, CLEANUP_CAR);
+				CTheScripts::MissionCleanUp.AddEntityToList(handle, CLEANUP_CAR);
 		}
 		ScriptParams[0] = handle;
 		StoreParameters(&m_nIp, 1);
@@ -594,7 +595,7 @@ int8 CRunningScript::ProcessCommands800To899(int32 command)
 			}
 		}
 		if (m_bIsMissionScript)
-			CTheScripts::MissionCleanup.RemoveEntityFromList(ScriptParams[0], CLEANUP_CHAR);
+			CTheScripts::MissionCleanUp.RemoveEntityFromList(ScriptParams[0], CLEANUP_CHAR);
 		return 0;
 	}
 	case COMMAND_SET_CHAR_STAY_IN_SAME_PLACE:
@@ -792,7 +793,7 @@ int8 CRunningScript::ProcessCommands800To899(int32 command)
 		pPed->m_pVehicleAnim = nil;
 		pPed->RestartNonPartialAnims();
 		pPed->SetMoveState(PEDMOVE_NONE);
-		CAnimManager::BlendAnimation(pPed->GetClump(), pPed->m_animGroup, ANIM_IDLE_STANCE, 100.0f);
+		CAnimManager::BlendAnimation(pPed->GetClump(), pPed->m_animGroup, ANIM_STD_IDLE, 100.0f);
 		pos.z += pPed->GetDistanceFromCentreOfMassToBaseOfModel();
 		pPed->Teleport(pos);
 		CTheScripts::ClearSpaceForMissionEntity(pos, pPed);
@@ -1002,7 +1003,7 @@ int8 CRunningScript::ProcessCommands800To899(int32 command)
 		ScriptParams[0] = CPools::GetPedPool()->GetIndex(ped);
 		StoreParameters(&m_nIp, 1);
 		if (m_bIsMissionScript)
-			CTheScripts::MissionCleanup.AddEntityToList(ScriptParams[0], CLEANUP_CHAR);
+			CTheScripts::MissionCleanUp.AddEntityToList(ScriptParams[0], CLEANUP_CHAR);
 		return 0;
 	}
 	case COMMAND_SET_CHAR_OBJ_STEAL_ANY_CAR:
@@ -1417,7 +1418,7 @@ int8 CRunningScript::ProcessCommands900To999(int32 command)
 		CVehicle* pVehicle = CPools::GetVehiclePool()->GetAt(ScriptParams[0]);
 		script_assert(pVehicle);
 		const CVector& pos = pVehicle->GetPosition();
-		float heading = CGeneral::GetATanOfXY(pos.y - *(float*)&ScriptParams[2], pos.x - *(float*)&ScriptParams[1]) + HALFPI;
+		float heading = CGeneral::GetATanOfXY(pos.x - *(float*)&ScriptParams[1], pos.y - *(float*)&ScriptParams[2]) + HALFPI;
 		if (heading > TWOPI)
 			heading -= TWOPI;
 		pVehicle->SetHeading(heading);

@@ -81,12 +81,13 @@ public:
 	CObject *SpawnFlyingComponent(int32 component);
 
 	static void InitHelis(void);
+	static CHeli *GenerateHeli(bool catalina); // out of class in III PC and later because of SecuROM
 	static void UpdateHelis(void);
 	static void SpecialHeliPreRender(void);
 	static bool TestRocketCollision(CVector *coors);
 	static bool TestBulletCollision(CVector *line0, CVector *line1, CVector *bulletPos, int32 damage);
 
-	static void StartCatalinaFlyBy(void);
+	static void StartCatalinaFlyBy(void); // out of class in III PC and later because of SecuROM
 	static void RemoveCatalinaHeli(void);
 	static CHeli *FindPointerToCatalinasHeli(void);
 	static void CatalinaTakeOff(void);

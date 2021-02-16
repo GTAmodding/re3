@@ -43,7 +43,7 @@ const char *neoVehicle_vert_src =
 "	v_tex1 = uv2.xy*0.5 + 0.5;\n"
 "	float b = 1.0 - clamp(dot(viewVec, Normal), 0.0, 1.0);\n"
 "	v_reflcolor = vec4(0.0, 0.0, 0.0, 1.0);\n"
-"	v_reflcolor.a = mix(b*b*b*b*b, 1.0f, fresnel)*shininess;\n"
+"	v_reflcolor.a = mix(b*b*b*b*b, 1.0, fresnel)*shininess;\n"
 
 "	for(int i = 0; i < 5; i++)\n"
 "		v_reflcolor.rgb += DoDirLightSpec(u_specDir[i].xyz, u_specColor[i].rgb, Normal, viewVec, u_specDir[i].w)*specularity*lightStrength;\n"

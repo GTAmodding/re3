@@ -553,9 +553,9 @@ CVehicleModelInfo::SetVehicleComponentFlags(RwFrame *frame, uint32 flags)
 		SETFLAGS(ATOMIC_FLAG_FRONT);
 	else if(flags & VEHICLE_FLAG_REAR && (handling->Flags & HANDLING_IS_VAN || (flags & (VEHICLE_FLAG_LEFT|VEHICLE_FLAG_RIGHT)) == 0))
 		SETFLAGS(ATOMIC_FLAG_REAR);
-	if(flags & VEHICLE_FLAG_LEFT)
+	else if(flags & VEHICLE_FLAG_LEFT)
 		SETFLAGS(ATOMIC_FLAG_LEFT);
-	if(flags & VEHICLE_FLAG_RIGHT)
+	else if(flags & VEHICLE_FLAG_RIGHT)
 		SETFLAGS(ATOMIC_FLAG_RIGHT);
 
 	if(flags & VEHICLE_FLAG_REARDOOR)
@@ -709,7 +709,7 @@ struct editableMatCBData
 RpMaterial*
 CVehicleModelInfo::GetEditableMaterialListCB(RpMaterial *material, void *data)
 {
-	static RwRGBA white = { 255, 255, 255, 255 };
+	RwRGBA white = { 255, 255, 255, 255 };
 	const RwRGBA *col;
 	editableMatCBData *cbdata;
 

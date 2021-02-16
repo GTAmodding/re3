@@ -13,7 +13,7 @@ const char *contrast_frag_src =
 "	vec4 dst = texture(tex0, vec2(v_tex0.x, 1.0-v_tex0.y));\n"
 "	vec4 color;\n"
 "	color.rgb = dst.rgb*u_contrastMult + u_contrastAdd;\n"
-"	color.a = 1.0f;\n"
+"	color.a = 1.0;\n"
 
 "	FRAGCOLOR(color);\n"
 "}\n"

@@ -2075,6 +2075,80 @@ VALIDATESAVEBUF(size)
 
 #undef SCRIPT_DATA_SIZE
 
+void CRunningScript::Save(uint8*& buf)
+{
+#ifdef COMPATIBLE_SAVES
+	SkipSaveBuf(buf, 8);
+	for (int i = 0; i < 8; i++)
+		WriteSaveBuf<char>(buf, m_abScriptName[i]);
+	WriteSaveBuf<uint32>(buf, m_nIp);
+#ifdef CHECK_STRUCT_SIZES
+	static_assert(MAX_STACK_DEPTH == 6, "Compatibility loss: MAX_STACK_DEPTH != 6");
+#endif
+	for (int i = 0; i < MAX_STACK_DEPTH; i++)
+		WriteSaveBuf<uint32>(buf, m_anStack[i]);
+	WriteSaveBuf<uint16>(buf, m_nStackPointer);
+	SkipSaveBuf(buf, 2);
+#ifdef CHECK_STRUCT_SIZES
+	static_assert(NUM_LOCAL_VARS + NUM_TIMERS == 18, "Compatibility loss: NUM_LOCAL_VARS + NUM_TIMERS != 18");
+#endif
+	for (int i = 0; i < NUM_LOCAL_VARS + NUM_TIMERS; i++)
+		WriteSaveBuf<int32>(buf, m_anLocalVariables[i]);
+	WriteSaveBuf<bool>(buf, m_bCondResult);
+	WriteSaveBuf<bool>(buf, m_bIsMissionScript);
+	WriteSaveBuf<bool>(buf, m_bSkipWakeTime);
+	SkipSaveBuf(buf, 1);
+	WriteSaveBuf<uint32>(buf, m_nWakeTime);
+	WriteSaveBuf<uint16>(buf, m_nAndOrState);
+	WriteSaveBuf<bool>(buf, m_bNotFlag);
+	WriteSaveBuf<bool>(buf, m_bDeatharrestEnabled);
+	WriteSaveBuf<bool>(buf, m_bDeatharrestExecuted);
+	WriteSaveBuf<bool>(buf, m_bMissionFlag);
+	SkipSaveBuf(buf, 2);
+#else
+	WriteSaveBuf(buf, *this);
+#endif
+}
+
+void CRunningScript::Load(uint8*& buf)
+{
+#ifdef COMPATIBLE_SAVES
+	SkipSaveBuf(buf, 8);
+	for (int i = 0; i < 8; i++)
+		m_abScriptName[i] = ReadSaveBuf<char>(buf);
+	m_nIp = ReadSaveBuf<uint32>(buf);
+#ifdef CHECK_STRUCT_SIZES
+	static_assert(MAX_STACK_DEPTH == 6, "Compatibility loss: MAX_STACK_DEPTH != 6");
+#endif
+	for (int i = 0; i < MAX_STACK_DEPTH; i++)
+		m_anStack[i] = ReadSaveBuf<uint32>(buf);
+	m_nStackPointer = ReadSaveBuf<uint16>(buf);
+	SkipSaveBuf(buf, 2);
+#ifdef CHECK_STRUCT_SIZES
+	static_assert(NUM_LOCAL_VARS + NUM_TIMERS == 18, "Compatibility loss: NUM_LOCAL_VARS + NUM_TIMERS != 18");
+#endif
+	for (int i = 0; i < NUM_LOCAL_VARS + NUM_TIMERS; i++)
+		m_anLocalVariables[i] = ReadSaveBuf<int32>(buf);
+	m_bCondResult = ReadSaveBuf<bool>(buf);
+	m_bIsMissionScript = ReadSaveBuf<bool>(buf);
+	m_bSkipWakeTime = ReadSaveBuf<bool>(buf);
+	SkipSaveBuf(buf, 1);
+	m_nWakeTime = ReadSaveBuf<uint32>(buf);
+	m_nAndOrState = ReadSaveBuf<uint16>(buf);
+	m_bNotFlag = ReadSaveBuf<bool>(buf);
+	m_bDeatharrestEnabled = ReadSaveBuf<bool>(buf);
+	m_bDeatharrestExecuted = ReadSaveBuf<bool>(buf);
+	m_bMissionFlag = ReadSaveBuf<bool>(buf);
+	SkipSaveBuf(buf, 2);
+#else
+	CRunningScript* n = next;
+	CRunningScript* p = prev;
+	*this = ReadSaveBuf<CRunningScript>(buf);
+	next = n;
+	prev = p;
+#endif
+}
+
 void CTheScripts::ClearSpaceForMissionEntity(const CVector& pos, CEntity* pEntity)
 {
 	static CColPoint aTempColPoints[MAX_COLLISION_POINTS];
@@ -2281,7 +2355,7 @@ int CTheScripts::FindFreeSlotInCollectiveArray()
 void CTheScripts::SetObjectiveForAllPedsInCollective(int colIndex, eObjective objective, int16 p1, int16 p2)
 {
 	for (int i = 0; i < MAX_NUM_COLLECTIVES; i++) {
-		if (CollectiveArray[i].colIndex = colIndex) {
+		if (CollectiveArray[i].colIndex == colIndex) {
 			CPed* pPed = CPools::GetPedPool()->GetAt(CollectiveArray[i].pedIndex);
 			if (pPed == nil) {
 				CollectiveArray[i].colIndex = -1;
@@ -2298,7 +2372,7 @@ void CTheScripts::SetObjectiveForAllPedsInCollective(int colIndex, eObjective ob
 void CTheScripts::SetObjectiveForAllPedsInCollective(int colIndex, eObjective objective, CVector p1, float p2)
 {
 	for (int i = 0; i < MAX_NUM_COLLECTIVES; i++) {
-		if (CollectiveArray[i].colIndex = colIndex) {
+		if (CollectiveArray[i].colIndex == colIndex) {
 			CPed* pPed = CPools::GetPedPool()->GetAt(CollectiveArray[i].pedIndex);
 			if (pPed == nil) {
 				CollectiveArray[i].colIndex = -1;
@@ -2315,7 +2389,7 @@ void CTheScripts::SetObjectiveForAllPedsInCollective(int colIndex, eObjective ob
 void CTheScripts::SetObjectiveForAllPedsInCollective(int colIndex, eObjective objective, CVector p1)
 {
 	for (int i = 0; i < MAX_NUM_COLLECTIVES; i++) {
-		if (CollectiveArray[i].colIndex = colIndex) {
+		if (CollectiveArray[i].colIndex == colIndex) {
 			CPed* pPed = CPools::GetPedPool()->GetAt(CollectiveArray[i].pedIndex);
 			if (pPed == nil) {
 				CollectiveArray[i].colIndex = -1;
@@ -2332,7 +2406,7 @@ void CTheScripts::SetObjectiveForAllPedsInCollective(int colIndex, eObjective ob
 void CTheScripts::SetObjectiveForAllPedsInCollective(int colIndex, eObjective objective, void* p1)
 {
 	for (int i = 0; i < MAX_NUM_COLLECTIVES; i++) {
-		if (CollectiveArray[i].colIndex = colIndex) {
+		if (CollectiveArray[i].colIndex == colIndex) {
 			CPed* pPed = CPools::GetPedPool()->GetAt(CollectiveArray[i].pedIndex);
 			if (pPed == nil) {
 				CollectiveArray[i].colIndex = -1;
@@ -2349,7 +2423,7 @@ void CTheScripts::SetObjectiveForAllPedsInCollective(int colIndex, eObjective ob
 void CTheScripts::SetObjectiveForAllPedsInCollective(int colIndex, eObjective objective)
 {
 	for (int i = 0; i < MAX_NUM_COLLECTIVES; i++) {
-		if (CollectiveArray[i].colIndex = colIndex) {
+		if (CollectiveArray[i].colIndex == colIndex) {
 			CPed* pPed = CPools::GetPedPool()->GetAt(CollectiveArray[i].pedIndex);
 			if (pPed == nil) {
 				CollectiveArray[i].colIndex = -1;
@@ -2368,7 +2442,7 @@ bool CTheScripts::IsPedStopped(CPed* pPed)
 {
 	if (pPed->bInVehicle)
 		return IsVehicleStopped(pPed->m_pMyVehicle);
-	return pPed->m_nMoveState == eMoveState::PEDMOVE_NONE || pPed->m_nMoveState == eMoveState::PEDMOVE_STILL;
+	return pPed->m_nMoveState == PEDMOVE_NONE || pPed->m_nMoveState == PEDMOVE_STILL;
 }
 
 bool CTheScripts::IsPlayerStopped(CPlayerInfo* pPlayer)
@@ -2376,12 +2450,12 @@ bool CTheScripts::IsPlayerStopped(CPlayerInfo* pPlayer)
 	CPed* pPed = pPlayer->m_pPed;
 	if (pPed->bInVehicle)
 		return IsVehicleStopped(pPed->m_pMyVehicle);
-	if (RpAnimBlendClumpGetAssociation(pPed->GetClump(), ANIM_RUN_STOP) ||
-		RpAnimBlendClumpGetAssociation(pPed->GetClump(), ANIM_RUN_STOP_R) ||
-		RpAnimBlendClumpGetAssociation(pPed->GetClump(), ANIM_JUMP_LAUNCH) ||
-		RpAnimBlendClumpGetAssociation(pPed->GetClump(), ANIM_JUMP_GLIDE))
+	if (RpAnimBlendClumpGetAssociation(pPed->GetClump(), ANIM_STD_RUNSTOP1) ||
+		RpAnimBlendClumpGetAssociation(pPed->GetClump(), ANIM_STD_RUNSTOP2) ||
+		RpAnimBlendClumpGetAssociation(pPed->GetClump(), ANIM_STD_JUMP_LAUNCH) ||
+		RpAnimBlendClumpGetAssociation(pPed->GetClump(), ANIM_STD_JUMP_GLIDE))
 		return false;
-	return pPed->m_nMoveState == eMoveState::PEDMOVE_NONE || pPed->m_nMoveState == eMoveState::PEDMOVE_STILL;
+	return pPed->m_nMoveState == PEDMOVE_NONE || pPed->m_nMoveState == PEDMOVE_STILL;
 }
 
 bool CTheScripts::IsVehicleStopped(CVehicle* pVehicle)
@@ -2482,7 +2556,7 @@ void CTheScripts::UpdateObjectIndices()
 			CBaseModelInfo* pModel = CModelInfo::GetModelInfo(j);
 			if (!pModel)
 				continue;
-			strcpy(name, pModel->GetName());
+			strcpy(name, pModel->GetModelName());
 #ifdef FIX_BUGS
 			for (int k = 0; k < USED_OBJECT_NAME_LENGTH && name[k]; k++)
 #else

@@ -264,15 +264,11 @@ CCivilianPed::ProcessControl(void)
 					m_pNextPathNode = nil;
 #ifdef PEDS_REPORT_CRIMES_ON_PHONE
 				} else if (bRunningToPhone && m_objective < OBJECTIVE_FLEE_ON_FOOT_TILL_SAFE) {
-					if (!isPhoneAvailable(m_phoneId)) {
+					if (crimeReporters[m_phoneId] != this) {
 						RestorePreviousState();
-						if (crimeReporters[m_phoneId] == this)
-							crimeReporters[m_phoneId] = nil;
-
 						m_phoneId = -1;
 						bRunningToPhone = false;
 					} else {
-						crimeReporters[m_phoneId] = this;
 						m_facePhoneStart = true;
 						SetPedState(PED_FACE_PHONE);
 					}
@@ -431,7 +427,8 @@ CPed::RunToReportCrime(eCrimeType crimeToReport)
 {
 #ifdef PEDS_REPORT_CRIMES_ON_PHONE
 	if (bRunningToPhone) {
-		if (!isPhoneAvailable(m_phoneId)) {
+		if (!isPhoneAvailable(m_phoneId) && crimeReporters[m_phoneId] != this) {
+			crimeReporters[m_phoneId] = nil;
 			m_phoneId = -1;
 			bIsRunning = false;
 			ClearSeek(); // clears bRunningToPhone
@@ -456,6 +453,8 @@ CPed::RunToReportCrime(eCrimeType crimeToReport)
 #ifndef PEDS_REPORT_CRIMES_ON_PHONE
 	if (phone->m_nState != PHONE_STATE_FREE)
 		return false;
+#else
+	crimeReporters[phoneId] = this;
 #endif
 
 	bRunningToPhone = true;

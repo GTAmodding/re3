@@ -8,7 +8,7 @@
 #include "Messages.h"
 #include "Text.h"
 
-static wchar WideErrorString[25];
+wchar WideErrorString[25];
 
 CText TheText;
 
@@ -97,7 +97,7 @@ CText::Unload(void)
 wchar*
 CText::Get(const char *key)
 {
-#ifdef FIX_BUGS
+#if defined (FIX_BUGS) || defined(FIX_BUGS_64)
 	return keyArray.Search(key, data.chars);
 #else
 	return keyArray.Search(key);
@@ -201,7 +201,7 @@ CKeyArray::Unload(void)
 void
 CKeyArray::Update(wchar *chars)
 {
-#ifndef FIX_BUGS
+#if !defined(FIX_BUGS) && !defined(FIX_BUGS_64)
 	int i;
 	for(i = 0; i < numEntries; i++)
 		entries[i].value = (wchar*)((uint8*)chars + (uintptr)entries[i].value);
@@ -229,7 +229,7 @@ CKeyArray::BinarySearch(const char *key, CKeyEntry *entries, int16 low, int16 hi
 }
 
 wchar*
-#ifdef FIX_BUGS
+#if defined (FIX_BUGS) || defined(FIX_BUGS_64)
 CKeyArray::Search(const char *key, wchar *data)
 #else
 CKeyArray::Search(const char *key)
@@ -239,7 +239,7 @@ CKeyArray::Search(const char *key)
 	char errstr[25];
 	int i;
 
-#ifdef FIX_BUGS
+#if defined (FIX_BUGS) || defined(FIX_BUGS_64)
 	found = BinarySearch(key, entries, 0, numEntries-1);
 	if(found)
 		return (wchar*)((uint8*)data + found->valueOffset);

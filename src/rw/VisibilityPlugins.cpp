@@ -2,6 +2,7 @@
 
 #include "RwHelper.h"
 #include "templates.h"
+#include "main.h"
 #include "Entity.h"
 #include "ModelInfo.h"
 #include "Lights.h"
@@ -14,6 +15,9 @@
 
 CLinkList<CVisibilityPlugins::AlphaObjectInfo> CVisibilityPlugins::m_alphaList;
 CLinkList<CVisibilityPlugins::AlphaObjectInfo> CVisibilityPlugins::m_alphaEntityList;
+#ifdef NEW_RENDERER
+CLinkList<CVisibilityPlugins::AlphaObjectInfo> CVisibilityPlugins::m_alphaBuildingList;
+#endif
 
 int32 CVisibilityPlugins::ms_atomicPluginOffset = -1;
 int32 CVisibilityPlugins::ms_framePluginOffset = -1;
@@ -158,6 +162,12 @@ CVisibilityPlugins::Initialise(void)
 #endif // ASPECT_RATIO_SCALE
 	m_alphaEntityList.head.item.sort = 0.0f;
 	m_alphaEntityList.tail.item.sort = 100000000.0f;
+
+#ifdef NEW_RENDERER
+	m_alphaBuildingList.Init(NUMALPHAENTITYLIST);
+	m_alphaBuildingList.head.item.sort = 0.0f;
+	m_alphaBuildingList.tail.item.sort = 100000000.0f;
+#endif
 }
 
 void
@@ -165,20 +175,34 @@ CVisibilityPlugins::Shutdown(void)
 {
 	m_alphaList.Shutdown();
 	m_alphaEntityList.Shutdown();
+#ifdef NEW_RENDERER
+	m_alphaBuildingList.Shutdown();
+#endif
 }
 
 void
 CVisibilityPlugins::InitAlphaEntityList(void)
 {
 	m_alphaEntityList.Clear();
+#ifdef NEW_RENDERER
+	m_alphaBuildingList.Clear();
+#endif
 }
 
 bool
 CVisibilityPlugins::InsertEntityIntoSortedList(CEntity *e, float dist)
 {
+#ifdef FIX_BUGS
+	if (!e->m_rwObject) return true;
+#endif
+
 	AlphaObjectInfo item;
 	item.entity = e;
 	item.sort = dist;
+#ifdef NEW_RENDERER
+	if(gbNewRenderer && e->IsBuilding())
+		return !!m_alphaBuildingList.InsertSorted(item);
+#endif
 	bool ret = !!m_alphaEntityList.InsertSorted(item);
 //	if(!ret)
 //		printf("list full %d\n", m_alphaEntityList.Count());

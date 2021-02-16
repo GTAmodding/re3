@@ -3,7 +3,6 @@
 #include "AnimBlendList.h"
 
 
-// TODO: put somewhere else
 struct AnimBlendFrameData
 {
 	enum {
@@ -38,7 +37,10 @@ public:
 #ifdef PED_SKIN
 	int32 modelNumber;	// doesn't seem to be used
 #endif
-	CVector *velocity;
+	union {
+		CVector2D *velocity2d;
+		CVector *velocity3d;
+	};
 	// order of frames is determined by RW hierarchy
 	AnimBlendFrameData *frames;
 

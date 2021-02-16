@@ -1,4 +1,11 @@
-﻿[LETTER1]
+﻿{
+    New strings are at the bottom of file.
+    Do not change the order of strings.
+    You can fix the typos of existing translation but please refrain from
+    unnecessary edits like rephasing because you think it suits better for your taste.
+}
+
+[LETTER1]
 abcdefghijklmnopqrstuvwxyz ABCDEFGHIJKLMNOPQRSTUVWXYZ 0123456789"$,.'-?!!SDBFàèéìòùÀÈÉÌÒÙ
 
 [DEFNAM]
@@ -2260,11 +2267,11 @@ Le bombe per le macchine costano 1000$
 [GA_5]
 La tua macchina ha già una bomba installata.
 
-[GA_6]
-Parcheggiala, attivala premendo il ~h~tasto ~k~~PED_FIREWEAPON~~w~ e DATTELA A GAMBE!
+[GA_6] { re3 change }
+Parcheggiala, attivala premendo il ~h~tasto ~k~~VEHICLE_FIREWEAPON~~w~ e DATTELA A GAMBE!
 
-[GA_7]
-Arma la bomba con il ~h~tasto ~k~~PED_FIREWEAPON~~w~: esploderà non appena qualcuno cercherà di avviarla.
+[GA_7] { re3 change }
+Arma la bomba con il ~h~tasto ~k~~VEHICLE_FIREWEAPON~~w~: esploderà non appena qualcuno cercherà di avviarla.
 
 [GA_8]
 Usa il detonatore per attivare la bomba.
@@ -2478,33 +2485,6 @@ Accelera
 
 [FEC_SMT]
 Attivatore missione speciale
-
-[FEC_CCF]
-Configurazione:
-
-[FEC_CF1]
-Config1
-
-[FEC_CF2]
-Config2
-
-[FEC_CF3]
-Config3
-
-[FEC_CF4]
-Config4
-
-[FEC_CDP]
-Schermata controller:
-
-[FEC_ONF]
-A piedi
-
-[FEC_INC]
-In macchina
-
-[FEC_VIB]
-Vibrazione:
 
 [FEA_OUT]
 Uscita:
@@ -3646,11 +3626,11 @@ OK?
 [JM6_1]
 Raggiungi la banca sulla strada principale.
 
-[GA_6B]
-Parcheggiala, innesca la bomba schiacciando il ~h~tasto ~k~~PED_FIREWEAPON~~w~ e BATTITELA!
+[GA_6B] { re3 change }
+Parcheggiala, innesca la bomba schiacciando il ~h~tasto ~k~~VEHICLE_FIREWEAPON~~w~ e BATTITELA!
 
-[GA_7B]
-Innescala col ~h~tasto ~k~~PED_FIREWEAPON~~w~. La bomba esploderà quando si tenterà di avviare il motore.
+[GA_7B] { re3 change }
+Innescala col ~h~tasto ~k~~VEHICLE_FIREWEAPON~~w~. La bomba esploderà quando si tenterà di avviare il motore.
 
 [BAT1]
 ~g~Prendi la mazza!
@@ -4084,11 +4064,11 @@ Porta l'auto dal carrozziere per perdere il ~h~livello di sospetto~w~, ~h~ripara
 [HM1_1]
 ~g~Fredda 20 Purple Nine in 2 minuti e 30 secondi.
 
-[KM1_8A]
-Premi il ~h~tasto ~k~~PED_FIREWEAPON~~w~ per ~h~attivare la bomba~w~: ricorda di toglierti di mezzo!
+[KM1_8A] { re3 change }
+Premi il ~h~tasto ~k~~VEHICLE_FIREWEAPON~~w~ per ~h~attivare la bomba~w~: ricorda di toglierti di mezzo!
 
-[KM1_8D]
-Premi il ~h~tasto ~k~~PED_FIREWEAPON~~w~ per ~h~attivare la bomba~w~: e ricorda di toglierti di mezzo!
+[KM1_8D] { re3 change }
+Premi il ~h~tasto ~k~~VEHICLE_FIREWEAPON~~w~ per ~h~attivare la bomba~w~: e ricorda di toglierti di mezzo!
 
 [KM1_12]
 ~g~Portalo nel dojo, ma prima sbarazzati degli sbirri!
@@ -4225,11 +4205,11 @@ Non mi serve che mi mostri i documenti, hai una faccia fidata.
 [DETON]
 DETONAZIONE:
 
-[DRIVE_A]
-Seleziona un Uzi quando entri in un veicolo, poi guarda a destra o a sinistra e premi il ~h~tasto ~k~~PED_FIREWEAPON~~w~ per sparare.
+[DRIVE_A] { re3 change }
+Seleziona un Uzi quando entri in un veicolo, poi guarda a destra o a sinistra e premi il ~h~tasto ~k~~VEHICLE_FIREWEAPON~~w~ per sparare.
 
-[DRIVE_B]
-Seleziona un Uzi quando entri in un veicolo, poi guarda a destra o a sinistra e premi il ~h~tasto ~k~~PED_FIREWEAPON~~w~ per sparare.
+[DRIVE_B] { re3 change }
+Seleziona un Uzi quando entri in un veicolo, poi guarda a destra o a sinistra e premi il ~h~tasto ~k~~VEHICLE_FIREWEAPON~~w~ per sparare.
 
 [RECORD]
 ~g~NUOVO RECORD!!!
@@ -4237,11 +4217,11 @@ Seleziona un Uzi quando entri in un veicolo, poi guarda a destra o a sinistra e 
 [NRECORD]
 ~r~NESSUN NUOVO RECORD!
 
-[RCHELP]
-Premi il tasto ~k~~PED_FIREWEAPON~ o dirigi l'auto radiocomandata contro i pneumatici di un veicolo per provocarne la detonazione.
+[RCHELP] { re3 change }
+Premi il tasto ~k~~VEHICLE_FIREWEAPON~ o dirigi l'auto radiocomandata contro i pneumatici di un veicolo per provocarne la detonazione.
 
-[RCHELPA]
-Premi il tasto ~k~~PED_FIREWEAPON~ o dirigi l'auto radiocomandata contro i pneumatici di un veicolo per provocarne la detonazione.
+[RCHELPA] { re3 change }
+Premi il tasto ~k~~VEHICLE_FIREWEAPON~ o dirigi l'auto radiocomandata contro i pneumatici di un veicolo per provocarne la detonazione.
 
 [RC_1]
 Hai 2 minuti per far esplodere quante più auto dei Diablo possibile!
@@ -4744,11 +4724,11 @@ LA SCOMPARSA DI LOVE
 [RM5_6]
 ~g~Ci è scappato! Spaccagli la corazza con un veicolo o con una bella esplosione!
 
-[PBOAT_1]
-Premi il ~h~tasto ~k~~PED_FIREWEAPON~~w~ per sparare con i cannoni della barca.
+[PBOAT_1] { re3 change }
+Premi il ~h~tasto ~k~~VEHICLE_FIREWEAPON~~w~ per sparare con i cannoni della barca.
 
-[PBOAT_2]
-Premi il ~h~tasto ~k~~PED_FIREWEAPON~~w~ per sparare con i cannoni della barca.
+[PBOAT_2] { re3 change }
+Premi il ~h~tasto ~k~~VEHICLE_FIREWEAPON~~w~ per sparare con i cannoni della barca.
 
 [DIAB1_B]
 Sono El Burro dei Diablo.
@@ -4762,11 +4742,11 @@ C'e una corsa d'auto con inizio alla vecchia scuola vicino al ponte Callahan.
 [DIAB1_F]
 Procurati un mezzo, il primo che attraversa tutti i posti di blocco vince il premio.
 
-[HM2_1]
-Usa i maggiolini radiocomandati per distruggere le auto blindate. Premi il ~h~tasto ~k~~PED_FIREWEAPON~~w~ per farli esplodere.
+[HM2_1] { re3 change }
+Usa i maggiolini radiocomandati per distruggere le auto blindate. Premi il ~h~tasto ~k~~VEHICLE_FIREWEAPON~~w~ per farli esplodere.
 
-[HM2_1A]
-Usa i maggiolini radiocomandati per distruggere le auto blindate. Premi il ~h~tasto ~k~~PED_FIREWEAPON~~w~ per farli esplodere.
+[HM2_1A] { re3 change }
+Usa i maggiolini radiocomandati per distruggere le auto blindate. Premi il ~h~tasto ~k~~VEHICLE_FIREWEAPON~~w~ per farli esplodere.
 
 [HM2_2]
 ~r~Non sei riuscito a distruggere tutte le auto blindate!
@@ -6592,11 +6572,11 @@ Questa memory card (PS2) è già formattata.
 [FEDSAS4]
 ;=<> - CAMBIA SELEZIONE
 
-[SPRAY_4]
-Usa il ~h~tasto ~k~~PED_FIREWEAPON~~w~ per sparare col cannone ad acqua.
+[SPRAY_4] { re3 change }
+Usa il ~h~tasto ~k~~VEHICLE_FIREWEAPON~~w~ per sparare col cannone ad acqua.
 
-[SPRAY_1]
-Usa il ~h~tasto ~k~~PED_FIREWEAPON~~w~ per sparare col cannone ad acqua.
+[SPRAY_1] { re3 change }
+Usa il ~h~tasto ~k~~VEHICLE_FIREWEAPON~~w~ per sparare col cannone ad acqua.
 
 [LITTLE]
 LITTLE T
@@ -7333,9 +7313,6 @@ CONNESSIONE
 [FET_AUD]
 IMPOSTAZIONI AUDIO
 
-[FET_GFX]
-IMPOSTAZIONI GRAFICA
-
 [FET_DIS]
 IMPOSTAZIONI VIDEO
 
@@ -8034,6 +8011,185 @@ RIPRISTINATE IMPOSTAZIONI ORIGINALI
 
 [FET_RSC]
 HARDWARE NON DISPONIBILE - RIPRISTINATE IMPOSTAZIONI ORIGINALI
+
+{ re3 updates }
+{ new languages }
+[FEL_JAP]
+GIAPPONESE
+
+[FEL_POL]
+POLACCO
+
+[FEL_RUS]
+RUSSO
+
+{ new display menus }
+[FET_GFX]
+IMPOSTAZIONI GRAFICA
+
+[FED_MIP]
+MIP MAPPING
+
+[FED_AAS]
+ANTI ALIASING
+
+[FED_FIL]
+TEXTURE FILTERING
+
+[FED_BIL]
+BILINEAR
+
+[FED_TRL]
+TRILINEAR
+
+[FED_WND]
+WINDOWED
+
+[FED_FLS]
+FULLSCREEN
+
+[FEM_CSB]
+CUTSCENE BORDERS
+
+[FEM_SCF]
+SCREEN FORMAT
+
+[FEM_ISL]
+MAP MEMORY USAGE
+
+[FEM_LOW]
+LOW
+
+[FEM_MED]
+MEDIUM
+
+[FEM_HIG]
+HIGH
+
+[FEM_2PR]
+PS2 ALPHA TEST
+
+[FEC_FRC]
+FREE CAM
+
+{ Linux joy detection }
+[FEC_JOD]
+DETECT JOYSTICK
+
+[FEC_JPR]
+Press any key on the joystick of your choice that you want to use on the game, and it will be selected.
+
+[FEC_JDE]
+Detected joystick
+
+{ mission restart }
+[FET_RMS]
+RIGIOCA MISSIONE
+
+[FESZ_RM]
+RIGIOCA?
+
+{ more graphics }
+[FED_VPL]
+VEHICLE PIPELINE
+
+[FED_PRM]
+PED RIM LIGHT
+
+[FED_RGL]
+ROAD GLOSS
+
+[FED_CLF]
+COLOUR FILTER
+
+[FED_WLM]
+WORLD LIGHTMAPS
+
+[FED_MBL]
+MOTION BLUR
+
+[FEM_SIM]
+SIMPLE
+
+[FEM_NRM]
+NORMAL
+
+[FEM_MOB]
+MOBILE
+
+[FED_MFX]
+MATFX
+
+[FED_NEO]
+NEO
+
+[FEM_PS2]
+PS2
+
+[FEM_XBX]
+XBOX
+
+[FEM_AUT] { aspect ratio related }
+AUTO
+
+{ controls }
+[FEC_IVP]
+INVERT PAD VERTICALLY
+
+{ map }
+[FEM_TWP]
+Toggle Waypoint
+
+[FEA_FMN]
+RADIO SPENTA
+
+[FEC_DS2]
+DUALSHOCK 2
+
+[FEC_DS3]
+DUALSHOCK 3
+
+[FEC_DS4]
+DUALSHOCK 4
+
+[FEC_360]
+XBOX 360 CONTROLLER
+
+[FEC_ONE]
+XBOX ONE CONTROLLER
+
+[FEC_TYP]
+GAMEPAD TYPE
+
+[FEC_CCF]
+CONFIGURAZIONE
+
+[FEC_CF1]
+CONFIGURAZIONE 1
+
+[FEC_CF2]
+CONFIGURAZIONE 2
+
+[FEC_CF3]
+CONFIGURAZIONE 3
+
+[FEC_CF4]
+CONFIGURAZIONE 4
+
+[FEC_CDP]
+SCHERMATA CONTROLLER
+
+[FEC_ONF]
+A PIEDI
+
+[FEC_INC]
+IN MACCHINA
+
+[FEC_VIB]
+VIBRAZIONE
+
+[FET_AGS]
+GAMEPAD SETTINGS
 
 [DUMMY]
 THIS LABEL NEEDS TO BE HERE !!!

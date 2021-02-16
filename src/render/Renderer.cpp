@@ -1,3 +1,4 @@
+#define WITHD3D
 #include "common.h"
 
 #include "main.h"
@@ -6,6 +7,7 @@
 #include "Treadable.h"
 #include "Ped.h"
 #include "Vehicle.h"
+#include "Boat.h"
 #include "Heli.h"
 #include "Object.h"
 #include "PathFind.h"
@@ -68,6 +70,12 @@ int32 CRenderer::ms_nNoOfVisibleEntities;
 CEntity *CRenderer::ms_aVisibleEntityPtrs[NUMVISIBLEENTITIES];
 CEntity *CRenderer::ms_aInVisibleEntityPtrs[NUMINVISIBLEENTITIES];
 int32 CRenderer::ms_nNoOfInVisibleEntities;
+#ifdef NEW_RENDERER
+int32 CRenderer::ms_nNoOfVisibleVehicles;
+CEntity *CRenderer::ms_aVisibleVehiclePtrs[NUMVISIBLEENTITIES];
+int32 CRenderer::ms_nNoOfVisibleBuildings;
+CEntity *CRenderer::ms_aVisibleBuildingPtrs[NUMVISIBLEENTITIES];
+#endif
 
 CVector CRenderer::ms_vecCameraPosition;
 CVehicle *CRenderer::m_pFirstPersonVehicle;
@@ -108,6 +116,20 @@ CRenderer::PreRender(void)
 
 	for(i = 0; i < ms_nNoOfVisibleEntities; i++)
 		ms_aVisibleEntityPtrs[i]->PreRender();
+
+#ifdef NEW_RENDERER
+	if(gbNewRenderer){
+		for(i = 0; i < ms_nNoOfVisibleVehicles; i++)
+			ms_aVisibleVehiclePtrs[i]->PreRender();
+		// How is this done with cWorldStream?
+		for(i = 0; i < ms_nNoOfVisibleBuildings; i++)
+			ms_aVisibleBuildingPtrs[i]->PreRender();
+		for(node = CVisibilityPlugins::m_alphaBuildingList.head.next;
+		    node != &CVisibilityPlugins::m_alphaBuildingList.tail;
+		    node = node->next)
+			((CEntity*)node->item.entity)->PreRender();
+	}
+#endif
 
 	for (i = 0; i < ms_nNoOfInVisibleEntities; i++) {
 #ifdef SQUEEZE_PERFORMANCE
@@ -241,6 +263,8 @@ CRenderer::RenderFirstPersonVehicle(void)
 	RwRenderStateSet(rwRENDERSTATEFOGENABLE, (void*)FALSE);
 }
 
+inline bool IsRoad(CEntity *e) { return e->IsBuilding() && ((CBuilding*)e)->GetIsATreadable(); }
+
 void
 CRenderer::RenderRoads(void)
 {
@@ -254,7 +278,7 @@ CRenderer::RenderRoads(void)
 
 	for(i = 0; i < ms_nNoOfVisibleEntities; i++){
 		t = (CTreadable*)ms_aVisibleEntityPtrs[i];
-		if(t->IsBuilding() && t->GetIsATreadable()){
+		if(IsRoad(t)){
 #ifndef MASTER
 			if(gbShowCarRoadGroups || gbShowPedRoadGroups){
 				int ind = 0;
@@ -288,7 +312,7 @@ CRenderer::RenderEverythingBarRoads(void)
 	for(i = 0; i < ms_nNoOfVisibleEntities; i++){
 		e = ms_aVisibleEntityPtrs[i];
 
-		if(e->IsBuilding() && ((CBuilding*)e)->GetIsATreadable())
+		if(IsRoad(e))
 			continue;
 
 #ifdef EXTENDED_PIPELINES
@@ -348,6 +372,248 @@ CRenderer::RenderBoats(void)
 			RenderOneNonRoad(v);
 	}
 }
+
+#ifdef NEW_RENDERER
+#ifndef LIBRW
+#error "Need librw for EXTENDED_PIPELINES"
+#endif
+#include "WaterLevel.h"
+
+enum {
+	// blend passes
+	PASS_NOZ,	// no z-write
+	PASS_ADD,	// additive
+	PASS_BLEND	// normal blend
+};
+
+static RwRGBAReal black;
+
+static void
+SetStencilState(int state)
+{
+	switch(state){
+	// disable stencil
+	case 0:
+		rw::SetRenderState(rw::STENCILENABLE, FALSE);
+		break;
+	// test against stencil
+	case 1:
+		rw::SetRenderState(rw::STENCILENABLE, TRUE);
+		rw::SetRenderState(rw::STENCILFUNCTION, rw::STENCILNOTEQUAL);
+		rw::SetRenderState(rw::STENCILPASS, rw::STENCILKEEP);
+		rw::SetRenderState(rw::STENCILFAIL, rw::STENCILKEEP);
+		rw::SetRenderState(rw::STENCILZFAIL, rw::STENCILKEEP);
+		rw::SetRenderState(rw::STENCILFUNCTIONMASK, 0xFF);
+		rw::SetRenderState(rw::STENCILFUNCTIONREF, 0xFF);
+		break;
+	// write to stencil
+	case 2:
+		rw::SetRenderState(rw::STENCILENABLE, TRUE);
+		rw::SetRenderState(rw::STENCILFUNCTION, rw::STENCILALWAYS);
+		rw::SetRenderState(rw::STENCILPASS, rw::STENCILREPLACE);
+		rw::SetRenderState(rw::STENCILFUNCTIONREF, 0xFF);
+		break;
+	}
+}
+
+void
+CRenderer::RenderOneBuilding(CEntity *ent, float camdist)
+{
+	if(ent->m_rwObject == nil)
+		return;
+
+	ent->bImBeingRendered = true;	// TODO: this seems wrong, but do we even need it?
+
+	assert(RwObjectGetType(ent->m_rwObject) == rpATOMIC);
+	RpAtomic *atomic = (RpAtomic*)ent->m_rwObject;
+	CSimpleModelInfo *mi = (CSimpleModelInfo*)CModelInfo::GetModelInfo(ent->GetModelIndex());
+
+	int pass = PASS_BLEND;
+	if(mi->m_additive)	// very questionable
+		pass = PASS_ADD;
+	if(mi->m_noZwrite)
+		pass = PASS_NOZ;
+
+	if(ent->bDistanceFade){
+		RpAtomic *lodatm;
+		float fadefactor;
+		uint32 alpha;
+
+		lodatm = mi->GetAtomicFromDistance(camdist - FADE_DISTANCE);
+		fadefactor = (mi->GetLargestLodDistance() - (camdist - FADE_DISTANCE))/FADE_DISTANCE;
+		if(fadefactor > 1.0f)
+			fadefactor = 1.0f;
+		alpha = mi->m_alpha * fadefactor;
+
+		if(alpha == 255)
+			WorldRender::AtomicFirstPass(atomic, pass);
+		else{
+			// not quite sure what this is about, do we have to do that?
+			RpGeometry *geo = RpAtomicGetGeometry(lodatm);
+			if(geo != RpAtomicGetGeometry(atomic))
+				RpAtomicSetGeometry(atomic, geo, rpATOMICSAMEBOUNDINGSPHERE);
+			WorldRender::AtomicFullyTransparent(atomic, pass, alpha);
+		}
+	}else
+		WorldRender::AtomicFirstPass(atomic, pass);
+
+	ent->bImBeingRendered = false;	// TODO: this seems wrong, but do we even need it?
+}
+
+void
+CRenderer::RenderWorld(int pass)
+{
+	int i;
+	CEntity *e;
+	CLink<CVisibilityPlugins::AlphaObjectInfo> *node;
+
+	RwRenderStateSet(rwRENDERSTATEFOGENABLE, (void*)TRUE);
+	DeActivateDirectional();
+	SetAmbientColours();
+
+	// Temporary...have to figure out sorting better
+	switch(pass){
+	case 0:
+		// Roads
+		RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)FALSE);
+		for(i = 0; i < ms_nNoOfVisibleBuildings; i++){
+			e = ms_aVisibleBuildingPtrs[i];
+			if(e->bIsBIGBuilding || IsRoad(e))
+				RenderOneBuilding(e);
+		}
+		for(node = CVisibilityPlugins::m_alphaBuildingList.tail.prev;
+		    node != &CVisibilityPlugins::m_alphaBuildingList.head;
+		    node = node->prev){
+			e = node->item.entity;
+			if(e->bIsBIGBuilding || IsRoad(e))
+				RenderOneBuilding(e, node->item.sort);
+		}
+
+		// KLUDGE for road puddles which have to be rendered at road-time
+		// only very temporary, there are more rendering issues
+		RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)TRUE);
+		RwRenderStateSet(rwRENDERSTATEDESTBLEND, (void*)rwBLENDINVSRCALPHA);
+		WorldRender::RenderBlendPass(PASS_BLEND);
+		WorldRender::numBlendInsts[PASS_BLEND] = 0;
+		break;
+	case 1:
+		// Opaque
+		RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)FALSE);
+		for(i = 0; i < ms_nNoOfVisibleBuildings; i++){
+			e = ms_aVisibleBuildingPtrs[i];
+			if(!(e->bIsBIGBuilding || IsRoad(e)))
+				RenderOneBuilding(e);
+		}
+		for(node = CVisibilityPlugins::m_alphaBuildingList.tail.prev;
+		    node != &CVisibilityPlugins::m_alphaBuildingList.head;
+		    node = node->prev){
+			e = node->item.entity;
+			if(!(e->bIsBIGBuilding || IsRoad(e)))
+				RenderOneBuilding(e, node->item.sort);
+		}
+		// Now we have iterated through all visible buildings (unsorted and sorted)
+		// and the transparency list is done.
+
+		RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)TRUE);
+		RwRenderStateSet(rwRENDERSTATEZWRITEENABLE, FALSE);
+		WorldRender::RenderBlendPass(PASS_NOZ);
+		RwRenderStateSet(rwRENDERSTATEZWRITEENABLE, (void*)TRUE);
+		break;
+	case 2:
+		// Transparent
+		RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)TRUE);
+		RwRenderStateSet(rwRENDERSTATEDESTBLEND, (void*)rwBLENDONE);
+		WorldRender::RenderBlendPass(PASS_ADD);
+		RwRenderStateSet(rwRENDERSTATEDESTBLEND, (void*)rwBLENDINVSRCALPHA);
+		WorldRender::RenderBlendPass(PASS_BLEND);
+		break;
+	}
+}
+
+void
+CRenderer::RenderPeds(void)
+{
+	int i;
+	CEntity *e;
+
+	for(i = 0; i < ms_nNoOfVisibleVehicles; i++){
+		e = ms_aVisibleVehiclePtrs[i];
+		if(e->IsPed())
+			RenderOneNonRoad(e);
+	}
+}
+
+void
+CRenderer::RenderVehicles(void)
+{
+	int i;
+	CEntity *e;
+	EntityInfo ei;
+	CLink<EntityInfo> *node;
+
+	// not the real thing
+	for(i = 0; i < ms_nNoOfVisibleVehicles; i++){
+		e = ms_aVisibleVehiclePtrs[i];
+		if(!e->IsVehicle())
+			continue;
+//		if(PutIntoSortedVehicleList((CVehicle*)e))
+//			continue;	// boats handled elsewhere
+		ei.ent = e;
+		ei.sort = (ms_vecCameraPosition - e->GetPosition()).MagnitudeSqr();
+		gSortedVehiclesAndPeds.InsertSorted(ei);
+	}
+
+	for(node = gSortedVehiclesAndPeds.tail.prev;
+	    node != &gSortedVehiclesAndPeds.head;
+	    node = node->prev)
+		RenderOneNonRoad(node->item.ent);
+}
+
+void
+CRenderer::RenderWater(void)
+{
+	int i;
+	CEntity *e;
+
+	RwRenderStateSet(rwRENDERSTATETEXTURERASTER, nil);
+	RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)TRUE);
+	RwRenderStateSet(rwRENDERSTATEFOGENABLE, (void*)FALSE);
+	RwRenderStateSet(rwRENDERSTATESRCBLEND, (void*)rwBLENDZERO);
+	RwRenderStateSet(rwRENDERSTATEDESTBLEND, (void*)rwBLENDONE);
+	RwRenderStateSet(rwRENDERSTATEZWRITEENABLE, (void*)FALSE);
+	SetStencilState(2);
+
+	for(i = 0; i < ms_nNoOfVisibleVehicles; i++){
+		e = ms_aVisibleVehiclePtrs[i];
+		if(e->IsVehicle() && ((CVehicle*)e)->IsBoat())
+			((CBoat*)e)->RenderWaterOutPolys();
+	}
+
+	RwRenderStateSet(rwRENDERSTATEFOGENABLE, (void*)TRUE);
+	RwRenderStateSet(rwRENDERSTATESRCBLEND, (void*)rwBLENDSRCALPHA);
+	RwRenderStateSet(rwRENDERSTATEDESTBLEND, (void*)rwBLENDINVSRCALPHA);
+	RwRenderStateSet(rwRENDERSTATEZWRITEENABLE, (void*)TRUE);
+	SetStencilState(1);
+
+	CWaterLevel::RenderWater();
+
+	SetStencilState(0);
+}
+
+void
+CRenderer::ClearForFrame(void)
+{
+	ms_nNoOfVisibleEntities = 0;
+	ms_nNoOfVisibleVehicles = 0;
+	ms_nNoOfVisibleBuildings = 0;
+	ms_nNoOfInVisibleEntities = 0;
+	gSortedVehiclesAndPeds.Clear();
+
+	WorldRender::numBlendInsts[PASS_NOZ] = 0;
+	WorldRender::numBlendInsts[PASS_ADD] = 0;
+	WorldRender::numBlendInsts[PASS_BLEND] = 0;
+}
+#endif
 
 void
 CRenderer::RenderFadingInEntities(void)
@@ -635,8 +901,13 @@ CRenderer::SetupBigBuildingVisibility(CEntity *ent)
 void
 CRenderer::ConstructRenderList(void)
 {
+#ifdef NEW_RENDERER
+	if(!gbNewRenderer)
+#endif
+{
 	ms_nNoOfVisibleEntities = 0;
 	ms_nNoOfInVisibleEntities = 0;
+}
 	ms_vecCameraPosition = TheCamera.GetPosition();
 
 	// unused
@@ -1123,6 +1394,24 @@ CRenderer::ScanSectorPoly(RwV2d *poly, int32 numVertices, void (*scanfunc)(CPtrL
 }
 
 void
+CRenderer::InsertEntityIntoList(CEntity *ent)
+{
+#ifdef FIX_BUGS
+	if (!ent->m_rwObject) return;
+#endif
+
+#ifdef NEW_RENDERER
+	// TODO: there are more flags being checked here
+	if(gbNewRenderer && (ent->IsVehicle() || ent->IsPed()))
+		ms_aVisibleVehiclePtrs[ms_nNoOfVisibleVehicles++] = ent;
+	else if(gbNewRenderer && ent->IsBuilding())
+		ms_aVisibleBuildingPtrs[ms_nNoOfVisibleBuildings++] = ent;
+	else
+#endif
+		ms_aVisibleEntityPtrs[ms_nNoOfVisibleEntities++] = ent;
+}
+
+void
 CRenderer::ScanBigBuildingList(CPtrList &list)
 {
 	CPtrNode *node;
@@ -1136,7 +1425,7 @@ CRenderer::ScanBigBuildingList(CPtrList &list)
 #endif
 		if(!ent->bZoneCulled){
 			if(SetupBigBuildingVisibility(ent) == VIS_VISIBLE)
-				ms_aVisibleEntityPtrs[ms_nNoOfVisibleEntities++] = ent;
+				InsertEntityIntoList(ent);
 #ifndef MASTER
 			EntitiesRendered++;
 			RenderedBigBuildings++;
@@ -1167,7 +1456,7 @@ CRenderer::ScanSectorList(CPtrList *lists)
 			if(IsEntityCullZoneVisible(ent)){
 				switch(SetupEntityVisibility(ent)){
 				case VIS_VISIBLE:
-					ms_aVisibleEntityPtrs[ms_nNoOfVisibleEntities++] = ent;
+					InsertEntityIntoList(ent);
 					break;
 				case VIS_INVISIBLE:
 					if(!IsGlass(ent->GetModelIndex()))
@@ -1210,7 +1499,7 @@ CRenderer::ScanSectorList(CPtrList *lists)
 					break;
 				}
 #endif
-			}else if(ent->IsBuilding() && ((CBuilding*)ent)->GetIsATreadable() && !CStreaming::ms_disableStreaming){
+			}else if(IsRoad(ent) && !CStreaming::ms_disableStreaming){
 				if(SetupEntityVisibility(ent) == VIS_STREAMME)
 					if(!m_loadingPriority || CStreaming::ms_numModelsRequested < 10)
 						CStreaming::RequestModel(ent->GetModelIndex(), 0);
@@ -1243,7 +1532,7 @@ CRenderer::ScanSectorList_Priority(CPtrList *lists)
 			if(IsEntityCullZoneVisible(ent)){
 				switch(SetupEntityVisibility(ent)){
 				case VIS_VISIBLE:
-					ms_aVisibleEntityPtrs[ms_nNoOfVisibleEntities++] = ent;
+					InsertEntityIntoList(ent);
 					break;
 				case VIS_INVISIBLE:
 					if(!IsGlass(ent->GetModelIndex()))
@@ -1289,7 +1578,7 @@ CRenderer::ScanSectorList_Priority(CPtrList *lists)
 					break;
 				}
 #endif
-			}else if(ent->IsBuilding() && ((CBuilding*)ent)->GetIsATreadable() && !CStreaming::ms_disableStreaming){
+			}else if(IsRoad(ent) && !CStreaming::ms_disableStreaming){
 				if(SetupEntityVisibility(ent) == VIS_STREAMME)
 					CStreaming::RequestModel(ent->GetModelIndex(), 0);
 			}else{
@@ -1320,7 +1609,7 @@ CRenderer::ScanSectorList_Subway(CPtrList *lists)
 			ent->m_scanCode = CWorld::GetCurrentScanCode();
 			switch(SetupEntityVisibility(ent)){
 			case VIS_VISIBLE:
-				ms_aVisibleEntityPtrs[ms_nNoOfVisibleEntities++] = ent;
+				InsertEntityIntoList(ent);
 				break;
 			case VIS_OFFSCREEN:
 				dx = ms_vecCameraPosition.x - ent->GetPosition().x;

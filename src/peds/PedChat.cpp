@@ -59,7 +59,7 @@ CPed::ServiceTalking(void)
 	if (bBodyPartJustCameOff && m_bodyPartBleeding == PED_HEAD)
 		return;
 
-	if (!CGeneral::faststricmp(CModelInfo::GetModelInfo(GetModelIndex())->GetName(), "bomber"))
+	if (!CGeneral::faststricmp(CModelInfo::GetModelInfo(GetModelIndex())->GetModelName(), "bomber"))
 		m_queuedSound = SOUND_PED_BOMBER;
 	else if (m_nPedState == PED_ON_FIRE)
 		m_queuedSound = SOUND_PED_BURNING;

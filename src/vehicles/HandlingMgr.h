@@ -149,8 +149,8 @@ public:
 	void DisplayHandlingData(CVehicle *, tHandlingData *, uint8, bool);
 	int32 GetHandlingId(const char *name);
 	tHandlingData *GetHandlingData(tVehicleType id) { return &HandlingData[id]; }
-	bool HasRearWheelDrive(tVehicleType id) { return HandlingData[id].Transmission.nDriveType == 'R'; }
-	bool HasFrontWheelDrive(tVehicleType id) { return HandlingData[id].Transmission.nDriveType == 'F'; }
+	bool HasRearWheelDrive(tVehicleType id) { return HandlingData[id].Transmission.nDriveType != 'F'; }
+	bool HasFrontWheelDrive(tVehicleType id) { return HandlingData[id].Transmission.nDriveType != 'R'; }
 };
 VALIDATE_SIZE(cHandlingDataMgr, 0x3030);
 extern cHandlingDataMgr mod_HandlingManager;

@@ -82,10 +82,10 @@ uint8 GetNumberOfMenuOptions(int screen);
 
 void FrontendOptionSetCursor(int screen, int8 option, bool overwrite = false);
 
-// var is optional in AddDynamic, enables you to save them in an INI file(also needs passing char array to saveName param. obv), otherwise pass nil/0
+// var is optional in AddDynamic, enables you to save them in an INI file(also needs passing char array to and saveCat saveKey param. obv), otherwise pass nil/0
 void FrontendOptionAddBuiltinAction(const char* gxtKey, int action, int targetMenu = MENUPAGE_NONE, int saveSlot = SAVESLOT_NONE);
-void FrontendOptionAddSelect(const char* gxtKey, const char** rightTexts, int8 numRightTexts, int8 *var, bool onlyApplyOnEnter, ChangeFunc changeFunc, const char* saveName = nil, bool disableIfGameLoaded = false);
-void FrontendOptionAddDynamic(const char* gxtKey, DrawFunc rightTextDrawFunc, int8 *var, ButtonPressFunc buttonPressFunc, const char* saveName = nil);
+void FrontendOptionAddSelect(const char* gxtKey, const char** rightTexts, int8 numRightTexts, int8 *var, bool onlyApplyOnEnter, ChangeFunc changeFunc, const char* saveCat = nil, const char* saveKey = nil, bool disableIfGameLoaded = false);
+void FrontendOptionAddDynamic(const char* gxtKey, DrawFunc rightTextDrawFunc, int8 *var, ButtonPressFunc buttonPressFunc, const char* saveCat = nil, const char* saveKey = nil);
 
 uint8 FrontendScreenAdd(const char* gxtKey, eMenuSprites sprite, int prevPage, int columnWidth, int headerHeight, int lineHeight, int8 font, float fontScaleX, float fontScaleY, int8 alignment, bool showLeftRightHelper, ReturnPrevPageFunc returnPrevPageFunc = nil);
 #endif

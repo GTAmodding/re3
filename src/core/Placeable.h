@@ -4,7 +4,7 @@ class CPlaceable
 {
 public:
 	// disable allocation
-	static void *operator new(size_t) = delete;
+	static void *operator new(size_t);
 
 	CMatrix m_matrix;
 

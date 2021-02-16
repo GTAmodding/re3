@@ -179,7 +179,7 @@ CCopPed::ClearPursuit(void)
 	m_bZoneDisabled = false;
 	ClearObjective();
 	if (IsPedInControl()) {
-		if (!m_pMyVehicle || wanted->m_nWantedLevel != 0)  {
+		if (!m_pMyVehicle || wanted->GetWantedLevel() != 0)  {
 			if (m_pMyVehicle && (m_pMyVehicle->GetPosition() - GetPosition()).MagnitudeSqr() < sq(5.0f)) {
 				m_nLastPedState = PED_IDLE;
 				SetSeek((CEntity*)m_pMyVehicle, 2.5f);
@@ -239,9 +239,9 @@ CCopPed::ArrestPlayer(void)
 
 		if (suspect && (suspect->m_nPedState == PED_ARRESTED || suspect->DyingOrDead() || suspect->EnteringCar())) {
 
-			CAnimBlendAssociation *arrestAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_ARREST_GUN);
+			CAnimBlendAssociation *arrestAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_STD_ARREST);
 			if (!arrestAssoc || arrestAssoc->blendDelta < 0.0f)
-				CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ANIM_ARREST_GUN, 4.0f);
+				CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ANIM_STD_ARREST, 4.0f);
 
 			CVector suspMidPos;
 			suspect->m_pedIK.GetComponentPosition(suspMidPos, PED_MID);
@@ -275,7 +275,7 @@ CCopPed::ScanForCrimes(void)
 	if (!m_bIsInPursuit) {
 		CPlayerPed *player = FindPlayerPed();
 		if ((m_objective == OBJECTIVE_ENTER_CAR_AS_DRIVER || m_objective == OBJECTIVE_ENTER_CAR_AS_PASSENGER)
-			&& player->m_pWanted->m_nWantedLevel == 0) {
+			&& player->m_pWanted->GetWantedLevel() == 0) {
 
 			if (player->m_pMyVehicle
 #ifdef FIX_BUGS
@@ -291,7 +291,7 @@ void
 CCopPed::CopAI(void)
 {
 	CWanted *wanted = FindPlayerPed()->m_pWanted;
-	int wantedLevel = wanted->m_nWantedLevel;
+	int wantedLevel = wanted->GetWantedLevel();
 	CPhysical *playerOrHisVeh = FindPlayerVehicle() ? (CPhysical*)FindPlayerVehicle() : (CPhysical*)FindPlayerPed();
 
 	if (wanted->m_bIgnoredByEveryone || wanted->m_bIgnoredByCops) {
@@ -401,7 +401,7 @@ CCopPed::CopAI(void)
 				if (m_nPedState != PED_ATTACK && m_nPedState != PED_FIGHT && !m_bZoneDisabled) {
 					CVector targetDist = playerOrHisVeh->GetPosition() - GetPosition();
 					if (m_fDistanceToTarget > 30.0f) {
-						CAnimBlendAssociation* crouchShootAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_RBLOCK_CSHOOT);
+						CAnimBlendAssociation* crouchShootAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_STD_RBLOCK_SHOOT);
 						if (crouchShootAssoc)
 							crouchShootAssoc->blendDelta = -1000.0f;
 

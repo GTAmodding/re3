@@ -1,92 +1,125 @@
-set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
+set(THREADS_PREFER_PTHREAD_FLAG ON)
 
-if(${RE3_AUDIO} STREQUAL "OAL")
-        find_package(OpenAL REQUIRED)
-        find_package(MPG123 REQUIRED)
-        find_package(SndFile REQUIRED)
-endif()
+file(GLOB_RECURSE ${PROJECT}_SOURCES "*.cpp" "*.h" "*.rc")
 
-file(GLOB_RECURSE Sources "*.cpp" "*.h")
+function(header_directories RETURN_LIST)
+    file(GLOB_RECURSE ALL_SRCS *.h *.cpp *.c)
+    set(RELDIRS)
+    foreach(SRC ${ALL_SRCS})
+        file(RELATIVE_PATH RELSRC "${CMAKE_CURRENT_SOURCE_DIR}" "${SRC}")
+        get_filename_component(RELDIR "${RELSRC}" DIRECTORY)
+        list(APPEND RELDIRS ${RELDIR})
+    endforeach()
+    list(REMOVE_DUPLICATES RELDIRS)
+    set(${RETURN_LIST} ${RELDIRS} PARENT_SCOPE)
+endfunction()
 
-MACRO(HEADER_DIRECTORIES return_list)
-    FILE(GLOB_RECURSE new_list *.cpp)
-    SET(dir_list "animation"
-            "audio"
-            "collision"
-            "control"
-            "core"
-            "entities"
-            "extras"
-            "fakerw"
-            "math"
-            "modelinfo"
-            "objects"
-            "peds"
-            "render"
-            "rw"
-            "save"
-            "skel"
-            "text"
-            "vehicles"
-            "weapons")
-    FOREACH(file_path ${new_list})
-        GET_FILENAME_COMPONENT(dir_path ${file_path} PATH)
-        SET(dir_list ${dir_list} ${dir_path})
-    ENDFOREACH()
-    LIST(REMOVE_DUPLICATES dir_list)
-    SET(${return_list} ${dir_list})
-ENDMACRO()
+header_directories(${PROJECT}_INCLUDES)
 
-HEADER_DIRECTORIES(header_list)
-include_directories(${header_list})
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/extras/GitSHA1.cpp.in" "${CMAKE_CURRENT_BINARY_DIR}/extras/GitSHA1.cpp" @ONLY)
+list(APPEND ${PROJECT}_SOURCES "${CMAKE_CURRENT_BINARY_DIR}/extras/GitSHA1.cpp")
 
+add_executable(${EXECUTABLE} WIN32
+    ${${PROJECT}_SOURCES}
+)
 
-add_executable(re3 ${Sources})
-target_link_libraries(re3 librw)
-target_link_libraries(re3 Threads::Threads)
+target_link_libraries(${EXECUTABLE} PRIVATE
+    librw::librw
+    Threads::Threads
+)
 
-if(${RE3_AUDIO} STREQUAL "OAL")
-        target_link_libraries(re3 ${OPENAL_LIBRARY})
-        target_link_libraries(re3 ${MPG123_LIBRARIES})
-        target_link_libraries(re3 ${SNDFILE_LIBRARIES})
-endif()
-
-target_include_directories(re3
-    INTERFACE
-        $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}>
-    )
-
-target_compile_definitions(re3
+target_include_directories(${EXECUTABLE}
     PRIVATE
-        "$<IF:$<CONFIG:DEBUG>,DEBUG,NDEBUG>"
-    PUBLIC
-        "RW_${RE3_PLATFORM}"
-    )
+        $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}>
+        $<BUILD_INTERFACE:${${PROJECT}_INCLUDES}>
+)
 
-target_compile_definitions(re3 PRIVATE LIBRW=1 AUDIO_OAL=1)
+target_compile_definitions(${EXECUTABLE}
+    PRIVATE
+        $<IF:$<CONFIG:DEBUG>,DEBUG,NDEBUG>
+        LIBRW
+        ${PROJECT}_NO_AUTOLINK
+)
+
+if(LIBRW_PLATFORM_D3D9)
+    target_compile_definitions(${EXECUTABLE}
+        PUBLIC
+            USE_D3D9
+    )
+endif()
+
+target_compile_definitions(${EXECUTABLE} PRIVATE CMAKE_BUILD)
+
+if(${PROJECT}_AUDIO STREQUAL "OAL")
+    find_package(OpenAL REQUIRED)
+    target_include_directories(${EXECUTABLE} PRIVATE ${OPENAL_INCLUDE_DIR})
+    target_link_libraries(${EXECUTABLE} PRIVATE ${OPENAL_LIBRARY})
+    target_compile_definitions(${EXECUTABLE} PRIVATE ${OPENAL_DEFINITIONS})
+    target_compile_definitions(${EXECUTABLE} PRIVATE AUDIO_OAL)
+elseif(${PROJECT}_AUDIO STREQUAL "MSS")
+    find_package(MilesSDK REQUIRED)
+    target_compile_definitions(${EXECUTABLE} PRIVATE AUDIO_MSS)
+    target_link_libraries(${EXECUTABLE} PRIVATE MilesSDK::MilesSDK)
+endif()
+
+find_package(mpg123 REQUIRED)
+target_link_libraries(${EXECUTABLE} PRIVATE
+    MPG123::libmpg123
+)
+if(${PROJECT}_WITH_OPUS)
+    find_package(opusfile REQUIRED)
+    target_link_libraries(${EXECUTABLE} PRIVATE
+        opusfile::opusfile
+    )
+    target_compile_definitions(${EXECUTABLE} PRIVATE AUDIO_OPUS)
+endif()
+if(${PROJECT}_WITH_LIBSNDFILE)
+    find_package(SndFile REQUIRED)
+    target_link_libraries(${EXECUTABLE} PRIVATE
+        SndFile::SndFile
+    )
+    target_compile_definitions(${EXECUTABLE} PRIVATE AUDIO_OAL_USE_SNDFILE)
+endif()
+
+target_compile_definitions(${EXECUTABLE} PRIVATE )
+
+option(${PROJECT}_WITH_SANITIZERS "Use UB sanitizers (better crash log)" OFF)
+option(${PROJECT}_WITH_ASAN "Use Address sanitizer (better crash log)" OFF)
+
+if(${PROJECT}_WITH_SANITIZERS)
+    target_compile_options(${EXECUTABLE} PUBLIC
+            -fsanitize=undefined,float-divide-by-zero,integer,implicit-conversion,implicit-integer-truncation,implicit-integer-arithmetic-value-change,local-bounds,nullability
+            -g3 -fno-omit-frame-pointer)
+    target_link_options(${EXECUTABLE} PUBLIC -fsanitize=undefined,float-divide-by-zero,integer,implicit-conversion,implicit-integer-truncation,implicit-integer-arithmetic-value-change,local-bounds,nullability)
+endif()
+
+if(${PROJECT}_WITH_ASAN)
+    target_compile_options(${EXECUTABLE} PUBLIC -fsanitize=address -g3 -fno-omit-frame-pointer)
+    target_link_options(${EXECUTABLE} PUBLIC -fsanitize=address)
+endif()
 
 if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang" OR CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang")
-    target_compile_options(re3
+    target_compile_options(${EXECUTABLE}
         PRIVATE
             "-Wall"
-        )
-    if (NOT RE3_PLATFORM_PS2)
-        target_compile_options(re3
+    )
+    if (NOT LIBRW_PLATFORM_PS2)
+        target_compile_options(${EXECUTABLE}
             PRIVATE
-                "-Wextra"
-                "-Wdouble-promotion"
-                "-Wpedantic"
-            )
+                -Wextra
+                -Wdouble-promotion
+                -Wpedantic
+        )
     endif()
 elseif(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
-    target_compile_options(re3
+    target_compile_options(${EXECUTABLE}
         PUBLIC
-            /wd4996 /wd4244
-        )
+            /Zc:sizedDealloc-
+    )
 endif()
 
-set_target_properties(re3
+set_target_properties(${EXECUTABLE}
     PROPERTIES
         C_STANDARD 11
         C_EXTENSIONS OFF
@@ -94,20 +127,15 @@ set_target_properties(re3
         CXX_STANDARD 11
         CXX_EXTENSIONS OFF
         CXX_STANDARD_REQUIRED ON
-        PREFIX ""
-    )
+)
 
-if(RE3_INSTALL)
-    target_include_directories(re3
-        INTERFACE
-            $<INSTALL_INTERFACE:${RE3_INSTALL_INCLUDEDIR}>
-        )
-
+if(${PROJECT}_INSTALL)
     install(
-        TARGETS re3
-        EXPORT re3-targets
-        RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}"
-        LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}"
-        ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}"
-        )
+        TARGETS ${EXECUTABLE}
+        EXPORT ${EXECUTABLE}-targets
+        RUNTIME DESTINATION "."
+    )
+    if(MSVC)
+        install(FILES $<TARGET_PDB_FILE:${EXECUTABLE}> DESTINATION "." OPTIONAL)
+    endif()
 endif()

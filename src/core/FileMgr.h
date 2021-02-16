@@ -9,7 +9,7 @@ public:
 	static void ChangeDir(const char *dir);
 	static void SetDir(const char *dir);
 	static void SetDirMyDocuments(void);
-	static ssize_t LoadFile(const char *file, uint8 *buf, int unused, const char *mode);
+	static ssize_t LoadFile(const char *file, uint8 *buf, int maxlen, const char *mode);
 	static int OpenFile(const char *file, const char *mode);
 	static int OpenFile(const char *file) { return OpenFile(file, "rb"); }
 	static int OpenFileForWriting(const char *file);

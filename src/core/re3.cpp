@@ -432,7 +432,7 @@ bool LoadINISettings()
 	ReadIniIfExists("Graphics", "FrameLimiter", &FrontEndMenuManager.m_PrefsFrameLimiter);
 #ifdef LEGACY_MENU_OPTIONS
 	ReadIniIfExists("Graphics", "VSync", &FrontEndMenuManager.m_PrefsVsyncDisp);
-    ReadIniIfExists("Graphics", "MaxFPS", &RsGlobal.maxFPS);
+	ReadIniIfExists("Graphics", "MaxFPS", &RsGlobal.maxFPS);
 	ReadIniIfExists("Graphics", "Trails", &CMBlur::BlurOn);
 #endif
 	ReadIniIfExists("General", "SkinFile", FrontEndMenuManager.m_PrefsSkinFile, 256);

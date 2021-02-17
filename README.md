@@ -36,6 +36,10 @@ We cannot build for PS2 or Xbox yet. If you're interested in doing so, get in to
 ![re3 2021-02-11 22-46-33-76](https://user-images.githubusercontent.com/1521437/107703343-cd101700-6cbb-11eb-9ccd-012cb90524b7.png)
 ![re3 2021-02-11 22-50-29-54](https://user-images.githubusercontent.com/1521437/107703348-d00b0780-6cbb-11eb-8afd-054249c2b95e.png)
 
+## Video
+
+[![](http://img.youtube.com/vi/ArTHIMT6YP4/0.jpg)](https://www.youtube.com/watch?v=ArTHIMT6YP4)
+
 ## Improvements
 
 We have implemented a number of changes and improvements to the original game.

@@ -18,7 +18,7 @@ find_path(mpg123_INCLUDE_DIR mpg123.h
     PATH_SUFFIXES include
 )
 
-find_library(mpg123_LIBRARIES NAMES mpg123 mpg123-0
+find_library(mpg123_LIBRARIES NAMES mpg123 mpg123-0 libmpg123-0
     HINTS ${PKG_MPG123_LIBRARIES}
     PATHS "${mpg123_DIR}"
     PATH_SUFFIXES lib

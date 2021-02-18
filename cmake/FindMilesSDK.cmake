@@ -28,7 +28,7 @@ find_package_handle_standard_args(MilesSDK DEFAULT_MSG MilesSDK_LIBRARIES MilesS
 if(NOT TARGET MilesSDK::MilesSDK)
     add_library(MilesSDK::MilesSDK UNKNOWN IMPORTED)
     set_target_properties(MilesSDK::MilesSDK PROPERTIES
-        IMPORTED_LOCATION "${MilesSDK_LIBRARIES}
+        IMPORTED_LOCATION "${MilesSDK_LIBRARIES}"
         INTERFACE_INCLUDE_DIRECTORIES "${MilesSDK_INCLUDE_DIR}"
     )
 endif()

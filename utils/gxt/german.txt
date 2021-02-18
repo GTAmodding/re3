@@ -8031,28 +8031,28 @@ BILINEAR
 TRILINEAR
 
 [FED_WND]
-WINDOWED
+FENSTERMODUS
 
 [FED_FLS]
-FULLSCREEN
+VOLLBILD
 
 [FEM_CSB]
 CUTSCENE BORDERS
 
 [FEM_SCF]
-SCREEN FORMAT
+BILDSCHIRMFORMAT
 
 [FEM_ISL]
-MAP MEMORY USAGE
+VERWENDUNG DES KARTENSPEICHERS
 
 [FEM_LOW]
-LOW
+NIEDRIG
 
 [FEM_MED]
-MEDIUM
+MITTEL
 
 [FEM_HIG]
-HIGH
+HOCH
 
 [FEM_2PR]
 PS2 ALPHA TEST
@@ -8062,13 +8062,13 @@ FREE CAM
 
 { Linux joy detection }
 [FEC_JOD]
-DETECT JOYSTICK
+JOYSTICK ERKENNEN
 
 [FEC_JPR]
-Press any key on the joystick of your choice that you want to use on the game, and it will be selected.
+Drücken Sie eine beliebige Taste auf dem Joystick Ihrer Wahl, den Sie für das Spiel verwenden möchten, und es wird ausgewählt.
 
 [FEC_JDE]
-Detected joystick
+Joystick erkannt
 
 { mission restart }
 [FET_RMS]
@@ -8079,25 +8079,25 @@ WIEDERHOLEN?
 
 { more graphics }
 [FED_VPL]
-VEHICLE PIPELINE
+FAHRZEUG-PIPELINE
 
 [FED_PRM]
 PED RIM LIGHT
 
 [FED_RGL]
-ROAD GLOSS
+STRAẞENGLANZ
 
 [FED_CLF]
-COLOUR FILTER
+FARBENFILTER
 
 [FED_WLM]
-WORLD LIGHTMAPS
+WELTLICHTKARTEN
 
 [FED_MBL]
 MOTION BLUR
 
 [FEM_SIM]
-SIMPLE
+SIMPEL
 
 [FEM_NRM]
 NORMAL
@@ -8122,11 +8122,11 @@ AUTO
 
 { controls }
 [FEC_IVP]
-INVERT PAD VERTICALLY
+PAD VERTIKAL INVERTIEREN
 
 { map }
 [FEM_TWP]
-Toggle Waypoint
+Wegpunkt umschalten
 
 [FEA_FMN]
 RADIO AUS
@@ -8177,7 +8177,7 @@ IM AUTO
 VIBRATION
 
 [FET_AGS]
-GAMEPAD SETTINGS
+KONTROLLEREINSTELLUNGEN
 
 [DUMMY]
 THIS LABEL NEEDS TO BE HERE !!!

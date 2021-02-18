@@ -372,7 +372,7 @@ void CHud::Draw()
 
 			RwRenderStateSet(rwRENDERSTATEZWRITEENABLE, (void*)FALSE);
 
-			float fStep = Sin((CTimer::GetTimeInMilliseconds() & 1023)/1024.0f * 6.28f);
+			float fStep = Sin((CTimer::GetTimeInMilliseconds() & 1023)/1024.0f * 2 * PI_3_14);
 			float fMultBright = SpriteBrightness / 30.0f * (0.25f * fStep + 0.75f);
 			CRect rect;
 #ifdef GTA_PC

@@ -1146,7 +1146,7 @@ CPopulation::ManagePopulation(void)
 			if (ped->m_nPedState == PED_DEAD && !ped->bFadeOut) {
 				CVector pedPos = ped->GetPosition();
 
-				float randAngle = (uint8) CGeneral::GetRandomNumber() * (3.14f / 128.0f); // Not PI, 3.14
+				float randAngle = (uint8) CGeneral::GetRandomNumber() * (PI_3_14 / 128.0f); // Not PI, 3.14
 				switch (CGeneral::GetRandomNumber() % 3) {
 					case 0:
 						CShadows::AddPermanentShadow(SHADOWTYPE_DARK, gpOutline1Tex, &pedPos,

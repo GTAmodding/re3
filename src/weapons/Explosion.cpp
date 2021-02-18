@@ -356,7 +356,7 @@ CExplosion::Update()
 					}
 					float ff = ((float)explosion.m_nIteration * 0.55f);
 					for (int i = 0; i < 5 * ff; i++) {
-						float angle = CGeneral::GetRandomNumber() / 256.0f * 6.28f;
+						float angle = CGeneral::GetRandomNumber() / 256.0f * 2 * PI_3_14;
 
 						CVector pos = explosion.m_vecPosition;
 						pos.x += ff * Sin(angle);

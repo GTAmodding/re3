@@ -7,6 +7,7 @@
 #include "CarCtrl.h"
 #include "Camera.h"
 #include "CutsceneMgr.h"
+#include "Ferry.h"
 #include "Garages.h"
 #include "GameLogic.h"
 #include "Hud.h"
@@ -29,22 +30,22 @@ int8 CRunningScript::ProcessCommands1500To1599(int32 command)
 	case COMMAND_DISABLE_FERRY_PATH:
 	{
 		CollectParameters(&m_nIp, 1);
-		// CFerry:DissableFerryPath(GET_INTEGER_PARAM(0)); TODO
+		CFerry::DissableFerryPath(GET_INTEGER_PARAM(0));
 		return 0;
 	}
 	case COMMAND_ENABLE_FERRY_PATH:
 	{
 		CollectParameters(&m_nIp, 1);
-		// CFerry::EnableFerryPath(GET_INTEGER_PARAM(0));
+		CFerry::EnableFerryPath(GET_INTEGER_PARAM(0));
 		return 0;
 	}
 	case COMMAND_GET_CLOSEST_DOCKED_FERRY:
 	{
 		CollectParameters(&m_nIp, 2);
-		// CFerry* pFerry = CFerry::GetClosestFerry(GET_FLOAT_PARAM(0), GET_FLOAT_PARAM(1));
+		CFerry* pFerry = CFerry::GetClosestFerry(GET_FLOAT_PARAM(0), GET_FLOAT_PARAM(1));
 		int id = -1;
-		// if (pFerry && pFerry->IsDocked()
-		//	id = pFerry->GetId();
+		if (pFerry && pFerry->IsDocked())
+			id = pFerry->m_nFerryId;
 		SET_INTEGER_PARAM(0, id);
 		StoreParameters(&m_nIp, 1);
 		return 0;
@@ -52,43 +53,41 @@ int8 CRunningScript::ProcessCommands1500To1599(int32 command)
 	case COMMAND_OPEN_FERRY_DOOR:
 	{
 		CollectParameters(&m_nIp, 1);
-		// CFerry* pFerry = CFerry::GetFerry(GET_INTEGER_PARAM(0));
-		// script_assert(pFerry);
-		// pFerry->OpenDoor();
+		CFerry* pFerry = CFerry::GetFerry(GET_INTEGER_PARAM(0));
+		script_assert(pFerry);
+		pFerry->OpenDoor();
 		return 0;
 	}
 	case COMMAND_CLOSE_FERRY_DOOR:
 	{
 		CollectParameters(&m_nIp, 1);
-		// CFerry* pFerry = CFerry::GetFerry(GET_INTEGER_PARAM(0));
-		// script_assert(pFerry);
-		// pFerry->CloseDoor();
+		CFerry* pFerry = CFerry::GetFerry(GET_INTEGER_PARAM(0));
+		script_assert(pFerry);
+		pFerry->CloseDoor();
 		return 0;
 	}
 	case COMMAND_IS_FERRY_DOOR_OPEN:
 	{
 		CollectParameters(&m_nIp, 1);
-		// CFerry* pFerry = CFerry::GetFerry(GET_INTEGER_PARAM(0));
-		// script_assert(pFerry);
-		// UpdateCompareFlag(pFerry->IsDoorOpen());
-		UpdateCompareFlag(false);
+		CFerry* pFerry = CFerry::GetFerry(GET_INTEGER_PARAM(0));
+		script_assert(pFerry);
+		UpdateCompareFlag(pFerry->IsDoorOpen());
 		return 0;
 	}
 	case COMMAND_IS_FERRY_DOOR_CLOSED:
 	{
 		CollectParameters(&m_nIp, 1);
-		// CFerry* pFerry = CFerry::GetFerry(GET_INTEGER_PARAM(0));
-		// script_assert(pFerry);
-		// UpdateCompareFlag(pFerry->IsDoorClosed());
-		UpdateCompareFlag(true);
+		CFerry* pFerry = CFerry::GetFerry(GET_INTEGER_PARAM(0));
+		script_assert(pFerry);
+		UpdateCompareFlag(pFerry->IsDoorClosed());
 		return 0;
 	}
 	case COMMAND_SKIP_FERRY_TO_NEXT_DOCK:
 	{
 		CollectParameters(&m_nIp, 1);
-		// CFerry* pFerry = CFerry::GetFerry(GET_INTEGER_PARAM(0));
-		// script_assert(pFerry);
-		// pFerry->SkipFerryToNextDock();
+		CFerry* pFerry = CFerry::GetFerry(GET_INTEGER_PARAM(0));
+		script_assert(pFerry);
+		pFerry->SkipFerryToNextDock();
 		return 0;
 	}
 	case COMMAND_SET_CHAR_DROPS_WEAPONS_ON_DEATH:
@@ -110,35 +109,36 @@ int8 CRunningScript::ProcessCommands1500To1599(int32 command)
 	case COMMAND_GET_FERRY_BOARDING_SPACE:
 	{
 		CollectParameters(&m_nIp, 4);
-		// CFerry* pFerry = CFerry::GetFerry(GET_INTEGER_PARAM(0));
-		// script_assert(pFerry);
-		// ? = pFerry->GetBoardingSpace((CFerry::eSpaceUse)GET_INTEGER_PARAMS(1), (CFerry::eSpaceStyle)GET_INTEGER_PARAMS(2), GET_INTEGER_PARAMS(3));
-		SET_FLOAT_PARAM(0, 0.0f);
-		SET_FLOAT_PARAM(1, 0.0f); // TODO
+		CFerry* pFerry = CFerry::GetFerry(GET_INTEGER_PARAM(0));
+		script_assert(pFerry);
+		CVector space = pFerry->GetBoardingSpace((CFerry::eSpaceUse)GET_INTEGER_PARAM(1), (CFerry::eSpaceStyle)GET_INTEGER_PARAM(2), GET_INTEGER_PARAM(3));
+		SET_FLOAT_PARAM(0, space.x);
+		SET_FLOAT_PARAM(1, space.y);
 		StoreParameters(&m_nIp, 2);
 		return 0;
 	}
 	case COMMAND_GET_FERRY_HEADING:
 	{
 		CollectParameters(&m_nIp, 1);
-		// CFerry* pFerry = CFerry::GetFerry(GET_INTEGER_PARAM(0));
-		// script_assert(pFerry);
-		// float fHeading = CGeneral::GetATanOfXY(pFerry->GetForward().x, pFerry->GetForward().y);
-		// SET_FLOAT_PARAM(0, fHeading);
-		SET_FLOAT_PARAM(0, 0.0f);
+		CFerry* pFerry = CFerry::GetFerry(GET_INTEGER_PARAM(0));
+		script_assert(pFerry);
+		float fHeading = Atan2(-pFerry->GetForward().x, pFerry->GetForward().y);
+		SET_FLOAT_PARAM(0, fHeading);
 		StoreParameters(&m_nIp, 1);
 		return 0;
 	}
-	case COMMAND_SET_FERRIES_ENABLED:
+	case COMMAND_SET_FERRIES_DISABLED:
 	{
-		CollectParameters(&m_nIp, 1);
-		// CFerry::SetFerriesEnabled(GET_INTEGER_PARAM(0));
+		CollectParameters(&m_nIp, 2);
+		CFerry::SetFerriesDisabled(GET_INTEGER_PARAM(1));
 		return 0;
 	}
 	case COMMAND_COMPLETE_FERRY_DOOR_MOVEMENT:
 	{
 		CollectParameters(&m_nIp, 1);
-		// CFerry::CompleteDorrMovement(GET_INTEGER_PARAM(0));
+		CFerry* pFerry = CFerry::GetFerry(GET_INTEGER_PARAM(0));
+		script_assert(pFerry);
+		pFerry->CompleteDorrMovement();
 		return 0;
 	}
 	case COMMAND_OVERRIDE_CAR_REMOTE_CONTROL:
@@ -157,7 +157,7 @@ int8 CRunningScript::ProcessCommands1500To1599(int32 command)
 		else {
 			TheCamera.TakeControl(pVehicle, CCam::MODE_1STPERSON, GET_INTEGER_PARAM(1) ? INTERPOLATION : JUMP_CUT, CAMCONTROL_SCRIPT);
 			script_assert(pVehicle->IsCar());
-			//((CAutomobile*)pVehicle)->Damage.m_bSmashedDoorDoesntClose = true;
+			((CAutomobile*)pVehicle)->Damage.m_bSmashedDoorDoesntClose = true;
 		}
 		if (m_bIsMissionScript)
 			CTheScripts::MissionCleanUp.RemoveEntityFromList(GET_INTEGER_PARAM(0), CLEANUP_CAR);
@@ -670,7 +670,7 @@ int8 CRunningScript::ProcessCommands1500To1599(int32 command)
 	}
 	case COMMAND_SWITCH_FERRY_COLLISION:
 		CollectParameters(&m_nIp, 1);
-		// CFerry::SwitchFerryCollision(GET_INTEGER_PARAM(0));
+		CFerry::SwitchFerryCollision(GET_INTEGER_PARAM(0));
 		return 0;
 	case COMMAND_SET_CHAR_MAX_HEALTH:
 	{

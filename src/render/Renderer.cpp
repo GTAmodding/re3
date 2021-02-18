@@ -27,6 +27,7 @@
 #include "Renderer.h"
 #include "custompipes.h"
 #include "Frontend.h"
+#include "Ferry.h"
 
 bool gbShowPedRoadGroups;
 bool gbShowCarRoadGroups;
@@ -522,6 +523,8 @@ CRenderer::RenderVehicles(void)
 	    node != &gSortedVehiclesAndPeds.head;
 	    node = node->prev)
 		RenderOneNonRoad(node->item.ent);
+
+	CFerry::RenderAllRemaning();
 }
 
 void

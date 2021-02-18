@@ -15,6 +15,10 @@
 #include "Train.h"
 #include "AudioScriptObject.h"
 
+#define TRAIN_SPEED (15.0f)
+#define TRAIN_SLOWDOWN_DISTANCE (40.0f)
+#define TRAIN_TIME_STOPPED_AT_STATION (25.0f)
+
 static CTrainNode* pTrackNodes;
 static int16 NumTrackNodes;
 static float StationDist[3] = { 873.0f, 1522.0f, 2481.0f };
@@ -598,23 +602,23 @@ CTrain::ReadAndInterpretTrackFile(Const char *filename, CTrainNode **nodes, int1
 		interpLines[j].type = 1;
 		interpLines[j].time = time;
 		interpLines[j].position = position;
-		interpLines[j].speed = 15.0f;
+		interpLines[j].speed = TRAIN_SPEED;
 		interpLines[j].acceleration = 0.0f;
 		j++;
 		// distance to next keyframe
-		float dist = (stationDists[i]-40.0f) - position;
-		time += dist/15.0f;
+		float dist = (stationDists[i]-TRAIN_SLOWDOWN_DISTANCE) - position;
+		time += dist/TRAIN_SPEED;
 		position += dist;
 
 		// Now slow down 40 units before stop
 		interpLines[j].type = 2;
 		interpLines[j].time = time;
 		interpLines[j].position = position;
-		interpLines[j].speed = 15.0f;
-		interpLines[j].acceleration = -45.0f/32.0f;
+		interpLines[j].speed = TRAIN_SPEED;
+		interpLines[j].acceleration = -(TRAIN_SPEED * TRAIN_SPEED) / (4 * TRAIN_SLOWDOWN_DISTANCE);
 		j++;
-		time += 80.0f/15.0f;
-		position += 40.0f;	// at station
+		time += 2*TRAIN_SLOWDOWN_DISTANCE/TRAIN_SPEED;
+		position += TRAIN_SLOWDOWN_DISTANCE;	// at station
 
 		// stopping
 		interpLines[j].type = 0;
@@ -623,26 +627,26 @@ CTrain::ReadAndInterpretTrackFile(Const char *filename, CTrainNode **nodes, int1
 		interpLines[j].speed = 0.0f;
 		interpLines[j].acceleration = 0.0f;
 		j++;
-		time += 25.0f;
+		time += TRAIN_TIME_STOPPED_AT_STATION;
 
 		// accelerate again
 		interpLines[j].type = 2;
 		interpLines[j].time = time;
 		interpLines[j].position = position;
 		interpLines[j].speed = 0.0f;
-		interpLines[j].acceleration = 45.0f/32.0f;
+		interpLines[j].acceleration = (TRAIN_SPEED * TRAIN_SPEED) / (4 * TRAIN_SLOWDOWN_DISTANCE);
 		j++;
-		time += 80.0f/15.0f;
-		position += 40.0f;	// after station
+		time += 2*TRAIN_SLOWDOWN_DISTANCE /TRAIN_SPEED;
+		position += TRAIN_SLOWDOWN_DISTANCE;	// after station
 	}
 	// last keyframe
 	interpLines[j].type = 1;
 	interpLines[j].time = time;
 	interpLines[j].position = position;
-	interpLines[j].speed = 15.0f;
+	interpLines[j].speed = TRAIN_SPEED;
 	interpLines[j].acceleration = 0.0f;
 	j++;
-	*totalDuration = time + (*totalLength - position)/15.0f;
+	*totalDuration = time + (*totalLength - position)/ TRAIN_SPEED;
 
 	// end
 	interpLines[j].time = *totalDuration;

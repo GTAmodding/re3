@@ -146,7 +146,9 @@ enum Config {
 	NUM_EXPLOSIONS = 48,
 
 	NUM_SETPIECES = 96,
-	NUM_SHORTCUT_START_POINTS = 16
+	NUM_SHORTCUT_START_POINTS = 16,
+
+	NUM_FERRY_PATHS = 1
 };
 
 // We don't expect to compile for PS2 or Xbox

@@ -137,12 +137,18 @@ workspace "reVC"
 	filter { "platforms:*arm*" }
 		architecture "ARM"
 		
-	filter { "platforms:macosx-arm64-*" }
-		buildoptions { "-target", "arm64-apple-macos11", "-std=gnu++14" }
-
-	filter { "platforms:macosx-amd64-*" }
-		buildoptions { "-target", "x86_64-apple-macos10.12", "-std=gnu++14" }
-
+	filter { "platforms:macosx-arm64-*", "files:**.cpp"}
+		buildoptions {"-target", "arm64-apple-macos11", "--std=gnu++14"}
+	
+	filter { "platforms:macosx-arm64-*", "files:**.c"}
+		buildoptions {"-target", "arm64-apple-macos11"}
+	
+	filter { "platforms:macosx-amd64-*", "files:**.cpp"}
+		buildoptions { "-target", "x86_64-apple-macos10.12", "--std=gnu++14"}
+	
+	filter { "platforms:macosx-amd64-*", "files:**.c"}
+		buildoptions { "-target", "x86_64-apple-macos10.12"}
+	
 	filter { "platforms:*librw_d3d9*" }
 		defines { "RW_D3D9" }
 		if(not _OPTIONS["with-librw"]) then
@@ -162,7 +168,7 @@ workspace "reVC"
 		includedirs { path.join(_OPTIONS["glfwdir64"], "include") }
 
 	filter  {}
-		
+	
     function setpaths (gamepath, exepath)
        if (gamepath) then
           postbuildcommands {
@@ -204,9 +210,9 @@ project "librw"
 
 	filter "platforms:macosx*"
 		-- Support MacPorts and Homebrew
-		includedirs { "/opt/local/include" }
+		includedirs { "/opt/homebrew/include" }
 		includedirs {"/usr/local/include" }
-		libdirs { "/opt/local/lib" }
+		libdirs { "/opt/homebrew/lib" }
 		libdirs { "/usr/local/lib" }
 
 	filter "platforms:*gl3_glfw*"
@@ -342,15 +348,15 @@ project "reVC"
 		libdirs { "vendor/openal-soft/libs/Win64" }
 
 	filter "platforms:linux*oal"
-		links { "openal", "mpg123", "sndfile", "pthread", "X11" }
+		links { "openal", "mpg123", "sndfile", "pthread" }
 		
 	filter "platforms:bsd*oal"
-		links { "openal", "mpg123", "sndfile", "pthread", "X11" }
+		links { "openal", "mpg123", "sndfile", "pthread" }
 
 	filter "platforms:macosx*oal"
 		links { "openal", "mpg123", "sndfile", "pthread" }
-		includedirs { "/usr/local/opt/openal-soft/include" }
-		libdirs { "/usr/local/opt/openal-soft/lib" }
+		includedirs { "/opt/homebrew/opt/openal-soft/include" }
+		libdirs { "/opt/homebrew/opt/openal-soft/lib" }
 	
 	if _OPTIONS["with-opus"] then
 		filter {}
@@ -403,7 +409,7 @@ project "reVC"
 	filter "platforms:macosx*gl3_glfw*"
 		links { "glfw" }
 		linkoptions { "-framework OpenGL" }
-		includedirs { "/opt/local/include" }
+		includedirs { "/opt/homebrew/include" }
 		includedirs { "/usr/local/include" }
-		libdirs { "/opt/local/lib" }
+		libdirs { "/opt/homebrew/lib/" }
 		libdirs { "/usr/local/lib" }

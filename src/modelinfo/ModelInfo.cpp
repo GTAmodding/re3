@@ -16,6 +16,8 @@ CStore<CPedModelInfo, PEDMODELSIZE> CModelInfo::ms_pedModelStore;
 CStore<CVehicleModelInfo, VEHICLEMODELSIZE> CModelInfo::ms_vehicleModelStore;
 CStore<C2dEffect, TWODFXSIZE> CModelInfo::ms_2dEffectStore;
 
+int32 CModelInfo::msNumModelInfos;
+
 void
 CModelInfo::Initialise(void)
 {
@@ -30,6 +32,7 @@ CModelInfo::Initialise(void)
 	debug("sizeof PedModelStore %d\n", sizeof(ms_pedModelStore));
 	debug("sizeof 2deffectsModelStore %d\n", sizeof(ms_2dEffectStore));
 
+	msNumModelInfos = 4900;
 	for(i = 0; i < MODELINFOSIZE; i++)
 		ms_modelInfoPtrs[i] = nil;
 	ms_2dEffectStore.Clear();
@@ -186,8 +189,12 @@ CBaseModelInfo*
 CModelInfo::GetModelInfo(const char *name, int *id)
 {
 	uint32 hashKey = CKeyGen::GetUppercaseKey(name);
+
+	if (CModelInfo::msNumModelInfos <= 0)
+		return nil;
+
 	CBaseModelInfo *modelinfo;
-	for(int i = 0; i < MODELINFOSIZE; i++){
+	for(int i = 0; i < msNumModelInfos; i++){
 		modelinfo = CModelInfo::ms_modelInfoPtrs[i];
 	 	if(modelinfo && hashKey == modelinfo->GetNameHashKey()){
 			if(id)
@@ -210,6 +217,23 @@ CModelInfo::GetModelInfo(const char *name, int minIndex, int maxIndex)
 		modelinfo = CModelInfo::ms_modelInfoPtrs[i];
 	 	if(modelinfo && hashKey == modelinfo->GetNameHashKey())
 			return modelinfo;
+	}
+	return nil;
+}
+
+CBaseModelInfo*
+CModelInfo::GetModelInfoFromHashKey(uint32 hashKey, int *id) {
+	if (CModelInfo::msNumModelInfos <= 0)
+		return nil;
+
+	CBaseModelInfo *modelinfo;
+	for (int i = 0; i < CModelInfo::msNumModelInfos; i++) {
+		modelinfo = CModelInfo::ms_modelInfoPtrs[i];
+		if (modelinfo && hashKey == modelinfo->GetNameHashKey()) {
+			if (id)
+				*id = i;
+			return modelinfo;
+		}
 	}
 	return nil;
 }

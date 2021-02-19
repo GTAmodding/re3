@@ -20,6 +20,8 @@ class CModelInfo
 	static CStore<CVehicleModelInfo, VEHICLEMODELSIZE> ms_vehicleModelStore;
 	static CStore<C2dEffect, TWODFXSIZE> ms_2dEffectStore;
 
+	static int32 msNumModelInfos;
+
 public:
 	static void Initialise(void);
 	static void ShutDown(void);
@@ -38,6 +40,7 @@ public:
 		return ms_modelInfoPtrs[id];
 	}
 	static CBaseModelInfo *GetModelInfo(const char *name, int minIndex, int maxIndex);
+	static CBaseModelInfo *GetModelInfoFromHashKey(uint32 hashKey, int *id);
 
 	static bool IsBoatModel(int32 id);
 	static bool IsBikeModel(int32 id);

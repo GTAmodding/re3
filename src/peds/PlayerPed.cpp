@@ -510,6 +510,25 @@ CPlayerPed::DoWeaponSmoothSpray(void)
 	return false;
 }
 
+float
+CPlayerPed::GetWeaponSmoothSprayRate(void)
+{
+	if(m_nPedState == PED_ATTACK && !m_pPointGunAt) {
+		CWeaponInfo *weaponInfo = CWeaponInfo::GetWeaponInfo(GetWeapon()->m_eWeaponType);
+		switch(GetWeapon()->m_eWeaponType) {
+		case WEAPONTYPE_SHOTGUN:
+		case WEAPONTYPE_AK47:
+		case WEAPONTYPE_M16: return PI / 180.f;
+		case WEAPONTYPE_FLAMETHROWER: return PI / 80.f;
+		case WEAPONTYPE_BASEBALLBAT:
+		case WEAPONTYPE_HELICANNON: return PI / 176.f;
+		default: return -1.0f;
+		}
+	}
+	if(bIsDucking) return PI / 112.f;
+	return -1.0f;
+}
+
 void
 CPlayerPed::DoStuffToGoOnFire(void)
 {
@@ -1169,36 +1188,36 @@ CPlayerPed::ProcessPlayerWeapon(CPad *padUsed)
 void
 CPlayerPed::PlayerControlZelda(CPad *padUsed)
 {
-	bool doSmoothSpray = DoWeaponSmoothSpray();
+	float smoothSprayRate = GetWeaponSmoothSprayRate();
 	float camOrientation = TheCamera.Orientation;
 	float leftRight = padUsed->GetPedWalkLeftRight();
 	float upDown = padUsed->GetPedWalkUpDown();
 	float padMoveInGameUnit;
 	bool smoothSprayWithoutMove = false;
 
-	if (doSmoothSpray && upDown > 0.0f) {
+	if(m_pPointGunAt && !CWeaponInfo::GetWeaponInfo(GetWeapon()->m_eWeaponType)->IsFlagSet(WEAPONFLAG_CANAIM_WITHARM)) {
+		upDown = 0.0f;
+		leftRight = 0.0f;
+	}
+
+	if(smoothSprayRate > 0.0f && upDown > 0.0f) {
 		padMoveInGameUnit = 0.0f;
 		smoothSprayWithoutMove = true;
 	} else {
 		padMoveInGameUnit = CVector2D(leftRight, upDown).Magnitude() / PAD_MOVE_TO_GAME_WORLD_MOVE;
 	}
 
-	if (padMoveInGameUnit > 0.0f || smoothSprayWithoutMove) {
+	if(padMoveInGameUnit > 0.0f || smoothSprayWithoutMove) {
 		float padHeading = CGeneral::GetRadianAngleBetweenPoints(0.0f, 0.0f, -leftRight, upDown);
 		float neededTurn = CGeneral::LimitRadianAngle(padHeading - camOrientation);
-		if (doSmoothSpray) {
-			if (GetWeapon()->m_eWeaponType == WEAPONTYPE_FLAMETHROWER || GetWeapon()->m_eWeaponType == WEAPONTYPE_COLT45
-				|| GetWeapon()->m_eWeaponType == WEAPONTYPE_UZI)
-				m_fRotationDest = m_fRotationCur - leftRight / 128.0f * (PI / 80.0f) * CTimer::GetTimeStep();
-			else
-				m_fRotationDest = m_fRotationCur - leftRight / 128.0f * (PI / 128.0f) * CTimer::GetTimeStep();
+		if(smoothSprayRate > 0.0f) {
+			m_fRotationDest = m_fRotationCur - leftRight / 128.0f * smoothSprayRate * CTimer::GetTimeStep();
 		} else {
 			m_fRotationDest = neededTurn;
 		}
-
+		
 		float maxAcc = 0.07f * CTimer::GetTimeStep();
 		m_fMoveSpeed = Min(padMoveInGameUnit, m_fMoveSpeed + maxAcc);
-
 	} else {
 		m_fMoveSpeed = 0.0f;
 	}

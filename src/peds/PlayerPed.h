@@ -54,6 +54,7 @@ public:
 	void SetRealMoveAnim(void);
 	void RestoreSprintEnergy(float);
 	bool DoWeaponSmoothSpray(void);
+	float GetWeaponSmoothSprayRate(void);
 	void DoStuffToGoOnFire(void);
 	bool DoesTargetHaveToBeBroken(CVector, CWeapon*);
 	void RunningLand(CPad*);

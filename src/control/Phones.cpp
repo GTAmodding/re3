@@ -13,6 +13,7 @@
 #include "RpAnimBlend.h"
 #include "AnimBlendAssociation.h"
 #include "soundlist.h"
+#include "SaveBuf.h"
 #ifdef FIX_BUGS
 #include "Replay.h"
 #endif
@@ -197,10 +198,10 @@ void
 CPhoneInfo::Load(uint8 *buf, uint32 size)
 {
 INITSAVEBUF
-	m_nMax = ReadSaveBuf<int32>(buf);
-	m_nScriptPhonesMax = ReadSaveBuf<int32>(buf);
+	ReadSaveBuf(&m_nMax, buf);
+	ReadSaveBuf(&m_nScriptPhonesMax, buf);
 	for (int i = 0; i < NUMPHONES; i++) {
-		m_aPhones[i] = ReadSaveBuf<CPhone>(buf);
+		ReadSaveBuf(&m_aPhones[i], buf);
 		// It's saved as building pool index in save file, convert it to true entity
 		if (m_aPhones[i].m_pEntity) {
 			m_aPhones[i].m_pEntity = CPools::GetBuildingPool()->GetSlot((uintptr)m_aPhones[i].m_pEntity - 1);

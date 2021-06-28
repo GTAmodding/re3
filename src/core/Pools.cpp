@@ -14,6 +14,7 @@
 #include "Wanted.h"
 #include "World.h"
 #include "MemoryHeap.h"
+#include "SaveBuf.h"
 
 CCPtrNodePool *CPools::ms_pPtrNodePool;
 CEntryInfoNodePool *CPools::ms_pEntryInfoNodePool;
@@ -137,15 +138,20 @@ CPools::MakeSureSlotInObjectPoolIsEmpty(int32 slot)
 void CPools::LoadVehiclePool(uint8* buf, uint32 size)
 {
 INITSAVEBUF
-	int nNumCars = ReadSaveBuf<int>(buf);
-	int nNumBoats = ReadSaveBuf<int>(buf);
-	int nNumBikes = ReadSaveBuf<int>(buf);
+	int nNumCars, nNumBoats, nNumBikes;
+	ReadSaveBuf(&nNumCars, buf);
+	ReadSaveBuf(&nNumBoats, buf);
+	ReadSaveBuf(&nNumBikes, buf);
 	for (int i = 0; i < nNumCars + nNumBoats + nNumBikes; i++) {
-		uint32 type = ReadSaveBuf<uint32>(buf);
-		int16 model = ReadSaveBuf<int16>(buf);
+		uint32 type;
+		int16 model;
+		int32 slot;
+
+		ReadSaveBuf(&type, buf);
+		ReadSaveBuf(&model, buf);
 		CStreaming::RequestModel(model, STREAMFLAGS_DEPENDENCY);
 		CStreaming::LoadAllRequestedModels(false);
-		int32 slot = ReadSaveBuf<int32>(buf);
+		ReadSaveBuf(&slot, buf);
 		CVehicle* pVehicle;
 #ifdef COMPATIBLE_SAVES
 		if (type == VEHICLE_TYPE_BOAT)

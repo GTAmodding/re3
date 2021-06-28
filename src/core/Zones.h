@@ -103,8 +103,8 @@ public:
 	static void SetPedDensity(uint16 zoneid, uint8 day, uint16 peddensity);
 	static void SetPedGroup(uint16 zoneid, uint8 day, uint16 pedgroup);
 	static int16 FindAudioZone(CVector *pos);
-	static CZone *GetPointerForZoneIndex(ssize_t i) { return i == -1 ? nil : &NavigationZoneArray[i]; }
-	static ssize_t GetIndexForZonePointer(CZone *zone) { return zone == nil ? -1 : zone - NavigationZoneArray; }
+	static CZone *GetPointerForNavigationZoneIndex(ssize_t i) { return i == -1 ? nil : &NavigationZoneArray[i]; }
+	static ssize_t GetIndexForNavigationZonePointer(CZone *zone) { return zone == nil ? -1 : zone - NavigationZoneArray; }
 	static void AddZoneToAudioZoneArray(CZone *zone);
 	static void InitialiseAudioZoneArray(void);
 	static void SaveAllZones(uint8 *buffer, uint32 *length);

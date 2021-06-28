@@ -5,6 +5,7 @@
 #include "CarCtrl.h"
 #include "Curves.h"
 #include "PathFind.h"
+#include "SaveBuf.h"
 
 void CAutoPilot::ModifySpeed(float speed)
 {
@@ -92,43 +93,44 @@ void CAutoPilot::Save(uint8*& buf)
 
 void CAutoPilot::Load(uint8*& buf)
 {
-	m_nCurrentRouteNode = ReadSaveBuf<int32>(buf);
-	m_nNextRouteNode = ReadSaveBuf<int32>(buf);
-	m_nPrevRouteNode = ReadSaveBuf<int32>(buf);
-	m_nTimeEnteredCurve = ReadSaveBuf<int32>(buf);
-	m_nTimeToSpendOnCurrentCurve = ReadSaveBuf<int32>(buf);
-	m_nCurrentPathNodeInfo = ReadSaveBuf<uint32>(buf);
-	m_nNextPathNodeInfo = ReadSaveBuf<uint32>(buf);
-	m_nPreviousPathNodeInfo = ReadSaveBuf<uint32>(buf);
-	m_nAntiReverseTimer = ReadSaveBuf<uint32>(buf);
-	m_nTimeToStartMission = ReadSaveBuf<uint32>(buf);
-	m_nPreviousDirection = ReadSaveBuf<int8>(buf);
-	m_nCurrentDirection = ReadSaveBuf<int8>(buf);
-	m_nNextDirection = ReadSaveBuf<int8>(buf);
-	m_nCurrentLane = ReadSaveBuf<int8>(buf);
-	m_nNextLane = ReadSaveBuf<int8>(buf);
-	m_nDrivingStyle = ReadSaveBuf<uint8>(buf);
-	m_nCarMission = ReadSaveBuf<uint8>(buf);
-	m_nTempAction = ReadSaveBuf<uint8>(buf);
-	m_nTimeTempAction = ReadSaveBuf<uint32>(buf);
-	m_fMaxTrafficSpeed = ReadSaveBuf<float>(buf);
-	m_nCruiseSpeed = ReadSaveBuf<uint8>(buf);
-	m_nCruiseSpeedMultiplierType = ReadSaveBuf<uint8>(buf);
+	ReadSaveBuf(&m_nCurrentRouteNode, buf);
+	ReadSaveBuf(&m_nNextRouteNode, buf);
+	ReadSaveBuf(&m_nPrevRouteNode, buf);
+	ReadSaveBuf(&m_nTimeEnteredCurve, buf);
+	ReadSaveBuf(&m_nTimeToSpendOnCurrentCurve, buf);
+	ReadSaveBuf(&m_nCurrentPathNodeInfo, buf);
+	ReadSaveBuf(&m_nNextPathNodeInfo, buf);
+	ReadSaveBuf(&m_nPreviousPathNodeInfo, buf);
+	ReadSaveBuf(&m_nAntiReverseTimer, buf);
+	ReadSaveBuf(&m_nTimeToStartMission, buf);
+	ReadSaveBuf(&m_nPreviousDirection, buf);
+	ReadSaveBuf(&m_nCurrentDirection, buf);
+	ReadSaveBuf(&m_nNextDirection, buf);
+	ReadSaveBuf(&m_nCurrentLane, buf);
+	ReadSaveBuf(&m_nNextLane, buf);
+	ReadSaveBuf(&m_nDrivingStyle, buf);
+	ReadSaveBuf(&m_nCarMission, buf);
+	ReadSaveBuf(&m_nTempAction, buf);
+	ReadSaveBuf(&m_nTimeTempAction, buf);
+	ReadSaveBuf(&m_fMaxTrafficSpeed, buf);
+	ReadSaveBuf(&m_nCruiseSpeed, buf);
+	ReadSaveBuf(&m_nCruiseSpeedMultiplierType, buf);
 	SkipSaveBuf(buf, 2);
-	m_fCruiseSpeedMultiplier = ReadSaveBuf<float>(buf);
-	uint8 flags = ReadSaveBuf<uint8>(buf);
+	ReadSaveBuf(&m_fCruiseSpeedMultiplier, buf);
+	uint8 flags;
+	ReadSaveBuf(&flags, buf);
 	m_bSlowedDownBecauseOfCars = !!(flags & BIT(0));
 	m_bSlowedDownBecauseOfPeds = !!(flags & BIT(1));
 	m_bStayInCurrentLevel = !!(flags & BIT(2));
 	m_bStayInFastLane = !!(flags & BIT(3));
 	m_bIgnorePathfinding = !!(flags & BIT(4));
-	m_nSwitchDistance = ReadSaveBuf<uint8>(buf);
+	ReadSaveBuf(&m_nSwitchDistance, buf);
 	SkipSaveBuf(buf, 2);
-	m_vecDestinationCoors.x = ReadSaveBuf<float>(buf);
-	m_vecDestinationCoors.y = ReadSaveBuf<float>(buf);
-	m_vecDestinationCoors.z = ReadSaveBuf<float>(buf);
+	ReadSaveBuf(&m_vecDestinationCoors.x, buf);
+	ReadSaveBuf(&m_vecDestinationCoors.y, buf);
+	ReadSaveBuf(&m_vecDestinationCoors.z, buf);
 	SkipSaveBuf(buf, 32);
-	m_nPathFindNodesCount = ReadSaveBuf<int16>(buf);
+	ReadSaveBuf(&m_nPathFindNodesCount, buf);
 	SkipSaveBuf(buf, 6);
 }
 #endif

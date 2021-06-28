@@ -28,6 +28,7 @@
 #include "Record.h"
 #include "Shadows.h"
 #include "Wanted.h"
+#include "SaveBuf.h"
 
 #define INVALID_ORIENTATION (-9999.99f)
 

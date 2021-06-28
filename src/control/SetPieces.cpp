@@ -11,6 +11,7 @@
 #include "Wanted.h"
 #include "World.h"
 #include "VarConsole.h"
+#include "SaveBuf.h"
 
 #define TIME_BETWEEN_SETPIECE_SPAWNS 20000
 
@@ -67,9 +68,9 @@ VALIDATESAVEBUF(*size)
 void CSetPieces::Load(uint8* buf, uint32 size)
 {
 INITSAVEBUF
-	NumSetPieces = ReadSaveBuf<uint32>(buf);
+	ReadSaveBuf(&NumSetPieces, buf);
 	for (int i = 0; i < NUM_SETPIECES; i++)
-		aSetPieces[i] = ReadSaveBuf<CSetPiece>(buf);
+		ReadSaveBuf(&aSetPieces[i], buf);
 VALIDATESAVEBUF(size)
 }
 

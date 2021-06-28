@@ -23,6 +23,7 @@
 #include "World.h"
 #include "Replay.h"
 #include "Coronas.h"
+#include "SaveBuf.h"
 
 CPlaneTrail CPlaneTrails::aArray[6];
 RwImVertexIndex TrailIndices[32] = {
@@ -1267,7 +1268,7 @@ INITSAVEBUF
 		aArray[i].Clear();
 
 	for (int32 i = 0; i < 3; i++) {
-		aArray[i] = ReadSaveBuf<CScriptPath>(buf);
+		ReadSaveBuf(&aArray[i], buf);
 
 		for (int32 j = 0; j < 6; j++) {
 			CScriptPath *pPath = &aArray[i];
@@ -1279,7 +1280,7 @@ INITSAVEBUF
 
 		aArray[i].m_pNode = new CPlaneNode[aArray[i].m_numNodes];
 		for (int32 j = 0; j < aArray[i].m_numNodes; j++) {
-			aArray[i].m_pNode[j] = ReadSaveBuf<CPlaneNode>(buf);
+			ReadSaveBuf(&aArray[i].m_pNode[j], buf);
 		}
 	}
 VALIDATESAVEBUF(size)

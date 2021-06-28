@@ -19,6 +19,7 @@
 #include "Streaming.h"
 #include "SpecialFX.h"
 #include "Font.h"
+#include "SaveBuf.h"
 
 float CRadar::m_radarRange;
 sRadarTrace CRadar::ms_RadarTrace[NUMRADARBLIPS];
@@ -973,21 +974,21 @@ INITSAVEBUF
 	CheckSaveHeader(buf, 'R', 'D', 'R', '\0', size - SAVE_HEADER_SIZE);
 
 	for (int i = 0; i < NUMRADARBLIPS; i++) {
-		ms_RadarTrace[i].m_nColor = ReadSaveBuf<uint32>(buf);
-		ms_RadarTrace[i].m_Radius = ReadSaveBuf<float>(buf);
-		ms_RadarTrace[i].m_eBlipType = ReadSaveBuf<uint32>(buf);
-		ms_RadarTrace[i].m_nEntityHandle = ReadSaveBuf<int32>(buf);
-		ms_RadarTrace[i].m_vec2DPos.x = ReadSaveBuf<float>(buf); // CVector2D
-		ms_RadarTrace[i].m_vec2DPos.y = ReadSaveBuf<float>(buf);
-		ms_RadarTrace[i].m_vecPos = ReadSaveBuf<CVector>(buf);
-		ms_RadarTrace[i].m_BlipIndex = ReadSaveBuf<uint16>(buf);
-		ms_RadarTrace[i].m_bDim = ReadSaveBuf<bool>(buf);
-		ms_RadarTrace[i].m_bInUse = ReadSaveBuf<bool>(buf);
-		ms_RadarTrace[i].m_bShortRange = ReadSaveBuf<bool>(buf);
-		ms_RadarTrace[i].m_unused = ReadSaveBuf<bool>(buf);
-		ms_RadarTrace[i].m_wScale = ReadSaveBuf<int16>(buf);
-		ms_RadarTrace[i].m_eBlipDisplay = ReadSaveBuf<uint16>(buf);
-		ms_RadarTrace[i].m_eRadarSprite = ReadSaveBuf<uint16>(buf);
+		ReadSaveBuf(&ms_RadarTrace[i].m_nColor, buf);
+		ReadSaveBuf(&ms_RadarTrace[i].m_Radius, buf);
+		ReadSaveBuf(&ms_RadarTrace[i].m_eBlipType, buf);
+		ReadSaveBuf(&ms_RadarTrace[i].m_nEntityHandle, buf);
+		ReadSaveBuf(&ms_RadarTrace[i].m_vec2DPos.x, buf);
+		ReadSaveBuf(&ms_RadarTrace[i].m_vec2DPos.y, buf);
+		ReadSaveBuf(&ms_RadarTrace[i].m_vecPos, buf);
+		ReadSaveBuf(&ms_RadarTrace[i].m_BlipIndex, buf);
+		ReadSaveBuf(&ms_RadarTrace[i].m_bDim, buf);
+		ReadSaveBuf(&ms_RadarTrace[i].m_bInUse, buf);
+		ReadSaveBuf(&ms_RadarTrace[i].m_bShortRange, buf);
+		ReadSaveBuf(&ms_RadarTrace[i].m_unused, buf);
+		ReadSaveBuf(&ms_RadarTrace[i].m_wScale, buf);
+		ReadSaveBuf(&ms_RadarTrace[i].m_eBlipDisplay, buf);
+		ReadSaveBuf(&ms_RadarTrace[i].m_eRadarSprite, buf);
 	}
 
 VALIDATESAVEBUF(size);

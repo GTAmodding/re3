@@ -33,6 +33,7 @@
 #include "Hud.h"
 #include "Messages.h"
 #include "Streaming.h"
+#include "SaveBuf.h"
 
 CPickup CPickups::aPickUps[NUMPICKUPS];
 int16 CPickups::NumMessages;
@@ -1441,7 +1442,7 @@ CPickups::Load(uint8 *buf, uint32 size)
 INITSAVEBUF
 
 	for (int32 i = 0; i < NUMPICKUPS; i++) {
-		aPickUps[i] = ReadSaveBuf<CPickup>(buf);
+		ReadSaveBuf(&aPickUps[i], buf);
 
 		if (aPickUps[i].m_eType != PICKUP_NONE) {
 			if (aPickUps[i].m_pObject != nil)
@@ -1452,12 +1453,12 @@ INITSAVEBUF
 			
 	}
 
-	CollectedPickUpIndex = ReadSaveBuf<uint16>(buf);
-	ReadSaveBuf<uint16>(buf);
+	ReadSaveBuf(&CollectedPickUpIndex, buf);
+	SkipSaveBuf(buf, 2);
 	NumMessages = 0;
 
 	for (uint16 i = 0; i < NUMCOLLECTEDPICKUPS; i++)
-		aPickUpsCollected[i] = ReadSaveBuf<int32>(buf);
+		ReadSaveBuf(&aPickUpsCollected[i], buf);
 
 VALIDATESAVEBUF(size)
 }

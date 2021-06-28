@@ -3,6 +3,7 @@
 #include "General.h"
 #include "FileMgr.h"
 #include "PedType.h"
+#include "SaveBuf.h"
 
 CPedType *CPedType::ms_apPedType[NUM_PEDTYPES];
 CPedStats *CPedStats::ms_apPedStats[NUM_PEDSTATS];
@@ -201,7 +202,7 @@ INITSAVEBUF
 	CheckSaveHeader(buf, 'P', 'T', 'P', '\0', size - SAVE_HEADER_SIZE);
 
 	for(int i = 0; i < NUM_PEDTYPES; i++)
-		*ms_apPedType[i] = ReadSaveBuf<CPedType>(buf);
+		ReadSaveBuf(ms_apPedType[i], buf);
 VALIDATESAVEBUF(size)
 }
 

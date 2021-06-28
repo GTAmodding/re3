@@ -23,6 +23,7 @@
 #include "Replay.h"
 #include "PedPlacement.h"
 #include "VarConsole.h"
+#include "SaveBuf.h"
 
 #define PAD_MOVE_TO_GAME_WORLD_MOVE 60.0f
 

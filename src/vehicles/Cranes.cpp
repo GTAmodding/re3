@@ -11,6 +11,7 @@
 #include "Replay.h"
 #include "Object.h"
 #include "World.h"
+#include "SaveBuf.h"
 
 #define MAX_DISTANCE_TO_FIND_CRANE (10.0f)
 #define CRANE_UPDATE_RADIUS (300.0f)
@@ -641,10 +642,10 @@ void CCranes::Load(uint8* buf, uint32 size)
 {
 	INITSAVEBUF
 
-	NumCranes = ReadSaveBuf<int32>(buf);
-	CarsCollectedMilitaryCrane = ReadSaveBuf<uint32>(buf);
+	ReadSaveBuf(&NumCranes, buf);
+	ReadSaveBuf(&CarsCollectedMilitaryCrane, buf);
 	for (int i = 0; i < NUM_CRANES; i++)
-		aCranes[i] = ReadSaveBuf<CCrane>(buf);
+		ReadSaveBuf(&aCranes[i], buf);
 	for (int i = 0; i < NUM_CRANES; i++) {
 		CCrane *pCrane = &aCranes[i];
 		if (pCrane->m_pCraneEntity != nil)

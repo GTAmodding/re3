@@ -35,6 +35,7 @@
 #include "Glass.h"
 #include "Sprite.h"
 #include "Pickups.h"
+#include "SaveBuf.h"
 
 float fReloadAnimSampleFraction[5] = {  0.5f,  0.7f,  0.75f,  0.75f,  0.7f };
 float fSeaSparrowAimingAngle = 10.0f;

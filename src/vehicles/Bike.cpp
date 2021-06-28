@@ -36,6 +36,7 @@
 #include "Automobile.h"
 #include "Bike.h"
 #include "Debug.h"
+#include "SaveBuf.h"
 
 const uint32 CBike::nSaveStructSize =
 #ifdef COMPATIBLE_SAVES

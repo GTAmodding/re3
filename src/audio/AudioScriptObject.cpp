@@ -3,6 +3,7 @@
 #include "AudioScriptObject.h"
 #include "Pools.h"
 #include "DMAudio.h"
+#include "SaveBuf.h"
 
 cAudioScriptObject::cAudioScriptObject()
 {
@@ -53,12 +54,14 @@ cAudioScriptObject::LoadAllAudioScriptObjects(uint8 *buf, uint32 size)
 
 	CheckSaveHeader(buf, 'A', 'U', 'D', '\0', size - SAVE_HEADER_SIZE);
 
-	int32 pool_size = ReadSaveBuf<int32>(buf);
+	int32 pool_size;
+	ReadSaveBuf(&pool_size, buf);
 	for (int32 i = 0; i < pool_size; i++) {
-		int handle = ReadSaveBuf<int32>(buf);
+		int32 handle;
+		ReadSaveBuf(&handle, buf);
 		cAudioScriptObject *p = new(handle) cAudioScriptObject;
 		assert(p != nil);
-		*p = ReadSaveBuf<cAudioScriptObject>(buf);
+		ReadSaveBuf(p, buf);
 		p->AudioEntity = DMAudio.CreateLoopingScriptObject(p);
 	}
 

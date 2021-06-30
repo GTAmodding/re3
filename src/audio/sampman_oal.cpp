@@ -920,7 +920,11 @@ cSampleManager::Initialise(void)
 
 		for ( int32 i = 0; i < TOTAL_STREAMED_SOUNDS; i++ )
 		{	
-			if ( aStream[0] && aStream[0]->Open(StreamedNameTable[i], IsThisTrackAt16KHz(i) ? 16000 : 32000) )
+			if ( aStream[0] && (
+#ifdef PS2_AUDIO_PATHS
+				aStream[0]->Open(PS2StreamedNameTable[i], IsThisTrackAt16KHz(i) ? 16000 : 32000) || 
+#endif
+				aStream[0]->Open(StreamedNameTable[i], IsThisTrackAt16KHz(i) ? 16000 : 32000)) )
 			{
 				uint32 tatalms = aStream[0]->GetLengthMS();
 				aStream[0]->Close();
@@ -1627,9 +1631,7 @@ cSampleManager::StopChannel(uint32 nChannel)
 
 void
 cSampleManager::PreloadStreamedFile(uint32 nFile, uint8 nStream)
-{
-	char filename[MAX_PATH];
-	
+{	
 	ASSERT( nStream < MAX_STREAMS );
 
 	if ( nFile < TOTAL_STREAMED_SOUNDS )
@@ -1637,10 +1639,10 @@ cSampleManager::PreloadStreamedFile(uint32 nFile, uint8 nStream)
 		CStream *stream = aStream[nStream];
 
 		stream->Close();
-
-		strcpy(filename, StreamedNameTable[nFile]);
-		
-		stream->Open(filename, IsThisTrackAt16KHz(nFile) ? 16000 : 32000);
+#ifdef PS2_AUDIO_PATHS
+		if(!stream->Open(PS2StreamedNameTable[nFile], IsThisTrackAt16KHz(nFile) ? 16000 : 32000))
+#endif
+			stream->Open(StreamedNameTable[nFile], IsThisTrackAt16KHz(nFile) ? 16000 : 32000);
 		if ( !stream->Setup() )
 		{
 			stream->Close();
@@ -1701,10 +1703,11 @@ cSampleManager::StartStreamedFile(uint32 nFile, uint32 nPos, uint8 nStream)
 				if(!_GetMP3PosFromStreamPos(&position, &e) && !e) {
 					nFile = 0;
 
-					strcpy(filename, StreamedNameTable[nFile]);
-
 					CStream *stream = aStream[nStream];
-					stream->Open(filename, IsThisTrackAt16KHz(nFile) ? 16000 : 32000);
+#ifdef PS2_AUDIO_PATHS
+					if(!stream->Open(PS2StreamedNameTable[nFile], IsThisTrackAt16KHz(nFile) ? 16000 : 32000))
+#endif
+						stream->Open(StreamedNameTable[nFile], IsThisTrackAt16KHz(nFile) ? 16000 : 32000);
 					if ( stream->Setup() ) {
 						stream->SetLoopCount(nStreamLoopedFlag[nStream] ? 0 : 1);
 						nStreamLoopedFlag[nStream] = TRUE;
@@ -1756,10 +1759,12 @@ cSampleManager::StartStreamedFile(uint32 nFile, uint32 nPos, uint8 nStream)
 					{
 						nFile = 0;
 						_bIsMp3Active = 0;
-						strcpy(filename, StreamedNameTable[nFile]);
 
-						CStream* stream = aStream[nStream];
-						stream->Open(filename, IsThisTrackAt16KHz(nFile) ? 16000 : 32000);
+						CStream *stream = aStream[nStream];
+#ifdef PS2_AUDIO_PATHS
+						if(!stream->Open(PS2StreamedNameTable[nFile], IsThisTrackAt16KHz(nFile) ? 16000 : 32000))
+#endif
+							stream->Open(StreamedNameTable[nFile], IsThisTrackAt16KHz(nFile) ? 16000 : 32000);
 
 						if (stream->Setup()) {
 							stream->SetLoopCount(nStreamLoopedFlag[nStream] ? 0 : 1);
@@ -1806,7 +1811,10 @@ cSampleManager::StartStreamedFile(uint32 nFile, uint32 nPos, uint8 nStream)
 	
 	CStream *stream = aStream[nStream];
 
-	aStream[nStream]->Open(filename, IsThisTrackAt16KHz(nFile) ? 16000 : 32000);
+#ifdef PS2_AUDIO_PATHS
+	if(!stream->Open(PS2StreamedNameTable[nFile], IsThisTrackAt16KHz(nFile) ? 16000 : 32000))
+#endif
+		stream->Open(StreamedNameTable[nFile], IsThisTrackAt16KHz(nFile) ? 16000 : 32000);
 	
 	if ( stream->Setup() ) {
 		stream->SetLoopCount(nStreamLoopedFlag[nStream] ? 0 : 1);

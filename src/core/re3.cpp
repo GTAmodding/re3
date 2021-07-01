@@ -503,6 +503,7 @@ bool LoadINISettings()
 	ReadIniIfExists("CustomPipesValues", "LightmapMult", &CustomPipes::LightmapMult);
 	ReadIniIfExists("CustomPipesValues", "GlossMult", &CustomPipes::GlossMult);
 #endif
+	ReadIniIfExists("Rendering", "MaxFPS", &RsGlobal.maxFPS);
 #ifdef NEW_RENDERER
 	ReadIniIfExists("Rendering", "NewRenderer", &gbNewRenderer);
 #endif
@@ -596,6 +597,7 @@ void SaveINISettings()
 	StoreIni("CustomPipesValues", "LightmapMult", CustomPipes::LightmapMult);
 	StoreIni("CustomPipesValues", "GlossMult", CustomPipes::GlossMult);
 #endif
+	StoreIni("Rendering", "MaxFPS", RsGlobal.maxFPS);
 #ifdef NEW_RENDERER
 	StoreIni("Rendering", "NewRenderer", gbNewRenderer);
 #endif

@@ -498,8 +498,33 @@ CPlayerPed::RestoreSprintEnergy(float restoreSpeed)
 		m_fCurrentStamina += restoreSpeed * CTimer::GetTimeStep() * 0.5f;
 }
 
+#ifdef FIX_BUGS
+float
+CPlayerPed::GetWeaponSmoothSpray(void)
+{
+	if (m_nPedState == PED_ATTACK && !m_pPointGunAt) {
+		CWeaponInfo *weaponInfo = CWeaponInfo::GetWeaponInfo(GetWeapon()->m_eWeaponType);
+		switch(GetWeapon()->m_eWeaponType) {
+		case WEAPONTYPE_SHOTGUN:
+		case WEAPONTYPE_AK47:
+		case WEAPONTYPE_M16:
+			return PI / 180.f;
+		case WEAPONTYPE_FLAMETHROWER: 
+			return PI / 80.f;
+		case WEAPONTYPE_BASEBALLBAT:
+		case WEAPONTYPE_HELICANNON:
+			return PI / 176.f;
+		default: 
+			return -1.0f;
+		}
+	}
+	if (bIsDucking) 
+		return PI / 112.f;
+	return -1.0f;
+}
+#else
 bool
-CPlayerPed::DoWeaponSmoothSpray(void)
+CPlayerPed::GetWeaponSmoothSpray(void)
 {
 	if (m_nPedState == PED_ATTACK && !m_pPointGunAt) {
 		eWeaponType weapon = GetWeapon()->m_eWeaponType;
@@ -509,6 +534,7 @@ CPlayerPed::DoWeaponSmoothSpray(void)
 	}
 	return false;
 }
+#endif
 
 void
 CPlayerPed::DoStuffToGoOnFire(void)
@@ -1077,7 +1103,7 @@ CPlayerPed::ProcessPlayerWeapon(CPad *padUsed)
 					SetLookFlag(limitedCam, true);
 					SetAimFlag(limitedCam);
 #ifdef VC_PED_PORTS
-					SetLookTimer(INT32_MAX); // removing this makes head move for real, but I experinced some bugs.
+					SetLookTimer(INT32_MAX); // removing this makes head move for real, but I experienced some bugs.
 #endif
 				} else {
 					m_fRotationDest = limitedCam;
@@ -1169,30 +1195,54 @@ CPlayerPed::ProcessPlayerWeapon(CPad *padUsed)
 void
 CPlayerPed::PlayerControlZelda(CPad *padUsed)
 {
-	bool doSmoothSpray = DoWeaponSmoothSpray();
+#ifdef FIX_BUGS
+	float
+#else
+	bool
+#endif
+		
+	smoothSprayRate = GetWeaponSmoothSpray();
 	float camOrientation = TheCamera.Orientation;
 	float leftRight = padUsed->GetPedWalkLeftRight();
 	float upDown = padUsed->GetPedWalkUpDown();
 	float padMoveInGameUnit;
 	bool smoothSprayWithoutMove = false;
 
-	if (doSmoothSpray && upDown > 0.0f) {
+#ifdef FIX_BUGS
+	if(m_pPointGunAt && !CWeaponInfo::GetWeaponInfo(GetWeapon()->m_eWeaponType)->IsFlagSet(WEAPONFLAG_CANAIM_WITHARM)) {
+		upDown = 0.0f;
+		leftRight = 0.0f;
+	}
+
+	if(smoothSprayRate > 0.0f && upDown > 0.0f) {
+#else
+	if(smoothSprayRate && upDown > 0.0f) {
+#endif
 		padMoveInGameUnit = 0.0f;
 		smoothSprayWithoutMove = true;
 	} else {
 		padMoveInGameUnit = CVector2D(leftRight, upDown).Magnitude() / PAD_MOVE_TO_GAME_WORLD_MOVE;
 	}
 
+
 	if (padMoveInGameUnit > 0.0f || smoothSprayWithoutMove) {
 		float padHeading = CGeneral::GetRadianAngleBetweenPoints(0.0f, 0.0f, -leftRight, upDown);
 		float neededTurn = CGeneral::LimitRadianAngle(padHeading - camOrientation);
-		if (doSmoothSpray) {
+#ifdef FIX_BUGS
+		if(smoothSprayRate > 0.0f)
+			
+			m_fRotationDest = m_fRotationCur - leftRight / 128.0f * smoothSprayRate * CTimer::GetTimeStep();
+#else
+
+		if (smoothSprayRate) {
 			if (GetWeapon()->m_eWeaponType == WEAPONTYPE_FLAMETHROWER || GetWeapon()->m_eWeaponType == WEAPONTYPE_COLT45
 				|| GetWeapon()->m_eWeaponType == WEAPONTYPE_UZI)
 				m_fRotationDest = m_fRotationCur - leftRight / 128.0f * (PI / 80.0f) * CTimer::GetTimeStep();
 			else
 				m_fRotationDest = m_fRotationCur - leftRight / 128.0f * (PI / 128.0f) * CTimer::GetTimeStep();
-		} else {
+		}
+#endif
+		else {
 			m_fRotationDest = neededTurn;
 		}
 

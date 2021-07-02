@@ -1321,9 +1321,11 @@ CPed::CalculateNewVelocity(void)
 			limitedRotDest -= 2 * PI;
 		}
 
+#ifdef THIS_IS_STUPID
 		if (IsPlayer() && m_nPedState == PED_ATTACK)
 			headAmount /= 4.0f;
-
+#endif
+		
 		float neededTurn = limitedRotDest - m_fRotationCur;
 		if (neededTurn <= headAmount) {
 			if (neededTurn > (-headAmount))

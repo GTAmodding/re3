@@ -921,16 +921,30 @@ CWaterLevel::RenderWater()
 	
 	if ( !CTimer::GetIsPaused() )
 	{
-		TEXTURE_ADDU       += windAddUV;
-		TEXTURE_ADDV       += windAddUV;
-		
-		_TEXTURE_MASK_ADDU += Sin(fAngle) 		 * 0.0005f + 1.1f * windAddUV;
-		_TEXTURE_MASK_ADDV -= Cos(fAngle * 1.3f) * 0.0005f + 1.2f * windAddUV;
-		
-		_TEXTURE_WAKE_ADDU -= Sin(fAngle) 		 * 0.0003f + windAddUV;
-		_TEXTURE_WAKE_ADDV += Cos(fAngle * 0.7f) * 0.0003f + windAddUV;
+		#ifdef FIX_BUGS
+			// Stop the  movement of the ocean speeding up at high FPS.
+			// Should be purely aesthetic, affecting only the texture UVs.
+			TEXTURE_ADDU       += windAddUV * CTimer::GetTimeStepFix();
+			TEXTURE_ADDV       += windAddUV * CTimer::GetTimeStepFix();
+
+			_TEXTURE_MASK_ADDU += (Sin(fAngle) 		  * 0.0005f + 1.1f * windAddUV) * CTimer::GetTimeStepFix();
+			_TEXTURE_MASK_ADDV -= (Cos(fAngle * 1.3f) * 0.0005f + 1.2f * windAddUV) * CTimer::GetTimeStepFix();
+
+			_TEXTURE_WAKE_ADDU -= (Sin(fAngle) 		  * 0.0003f + windAddUV) * CTimer::GetTimeStepFix();
+			_TEXTURE_WAKE_ADDV += (Cos(fAngle * 0.7f) * 0.0003f + windAddUV) * CTimer::GetTimeStepFix();
+		#else
+			TEXTURE_ADDU       += windAddUV;
+			TEXTURE_ADDV       += windAddUV;
+
+			_TEXTURE_MASK_ADDU += Sin(fAngle) 		 * 0.0005f + 1.1f * windAddUV;
+			_TEXTURE_MASK_ADDV -= Cos(fAngle * 1.3f) * 0.0005f + 1.2f * windAddUV;
+
+			_TEXTURE_WAKE_ADDU -= Sin(fAngle) 		 * 0.0003f + windAddUV;
+			_TEXTURE_WAKE_ADDV += Cos(fAngle * 0.7f) * 0.0003f + windAddUV;
+		#endif
 	}
 	
+	// What does this code do?  Are the above equations sometimes unstable and make big numbers?
 	if ( _TEXTURE_MASK_ADDU >= 1.0f )
 		_TEXTURE_MASK_ADDU = 0.0f;
 	if ( _TEXTURE_MASK_ADDV >= 1.0f )

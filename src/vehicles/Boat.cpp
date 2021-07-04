@@ -263,9 +263,17 @@ CBoat::ProcessControl(void)
 	}
 
 	// Damage particles
+#ifdef FIX_BUGS
+	if(m_fHealth <= 460.0f && GetStatus() != STATUS_WRECKED &&
+	   Abs(GetPosition().x - TheCamera.GetPosition().x) < 200.0f &&
+	   Abs(GetPosition().y - TheCamera.GetPosition().y) < 200.0f &&
+	   CTimer::GetLogicalFramesPassed() ) // Fix high-FPS particle spam
+	   {
+#else
 	if(m_fHealth <= 460.0f && GetStatus() != STATUS_WRECKED &&
 	   Abs(GetPosition().x - TheCamera.GetPosition().x) < 200.0f &&
 	   Abs(GetPosition().y - TheCamera.GetPosition().y) < 200.0f){
+#endif
 		float speedSq = m_vecMoveSpeed.MagnitudeSqr();
 		CVector smokeDir = 0.8f*m_vecMoveSpeed;
 		CVector smokePos;
@@ -378,7 +386,11 @@ CBoat::ProcessControl(void)
 		// Handle boat moving forward
 		float fwdSpeed = 1.0f;
 		if(Abs(m_fGasPedal) > 0.05f || (fwdSpeed = m_vecMoveSpeed.Magnitude2D()) > 0.01f){
+#ifdef FIX_BUGS
+			if(bBoatInWater && fwdSpeed > 0.05f && CTimer::GetLogicalFramesPassed()) // Fix super-short wake trail at high FPS
+#else
 			if(bBoatInWater && fwdSpeed > 0.05f)
+#endif
 				AddWakePoint(GetPosition());
 
 			float steerFactor = 1.0f;
@@ -433,7 +445,11 @@ CBoat::ProcessControl(void)
 
 					// Spray some particles
 					CVector jetDir = -0.04f * force;
+#ifdef FIX_BUGS
+					if(m_fGasPedal > 0.0f && CTimer::GetLogicalFramesPassed()){  // Fix high-FPS particle spam
+#else
 					if(m_fGasPedal > 0.0f){
+#endif
 						if(GetStatus() == STATUS_PLAYER){
 							CVector sternPos = GetColModel()->boundingBox.min;
 							sternPos.x = 0.0f;
@@ -546,8 +562,15 @@ CBoat::ProcessControl(void)
 
 		// Splashes
 		float speed = m_vecMoveSpeed.Magnitude();
+#ifdef FIX_BUGS
 		if(speed > 0.05f && GetUp().x > 0.0f && !TheCamera.GetLookingForwardFirstPerson() && IsVisible() &&
-		   (AutoPilot.m_nCarMission != MISSION_CRUISE || (CTimer::GetFrameCounter()&2) == 0)){
+		   (AutoPilot.m_nCarMission != MISSION_CRUISE || (CTimer::GetFrameCounter()&2) == 0) &&
+		   CTimer::GetLogicalFramesPassed() ) // Fix particle spam at high FPS
+#else
+		if(speed > 0.05f && GetUp().x > 0.0f && !TheCamera.GetLookingForwardFirstPerson() && IsVisible() &&
+		   (AutoPilot.m_nCarMission != MISSION_CRUISE || (CTimer::GetFrameCounter()&2) == 0))
+#endif
+		{
 			CVector splashPos, splashDir;
 			float splashSize, front, waterLevel;
 
@@ -682,8 +705,14 @@ CBoat::ProcessControl(void)
 		}
 
 		// Spray waterdrops on screen
+#ifdef FIX_BUGS
 		if(TheCamera.GetLookingForwardFirstPerson() && FindPlayerVehicle() && FindPlayerVehicle()->IsBoat() &&
-		   m_nDeltaVolumeUnderWater > 0 && numWaterDropOnScreen < 20){
+		   m_nDeltaVolumeUnderWater > 0 && numWaterDropOnScreen < 20 && CTimer::GetLogicalFramesPassed()) // Fix particle spam at high FPS
+#else
+		if(TheCamera.GetLookingForwardFirstPerson() && FindPlayerVehicle() && FindPlayerVehicle()->IsBoat() &&
+		   m_nDeltaVolumeUnderWater > 0 && numWaterDropOnScreen < 20)
+#endif
+		{
 			CVector dropPos;
 			CVector dropDir(CGeneral::GetRandomNumberInRange(-0.25f, 0.25f), CGeneral::GetRandomNumberInRange(1.0f, 0.75f), 0.0f);
 
@@ -714,7 +743,13 @@ CBoat::ProcessControl(void)
 				numWaterDropOnScreen++;
 		}
 
-		if(m_fPrevVolumeUnderWater == 0.0f && m_fVolumeUnderWater > 0.0f && GetModelIndex() == MI_SKIMMER){
+#ifdef FIX_BUGS
+		if(m_fPrevVolumeUnderWater == 0.0f && m_fVolumeUnderWater > 0.0f && GetModelIndex() == MI_SKIMMER &&
+		CTimer::GetLogicalFramesPassed()) // Fix particle spam at high FPS
+#else
+		if(m_fPrevVolumeUnderWater == 0.0f && m_fVolumeUnderWater > 0.0f && GetModelIndex() == MI_SKIMMER)
+#endif
+		{
 			CVector splashDir(0.0f, 0.0f, 0.25f*speed);
 			CVector splashPos = GetPosition();
 			float level;

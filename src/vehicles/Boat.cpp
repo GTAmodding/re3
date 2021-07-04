@@ -808,6 +808,18 @@ CBoat::ProcessControlInputs(uint8 pad)
 	m_fBrake += (CPad::GetPad(pad)->GetBrake()/255.0f - m_fBrake)*0.1f;
 	m_fBrake = Clamp(m_fBrake, 0.0f, 1.0f);
 
+#ifdef FIX_BUGS
+	// Fix accelerator control and steering control ramp rates at high FPS
+	if(m_fBrake < 0.05f){
+		m_fBrake = 0.0f;
+		m_fAccelerate += (CPad::GetPad(pad)->GetAccelerate()/255.0f - m_fAccelerate)*0.1f*CTimer::GetTimeStepFix();
+		m_fAccelerate = Clamp(m_fAccelerate, 0.0f, 1.0f);
+	}else
+		m_fAccelerate = -m_fBrake*0.3f;
+
+	m_fSteeringLeftRight += (-CPad::GetPad(pad)->GetSteeringLeftRight()/128.0f - m_fSteeringLeftRight)*0.2f*CTimer::GetTimeStepFix();
+	m_fSteeringLeftRight = Clamp(m_fSteeringLeftRight, -1.0f, 1.0f);
+#else
 	if(m_fBrake < 0.05f){
 		m_fBrake = 0.0f;
 		m_fAccelerate += (CPad::GetPad(pad)->GetAccelerate()/255.0f - m_fAccelerate)*0.1f;
@@ -817,6 +829,7 @@ CBoat::ProcessControlInputs(uint8 pad)
 
 	m_fSteeringLeftRight += (-CPad::GetPad(pad)->GetSteeringLeftRight()/128.0f - m_fSteeringLeftRight)*0.2f;
 	m_fSteeringLeftRight = Clamp(m_fSteeringLeftRight, -1.0f, 1.0f);
+#endif
 
 	float steeringSq = m_fSteeringLeftRight < 0.0f ? -SQR(m_fSteeringLeftRight) : SQR(m_fSteeringLeftRight);
 	m_fSteerAngle = pHandling->fSteeringLock * DEGTORAD(steeringSq);

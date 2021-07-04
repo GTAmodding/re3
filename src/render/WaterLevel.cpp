@@ -1968,7 +1968,7 @@ CWaterLevel::RenderWavyMask(float fX, float fY, float fZ,
 #ifndef PC_WATER
 			if (maskMorphVerts[base].z >= fMinSparkZ)
 #else
-			if ( maskMorphVerts[base].z > fMinSparkZ )
+			if (maskMorphVerts[base].z >  fMinSparkZ)
 #endif
 			{
 				switch ( (i + j + randval) & 3 )

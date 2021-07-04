@@ -6,6 +6,7 @@
 #include "Timer.h"
 #include "rtcharse.h"
 #include "re3_inttypes.h"
+#include "Frontend.h"
 #include "debugmenu.h"
 #include <new>
 
@@ -1017,6 +1018,8 @@ DebugMenuProcess(void)
 	CPad *pad = CPad::GetPad(0);
 	if(CTRLJUSTDOWN('M'))
 		menuOn = !menuOn;
+	if (KEYJUSTDOWN(rsF4))
+		FrontEndMenuManager.m_PrefsFrameLimiter = !FrontEndMenuManager.m_PrefsFrameLimiter;
 	if(!menuOn)
 		return;
 

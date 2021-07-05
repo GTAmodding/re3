@@ -85,7 +85,7 @@ jobs:
           fi
       - name: "Export Playstation 2 CMake toolchain conan recipe"
         run: |
-          conan export vendor/librw/cmake/ps2toolchain ps2dev-cmaketoolchain/master@
+          conan export vendor/librw/cmake/ps2/cmaketoolchain ps2dev-cmaketoolchain/master@
       - name: "Export librw conan recipe"
         run: |
           conan export vendor/librw librw/master@

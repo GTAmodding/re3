@@ -114,7 +114,7 @@ cSampleManager::SetMusicMasterVolume(uint8 nVolume)
 }
 
 void
-cSampleManager::SetMusicMasterVolume(uint8 nVolume)
+cSampleManager::SetMP3BoostVolume(uint8 nVolume)
 {
 }
 
@@ -231,35 +231,35 @@ cSampleManager::InitialiseChannel(uint32 nChannel, uint32 nSfx, uint8 nBank)
 void
 cSampleManager::SetChannelEmittingVolume(uint32 nChannel, uint32 nVolume)
 {
-	ASSERT( nChannel != CHANNEL2D );
+	ASSERT( nChannel < MAXCHANNELS );
 	ASSERT( nChannel < MAXCHANNELS+MAX2DCHANNELS );
 }
 
 void
 cSampleManager::SetChannel3DPosition(uint32 nChannel, float fX, float fY, float fZ)
 {
-	ASSERT( nChannel != CHANNEL2D );
+	ASSERT( nChannel < MAXCHANNELS );
 	ASSERT( nChannel < MAXCHANNELS+MAX2DCHANNELS );
 }
 
 void
 cSampleManager::SetChannel3DDistances(uint32 nChannel, float fMax, float fMin)
 {
-	ASSERT( nChannel != CHANNEL2D );
+	ASSERT( nChannel < MAXCHANNELS );
 	ASSERT( nChannel < MAXCHANNELS+MAX2DCHANNELS );
 }
 
 void
 cSampleManager::SetChannelVolume(uint32 nChannel, uint32 nVolume)
 {
-	ASSERT( nChannel == CHANNEL2D );
+	ASSERT( nChannel >= MAXCHANNELS );
 	ASSERT( nChannel < MAXCHANNELS+MAX2DCHANNELS );
 }
 
 void
 cSampleManager::SetChannelPan(uint32 nChannel, uint32 nPan)
 {
-	ASSERT(nChannel == CHANNEL2D);
+	ASSERT( nChannel >= MAXCHANNELS );
 	ASSERT( nChannel < MAXCHANNELS+MAX2DCHANNELS );
 }
 

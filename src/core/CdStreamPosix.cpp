@@ -13,6 +13,7 @@
 #include <fcntl.h>
 #include <sys/resource.h>
 #include <stdarg.h>
+#include <limits.h>
 
 #ifdef __linux__
 #include <sys/syscall.h>

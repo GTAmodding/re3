@@ -820,7 +820,12 @@ CVehicle::ProcessWheel(CVector &wheelFwd, CVector &wheelRight, CVector &wheelCon
 
 		if(wheelStatus == WHEEL_STATUS_BURST){
 			float fwdspeed = Min(contactSpeedFwd, fBurstSpeedMax);
+#ifdef FIX_BUGS
+			// Keep the effect running at the same frequency even when the game is at high FPS
+			right += fwdspeed * CGeneral::GetRandomNumberInRange(-fBurstTyreMod, fBurstTyreMod) * CTimer::GetLogicalFramesPassed();
+#else
 			right += fwdspeed * CGeneral::GetRandomNumberInRange(-fBurstTyreMod, fBurstTyreMod);
+#endif
 		}
 	}
 

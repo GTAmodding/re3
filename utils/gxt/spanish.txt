@@ -55,23 +55,28 @@ Algunas veces puedes necesitar ir por caminos que el radar no detecta.
 [REWARD]
 RECOMPENSA ~1~ $
 
+{ OPENING EXCLAMATION SIGNS SWAPPED WITH LOWERCASE i BECAUSE THE PRICEDOWN FONT LACKS THE OPENING EXCLAMATION MARK }
+{ SIGNOS DE APERTURA DE EXCLAMACIÓN SUSTITUIDOS POR i MINÚSCULA PORQUE LA FUENTE PRICEDOWN NO TIENE EL SÍMBOLO DE APERTURA DE EXCLAMACIÓN }
+
 [M_FAIL]
-¡MISIÓN FALLIDA!
+iMISIÓN FALLIDA!
 
 [M_PASS]
-¡MISIÓN SUPERADA! ~1~ $
+iMISIÓN SUPERADA! ~1~ $
 
 [DEAD]
-¡ELIMINADO!
+iELIMINADO!
 
 [BUSTED]
-¡ARRESTADO!
+iTRINCADO!
+
+{ DEBUG/CHEAT STRINGS }
 
 [WEATHE1]
 FORZAR TIEMPO SOLEADO
 
 [WEATHE2]
-FORZAR TIEMPO EXTREMADAMENTE SOLEADO
+FORZAR TIEMPO MUY SOLEADO
 
 [WEATHE3]
 FORZAR TIEMPO NUBLADO
@@ -309,6 +314,8 @@ El Club Pole Position
 
 [MALL1]
 Centro comercial North Point
+
+{ BAD SPANISH, BUT THAT'S WHAT THE LETTERING AT THE ENTRANCE OF THE BANK SAYS. DO NOT MODIFY. }
 
 [BANKINT]
 El Banco Corrupto Grande
@@ -1414,6 +1421,8 @@ La grúa no puede levantar este vehículo
 [PU_MONY]
 No tienes suficiente dinero.
 
+{ Refers to the hidden packages }
+
 [CO_ALL]
 Los tienes todos. Aquí tienes una cosilla...
 
@@ -1432,38 +1441,40 @@ No
 [FEM_RET]
 REINTENTAR
 
+{ Controls. Actions available. Contains strings from console }
+
 [FEC_NA]
-NO DISPONIBLE
+No disponible
 
 [FEC_CWL]
-Escoger arma hacia la izquierda
+Siguiente arma
 
 [FEC_CWR]
-Escoger arma hacia la derecha
+Arma anterior
 
 [FEC_LOF]
 Mirar hacia adelante
 
 [FEC_TAR]
-Objetivo
+Apuntar
 
 [FEC_MOV]
 Movimiento
 
 [FEC_CAM]
-Modos de cámara
+Cambiar cámara
 
 [FEC_PAU]
 Pausa
 
 [FEC_ENV]
-Entrar en el vehículo
+Entrar en vehículo
 
 [FEC_JUM]
 Saltar
 
 [FEC_ATT]
-Atacar o disparar arma
+Atacar o disparar
 
 [FEC_RUN]
 Correr
@@ -1475,7 +1486,7 @@ Cámara en primera persona
 Mirar a la izquierda
 
 [FEC_LB]
-Retrovisor
+Mirar atrás
 
 [FEC_LR]
 Mirar a la derecha
@@ -1484,10 +1495,10 @@ Mirar a la derecha
 Acelerar, frenar o dar marcha atrás
 
 [FEC_HOR]
-Bocina
+Claxon
 
 [FEC_VES]
-Control del vehículo
+Controlar vehículo
 
 [FEC_BRA]
 Freno o marcha atrás
@@ -1517,16 +1528,16 @@ Configuración 3
 Configuración 4
 
 [FEC_CDP]
-Pantalla del mando
+Control a mostrar
 
 [FEC_ONF]
 A pie
 
 [FEC_INC]
-En coche
+En vehículo
 
 [FEC_VIB]
-Vibración :
+Vibración:
 
 [FEL_ENG]
 Inglés
@@ -1544,7 +1555,7 @@ Italiano
 Español
 
 [FED_DBG]
-Menú de soluciones técnicas
+Menú de depuración
 
 [FED_RID]
 Recargar IDE
@@ -1556,40 +1567,40 @@ Recargar IPL
 Parse Heap
 
 [FED_DFL]
-CLos guiones::DbgBandera
+CTheScripts::DbgFlag
 
 [FED_DLS]
-Gran luz blanca de solución técnica encendida
+Cambiar luz blanca grande de depuración
 
 [FED_SPR]
-Mostrar grupos de aceras
+Mostrar rutas de aceras
 
 [FED_SCR]
-Mostrar grupos de carreteras
+Mostrar rutas de carreteras
 
 [FED_SCZ]
-Mostrar zonas de desechos
+Mostrar zonas de máscara selectiva
 
 [FED_DSR]
-Solicitud de solución técnica del streaming
+Solicitudes de depuración de streaming
 
 [FED_SCP]
-gbMostrarcolisiónPolys
+gbShowCollisionPolys
 
 [PL_STAT]
 Estadísticas del jugador
 
 [PE_WAST]
-Gente que te has cargado
+Personas que has liquidado
 
 [PE_WSOT]
-Gente eliminada por otros
+Personas liquidadas por otros
 
 [TM_BUST]
-Veces detenido
+Detenciones
 
 [GNG_WST]
-Miembros de la banda liquidados
+Miembros de bandas liquidados
 
 [DED_CRI]
 Criminales liquidados
@@ -1615,11 +1626,13 @@ Presupuesto para reparación de coches y pintura
 [ST_PHOT]
 Fotografías tomadas
 
+{ Unused stat }
+
 [ST_LOAN]
 Visitas de usureros prestamistas
 
 [ST_STOR]
-Almacenes desvalijados
+Tiendas atracadas
 
 [ST_MOVI]
 Escenas de especialista
@@ -1652,7 +1665,7 @@ Tiempo de juego
 Horas de vuelo
 
 [ST_PRAN]
-Clasificación de los pilotos
+Clasificación como piloto
 
 [ST_RAN0]
 Aprendiz
@@ -1697,22 +1710,22 @@ Días transcurridos en el juego
 Visitas a pisos francos
 
 [MXCARD]
-Max. Distancia de salto LOCO (pies)
+Dist. máx. de salto demencial (pies)
 
 [MXCARJ]
-Max. Altura de salto LOCO (pies)
+Altura máx. de salto demencial (pies)
 
 [MXCARDM]
-Máxima distancia de salto LOCO (m)
+Dist. máx. de salto demencial (m)
 
 [MXCARJM]
-Máxima altura de salto LOCO (m)
+Altura máx. de salto demencial (m)
 
 [MXFLIP]
-Máximas vueltas de salto LOCO
+Vueltas máximas en salto demencial
 
 [MXJUMP]
-Máxima rotación de salto LOCO
+Rotación máxima en salto demencial
 
 [BUL_FIR]
 Balas disparadas
@@ -1724,34 +1737,34 @@ Aciertos
 Pintura
 
 [BSTSTU]
-Mejor maniobra LOCA hasta ahora
+Mayor acrobacia demencial
 
 [INSTUN]
-Maniobra loca
+Acrobacia demencial
 
 [PRINST]
-Maniobra loca perfecta
+Acrobacia demencial perfecta
 
 [DBINST]
-Maniobra loca doble
+Acrobacia demencial doble
 
 [DBPINS]
-Maniobra loca doble perfecta
+Acrobacia demencial doble perfecta
 
 [TRINST]
-Maniobra loca triple
+Acrobacia demencial triple
 
 [PRTRST]
-Maniobra loca triple perfecta
+Acrobacia demencial triple perfecta
 
 [QUINST]
-Maniobra loca cuádruple
+Acrobacia demencial cuádruple
 
 [PQUINS]
-Maniobra loca cuádruple perfecta
+Acrobacia demencial cuádruple perfecta
 
 [NOSTUC]
-No se ha completado ninguna
+No se han hecho acrobacias
 
 [NOUNIF]
 Saltos únicos completados
@@ -1760,16 +1773,16 @@ Saltos únicos completados
 Intentos de misión
 
 [PASDRO]
-Pasajeros en destino
+Pasajeros llevados a sus destinos
 
 [MONTAX]
-Dinero conseguido con el taxi
+Dinero conseguido con taxis
 
 [DAYPLC]
 Gastos diarios provocados a la policía
 
 [CRIMRA]
-Tasa criminal:
+Rango de criminal:
 
 [STPR_1]
 El Malibú
@@ -1805,7 +1818,7 @@ Volver
 de
 
 [FEC_TUC]
-Control de la torreta
+Controlar torreta
 
 [FEC_RS3]
 Cambiar emisora de radio (Botón L3)
@@ -1871,16 +1884,16 @@ Nueva partida
 Cancelar
 
 [FESZ_QL]
-Todo el progreso no guardado de tu partida actual se perderá. ¿Continuar cargando?
+Perderás todo el progreso en tu partida actual. ¿Quieres continuar con la carga?
 
 [FESZ_QD]
-¿Proceder a borrar esta partida guardada?
+¿Quieres borrar esta partida guardada?
 
 [FESZ_QO]
-¿Proceder para sobrescribir esta partida guardada?
+¿Quieres sobreescribir esta partida guardada?
 
 [FESZ_QR]
-¿Seguro que quieres empezar una nueva partida? Todo el progreso desde la última partida guardada se perderá. ¿Continuar?
+¿Seguro que quieres empezar una nueva partida? Perderás todo el progreso desde la última partida guardada.
 
 [T4X4_1]
 Prueba de PCJ
@@ -1898,10 +1911,10 @@ Pista de pruebas
 ~g~¡Nuevo récord establecido: ~1~!
 
 [T4X4_3]
-¡AGARRADO!
+¡Agarrado!
 
 [MM_1]
-CONOCIRCUITO
+Conocircuito
 
 [T4X4_F]
 ~r~¡Te rajaste! ¿Demasiado duro para ti?
@@ -1937,7 +1950,7 @@ Camión de bomberos
 Trashmaster
 
 [STRETCH]
-Limusina
+Stretch
 
 [MANANA]
 Mañana
@@ -1979,7 +1992,7 @@ Washington
 Bobcat
 
 [WHOOPEE]
-Mr Whoopee
+Mr. Whoopee
 
 [BFINJC]
 BF Injection
@@ -1988,7 +2001,7 @@ BF Injection
 Hunter
 
 [POLICAR]
-Policía
+Coche patrulla
 
 [ENFORCR]
 Enforcer
@@ -2012,7 +2025,7 @@ Rhino
 Barracks OL
 
 [CUBAN]
-Cuban Hermes
+Hermes cubano
 
 [HELI]
 Helicóptero
@@ -2054,7 +2067,7 @@ Sea Sparrow
 Pizza Boy
 
 [GANGBUR]
-Gang Burrito
+Burrito de bandas
 
 [TROPIC]
 Tropic
@@ -2108,7 +2121,7 @@ Glendale
 Oceanic
 
 [SANCHEZ]
-Sanchez
+Sánchez
 
 [SPARROW]
 Sparrow
@@ -2153,13 +2166,13 @@ Spand Express
 Marquis
 
 [BAGGAGE]
-Mozo de equipaje
+Portamaletas
 
 [KAUFMAN]
 Taxi Kaufman
 
 [COASTMA]
-Guardacostas Maverick
+Maverick de Guardacostas
 
 [MAVERIC]
 Maverick
@@ -2168,7 +2181,7 @@ Maverick
 Rancher
 
 [FBIRANC]
-FBI Rancher
+Rancher del FBI
 
 [VIRGO]
 Virgo
@@ -2183,10 +2196,10 @@ Hotring Racer
 Blista Compact
 
 [FEST_DF]
-Dist. recorrida a pie (millas)
+Distancia recorrida a pie (millas)
 
 [FEST_DC]
-Dist. recorrida en coche (millas)
+Distancia recorrida en coche (millas)
 
 [FESTDFM]
 Distancia recorrida a pie (m)
@@ -2201,25 +2214,25 @@ Distancia total recorrida (millas)
 Distancia total recorrida (m)
 
 [DISTHEL]
-Dist. recorrida en helicóptero (millas)
+Distancia recorrida en helicóptero (millas)
 
 [DISTHEM]
 Distancia recorrida en helicóptero (m)
 
 [DISTBOA]
-Dist. recorrida en barco (millas)
+Distancia recorrida en barco (millas)
 
 [DISTBOM]
 Distancia recorrida en barco (m)
 
 [FEST_LS]
-Gente salvada en una ambulancia
+Personas salvadas con una ambulancia
 
 [FEST_CC]
-Criminales asesinados en misión Vigilante
+Criminales asesinados en misiones de justiciero
 
 [FEST_FE]
-Total de fuegos extinguidos
+Incendios extinguidos
 
 [FEST_RP]
 Masacres superadas
@@ -2228,25 +2241,25 @@ Masacres superadas
 Misiones superadas
 
 [FEST_BB]
-Bling-bling Scramble:
+''Corre a por la pasta'':
 
 [FEST_H0]
-Mayoría de puntos de control
+Puntos de control alcanzados
 
 [FEST_GC]
-Total de coches de bandas:
+Coches de bandas destruidos:
 
 [FEST_H1]
-Destrucción del diablo
+Destrucción de los Diablos
 
 [FEST_H2]
-Masacre de la mafia
+La masacre de la mafia
 
 [FEST_H3]
-Casino Calamity
+Calamidad en el casino
 
 [FEST_H4]
-Rumpo Wrecker
+Exterminio de Rumpos
 
 [USJ]
 ¡BONIFICACIÓN POR MANIOBRA ÚNICA!
@@ -2408,7 +2421,7 @@ Negado
 Don
 
 [RATNG52]
-Rey de la Jodida Ciudad
+Padrino
 
 [PAGE_00]
 .
@@ -2828,7 +2841,7 @@ ESCRITO POR DAN HOUSER
 PRODUCIDO POR ADAM TEDMAN
 
 [CRED087]
-WWW.KENTPAUL.COM AND WWW.VICECITY.COM
+WWW.KENTPAUL.COM Y WWW.VICECITY.COM
 
 [CRED088]
 CREADO POR
@@ -3035,7 +3048,7 @@ DWAYNE - NAVID KHONSARI
 DICK - PETER MCKAY
 
 [CRD134H]
-MIKE EL MATÓN & CHICO PORNO - ROBERT CIHRA
+MIKE EL MATÓN Y CHICO PORNO - ROBERT CIHRA
 
 [CRD134I]
 PERCY - RUSSELL FOREMAN
@@ -3407,7 +3420,7 @@ CHUCK FLECKENSTEIN,
 RITA LIBERATOR
 
 [CRED236]
-MARTIN & CLAIRE LOGAN
+MARTIN Y CLAIRE LOGAN
 
 [CRED237]
 SANDRA HUTTON
@@ -3416,7 +3429,7 @@ SANDRA HUTTON
 CHRISTINE DAVIDSON
 
 [CRED239]
-ALAN, RED & BIGFOOT
+ALAN, RED Y BIGFOOT
 
 [CRED240]
 LE T
@@ -3785,10 +3798,10 @@ MIKE BLACKBURN
 TIM MCGAFF
 
 [CINCAM]
-Cámara cinemática
+Cámara cinematográfica
 
 [RC4]
-MASACRES RUMPO
+Exterminio de Rumpos
 
 [LEGAL]
 ~g~¡Elimina la amenaza criminal!
@@ -3800,13 +3813,13 @@ Nuevo motor y trabajo de pintura. ¡Los policías no te reconocerán!
 Cuando vayas a pie, pulsa ~h~~k~~PED_LOOKBEHIND~~w~ para ~h~mirar detrás~w~. Utiliza el ~h~joystick analógico derecho~w~ para ~h~mirar a tu alrededor~w~.
 
 [FEC_LB4]
-Mirar detrás (botón R3)
+Mirar atrás (botón R3)
 
 [PERPIC]
-Objetos ocultos encontrados
+Paquetes ocultos encontrados
 
 [CO_ONE]
-Objeto oculto ~1~ de ~1~
+Paquete oculto ~1~ de ~1~
 
 [GA_21]
 No puedes almacenar más coches en este garaje.
@@ -3824,13 +3837,13 @@ Truco de salud
 Truco de blindaje
 
 [CHEAT5]
-Truco de nivel de se busca
+Truco de nivel de búsqueda
 
 [CHEAT6]
 Truco de dinero
 
 [CHEAT7]
-Truco de tiempo
+Truco de clima
 
 [USJ_ALL]
 ¡TODAS LAS MANIOBRAS ÚNICAS COMPLETADAS!
@@ -3931,11 +3944,14 @@ Carga completada con éxito.
 [HELI_1A]
 Prueba tus habilidades con el Sparrow, comprueba lo rápido que puedes completar el circuito.
 
+{ OPENING EXCLAMATION SIGN SWAPPED WITH LOWERCASE i BECAUSE THE PRICEDOWN FONT LACKS THE OPENING EXCLAMATION MARK }
+{ SIGNO DE APERTURA DE EXCLAMACIÓN SUSTITUIDO POR i MINÚSCULA PORQUE LA FUENTE PRICEDOWN NO TIENE EL SÍMBOLO DE APERTURA DE EXCLAMACIÓN }
+
 [HELI_1B]
-¡Circuito completado! ~1~ $
+iCircuito completado! ~1~ $
 
 [HELIODD]
-Trabajos esporádicos del helicóptero
+Trabajos esporádicos con helicóptero
 
 [LAW]
 LAS MISIONES DEL ABOGADO
@@ -4076,7 +4092,7 @@ Sí.
 ¡Subiendo el puente!
 
 [COK4_22]
-¡Salta, está apunto de estallar!
+¡Salta, está a punto de estallar!
 
 [COK4_23]
 Buen disparo.
@@ -4118,7 +4134,7 @@ Unos techos altos muy bonitos...
 MISIONES DE LA GUERRA DE TAXIS
 
 [NOTAXI]
-~g~Necesitas un Taxi Kaufman para activar esta misión.
+~g~Necesitas un taxi Kaufman para activar esta misión.
 
 [TAXW1_5]
 ~g~¡Necesitas estar en un taxi Kaufman!
@@ -4439,16 +4455,16 @@ MISIÓN DE FALSIFICACIÓN 1
 MISIÓN DE FALSIFICACIÓN 2
 
 [BIKE]
-LAS MISIONES DE LA PANDILLA DE MOTEROS
+LAS MISIONES DE LA BANDA DE MOTEROS
 
 [BIKE1]
-MISIÓN DE MOTORISTA 1
+MISIÓN DE MOTEROS 1
 
 [BIKE2]
-MISIÓN DE MOTORISTA 2
+MISIÓN DE MOTEROS 2
 
 [BIKE3]
-MISIÓN DE MOTORISTA 3
+MISIÓN DE MOTEROS 3
 
 [GOAWAY1]
 Vuelve cuando hayas terminado con las misiones de la banda haitiana.
@@ -4726,7 +4742,6 @@ Nuevo mejor tiempo: ~1~:0~1~
 [RACES21]
 Tiempo: ~1~:0~1~
 
-
 [RCH1_2]
 ~g~Los CONTROLES están esparcidos a lo largo del aeropuerto.
 
@@ -4791,13 +4806,13 @@ Utilizar apariencia
 Restaurar valores por defecto
 
 [FESZ_QZ]
-¿Seguro de que quieres guardar esta partida?
+¿Seguro que deseas guardar esta partida?
 
 [FES_SCG]
 ¿Guardar la partida actual?
 
 [FES_LCG]
-¿Cargar la partida y continuar jugando?
+¿Cargar la partida y seguir jugando?
 
 [FEC_FIR]
 Disparar
@@ -4860,7 +4875,7 @@ Siguiente objetivo
 Objetivo anterior
 
 [FEC_LBA]
-Mirar detrás
+Mirar hacia atrás
 
 [FEC_CEN]
 Centrar cámara
@@ -4869,7 +4884,7 @@ Centrar cámara
 A PIE
 
 [FET_CCR]
-EN COCHE
+EN VEHÍCULO
 
 [FET_CAC]
 ACCIÓN
@@ -4878,25 +4893,25 @@ ACCIÓN
 -
 
 [FEC_MXO]
-MXB1
+RATÓN 1
 
 [FEC_MXT]
-MXB2
+RATÓN 2
 
 [FEC_UNB]
-ILIMITADO
+SIN ASIGNAR
 
 [FEC_TFL]
-Mirar a izquierd+Torreta L
+Mirar /Torreta a izda.
 
 [FEC_TFR]
-Mirar a derecha+Torreta R
+Mirar /Torreta a dcha.
 
 [FEC_MWF]
-RUEDA DEL RATÓN ARRIBA
+RUEDA RATÓN ARRIBA
 
 [FEC_MWB]
-RUEDA DEL RATÓN ABAJO
+RUEDA RATÓN ABAJO
 
 [FEC_ORR]
 o
@@ -4911,7 +4926,7 @@ Mirar arriba
 Mirar abajo
 
 [FEC_CMP]
-COMBO: MIRAR I+d
+COMBO: MIRAR I+D
 
 [LAW_1A]
 law_1a
@@ -4947,10 +4962,10 @@ IDIOMA
 INICIAR NUEVA PARTIDA
 
 [FEO_CON]
-Configuración del mando
+Configuración de controles
 
 [FEO_AUD]
-Configuración de sonido
+Configuración de audio
 
 [FEO_DIS]
 Configuración de pantalla
@@ -5013,7 +5028,7 @@ Estelas
 Subtítulos
 
 [FED_WIS]
-Formato 16:9
+Formato panorámico
 
 [FED_POS]
 Posición de la pantalla
@@ -5022,7 +5037,7 @@ Posición de la pantalla
 RADAR
 
 [FED_HUD]
-MODO HUD
+INTERFAZ
 
 [FED_RDB]
 SOLO ICONOS
@@ -5031,7 +5046,7 @@ SOLO ICONOS
 LEYENDA DEL MAPA
 
 [FEI_SCR]
-Desplazarse
+Desplazamiento
 
 [FEP_RES]
 Continuar
@@ -5058,7 +5073,7 @@ Cargar partida
 Borrar partida
 
 [FEC_CSU]
-Configuración del controlador
+Configuración de controles
 
 [FEC_RED]
 Redefinir controles
@@ -5073,10 +5088,10 @@ Distancia recorrida en carro de golf (millas)
 Distancia recorrida en carro de golf (m)
 
 [ST_FAVR]
-Estación de radio favorita
+Emisora de radio favorita
 
 [ST_WSTR]
-estación de radio que menos te gusta
+Emisora de radio menos escuchada
 
 [ST_FAVV]
 Vehículo favorito
@@ -5115,7 +5130,7 @@ Haitianos
 Aspirantes callejeros
 
 [ST_GNG4]
-Pandilleros de Díaz
+Banda de Díaz
 
 [ST_GNG5]
 Guardias de seguridad
@@ -5136,7 +5151,7 @@ ESPANTOSO
 Contratos de asesinato completados
 
 [DISTBIK]
-Dist. Recorrida en moto (millas)
+Distancia recorrida en moto (millas)
 
 [DISTBIM]
 Distancia recorrida en moto (m)
@@ -5157,16 +5172,16 @@ No tienes suficiente dinero para empezar esta misión.
 Ve a la señal de la casa verde que hay en el radar.
 
 [FES_FMS]
-Éxito al formatear. Selecciona Aceptar para continuar.
+Formateo completado. Selecciona Aceptar para continuar.
 
 [FES_SSC]
-Éxito al guardar. Selecciona Aceptar para continuar.
+Guardado completado. Selecciona Aceptar para continuar.
 
 [FES_DSC]
-Éxito al borrar. Selecciona Aceptar para continuar.
+Borrado completado. Selecciona Aceptar para continuar.
 
 [FESZ_QC]
-¿Deseas sobreescribir esta partida guardada dañada?
+¿Deseas sobrescribir esta partida guardada dañada?
 
 [FES_CHE]
 ¡Atención! Se han activado uno o más trucos, esto puede afectar a tus partidas guardadas. Te recomendamos no guardar esta partida.
@@ -5175,7 +5190,7 @@ Ve a la señal de la casa verde que hay en el radar.
 GUARDAR PARTIDA
 
 [FEH_BRI]
-INFORME
+RESUMEN
 
 [FEH_MAP]
 MAPA
@@ -5187,13 +5202,13 @@ Aceptar
 Agacharse
 
 [FEC_CR3]
-Agacharse (Botón L3)
+Agacharse (botón L3)
 
 [FEC_SMT]
-Sub-misión
+Misión secundaria
 
 [FEC_SM3]
-Sub-misión (Botón R3)
+Misión secundaria (botón R3)
 
 [FEC_RSC]
 Emisoras de radio
@@ -5415,7 +5430,7 @@ BONIFICACIÓN EN PARADA MÁS LARGA: ~1~ $ Distancia: ~1~ pies
 ¡Eh!
 
 [DESPERA]
-Desesperado
+Desperado
 
 [MOB_99A]
 Ve hasta el teléfono público junto al centro comercial en Washington.
@@ -5478,7 +5493,7 @@ Si desea hablar conmigo de manera más privada, me podrá encontrar en el barco.
 Ángel
 
 [CUBJET]
-Jetmax Cubano
+Jetmax cubano
 
 [SANDKIN]
 Sandking
@@ -5508,37 +5523,37 @@ Coche de Bloodring
 Yate de la Mafia
 
 [COP_M2]
-ANTI VICIO
+Antivicio
 
 [COP_M3]
-TRUENO MARRÓN
+Trueno marrón
 
 [BNK3_2]
 No voy a conducir por ti, ni soñando, voy a compartir esto con el grupo.
 
 [FEM_SL1]
-No hay archivo 1 guardado
+Archivo 1 no presente
 
 [FEM_SL2]
-No hay archivo 2 guardado
+Archivo 2 no presente
 
 [FEM_SL3]
-No hay archivo 3 guardado
+Archivo 3 no presente
 
 [FEM_SL4]
-No hay archivo 4 guardado
+Archivo 4 no presente
 
 [FEM_SL5]
-No hay archivo 5 guardado
+Archivo 5 no presente
 
 [FEM_SL6]
-No hay archivo 6 guardado
+Archivo 6 no presente
 
 [FEM_SL7]
-No hay archivo 7 guardado
+Archivo 7 no presente
 
 [FEM_SL8]
-No hay archivo 8 guardado
+Archivo 8 no presente
 
 [FEA_CHA]
 Cambiando la salida de audio a ESTÉREO. Espera...
@@ -5559,10 +5574,10 @@ Reanudar
 Navegar
 
 [FEI_BTX]
-botón / -
+Botón / -
 
 [FEI_BTT]
-botón " -
+Botón " -
 
 [FEI_STA]
 Botón START -
@@ -5616,7 +5631,7 @@ Sr. Vercetti
 Chándal
 
 [OUTFT13]
-MC Tommy
+Motero
 
 [CAR_AS1]
 CONCESIONARIO DE COCHES CONSOLIDADO
@@ -5656,6 +5671,8 @@ Tommy, soy yo, el coronel Cortez. Mira, me parece que eres la clase de hombre qu
 
 [MOB_70B]
 Me podrás encontrar en el barco.
+
+{ Help messages that appear after picking up hidden packages }
 
 [PICK1]
 ¡El chaleco antibalas ha sido entregado en el hotel Ocean View!
@@ -5805,7 +5822,7 @@ Pulsa ~h~~k~~VEHICLE_BRAKE~~w~ para frenar o para dar marcha atrás si el vehíc
 Pulsa ~h~~k~~PED_SNIPER_ZOOM_IN~~w~ para hacer zoom con el rifle y ~h~~k~~PED_SNIPER_ZOOM_OUT~~w~ para alejar la vista.
 
 [PBOAT_1] { reVC update }
-Pulsa ~h~ ~k~~VEHICLE_FIREWEAPON~~w~ para disparar los cañones del barco.
+Pulsa ~h~~k~~VEHICLE_FIREWEAPON~~w~ para disparar los cañones del barco.
 
 [SEG3_4] { reVC update }
 ~g~Puedes recoger bombas simplemente pilotando tu Helicóptero RC cerca de cada una de ellas, para soltar una bomba pulsa ~h~~k~~VEHICLE_FIREWEAPON~~g~.
@@ -5910,16 +5927,16 @@ Cruza la puerta principal del hotel ~h~Ocean View~w~ para entrar en el edificio.
 Si necesitas armas pásate por ~h~Ammu-Nation~w~. Está indicado en el radar como una ~h~pistola~w~ azul.
 
 [HELI_1]
-Control del Helicóptero de Centro de la ciudad
+Carrera en helicóptero por el centro de la ciudad
 
 [HELI_2]
-Control del Helicóptero de Ocean Beach
+Carrera en helicóptero por Ocean Beach
 
 [HELI_3]
-Control del Helicóptero de Vice Point
+Carrera en helicóptero por Vice Point
 
 [HELI_4]
-Control del Helicóptero de Little Haiti
+Carrera en helicóptero por Little Haiti
 
 [FST_MFR]
 Emisora de radio preferida
@@ -5937,7 +5954,7 @@ Zoom
 > < -
 
 [FEI_NA]
-N\A
+No disponible
 
 [MESA]
 Mesa Grande
@@ -6006,10 +6023,10 @@ Pulsa ~h~~k~~PED_ANSWER_PHONE~~w~ para comprar el 3321 de Vice Point por ~1~ $.
 Pulsa ~h~~k~~PED_ANSWER_PHONE~~w~ para comprar la chabola Skumole por ~1~ $.
 
 [SKUM_T]
-Pulsa ~h~~k~~PED_ANSWER_PHONE~~w~para comprar la chabola Skumole por ~1~ $.
+Pulsa ~h~~k~~PED_ANSWER_PHONE~~w~ para comprar la chabola Skumole por ~1~ $.
 
 [SKUM_C]
-Pulsa ~h~~k~~PED_ANSWER_PHONE~ ~w~ para comprar la chabola Skumole por ~1~ $.
+Pulsa ~h~~k~~PED_ANSWER_PHONE~~w~ para comprar la chabola Skumole por ~1~ $.
 
 [PRNT_L]
 Pulsa ~h~~k~~PED_ANSWER_PHONE~~w~ para comprar la imprenta por ~1~ $.
@@ -6108,7 +6125,7 @@ Para encontrar el bufete del abogado, ve hacia la ~h~señal de la L~w~ que hay e
 ¡Destruye ~1~ vehículos en 2 minutos!
 
 [PAGE_03]
-¡Pasa en el coche y cárgate a ~1~ criminales en 2 minutos!
+¡Cárgate a ~1~ criminales disparando desde un coche en 2 minutos!
 
 [PAGE_04]
 ¡Atropella y mata a ~1~ criminales en 2 minutos!
@@ -6123,7 +6140,7 @@ Sentinel XS
 Leyenda
 
 [VCNMAV]
-VCN Maverick
+Maverick de VCN
 
 [LG_01]
 Posición del jugador
@@ -6132,7 +6149,7 @@ Posición del jugador
 Avery Carrington
 
 [LG_03]
-Contacto del motero
+Contacto de moteros
 
 [LG_04]
 Coronel Cortez
@@ -6159,7 +6176,7 @@ Club Malibú
 Cubanos
 
 [LG_12]
-Estudio Cinematográfico
+Estudio cinematográfico
 
 [LG_13]
 Ammu-Nation
@@ -6174,7 +6191,7 @@ Ferretería
 Piso franco
 
 [LG_17]
-Helado
+Fábrica de helados
 
 [LG_18]
 Taxis Kaufman
@@ -6189,7 +6206,7 @@ Imprenta
 Propiedad
 
 [LG_22]
-Taller de Pintura
+Taller de pintura
 
 [LG_23]
 Tienda de ropa
@@ -6231,10 +6248,10 @@ Emisora de radio Wave 103
 Destino
 
 [LG_36]
-Solarium
+Concesionario Sunshine
 
 [LG_37]
-Club de Striptease
+Club de striptease
 
 [LG_38]
 Objetivo
@@ -6261,7 +6278,7 @@ Helados Cherry Popper
 Taxis Kaufman
 
 [BOATYAR]
-El Astillero
+Astillero
 
 [WANT_L]
 Has perdido tu nivel de se busca, si cometes un crimen mientras las estrellas parpadean, tu nivel total de se busca se restablecerá.
@@ -6303,7 +6320,7 @@ Pulsa ~h~~k~~PED_ANSWER_PHONE~ ~w~para recoger esta arma. Reemplazará cualquier
 MAPA E ICONOS
 
 [FEC_ILU]
-Invertir vista en primera persona
+Invertir 1.a per.
 
 [NITRO]
 ¡Ahora todos los taxis disponen de un impulsor de salto! Simplemente toca el claxon.
@@ -6330,16 +6347,16 @@ Puntuación más alta por mantener la pelota en el aire en la playa
 Mejor resultado de Hotring
 
 [STFT_13]
-Mejor tiempo en el Control del Helicóptero del centro
+Mejor tiempo en la carrera en helicóptero por el centro
 
 [STFT_14]
-Mejor tiempo en el Control del Helicóptero de Ocean Beach
+Mejor tiempo en la carrera en helicóptero por Ocean Beach
 
 [STFT_15]
-Mejor tiempo en el Control del Helicóptero de Vice Point
+Mejor tiempo en la carrera en helicóptero por Vice Point
 
 [STFT_16]
-Mejor tiempo en el Control del Helicóptero de Little Haití
+Mejor tiempo en la carrera en helicóptero por Little Haití
 
 [STFT_21]
 Tiempo más rápido en Hotring
@@ -6366,13 +6383,15 @@ Carrera Barón RC
 Recogidas del Raider RC
 
 [FEA_CTD]
-¡Aviso! Esta característica requiere que el dispositivo compatible DTS esté conectado. ¿Continuar?
+¡Aviso! Esta característica requiere que haya un dispositivo compatible con DTS conectado. ¿Quieres continuar?
 
 [FEM_STE]
 UTILIZAR ESTÉREO
 
 [GREET]
 Saludos desde...
+
+{ Generic strings from Lance }
 
 [LANCE_1]
 ¡Venga, tío, conduce con más cuidado!
@@ -6391,6 +6410,8 @@ Saludos desde...
 
 [MERC_5]
 Bonito coche, Mr. Vercetti.
+
+{ Generic strings from Mercedes }
 
 [MERC_26]
 ¡DEPRISA, DEPRISA, DEPRISA!
@@ -6444,7 +6465,7 @@ Tommy, ¡hazte con ese helicóptero!
 ¡Ahí viene de nuevo!
 
 [FEA_DSM]
-¡Aviso! Esta partida guardada está configurada para utilizar DTS. Esto requiere que el dispositivo compatible DTS esté conectado. Por favor selecciona si quieres continuar usando el sistema DTS o ESTÉREO.
+¡Aviso! Esta partida guardada está configurada para utilizar DTS. Esta característica requiere que haya un dispositivo compatible con DTS conectado. Por favor, selecciona si quieres continuar usando el sistema DTS o ESTÉREO.
 
 [STFT_23]
 Tiempo más rápido en Punto de control Charlie
@@ -6468,7 +6489,7 @@ Hay ocho categorías de armas diferentes.
 Puedes llevar una arma de cada categoría al mismo tiempo: un tipo de pistola, un tipo de rifle.
 
 [HELP54]
-~w~Cuesta: ~1~ $. ~r~Si compras esta arma reemplazarás la actual.
+~w~Coste: ~1~ $. ~r~Si compras esta arma, reemplazarás la actual.
 
 [HELP2A2]
 Pulsa ~h~~k~~PED_SPRINT~~w~ cuando corras para ~h~esprintar.
@@ -6495,10 +6516,10 @@ Pulsa ~h~~k~~PED_FIREWEAPON~~w~ para ~h~disparar~w~ el rifle de francotirador.
 Pulsa ~h~~k~~PED_FIREWEAPON~~w~ para ~h~disparar~w~ el rifle de francotirador.
 
 [PLANE_H]
-Mueve ~h~~k~~VEHICLE_ACCELERATE~~w~ hacia delante para acelerar y a izquierda o derecha para girar.
+Pulsa ~h~~k~~VEHICLE_ACCELERATE~~w~ para acelerar. Mueve el joystick a izquierda o derecha para girar.
 
 [PLANE_4] { reVC update }
-{Mueve ~h~~k~~VEHICLE_ACCELERATE~~w~ hacia delante para acelerar y a izquierda o derecha para girar.}
+{Pulsa ~h~~k~~VEHICLE_ACCELERATE~~w~ para acelerar. Mueve el joystick a izquierda o derecha para girar.}
 Utiliza el joystick analógico derecho para acelerar, tira hacia atrás el joystick analógico izquierdo para ascender, empújalo hacia adelante para descender. Para girar muévelo a izquierda o derecha.
 
 [HELP55]
@@ -6567,17 +6588,23 @@ KEVIN HOBSON
 [CRED368]
 JIM CREE
 
+{ Call from Auntie Poulet, after clearing her missions (first call) }
+
 [MOB_66A]
 Tommy, Tommy, ¿para qué has vuelto?
 
 [MOB_66B]
 Ya te he dicho que no queremos verte más.
 
+{ Call from Auntie Poulet, after clearing her missions (second call) }
+
 [MOB_67A]
 Tommy, creo que no deberías acercarte, ¿me oyes?
 
 [MOB_67B]
 Los chicos haitianos no están muy contentos contigo.
+
+{ Call from Paul Kent, unknown appearance }
 
 [MOB_18A]
 Tommy, soy Paulo, ¿cómo estás? Vale hombre, bueno pensé que tenía que mandarte una nota.
@@ -6600,6 +6627,8 @@ Sabe como ponerte a tono. Dijo que yo era el mejor tío con el que había estado
 [MOB_18G]
 Estate al tanto por si la ves. Hasta luego.
 
+{ Call from Lance Vance, appears after completing the Cop Land mission }
+
 [MOB_72A]
 Tommy, soy yo, Lance. Mantén la boca cerrada Tommy porque no tengo ganas de hablar.
 
@@ -6620,6 +6649,8 @@ Mi hermano haría eso. Por favor, tío, no lo hagas.
 
 [MOB_72G]
 Tengo que irme.
+
+{ Call from Earnest Kelly, the print works owner, appears after completing Keep Your Friends Close mission }
 
 [MOB_63A]
 Tommy, soy Earnest. Earnest Kelly.
@@ -6651,6 +6682,8 @@ Tommy, para ser un chalado furioso, eres bastante ingenuo. Cuando vuelva a traba
 [MOB_63J]
 Tómate tu tiempo, Earnest. Cuídate.
 
+{ Phone call from Kent Paul, duplicate from MOB16_X, appears after completing Interglobal Studios' missions? }
+
 [MOB_16A]
 Tommy, soy Paulo, ¿qué pasa amigo?
 
@@ -6671,6 +6704,8 @@ En serio, después de todo lo que he hecho por ti, no te olvides de mí.
 
 [MOB_16G]
 Eso es lo que intento olvidar.
+
+{ Phone call from Kent Paul, appearance unknown }
 
 [MOB_17A]
 Tommy Vercetti, ¿Qué tal te va Sr. Influyente? He oído un montón de cosas sobre ti, así que ahora eres el que manda en la ciudad, eh...
@@ -6704,6 +6739,8 @@ Tommy, colega. Por favor. ¡Tú eras mi gran esperanza! Por favor, ¡no te rías
 
 [MOB_17L]
 Paul, vete a dormir un poco, de verdad.
+
+{ Phone call from Steve Scott, appearance unknown }
 
 [MOB_73A]
 Tommy, soy Steve.
@@ -6822,15 +6859,17 @@ JOHN JANSEN
 [CUNTY]
 ¡Ropa nueva entregada en la finca de Vercetti!
 
+{ OPENING EXCLAMATION SIGN SWAPPED WITH LOWERCASE i BECAUSE THE PRICEDOWN FONT LACKS THE OPENING EXCLAMATION MARK }
+{ SIGNO DE APERTURA DE EXCLAMACIÓN SUSTITUIDO POR i MINÚSCULA PORQUE LA FUENTE PRICEDOWN NO TIENE EL SÍMBOLO DE APERTURA DE EXCLAMACIÓN }
+
 [GOODBOY]
-¡Prima de 50 $ por comportamiento ejemplar!
+iPremio de 50 $ por comportamiento ejemplar!
 
 [NEWCONT]
 ¡Nuevo ~h~punto de contacto ~w~disponible en el puerto deportivo en Ocean Beach!
 
 [FIRELVL]
 Misión de camión de bomberos nivel ~1~
-
 
 [HELP56]
 Pulsa ~h~~k~~CAMERA_CHANGE_VIEW_ALL_SITUATIONS~~w~ para ajustar la cámara.
@@ -6887,43 +6926,43 @@ Andar hacia delante
 Andar hacia la cámara
 
 [FEC_PLB]
-Mirar hacia atrás.
+Mirar hacia atrás
 
 [FEC_PFR]
 Disparar arma
 
 [FEC_CLE]
-Cambiar Arma a la Izq.
+Cambiar arma a la izq.
 
 [FEC_CRI]
-Cambiar Arma a la Dcha.
+Cambiar arma a la dcha.
 
 [FEC_LKT]
-Bloquear objetivo
+Fijar objetivo
 
 [FEC_PJP]
-Salto Peatón
+Saltar a pie
 
 [FEC_PSP]
-Sprint Peatón
+Esprintar a pie
 
 [FEC_PSH]
-Disparar Peatón
+Disparar a pie
 
 [FEC_TLF]
-Siguiente objetivo a la izq.
+Objetivo a la izq.
 
 [FEC_TRG]
-Siguiente objetivo a la dcha.
+Objetivo a la dcha.
 
 [FEC_CCM]
-Centrar cámara detrás del jugador
+Centrar cámara tras jugador
 
 [FEC_SZI]
-Acercar vista rifle francotirador
+Acercar zoom rifle francotirador
 
 [FEC_SZO]
-Alejar vista rifle francotirador
+Alejar zoom rifle francotirador
 
 [FEC_LKL]
 Mirar izq. en primera persona
@@ -6965,7 +7004,7 @@ Misiones secundarias
 Cambiar emisora de radio
 
 [FEC_ENT]
-Entrar/salir de vehículo
+Entrar /salir de vehículo
 
 [FEC_WPN]
 Disparar arma
@@ -6974,61 +7013,61 @@ Disparar arma
 Pausa
 
 [FEC_FPO]
-Cambiar armas primera persona
+Armas en primera persona
 
 [FEC_SMS]
 Mostrar puntero del ratón
 
 [FEC_CMS]
-Cambiar modo cámara en todas situaciones.
+Cambiar cámara en todas las situaciones
 
 [FEC_TSS]
 Capturar pantalla
 
 [FEC_DBG]
-DEBUG MENU
+MENÚ DE DEPURACIÓN
 
 [FEC_TGD]
 Cambiar mando de juego/depuración
 
 [FEC_TDO]
-Cambiar cámara depuración No
+Desactivar cámara de depuración
 
 [FEC_IVH]
 Invertir horizontalidad ratón
 
 [FEC_MSL]
-BIR
+RATÓN IZDO.
 
 [FEC_MSM]
-BCR
+RATÓN CENTRAL
 
 [FEC_MSR]
-BDR
+RATÓN DCHO.
 
 [FEC_QUE]
-???
+¿¿¿???
 
 [FEC_TWO]
-Permitidas sólo dos teclas del teclado.
+Sólo se permiten dos teclas del teclado.
 
 [FEC_UMS]
-Por favor sólo teclas de ratón.
+Sólo se permiten botones del ratón.
 
 [FEC_OMS]
-Permitida sólo una tecla del ratón.
+Sólo se permite un botón del ratón.
 
 [FEC_UJS]
-Por favor sólo botones de joystick.
+Sólo se permiten botones del joystick.
 
 [FEC_OJS]
-Permitido sólo un botón de joystick por acción.
+Sólo se permite un botón del joystick por acción.
 
 [FEC_PTL]
-Usar Bloquear objetivo al cambiar arma a izq.
+Usar Fijar objetivo con Siguiente arma.
 
 [FEC_PTR]
-Usar Bloquear objetivo al cambiar arma a dcha.
+Usar Fijar objetivo con Arma anterior.
 
 [FEC_LBC]
 Usar Mirar a izq. con Mirar a la dcha.
@@ -7043,22 +7082,22 @@ Aviso
 Aceptar
 
 [FEC_DLF]
-Error al borrar.
+Fallo al borrar.
 
 [FEC_SVU]
-Error al guardar.
+Fallo al guardar.
 
 [FEC_LUN]
-Error al cargar. Archivo dañado, por favor bórralo.
+Fallo al cargar. Archivo dañado, por favor bórralo.
 
 [FEC_PAD]
-Gamepad
+Mando
 
 [FEC_JOY]
 Joystick
 
 [FES_CSA]
-Seleccionar aspecto de la lista inferior:
+Selecciona una apariencia de la lista:
 
 [FET_HRD]
 AJUSTES POR DEFECTO RESTAURADOS
@@ -7067,13 +7106,13 @@ AJUSTES POR DEFECTO RESTAURADOS
 CONDUCCIÓN CONTROLADA POR EL RATÓN
 
 [FEC_STR]
-NUM. INICIO
+NUM. MULTIPL.
 
 [FET_MIG]
 IZQUIERDA, DERECHA, RUEDA DEL RATÓN PARA AJUSTAR
 
 [FET_CIG]
-RETROCESO PARA QUITAR - BIR, VOLVER A CAMBIAR
+RETROCESO: QUITAR - BIR, INTRO: CAMBIAR
 
 [FET_DSN]
 Apariencia predeterminada del jugador.bmp
@@ -7088,16 +7127,16 @@ HARDAWARE NO DISPONIBLE. RESTAURADO AJUSTE ORIGINAL
 HARDWARE DE SONIDO
 
 [FEA_SPK]
-AJUSTE DE ALTAVOCES
+CONFIGURACIÓN DE ALTAVOCES
 
 [FEM_LOD]
-DIST. DE REPRESENTACIÓN
+DISTANCIA DE DIBUJADO
 
 [FEM_VSC]
-SINCRONÍA DE IMAGEN
+SINCRONIZAR IMAGEN
 
 [FEM_FRM]
-LIMITADOR DE CUADROS
+LIMITADOR DE FOTOGRAMAS
 
 [FEM_MM]
 MENÚ PRINCIPAL
@@ -7106,7 +7145,7 @@ MENÚ PRINCIPAL
 RESOLUCIÓN DE PANTALLA
 
 [FET_CTL]
-CONFIGURAR MANDO
+CONFIGURACIÓN DE CONTROLES
 
 [FET_OPT]
 OPCIONES
@@ -7172,7 +7211,7 @@ NUM. .
 BLOQ NUM
 
 [FEC_ETR]
-INTRO
+ENTRAR
 
 [FEC_SLK]
 BLOQ DESPL
@@ -7193,28 +7232,28 @@ BLOQ MAYÚS
 INTRO
 
 [FEC_LSF]
-MAYÚS IZQ
+MAYÚS IZQ.
 
 [FEC_RSF]
-MAYÚS DCH
+MAYÚS DCHA.
 
 [FEC_LCT]
-CTRL I
+CTRL IZQ.
 
 [FEC_RCT]
-CTRL D
+CTRL DCHO.
 
 [FEC_LAL]
-ALT I
+ALT IZQ.
 
 [FEC_RAL]
-ALT D
+ALT DCHA.
 
 [FEC_LWD]
-WIN I
+WIN IZQ.
 
 [FEC_RWD]
-WIN D
+WIN DCHO.
 
 [FEC_WRC]
 APMENÚ
@@ -7226,10 +7265,10 @@ ESPACIO
 Grand Theft Auto VC
 
 [WIN_95]
-Grand Theft Auto VC no se puede ejecutar bajo W95
+Grand Theft Auto VC no se puede ejecutar bajo Windows 95.
 
 [WIN_DX]
-Grand Theft Auto VC necesita al menos la versión 8.1 de DirectX
+Grand Theft Auto VC necesita al menos la versión 8.1 de DirectX.
 
 [FET_EIG]
 NO SE PUEDE DEFINIR UN CONTROL PARA ESTA ACCIÓN
@@ -7247,19 +7286,19 @@ MODELADO ACÚSTICO DINÁMICO
 SALIR DEL JUEGO
 
 [FEN_STA]
-INICIAR JUEGO
+INICIAR PARTIDA
 
 [FET_PAU]
 MENÚ PAUSA
 
 [REPLAY]
-VOLVER A JUGAR
+REPETICIÓN
 
 [FEC_ANS]
 Acción
 
 [CVT_MSG]
-Convertir texturas a un formato óptimo para tu tarjeta de vídeo
+Convirtiendo texturas a un formato óptimo para tu tarjeta de vídeo
 
 [FEC_SFT]
 MAYÚS
@@ -7268,22 +7307,22 @@ MAYÚS
 VER MAPA
 
 [FES_DEE]
-¡Error al eliminar! Por favor, inténtalo de nuevo.
+¡Fallo al borrar! Por favor, inténtalo de nuevo.
 
 [FES_CMP]
-¡Error al guardar! Por favor, inténtalo de nuevo.
+¡Fallo al guardar! Por favor, inténtalo de nuevo.
 
 [FESZ_WR]
-Guardando partida actual. Por favor, espera...
+Guardando partida actual. Espera, por favor...
 
 [FELD_WR]
-Cargando el juego. Por favor, espera...
+Cargando partida. Espera, por favor...
 
 [FEDL_WR]
-Eliminando partida guardada. Por favor, espera...
+Eliminando partida guardada. Espera, por favor...
 
 [PCRESRT]
-Iniciando nueva partida. Por favor, espera...
+Iniciando nueva partida. Espera, por favor...
 
 [FET_STI]
 Controles estándar
@@ -7295,16 +7334,16 @@ Controles clásicos
 OPCIÓN NO DISPONIBLE
 
 [FEH_MPH]
-RATÓN, CURSORES PARA MOVERSE - RE. PAG, AV. PAG, RUEDA RATÓN PARA ZOOM, L - LEYENDA
+RATÓN, CURSORES PARA DESPLAZAR - RE PÁG, AV PÁG, RUEDA RATÓN PARA HACER ZOOM, L - LEYENDA
 
 [FEA_MP3]
 REPRODUCTOR MP3
 
 [NO_PCCD]
-Por favor, introduce tu CD de GTA Vice City o pulsa ESC para cancelar
+Introduce tu CD de GTA Vice City o pulsa ESC para cancelar
 
 [FEH_SSA]
-CURSORES PARA MOVERSE - S PARA GUARDAR EN UN ARCHIVO
+CURSORES PARA DESPLAZAR - S PARA GUARDAR EN UN ARCHIVO
 
 [FES_CMI]
 ÚLTIMA MISIÓN SUPERADA
@@ -7316,19 +7355,19 @@ ESTADÍSTICAS GUARDADAS EN 'STATS.HTML' + 'STATS.TXT'
 Grand Theft Auto VC no pudo encontrar suficiente memoria de vídeo disponible
 
 [FEC_ERI]
-¡Error! Una o más acciones de control no están vinculadas a ninguna tecla o botón. Comprueba que todas las acciones de control estén definidas.
+¡Error! Una o más acciones de control no están asignadas a una tecla o botón. Comprueba que todas las acciones de control estén asignadas.
 
 [FEC_TFU]
-Torreta + Inclinar arriba
+Torreta /morro arriba
 
 [FEC_TFD]
-Torreta + Inclinar abajo
+Torreta /morro abajo
 
 [FET_RIG]
 ELIGE UN NUEVO CONTROL PARA ESTA ACCIÓN
 
 [FEA_NM3]
-NO SE ENCONTRARON ARCHIVOS MP3
+NO HAY ARCHIVOS MP3
 
 [FEA_MPB]
 SUBIR VOLUMEN DE MP3
@@ -7340,10 +7379,10 @@ VOLUMEN DE MÚSICA
 VOLUMEN DE EFECTOS
 
 [CVT_ERR]
-Te has quedado sin espacio en el disco duro. Por favor, antes de seguir consigue algo de espacio en tu disco duro. Pulsa ESC para cancelar.
+Te has quedado sin espacio en el disco duro. Por favor, libera algo de espacio antes de continuar. Pulsa ESC para cancelar.
 
 [FEA_ADP]
-DETECTAR EL HARDWARE AUTOMÁTICAMENTE
+DETECTAR AUTOMÁTICAMENTE
 
 {=================================== MISSION TABLE AMBULAE ===================================}
 
@@ -7436,7 +7475,7 @@ Sr. Teal, su ayuda en erradicar a esos forasteros fue inestimable para el negoci
 ¡Que alguien me ayude!
 
 [ASM2_13:ASSIN2]
-¡oh, Dios mío!
+¡Dios mío!
 
 [ASM2_A:ASSIN2]
 Felicidades por un trabajo bien hecho, Sr. Teal. Mi cliente está muy satisfecho.
@@ -7812,7 +7851,7 @@ PUNTUACIÓN RONDA TRES: ~1~
 ~g~El objetivo más lejano vale tres puntos.
 
 [BNK2_1:BANKJ2]
-MUNICIÓN CARGADA
+¡Prepárense para disparar!
 
 [RANGE_1:BANKJ2]
 PUNTUACIÓN POR DISPARO: ~1~
@@ -8157,7 +8196,7 @@ Tommy Vercetti, ¿me recuerdas?
 Perdóname, estoy un poco alterado. ¡Nunca te fíes de un maldito caballo!
 
 [COK1_F:BARON1]
-Hiciste un buen trabajo... ahora trabajas para mí.
+Hiciste un buen trabajo... Ahora trabajas para mí.
 
 [COK1_H:BARON1]
 Como dije amigo, trabajas para mí. Ahora, cállate. Algún Judas me ha traicionado.
@@ -8213,7 +8252,7 @@ Trabajo por dinero.
 Tommy...
 
 [COK2_D:BARON2]
-¿Qué pasa, Ricardo?
+¿Qué, Ricardo?
 
 [COK2_E:BARON2]
 Estos idiotas... Siempre intentan joderle a uno.
@@ -8588,10 +8627,10 @@ No te preocupes Tommy, te cubro.
 ¡TOMMY! Me has traicionado... ¡Imbécil! Voy a acabar contigo muy pronto...
 
 [ASS1_15:BARON5]
-~g~¡Arrasa esa mansión y mata a Diaz!
+~g~¡Arrasa esa mansión y mata a Díaz!
 
 [ASS1_16:BARON5]
-~g~¡Mata a Diaz!
+~g~¡Mata a Díaz!
 
 [ASS1_17:BARON5]
 ~g~Hay múltiples caminos para entrar en la mansión.
@@ -8650,7 +8689,7 @@ Sólo hacemos favores a los nuestros.
 ¿Cómo puedo unirme a vosotros?
 
 [BM1_N:BIKE1]
-Este no es un club de campo, chico. ¿Sabes montar en moto?
+Éste no es un club de campo, chico. ¿Sabes montar en moto?
 
 [BM1_O:BIKE1]
 ¿Sabes sentarte en un taburete y beber?
@@ -8843,7 +8882,7 @@ Tipo trajeado, ¿tienes fuego?
 {=================================== MISSION TABLE CAP_1 ===================================}
 
 [CAP1_B1:CAP_1]
-~g~La mafia está imponiendo impuestos a tus negocios. Encuéntrales y mátales.
+~g~La mafia está saqueando tus negocios. Encuentra a sus enviados y mátalos.
 
 [CAP1_B2:CAP_1]
 ~g~¡La mafia ha saqueado el astillero!
@@ -8930,10 +8969,10 @@ Vas a morir, Vercetti.
 ~r~El cobrador ha saqueado todos tus negocios.
 
 [CAP1_B9:CAP_1]
-~g~¡La mafia ha saqueado a El Malibu!
+~g~¡La mafia ha saqueado el Malibú!
 
 [CAP1_B0:CAP_1]
-~g~¡La mafia ha saqueado al estudio cinematográfico!
+~g~¡La mafia ha saqueado el estudio cinematográfico!
 
 [CAP1_C2:CAP_1]
 ~g~¡La mafia ha llegado al astillero!
@@ -8972,7 +9011,7 @@ Vas a morir, Vercetti.
 ~g~¡La mafia abandona el estudio cinematográfico!
 
 [CAP1B10:CAP_1]
-Has puesto límite a los recaudadores. Vienen más de camino.
+Has despachado a los cobradores. Hay más de camino.
 
 {=================================== MISSION TABLE CARBUY ===================================}
 
@@ -9033,13 +9072,13 @@ Sí, así es, ¿así que entiendo que tenemos un trato?
 {=================================== MISSION TABLE CARPAR1 ===================================}
 
 [MM_1_A:CARPAR1]
-~g~Atraviesa ~y~5 puntos de control ~r~¡SIN ~g~aplastar ningún ~r~CONO! ~g~Puedes atravesarlos en ~y~CUALQUIER ORDEN.
+~g~Cruza ~y~5 puntos de control ~r~¡SIN ~g~aplastar ningún ~r~CONO! ~g~Puedes atravesarlos en ~y~CUALQUIER ORDEN.
 
 [CONE_1:CARPAR1]
-~r~¡Aplastaste un cono!
+~r~¡Has aplastado un cono!
 
 [MM_1_C:CARPAR1]
-~y~PASA POR~g~ un punto de control para activar el temporizador. ~g~Cada punto de control te dará ~y~~1~ SEGUNDOS~g~.
+~y~ATRAVIESA~g~ un punto de control para poner en marcha el cronómetro. ~g~Cada punto de control te dará ~y~~1~ SEGUNDOS~g~.
 
 {=================================== MISSION TABLE COPCAR ===================================}
 
@@ -9047,7 +9086,7 @@ Sí, así es, ¿así que entiendo que tenemos un trato?
 MUERTES:
 
 [C_BREIF:COPCAR]
-~g~Sospechoso visto por última vez en la zona de ~a~.
+~g~Sospechoso visto por última vez en: ~a~.
 
 [C_PASS:COPCAR]
 AMENAZA ELIMINADA: ~1~ $
@@ -9536,7 +9575,6 @@ Mi barco, no me sirve lleno de agujeros, ¿eh?
 [CUB3_07:CUBAN3]
 ~g~Ve y reúnete con Rico. Te llevará al punto de encuentro.
 
-
 [CUB3_02:CUBAN3]
 ~g~¡MATA A TODOS LOS HAITIANOS DEL BARCO!
 [CUB3_08:CUBAN3]
@@ -9799,7 +9837,7 @@ Confié en ti, Tommy, y me decepcionaste.
 Pero al menos alguno de tu organización de mierda sabe hacer negocios,
 
 [FIN2_19:FINALE]
-¿No es verdad, Lance?
+¿no es verdad, Lance?
 
 [FIN2_20:FINALE]
 Lo siento, Tommy. Esto es Vice City. Son negocios.
@@ -10019,7 +10057,7 @@ Gracias por venir. Por favor siéntese. ¿Langosta?
 Te pagaré el doble, Tommy, ¡EL DOBLE!
 
 [GEN1_18:GENERA1]
-~r~¡González ha conseguido llegar a la Jefatura de Policía!
+~r~¡González ha conseguido llegar a la jefatura de Policía!
 
 [GEN1_19:GENERA1]
 ~g~¡La policía de Vice City viene a por ti!
@@ -10096,13 +10134,13 @@ La lluvia, está muy húmeda esta época del año...
 ¿Qué?
 
 [COL2_3:GENERA2]
-Ah, comment?
+Ah, ''comment''?
 
 [COL2_4:GENERA2]
 Mira, me envía Cortez. Tan sólo dame los malditos chips.
 
 [COL2_5:GENERA2]
-Oh... d'accord.
+Oh... ''D'accord''.
 
 [COL2_B1:GENERA2]
 ~g~Encuéntrate con el mensajero en el centro comercial.
@@ -10212,7 +10250,7 @@ Salud de Díaz:
 ~g~¡Has dejado a Lance atrás! ¡Ve a por él!
 
 [GEN3_25:GENERA3]
-~r~¡Lance murió!
+~r~¡Lance ha muerto!
 
 [GEN3_28:GENERA3]
 ~g~Devuélvele el maletín a Díaz.
@@ -10305,7 +10343,7 @@ Pulsa ~h~~k~~PED_FIREWEAPON~~w~ para ~h~disparar~w~ un rifle de asalto.
 Pulsa ~h~~k~~PED_FIREWEAPON~~w~ para ~h~disparar~w~ un rifle de asalto.
 
 [GEN3_63:GENERA3]
-Además de realizar maniobras de acercamiento,~h~ las motos ~w~te permiten ~h~disparar hacia adelante~w~.
+~h~Las motos~w~ no solo permiten disparar hacia los lados, sino también ~h~hacia adelante~w~.
 
 [GEN3_64:GENERA3] { reVC update }
 Para ~h~disparar hacia el frente ~w~sobre una ~h~moto ~w~pulsa ~h~~k~~VEHICLE_FIREWEAPON~~w~.
@@ -10439,7 +10477,7 @@ y una vez que la tengas, quiero que me llames inmediatamente, entonces...
 ~g~Ve y adquiere el vehículo militar que se está paseando por la ciudad.
 
 [COL4_B3:GENERA4]
-~g~Deja el tanque en el escondite del Coronel antes que se autodestruya.
+~g~Deja el tanque en el escondite del coronel antes que se autodestruya.
 
 [COL4_B6:GENERA4]
 ~g~¡Encuentra el modo de robar el tanque!
@@ -10507,7 +10545,7 @@ Adiós, amigo.
 ¡Tengo inmunidad diplomática!
 
 [COL5_11:GENERA5]
-¡No disparen, soy un Coronel!
+¡No disparen, soy un coronel!
 
 [COL5_12:GENERA5]
 Thomas, mátales, mi país te adorará.
@@ -10543,7 +10581,7 @@ Tommy, ¿cómo estás?
 ~g~Ponte delante y despeja la ruta del yate del Coronel.
 
 [COL5_B3:GENERA5]
-~r~¡El Coronel está muerto!
+~r~¡El coronel está muerto!
 
 [COL5_B4:GENERA5]
 ~g~Destruye el helicóptero de ataque.
@@ -10788,7 +10826,7 @@ Hola, Sonny.
 Lo sé, lo sé. Te abruma la emoción.
 
 [INTB_D:HOTEL]
-Quince años... si parece que fue ayer.
+Quince años... Si parece que fue ayer.
 
 [INTB_E:HOTEL]
 Supongo que es cuestión de perspectiva.
@@ -10809,7 +10847,7 @@ Mira, Sonny, nos tendieron una trampa. El negocio fue una emboscada. Harry y Lee
 Me estás tomando el pelo, ¿no? Tommy. Dime que aún tienes el dinero.
 
 [INTB_K:HOTEL]
-No Sonny... no tengo el dinero.
+No, Sonny... No tengo el dinero.
 
 [INTB_L:HOTEL]
 Ése era mi dinero, Tommy, ¡mi dinero!
@@ -10818,7 +10856,7 @@ No Sonny... no tengo el dinero.
 ¡Espero que no me andes jodiendo, Tommy, porque sabes que soy un hombre con el que no se puede jugar!
 
 [INTB_N:HOTEL]
-Espera Sonny.
+Espera, Sonny.
 
 [INTB_O:HOTEL]
 Tienes mi garantía personal de que voy a conseguir recuperar el dinero y el alijo.
@@ -10853,7 +10891,7 @@ Estaremos en contacto.
 ~g~No hay ningún cliente en esta zona, inténtalo en otra.
 
 [ICC1_5:ICECRE1]
-Negocios hechos:
+Ventas:
 
 [ICC1_6:ICECRE1]
 ~g~Utiliza la furgoneta Mr. Whoopee para distribuir los productos Cherry Popper por Vice City.
@@ -10868,16 +10906,16 @@ Negocios hechos:
 ~g~A las bandas locales no les gustará que hagas negocios en su territorio así que si haces esto, prepárate para hostilidades.
 
 [ICC1_10:ICECRE1]
-~g~Has hecho ~1~ tratos!
+~g~¡Has hecho ~1~ ventas!
 
 [ICC1_11:ICECRE1]
-~g~Has hecho ~1~ trato!
+~g~¡Has hecho ~1~ venta!
 
 [ICC1_12:ICECRE1]
 ¡PROPIEDAD ADQUIRIDA!
 
 [ICC1_13:ICECRE1]
-~r~¡No conseguiste ningún trato!
+~r~¡No has vendido nada!
 
 [ICC1_14:ICECRE1]
 FÁBRICA DE HELADOS CONSOLIDADA
@@ -10898,13 +10936,13 @@ FÁBRICA DE HELADOS CONSOLIDADA
 ~g~La fábrica Cherry Popper generará ahora unos ingresos hasta un máximo de ~1~ $. Asegúrate de recaudarlos de manera regular.
 
 [ICC1_17:ICECRE1]
-Misión de Distribución finalizada
+Misión de distribución finalizada
 
 [ICC1_18:ICECRE1]
-Venta total de helados: ~1~ $
+Ganancias con ''helados'': ~1~ $
 
 [ICC1_19:ICECRE1]
-Total de negocios hechos: ~1~
+Ventas hechas: ~1~
 
 {=================================== MISSION TABLE ICECUT ===================================}
 
@@ -10936,10 +10974,10 @@ Lo sabía. Un niño.
 Bebés... Criaturas repugnantes, horribles y espantosas.
 
 [ICC1_J:ICECUT]
-Mami no te quiere. ¡mierdecilla!
+Mami no te quiere... ¡Mierdecilla!
 
 [ICC1_K:ICECUT]
-Cálmate.
+¡Ay! Cálmate.
 
 [ICC1_L:ICECUT]
 ODIO los bebés, odio los niños.
@@ -10972,7 +11010,7 @@ Oh, estúpido, apestoso, lloriqueante...
 ¡Mocoso!
 
 [ICC1_V:ICECUT]
-El helado es una tapadera.
+Los helados son una tapadera.
 
 [ICC1_W:ICECUT]
 Distribuimos otros productos no lácteos.
@@ -11160,7 +11198,7 @@ Bueno, ¡jódete!
 Cierra el pico y deja de quejarte. Estás vivo, ¿no?
 
 [INT4_G:INTRO]
-Déjame justo aquí.
+Déjame aquí.
 
 [INT4_H:INTRO]
 Ve y abandona el coche y luego vete a dormir un poco.
@@ -11172,7 +11210,7 @@ Mañana me pasaré por tu oficina y podemos empezar a solucionar esto.
 De acuerdo, es una buena idea, iré a dormir un poco.
 
 [INT4_K:INTRO]
-¿Qué vas a hacer tú.
+¿Qué vas a hacer tú?
 
 [INT4_L:INTRO]
 Me las arreglaré para volver a mi hotel.
@@ -11269,8 +11307,11 @@ De acuerdo, entendido.
 [KPM1_4:KENT1]
 ~g~¡Lleva a Lance al hospital!
 
+{ OPENING EXCLAMATION SIGN SWAPPED WITH LOWERCASE i BECAUSE THE PRICEDOWN FONT LACKS THE OPENING EXCLAMATION MARK }
+{ SIGNO DE APERTURA DE EXCLAMACIÓN SUSTITUIDO POR i MINÚSCULA PORQUE LA FUENTE PRICEDOWN NO TIENE EL SÍMBOLO DE APERTURA DE EXCLAMACIÓN }
+
 [M_PASSN:KENT1]
-¡MISIÓN SUPERADA!
+iMISIÓN SUPERADA!
 
 [KPM1_5:KENT1]
 ~g~¡Los hombres de Díaz te están buscando! Lleva a Lance al hospital.
@@ -11305,7 +11346,7 @@ TIEMPO EMPLEADO:
 ~g~¡Bien hecho!
 
 [KICK_10:KICKSTT]
-~g~Utiliza la Sanchez para completar el circuito pasando por todos los puntos de control.
+~g~Utiliza la Sánchez para completar el circuito pasando por todos los puntos de control.
 
 [KICK_12:KICKSTT]
 ~r~¡La has cagado!
@@ -11400,7 +11441,7 @@ Vercetti. Tan sólo tiene un poco de... agorafobia.
 Excelente, excelente. ¿Y usted?
 
 [LAWP_7:LAWYER1]
-Yo solo quiero mi farlopa.
+Yo sólo quiero mi mercancía.
 
 [LAWP_8:LAWYER1]
 Ah. Ha sido un desgraciado cúmulo de circunstancias para todos los interesados.
@@ -11502,7 +11543,7 @@ entonces aparece el tiburón gigante y...
 ¡Les arranca las pollas de un mordisco!
 
 [LAWP_41:LAWYER1]
-Ja, bien. Nunca has visto nada igual, ¿Verdad?
+Ja, bien. Nunca habíais visto nada igual, ¿Verdad?
 
 [LAWP_42:LAWYER1]
 ¡Coronel!
@@ -11544,10 +11585,10 @@ Salgamos de aquí.
 Mejor llévame al club Pole Position.
 
 [LAW1_2:LAWYER1]
-~g~Ve al barco del Coronel.
+~g~Ve al barco del coronel.
 
 [LAW1_4:LAWYER1]
-~r~¡Mataste a la hija del Coronel!
+~r~¡Mataste a la hija del coronel!
 
 [LAW1_5:LAWYER1]
 ¿Trabajarás para mi padre?
@@ -11577,16 +11618,16 @@ Bonita moto.
 ¡No! ¡Mi moto!
 
 [LAW1_3:LAWYER1]
-~g~Lleva a la hija del Coronel al club Pole Position.
+~g~Lleva a la hija del coronel al club Pole Position.
 
 [HELP20:LAWYER1]
 Ve al icono de la ~h~camiseta~w~ que hay en el radar para encontrar la tienda de Rafael.
 
 [LAW1_14:LAWYER1]
-¡Guau!, Me encantaría probar tu moto.
+¡Guau! Me mola muchísimo tu moto.
 
 [LAW1_15:LAWYER1]
-Sí pequeño, pues recógela de Howlin' Pete's
+La acabo de recoger de Howlin' Pete's, guapa.
 
 {=================================== MISSION TABLE LAWYER2 ===================================}
 
@@ -11726,7 +11767,7 @@ Mi espalda está bien, hermano...
 ¿Qué estás mirando?
 
 [LAW2_2:LAWYER2]
-Mejor empieza a hablar...
+Empieza a hablar...
 
 [LAW2_3:LAWYER2]
 ¡Oblígame, mamón!
@@ -11753,7 +11794,7 @@ Voy a ver qué puedo averiguar. Te estaré vigilando, Tommy.
 ¡Adquirido un teléfono móvil! Ahora puedes recibir llamadas telefónicas.
 
 [LAW2_13:LAWYER2]
-~g~¡Has dejado a Lance atrás! ¡Ve y tráele!
+~g~¡Has dejado a Lance atrás! ¡Vuelve con él!
 
 [LAW2_14:LAWYER2]
 ¡Tenemos que salir pitando de aquí!
@@ -11827,7 +11868,7 @@ Pensé que te estabas ocupando de esto, de verdad que sí.
 Y ahora esos tipos dicen que les tenemos que hacer un favor.
 
 [LAW3_G:LAWYER3]
-Quieres decir que yo tengo que hacerles un favor.
+Querrás decir que yo tengo que hacerles un favor.
 
 [LAW3_H:LAWYER3]
 Oh, por supuesto, eso es lo que quiero decir. ¿Doy yo la impresión de poder intimidar a un jurado?
@@ -12013,13 +12054,13 @@ Puedes disparar a los barriles explosivos, pero mantén la distancia.
 ESTADO DEL COCHE:
 
 [BLOD_05:MM]
-~g~TIEMPO OBJETIVO: ~1~ Minuto
+~g~TIEMPO OBJETIVO: ~1~ minuto
 
 [BLOD_06:MM]
-~g~TIEMPO OBJETIVO: ~1~ Minutos
+~g~TIEMPO OBJETIVO: ~1~ minutos
 
 [BLOD_07:MM]
-NUEVO Mejor Tiempo: ~1~ Segundos
+NUEVO mejor tiempo: ~1~ segundos
 
 [BLOD_08:MM]
 Coches destrozados: ~1~
@@ -12028,7 +12069,7 @@ Coches destrozados: ~1~
 ~1~ $
 
 [BLOD_10:MM]
-¡GANADOR!
+¡HAS GANADO!
 
 [BLOD_01:MM]
 Pasa por todos los puntos de control para aumentar tu tiempo total.
@@ -12087,22 +12128,22 @@ Tiempo: ~1~:~1~
 Tiempo: ~1~:0~1~
 
 [HOTR_17:OVALRIG]
-Mejor Tiempo: ~1~:~1~
+Mejor tiempo: ~1~:~1~
 
 [HOTR_18:OVALRIG]
-Mejor Tiempo: ~1~:0~1~
+Mejor tiempo: ~1~:0~1~
 
 [HOTR_19:OVALRIG]
-Mejor Tiempo: NA
+Mejor tiempo: ninguno
 
 [HOTR_20:OVALRIG]
-Nuevo Mejor Tiempo: ~1~:~1~
+Nuevo mejor tiempo: ~1~:~1~
 
 [HOTR_21:OVALRIG]
-Nuevo Mejor Tiempo: ~1~:0~1~
+Nuevo mejor tiempo: ~1~:0~1~
 
 [HOTR_22:OVALRIG]
-Mejor Resultado: NA
+Mejor resultado: ninguno
 
 [HOTR_23:OVALRIG]
 Mejor resultado: 1
@@ -12117,10 +12158,10 @@ Mejor resultado: 3
 Mejor resultado: ~1~
 
 [HOTR_27:OVALRIG]
-Mejor Tiempo de Vuelta: ~1~.~1~ segundos
+Mejor tiempo de vuelta: ~1~.~1~ segundos
 
 [HOTR_28:OVALRIG]
-Mejor Tiempo de Vuelta: ~1~.0~1~ segundos
+Mejor tiempo de vuelta: ~1~.0~1~ segundos
 
 [HOTR_29:OVALRIG]
 ~1~ $
@@ -12235,7 +12276,7 @@ No te preocupes por el olor, Tommy, mira esto.
 Las malditas pilas baratas o algo así. Hay más en el banco.
 
 [PHIL2_J:PHIL2]
-¡TA-DAAA!
+¡Tachááán!
 
 [PHIL2_K:PHIL2]
 ¡Maldición!
@@ -12395,7 +12436,7 @@ Acción.
 ¡Guau! Eso sí que es grande.
 
 [POR1_C:PORN1]
-30 cm, eso es para pensárselo, nene.
+30 cm, eso es para pensárselo, nena.
 
 [POR1_D:PORN1]
 ¡CORTEN! ¿Quién es este idiota? ¡Tú! ¡Tú! ¿Por qué estás en el set? ¿POR QUÉ?
@@ -12422,7 +12463,7 @@ Hay que desechar todo este material.
 ¡Por los chochos, evidentemente! ¿Qué es esto?
 
 [POR1_L:PORN1]
-Éste es mi arte. ¡SEGURIDAD!
+Esto es mi arte. ¡SEGURIDAD!
 
 [POR1_M:PORN1]
 Mira, pomposo gilipollas, ahora eres de mi propiedad. Yo poseo todo esto.
@@ -12467,7 +12508,7 @@ Candy. Estoy buscando una estrella de cine. ¿Estás interesada?
 ¡Hoy deberías haberte quedado en casa!
 
 [POR1_7B:PORN1]
-¿Puedes creer a este gilipollas?
+¿Os podéis creer a este gilipollas?
 
 [POR1_08:PORN1]
 ¡Eh, Mercedes!
@@ -12610,7 +12651,7 @@ Utilízalo para distribuir los folletos por toda la ciudad.
 Combustible del Skimmer:
 
 [POR2_Q:PORN2]
-¡Jo!, tío.
+¡Jo, tío...!
 
 [PORN2_9:PORN2]
 ~g~Tienes ~1~ segundos para volver a subir a una Skimmer antes de que termine la misión.
@@ -12621,7 +12662,7 @@ Combustible del Skimmer:
 Vale, ¿cuál es el problema ahora?
 
 [POR3_B:PORN3]
-¡SSShhhh!
+~n~
 
 [POR3_C:PORN3]
 Bien, después de este encuentro cercano con las invasoras ninfómanas
@@ -12636,7 +12677,7 @@ y es entonces cuando queremos hacer la escena con la tina de puré de patatas, p
 ¡Me importa una mierda!
 
 [POR3_G:PORN3]
-¡Sigue, sigue!
+¡Seguid, seguid!
 
 [POR3_H:PORN3]
 Eh Tommy...
@@ -12645,7 +12686,7 @@ Eh Tommy...
 ¿Mencionaste algo sobre un problema legal al teléfono?
 
 [POR3_J:PORN3]
-¡Vaya que sí! El congresista Alex Shrub se ha subido al tren preelectoral y va tras el voto puritano.
+El congresista Alex Shrub se ha subido al tren preelectoral y va tras el voto puritano.
 
 [POR3_K:PORN3]
 Hay rumores de que va a apoyar medidas restrictivas, digamos,
@@ -12666,7 +12707,7 @@ Genial.
 ¡Oh sí, oh sí, oh sí! ¡Sí sí sí SÍ! ¡OOOoooh!
 
 [POR3_Q:PORN3]
-Por favor dime que filmaste eso.
+Por favor, dime que filmaste eso.
 
 [POR3_R:PORN3]
 ¿Eso era parte del eh... o estaba hablando conmigo...?
@@ -12684,13 +12725,13 @@ para ver si te lleva a su nuevo nido de amor.
 ¿Tienes una cámara?
 
 [POR3_X:PORN3]
-Vale, conseguidle una cámara.
+Sí. Tráele una cámara.
 
 [POR3_02:PORN3]
-~r~¡Has asesinado al Congresista! Ahora no habrá modo de que puedas chantajearle.
+~r~¡Has asesinado al congresista! Ahora no habrá modo de que puedas chantajearle.
 
 [POR3_03:PORN3]
-~r~Has alertado a la protección del Congresista, le sacarán de aquí inmediatamente.
+~r~Has alertado a la protección del congresista, le sacarán de aquí inmediatamente.
 
 [POR3_04:PORN3]
 Candy, ¿podrías llamarme Marta?
@@ -12699,7 +12740,7 @@ Candy, ¿podrías llamarme Marta?
 Oh Alex, quiero decir Marta. Lo que tú digas.
 
 [POR3_06:PORN3]
-Marta, alguien está mirando... qué pervertido.
+Marta, alguien está mirando... Qué pervertido.
 
 [POR3_07:PORN3]
 Tú, el de ahí. Dame esa cámara.
@@ -12711,7 +12752,7 @@ Tú, el de ahí. Dame esa cámara.
 ~r~¡Has destruido la limusina de Candy!
 
 [POR3_17:PORN3]
-~g~Regresa a la compañía de pornografía con las fotos.
+~g~Vuelve a los estudios de porno con las fotos.
 
 [POR3_19:PORN3]
 ~r~¡Te has quedado sin película!
@@ -12732,10 +12773,10 @@ Mantén pulsado ~h~~k~~PED_LOCK_TARGET~ ~w~para~h~ enfocar~w~ con la cámara.
 Mantén pulsado ~h~~k~~PED_LOCK_TARGET~ ~w~para~h~ enfocar~w~ con la cámara.
 
 [POR3_10:PORN3]
-Pulsa ~h~~k~~PED_SNIPER_ZOOM_IN~ ~w~para ~h~acercar el zoom ~w~con la cámara y ~h~~k~~PED_SNIPER_ZOOM_OUT~ ~w~para ~h~alejarlo ~w~de nuevo.
+Pulsa ~h~~k~~PED_SNIPER_ZOOM_IN~ ~w~para ~h~acercar el zoom ~w~de la cámara y ~h~~k~~PED_SNIPER_ZOOM_OUT~ ~w~para ~h~alejarlo ~w~de nuevo.
 
 [POR3_11:PORN3]
-Pulsa ~h~~k~~PED_SNIPER_ZOOM_IN~ ~w~para ~h~acercar el zoom ~w~con la cámara y ~h~~k~~PED_SNIPER_ZOOM_OUT~ ~w~para ~h~alejarlo ~w~de nuevo.
+Pulsa ~h~~k~~PED_SNIPER_ZOOM_IN~ ~w~para ~h~acercar el zoom ~w~de la cámara y ~h~~k~~PED_SNIPER_ZOOM_OUT~ ~w~para ~h~alejarlo ~w~de nuevo.
 
 [POR3_12:PORN3]
 Pulsa ~h~~k~~PED_FIREWEAPON~ ~w~para sacar una foto.
@@ -12753,7 +12794,7 @@ Pulsa ~h~~k~~PED_FIREWEAPON~ ~w~para sacar una foto.
 ~g~Necesitas tres buenas fotos de Alex Shrub con Candy para chantajearle.
 
 [POR3_24:PORN3]
-FOTOS HECHAS:
+FOTOS:
 
 {=================================== MISSION TABLE PORN4 ===================================}
 
@@ -12812,7 +12853,7 @@ estrellas, limusinas, el cielo nocturno con los focos entrecruzados...
 ...sí, sí, sí. Los numeritos de lentejuelas, y las limusinas, oh, premieres.
 
 [POR4_S:PORN4]
-Oh, sí, madam, por supuesto madam,
+Oh, sí, madam, por supuesto, madam,
 
 [POR4_T:PORN4]
 y la prensa, y el bombardeo de luces...
@@ -12877,7 +12918,7 @@ Lo que necesitas es un frente legítimo, Tommy, una verdadera propiedad. A mí n
 Necesitamos empezar a utilizar la fuerza o podemos despedirnos de todo el trabajo duro que hemos hecho.
 
 [PRO1_K:PROT1]
-¡Los negociantes locales saben que Díaz está muerto, y se niegan a pagar la protección!
+¡Los empresarios locales saben que Díaz está muerto y se niegan a pagar la protección!
 
 [PRO1_L:PROT1]
 Oh. Podríamos intentar el soborno...
@@ -12895,7 +12936,7 @@ Oh. Podríamos intentar el soborno...
 ¡Mi sustento, destruido!
 
 [PRO1_05:PROT1]
-¡Arruinado... ESTOY ARRUINADO!
+¡Arruinado...! ¡ESTOY ARRUINADO!
 
 [PRO1_06:PROT1]
 ¡Pagaré lo que sea por protección!
@@ -12904,7 +12945,7 @@ Oh. Podríamos intentar el soborno...
 ¡Mi hermoso escaparate destruido!
 
 [PRO1_08:PROT1]
-Mi tienda. Mi maravillosa tienda.
+¡Mi tienda! ¡Mi maravillosa tienda!
 
 [PRO1_09:PROT1]
 Vercetti. Recuerda el nombre.
@@ -12922,7 +12963,7 @@ Si ves un indicador con una casa verde, puedes comprar esa propiedad.
 Volveré aquí en cinco minutos...
 
 [PRO1_11:PROT1]
-~g~Ve al ~y~Centro Comercial North Point~g~ en ~y~Vice Point~g~.
+~g~Ve al ~y~centro comercial North Point~g~ en ~y~Vice Point~g~.
 
 [PRO1_12:PROT1]
 ~g~Destroza los escaparates de todas las tiendas y los propietarios te suplicarán para obtener nueva protección.
@@ -12969,7 +13010,7 @@ Vamos.
 ~g~Dos más han huido. Sígueles la pista y acaba con ellos.
 
 [PRO2_11:PROT2]
-Sube al coche, inútil.
+Subid al coche, inútiles.
 
 [PRO2_02:PROT2]
 Tu seguridad necesita un poco más de seguridad.
@@ -12978,10 +13019,10 @@ Tu seguridad necesita un poco más de seguridad.
 ¡Ahh! demonios, ¡otra vez no! ¡no necesito esta basura!
 
 [PRO2_04:PROT2]
-Estos idiotas pertenecen al DBP de Seguridad que hay a la vuelta de la esquina.
+Estos idiotas vienen de DBP Security, a la vuelta de la esquina.
 
 [PRO2_05:PROT2]
-¡Eh tíos! Arregladlo entre vosotros.
+Arreglad esto entre vosotros.
 
 [PRO2_06:PROT2]
 Nos vemos en un rato.
@@ -12990,7 +13031,7 @@ Nos vemos en un rato.
 Sí, vale, lo que tú digas.
 
 [PRO2_08:PROT2]
-~g~El DBP de Seguridad sabrá que estás de camino, ve y atrápalos antes que escapen.
+~g~DBP Security sabrá que estás de camino, atrápalos antes que escapen.
 
 [PRO2_09:PROT2]
 ~g~Ve y habla con el dueño del bar Front Page.
@@ -13001,7 +13042,7 @@ Sí, vale, lo que tú digas.
 ¡Idiota! ¿En qué estabas pensando?
 
 [PRO3_B:PROT3]
-¿Te das cuenta de lo que significa ésto?
+¿Te das cuenta de lo que significa esto?
 
 [PRO3_C:PROT3]
 ¡Podríamos estar todos hundidos!
@@ -13082,25 +13123,25 @@ De acuerdo.
 De acuerdo, Lance, ¡vamos a por los polis!
 
 [PRO3_02:PROT3]
-~g~ Roba el coche de policía y coloca la bomba en el Café Tarbrush del centro comercial.
+~g~Roba el coche de policía y coloca la bomba en el Café Tarbrush del centro comercial.
 
 [PRO3_03:PROT3]
-~g~ Has dejado atrás a Lance, vuelve y recógele.
+~g~Has dejado atrás a Lance, vuelve y recógele.
 
 [PRO3_04:PROT3]
-~g~ Vamos.
+~g~Vamos.
 
 [PRO3_05:PROT3]
 ~r~¡Has matado a Lance!
 
 [PRO3_07:PROT3]
-~g~ Te has descubierto. ¡Date prisa y coloca la bomba!
+~g~Te has descubierto. ¡Date prisa y coloca la bomba!
 
 [PRO3_08:PROT3]
 ~g~Vuelve a la ~h~finca de Vercetti~g~ en ~h~Starfish Island~g~.
 
 [PRO3_09:PROT3]
-¡Átales y amordázales!
+¡Átalos y amordázalos!
 
 [PRO3_10:PROT3]
 ¡Me queda como un guante!
@@ -13109,7 +13150,7 @@ De acuerdo, Lance, ¡vamos a por los polis!
 Un poco ajustado en la entrepierna...
 
 [PRO3_12:PROT3]
-Oh, sí, sí, el mío también. El mío también.
+Oh, sí, sí, el mío también, el mío también.
 
 [PRO3_13:PROT3]
 ¡Relájate, hermano! ¡Ningún poli conduce tan mal!
@@ -13133,7 +13174,7 @@ De acuerdo, los temporizadores están colocados, 5 segundos.
 Ahora que los hemos enfadado de verdad.
 
 [PRO3_20:PROT3]
-~g~ Haz que dos polis te sigan hasta el garaje.
+~g~Haz que dos polis te sigan hasta el garaje.
 
 [PRO3_21:PROT3]
 ~g~Consigue un nivel de se busca suficiente para que los polis te sigan hasta el garaje.
@@ -13204,13 +13245,13 @@ Mejor resultado: 3
 Mejor resultado: 4
 
 [RACES13:RACES]
-Longitud de pista: ~1~.~1~ km
+Longitud del circuito: ~1~,~1~ km
 
 [RACES15:RACES]
-Mejor tiempo: NA
+Mejor tiempo: ninguno
 
 [RACES16:RACES]
-Mejor resultado: NA
+Mejor resultado: ninguno
 
 [RACES19:RACES]
 No puedes permitirte entrar en esta carrera.
@@ -13219,7 +13260,7 @@ No puedes permitirte entrar en esta carrera.
 Mejor tiempo: ~1~:0~1~
 
 [RACES23:RACES]
-Longitud de la pista: ~1~.~1~ millas
+Longitud del circuito: ~1~,~1~ millas
 
 [RACES_1:RACES]
 ~g~Consigue un vehículo rápido y ve a la parrilla de salida.
@@ -13392,7 +13433,7 @@ Conozco a la chica apropiada.
 Hola, Tommy. ¿Cómo estás?
 
 [ROK1_7:ROCK1]
-Bien. Escucha, ¿te apetece acostarte con los Love Fist?
+Bien. Escucha, ¿te apetece salir con los Love Fist?
 
 [ROK1_8:ROCK1]
 De acuerdo, pero sólo como un favor que espero que me sea devuelto...
@@ -13405,12 +13446,6 @@ De acuerdo, pero sólo como un favor que espero que me sea devuelto...
 
 [RBM1_12:ROCK1]
 ~g~Ve y reúnete con el camello para conseguir los ingredientes del ''love juice''.
-
-[ROK1_2:ROCK1]
-YA NO ES NECESARIO
-
-[ROK1_3:ROCK1]
-YA NO ES NECESARIO
 
 [MERC_39:ROCK1]
 Hasta luego grandullón.
@@ -13734,13 +13769,13 @@ Ve y dale una paliza inolvidable.
 Bien, toma... te he conseguido un carné de socio, y chico, vas a necesitar un tipo de ropa más apropiada.
 
 [TEX1_2:SERG1]
-~g~Ahora ve al Club de golf Leaf Links.
+~g~Ahora ve al club de golf Leaf Links.
 
 [TEX1_0:SERG1]
 ~g~El objetivo está en el campo de prácticas disfrutando de una partida de golf. ¡Asegúrate de que sea la última!
 
 [TEX1_3:SERG1]
-¿Quién es este tipo? Chicos, ocuparos de él.
+¿Quién es este tipo? Chicos, ocupaos de él.
 
 [TEX1_6:SERG1]
 ¡Bonito culo nena!
@@ -13772,7 +13807,7 @@ Cada vez que subas a un Caddy recibirás automáticamente un palo de golf, siemp
 ~r~¡Idiota! ¡La gente debe PRESENCIAR a un cubano haciendo el trabajito!
 
 [TEX_2C:SERG2]
-~g~¡Ve y consígue algo con los colores de la banda cubana en Little Havana!
+~g~¡Consigue ropa de la banda cubana en Little Havana!
 
 [TEX_2D:SERG2]
 ~g~¡Ahora elimina al capo de la banda haitiana en la Funeraria de Romero!
@@ -13790,13 +13825,13 @@ Si... eh...
 Donald, ahora cállate y escucha, puede que aprendas algo.
 
 [TEX2_E:SERG2]
-Veamos. Nada hace que los precios de las propiedades bajen más rápido que una guerra entre bandas al viejo estilo.
+Bueno, no hay nada como una clásica guerra de bandas para hacer que bajen los precios de los bienes inmuebles.
 
 [TEX2_F:SERG2]
-Excepto un desastre quizás, como la peste de la que habla la biblia o algo así,
+Excepto un desastre quizás, como una plaga de la Biblia o algo de ese estilo,
 
 [TEX2_G:SERG2]
-aunque puede que en este caso vayamos demasiado lejos.
+pero eso sería excesivo en este caso.
 
 [TEX2_H:SERG2]
 ¿Te estás enterando, capullo cuatro ojos?
@@ -13820,7 +13855,7 @@ Eso debería meter al zorro en el gallinero. ¿Eh?
 y ahora sólo tenemos que sentarnos a esperar y ver cómo caen los precios.
 
 [TEXEXIT:SERG2]
-~g~¡Lárgate de Little Haiti ahora!
+~g~¡Lárgate de Little Haiti!
 
 {=================================== MISSION TABLE SERG3 ===================================}
 
@@ -13906,10 +13941,10 @@ objetivos restantes:
 ~r~¡Tu Helicóptero RC está fuera del alcance del control remoto!
 
 [TEX3_24:SERG3]
-Pulsa ~h~~k~~VEHICLE_LOOKLEFT~ ~w~para girar el helicóptero en sentido contrario a las agujas del reloj.
+Pulsa ~h~~k~~VEHICLE_LOOKLEFT~ ~w~para girar el helicóptero en el sentido contrario a las agujas del reloj.
 
 [TEX3_25:SERG3]
-Pulsa ~h~~k~~VEHICLE_LOOKLEFT~ ~w~para girar el helicóptero en sentido de las agujas del reloj.
+Pulsa ~h~~k~~VEHICLE_LOOKLEFT~ ~w~para girar el helicóptero en el sentido de las agujas del reloj.
 
 [TEX3_27:SERG3]
 ~g~Una escalera central permite el acceso a todas las plantas del edificio.
@@ -13921,7 +13956,7 @@ Pulsa ~h~~k~~VEHICLE_LOOKLEFT~ ~w~para girar el helicóptero en sentido de las a
 Puedes ~h~mirar atrás~w~ si ~h~pulsas simultáneamente ~k~~VEHICLE_LOOKLEFT~ y ~k~~VEHICLE_LOOKRIGHT~~w~.
 
 [TEX3_29:SERG3] { reVC update }
-~g~Para soltar una bomba pulsa ~h~~k~~VEHICLE_FIREWEAPON~~g~.
+~g~Para soltar una bomba, pulsa ~h~~k~~VEHICLE_FIREWEAPON~~g~.
 
 [TEX3_26:SERG3]
 Pulsa ~h~~k~~VEHICLE_BRAKE~~w~ para disminuir la velocidad del rotor y ~h~descender~w~.
@@ -13930,10 +13965,10 @@ Pulsa ~h~~k~~VEHICLE_BRAKE~~w~ para disminuir la velocidad del rotor y ~h~descen
 Pulsa ~h~~k~~VEHICLE_ACCELERATE~~w~ para aumentar la velocidad del rotor y así ~h~ascender~w~.
 
 [TEX3_16:SERG3]
-~g~Ve a la furgoneta ~w~TOPFUN ~g~cercana al solar de construcción que se va a demoler.
+~g~Ve a la furgoneta ~w~TOPFUN ~g~que hay cerca del solar a demoler.
 
 [TEX3_33:SERG3]
-Una vez que recojas una bomba el radar te mostrará la posición del objetivo con relación al helicóptero RC.
+Una vez que recojas una bomba, el radar te mostrará la posición del objetivo con relación al helicóptero RC.
 
 [TEX3_34:SERG3]
 Un ~h~icono triangular apuntando hacia arriba ~w~indica que el objetivo está ~h~por encima ~w~del helicóptero RC.
@@ -13942,7 +13977,7 @@ Un ~h~icono triangular apuntando hacia arriba ~w~indica que el objetivo está ~h
 Un ~h~icono triangular apuntando hacia abajo ~w~indica que el objetivo está ~h~por debajo ~w~del helicóptero RC.
 
 [TEX3_36:SERG3]
-Un ~h~icono cuadrado ~w~indica que el objetivo está al ~h~mismo nivel ~w~que el helicóptero RC.
+Un ~h~icono cuadrado ~w~indica que el objetivo está ~h~a la misma altura ~w~que el helicóptero RC.
 
 [TEX3_28:SERG3]
 Para ~h~recoger una bomba~w~, simplemente dirige el helicóptero RC hasta ella. El helicóptero RC sólo puede transportar una bomba.
@@ -13966,14 +14001,14 @@ Para ~h~recoger una bomba~w~, simplemente dirige el helicóptero RC hasta ella. 
 Si empujas ~h~el joystick analógico derecho hacia atrás~w~, aumentarás la velocidad del rotor y así ~h~ascenderá~w~.
 
 [TEX3_38:SERG3] { reVC update }
-{Pulsa ~h~~k~~VEHICLE_ACCELERATE~~w~ para aumentar la velocidad del rotor y así ~h~ascender~w~.}
+{Pulsa ~h~~k~~VEHICLE_ACCELERATE~~w~ para acelerar el rotor y así ~h~ascender~w~.}
 Si empujas ~h~el joystick analógico derecho hacia adelante ~w~la velocidad del rotor aumenta, haciendo que el helicóptero ~h~descienda.
 
 [TEX3_39:SERG3]
-~g~Para soltar una bomba pulsa ~h~~k~~VEHICLE_HANDBRAKE~~w~.
+~g~Para soltar una bomba, pulsa ~h~~k~~VEHICLE_HANDBRAKE~~w~.
 
 [TEX3_40:SERG3]
-~g~Para soltar una bomba pulsa ~h~~k~~VEHICLE_HANDBRAKE~~w~.
+Para soltar una bomba, pulsa ~h~~k~~VEHICLE_HANDBRAKE~~w~.
 
 [TEX3_23:SERG3]
 Pulsa ~h~~k~~VEHICLE_TURRETUP~~w~ y ~h~~k~~VEHICLE_TURRETDOWN~~w~ para inclinar el helicóptero en la dirección deseada.
@@ -13990,13 +14025,13 @@ CARRERAS:
 ~1~ $
 
 [IN_ROW:TAXI1]
-~1~ ¡Racha de clientes! ~1~ $
+¡Racha de ~1~ clientes! Premio de ~1~ $.
 
 [TAXI3:TAXI1]
-~r~¡Tu pasajero huye aterrorizado!
+~r~¡Tu cliente ha salido por patas!
 
 [TAXI7:TAXI1]
-~r~Tu coche está destrozado, haz que lo reparen.
+~r~Tu coche está destrozado, repáralo.
 
 [TAXI4:TAXI1]
 ¡Viaje completado!
@@ -14259,7 +14294,7 @@ COMPAÑÍA DE TAXIS CONSOLIDADA
 ¡Es hora que el ángel guardián de Taxis Kaufman coma algo del parachoques!
 
 [TAX3_5:TAXIWA3]
-¡Eh chico te voy a zurrar la badana!
+¡Eh, chico, te voy a zurrar la badana!
 
 { reVC updates }
 { new languages }
@@ -14304,7 +14339,7 @@ BORDES EN CINEMÁTICAS
 FORMATO DE IMAGEN
 
 [FEM_ISL]
-USO DE MEMORIA
+USO DE MEMORIA DEL MAPA
 
 [FEM_LOW]
 BAJO
@@ -14323,13 +14358,13 @@ CÁMARA LIBRE
 
 { Linux joy detection }
 [FEC_JOD]
-DETECTAR JOYSTICK
+DETECTAR MANDO
 
 [FEC_JPR]
-Pulsa cualquier botón del joystick que quieras usar con el juego para seleccionarlo.
+Pulsa cualquier botón del mando que quieras usar para seleccionarlo.
 
 [FEC_JDE]
-Joystick detectado
+Mando detectado
 
 { mission restart }
 [FET_RMS]
@@ -14339,10 +14374,10 @@ REPETIR MISIÓN
 ¿REINTENTAR?
 
 [FED_VPL]
-FLUJO DE VEHÍCULOS
+RENDERIZADO DE VEHÍCULOS
 
 [FED_PRM]
-LUCES EN PEATONES
+ILUMINAR CONTORNOS DE PEATONES
 
 [FED_RGL]
 BRILLO DE CARRETERAS
@@ -14354,7 +14389,7 @@ FILTRO DE COLOR
 MAPAS DE LUZ DEL MUNDO
 
 [FED_MBL]
-DESENFOQ. MOVIMIENTO
+DESENFOQUE DE MOVIMIENTO
 
 [FEM_SIM]
 SIMPLE
@@ -14402,10 +14437,10 @@ MANDO DE XBOX ONE
 TIPO DE MANDO
 
 [FET_AGS]
-AJUSTES DE MANDO
+CONFIGURACIÓN DEL MANDO
 
 [FEM_AUT] { aspect ratio related }
-AUTO
+AUTOMÁTICO
 
 { end of file }
 [DUMMY]

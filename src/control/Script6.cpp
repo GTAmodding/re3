@@ -383,12 +383,10 @@ int8 CRunningScript::ProcessCommands1000To1099(int32 command)
 #endif
 		CTimer::Suspend();
 		int offset = CTheScripts::MultiScriptArray[ScriptParams[0]];
+		CFileMgr::ChangeDir("\\");
 #ifdef USE_DEBUG_SCRIPT_LOADER
-		CFileMgr::ChangeDir("\\data\\");
-		int handle = CFileMgr::OpenFile(scriptfile, "rb");
-		CFileMgr::ChangeDir("\\");
+		int handle = open_script();
 #else
-		CFileMgr::ChangeDir("\\");
 		int handle = CFileMgr::OpenFile("data\\main.scm", "rb");
 #endif
 		CFileMgr::Seek(handle, offset, 0);

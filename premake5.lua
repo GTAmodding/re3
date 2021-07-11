@@ -331,6 +331,7 @@ project "re3"
 
 	filter "platforms:*oal"
 		defines { "AUDIO_OAL" }
+		includedirs { "vendor/minimp3" }
 
 	filter {}
 	if(os.getenv("GTA_III_RE_DIR")) then
@@ -367,26 +368,23 @@ project "re3"
 	filter "platforms:win*oal"
 		includedirs { "vendor/openal-soft/include" }
 		includedirs { "vendor/libsndfile/include" }
-		includedirs { "vendor/mpg123/include" }
 
 	filter "platforms:win-x86*oal"
-		libdirs { "vendor/mpg123/lib/Win32" }
 		libdirs { "vendor/libsndfile/lib/Win32" }
 		libdirs { "vendor/openal-soft/libs/Win32" }
 
 	filter "platforms:win-amd64*oal"
-		libdirs { "vendor/mpg123/lib/Win64" }
 		libdirs { "vendor/libsndfile/lib/Win64" }
 		libdirs { "vendor/openal-soft/libs/Win64" }
 
 	filter "platforms:linux*oal"
-		links { "openal", "mpg123", "sndfile", "pthread", "X11" }
+		links { "openal", "sndfile", "pthread", "X11" }
 
 	filter "platforms:bsd*oal"
-		links { "openal", "mpg123", "sndfile", "pthread", "X11" }
+		links { "openal", "sndfile", "pthread", "X11" }
 
 	filter "platforms:macosx*oal"
-		links { "openal", "mpg123", "sndfile", "pthread" }
+		links { "openal", "sndfile", "pthread" }
 		
 	filter "platforms:macosx-arm64-*oal"
 		includedirs { "/opt/homebrew/opt/openal-soft/include" }

@@ -21,15 +21,6 @@ class Re3Conan(ConanFile):
         "with_libsndfile": False,
         "with_opus": False,
         # "libsndfile:with_external_libs": False,
-        # "mpg123:flexible_resampling": False,
-        # "mpg123:network": False,
-        # "mpg123:icy": False,
-        # "mpg123:id3v2": False,
-        # "mpg123:ieeefloat": False,
-        # "mpg123:layer1": False,
-        # "mpg123:layer2": False,
-        # "mpg123:layer3": False,
-        # "mpg123:moreinfo": False,
         # "sdl2:vulkan": False,
         # "sdl2:opengl": True,
         # "sdl2:sdl2main": True,
@@ -49,7 +40,6 @@ class Re3Conan(ConanFile):
 
     def requirements(self):
         self.requires("librw/{}".format(self.version))
-        self.requires("mpg123/1.26.4")
         if self.options.audio == "openal":
             self.requires("openal/1.21.0")
         elif self.options.audio == "miles":

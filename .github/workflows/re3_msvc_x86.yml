@@ -48,7 +48,6 @@ jobs:
     - if: contains(matrix.platform, 'oal')
       name: Move dynamic dependencies to gamefiles
       run: |
-        mv ./vendor/mpg123/dist/Win32/libmpg123-0.dll ./gamefiles/
         mv ./vendor/openal-soft/dist/Win32/OpenAL32.dll ./gamefiles/
     - name: Upload artifact to actions
       uses: actions/upload-artifact@v2

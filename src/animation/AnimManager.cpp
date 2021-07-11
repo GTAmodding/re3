@@ -763,6 +763,7 @@ CAnimManager::LoadAnimFiles(void)
 {
 	int i, j;
 
+	CFileMgr::SetDir("");
 	LoadAnimFile("ANIM\\PED.IFP");
 
 	// Create all assoc groups

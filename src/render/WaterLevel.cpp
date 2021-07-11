@@ -61,7 +61,7 @@ CWaterLevel::Initialise(Const char *pWaterDat)
 
 #ifdef MASTER
 	int32 hFile = -1;
-
+	CFileMgr::SetDir("");
 	do
 	{
 		hFile = CFileMgr::OpenFile("DATA\\waterpro.dat", "rb");

@@ -20,8 +20,10 @@
 #endif
 
 #include "CdStream.h"
+#include "FileMgr.h"
 #include "rwcore.h"
 #include "MemoryMgr.h"
+#include "RwHelper.h"
 
 #define CDDEBUG(f, ...)   debug ("%s: " f "\n", "cdvd_stream", ## __VA_ARGS__)
 #define CDTRACE(f, ...)   printf("%s: " f "\n", "cdvd_stream", ## __VA_ARGS__)
@@ -195,17 +197,28 @@ CdStreamInitThread(void)
 #endif
 }
 
+static const char *gta3ImgPath = "models/gta3.img";
+
 void
 CdStreamInit(int32 numChannels)
 {
-	struct statvfs fsInfo;
+    struct statvfs fsInfo;
+    char imgPath[128] = {'\0'};
 
-	if((statvfs("models/gta3.img", &fsInfo)) < 0)
-	{
-		CDTRACE("can't get filesystem info");
-		ASSERT(0);
-		return;
-	}
+#ifdef XDG_ROOT
+    const char *rootDir = CFileMgr::GetRootDirName();
+    strncpy(imgPath, rootDir, strlen(rootDir) - 1);
+    strcat(imgPath, "/");
+    strcat(imgPath, gta3ImgPath);
+#else
+    strcpy(imgPath, gta3ImgPath);
+#endif
+    if((statvfs(imgPath, &fsInfo)) < 0)
+    {
+        CDTRACE("can't get filesystem info");
+        ASSERT(0);
+        return;
+    }
 #ifdef __linux__
 	_gdwCdStreamFlags = O_RDONLY | O_NOATIME;
 #else
@@ -538,6 +551,8 @@ CdStreamAddImage(char const *path)
 {
 	ASSERT(path != nil);
 	ASSERT(gNumImages < MAX_CDIMAGES);
+
+	CFileMgr::SetDir("");
 
 	gImgFiles[gNumImages] = open(path, _gdwCdStreamFlags);
 

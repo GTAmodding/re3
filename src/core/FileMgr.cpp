@@ -197,10 +197,69 @@ myfeof(int fd)
 char CFileMgr::ms_rootDirName[128] = {'\0'};
 char CFileMgr::ms_dirName[128];
 
+#ifdef XDG_ROOT
+// Must have char homeDir[PATH_MAX] in scope.
+#define getenvvar(varName)                                  \
+	char **p = environ;                                     \
+	size_t varNameLength = ARRAY_SIZE(varName) - 1;         \
+	for (; *p; p++) {                                       \
+		if (!strncmp(varName "=", *p, varNameLength + 1)) { \
+			strcpy(homeDir, *p + varNameLength + 1);        \
+			break;                                          \
+		}                                                   \
+	}
+
+void
+CFileMgr::GetHomeDirectory(char *homeDir)
+{
+	getenvvar("HOME");
+}
+
+void
+CFileMgr::GetXDGDataHome(char *homeDir)
+{
+	getenvvar("XDG_DATA_HOME");
+}
+#endif
+
 void
 CFileMgr::Initialise(void)
 {
+#ifdef XDG_ROOT
+	char homeDir[255];
+	struct stat buf;
+	memset(homeDir, 0, 255);
+	GetXDGDataHome(homeDir);
+	if (strlen(homeDir) > 0) {
+		strcat(homeDir, "/re3");
+		if (stat(homeDir, &buf) < 0) {
+			int ret = mkdir(homeDir, 0755);
+			assert(ret == 0);
+		}
+	} else {
+		memset(homeDir, 0, 255);
+		GetHomeDirectory(homeDir);
+		// Build up ${HOME}/.local/share/re3
+		strcat(homeDir, "/.local");
+		if (stat(homeDir, &buf) < 0) {
+			int ret = mkdir(homeDir, 0755);
+			assert(ret == 0);
+		}
+		strcat(homeDir, "/share");
+		if (stat(homeDir, &buf) < 0) {
+			int ret = mkdir(homeDir, 0755);
+			assert(ret == 0);
+		}
+		strcat(homeDir, "/re3");
+		if (stat(homeDir, &buf) < 0) {
+			int ret = mkdir(homeDir, 0755);
+			assert(ret == 0);
+		}
+	}
+	strcpy(ms_rootDirName, homeDir);
+#else
 	_getcwd(ms_rootDirName, 128);
+#endif
 	strcat(ms_rootDirName, "\\");
 }
 

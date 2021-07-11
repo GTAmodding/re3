@@ -25,6 +25,12 @@
   "C_Cpp.vcFormat.indent.gotoLabels": "leftmostColumn",
   "C_Cpp.vcFormat.space.pointerReferenceAlignment": "right",
   "cSpell.enabled": false,
+  "editor.detectIndentation": false,
+  "editor.formatOnPaste": false,
+  "editor.formatOnSave": false,
+  "editor.formatOnType": false,
+  "editor.insertSpaces": false,
+  "editor.tabSize": 4,
   "files.trimFinalNewlines": false,
   "files.trimTrailingWhitespace": false
 }

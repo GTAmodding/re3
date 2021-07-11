@@ -813,7 +813,7 @@ void CGame::ReloadIPLs(void)
 	CWorld::RemoveStaticObjects();
 	ThePaths.Init();
 	CCullZones::Init();
-	CFileLoader::ReloadPaths("GTA3.IDE");
+	CFileLoader::ReloadPaths("DATA\\MAPS\\GTA3.IDE");
 	CFileLoader::LoadScene("INDUST.IPL");
 	CFileLoader::LoadScene("COMMER.IPL");
 	CFileLoader::LoadScene("SUBURBAN.IPL");

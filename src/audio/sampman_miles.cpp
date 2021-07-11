@@ -16,6 +16,7 @@
 #include "MusicManager.h"
 #include "Frontend.h"
 #include "Timer.h"
+#include "FileMgr.h"
 
 
 #pragma comment( lib, "mss32.lib" )
@@ -450,6 +451,7 @@ _FindMP3s(void)
 		return;
 	}
 	
+	CFileMgr::SetDir("");
 	FILE *f = fopen("MP3\\MP3Report.txt", "w");
 	
 	if ( f )
@@ -961,6 +963,7 @@ cSampleManager::Initialise(void)
 	
 #ifdef AUDIO_CACHE
 	TRACE("cache");
+	CFileMgr::SetDir("");
 	FILE *cacheFile = fopen("audio\\sound.cache", "rb");
 	if (cacheFile) {
 		fread(nStreamLength, sizeof(uint32), TOTAL_STREAMED_SOUNDS, cacheFile);
@@ -1077,7 +1080,8 @@ cSampleManager::Initialise(void)
 		
 		strcpy(_aHDDPath, m_szCDRomRootPath);
 		rootpath[0] = '\0';
-		
+
+		CFileMgr::SetDir("");
 		FILE *f = fopen(StreamedNameTable[0], "rb");
 		
 		if ( f )
@@ -1125,6 +1129,7 @@ cSampleManager::Initialise(void)
 	}
 #endif
 #ifdef AUDIO_CACHE
+	CFileMgr::SetDir("");
 	cacheFile = fopen("audio\\sound.cache", "wb");
 	fwrite(nStreamLength, sizeof(uint32), TOTAL_STREAMED_SOUNDS, cacheFile);
 	fclose(cacheFile);
@@ -1311,6 +1316,8 @@ cSampleManager::CheckForAnAudioFileOnCD(void)
 
 	strcat(filepath, StreamedNameTable[AudioManager.GetRandomNumber(1) % TOTAL_STREAMED_SOUNDS]);
 	
+	CFileMgr::SetDir("");
+
 	FILE *f = fopen(filepath, "rb");
 	
 	if ( f )
@@ -2279,6 +2286,8 @@ cSampleManager::IsStreamPlaying(uint8 nStream)
 bool8
 cSampleManager::InitialiseSampleBanks(void)
 {
+	CFileMgr::SetDir("");
+
 	int32 nBank = SFX_BANK_0;
 	
 	fpSampleDescHandle = fopen(SampleBankDescFilename, "rb");

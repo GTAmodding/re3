@@ -243,6 +243,7 @@ ReadVideoCardCapsFile(uint32 &cap32, uint32 &cap24, uint32 &cap16, uint32 &cap8)
 	cap16 = UINT32_MAX;
 	cap8 = UINT32_MAX;
 
+	CFileMgr::SetDir("");
 	int32 file = CFileMgr::OpenFile("DATA\\CAPS.DAT", "rb");
 	if (file != 0) {
 		CFileMgr::Read(file, (char*)&cap32, 4);

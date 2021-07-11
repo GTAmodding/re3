@@ -155,6 +155,7 @@ CCutsceneMgr::Initialise(void)
 	ms_cutsceneProcessing = false;
 	ms_useLodMultiplier = false;
 
+	CFileMgr::SetDir("");
 	ms_pCutsceneDir = new CDirectory(CUTSCENEDIRSIZE);
 	ms_pCutsceneDir->ReadDirFile("ANIM\\CUTS.DIR");
 }
@@ -179,12 +180,14 @@ CCutsceneMgr::LoadCutsceneData(const char *szCutsceneName)
 	CTimer::Stop();
 
 	ms_pCutsceneDir->numEntries = 0;
+	CFileMgr::SetDir("");
 	ms_pCutsceneDir->ReadDirFile("ANIM\\CUTS.DIR");
 
 	CStreaming::RemoveUnusedModelsInLoadedList();
 	CGame::DrasticTidyUpMemory(true);
 
 	strcpy(ms_cutsceneName, szCutsceneName);
+	CFileMgr::SetDir("");
 	file = CFileMgr::OpenFile("ANIM\\CUTS.IMG", "rb");
 
 	// Load animations

@@ -163,6 +163,9 @@ Error(char *fmt, ...)
 void
 ValidateVersion()
 {
+#ifdef XDG_ROOT
+	CFileMgr::SetDir("");
+#endif
 	int32 file = CFileMgr::OpenFile("models\\coll\\peds.col", "rb");
 	char buff[128];
 
@@ -1800,6 +1803,7 @@ void
 InitialiseGame(void)
 {
 	LoadingScreen(nil, nil, "loadsc0");
+	CFileMgr::SetDir("");
 	CGame::Initialise("DATA\\GTA3.DAT");
 }
 

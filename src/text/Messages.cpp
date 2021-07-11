@@ -290,6 +290,7 @@ CMessages::AddBigMessage(wchar *msg, uint32 time, uint16 style)
 	BIGMessages[style].m_Stack[0].m_nNumber[5] = -1;
 	BIGMessages[style].m_Stack[0].m_pString = nil;
 }
+
 void
 CMessages::AddBigMessageQ(wchar *msg, uint32 time, uint16 style)
 {
@@ -320,7 +321,7 @@ CMessages::AddBigMessageQ(wchar *msg, uint32 time, uint16 style)
 void
 CMessages::AddToPreviousBriefArray(wchar *text, int32 n1, int32 n2, int32 n3, int32 n4, int32 n5, int32 n6, wchar *string)
 {
-	int32 i = 0;
+	int32 i;
 	for (i = 0; i < NUMPREVIOUSBRIEFS && PreviousBriefs[i].m_pText != nil; i++) {
 		if (PreviousBriefs[i].m_nNumber[0] == n1
 			&& PreviousBriefs[i].m_nNumber[1] == n2
@@ -419,10 +420,9 @@ CMessages::InsertStringInString(wchar *str1, wchar *str2)
 	for (i = 0; i < total_size; ) {
 #ifdef MORE_LANGUAGES
 		if ((CFont::IsJapanese() && *_str1 == (0x8000 | '~') && *(_str1 + 1) == (0x8000 | 'a') && *(_str1 + 2) == (0x8000 | '~'))
-			|| (*_str1 == '~' && *(_str1 + 1) == 'a' && *(_str1 + 2) == '~'))
-		{
+			|| (*_str1 == '~' && *(_str1 + 1) == 'a' && *(_str1 + 2) == '~')) {
 #else
-			if (*_str1 == '~' && *(_str1 + 1) == 'a' && *(_str1 + 2) == '~') {
+		if (*_str1 == '~' && *(_str1 + 1) == 'a' && *(_str1 + 2) == '~') {
 #endif
 			_str1 += 3;
 			for (int j = 0; j < str2_size; j++) {

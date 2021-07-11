@@ -13,14 +13,6 @@ public:
 
 	void Normalise(void) {
 		float sq = MagnitudeSqr();
-		// assert(sq != 0.0f);	// just be safe here
-		float invsqrt = RecipSqrt(sq);
-		x *= invsqrt;
-		y *= invsqrt;
-	}
-
-	void NormaliseSafe(void) {
-		float sq = MagnitudeSqr();
 		if(sq > 0.0f){
 			float invsqrt = RecipSqrt(sq);
 			x *= invsqrt;
@@ -60,6 +52,9 @@ public:
 	}
 	CVector2D operator/(float t) const {
 		return CVector2D(x/t, y/t);
+	}
+	CVector2D operator-() const {
+		return CVector2D(-x, -y);
 	}
 };
 

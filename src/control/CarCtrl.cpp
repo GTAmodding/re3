@@ -1070,11 +1070,11 @@ void CCarCtrl::SlowCarDownForCarsSectorList(CPtrList& lst, CVehicle* pVehicle, f
 void CCarCtrl::SlowCarDownForOtherCar(CEntity* pOtherEntity, CVehicle* pVehicle, float* pSpeed, float curSpeed)
 {
 	CVector forwardA = pVehicle->GetForward();
-	((CVector2D)forwardA).NormaliseSafe();
+	((CVector2D)forwardA).Normalise();
 	if (DotProduct2D(pOtherEntity->GetPosition() - pVehicle->GetPosition(), forwardA) < 0.0f)
 		return;
 	CVector forwardB = pOtherEntity->GetForward();
-	((CVector2D)forwardB).NormaliseSafe();
+	((CVector2D)forwardB).Normalise();
 	forwardA.z = forwardB.z = 0.0f;
 	CVehicle* pOtherVehicle = (CVehicle*)pOtherEntity;
 	/* why is the argument CEntity if it's always CVehicle anyway and is casted? */
@@ -1327,7 +1327,7 @@ void CCarCtrl::WeaveForOtherCar(CEntity* pOtherEntity, CVehicle* pVehicle, float
 	  pVehicle->GetModelInfo()->GetColModel()->boundingSphere.radius < distance)
 		return;
 	CVector2D forward = pVehicle->GetForward();
-	forward.NormaliseSafe();
+	forward.Normalise();
 	float forwardAngle = CGeneral::GetATanOfXY(forward.x, forward.y);
 	float angleDiff = angleBetweenVehicles - forwardAngle;
 	float lenProjection = ABS(pOtherCar->GetColModel()->boundingBox.max.y * Sin(angleDiff));
@@ -2266,7 +2266,7 @@ float CCarCtrl::FindMaxSteerAngle(CVehicle* pVehicle)
 void CCarCtrl::SteerAICarWithPhysicsFollowPath(CVehicle* pVehicle, float* pSwerve, float* pAccel, float* pBrake, bool* pHandbrake)
 {
 	CVector2D forward = pVehicle->GetForward();
-	forward.NormaliseSafe();
+	forward.Normalise();
 	CCarPathLink* pCurrentLink = &ThePaths.m_carPathLinks[pVehicle->AutoPilot.m_nCurrentPathNodeInfo];
 	CCarPathLink* pNextLink = &ThePaths.m_carPathLinks[pVehicle->AutoPilot.m_nNextPathNodeInfo];
 	CVector2D currentPathLinkForward(pCurrentLink->GetDirX() * pVehicle->AutoPilot.m_nCurrentDirection,
@@ -2404,7 +2404,7 @@ void CCarCtrl::SteerAICarWithPhysicsHeadingForTarget(CVehicle* pVehicle, CPhysic
 {
 	*pHandbrake = false;
 	CVector2D forward = pVehicle->GetForward();
-	forward.NormaliseSafe();
+	forward.Normalise();
 	float angleToTarget = CGeneral::GetATanOfXY(targetX - pVehicle->GetPosition().x, targetY - pVehicle->GetPosition().y);
 	float angleForward = CGeneral::GetATanOfXY(forward.x, forward.y);
 	if (pVehicle->AutoPilot.m_nDrivingStyle == DRIVINGSTYLE_AVOID_CARS)
@@ -2491,7 +2491,7 @@ void CCarCtrl::SteerAICarWithPhysicsTryingToBlockTarget_Stop(CVehicle* pVehicle,
 void CCarCtrl::SteerAIBoatWithPhysicsHeadingForTarget(CBoat* pBoat, float targetX, float targetY, float* pSwerve, float* pAccel, float* pBrake)
 {
 	CVector2D forward(pBoat->GetForward());
-	forward.NormaliseSafe();
+	forward.Normalise();
 	CVector2D distanceToTarget = CVector2D(targetX, targetY) - pBoat->GetPosition();
 	float angleToTarget = CGeneral::GetATanOfXY(distanceToTarget.x, distanceToTarget.y);
 	float angleForward = CGeneral::GetATanOfXY(forward.x, forward.y);
@@ -2727,7 +2727,7 @@ bool CCarCtrl::GenerateOneEmergencyServicesCar(uint32 mi, CVector vecPos)
 	pVehicle->AutoPilot.m_nTempAction = TEMPACT_NONE;
 	pVehicle->AutoPilot.m_nDrivingStyle = DRIVINGSTYLE_AVOID_CARS;
 	CVector2D direction = vecPos - spawnPos;
-	direction.NormaliseSafe();
+	direction.Normalise();
 	pVehicle->GetForward() = CVector(direction.x, direction.y, 0.0f);
 	pVehicle->GetRight() = CVector(direction.y, -direction.x, 0.0f);
 	pVehicle->GetUp() = CVector(0.0f, 0.0f, 1.0f);

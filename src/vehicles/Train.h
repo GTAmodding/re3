@@ -82,5 +82,3 @@ public:
 		float *totalLength, float *totalDuration, CTrainInterpolationLine *interpLines, bool rightRail);
 	static void UpdateTrains(void);
 };
-
-VALIDATE_SIZE(CTrain, 0x2E4);

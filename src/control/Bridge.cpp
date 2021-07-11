@@ -23,6 +23,7 @@ uint32 CBridge::TimeOfBridgeBecomingOperational;
 
 void CBridge::Init()
 {
+#ifdef GTA_BRIDGE
 	FindBridgeEntities();
 	OldLift = -1.0f;
 	if (pLiftPart && pWeight)
@@ -35,10 +36,12 @@ void CBridge::Init()
 
 		ThePaths.SetLinksBridgeLights(-330.0, -230.0, -700.0, -588.0, true);
 	}
+#endif
 }
 
 void CBridge::Update()
 {
+#ifdef GTA_BRIDGE
 	if (!pLiftPart || !pWeight)
 		return;
 
@@ -113,15 +116,21 @@ void CBridge::Update()
 		ThePaths.SetLinksBridgeLights(-330.0, -230.0, -700.0, -588.0, true);
 	else if (State == STATE_LIFT_PART_IS_DOWN && OldState == STATE_LIFT_PART_MOVING_DOWN)
 		ThePaths.SetLinksBridgeLights(-330.0, -230.0, -700.0, -588.0, false);
+#endif
 }
 
 bool CBridge::ShouldLightsBeFlashing()
 {
+#ifdef GTA_BRIDGE
 	return State != STATE_LIFT_PART_IS_DOWN;
+#else
+	return false;
+#endif
 }
 
 void CBridge::FindBridgeEntities()
 {
+#ifdef GTA_BRIDGE
 	pWeight   = nil;
 	pLiftRoad = nil;
 	pLiftPart = nil;
@@ -138,12 +147,17 @@ void CBridge::FindBridgeEntities()
 				pWeight = entry;
 		}
 	}
+#endif
 }
 
 bool CBridge::ThisIsABridgeObjectMovingUp(int index)
 {
+#ifdef GTA_BRIDGE
 	if (index != MI_BRIDGEROADSEGMENT && index != MI_BRIDGELIFT)
 		return false;
 
 	return State == STATE_LIFT_PART_ABOUT_TO_MOVE_UP || State == STATE_LIFT_PART_MOVING_UP;
+#else
+	return false;
+#endif
 }

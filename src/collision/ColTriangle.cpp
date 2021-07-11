@@ -1,15 +1,6 @@
 #include "common.h"
 #include "ColTriangle.h"
 
-void
-CColTriangle::Set(const CompressedVector *, int a, int b, int c, uint8 surf, uint8 piece)
-{
-	this->a = a;
-	this->b = b;
-	this->c = c;
-	this->surface = surf;
-}
-
 #ifdef VU_COLLISION
 void
 CColTrianglePlane::Set(const CVector &va, const CVector &vb, const CVector &vc)

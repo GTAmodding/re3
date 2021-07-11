@@ -64,11 +64,11 @@ public:
 		return CVector(-x, -y, -z);
 	}
 
-	const bool operator==(CVector const &right) {
+	const bool operator==(CVector const &right) const {
 		return x == right.x && y == right.y && z == right.z;
 	}
 
-	const bool operator!=(CVector const &right) {
+	const bool operator!=(CVector const &right) const {
 		return x != right.x || y != right.y || z != right.z;
 	}
 

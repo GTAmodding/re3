@@ -50,3 +50,18 @@ CDummy::Remove(void)
 		m_entryInfoList.DeleteNode(node);
 	}
 }
+
+bool
+IsDummyPointerValid(CDummy* pDummy)
+{
+	if (!pDummy)
+		return false;
+	int index = CPools::GetDummyPool()->GetJustIndex_NoFreeAssert(pDummy);
+#ifdef FIX_BUGS
+	if (index < 0 || index >= CPools::GetDummyPool()->GetSize())
+#else
+	if (index < 0 || index > CPools::GetDummyPool()->GetSize())
+#endif
+		return false;
+	return pDummy->m_entryInfoList.first;
+}

@@ -43,4 +43,4 @@ public:
 	}
 };
 
-VALIDATE_SIZE(cPoliceRadioQueue, 444);
+VALIDATE_SIZE(cPoliceRadioQueue, 0x1BC);

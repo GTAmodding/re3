@@ -17,5 +17,4 @@ public:
 	virtual bool GetIsATreadable(void) { return false; }
 };
 
-VALIDATE_SIZE(CBuilding, 0x64);
-
+bool IsBuildingPointerValid(CBuilding*);

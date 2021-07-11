@@ -93,6 +93,8 @@ cAudioScriptObject::SaveAllAudioScriptObjects(uint8 *buf, uint32 *size)
 void
 PlayOneShotScriptObject(uint8 id, CVector const &pos)
 {
+	if (!DMAudio.IsAudioInitialised()) return;
+
 	cAudioScriptObject *audioScriptObject = new cAudioScriptObject();
 	audioScriptObject->Posn = pos;
 	audioScriptObject->AudioId = id;

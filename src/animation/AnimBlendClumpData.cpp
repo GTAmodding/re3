@@ -3,7 +3,6 @@
 #include "AnimBlendClumpData.h"
 #include "MemoryMgr.h"
 
-
 CAnimBlendClumpData::CAnimBlendClumpData(void)
 {
 	numFrames = 0;

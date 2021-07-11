@@ -3653,6 +3653,7 @@ const char* controllerTypesPaths[] = {
 	"MODELS/FRONTEND_DS4.TXD",
 	"MODELS/FRONTEND_X360.TXD",
 	"MODELS/FRONTEND_XONE.TXD",
+	"MODELS/FRONTEND_SPRO.TXD",
 };
 
 void
@@ -3664,6 +3665,9 @@ CMenuManager::LoadController(int8 type)
 	case CONTROLLER_DUALSHOCK3:
 	case CONTROLLER_DUALSHOCK4:
 		CFont::LoadButtons("MODELS/PS3BTNS.TXD");
+		break;
+	case CONTROLLER_SWITCHPRO:
+		CFont::LoadButtons("MODELS/NXBTNS.TXD");
 		break;
 	default:
 		CFont::LoadButtons("MODELS/X360BTNS.TXD");

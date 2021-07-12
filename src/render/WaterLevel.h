@@ -1,8 +1,6 @@
 #pragma once
 
-#define WATER_X_OFFSET (0.0f)
-
-#define WATER_Z_OFFSET (0.5f)
+#define WATER_Z_OFFSET (1.5f)
 
 #define NO_WATER -128
 
@@ -100,13 +98,19 @@ class CEntity;
 class CWaterLevel
 {
 public:
-	static int32       ms_nNoOfWaterLevels;
-	static float       ms_aWaterZs[48];
-	static CRect       ms_aWaterRects[48];
-	static int8        aWaterBlockList[MAX_LARGE_SECTORS][MAX_LARGE_SECTORS];				// 64x64 Large blocks 64x64 each
-	static int8        aWaterFineBlockList[MAX_SMALL_SECTORS][MAX_SMALL_SECTORS];			// 128x128 Small blocks 32x32 each
+	static CWaterLevel  *mspInst;
+
+	int32       m_nNoOfWaterLevels;
+	float       *m_aWaterZs;
+	CRect       *m_aWaterRects;
+	int8        m_aWaterBlockList[MAX_LARGE_SECTORS][MAX_LARGE_SECTORS];				// 64x64 Large blocks 64x64 each
+	int8        m_aWaterFineBlockList[MAX_SMALL_SECTORS][MAX_SMALL_SECTORS];			// 128x128 Small blocks 32x32 each
+	void        *unk1; // TODO
+	void        *unk2; // TODO
+
 	static bool        WavesCalculatedThisFrame;
 
+	static int32       mRecentlyRenderedWavySector;
 	static bool        RequireWavySector;
 	static bool        MaskCalculatedThisFrame;
 	static CVector     PreCalculatedMaskPosn;
@@ -116,7 +120,8 @@ public:
 	static RpAtomic    *ms_pWavyAtomic;
 	static RpAtomic    *ms_pMaskAtomic;
 
-	static void    Initialise(Const char *pWaterDat); // out of class in III PC and later because of SecuROM
+	static void    Initialise(const char *pWaterDat, void *pInst = nil); // out of class in III PC and later because of SecuROM
+	static void    Initialise2();
 	static void    Shutdown();
 
 	static void    CreateWavyAtomic();
@@ -132,6 +137,8 @@ public:
 	static bool    GetWaterLevelNoWaves(float fX, float fY, float fZ, float *pfOutLevel);
 	static float   GetWaterWavesOnly(short x, short y);	// unused
 	static CVector GetWaterNormal(float fX, float fY);
+
+	static int32   NearWater();
 
 	static void    RenderWater();
 	static void    RenderTransparentWater(void);
@@ -182,3 +189,5 @@ public:
 	static void HandleBeachToysStuff(void);
 	static CEntity *CreateBeachToy(CVector const &vec, eBeachToy beachtoy);
 };
+
+VALIDATE_SIZE(CWaterLevel, 0x5014);

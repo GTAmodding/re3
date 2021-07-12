@@ -449,6 +449,7 @@ bool CGame::Initialise(const char* datFile)
 	CModelInfo::Initialise();
 	CPickups::Init();
 	CTheCarGenerators::Init();
+	CWaterLevel::Initialise("DATA\\WATER.DAT");
 
 	CdStreamAddImage("MODELS\\GTA3.IMG");
 
@@ -470,7 +471,7 @@ bool CGame::Initialise(const char* datFile)
 	TestModelIndices();
 
 	LoadingScreen("Loading the Game", "Setup water", nil);
-	CWaterLevel::Initialise("DATA\\WATER.DAT");
+	CWaterLevel::Initialise2();
 	TheConsole.Init();
 	CDraw::SetFOV(120.0f);
 	CDraw::ms_fLODDistance = 500.0f;

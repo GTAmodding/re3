@@ -5872,6 +5872,7 @@ const char* controllerTypesPaths[] = {
 	"MODELS/FRONTEND_DS4.TXD",
 	"MODELS/FRONTEND_X360.TXD",
 	"MODELS/FRONTEND_XONE.TXD",
+	"MODELS/FRONTEND_SPRO.TXD",
 };
 
 void
@@ -5966,6 +5967,7 @@ CMenuManager::PrintController(void)
 		TEXT_SELECT_X += 4.0f;
 		break;
 	case CONTROLLER_XBOX360:
+	case CONTROLLER_SWITCHPRO:
 		TEXT_L2_X += 8.0f;
 		TEXT_R2_X -= 8.0f;
 		TEXT_L1_Y += 15.0f;
@@ -6278,6 +6280,7 @@ CMenuManager::PrintController(void)
 			{
 			case CONTROLLER_XBOXONE:
 			case CONTROLLER_XBOX360:
+			case CONTROLLER_SWITCHPRO:
 				CFont::SetScale(MENU_X(SMALLESTTEXT_X_SCALE * 2 * scale * 0.65f), MENU_Y(SMALLESTTEXT_Y_SCALE * scale * 0.65f));
 				switch (m_PrefsLanguage)
 				{
@@ -6358,6 +6361,7 @@ CMenuManager::PrintController(void)
 			{
 			case CONTROLLER_XBOXONE:
 			case CONTROLLER_XBOX360:
+			case CONTROLLER_SWITCHPRO:
 				CFont::SetScale(MENU_X(SMALLESTTEXT_X_SCALE * 2 * scale * 0.65f), MENU_Y(SMALLESTTEXT_Y_SCALE * scale * 0.65f));
 				switch (m_PrefsLanguage)
 				{
@@ -6441,6 +6445,7 @@ CMenuManager::PrintController(void)
 			{
 			case CONTROLLER_XBOXONE:
 			case CONTROLLER_XBOX360:
+			case CONTROLLER_SWITCHPRO:
 				CFont::SetScale(MENU_X(SMALLESTTEXT_X_SCALE * 2 * scale * 0.65f), MENU_Y(SMALLESTTEXT_Y_SCALE * scale * 0.65f));
 				switch (m_PrefsLanguage)
 				{
@@ -6525,6 +6530,7 @@ CMenuManager::PrintController(void)
 			{
 			case CONTROLLER_XBOXONE:
 			case CONTROLLER_XBOX360:
+			case CONTROLLER_SWITCHPRO:
 				CFont::SetScale(MENU_X(SMALLESTTEXT_X_SCALE * 2 * scale * 0.65f), MENU_Y(SMALLESTTEXT_Y_SCALE * scale * 0.65f));
 				CFont::PrintStringFromBottom(MENU_X_LEFT_ALIGNED(X(TEXT_SQUARE_X)), MENU_Y(Y(TEXT_SQUARE_Y)), TheText.Get("FEC_SMT"));
 				break;
@@ -6566,6 +6572,9 @@ CMenuManager::LoadController(int8 type)
 	case CONTROLLER_DUALSHOCK3:
 	case CONTROLLER_DUALSHOCK4:
 		CFont::LoadButtons("MODELS/PS3BTNS.TXD");
+		break;
+	case CONTROLLER_SWITCHPRO:
+		CFont::LoadButtons("MODELS/NXBTNS.TXD");
 		break;
 	default:
 		CFont::LoadButtons("MODELS/X360BTNS.TXD");

@@ -271,7 +271,7 @@ enum Config {
 
 #define ASCII_STRCMP // use faster ascii str comparisons
 
-#if !defined _WIN32 || defined __MINGW32__ 
+#if !defined _WIN32 || defined __MINGW32__
 #undef ASCII_STRCMP
 #endif
 
@@ -288,7 +288,7 @@ enum Config {
 #define PROPER_SCALING		// use original DEFAULT_SCREEN_WIDTH/DEFAULT_SCREEN_HEIGHT from PS2 instead of PC(R* changed HEIGHT here to make radar look better, but broke other hud elements aspect ratio).
 #define DEFAULT_NATIVE_RESOLUTION	// Set default video mode to your native resolution (fixes Windows 10 launch)
 #define USE_TXD_CDIMAGE		// generate and load textures from txd.img
-#define PS2_ALPHA_TEST		// emulate ps2 alpha test 
+#define PS2_ALPHA_TEST		// emulate ps2 alpha test
 #define IMPROVED_VIDEOMODE	// save and load videomode parameters instead of a magic number
 #define DISABLE_LOADING_SCREEN // disable the loading screen which vastly improves the loading time
 #ifdef DISABLE_LOADING_SCREEN
@@ -406,10 +406,10 @@ enum Config {
 // Peds
 #define PED_SKIN		// support for skinned geometry on peds, requires COMPATIBLE_SAVES
 #define ANIMATE_PED_COL_MODEL
-// #define VC_PED_PORTS			// various ports from VC's CPed, mostly subtle
-// #define NEW_WALK_AROUND_ALGORITHM	// to make walking around vehicles/objects less awkward
+#define VC_PED_PORTS			// various ports from VC's CPed, mostly subtle
+#define NEW_WALK_AROUND_ALGORITHM	// to make walking around vehicles/objects less awkward
 #define CANCELLABLE_CAR_ENTER
-//#define PEDS_REPORT_CRIMES_ON_PHONE, requires COMPATIBLE_SAVES
+#define PEDS_REPORT_CRIMES_ON_PHONE, requires COMPATIBLE_SAVES
 
 // Camera
 //#define PS2_CAM_TRANSITION	// old way of transitioning between cam modes

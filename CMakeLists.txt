@@ -18,6 +18,7 @@ endif()
 
 set(${PROJECT}_AUDIO "OAL" CACHE STRING "Audio")
 
+option(${PROJECT}_INSTALL "Enable installation of ${EXECUTABLE} + gamefiles" OFF)
 option(${PROJECT}_WITH_OPUS "Build ${EXECUTABLE} with opus support" OFF)
 option(${PROJECT}_WITH_LIBSNDFILE "Build ${EXECUTABLE} with libsndfile (instead of internal decoder)" OFF)
 

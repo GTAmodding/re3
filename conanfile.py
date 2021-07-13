@@ -60,7 +60,7 @@ class Re3Conan(ConanFile):
             self.requires("opusfile/0.12")
 
     def export_sources(self):
-        for d in ("cmake", "src"):
+        for d in ("cmake", "gamefiles", "src"):
             shutil.copytree(src=d, dst=os.path.join(self.export_sources_folder, d))
         self.copy("CMakeLists.txt")
 

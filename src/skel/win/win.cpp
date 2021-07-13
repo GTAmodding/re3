@@ -522,7 +522,7 @@ DWORD GetDXVersion()
 /*
  *****************************************************************************
  */
-#ifndef _WIN64
+#ifdef _M_IX86
 static char cpuvendor[16] = "UnknownVendr";
 __declspec(naked)  const char * _psGetCpuVendr()
 {
@@ -674,7 +674,7 @@ psInitialize(void)
 	
 	gGameState = GS_START_UP;
 	TRACE("gGameState = GS_START_UP");
-#ifndef _WIN64
+#ifdef _M_IX86
 	_psPrintCpuInfo();
 #endif
 	OSVERSIONINFO verInfo;

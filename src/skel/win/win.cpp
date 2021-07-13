@@ -36,7 +36,9 @@
 #pragma comment( lib, "Winmm.lib" )
 #pragma comment( lib, "dxguid.lib" )
 #pragma comment( lib, "strmiids.lib" )
+#ifndef NO_DINPUT
 #pragma comment( lib, "dinput8.lib" )
+#endif
 
 #define WITHD3D
 #define WITHDINPUT
@@ -624,11 +626,13 @@ psInitialize(void)
 	RsGlobal.ps = &PsGlobal;
 	
 	PsGlobal.fullScreen = FALSE;
-	
+
+#ifndef NO_DINPUT
 	PsGlobal.dinterface = nil;
 	PsGlobal.mouse	   = nil;
 	PsGlobal.joy1	= nil;
 	PsGlobal.joy2	= nil;
+#endif
 
 	CFileMgr::Initialise();
 
@@ -1044,6 +1048,61 @@ MainWndProc(HWND window, UINT message, WPARAM wParam, LPARAM lParam)
 
 			return 0L;
 		}
+
+#if defined USE_RAWINPUT && defined NO_DINPUT
+		case WM_INPUT: {
+			UINT dwSize;
+
+			GetRawInputData((HRAWINPUT)lParam, RID_INPUT, NULL, &dwSize, sizeof(RAWINPUTHEADER));
+			LPBYTE lpb = new BYTE[dwSize];
+			if(lpb == NULL) { return 0; }
+
+			if(GetRawInputData((HRAWINPUT)lParam, RID_INPUT, lpb, &dwSize, sizeof(RAWINPUTHEADER)) != dwSize)
+				debug("GetRawInputData does not return correct size !\n");
+
+			RAWINPUT *raw = (RAWINPUT *)lpb;
+
+			if(raw->header.dwType == RIM_TYPEMOUSE) {
+
+				if((raw->data.mouse.usButtonFlags & RI_MOUSE_LEFT_BUTTON_DOWN)   == RI_MOUSE_LEFT_BUTTON_DOWN)   PSGLOBAL(mouseData).LMB = TRUE;
+				if((raw->data.mouse.usButtonFlags & RI_MOUSE_LEFT_BUTTON_UP)     == RI_MOUSE_LEFT_BUTTON_UP)     PSGLOBAL(mouseData).LMB = FALSE;
+				if((raw->data.mouse.usButtonFlags & RI_MOUSE_RIGHT_BUTTON_DOWN)  == RI_MOUSE_RIGHT_BUTTON_DOWN)  PSGLOBAL(mouseData).RMB = TRUE;
+				if((raw->data.mouse.usButtonFlags & RI_MOUSE_RIGHT_BUTTON_UP)    == RI_MOUSE_RIGHT_BUTTON_UP)    PSGLOBAL(mouseData).RMB = FALSE;
+				if((raw->data.mouse.usButtonFlags & RI_MOUSE_MIDDLE_BUTTON_DOWN) == RI_MOUSE_MIDDLE_BUTTON_DOWN) PSGLOBAL(mouseData).MMB = TRUE;
+				if((raw->data.mouse.usButtonFlags & RI_MOUSE_MIDDLE_BUTTON_UP)   == RI_MOUSE_MIDDLE_BUTTON_UP)   PSGLOBAL(mouseData).MMB = FALSE;
+
+				if((raw->data.mouse.usButtonFlags & RI_MOUSE_WHEEL) == RI_MOUSE_WHEEL)
+					if((raw->data.mouse.usButtonFlags & 0x0800) != 0x0800) { // not HWheel
+						PSGLOBAL(mouseData).wheel = raw->data.mouse.usButtonData;
+					}
+
+				if((raw->data.mouse.usFlags & MOUSE_MOVE_ABSOLUTE) != MOUSE_MOVE_ABSOLUTE) {
+					if(raw->data.mouse.lLastX != 0 || raw->data.mouse.lLastY != 0) {
+						PSGLOBAL(mouseData).x = raw->data.mouse.lLastX;
+						PSGLOBAL(mouseData).y = raw->data.mouse.lLastY;
+					}
+				} 
+#ifdef RAWINPUT_ABSOLUTE
+				else 
+				{
+					short tmp_x = PSGLOBAL(mouseData).prev_x - raw->data.mouse.lLastX;
+					short tmp_y = PSGLOBAL(mouseData).prev_y - raw->data.mouse.lLastY;
+					if(tmp_x != 0 || tmp_y != 0) {
+						if(tmp_x < 50 && tmp_y < 50 && tmp_x > -50 && tmp_y > -50) {
+							PSGLOBAL(mouseData).x = tmp_x;
+							PSGLOBAL(mouseData).y = tmp_y;
+						}
+					}
+					PSGLOBAL(mouseData).prev_x = raw->data.mouse.lLastX;
+					PSGLOBAL(mouseData).prev_y = raw->data.mouse.lLastY;
+				}
+#endif
+			}
+
+		delete[] lpb;
+			return 0;
+		}
+#endif
 
 		case WM_LBUTTONDOWN:
 		{
@@ -2645,18 +2704,47 @@ WinMain(HINSTANCE instance,
 
 HRESULT _InputInitialise()
 {
+#ifndef NO_DINPUT
 	HRESULT hr;
 
 	// Create a DInput object
 	if( FAILED( hr = DirectInput8Create( GetModuleHandle(nil), DIRECTINPUT_VERSION, 
 										IID_IDirectInput8, (VOID**)&PSGLOBAL(dinterface), nil ) ) )
 		return hr;
-		
+
+#elif defined USE_RAWINPUT
+	PSGLOBAL(mouseData).MMB = FALSE;
+	PSGLOBAL(mouseData).RMB = FALSE;
+	PSGLOBAL(mouseData).LMB = FALSE;
+	PSGLOBAL(mouseData).x = 0;
+	PSGLOBAL(mouseData).y = 0;
+	PSGLOBAL(mouseData).wheel = 0;
+
+#ifdef RAWINPUT_ABSOLUTE
+	PSGLOBAL(mouseData).prev_x = 0;
+	PSGLOBAL(mouseData).prev_y = 0;
+	PSGLOBAL(mouseData).prev_valid = FALSE;
+#endif
+
+	RAWINPUTDEVICE Rid[1];
+
+	Rid[0].usUsagePage = 0x01; // HID_USAGE_PAGE_GENERIC
+	Rid[0].usUsage = 0x02;     // HID_USAGE_GENERIC_MOUSE
+	Rid[0].dwFlags = 0;
+	Rid[0].hwndTarget = 0;
+
+	if(RegisterRawInputDevices(Rid, 1, sizeof(Rid[0])) == FALSE) {
+		debug("can't register raw_input %x\n", GetLastError());
+		return S_FALSE;
+	}
+#endif
+
 	return S_OK;
 }
 
 HRESULT _InputInitialiseMouse(bool exclusive)
 {
+#ifndef NO_DINPUT
 	HRESULT hr;
 
 	// Obtain an interface to the system mouse device.
@@ -2678,10 +2766,14 @@ HRESULT _InputInitialiseMouse(bool exclusive)
 	
 	// Acquire the newly created device
 	PSGLOBAL(mouse)->Acquire();
-	
+#elif defined USE_RAWINPUT
+	PSGLOBAL(mouseInitialized) = TRUE;
+#endif
+
 	return S_OK;
 }
 
+#ifndef NO_DINPUT
 RwV2d leftStickPos;
 RwV2d rightStickPos;
 
@@ -2799,15 +2891,19 @@ HRESULT CapturePad(RwInt32 padID)
 	
 	return S_OK;
 }
+#endif
 
 void _InputInitialiseJoys()
 {
+#ifndef NO_DINPUT
 	DIPROPDWORD prop;
 	DIDEVCAPS devCaps;
+#endif
 
 	for ( int32 i = 0; i < _TODOCONST(2); i++ )
 		AllValidWinJoys.ClearJoyInfo(i);
-	
+
+#ifndef NO_DINPUT
 	_InputAddJoys();
 	
 	if ( PSGLOBAL(joy1) != nil )
@@ -2835,8 +2931,10 @@ void _InputInitialiseJoys()
 		AllValidWinJoys.m_aJoys[1].m_nProductID = HIWORD(prop.dwData);
 		AllValidWinJoys.m_aJoys[1].m_bInitialised = true;
 	}
+#endif
 }
 
+#ifndef NO_DINPUT
 void _InputAddJoyStick(LPDIRECTINPUTDEVICE8 lpDevice, INT num)
 {
 	DIDEVICEOBJECTINSTANCE objInst;
@@ -2955,19 +3053,24 @@ HRESULT _InputGetMouseState(DIMOUSESTATE2 *state)
 	
 	return S_OK;
 }
+#endif
 
 void _InputShutdown()
 {
+#ifndef NO_DINPUT
 	SAFE_RELEASE(PSGLOBAL(dinterface));
+#endif
 }
 
 void _InputShutdownMouse()
 {
+#ifndef NO_DINPUT
 	if (PSGLOBAL(mouse) == nil)
 		return;
 
 	PSGLOBAL(mouse)->Unacquire();
 	SAFE_RELEASE(PSGLOBAL(mouse));
+#endif
 }
 
 bool _InputMouseNeedsExclusive(void)
@@ -2983,6 +3086,7 @@ bool _InputMouseNeedsExclusive(void)
 	return vm.flags & rwVIDEOMODEEXCLUSIVE;
 }
 
+#ifndef NO_DINPUT
 BOOL CALLBACK _InputEnumDevicesCallback( const DIDEVICEINSTANCE* pdidInstance, VOID* pContext )
 {
 	HRESULT hr;
@@ -3034,6 +3138,7 @@ BOOL CALLBACK _InputEnumDevicesCallback( const DIDEVICEINSTANCE* pdidInstance, V
 	
 	return DIENUM_CONTINUE;
 }
+#endif
 
 BOOL _InputTranslateKey(RsKeyCodes *rs, UINT flag, UINT key)
 {

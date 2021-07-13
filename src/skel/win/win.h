@@ -19,10 +19,27 @@ typedef struct
 	
 	DWORD field_14;
 
+#ifndef NO_DINPUT
 	LPDIRECTINPUT8		 dinterface;
 	LPDIRECTINPUTDEVICE8 mouse;
 	LPDIRECTINPUTDEVICE8 joy1;
 	LPDIRECTINPUTDEVICE8 joy2;
+#elif defined USE_RAWINPUT
+	bool mouseInitialized;
+	struct {
+		bool LMB;
+		bool RMB;
+		bool MMB;
+		long x;
+		long y;
+		short wheel;
+#ifdef RAWINPUT_ABSOLUTE
+		bool prev_valid;
+		long prev_x;
+		long prev_y;
+#endif
+	} mouseData;
+#endif
 }
 psGlobalType;
 
@@ -70,12 +87,16 @@ extern "C"
 
 #ifdef __DINPUT_INCLUDED__
 HRESULT _InputInitialise();
+#ifndef NO_DINPUT
 HRESULT CapturePad(RwInt32 padID);
 void _InputAddJoyStick(LPDIRECTINPUTDEVICE8 lpDevice, INT num);
 HRESULT _InputAddJoys();
 HRESULT _InputGetMouseState(DIMOUSESTATE2 *state);
+#endif
 void _InputShutdown();
+#ifndef NO_DINPUT
 BOOL CALLBACK _InputEnumDevicesCallback( const DIDEVICEINSTANCE* pdidInstance, VOID* pContext );
+#endif
 BOOL _InputTranslateKey(RsKeyCodes *rs, UINT flag, UINT key);
 BOOL _InputTranslateShiftKey(RsKeyCodes *rs, UINT key, BOOLEAN bDown);
 BOOL _InputIsExtended(INT flag);

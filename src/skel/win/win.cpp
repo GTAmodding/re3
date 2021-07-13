@@ -1566,12 +1566,17 @@ psSelectDevice()
 #else
 	if ( !useDefault )
 	{
+		HDC hdc = GetDC(NULL);
+		int32 client_width = GetDeviceCaps(hdc, DESKTOPHORZRES);
+		int32 client_height = GetDeviceCaps(hdc, DESKTOPVERTRES);
+		ReleaseDC(NULL, hdc);
+
 		if(FrontEndMenuManager.m_nPrefsWidth == 0 ||
 			FrontEndMenuManager.m_nPrefsHeight == 0 ||
 			FrontEndMenuManager.m_nPrefsDepth == 0){
 			// Defaults if nothing specified
-			FrontEndMenuManager.m_nPrefsWidth = GetSystemMetrics(SM_CXSCREEN);
-			FrontEndMenuManager.m_nPrefsHeight = GetSystemMetrics(SM_CYSCREEN);
+			FrontEndMenuManager.m_nPrefsWidth = client_width;
+			FrontEndMenuManager.m_nPrefsHeight = client_height;
 			FrontEndMenuManager.m_nPrefsDepth = 32;
 			FrontEndMenuManager.m_nPrefsWindowed = 0;
 		}
@@ -1581,6 +1586,10 @@ psSelectDevice()
 		RwInt32 bestWidth = -1;
 		RwInt32 bestHeight = -1;
 		RwInt32 bestDepth = -1;
+		RwInt32 biggerFsMode = -1;
+		RwInt32 biggerWidth = -1;
+		RwInt32 biggerHeight = -1;
+		RwInt32 biggerDepth = -1;
 		for (GcurSelVM = 0; GcurSelVM < RwEngineGetNumVideoModes(); GcurSelVM++) {
 			RwEngineGetVideoModeInfo(&vm, GcurSelVM);
 
@@ -1588,20 +1597,36 @@ psSelectDevice()
 				bestWndMode = GcurSelVM;
 			} else {
 				// try the largest one that isn't larger than what we wanted
-				if (vm.width >= bestWidth && vm.width <= FrontEndMenuManager.m_nPrefsWidth &&
-					vm.height >= bestHeight && vm.height <= FrontEndMenuManager.m_nPrefsHeight &&
-					vm.depth >= bestDepth && vm.depth <= FrontEndMenuManager.m_nPrefsDepth){
-					bestWidth = vm.width;
-					bestHeight = vm.height;
-					bestDepth = vm.depth;
-					bestFsMode = GcurSelVM;
+				if (vm.width >= bestWidth &&
+					vm.height >= bestHeight &&
+					vm.depth >= bestDepth) {
+					if(vm.width <= FrontEndMenuManager.m_nPrefsWidth &&
+						vm.height <= FrontEndMenuManager.m_nPrefsHeight &&
+						vm.depth <= FrontEndMenuManager.m_nPrefsDepth) {
+						bestWidth = vm.width;
+						bestHeight = vm.height;
+						bestDepth = vm.depth;
+						bestFsMode = GcurSelVM;
+					}
+					if(vm.width <= client_width && vm.height <= client_height) {
+						biggerWidth = vm.width;
+						biggerHeight = vm.height;
+						biggerDepth = vm.depth;
+						biggerFsMode = GcurSelVM;
+					}
 				}
 			}
 		}
 
+		//if best fs mode for prefered resolution not found try to select bigger for this screen
 		if(bestFsMode < 0){
-			MessageBox(nil, "Cannot find desired video mode", "GTA: Vice City", MB_OK);
-			return FALSE;
+			if(biggerFsMode < 0) {
+				MessageBox(nil, "Cannot find desired video mode", "GTA: Vice City", MB_OK);
+				return FALSE;
+			} else {
+				debug("FS VideoMode for prefered resolution not found!\n");
+				bestFsMode = biggerFsMode;
+			}
 		}
 		GcurSelVM = bestFsMode;
 
@@ -1615,8 +1640,20 @@ psSelectDevice()
 	RwEngineGetVideoModeInfo(&vm, GcurSelVM);
 
 #ifdef IMPROVED_VIDEOMODE
-	if (FrontEndMenuManager.m_nPrefsWindowed)
+	if(FrontEndMenuManager.m_nPrefsWindowed) 
+	{ 
 		GcurSelVM = bestWndMode;
+		//allow to choose any resolution for windowed mode
+		if(FrontEndMenuManager.m_nPrefsWidth > GetSystemMetrics(SM_CXSCREEN) || 
+			FrontEndMenuManager.m_nPrefsHeight > GetSystemMetrics(SM_CYSCREEN)) {
+			debug("prefered resolution is too big, set to maximum window size!");
+			vm.width = GetSystemMetrics(SM_CXSCREEN);
+			vm.height = GetSystemMetrics(SM_CYSCREEN);
+		} else {
+			vm.width = FrontEndMenuManager.m_nPrefsWidth;
+			vm.height = FrontEndMenuManager.m_nPrefsHeight;
+		}
+	}
 
 	// Now GcurSelVM is 0 but vm has sizes(and fullscreen flag) of the video mode we want, that's why we changed the rwVIDEOMODEEXCLUSIVE conditions below
 	FrontEndMenuManager.m_nPrefsWidth = vm.width;

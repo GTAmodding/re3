@@ -992,11 +992,20 @@ cSampleManager::Initialise(void)
 				
 				if ( GetDriveType(m_szCDRomRootPath) == DRIVE_CDROM )
 				{
+					FILE *f;
+#ifdef PS2_AUDIO_PATHS
 					strcpy(filepath, m_szCDRomRootPath);
-					strcat(filepath, StreamedNameTable[0]);
+					strcat(filepath, PS2StreamedNameTable[0]);
+					f = fopen(filepath, "rb");
+
+					if ( !f )
+#endif
+					{
+						strcpy(filepath, m_szCDRomRootPath);
+						strcat(filepath, StreamedNameTable[0]);
 					
-					FILE *f = fopen(filepath, "rb");
-					
+						f = fopen(filepath, "rb");
+					}
 					if ( f )
 					{
 						fclose(f);
@@ -1005,11 +1014,20 @@ cSampleManager::Initialise(void)
 
 						for ( int32 i = 0; i < TOTAL_STREAMED_SOUNDS; i++ )
 						{
+#ifdef PS2_AUDIO_PATHS
 							strcpy(filepath, m_szCDRomRootPath);
-							strcat(filepath, StreamedNameTable[i]);
-							
+							strcat(filepath, PS2StreamedNameTable[i]);
+
 							mp3Stream[0] = AIL_open_stream(DIG, filepath, 0);
-							
+							if ( !mp3Stream[0] )
+#endif
+							{
+								strcpy(filepath, m_szCDRomRootPath);
+								strcat(filepath, StreamedNameTable[i]);
+
+								mp3Stream[0] = AIL_open_stream(DIG, filepath, 0);
+							}
+
 							if ( mp3Stream[0] )
 							{
 								AIL_stream_ms_position(mp3Stream[0], &tatalms, NULL);
@@ -1078,7 +1096,14 @@ cSampleManager::Initialise(void)
 		strcpy(_aHDDPath, m_szCDRomRootPath);
 		rootpath[0] = '\0';
 		
-		FILE *f = fopen(StreamedNameTable[0], "rb");
+		FILE *f;
+
+#ifdef PS2_AUDIO_PATHS
+		f = fopen(PS2StreamedNameTable[0], "rb");
+		if (!f)
+#endif
+
+			f = fopen(StreamedNameTable[0], "rb");
 		
 		if ( f )
 		{
@@ -1086,11 +1111,20 @@ cSampleManager::Initialise(void)
 			
 			for ( int32 i = 0; i < TOTAL_STREAMED_SOUNDS; i++ )
 			{
+#ifdef PS2_AUDIO_PATHS
 				strcpy(filepath, rootpath);
-				strcat(filepath, StreamedNameTable[i]);
-				
+				strcat(filepath, PS2StreamedNameTable[i]);
+
 				mp3Stream[0] = AIL_open_stream(DIG, filepath, 0);
-				
+				if ( !mp3Stream[0] )
+#endif
+				{
+					strcpy(filepath, rootpath);
+					strcat(filepath, StreamedNameTable[i]);
+
+					mp3Stream[0] = AIL_open_stream(DIG, filepath, 0);
+				}
+
 				if ( mp3Stream[0] )
 				{
 					AIL_stream_ms_position(mp3Stream[0], &tatalms, NULL);
@@ -1299,9 +1333,11 @@ cSampleManager::CheckForAnAudioFileOnCD(void)
 {
 #if GTA_VERSION < GTA3_PC_STEAM && !defined(NO_CDCHECK)
 	char filepath[MAX_PATH];
+	FILE *f;
 	
+#ifdef PS2_AUDIO_PATHS
 #if GTA_VERSION >= GTA3_PC_11
-	if (_bUseHDDAudio)
+	if(_bUseHDDAudio)
 		strcpy(filepath, _aHDDPath);
 	else
 		strcpy(filepath, m_szCDRomRootPath);
@@ -1309,10 +1345,25 @@ cSampleManager::CheckForAnAudioFileOnCD(void)
 	strcpy(filepath, m_szCDRomRootPath);
 #endif // #if GTA_VERSION >= GTA3_PC_11
 
-	strcat(filepath, StreamedNameTable[AudioManager.GetRandomNumber(1) % TOTAL_STREAMED_SOUNDS]);
+	strcat(filepath, PS2StreamedNameTable[AudioManager.GetRandomNumber(1) % TOTAL_STREAMED_SOUNDS]);
+
+	f = fopen(filepath, "rb");
+	if ( !f )
+#endif // PS2_AUDIO_PATHS
+	{
+#if GTA_VERSION >= GTA3_PC_11
+		if (_bUseHDDAudio)
+			strcpy(filepath, _aHDDPath);
+		else
+			strcpy(filepath, m_szCDRomRootPath);
+#else
+		strcpy(filepath, m_szCDRomRootPath);
+#endif // #if GTA_VERSION >= GTA3_PC_11
+
+		strcat(filepath, StreamedNameTable[AudioManager.GetRandomNumber(1) % TOTAL_STREAMED_SOUNDS]);
 	
-	FILE *f = fopen(filepath, "rb");
-	
+		f = fopen(filepath, "rb");
+	}
 	if ( f )
 	{
 		fclose(f);
@@ -2007,11 +2058,19 @@ cSampleManager::PreloadStreamedFile(uint8 nFile, uint8 nStream)
 			}
 			
 			char filepath[MAX_PATH];
-			
+#ifdef PS2_AUDIO_PATHS
 			strcpy(filepath, m_szCDRomRootPath);
-			strcat(filepath, StreamedNameTable[nFile]);
-			
+			strcat(filepath, PS2StreamedNameTable[nFile]);
+
 			mp3Stream[nStream] = AIL_open_stream(DIG, filepath, 0);
+			if ( !mp3Stream[nStream] )
+#endif
+			{
+				strcpy(filepath, m_szCDRomRootPath);
+				strcat(filepath, StreamedNameTable[nFile]);
+
+				mp3Stream[nStream] = AIL_open_stream(DIG, filepath, 0);
+			}
 	
 			if ( mp3Stream[nStream] )
 			{
@@ -2073,10 +2132,19 @@ cSampleManager::StartStreamedFile(uint8 nFile, uint32 nPos, uint8 nStream)
 				// Try to continue from previous song, if already started
 				if(!_GetMP3PosFromStreamPos(&position, &e) && !e) {
 					nFile = 0;
+#ifdef PS2_AUDIO_PATHS
 					strcpy(filename, m_szCDRomRootPath);
-					strcat(filename, StreamedNameTable[nFile]);
-					
+					strcat(filename, PS2StreamedNameTable[nFile]);
+
 					mp3Stream[nStream] = AIL_open_stream(DIG, filename, 0);
+					if ( !mp3Stream[nStream] )
+#endif
+					{
+						strcpy(filename, m_szCDRomRootPath);
+						strcat(filename, StreamedNameTable[nFile]);
+					
+						mp3Stream[nStream] = AIL_open_stream(DIG, filename, 0);
+					}
 					if ( mp3Stream[nStream] )
 					{
 						AIL_set_stream_loop_count(mp3Stream[nStream], 1);
@@ -2120,10 +2188,19 @@ cSampleManager::StartStreamedFile(uint8 nFile, uint32 nPos, uint8 nStream)
 					{
 						nFile = 0;
 						_bIsMp3Active = 0;
+#ifdef PS2_AUDIO_PATHS
 						strcpy(filename, m_szCDRomRootPath);
-						strcat(filename, StreamedNameTable[nFile]);
-						
+						strcat(filename, PS2StreamedNameTable[nFile]);
+
 						mp3Stream[nStream] = AIL_open_stream(DIG, filename, 0);
+						if ( !mp3Stream[nStream] )
+#endif
+						{
+							strcpy(filename, m_szCDRomRootPath);
+							strcat(filename, StreamedNameTable[nFile]);
+						
+							mp3Stream[nStream] = AIL_open_stream(DIG, filename, 0);
+						}
 						if ( mp3Stream[nStream] )
 						{
 							AIL_set_stream_loop_count(mp3Stream[nStream], 1);
@@ -2161,10 +2238,19 @@ cSampleManager::StartStreamedFile(uint8 nFile, uint32 nPos, uint8 nStream)
 		position = 0;
 		nFile = 0;
 	}
+#ifdef PS2_AUDIO_PATHS
 	strcpy(filename, m_szCDRomRootPath);
-	strcat(filename, StreamedNameTable[nFile]);
-	
+	strcat(filename, PS2StreamedNameTable[nFile]);
+
 	mp3Stream[nStream] = AIL_open_stream(DIG, filename, 0);
+	if ( !mp3Stream[nStream] )
+#endif
+	{
+		strcpy(filename, m_szCDRomRootPath);
+		strcat(filename, StreamedNameTable[nFile]);
+	
+		mp3Stream[nStream] = AIL_open_stream(DIG, filename, 0);
+	}
 	if ( mp3Stream[nStream] )
 	{
 		AIL_set_stream_loop_count(mp3Stream[nStream], 1);

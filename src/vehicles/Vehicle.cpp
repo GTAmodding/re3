@@ -821,7 +821,12 @@ CVehicle::ProcessWheel(CVector &wheelFwd, CVector &wheelRight, CVector &wheelCon
 
 		if(wheelStatus == WHEEL_STATUS_BURST){
 			float fwdspeed = Min(contactSpeedFwd, fBurstSpeedMax);
+#ifdef FIX_BUGS
+			// Keep the effect running at the same frequency even when the game is at high FPS
+			right += fwdspeed * CGeneral::GetRandomNumberInRange(-fBurstTyreMod, fBurstTyreMod) * CTimer::GetLogicalFramesPassed();
+#else
 			right += fwdspeed * CGeneral::GetRandomNumberInRange(-fBurstTyreMod, fBurstTyreMod);
+#endif
 		}
 	}
 
@@ -981,8 +986,13 @@ CVehicle::ProcessBikeWheel(CVector &wheelFwd, CVector &wheelRight, CVector &whee
 #endif
 
 		if(wheelStatus == WHEEL_STATUS_BURST){
-			float fwdspeed = Min(contactSpeedFwd, fBurstBikeSpeedMax);
+			float fwdspeed = Min(contactSpeedFwd, fBurstBikeSpeedMax);		
+#ifdef FIX_BUGS
+			// Keep the effect running at the same frequency even when the game is at high FPS
+			right += fwdspeed * CGeneral::GetRandomNumberInRange(-fBurstBikeTyreMod, fBurstBikeTyreMod) * CTimer::GetLogicalFramesPassed();
+#else
 			right += fwdspeed * CGeneral::GetRandomNumberInRange(-fBurstBikeTyreMod, fBurstBikeTyreMod);
+#endif
 		}
 	}
 

@@ -1834,9 +1834,16 @@ CPhysical::ProcessCollisionSectorList(CPtrList *lists)
 					   A->GetStatus() == STATUS_PLAYER && A->IsVehicle() &&
 					   Abs(A->m_vecMoveSpeed.x) > 0.2f &&
 					   Abs(A->m_vecMoveSpeed.y) > 0.2f){
+#ifdef FIX_BUGS
+						// Fix vehicles having lower turning circles at high FPS
+						A->m_vecMoveFriction.x += CTimer::GetTimeStepFix() * moveSpeed.x * -0.3f / numCollisions;
+						A->m_vecMoveFriction.y += CTimer::GetTimeStepFix() * moveSpeed.y * -0.3f / numCollisions;
+						A->m_vecTurnFriction += CTimer::GetTimeStepFix() * turnSpeed * -0.3f / numCollisions;
+#else
 						A->m_vecMoveFriction.x += moveSpeed.x * -0.3f / numCollisions;
 						A->m_vecMoveFriction.y += moveSpeed.y * -0.3f / numCollisions;
 						A->m_vecTurnFriction += turnSpeed * -0.3f / numCollisions;
+#endif
 					}
 
 					if(B->IsObject() && Bobj->m_nCollisionDamageEffect && maxImpulseA > 20.0f)

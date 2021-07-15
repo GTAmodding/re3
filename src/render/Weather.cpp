@@ -323,6 +323,11 @@ void CWeather::Update(void)
 
 void CWeather::AddHeatHaze()
 {
+#ifdef FIX_BUGS
+	// Fix particle spam at high FPS
+	if (!CTimer::GetLogicalFramesPassed())
+		return;
+#endif
 	if(TheCamera.Cams[TheCamera.ActiveCam].Mode == CCam::MODE_TOPDOWN ||
 	   TheCamera.Cams[TheCamera.ActiveCam].Mode == CCam::MODE_TOP_DOWN_PED)
 		return;
@@ -338,6 +343,11 @@ void CWeather::AddHeatHaze()
 
 void CWeather::AddBeastie()
 {
+#ifdef FIX_BUGS
+	// Fix particle spam at high FPS.  Beasties look like tree leaves.
+	if (!CTimer::GetLogicalFramesPassed())
+		return;
+#endif
 	if(FindPlayerVehicle() || CTimer::GetFrameCounter()%10 || (CGeneral::GetRandomNumber()&5) == 0)
 		return;
 	CVector pos = TheCamera.GetPosition();

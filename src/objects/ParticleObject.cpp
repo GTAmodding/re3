@@ -429,6 +429,12 @@ CParticleObject::RemoveObject(void)
 void
 CParticleObject::UpdateAll(void)
 {
+#ifdef FIX_BUGS
+	// Fix particle generation spam at high FPS
+	if (CTimer::GetLogicalFramesPassed() == 0)
+		return;
+#endif
+
 	{
 		CParticleObject *pobj = pCloseListHead;
 		CParticleObject *nextpobj;

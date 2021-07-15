@@ -1259,8 +1259,11 @@ void CParticle::Update()
 			}
 			
 			vecPos += vecMoveStep;
-			
+#ifdef FIX_BUGS
+			if ( psystem->m_Type == PARTICLE_FIREBALL && CTimer::GetLogicalFramesPassed()) // Fix particle spam at high FPS
+#else
 			if ( psystem->m_Type == PARTICLE_FIREBALL )
+#endif
 			{
 				  AddParticle(PARTICLE_HEATHAZE, particle->m_vecPosition, CVector(0.0f, 0.0f, 0.0f),
 					nil, particle->m_fSize * 5.0f);
@@ -1326,11 +1329,18 @@ void CParticle::Update()
 					
 					fDistToCam = (TheCamera.GetPosition() - vecPos).Magnitude();
 				}
-
+#ifdef FIX_BUGS
+				if ( numWaterDropOnScreen < nMaxDrops && numWaterDropOnScreen < 63
+					&& fDistToCam < 10.0f
+					&& clearWaterDrop == false
+					&& !CGame::IsInInterior() 
+					&& CTimer::GetLogicalFramesPassed()) // Fix waterdrop spam at high FPS
+#else
 				if ( numWaterDropOnScreen < nMaxDrops && numWaterDropOnScreen < 63
 					&& fDistToCam < 10.0f
 					&& clearWaterDrop == false
 					&& !CGame::IsInInterior() )
+#endif
 				{
 					CVector vecWaterdropTarget
 					(
@@ -1411,7 +1421,11 @@ void CParticle::Update()
 				}
 			}
 			
+#ifdef FIX_BUGS
+			if ( !(psystem->Flags & SCREEN_TRAIL) && CTimer::GetLogicalFramesPassed()) // Fix particle over-expansion at high FPS
+#else
 			if ( !(psystem->Flags & SCREEN_TRAIL) )
+#endif
 			{
 				float size;
 
@@ -1701,6 +1715,12 @@ void CParticle::Update()
 				}
 			}
 
+#ifdef FIX_BUGS
+			// Keep particles animating, rotating, fading etc at the right speed
+			// at high or low FPS.
+			for (uint32 i=0; i<CTimer::GetLogicalFramesPassed(); i++)
+#endif
+			{ // -- start FPS fix ---
 			if ( particle->m_nFadeToBlackTimer != 0 )
 			{
 				particle->m_nColorIntensity = Clamp(particle->m_nColorIntensity - particle->m_nFadeToBlackTimer,
@@ -1764,6 +1784,7 @@ void CParticle::Update()
 #else
 				particle->m_nRotation += particle->m_nRotationStep;
 #endif
+			} // -- end FPS fix --
 			
 			if ( particle->m_fCurrentZRadius != 0.0f )
 			{
@@ -1773,6 +1794,16 @@ void CParticle::Update()
 				
 				float fY = (Sin(nSinCosIndex) + Cos(nSinCosIndex)) * particle->m_fCurrentZRadius;
 
+#ifdef FIX_BUGS
+				// Prevent super-fast movement at high FPS
+				// We can use GetTimeSetpFix() here instead of GetLogicalFramesPassed()
+				// so the visual result looks "smooth" on player's screens.  We can't
+				// do this with most of the above Timers because the effects are stored
+				// as uint16's instead of floats, which means tiny changes each frame
+				// are often rounded down to zero change each frame.
+				fX *= CTimer::GetTimeStepFix();
+				fY *= CTimer::GetTimeStepFix();
+#endif
 				vecPos -= particle->m_vecParticleMovementOffset;
 
 				vecPos += CVector(fX, fY, 0.0f);

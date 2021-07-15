@@ -263,9 +263,17 @@ CBoat::ProcessControl(void)
 	}
 
 	// Damage particles
+#ifdef FIX_BUGS
+	if(m_fHealth <= 460.0f && GetStatus() != STATUS_WRECKED &&
+	   Abs(GetPosition().x - TheCamera.GetPosition().x) < 200.0f &&
+	   Abs(GetPosition().y - TheCamera.GetPosition().y) < 200.0f &&
+	   CTimer::GetLogicalFramesPassed() ) // Fix high-FPS particle spam
+	   {
+#else
 	if(m_fHealth <= 460.0f && GetStatus() != STATUS_WRECKED &&
 	   Abs(GetPosition().x - TheCamera.GetPosition().x) < 200.0f &&
 	   Abs(GetPosition().y - TheCamera.GetPosition().y) < 200.0f){
+#endif
 		float speedSq = m_vecMoveSpeed.MagnitudeSqr();
 		CVector smokeDir = 0.8f*m_vecMoveSpeed;
 		CVector smokePos;
@@ -378,7 +386,11 @@ CBoat::ProcessControl(void)
 		// Handle boat moving forward
 		float fwdSpeed = 1.0f;
 		if(Abs(m_fGasPedal) > 0.05f || (fwdSpeed = m_vecMoveSpeed.Magnitude2D()) > 0.01f){
+#ifdef FIX_BUGS
+			if(bBoatInWater && fwdSpeed > 0.05f && CTimer::GetLogicalFramesPassed()) // Fix super-short wake trail at high FPS
+#else
 			if(bBoatInWater && fwdSpeed > 0.05f)
+#endif
 				AddWakePoint(GetPosition());
 
 			float steerFactor = 1.0f;
@@ -433,7 +445,11 @@ CBoat::ProcessControl(void)
 
 					// Spray some particles
 					CVector jetDir = -0.04f * force;
+#ifdef FIX_BUGS
+					if(m_fGasPedal > 0.0f && CTimer::GetLogicalFramesPassed()){  // Fix high-FPS particle spam
+#else
 					if(m_fGasPedal > 0.0f){
+#endif
 						if(GetStatus() == STATUS_PLAYER){
 							CVector sternPos = GetColModel()->boundingBox.min;
 							sternPos.x = 0.0f;
@@ -546,8 +562,15 @@ CBoat::ProcessControl(void)
 
 		// Splashes
 		float speed = m_vecMoveSpeed.Magnitude();
+#ifdef FIX_BUGS
 		if(speed > 0.05f && GetUp().x > 0.0f && !TheCamera.GetLookingForwardFirstPerson() && IsVisible() &&
-		   (AutoPilot.m_nCarMission != MISSION_CRUISE || (CTimer::GetFrameCounter()&2) == 0)){
+		   (AutoPilot.m_nCarMission != MISSION_CRUISE || (CTimer::GetFrameCounter()&2) == 0) &&
+		   CTimer::GetLogicalFramesPassed() ) // Fix particle spam at high FPS
+#else
+		if(speed > 0.05f && GetUp().x > 0.0f && !TheCamera.GetLookingForwardFirstPerson() && IsVisible() &&
+		   (AutoPilot.m_nCarMission != MISSION_CRUISE || (CTimer::GetFrameCounter()&2) == 0))
+#endif
+		{
 			CVector splashPos, splashDir;
 			float splashSize, front, waterLevel;
 
@@ -682,8 +705,14 @@ CBoat::ProcessControl(void)
 		}
 
 		// Spray waterdrops on screen
+#ifdef FIX_BUGS
 		if(TheCamera.GetLookingForwardFirstPerson() && FindPlayerVehicle() && FindPlayerVehicle()->IsBoat() &&
-		   m_nDeltaVolumeUnderWater > 0 && numWaterDropOnScreen < 20){
+		   m_nDeltaVolumeUnderWater > 0 && numWaterDropOnScreen < 20 && CTimer::GetLogicalFramesPassed()) // Fix particle spam at high FPS
+#else
+		if(TheCamera.GetLookingForwardFirstPerson() && FindPlayerVehicle() && FindPlayerVehicle()->IsBoat() &&
+		   m_nDeltaVolumeUnderWater > 0 && numWaterDropOnScreen < 20)
+#endif
+		{
 			CVector dropPos;
 			CVector dropDir(CGeneral::GetRandomNumberInRange(-0.25f, 0.25f), CGeneral::GetRandomNumberInRange(1.0f, 0.75f), 0.0f);
 
@@ -714,7 +743,13 @@ CBoat::ProcessControl(void)
 				numWaterDropOnScreen++;
 		}
 
-		if(m_fPrevVolumeUnderWater == 0.0f && m_fVolumeUnderWater > 0.0f && GetModelIndex() == MI_SKIMMER){
+#ifdef FIX_BUGS
+		if(m_fPrevVolumeUnderWater == 0.0f && m_fVolumeUnderWater > 0.0f && GetModelIndex() == MI_SKIMMER &&
+		CTimer::GetLogicalFramesPassed()) // Fix particle spam at high FPS
+#else
+		if(m_fPrevVolumeUnderWater == 0.0f && m_fVolumeUnderWater > 0.0f && GetModelIndex() == MI_SKIMMER)
+#endif
+		{
 			CVector splashDir(0.0f, 0.0f, 0.25f*speed);
 			CVector splashPos = GetPosition();
 			float level;
@@ -773,6 +808,18 @@ CBoat::ProcessControlInputs(uint8 pad)
 	m_fBrake += (CPad::GetPad(pad)->GetBrake()/255.0f - m_fBrake)*0.1f;
 	m_fBrake = Clamp(m_fBrake, 0.0f, 1.0f);
 
+#ifdef FIX_BUGS
+	// Fix accelerator control and steering control ramp rates at high FPS
+	if(m_fBrake < 0.05f){
+		m_fBrake = 0.0f;
+		m_fAccelerate += (CPad::GetPad(pad)->GetAccelerate()/255.0f - m_fAccelerate)*0.1f*CTimer::GetTimeStepFix();
+		m_fAccelerate = Clamp(m_fAccelerate, 0.0f, 1.0f);
+	}else
+		m_fAccelerate = -m_fBrake*0.3f;
+
+	m_fSteeringLeftRight += (-CPad::GetPad(pad)->GetSteeringLeftRight()/128.0f - m_fSteeringLeftRight)*0.2f*CTimer::GetTimeStepFix();
+	m_fSteeringLeftRight = Clamp(m_fSteeringLeftRight, -1.0f, 1.0f);
+#else
 	if(m_fBrake < 0.05f){
 		m_fBrake = 0.0f;
 		m_fAccelerate += (CPad::GetPad(pad)->GetAccelerate()/255.0f - m_fAccelerate)*0.1f;
@@ -782,6 +829,7 @@ CBoat::ProcessControlInputs(uint8 pad)
 
 	m_fSteeringLeftRight += (-CPad::GetPad(pad)->GetSteeringLeftRight()/128.0f - m_fSteeringLeftRight)*0.2f;
 	m_fSteeringLeftRight = Clamp(m_fSteeringLeftRight, -1.0f, 1.0f);
+#endif
 
 	float steeringSq = m_fSteeringLeftRight < 0.0f ? -SQR(m_fSteeringLeftRight) : SQR(m_fSteeringLeftRight);
 	m_fSteerAngle = pHandling->fSteeringLock * DEGTORAD(steeringSq);
@@ -793,6 +841,79 @@ float fSeaPlaneWaterResistance = 30.0f;
 void
 CBoat::ApplyWaterResistance(void)
 {
+#ifdef FIX_BUGS
+	// TODO: confirm if the explanation below makes sense
+	float depthResistance = 0.001f * pHandling->fSuspensionForceLevel * SQR(m_fVolumeUnderWater) * m_fMass;
+	if(GetModelIndex() == MI_SKIMMER)
+		depthResistance *= fSeaPlaneWaterResistance;
+	float fwdSpeed = DotProduct(GetMoveSpeed(), GetForward());
+
+	// Water resistances goes up with the square of boat speed (in real life it goes up by the
+	// cube? close enough!).  An extra 0.05f fudge factor was probably put in to make sure the
+	// boat still has resistance at low speeds (ie auto-brakes to standstill).
+	float waterResistance = (SQR(fwdSpeed) + 0.05f) * Abs(depthResistance);  // Abs() used defensively, negative numbers stuff things up later
+	// waterResistance will now be a small number like 0.002 or 0.015
+
+	// An odd use of Abs() was in the original binary.  It's possible that the developers did not
+	// put this in intentionally, instead the compiler may have silently added it to avoid
+	// Pow() having to deal	with negative numbers to a fractional power (undefined) later.
+	// Regardless it was done badly, making assumptions like vecMoveRes never accidentally
+	// being negative, so the use of Abs() has changed a little bit in this FIX_BUGS.  In
+	// real gameplay these corner cases should rarely (never?) be encountered anyway.
+
+	// Our boat has different water resistances when travelling forwards (y axis) versus
+	// sideways (x axis).  Boats tend to find it hard to move sideways.
+	float rx = Abs(pBoatHandling->vecMoveRes.x/(waterResistance + 1.0f)); // Abs() used defensively, negative numbers stuff things up later
+	float ry = Abs(pBoatHandling->vecMoveRes.y/(waterResistance + 1.0f));
+	float rz = Abs(pBoatHandling->vecMoveRes.z/(waterResistance + 1.0f));
+	// These rx, ry, rz resistance numbers will each be something like 0.8 or 0.9 or so
+
+	// Fun fact: the above equations are _approximately_ the same as:
+	//
+	//         pBoatHandling->vecMoveRes.x * (1.0f - waterResistance)
+	//
+	// If you change the equations to this then boating feels about the same in-game.
+	// Which version makes more sense compared to physics in real life?  Probably neither :P
+	// This second version of the equation is a little more efficient however (no division).
+
+	// Now how do we apply these rx ry rz resistance numbers to the boat speed?
+	// It's not simple:
+	//
+	//  - We can't multiply them into the speed once per frame, because then players with
+	//    higher framerates will get a lot more friction when boating (lower top speed).
+	//
+	//  - We can't linearly modify each r number based off frametime, as higher FPS players
+	//    will still end up with more friction.  This is for the same reason why linearly
+	//    reducing your bank account's yearly interest into monthly amounts but then
+	//    compounding it monthly will yield you more money than just compounding it yearly.
+	//
+	//  - We could try compounding each r number based off how many fixed units of time have
+	//    passed (eg multiply itself by itself for every 1ms elapsed this frame).  This will
+	//    work fairly regardless of framerate.
+	//
+	// We don't actually have to limit ourselves to a fixed time unit (like 1ms chunks),
+	// instead we can raise the resistance to some power of time using Pow().
+	float rrx = Pow(rx, 0.5f*CTimer::GetTimeStep());  // Why 0.5f?  Taste?
+	float rry = Pow(ry, 0.5f*CTimer::GetTimeStep());
+	float rrz = Pow(rz, 0.5f*CTimer::GetTimeStep());
+
+	m_vecMoveSpeed = Multiply3x3(m_vecMoveSpeed, GetMatrix());	// convert velocities to boat-local space (y = boat forwards, x = sideways, z = up/down)
+	m_vecMoveSpeed.x *= rrx;
+	m_vecMoveSpeed.y *= rry;
+	m_vecMoveSpeed.z *= rrz;
+	float force = (rry - 1.0f) * m_vecMoveSpeed.y * m_fMass;
+	m_vecMoveSpeed = Multiply3x3(GetMatrix(), m_vecMoveSpeed);	// back to world space
+
+	// Is this for "flipping the boat over"?  Seems to have almost zero effect normally?
+	ApplyTurnForce(force*GetForward(), -GetUp());
+
+	// What the hell?  Why arbitrarily compound in one more factor of rrz?
+	// This is framerate dependent!  Bah!
+	if(m_vecMoveSpeed.z > 0.0f)
+		m_vecMoveSpeed.z *= rrz;
+	else
+		m_vecMoveSpeed.z *= (1.0f - rrz)*0.5f + rrz;
+#else
 	// TODO: figure out how this works
 	float resistance = 0.001f * pHandling->fSuspensionForceLevel * SQR(m_fVolumeUnderWater) * m_fMass;
 	if(GetModelIndex() == MI_SKIMMER)
@@ -817,6 +938,7 @@ CBoat::ApplyWaterResistance(void)
 		m_vecMoveSpeed.z *= fz;
 	else
 		m_vecMoveSpeed.z *= (1.0f - fz)*0.5f + fz;
+#endif
 }
 
 RwObject*

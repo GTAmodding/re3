@@ -81,7 +81,7 @@ enum tParticleType
 	PARTICLE_TEST,
 	PARTICLE_BIRD_FRONT,
 	PARTICLE_SHIP_SIDE,
-	PARTICLE_BEASTIE,
+	PARTICLE_BEASTIE,  // "Beasties" look like tree leaves circling up at canopy height, but are also used in other places (eg docks)
 	PARTICLE_RAINDROP_2D,
 	PARTICLE_HEATHAZE,
 	PARTICLE_HEATHAZE_IN_DIST,

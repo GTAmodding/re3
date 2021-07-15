@@ -264,7 +264,7 @@ project "re3"
 	files { addSrcFiles("src/modelinfo") }
 	files { addSrcFiles("src/objects") }
 	files { addSrcFiles("src/peds") }
-	files { addSrcFiles("src/render") }
+	files { addSrcFiles("src/renderer") }
 	files { addSrcFiles("src/rw") }
 	files { addSrcFiles("src/save") }
 	files { addSrcFiles("src/skel") }
@@ -293,7 +293,7 @@ project "re3"
 	includedirs { "src/modelinfo" }
 	includedirs { "src/objects" }
 	includedirs { "src/peds" }
-	includedirs { "src/render" }
+	includedirs { "src/renderer" }
 	includedirs { "src/rw" }
 	includedirs { "src/save/" }
 	includedirs { "src/skel/" }

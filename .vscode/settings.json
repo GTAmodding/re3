@@ -13,7 +13,7 @@
     "src/modelinfo",
     "src/objects",
     "src/peds",
-    "src/render",
+    "src/renderer",
     "src/rw",
     "src/save",
     "src/skel",

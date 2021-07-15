@@ -12,11 +12,13 @@ DWORD _dwOperatingSystemVersion;
 #include "resource.h"
 #else
 long _dwOperatingSystemVersion;
+#ifndef __SWITCH__
 #ifndef __APPLE__
 #include <sys/sysinfo.h>
 #else
 #include <mach/mach_host.h>
 #include <sys/sysctl.h>
+#endif
 #endif
 #include <errno.h>
 #include <locale.h>
@@ -51,7 +53,7 @@ long _dwOperatingSystemVersion;
 #include "MemoryMgr.h"
 
 // We found out that GLFW's keyboard input handling is still pretty delayed/not stable, so now we fetch input from X11 directly on Linux.
-#if !defined _WIN32 && !defined __APPLE__ && !defined __SWITCH__ // && !defined WAYLAND
+#if !defined _WIN32 && !defined __APPLE__ && !defined GTA_HANDHELD // && !defined WAYLAND
 #define GET_KEYBOARD_INPUT_FROM_X11
 #endif
 
@@ -331,6 +333,78 @@ psNativeTextureSupport(void)
 /*
  *****************************************************************************
  */
+
+#ifdef __SWITCH__
+
+static HidVibrationValue SwitchVibrationValues[2];
+static HidVibrationDeviceHandle SwitchVibrationDeviceHandles[2][2];
+static HidVibrationDeviceHandle SwitchVibrationDeviceGC;
+
+static PadState SwitchPad;
+
+static Result HidInitializationResult[2];
+static Result HidInitializationGCResult;
+
+static void _psInitializeVibration()
+{
+	HidInitializationResult[0] = hidInitializeVibrationDevices(SwitchVibrationDeviceHandles[0], 2, HidNpadIdType_Handheld, HidNpadStyleTag_NpadHandheld);
+	if(R_FAILED(HidInitializationResult[0])) {
+		printf("Failed to initialize VibrationDevice for Handheld Mode\n");
+	}
+	HidInitializationResult[1] = hidInitializeVibrationDevices(SwitchVibrationDeviceHandles[1], 2, HidNpadIdType_No1, HidNpadStyleSet_NpadFullCtrl);
+	if(R_FAILED(HidInitializationResult[1])) {
+		printf("Failed to initialize VibrationDevice for Detached Mode\n");
+	}
+	HidInitializationGCResult = hidInitializeVibrationDevices(&SwitchVibrationDeviceGC, 1, HidNpadIdType_No1, HidNpadStyleTag_NpadGc);
+	if(R_FAILED(HidInitializationResult[1])) {
+		printf("Failed to initialize VibrationDevice for GC Mode\n");
+	}
+
+	SwitchVibrationValues[0].freq_low  = 160.0f;
+	SwitchVibrationValues[0].freq_high = 320.0f;
+
+	padConfigureInput(1, HidNpadStyleSet_NpadFullCtrl);
+	padInitializeDefault(&SwitchPad);
+}
+
+static void _psHandleVibration()
+{
+	padUpdate(&SwitchPad);
+
+	uint8 target_device = padIsHandheld(&SwitchPad) ? 0 : 1;
+
+	if(R_SUCCEEDED(HidInitializationResult[target_device])) {
+		CPad* pad = CPad::GetPad(0);
+
+		// value conversion based on SDL2 switch port
+		SwitchVibrationValues[0].amp_high = SwitchVibrationValues[0].amp_low = pad->ShakeFreq == 0 ? 0.0f : 320.0f;
+		SwitchVibrationValues[0].freq_low = pad->ShakeFreq == 0.0 ? 160.0f : (float)pad->ShakeFreq * 1.26f;
+		SwitchVibrationValues[0].freq_high = pad->ShakeFreq == 0.0 ? 320.0f : (float)pad->ShakeFreq * 1.26f;
+
+		if (pad->ShakeDur < CTimer::GetTimeStepInMilliseconds())
+			pad->ShakeDur = 0;
+		else
+			pad->ShakeDur -= CTimer::GetTimeStepInMilliseconds();
+		if (pad->ShakeDur == 0) pad->ShakeFreq = 0;
+
+
+		if(target_device == 1 && R_SUCCEEDED(HidInitializationGCResult)) {
+			// gamecube rumble
+			hidSendVibrationGcErmCommand(SwitchVibrationDeviceGC, pad->ShakeFreq > 0 ? HidVibrationGcErmCommand_Start : HidVibrationGcErmCommand_Stop);
+		}
+
+		memcpy(&SwitchVibrationValues[1], &SwitchVibrationValues[0], sizeof(HidVibrationValue));
+		hidSendVibrationValues(SwitchVibrationDeviceHandles[target_device], SwitchVibrationValues, 2);
+	}
+}
+#else
+static void _psInitializeVibration() {}
+static void _psHandleVibration() {}
+#endif
+
+/*
+ *****************************************************************************
+ */
 RwBool
 psInitialize(void)
 {
@@ -407,6 +481,8 @@ psInitialize(void)
 	InitialiseLanguage();
 
 #endif
+
+	_psInitializeVibration();
 	
 	gGameState = GS_START_UP;
 	TRACE("gGameState = GS_START_UP");
@@ -480,6 +556,9 @@ psInitialize(void)
 	_dwMemAvailPhys = (uint64_t)(vm_stat.free_count * page_size);
 	debug("Physical memory size %llu\n", _dwMemAvailPhys);
 	debug("Available physical memory %llu\n", size);
+#elif defined (__SWITCH__)
+	svcGetInfo(&_dwMemAvailPhys, InfoType_UsedMemorySize, CUR_PROCESS_HANDLE, 0);
+	debug("Physical memory size %llu\n", _dwMemAvailPhys);
 #else
 #ifndef __APPLE__
  	struct sysinfo systemInfo;
@@ -982,13 +1061,15 @@ void psPostRWinit(void)
 	RwVideoMode vm;
 	RwEngineGetVideoModeInfo(&vm, GcurSelVM);
 
+	glfwSetFramebufferSizeCallback(PSGLOBAL(window), resizeCB);
+#ifndef IGNORE_MOUSE_KEYBOARD
 #ifndef GET_KEYBOARD_INPUT_FROM_X11
 	glfwSetKeyCallback(PSGLOBAL(window), keypressCB);
 #endif
-	glfwSetFramebufferSizeCallback(PSGLOBAL(window), resizeCB);
 	glfwSetScrollCallback(PSGLOBAL(window), scrollCB);
 	glfwSetCursorPosCallback(PSGLOBAL(window), cursorCB);
 	glfwSetCursorEnterCallback(PSGLOBAL(window), cursorEnterCB);
+#endif
 	glfwSetWindowIconifyCallback(PSGLOBAL(window), windowIconifyCB);
 	glfwSetWindowFocusCallback(PSGLOBAL(window), windowFocusCB);
 	glfwSetJoystickCallback(joysChangeCB);
@@ -1824,7 +1905,7 @@ main(int argc, char *argv[])
 	InitMemoryMgr();
 #endif
 
-#ifndef _WIN32
+#if !defined(_WIN32) && !defined(__SWITCH__)
 	struct sigaction act;
 	act.sa_sigaction = terminateHandler;
 	act.sa_flags = SA_SIGINFO;
@@ -2486,7 +2567,9 @@ void CapturePad(RwInt32 padID)
 		if ( Abs(rightStickPos.y) > 0.3f )
 			pad->PCTempJoyState.RightStickY = (int32)(rightStickPos.y * 128.0f);
 	}
-	
+
+	_psHandleVibration();
+
 	return;
 }
 

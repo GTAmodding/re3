@@ -1,14 +1,26 @@
-cmake_minimum_required(VERSION 3.8)
+cmake_minimum_required(VERSION 3.14)
 
 set(EXECUTABLE reVC)
 set(PROJECT REVC)
 
 project(${EXECUTABLE} C CXX)
+set(${PROJECT}_AUTHOR "${PROJECT} Team")
 list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake")
 
 include(GetGitRevisionDescription)
 get_git_head_revision(GIT_REFSPEC GIT_SHA1 "ALLOW_LOOKING_ABOVE_CMAKE_SOURCE_DIR")
 message(STATUS "Building ${CMAKE_PROJECT_NAME} GIT SHA1: ${GIT_SHA1}")
+
+
+if(NINTENDO_SWITCH)
+    list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake/nx")
+    include(NXFunctions)
+endif()
+
+if(NOT COMMAND reVC_platform_target)
+    function(reVC_platform_target)
+    endfunction()
+endif()
 
 if(WIN32)
     set(${PROJECT}_AUDIOS "OAL" "MSS")
@@ -66,6 +78,8 @@ if(${PROJECT}_INSTALL)
             set(os "-apple")
         elseif(UNIX)
             set(os "-linux")
+        elseif(NINTENDO_SWITCH)
+            set(os "-switch")
         else()
             set(compiler "-UNK")
             message(WARNING "Unknown os. Created cpack package will be wrong. (override using cpack -P)")

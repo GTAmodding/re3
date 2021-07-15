@@ -165,6 +165,11 @@ enum Config {
 
 #define GTA_VERSION	GTAVC_PC_11
 
+// Enable configuration for handheld console ports
+#if defined(__SWITCH__) || defined(PSP2)
+	#define GTA_HANDHELD
+#endif
+
 // TODO(MIAMI): someone ought to find and check out uses of these defines:
 //#define GTA3_STEAM_PATCH
 //#define GTAVC_JP_PATCH
@@ -176,7 +181,9 @@ enum Config {
 #	define VU_COLLISION
 #	define PS2_MENU
 #elif defined GTA_PC
-#	define PC_PLAYER_CONTROLS	// mouse player/cam mode
+#	ifndef GTA_HANDHELD
+#		define PC_PLAYER_CONTROLS	// mouse player/cam mode
+#	endif
 #	define GTA_REPLAY
 #	define GTA_SCENE_EDIT
 #	define PC_MENU
@@ -325,7 +332,7 @@ enum Config {
 #if !defined(RW_GL3) && defined(_WIN32)
 #define XINPUT
 #endif
-#if defined XINPUT || (defined RW_GL3 && !defined LIBRW_SDL2 && !defined __SWITCH__)
+#if defined XINPUT || (defined RW_GL3 && !defined LIBRW_SDL2 && !defined GTA_HANDHELD)
 #define DETECT_JOYSTICK_MENU // Then we'll expect user to enter Controller->Detect joysticks if his joystick isn't detected at the start.
 #endif
 #define DETECT_PAD_INPUT_SWITCH // Adds automatic switch of pad related stuff between controller and kb/m
@@ -347,7 +354,7 @@ enum Config {
 //#	define PS2_MENU_USEALLPAGEICONS
 #else
 #	define MAP_ENHANCEMENTS			// Adding waypoint and better mouse support
-#	ifdef XINPUT
+#	if defined(XINPUT) || defined(GTA_HANDHELD)
 #		define GAMEPAD_MENU		// Add gamepad menu
 #	endif
 #	define TRIANGLE_BACK_BUTTON
@@ -454,6 +461,14 @@ static_assert(false, "SUPPORT_XBOX_SCRIPT and SUPPORT_MOBILE_SCRIPT are mutually
 // if these defines are enabled saves are not vanilla compatible without COMPATIBLE_SAVES
 #ifndef COMPATIBLE_SAVES
 #undef USE_CUTSCENE_SHADOW_FOR_PED
+#endif
+
+#ifdef GTA_HANDHELD
+	#define IGNORE_MOUSE_KEYBOARD // ignore mouse & keyboard input
+#endif
+
+#ifdef __SWITCH__
+	#define USE_UNNAMED_SEM // named semaphores are unsupported on the switch
 #endif
 
 #endif // VANILLA_DEFINES

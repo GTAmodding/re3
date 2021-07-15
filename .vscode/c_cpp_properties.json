@@ -26,6 +26,24 @@
       "compilerArgs": ["-ggdb"],
       "cStandard": "gnu11",
       "cppStandard": "gnu++14"
+    },
+    {
+      "name": "devkitPro aarch64 (Nintendo Switch)",
+      "compilerPath": "${env:DEVKITPRO}/devkitA64/bin/aarch64-none-elf-g++",
+      "includePath": [
+        "${default}",
+        "${env:DEVKITPRO}/portlibs/switch/include",
+        "${env:DEVKITPRO}/libnx/include"
+      ],
+      "intelliSenseMode": "gcc-arm64",
+      "cStandard": "gnu11",
+      "cppStandard": "gnu++11",
+      "defines": [
+        "__SWITCH__",
+        "LIBRW",
+        "RW_GL3",
+        "AUDIO_OAL"
+      ]
     }
   ],
   "version": 4

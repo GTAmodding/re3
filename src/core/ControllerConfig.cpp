@@ -2673,6 +2673,14 @@ const char *PlayStationButtons[][MAX_CONTROLLERACTIONS] =
 #undef PS2_CROSS
 #undef PS2_SQUARE
 
+const char *NintendoSwitchButtons_noIcons[][MAX_CONTROLLERACTIONS] =
+    CONTROLLER_BUTTONS("Y", "A", "B", "X", "L", "ZL", "LS", "R", "ZR", "RS", "BACK", "right stick up", "right stick down", "right stick left", "right stick right");
+
+#ifdef BUTTON_ICONS
+const char *NintendoSwitchButtons[][MAX_CONTROLLERACTIONS] =
+    CONTROLLER_BUTTONS("~T~", "~O~", "~X~", "~Q~", "~K~", "~M~", "~A~", "~J~", "~V~", "~C~", "BACK", "~H~", "~L~", "~(~", "~)~");
+#endif
+
 #undef UP
 #undef DOWN
 #undef LEFT
@@ -2698,6 +2706,9 @@ void CControllerConfigManager::GetWideStringOfCommandKeys(uint16 action, wchar *
 		case CMenuManager::CONTROLLER_DUALSHOCK4:
 			Buttons = CFont::ButtonsSlot != -1 ? PlayStationButtons : PlayStationButtons_noIcons;
 			break;
+		case CMenuManager::CONTROLLER_NINTENDO_SWITCH:
+			Buttons = CFont::ButtonsSlot != -1 ? NintendoSwitchButtons : NintendoSwitchButtons_noIcons;
+			break;
 		default:
 	#endif
 			Buttons = CFont::ButtonsSlot != -1 ? XboxButtons : XboxButtons_noIcons;
@@ -2712,6 +2723,9 @@ void CControllerConfigManager::GetWideStringOfCommandKeys(uint16 action, wchar *
 		case CMenuManager::CONTROLLER_DUALSHOCK3:
 		case CMenuManager::CONTROLLER_DUALSHOCK4:
 			Buttons = PlayStationButtons_noIcons;
+			break;
+		case CMenuManager::CONTROLLER_NINTENDO_SWITCH:
+			Buttons = NintendoSwitchButtons_noIcons;
 			break;
 		default:
 			Buttons = XboxButtons_noIcons;

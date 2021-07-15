@@ -539,7 +539,11 @@ CMenuManager::CMenuManager()
 #endif
 
 #ifdef GAMEPAD_MENU
+#ifdef __SWITCH__
+	m_PrefsControllerType = CONTROLLER_NINTENDO_SWITCH;
+#else
 	m_PrefsControllerType = CONTROLLER_XBOXONE;
+#endif
 #endif
 }
 
@@ -566,7 +570,11 @@ CMenuManager::Initialise(void)
 	m_nCurrOption = 0;
 	m_nOptionHighlightTransitionBlend = 0;
 	CentreMousePointer();
+#ifdef GTA_HANDHELD
+	m_bShowMouse = false;
+#else
 	m_bShowMouse = true;
+#endif
 	m_fMapSize = MENU_Y(162.0f); // Y because of HOR+
 	m_fMapCenterX = MENU_X_LEFT_ALIGNED(320.0f);
 	m_fMapCenterY = MENU_Y(225.0f);
@@ -5872,6 +5880,7 @@ const char* controllerTypesPaths[] = {
 	"MODELS/FRONTEND_DS4.TXD",
 	"MODELS/FRONTEND_X360.TXD",
 	"MODELS/FRONTEND_XONE.TXD",
+	"MODELS/FRONTEND_NSW.TXD",
 };
 
 void
@@ -5981,6 +5990,18 @@ CMenuManager::PrintController(void)
 		TEXT_L3_X -= 36.0f;
 		TEXT_L2R2_Y += 5.0f;
 		TEXT_SELECT_X += 3.0f;
+		break;
+	case CONTROLLER_NINTENDO_SWITCH:
+		TEXT_L1_Y += 5.0f;
+		TEXT_L1_Y_VEH = TEXT_L1_Y;
+		TEXT_R1_Y += 5.0f;
+		TEXT_TRIANGLE_Y += 3.0f;
+		TEXT_CIRCLE_Y += 3.0f;
+		TEXT_CROSS_Y += 3.0f;
+		TEXT_LSTICK_Y -= 23.0f;
+		TEXT_DPAD_Y += 25.0;
+		TEXT_RSTICK_Y += 1.0f;
+		TEXT_R3_Y += 1.0f;
 		break;
 	};
 
@@ -6278,6 +6299,7 @@ CMenuManager::PrintController(void)
 			{
 			case CONTROLLER_XBOXONE:
 			case CONTROLLER_XBOX360:
+			case CONTROLLER_NINTENDO_SWITCH:
 				CFont::SetScale(MENU_X(SMALLESTTEXT_X_SCALE * 2 * scale * 0.65f), MENU_Y(SMALLESTTEXT_Y_SCALE * scale * 0.65f));
 				switch (m_PrefsLanguage)
 				{
@@ -6358,6 +6380,7 @@ CMenuManager::PrintController(void)
 			{
 			case CONTROLLER_XBOXONE:
 			case CONTROLLER_XBOX360:
+			case CONTROLLER_NINTENDO_SWITCH:
 				CFont::SetScale(MENU_X(SMALLESTTEXT_X_SCALE * 2 * scale * 0.65f), MENU_Y(SMALLESTTEXT_Y_SCALE * scale * 0.65f));
 				switch (m_PrefsLanguage)
 				{
@@ -6441,6 +6464,7 @@ CMenuManager::PrintController(void)
 			{
 			case CONTROLLER_XBOXONE:
 			case CONTROLLER_XBOX360:
+			case CONTROLLER_NINTENDO_SWITCH:
 				CFont::SetScale(MENU_X(SMALLESTTEXT_X_SCALE * 2 * scale * 0.65f), MENU_Y(SMALLESTTEXT_Y_SCALE * scale * 0.65f));
 				switch (m_PrefsLanguage)
 				{
@@ -6525,6 +6549,7 @@ CMenuManager::PrintController(void)
 			{
 			case CONTROLLER_XBOXONE:
 			case CONTROLLER_XBOX360:
+			case CONTROLLER_NINTENDO_SWITCH:
 				CFont::SetScale(MENU_X(SMALLESTTEXT_X_SCALE * 2 * scale * 0.65f), MENU_Y(SMALLESTTEXT_Y_SCALE * scale * 0.65f));
 				CFont::PrintStringFromBottom(MENU_X_LEFT_ALIGNED(X(TEXT_SQUARE_X)), MENU_Y(Y(TEXT_SQUARE_Y)), TheText.Get("FEC_SMT"));
 				break;
@@ -6566,6 +6591,9 @@ CMenuManager::LoadController(int8 type)
 	case CONTROLLER_DUALSHOCK3:
 	case CONTROLLER_DUALSHOCK4:
 		CFont::LoadButtons("MODELS/PS3BTNS.TXD");
+		break;
+	case CONTROLLER_NINTENDO_SWITCH:
+		CFont::LoadButtons("MODELS/NSWBTNS.TXD");
 		break;
 	default:
 		CFont::LoadButtons("MODELS/X360BTNS.TXD");

@@ -597,5 +597,6 @@ void RetryMission(int, int);
 #endif
 
 #ifdef USE_DEBUG_SCRIPT_LOADER
+int open_script();
 extern int scriptToLoad;
 #endif

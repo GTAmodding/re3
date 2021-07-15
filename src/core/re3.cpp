@@ -45,9 +45,7 @@
 #include "Population.h"
 #include "IniFile.h"
 
-#ifdef DETECT_JOYSTICK_MENU
 #include "crossplatform.h"
-#endif
 
 #ifndef _WIN32
 #include "assert.h"

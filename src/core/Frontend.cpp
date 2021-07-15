@@ -142,7 +142,11 @@ int8 CMenuManager::m_PrefsIslandLoading = ISLAND_LOADING_LOW;
 #endif
 
 #ifdef GAMEPAD_MENU
+#ifdef __SWITCH__
+int8 CMenuManager::m_PrefsControllerType = CONTROLLER_NINTENDO_SWITCH;
+#else
 int8 CMenuManager::m_PrefsControllerType = CONTROLLER_XBOXONE;
+#endif
 #endif
 
 int32 CMenuManager::OS_Language = LANG_ENGLISH;
@@ -3674,6 +3678,7 @@ const char* controllerTypesPaths[] = {
 	"MODELS/FRONTEND_DS4.TXD",
 	"MODELS/FRONTEND_X360.TXD",
 	"MODELS/FRONTEND_XONE.TXD",
+	"MODELS/FRONTEND_NSW.TXD",
 };
 
 void
@@ -3685,6 +3690,9 @@ CMenuManager::LoadController(int8 type)
 	case CONTROLLER_DUALSHOCK3:
 	case CONTROLLER_DUALSHOCK4:
 		CFont::LoadButtons("MODELS/PS3BTNS.TXD");
+		break;
+	case CONTROLLER_NINTENDO_SWITCH:
+		CFont::LoadButtons("MODELS/NSWBTNS.TXD");
 		break;
 	default:
 		CFont::LoadButtons("MODELS/X360BTNS.TXD");
@@ -5927,6 +5935,18 @@ CMenuManager::PrintController(void)
 		TEXT_L3_X -= 36.0f;
 		TEXT_L2R2_Y += 5.0f;
 		TEXT_SELECT_X += 3.0f;
+		break;
+	case CONTROLLER_NINTENDO_SWITCH:
+		TEXT_L1_Y += 5.0f;
+		TEXT_L1_Y_VEH = TEXT_L1_Y;
+		TEXT_R1_Y += 5.0f;
+		TEXT_TRIANGLE_Y += 3.0f;
+		TEXT_CIRCLE_Y += 3.0f;
+		TEXT_CROSS_Y += 3.0f;
+		TEXT_LSTICK_Y -= 23.0f;
+		TEXT_DPAD_Y += 25.0;
+		TEXT_RSTICK_Y += 1.0f;
+		TEXT_R3_Y += 1.0f;
 		break;
 	};
 

@@ -1,0 +1,28 @@
+name: re3 cmake devkitA64 (Nintendo Switch)
+on:
+  pull_request:
+  push:
+  release:
+    types: published
+jobs:
+  build-nintendo-switch:
+    runs-on: ubuntu-latest
+    container: devkitpro/devkita64:latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: 'true'
+      - name: "Build files"
+        run: |
+          /opt/devkitpro/portlibs/switch/bin/aarch64-none-elf-cmake -S. -Bbuild -DRE3_AUDIO=OAL -DLIBRW_PLATFORM=GL3 -DLIBRW_GL3_GFXLIB=GLFW -DRE3_WITH_OPUS=False -DRE3_VENDORED_LIBRW=True -DRE3_INSTALL=True
+          cmake --build build --parallel
+      - name: "Create binary package (cpack)"
+        working-directory: ./build
+        run: |
+          cpack
+      - name: "Archive binary package (github artifacts)"
+        uses: actions/upload-artifact@v2
+        with:
+          name: "switch-gl3"
+          path: build/*.zip
+          if-no-files-found: error

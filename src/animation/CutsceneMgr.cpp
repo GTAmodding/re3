@@ -20,6 +20,7 @@
 #include "RpAnimBlend.h"
 #include "ModelIndices.h"
 #include "TempColModels.h"
+#include "postfx.h"
 
 const struct {
 	const char *szTrackName;
@@ -129,6 +130,7 @@ CAnimBlendAssocGroup CCutsceneMgr::ms_cutsceneAssociations;
 CVector CCutsceneMgr::ms_cutsceneOffset;
 float CCutsceneMgr::ms_cutsceneTimer;
 uint32 CCutsceneMgr::ms_cutsceneLoadStatus;
+bool CCutsceneMgr::ms_blurSetting;
 
 RpAtomic *
 CalculateBoundingSphereRadiusCB(RpAtomic *atomic, void *data)
@@ -232,6 +234,10 @@ CCutsceneMgr::LoadCutsceneData(const char *szCutsceneName)
 	pPlayerPed->m_fCurrentStamina = pPlayerPed->m_fMaxStamina;
 	CPad::GetPad(0)->SetDisablePlayerControls(PLAYERCONTROL_CUTSCENE);
 	CWorld::Players[CWorld::PlayerInFocus].MakePlayerSafe(true);
+
+	// save blur state and disable it
+	ms_blurSetting = CPostFX::MotionBlurOn;
+	CPostFX::MotionBlurOn = false;
 }
 
 void
@@ -363,6 +369,7 @@ CCutsceneMgr::DeleteCutsceneData(void)
 	TheCamera.SetWideScreenOff();
 	ms_running = false;
 	ms_loaded = false;
+	CPostFX::MotionBlurOn = ms_blurSetting;
 
 	FindPlayerPed()->bIsVisible = true;
 	CPad::GetPad(0)->SetEnablePlayerControls(PLAYERCONTROL_CUTSCENE);

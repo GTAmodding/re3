@@ -16,6 +16,7 @@ class CCutsceneMgr
 	static bool ms_loaded;
 	static bool ms_animLoaded;
 	static bool ms_useLodMultiplier;
+	static bool ms_blurSetting;
 
 	static char ms_cutsceneName[CUTSCENENAMESIZE];
 	static CAnimBlendAssocGroup ms_cutsceneAssociations;

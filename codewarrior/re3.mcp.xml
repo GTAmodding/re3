@@ -187,7 +187,7 @@
                     </SETTING>
                     <SETTING>
                         <SETTING><NAME>SearchPath</NAME>
-                            <SETTING><NAME>Path</NAME><VALUE>..\src\render</VALUE></SETTING>
+                            <SETTING><NAME>Path</NAME><VALUE>..\src\renderer</VALUE></SETTING>
                             <SETTING><NAME>PathFormat</NAME><VALUE>Windows</VALUE></SETTING>
                             <SETTING><NAME>PathRoot</NAME><VALUE>Project</VALUE></SETTING>
                         </SETTING>
@@ -6424,7 +6424,7 @@
                     </SETTING>
                     <SETTING>
                         <SETTING><NAME>SearchPath</NAME>
-                            <SETTING><NAME>Path</NAME><VALUE>..\src\render</VALUE></SETTING>
+                            <SETTING><NAME>Path</NAME><VALUE>..\src\renderer</VALUE></SETTING>
                             <SETTING><NAME>PathFormat</NAME><VALUE>Windows</VALUE></SETTING>
                             <SETTING><NAME>PathRoot</NAME><VALUE>Project</VALUE></SETTING>
                         </SETTING>
@@ -14281,7 +14281,7 @@
                 <PATHFORMAT>Windows</PATHFORMAT>
             </FILEREF>
         </GROUP>
-        <GROUP><NAME>render</NAME>
+        <GROUP><NAME>renderer</NAME>
             <FILEREF>
                 <TARGETNAME>Debug</TARGETNAME>
                 <PATHTYPE>Name</PATHTYPE>

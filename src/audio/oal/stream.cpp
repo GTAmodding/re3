@@ -15,6 +15,9 @@
 #endif
 #ifdef AUDIO_OAL_USE_MPG123
 #include <mpg123.h>
+#else
+#define MINIMP3_IMPLEMENTATION
+#include "minimp3_ex.h"
 #endif
 #ifdef AUDIO_OAL_USE_OPUS
 #include <opusfile.h>
@@ -500,7 +503,98 @@ public:
 };
 #endif
 
-#ifdef AUDIO_OAL_USE_MPG123
+// use minimp3
+#ifndef AUDIO_OAL_USE_MPG123
+
+class CMP3File : public IDecoder
+{
+	mp3dec_ex_t m_handle;
+	mp3dec_frame_info_t m_frameInfo;
+	bool m_bOpened;
+	uint32 m_nRate;
+	uint32 m_nChannels;
+public:
+	CMP3File(const char *path) :
+		m_bOpened(false),
+		m_nRate(0),
+		m_nChannels(0)
+	{
+		int res = mp3dec_ex_open(&m_handle, path, MP3D_SEEK_TO_SAMPLE);
+		if (res == 0)
+		{
+			m_bOpened = true;
+			m_nRate = m_handle.info.hz;
+			m_nChannels = m_handle.info.channels;
+		}
+	}
+	
+	void FileOpen()
+	{
+	}
+
+	~CMP3File()
+	{
+		mp3dec_ex_close(&m_handle);
+	}
+	
+	bool IsOpened()
+	{
+		return m_bOpened;
+	}
+	
+	uint32 GetSampleSize()
+	{
+		return sizeof(mp3d_sample_t); // uint16
+	}
+	
+	uint32 GetSampleCount()
+	{
+		if ( !IsOpened() ) return 0;
+		return m_handle.samples;
+	}
+	
+	uint32 GetSampleRate()
+	{
+		return m_nRate;
+	}
+	
+	uint32 GetChannels()
+	{
+		return m_nChannels;
+	}
+	
+	void Seek(uint32 milliseconds)
+	{
+		if ( !IsOpened() ) return;
+		mp3dec_ex_seek(&m_handle, ms2samples(milliseconds));
+	}
+	
+	uint32 Tell()
+	{
+		if ( !IsOpened() ) return 0;
+		return samples2ms(m_handle.cur_sample);
+	}
+	
+	uint32 Decode(void *buffer)
+	{
+		if ( !IsOpened() ) return 0;
+
+		size_t read_samples = mp3dec_ex_read(&m_handle, (mp3d_sample_t*)buffer, GetBufferSamples());
+		if (read_samples == 0)
+			return 0;
+
+		size_t read_bytes = read_samples * GetSampleSize();
+
+#if defined(__LP64__) || defined(_WIN64)
+		assert("We can't handle this big audio files yet :shrug:" && (read_bytes < UINT32_MAX));
+#endif
+		if (GetChannels() == 2)
+			SortStereoBuffer.SortStereo(buffer, read_bytes);
+		return (uint32)read_bytes;
+	}
+};
+
+#else
 
 class CMP3File : public IDecoder
 {
@@ -1205,10 +1299,8 @@ bool CStream::Open(const char* filename, uint32 overrideSampleRate)
 #else
 		m_pSoundFile = new CWavFile(m_aFilename);
 #endif
-#ifdef AUDIO_OAL_USE_MPG123
 	else if (!strcasecmp(&m_aFilename[strlen(m_aFilename) - strlen(".mp3")], ".mp3"))
 		m_pSoundFile = new CMP3File(m_aFilename);
-#endif
 	else if (!strcasecmp(&m_aFilename[strlen(m_aFilename) - strlen(".vb")], ".VB"))
 		m_pSoundFile = new CVbFile(m_aFilename, overrideSampleRate);
 #ifdef AUDIO_OAL_USE_OPUS

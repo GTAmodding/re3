@@ -14,3 +14,7 @@
 	path = vendor/librw
 	url = https://github.com/aap/librw.git
 	branch = master
+[submodule "vendor/minimp3"]
+	path = vendor/minimp3
+	url = https://github.com/lieff/minimp3
+	branch = master

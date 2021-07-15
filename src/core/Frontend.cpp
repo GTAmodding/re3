@@ -4848,10 +4848,12 @@ CMenuManager::ProcessUserInput(uint8 goDown, uint8 goUp, uint8 optionSelected, u
 					ControlsManager.InitDefaultControlConfigMouse(MousePointerStateHelper.GetMouseSetUp());
 #if !defined RW_GL3
 					if (AllValidWinJoys.m_aJoys[JOYSTICK1].m_bInitialised) {
+#ifndef NO_DINPUT
 						DIDEVCAPS devCaps;
 						devCaps.dwSize = sizeof(DIDEVCAPS);
 						PSGLOBAL(joy1)->GetCapabilities(&devCaps);
 						ControlsManager.InitDefaultControlConfigJoyPad(devCaps.dwButtons);
+#endif
 					}
 #else
 					if (PSGLOBAL(joy1id) != -1 && glfwJoystickPresent(PSGLOBAL(joy1id))) {

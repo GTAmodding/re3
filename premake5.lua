@@ -90,6 +90,7 @@ workspace "reVC"
 			"win-x86-librw_gl3_glfw-oal",
 			"win-amd64-librw_d3d9-oal",
 			"win-amd64-librw_gl3_glfw-oal",
+			"win-arm-librw_d3d9-none",
 		}
 
 	filter { "system:linux" }
@@ -212,6 +213,10 @@ project "librw"
 		staticruntime "on"
 		buildoptions { "/Zc:sizedDealloc-" }
 
+	filter { "platforms:win-arm*" }
+		justmycode "Off"
+		editAndContinue "Off"
+
 	filter "platforms:bsd*"
 		includedirs { "/usr/local/include" }
 		libdirs { "/usr/local/lib" }
@@ -333,7 +338,7 @@ project "reVC"
 	filter "platforms:*oal"
 		defines { "AUDIO_OAL" }
 
-	filter {}
+	filter "platforms:*amd64* or *x86*"
 	if(os.getenv("GTA_VC_RE_DIR")) then
 		setpaths(os.getenv("GTA_VC_RE_DIR") .. "/", "%(cfg.buildtarget.name)")
 	end
@@ -379,6 +384,11 @@ project "reVC"
 		libdirs { "vendor/mpg123/lib/Win64" }
 		libdirs { "vendor/libsndfile/lib/Win64" }
 		libdirs { "vendor/openal-soft/libs/Win64" }
+
+	filter { "platforms:win-arm*" }
+		defines { "PSAPI_VERSION=1" }
+		justmycode "Off"
+		editAndContinue "Off"
 
 	filter "platforms:linux*oal"
 		links { "openal", "mpg123", "sndfile", "pthread", "X11" }

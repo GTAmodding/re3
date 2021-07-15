@@ -830,6 +830,7 @@ CMouseControllerState CMousePointerStateHelper::GetMouseSetUp()
 	CMouseControllerState state;
 
 #if defined RW_D3D9 || defined RWLIBS
+#ifndef NO_DINPUT
 	if ( PSGLOBAL(mouse) == nil )
 		_InputInitialiseMouse(!FrontEndMenuManager.m_bMenuActive && _InputMouseNeedsExclusive());
 
@@ -862,6 +863,15 @@ CMouseControllerState CMousePointerStateHelper::GetMouseSetUp()
 			state.WHEELUP = true;
 		}
 	}
+#elif defined USE_RAWINPUT
+	if(PSGLOBAL(mouseInitialized)) {
+		state.MMB = true;
+		state.RMB = true;
+		state.LMB = true;
+		state.WHEELDN = true;
+		state.WHEELUP = true;
+	}
+#endif
 #else
 	// It seems there is no way to get number of buttons on mouse, so assign all buttons if we have mouse.
 	double xpos = 1.0f, ypos;
@@ -884,6 +894,7 @@ void CPad::UpdateMouse()
 #if defined RW_D3D9 || defined RWLIBS
 	if ( IsForegroundApp() )
 	{
+#ifndef NO_DINPUT
 		if ( PSGLOBAL(mouse) == nil )
 			_InputInitialiseMouse(!FrontEndMenuManager.m_bMenuActive && _InputMouseNeedsExclusive());
 
@@ -920,6 +931,37 @@ void CPad::UpdateMouse()
 			OldMouseControllerState = NewMouseControllerState;
 			NewMouseControllerState = PCTempMouseControllerState;
 		}
+#elif defined USE_RAWINPUT
+		if(PSGLOBAL(mouseInitialized)) {
+			int32 signX = 1;
+			int32 signy = 1;
+
+			if(!FrontEndMenuManager.m_bMenuActive) {
+				if(MousePointerStateHelper.bInvertVertically) signy = -1;
+				if(MousePointerStateHelper.bInvertHorizontally) signX = -1;
+			}
+
+			PCTempMouseControllerState.Clear();
+
+			PCTempMouseControllerState.x = (float)(signX * PSGLOBAL(mouseData).x);
+			PCTempMouseControllerState.y = (float)(signy * PSGLOBAL(mouseData).y);
+			PCTempMouseControllerState.LMB = PSGLOBAL(mouseData).LMB;
+			PCTempMouseControllerState.RMB = PSGLOBAL(mouseData).RMB;
+			PCTempMouseControllerState.MMB = PSGLOBAL(mouseData).MMB;
+
+			if(PSGLOBAL(mouseData).wheel > 0)
+				PCTempMouseControllerState.WHEELUP = 1;
+			else if(PSGLOBAL(mouseData).wheel < 0)
+				PCTempMouseControllerState.WHEELDN = 1;
+
+			PSGLOBAL(mouseData).x = 0;
+			PSGLOBAL(mouseData).y = 0;
+			if(PSGLOBAL(mouseData).wheel != 0) PSGLOBAL(mouseData).wheel = 0;
+
+			OldMouseControllerState = NewMouseControllerState;
+			NewMouseControllerState = PCTempMouseControllerState;
+		}
+#endif
 	}
 #else
 	if ( IsForegroundApp() && PSGLOBAL(cursorIsInWindow) )

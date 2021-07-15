@@ -1784,6 +1784,10 @@ int
 main(int argc, char *argv[])
 {
 #endif
+#ifdef LOG_TO_FILE
+	freopen("re3_log.txt", "w", stdout);
+	freopen("re3_errors.txt", "w", stderr);
+#endif
 	RwV2d pos;
 	RwInt32 i;
 

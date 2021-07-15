@@ -17,9 +17,6 @@
 #include "debugmenu.h"
 
 
-#define MAX_PARTICLES_ON_SCREEN   (1000)
-
-
 //(5)
 #define MAX_SMOKE_FILES           ARRAY_SIZE(SmokeFiles)
 
@@ -149,7 +146,7 @@ const char CarsplashFiles[][12+1] =
 	"carsplash_04"
 };
 
-CParticle gParticleArray[MAX_PARTICLES_ON_SCREEN];
+CParticle gParticleArray[NUM_PARTICLES];
 
 RwTexture *gpSmokeTex[MAX_SMOKE_FILES];
 RwTexture *gpSmoke2Tex[MAX_SMOKE2_FILES];
@@ -243,9 +240,9 @@ void CParticle::ReloadConfig()
 	
 	m_pUnusedListHead = gParticleArray;
 	
-	for ( int32 i = 0; i < MAX_PARTICLES_ON_SCREEN; i++ )
+	for ( int32 i = 0; i < NUM_PARTICLES; i++ )
 	{
-		if ( i == MAX_PARTICLES_ON_SCREEN - 1 )
+		if ( i == NUM_PARTICLES - 1 )
 			gParticleArray[i].m_pNext = nil;
 		else
 			gParticleArray[i].m_pNext = &gParticleArray[i + 1];

@@ -154,12 +154,7 @@ CVisibilityPlugins::Initialise(void)
 	m_alphaList.Init(NUMALPHALIST);
 	m_alphaList.head.item.sort = 0.0f;
 	m_alphaList.tail.item.sort = 100000000.0f;
-#ifdef ASPECT_RATIO_SCALE
-	// default 150 if not enough for bigger FOVs
-	m_alphaEntityList.Init(NUMALPHAENTITYLIST * 3);
-#else
 	m_alphaEntityList.Init(NUMALPHAENTITYLIST);
-#endif // ASPECT_RATIO_SCALE
 	m_alphaEntityList.head.item.sort = 0.0f;
 	m_alphaEntityList.tail.item.sort = 100000000.0f;
 

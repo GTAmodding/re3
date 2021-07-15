@@ -44,11 +44,11 @@ RwTexture *gpPostShadowTex;
 RwTexture *gpGoalTex;
 
 int16            CShadows::ShadowsStoredToBeRendered;
-CStoredShadow    CShadows::asShadowsStored  [MAX_STOREDSHADOWS];
-CPolyBunch       CShadows::aPolyBunches     [MAX_POLYBUNCHES];
-CStaticShadow    CShadows::aStaticShadows   [MAX_STATICSHADOWS];
+CStoredShadow    CShadows::asShadowsStored  [NUM_STOREDSHADOWS];
+CPolyBunch       CShadows::aPolyBunches     [NUM_POLYBUNCHES];
+CStaticShadow    CShadows::aStaticShadows   [NUM_STATICSHADOWS];
 CPolyBunch      *CShadows::pEmptyBunchList;
-CPermanentShadow CShadows::aPermanentShadows[MAX_PERMAMENTSHADOWS];
+CPermanentShadow CShadows::aPermanentShadows[NUM_PERMAMENTSHADOWS];
 
 
 void
@@ -125,7 +125,7 @@ CShadows::Init(void)
 	ShadowIndexList[23] = 8;
 
 
-	for ( int32 i = 0; i < MAX_STATICSHADOWS; i++ )
+	for ( int32 i = 0; i < NUM_STATICSHADOWS; i++ )
 	{
 		aStaticShadows[i].m_nId = 0;
 		aStaticShadows[i].m_pPolyBunch = NULL;
@@ -133,15 +133,15 @@ CShadows::Init(void)
 
 	pEmptyBunchList = &aPolyBunches[0];
 
-	for ( int32 i = 0; i < MAX_POLYBUNCHES; i++ )
+	for ( int32 i = 0; i < NUM_POLYBUNCHES; i++ )
 	{
-		if ( i == MAX_POLYBUNCHES - 1 )
+		if ( i == NUM_POLYBUNCHES - 1 )
 			aPolyBunches[i].m_pNext = NULL;
 		else
 			aPolyBunches[i].m_pNext = &aPolyBunches[i + 1];
 	}
 
-	for ( int32 i = 0; i < MAX_PERMAMENTSHADOWS; i++ )
+	for ( int32 i = 0; i < NUM_PERMAMENTSHADOWS; i++ )
 	{
 		aPermanentShadows[i].m_nType = SHADOWTYPE_NONE;
 	}
@@ -193,10 +193,10 @@ CShadows::AddPermanentShadow(uint8 ShadowType, RwTexture *pTexture, CVector *pPo
 
 	// find free slot
 	int32 nSlot = 0;
-	while ( nSlot < MAX_PERMAMENTSHADOWS && aPermanentShadows[nSlot].m_nType != SHADOWTYPE_NONE )
+	while ( nSlot < NUM_PERMAMENTSHADOWS && aPermanentShadows[nSlot].m_nType != SHADOWTYPE_NONE )
 		nSlot++;
 
-	if ( nSlot < MAX_PERMAMENTSHADOWS )
+	if ( nSlot < NUM_PERMAMENTSHADOWS )
 	{
 		aPermanentShadows[nSlot].m_nType        = ShadowType;
 		aPermanentShadows[nSlot].m_pTexture     = pTexture;
@@ -244,10 +244,10 @@ CShadows::StoreStaticShadow(uint32 nID, uint8 ShadowType, RwTexture *pTexture, C
 		int32 nSlot;
 
 		nSlot = 0;
-		while ( nSlot < MAX_STATICSHADOWS && !(nID == aStaticShadows[nSlot].m_nId && aStaticShadows[nSlot].m_pPolyBunch != NULL) )
+		while ( nSlot < NUM_STATICSHADOWS && !(nID == aStaticShadows[nSlot].m_nId && aStaticShadows[nSlot].m_pPolyBunch != NULL) )
 			nSlot++;
 
-		if ( nSlot < MAX_STATICSHADOWS )
+		if ( nSlot < NUM_STATICSHADOWS )
 		{
 			if (   Abs(pPosn->x - aStaticShadows[nSlot].m_vecPosn.x) < fUpDistance
 				&& Abs(pPosn->y - aStaticShadows[nSlot].m_vecPosn.y) < fUpDistance )
@@ -313,10 +313,10 @@ CShadows::StoreStaticShadow(uint32 nID, uint8 ShadowType, RwTexture *pTexture, C
 		else
 		{
 			nSlot = 0;
-			while ( nSlot < MAX_STATICSHADOWS && aStaticShadows[nSlot].m_pPolyBunch != NULL )
+			while ( nSlot < NUM_STATICSHADOWS && aStaticShadows[nSlot].m_pPolyBunch != NULL )
 				nSlot++;
 
-			if ( nSlot != MAX_STATICSHADOWS )
+			if ( nSlot != NUM_STATICSHADOWS )
 			{
 				aStaticShadows[nSlot].m_nId              = nID;
 				aStaticShadows[nSlot].m_nType            = ShadowType;
@@ -429,7 +429,7 @@ CShadows::StoreShadowToBeRendered(uint8 ShadowType, RwTexture *pTexture, CVector
 	ASSERT(pTexture != NULL);
 	ASSERT(pPosn != NULL);
 
-	if ( ShadowsStoredToBeRendered < MAX_STOREDSHADOWS )
+	if ( ShadowsStoredToBeRendered < NUM_STOREDSHADOWS )
 	{
 		asShadowsStored[ShadowsStoredToBeRendered].m_ShadowType          = ShadowType;
 		asShadowsStored[ShadowsStoredToBeRendered].m_pTexture            = pTexture;
@@ -804,10 +804,10 @@ CShadows::RenderStaticShadows(void)
 
 	SetAlphaTest(0);
 
-	for ( int32 i = 0; i < MAX_STATICSHADOWS; i++ )
+	for ( int32 i = 0; i < NUM_STATICSHADOWS; i++ )
 		aStaticShadows[i].m_bRendered = false;
 
-	for ( int32 i = 0; i < MAX_STATICSHADOWS; i++ )
+	for ( int32 i = 0; i < NUM_STATICSHADOWS; i++ )
 	{
 		if ( aStaticShadows[i].m_pPolyBunch && !aStaticShadows[i].m_bRendered )
 		{
@@ -815,7 +815,7 @@ CShadows::RenderStaticShadows(void)
 			RwRenderStateSet(rwRENDERSTATETEXTURERASTER, RwTextureGetRaster(aStaticShadows[i].m_pTexture));
 
 			// optimization trick, render all shadows with same renderstate and texture
-			for ( int32 j = i; j < MAX_STATICSHADOWS; j++ )
+			for ( int32 j = i; j < NUM_STATICSHADOWS; j++ )
 			{
 				if ( aStaticShadows[j].m_pPolyBunch != NULL
 						&& aStaticShadows[i].m_nType    == aStaticShadows[j].m_nType
@@ -1498,7 +1498,7 @@ CShadows::CastShadowEntity(CEntity *pEntity,  float fStartX, float fStartY, floa
 void
 CShadows::UpdateStaticShadows(void)
 {
-	for ( int32 i = 0; i < MAX_STATICSHADOWS; i++ )
+	for ( int32 i = 0; i < NUM_STATICSHADOWS; i++ )
 	{
 		if ( aStaticShadows[i].m_pPolyBunch != NULL && !aStaticShadows[i].m_bJustCreated
 			&& (!aStaticShadows[i].m_bTemp || CTimer::GetTimeInMilliseconds() > aStaticShadows[i].m_nTimeCreated + 5000) )
@@ -1513,7 +1513,7 @@ CShadows::UpdateStaticShadows(void)
 void
 CShadows::UpdatePermanentShadows(void)
 {
-	for ( int32 i = 0; i < MAX_PERMAMENTSHADOWS; i++ )
+	for ( int32 i = 0; i < NUM_PERMAMENTSHADOWS; i++ )
 	{
 		if ( aPermanentShadows[i].m_nType != SHADOWTYPE_NONE )
 		{
@@ -1768,7 +1768,7 @@ CShadows::RenderExtraPlayerShadows(void)
 void
 CShadows::TidyUpShadows(void)
 {
-	for ( int32 i = 0; i < MAX_PERMAMENTSHADOWS; i++ )
+	for ( int32 i = 0; i < NUM_PERMAMENTSHADOWS; i++ )
 		aPermanentShadows[i].m_nType = SHADOWTYPE_NONE;
 }
 

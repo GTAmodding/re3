@@ -1,11 +1,5 @@
 #pragma once
 
-#define MAX_STOREDSHADOWS    48
-#define MAX_POLYBUNCHES      300
-#define MAX_STATICSHADOWS    64
-#define MAX_PERMAMENTSHADOWS 48
-
-
 class CEntity;
 
 enum eShadowType
@@ -129,11 +123,11 @@ class CShadows
 {
 public:
 	static int16            ShadowsStoredToBeRendered;
-	static CStoredShadow    asShadowsStored  [MAX_STOREDSHADOWS];
-	static CPolyBunch       aPolyBunches     [MAX_POLYBUNCHES];
-	static CStaticShadow    aStaticShadows   [MAX_STATICSHADOWS];
+	static CStoredShadow    asShadowsStored  [NUM_STOREDSHADOWS];
+	static CPolyBunch       aPolyBunches     [NUM_POLYBUNCHES];
+	static CStaticShadow    aStaticShadows   [NUM_STATICSHADOWS];
 	static CPolyBunch      *pEmptyBunchList;
-	static CPermanentShadow aPermanentShadows[MAX_PERMAMENTSHADOWS];
+	static CPermanentShadow aPermanentShadows[NUM_PERMAMENTSHADOWS];
 
 	static void Init                         (void);
 	static void Shutdown                     (void);
